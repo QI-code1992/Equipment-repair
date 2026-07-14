@@ -4,6 +4,7 @@
 
 # Local brainstorming and transient server state
 .superpowers/
+.worktrees/
 
 # Local logs and runtime files
 *.log
