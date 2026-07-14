@@ -266,7 +266,7 @@
 ### CR-023：融合外部工作台原型并隔离共享依赖
 
 - 级别：L2
-- 状态：设计已批准 / 实施计划待确认
+- 状态：已实施 / 等待 Stage 3 审批
 - 提出人：项目负责人
 - 提出时间：2026-07-14
 - 当前阶段：Stage 3 — UI 与高保真原型
@@ -276,5 +276,5 @@
 - 不影响：其他原型页面、共享 `app.js` / `app.css` / `global-agent.js` 的既有功能、全局 AI 助手、通知面板和导航。
 - 决定：采用页面级移植与最小依赖适配；禁止整包覆盖输入 ZIP 的旧版共享资源。
 - 设计基线：`03-ui-prototype/WORKBENCH_INTEGRATION_DESIGN.md`。
-- 实施：设计文档已获项目负责人确认；实施计划为 `03-ui-prototype/WORKBENCH_INTEGRATION_PLAN.md`，待项目负责人确认后开始。
-- 验证：待实施后补充工作台静态交互回归、现有原型回归、检查点 Commit SHA 与 GitHub 推送证据。
+- 实施：已按 `03-ui-prototype/WORKBENCH_INTEGRATION_PLAN.md` 在 `feature/workbench-integration` 实现；工作台页面与专用静态检查已提交。
+- 验证：Commit `4a5f302ffe42c972186426d5f8587cd8059adc6e` 已推送至 GitHub；工作台专用测试与现有 11 项静态回归共 12 项通过，`git diff --check` 通过；检查点见 `PCP-012`。
