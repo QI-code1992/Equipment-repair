@@ -3416,7 +3416,21 @@
       });
     })();
   </script>
-  <script src="../assets/global-agent.js?v=20260702a"></script>
+<script>
+(() => {
+  const key = "equipment.agent.runtime.config";
+  const config = { enabled: true, llm: "通义千问主模型（qwen2.5-72b）", streaming: true, suggestions: true, sources: true, queryRewrite: true, contextTurns: 3, deepThinking: "medium", maxReply: 4096 };
+  const all = { "AI故障上报 Agent": { ...config }, "智能问数 Agent": { ...config }, "操作指引 Agent": { ...config }, "故障诊断 Agent": { ...config } };
+  localStorage.setItem(key, JSON.stringify(all));
+  document.querySelectorAll("[data-agent-card]").forEach((card) => {
+    const name = card.dataset.agentCard;
+    const state = all[name]; if (!state) return;
+    const status = card.querySelector(".card-head .status"); if (status) { status.className = "status ok"; status.textContent = "启用"; }
+    const llm = card.querySelector(".card-kv strong"); if (llm) llm.textContent = state.llm;
+  });
+})();
+</script>
+<script src="../assets/global-agent.js?v=20260702a"></script>
 </body>
 </html>
 

@@ -856,7 +856,8 @@
       color: var(--muted);
       font-size: 13px;
       line-height: 1.55;
-      white-space: nowrap;
+      white-space: normal;
+      overflow-wrap: anywhere;
     }
 
     .start-repair-evidence {
@@ -1763,7 +1764,13 @@
     #startRepairModal .start-repair-shell { min-height: 0; height: 100%; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
     .start-repair-left-scroll, .repair-agent-scroll { min-height: 0; max-height: calc(92vh - 172px); overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; }
     .start-repair-left-scroll { overflow-x: hidden; }
-    .repair-agent-scroll { display: block; }
+    .repair-agent-scroll {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding-right: 0;
+      background: var(--surface);
+    }
     .start-repair-left-scroll .start-repair-grid { grid-template-columns: minmax(0, 0.68fr) minmax(0, 1.32fr); }
     .start-repair-left-scroll .fault-evidence-grid { min-width: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .repair-agent-loading { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: color-mix(in oklab, var(--blue-50), var(--surface) 48%); }
@@ -1778,8 +1785,70 @@
     .repair-agent-facts { margin: 0; padding-left: 18px; color: var(--fg); font-size: 12px; line-height: 1.6; }
     .repair-agent-plan { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); text-align: left; }
     .repair-agent-plan.is-selected { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent), transparent 82%); }
-    .end-agent-summary { margin-top: 14px; padding: 14px; border: 1px solid color-mix(in oklab, var(--border), var(--accent) 18%); border-radius: 14px; background: color-mix(in oklab, var(--blue-50), var(--surface) 55%); }
-    .end-agent-summary h4, .end-agent-summary p { margin: 0; }.end-agent-summary p { margin-top: 8px; color: var(--muted); line-height: 1.65; }
+    .end-agent-summary { grid-column: 1 / -1; margin-top: 0; padding: 14px; border: 1px solid color-mix(in oklab, var(--border), var(--accent) 18%); border-radius: 14px; background: color-mix(in oklab, var(--blue-50), var(--surface) 55%); }
+    .end-agent-summary h4, .end-agent-summary p { margin: 0; }.end-agent-summary p { margin-top: 8px; color: var(--muted); line-height: 1.65; white-space: pre-line; }
+    .repair-agent-scroll .repair-agent-suggestion,
+    .repair-agent-scroll .repair-agent-evidence { display: none !important; }
+    .repair-agent-scroll .repair-agent-head,
+    .repair-agent-scroll .repair-agent-loading { flex: 0 0 auto; }
+    .repair-agent-scroll .repair-agent-chat {
+      flex: 1 1 auto;
+      min-height: 0;
+      margin-top: 10px;
+      border: 0;
+      background: transparent;
+      padding: 0 8px 0 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      background: var(--surface);
+    }
+    .repair-agent-scroll .repair-agent-input-row {
+      position: relative;
+      z-index: 2;
+      flex: 0 0 auto;
+      margin: 10px 0 0;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      background: transparent;
+    }
+    .repair-agent-scroll .repair-agent-input-row { position: relative; }
+    .repair-agent-required-tag { position: absolute; z-index: 3; left: 10px; top: 50%; transform: translateY(-50%); padding: 3px 7px; border-radius: 6px; color: var(--accent); background: color-mix(in oklab, var(--blue-50), var(--surface) 12%); font-size: 11px; font-weight: 800; pointer-events: none; }
+    .repair-agent-input-row.is-required input { padding-left: 62px; border-color: color-mix(in oklab, var(--accent), var(--border) 55%); }
+    .repair-agent-input-row.is-required .repair-agent-required-tag[hidden] { display: none; }
+    .repair-agent-scroll .repair-agent-message { max-width: 100%; }
+    .repair-agent-scroll .repair-agent-head { align-items: center; padding: 2px 2px 10px; border-bottom: 1px solid var(--border); }
+    .repair-agent-scroll .repair-agent-head > div:first-child { display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 9px; }
+    .repair-agent-scroll .repair-agent-head > div:first-child::before { content: "AI"; grid-row: span 2; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; color: white; background: linear-gradient(135deg, #1677ff, #6b8cff); font-size: 11px; font-weight: 800; letter-spacing: .04em; box-shadow: 0 6px 16px rgb(22 119 255 / .22); }
+    .repair-agent-scroll .repair-agent-head h4 { margin: 0; font-size: 15px; }
+    .repair-agent-scroll .repair-agent-head p { grid-column: 2; font-size: 11px; }
+    .repair-agent-scroll .repair-agent-kicker { grid-column: 2; margin-bottom: 2px; font-size: 11px; letter-spacing: .06em; }
+    .repair-agent-scroll .repair-agent-chat { gap: 14px; padding: 14px 10px 14px 2px; }
+    .repair-agent-scroll .repair-agent-message { position: relative; max-width: 94%; padding: 11px 13px; border-color: color-mix(in oklab, var(--border), var(--accent) 10%); border-radius: 4px 15px 15px 15px; box-shadow: 0 2px 8px rgb(20 51 93 / .04); font-size: 13px; line-height: 1.7; }
+    .repair-agent-scroll .repair-agent-message.bot::before { content: "AI"; position: absolute; left: -28px; top: 3px; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 7px; color: white; background: var(--accent); font-size: 8px; font-weight: 800; }
+    .repair-agent-scroll .repair-agent-message.user { max-width: 82%; border-radius: 15px 4px 15px 15px; box-shadow: none; }
+    .repair-agent-scroll .repair-agent-source { padding-top: 4px; border-top: 1px solid color-mix(in oklab, var(--border), transparent 20%); }
+    .fault-detail-grid > div { min-width: 0; }
+    .fault-detail-grid strong { display: inline; white-space: normal; overflow-wrap: anywhere; }
+    .fault-detail-closure .fault-detail-copy { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); overflow-wrap: anywhere; }
+    .fault-detail-ai-summary { margin-top: 14px; padding: 14px; border: 1px solid color-mix(in oklab, var(--accent), var(--border) 74%); border-radius: 14px; background: color-mix(in oklab, var(--blue-50), var(--surface) 74%); }
+    .fault-detail-ai-summary h5, .fault-detail-ai-summary p { margin: 0; }
+    .fault-detail-ai-summary h5 { color: var(--fg); font-size: 14px; }
+    .fault-detail-ai-summary p { margin-top: 8px; color: var(--muted); line-height: 1.7; white-space: pre-line; }
+    .repair-agent-dialogue-detail { margin: 8px 0 2px; padding: 9px 11px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+    .repair-agent-dialogue-detail summary { cursor: pointer; color: var(--accent); font-weight: 700; }
+    .repair-agent-dialogue-detail p { margin: 8px 0 0; font-size: 13px; line-height: 1.65; }
+    .repair-agent-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .repair-agent-chip { border: 1px solid var(--border); border-radius: 999px; padding: 5px 9px; background: var(--surface); color: var(--accent); font-size: 12px; cursor: pointer; }
+    .repair-agent-source { margin-top: 8px; font-size: 12px; color: var(--muted); }
+    .repair-agent-source details { margin-top: 6px; }
+    .repair-agent-source summary { list-style: none; display: inline-flex; align-items: center; gap: 5px; }
+    .repair-agent-source summary::-webkit-details-marker { display: none; }
+    .repair-agent-source summary::before { content: "›"; color: var(--accent); font-size: 16px; transition: transform .18s ease; }
+    .repair-agent-source details[open] summary::before { transform: rotate(90deg); }
+    .repair-agent-source-toggle { color: var(--accent); font: inherit; cursor: pointer; }
+    .repair-agent-source details p { margin: 6px 0 0; line-height: 1.55; }
+    .repair-agent-streaming::after { content: ""; display: inline-block; width: 6px; height: 15px; margin-left: 3px; vertical-align: -2px; background: var(--accent); animation: repairAgentCursor .8s steps(2) infinite; }
+    @keyframes repairAgentCursor { 50% { opacity: 0; } }
 
     @media (max-width: 1180px) {
       #startRepairModal .start-repair-shell { grid-template-columns: minmax(0, 1fr); }
@@ -2082,6 +2151,7 @@
           <div class="repair-agent-evidence" id="repairAgentEvidence"></div>
           <div class="repair-agent-chat" id="repairAgentChat" aria-live="polite"></div>
           <div class="repair-agent-input-row">
+            <span class="repair-agent-required-tag" id="repairAgentRequiredTag" hidden>报警码</span>
             <input id="repairAgentInput" type="text" placeholder="继续追问或修正判断，例如：优先排查冷却系统">
             <button class="btn btn-primary" id="repairAgentSend" type="button">发送</button>
           </div>
@@ -2104,9 +2174,6 @@
           <div><span>维修开始时间</span><strong id="endRepairStartTime">—</strong></div>
           <div><span>维修人</span><strong id="endRepairPerson">—</strong></div>
         </div>
-        <p class="fault-resolution-note">提交后该记录状态将更新为“已处理”，处理结论会进入故障详情和维修记录。</p>
-        <p class="fault-resolution-note repair-agent-prefill-note" id="endAgentPrefillNote" hidden>AI建议已带入，可根据实际维修结果修改后提交。</p>
-        <section class="end-agent-summary" id="endAgentSummary" hidden><h4>AI 诊断对话摘要</h4><p id="endAgentSummaryText"></p></section>
         <section class="start-repair-card end-report-evidence-card">
           <h4>故障上报现场附件</h4>
           <p class="start-repair-attachment-note">以下附件来自新增故障上报，维修结束时可再次核对并下载归档。</p>
@@ -2121,6 +2188,7 @@
           <div class="field full"><label for="faultReason">故障原因 *</label><textarea id="faultReason" rows="2" placeholder="请输入故障原因" aria-describedby="faultReasonError"></textarea><span class="fault-inline-error" id="faultReasonError">请输入故障原因</span></div>
           <div class="field full"><label for="handleMeasure">处理措施 *</label><textarea id="handleMeasure" rows="2" placeholder="请输入故障处理措施" aria-describedby="handleMeasureError"></textarea><span class="fault-inline-error" id="handleMeasureError">请输入处理措施</span></div>
           <div class="field spare-part-field"><label>备件更换说明</label><input id="sparePartDesc" type="text" placeholder="如有更换备件，请填写说明"></div>
+          <section class="end-agent-summary" id="endAgentSummary" hidden><h4>AI 诊断对话摘要</h4><p id="endAgentSummaryText"></p></section>
         </div>
       </div>
       <div class="fault-modal-foot"><button class="btn btn-secondary" id="cancelEndRepairBtn" type="button">取消</button><button class="btn btn-primary" id="submitEndRepairBtn" type="button">提交处理结果</button></div>
@@ -2566,6 +2634,7 @@
       showToastLocal("故障上报已更新");
     } else {
       faultList.unshift({ id: `FR-240630-${String(nextFaultId++).padStart(3, "0")}`, deviceId: device.id, deviceName: device.name, workshop: device.workshop, line: device.line, phenomenon, description, urgency, reportTime, scene, status: "pending", repairStartTime: "", repairPerson: "", faultType: "", faultReason: "", handleMeasure: "", deviceStatus: "", sparePartDesc: "", mediaImages, mediaFiles, mediaVideos: [] });
+      queueRepairPreDiagnosis(faultList[0]);
       showToastLocal("故障上报已新增");
     }
     clearFaultFilters();
@@ -2830,9 +2899,7 @@
     $("#handleMeasure").value = fault.handleMeasure || suggestion.handleMeasure || "";
     $("#deviceStatus").value = fault.deviceStatus || suggestion.deviceStatus || "";
     $("#sparePartDesc").value = fault.sparePartDesc || suggestion.sparePartDesc || "";
-    $("#endAgentPrefillNote").hidden = !fault.repairAssistantSuggestion;
     const hasAiSummary = Boolean(fault.repairAi?.accepted && fault.aiDiagnosticSummary);
-    $("#endAgentPrefillNote").hidden = !hasAiSummary;
     $("#endAgentSummary").hidden = !hasAiSummary;
     $("#endAgentSummaryText").textContent = hasAiSummary ? fault.aiDiagnosticSummary : "";
     clearFormErrors($("#endRepairForm"));
@@ -2972,6 +3039,8 @@
     const detailMeta = statusDetailMeta(fault.status);
     const repairStarted = fault.status !== "pending";
     const closed = fault.status === "completed";
+    const aiDetailSummary = fault.repairAi?.accepted && fault.aiDiagnosticSummary
+      ? `<section class="fault-detail-ai-summary"><h5>AI 诊断对话摘要</h5><p>${escapeHtml(fault.aiDiagnosticSummary)}</p></section>` : "";
     $("#detailContent").innerHTML = `
       <section class="fault-detail-hero">
         <div>
@@ -3035,6 +3104,7 @@
             <div><span>备件更换说明：</span><strong>${detailValue(fault.sparePartDesc)}</strong></div>
           </div>
           <p class="fault-detail-copy">${detailValue(fault.handleMeasure, "暂无处理措施")}</p>
+          ${aiDetailSummary}
         ` : `<p class="fault-detail-copy muted">${fault.status === "pending" ? "该故障仍在待接单阶段，处理结论将在维修结束后展示。" : "维修处理中，处理原因、处置措施和备件信息将在闭环后展示。"}</p>`}
       </section>
 
@@ -3143,11 +3213,12 @@
     window.addEventListener("resize", hideFloatingTooltip);
   }
 
-  const repairAgentEnabled = true;
+  const repairAgentConfig = JSON.parse(localStorage.getItem("equipment.agent.runtime.config") || "{}")["故障诊断 Agent"] || { enabled: true, streaming: true, suggestions: true, sources: true };
+  const repairAgentEnabled = repairAgentConfig.enabled;
   function createRepairAiState(fault) { return { status: "queued", draft: null, facts: [], messages: [], sources: [], selectedPlanId: "", accepted: false, summary: "" }; }
   function buildRepairAgentDraft(fault) {
     const base = buildRepairAssistantSuggestion(fault);
-    return { ...base, inspectionChecklist: base.steps, isComplete: true, nextQuestion: "请确认现场是否已检查接口、线束与报警信息？", repairPlans: [
+    return { ...base, inspectionChecklist: base.steps, isComplete: false, nextQuestion: "请确认现场是否已检查接口、线束与报警信息？", repairPlans: [
       { id: "recommended", title: "推荐维修方案", conditions: "先完成基础检查并确认异常点", steps: base.steps, risk: "需复测信号稳定性", recommended: true },
       { id: "fallback", title: "备选维修方案", conditions: "现场无法立即更换部件时", steps: ["清洁并紧固连接件", "恢复供电后低负荷复测", "安排备件复核"], risk: "仅可作为临时处置", recommended: false }
     ], sources: [{ title: "同类设备相似维修案例 3 条", detail: "设备编号、维修人员、根因、处理措施及复发情况已纳入诊断依据。" }, { title: "知识库引用 2 份", detail: "已引用维护手册相关章节与安全作业原文片段。" }] };
@@ -3164,7 +3235,7 @@
   function applyRepairAgentReply(fault, reply) { const ai = fault.repairAi; if (!ai?.draft || !reply) return; ai.messages.push({ role: "user", text: reply }); ai.facts.push(reply); ai.draft = { ...buildRepairAgentDraft(fault), nextQuestion: "已收到补充信息。请确认是否还有现场报警码、温升或附件需要补充？" }; ai.messages.push({ role: "bot", text: "已将补充信息纳入诊断依据，并更新检查清单与推荐维修方案。" }); }
   function acceptRepairAgentDraft(fault) { if (!fault?.repairAi?.draft) return; fault.repairAi.accepted = true; fault.repairAi.summary = buildRepairAiSummary(fault); startRepair(fault, { adoptAi: true }); }
   function renderRepairAgentLoading(ai) { const loading = $("#repairAgentLoading"); if (!loading) return; const elapsed = Math.min(3000, Date.now() - (ai?.openedAt || Date.now())); const progress = Math.max(8, Math.round(elapsed / 3000 * 100)); const stages = ["正在理解故障描述", "正在检索同类设备历史维修记录", "正在查阅知识库", "正在形成诊断问题"]; const stage = stages[Math.min(stages.length - 1, Math.floor(progress / 25))]; loading.hidden = false; loading.innerHTML = `<strong>${stage}</strong><div class="repair-agent-loading-track"><i style="width:${progress}%"></i></div><div class="repair-agent-loading-line"><span>${progress}%</span><span>预计剩余 ${Math.max(1, Math.ceil((3000 - elapsed) / 1000))} 秒</span></div>`; }
-  function renderStartRepairActions(fault) { const foot = $("#startRepairModal .fault-modal-foot"); const ai = fault?.repairAi; if (!foot) return; if (ai?.status === "ready" && ai.draft && !ai.accepted) foot.innerHTML = '<button class="btn btn-secondary" type="button" data-start-direct>直接开始维修</button><button class="btn btn-primary" type="button" data-start-adopt>采纳 AI 建议并开始维修</button>'; else foot.innerHTML = '<button class="btn btn-secondary" id="cancelStartRepairBtn" type="button">取消</button><button class="btn btn-primary" id="confirmStartRepairBtn" type="button">开始维修</button>'; }
+  function renderStartRepairActions(fault) { const foot = $("#startRepairModal .fault-modal-foot"); const ai = fault?.repairAi; if (!foot) return; if (ai?.status === "ready" && ai.draft?.isComplete && !ai.accepted) foot.innerHTML = '<button class="btn btn-secondary" type="button" data-start-direct>直接开始维修</button><button class="btn btn-primary" type="button" data-start-adopt>采纳 AI 建议并开始维修</button>'; else foot.innerHTML = '<button class="btn btn-secondary" id="cancelStartRepairBtn" type="button">取消</button><button class="btn btn-primary" id="confirmStartRepairBtn" type="button">开始维修</button>'; }
   function renderRepairAssistant(fault) {
     if (!fault.repairAi) { queueRepairPreDiagnosis(fault); ensureRepairAiReady(fault); }
     if (!fault.repairAi.openedAt) fault.repairAi.openedAt = Date.now();
@@ -3180,6 +3251,229 @@
   function confirmStartRepair() { startRepair(activeStartRepairFault(), { adoptAi: false }); }
   $("#startRepairModal .fault-modal-foot")?.addEventListener("click", (event) => { const fault = activeStartRepairFault(); if (event.target.closest("[data-start-adopt]")) acceptRepairAgentDraft(fault); if (event.target.closest("[data-start-direct]")) startRepair(fault, { adoptAi: false }); });
 
+  function applyRepairAgentReply(fault, reply) {
+    const ai = fault.repairAi;
+    if (!ai?.draft || !reply) return;
+    ai.messages.push({ role: "user", text: reply });
+    ai.facts.push(reply);
+    ai.messages.push({ role: "bot", text: "我已结合你的补充重新归纳当前诊断。\n\n检查清单：1. 核对报警与实时信号；2. 检查相关接口、线束和部件；3. 完成复测后确认是否更换部件。\n\n推荐维修方案：先处理可确认的异常连接点并复测；若异常仍在，再按现场检测结果更换对应部件。\n\n你可以继续补充现场情况，或采纳当前建议开始维修。" });
+    ai.draft = { ...ai.draft, nextQuestion: "还有报警码、温升或附件需要补充吗？" };
+  }
+  function renderRepairAssistant(fault) {
+    if (!fault.repairAi) { queueRepairPreDiagnosis(fault); ensureRepairAiReady(fault); }
+    const ai = fault.repairAi;
+    if (!ai.openedAt) ai.openedAt = Date.now();
+    const chat = $("#repairAgentChat"); const row = $("#repairAgentInput")?.closest(".repair-agent-input-row");
+    if (ai.status !== "ready" || Date.now() - ai.openedAt < 3000) { renderRepairAgentLoading(ai); if (chat) chat.innerHTML = ""; if (row) row.hidden = true; window.setTimeout(() => renderRepairAssistant(fault), 350); renderStartRepairActions(fault); return; }
+    $("#repairAgentLoading").hidden = true; if (row) row.hidden = false;
+    if (chat) chat.innerHTML = [{ role: "bot", text: "我已完成同类设备案例和知识库检索。为了判断当前故障，先确认：现场是否存在报警码、温升异常或相关附件？" }, ...ai.messages].map(repairAssistantMessageHTML).join("");
+    renderStartRepairActions(fault);
+  }
+
+  /* 配置驱动的故障诊断对话状态机：只呈现可审计的诊断结果，不呈现模型思维链。 */
+  function diagnosticAgentRuntime() {
+    const defaults = { enabled: true, llm: "通义千问主模型（qwen2.5-72b）", streaming: true, suggestions: true, sources: true, contextTurns: 3 };
+    try { return { ...defaults, ...(JSON.parse(localStorage.getItem("equipment.agent.runtime.config") || "{}")["故障诊断 Agent"] || {}) }; } catch { return defaults; }
+  }
+  function dialogueDraft(fault) {
+    const base = buildRepairAssistantSuggestion(fault);
+    return {
+      ...base,
+      isComplete: false,
+      inspectionChecklist: base.steps,
+      repairPlans: [
+        { id: "recommended", title: "推荐维修方案", text: "完成基础检查后，处理已确认的异常点并复测稳定性。" },
+        { id: "fallback", title: "备选维修方案", text: "无法立即更换备件时，先完成安全处置和低负载验证。" }
+      ],
+      sources: [
+        { title: "同类设备相似维修案例 3 条", kind: "case", detail: "案例 FR-240629-011：冷却风扇转速异常，根因是风扇控制线束接插件松动；重新固定后复测温控曲线恢复平稳。案例 FR-240630-018：驱动电机过温限扭，排查温度曲线、风道与冷却液循环后确认异常点。案例 FR-240629-009：仪表通信间歇中断，清洁并重新压接 CAN 接头后错误计数归零。" },
+        { title: "知识库引用 2 份", kind: "knowledge", detail: "《电驱系统维护规程》：出现限扭或温升异常时，应先读取控制器报警与实时温度，再检查风道、冷却循环和温度传感器。 《高压设备安全作业规范》：拆检前须完成断电、验电和能量隔离，复测应在安全工况下进行。" }
+      ]
+    };
+  }
+  function createDialogueAiState(fault) {
+    return { status: "queued", openedAt: 0, messages: [], facts: [], draft: dialogueDraft(fault), selectedPlanId: "", accepted: false, streaming: false, prediagnosisAt: Date.now() };
+  }
+  function queueRepairPreDiagnosis(fault) {
+    if (!fault || fault.repairAi) return;
+    fault.repairAi = createDialogueAiState(fault);
+    window.setTimeout(() => {
+      if (faultList.includes(fault) && fault.repairAi?.status === "queued") fault.repairAi.status = "ready";
+    }, 650);
+  }
+  function repairQuestionPlan(fault) {
+    const text = `${fault.deviceName || ""} ${fault.phenomenon || ""} ${fault.description || ""}`;
+    if (/电池|BMS|压差|单体/.test(text)) return [
+      { key: "alarm", question: "先确认仪表或 BMS 当前是否有具体报警码？如有请发送报码或截图。", suggestions: ["有报警码", "没有报警码", "上传截图"] },
+      { key: "cellData", question: "请提供异常电池包的最高/最低单体电压、压差，以及 SOC；这些数据能区分单体、采样与均衡问题。", suggestions: ["有压差读数", "暂无读数", "上传 BMS 截图"] },
+      { key: "sampling", question: "请检查 BMS 采样线束、均衡插接件和高压连接：是否有松动、氧化、拉扯或近期拆装？", suggestions: ["发现线束异常", "外观正常", "上传现场照片"] },
+      { key: "condition", question: "该压差是在高负载、充电末段、静置后，还是任意工况下出现？能否稳定复现？", suggestions: ["高负载复现", "充电末段复现", "静置后出现", "暂不能复现"] }
+    ];
+    if (/转向|角度|传感器/.test(text)) return [
+      { key: "alarm", question: "先确认仪表或控制器当前是否有具体报警码？如有请发送报码或截图。", suggestions: ["有报警码", "没有报警码", "上传截图"] },
+      { key: "signal", question: "请提供转向角实际值与目标值，或描述回正时的偏差/跳变范围；是否存在信号抖动？", suggestions: ["有信号跳变", "有回正偏差", "暂无读数", "上传趋势图"] },
+      { key: "connection", question: "请检查角度传感器插接件、线束弯折处和安装固定点：是否松动、进水、磨损或近期调整过？", suggestions: ["发现连接异常", "外观正常", "上传现场照片"] },
+      { key: "condition", question: "故障是在低速转向、满转向、冷热机切换，还是任意工况下出现？", suggestions: ["低速转向出现", "满转向出现", "冷热机后出现", "任意工况"] }
+    ];
+    if (/液压|油缸|油泵|渗油/.test(text)) return [
+      { key: "alarm", question: "先确认是否有液压或控制器报警码；如有请发送具体报码。", suggestions: ["有报警码", "没有报警码", "上传截图"] },
+      { key: "pressure", question: "请提供液压压力、油温或滤芯压差读数；异常发生前后是否有明显波动？", suggestions: ["有压力读数", "有油温异常", "暂无读数", "上传趋势图"] },
+      { key: "inspection", question: "请检查油位、滤芯、吸油管与密封处：是否有渗漏、气泡、异响或污染？", suggestions: ["发现渗漏/异响", "外观正常", "上传现场照片"] },
+      { key: "condition", question: "故障是在举升、保压、连续动作，还是低温启动时出现？", suggestions: ["举升时出现", "保压时出现", "连续动作出现", "低温启动出现"] }
+    ];
+    if (/过温|限扭|冷却|风扇|电机/.test(text)) return [
+      { key: "alarm", question: "先确认电驱控制器当前是否有具体报警码？如有请发送报码或截图。", suggestions: ["有报警码", "没有报警码", "上传截图"] },
+      { key: "temperature", question: "请提供电机、控制器和冷却液的最高温度及出现时刻；温升是持续上升还是突然跳变？", suggestions: ["有温升读数", "温度突然跳变", "暂无读数", "上传趋势图"] },
+      { key: "cooling", question: "请检查冷却风扇、风道、冷却液循环和温度传感器：风扇是否正常介入，是否有堵塞或渗漏？", suggestions: ["风扇未正常介入", "发现风道/冷却异常", "检查正常", "上传现场照片"] },
+      { key: "condition", question: "限扭发生在持续高负载、坡道、铲装还是低负载工况？停止后多久可恢复？", suggestions: ["持续高负载", "坡道工况", "低负载也出现", "停机后恢复"] }
+    ];
+    return [
+      { key: "alarm", question: "先确认仪表或控制器当前是否有具体报警码？如有请发送报码或截图。", suggestions: ["有报警码", "没有报警码", "上传截图"] },
+      { key: "signal", question: "请提供异常发生时可观察到的关键读数或日志，例如电压、温度、压力或通信计数。", suggestions: ["有现场读数", "暂无读数", "上传日志"] },
+      { key: "connection", question: "请检查相关接口、线束、接插件和保险：是否松动、氧化、发热、磨损或近期拆装？", suggestions: ["发现连接异常", "外观正常", "上传现场照片"] },
+      { key: "condition", question: "请说明故障复现条件：何种工况触发、持续多久、是否稳定复现？", suggestions: ["稳定复现", "偶发", "高负载触发", "暂不能复现"] }
+    ];
+  }
+  function repairQuestion(ai, fault) {
+    const plan = repairQuestionPlan(fault);
+    if (!ai.facts.some((item) => item.key === "alarm")) return "先只确认一项：仪表或控制器当前有没有具体报警码？如有，请发送报码或截图；没有也可以直接回复“没有”。";
+    const alarm = ai.facts.find((item) => item.key === "alarm");
+    if (!alarm.absent && !ai.facts.some((item) => item.key === "alarmCode")) return "你提到有报警码。请把具体报码发给我（例如 P0xxx / 控制器报码），并说明它是在什么工况、何时出现的；这是判断故障链路的关键依据。";
+    const next = plan.find((item) => item.key !== "alarm" && !ai.facts.some((fact) => fact.key === item.key));
+    if (next) return next.question;
+    return "还缺一项验证数据：请提供一次复测前后的关键读数，或上传现场日志/照片。没有可验证数据时，我不能把推测当作根因。";
+  }
+  function recordDiagnosticFacts(ai, fault, answer) {
+    const no = /(没有|无|暂无|未见|未测|没发现|否|不是|没)/.test(answer.trim());
+    const alarm = ai.facts.find((item) => item.key === "alarm");
+    const plan = repairQuestionPlan(fault);
+    const next = plan.find((item) => item.key !== "alarm" && !ai.facts.some((fact) => fact.key === item.key));
+    const key = !alarm ? "alarm" : (!alarm.absent && !ai.facts.some((item) => item.key === "alarmCode")) ? "alarmCode" : next?.key || "verification";
+    ai.facts.push({ key, value: answer, absent: no });
+    return { key, no };
+  }
+  function diagnosticEnough(ai) {
+    const evidence = ai.facts.filter((item) => !item.absent);
+    const hasCondition = evidence.some((item) => item.key === "condition");
+    const hasTechnicalSignal = evidence.some((item) => !["alarm", "condition"].includes(item.key));
+    return ai.facts.length >= 4 && hasCondition && hasTechnicalSignal;
+  }
+  function composeDiagnosis(fault) {
+    const draft = dialogueDraft(fault);
+    const ai = fault.repairAi;
+    draft.isComplete = true;
+    const selected = draft.repairPlans.find((plan) => plan.id === ai.selectedPlanId);
+    draft.handleMeasure = `${draft.faultReason}。建议按检查清单完成核对${selected ? `，并优先执行“${selected.title}”` : ""}；现场确认后再实施处理并复测。`;
+    return draft;
+  }
+  function messageHTML(message, config) {
+    const suggestions = config.suggestions && message.suggestions?.length
+      ? `<div class="repair-agent-chip-row">${message.suggestions.map((text) => `<button type="button" class="repair-agent-chip" data-repair-agent-choice="${escapeHtml(text)}">${escapeHtml(text)}</button>`).join("")}</div>` : "";
+    const sources = config.sources && message.sources?.length
+      ? `<div class="repair-agent-source">${message.sources.map((source) => `<details><summary><span class="repair-agent-source-toggle">查看 ${escapeHtml(source.title)} 详情</span></summary><p>${escapeHtml(source.detail)}</p><p>${source.kind === "case" ? "以上为匹配案例的故障现象、处理方式与复测结果。" : "以上为本次诊断引用的知识库规程片段。"}</p></details>`).join("")}</div>` : "";
+    const detail = message.detail ? `<details class="repair-agent-dialogue-detail"><summary>查看诊断建议与维修方案</summary><p><strong>根因分析：</strong>${escapeHtml(message.detail.faultReason)}</p><p><strong>维修检查清单：</strong>${message.detail.inspectionChecklist.map((x, i) => `${i + 1}. ${x}`).join("；")}</p><p><strong>推荐维修方案：</strong>${message.detail.repairPlans.map((plan) => `${plan.title}：${escapeHtml(plan.text)}`).join("；")}</p><p><strong>备件 / 安全建议：</strong>${escapeHtml(message.detail.sparePartDesc)}；${escapeHtml(message.detail.safety)}</p></details>` : "";
+    return `<div class="repair-agent-message ${message.role === "user" ? "user" : "bot"}${message.streaming ? " repair-agent-streaming" : ""}">${escapeHtml(message.text || "")}${detail}${sources}${suggestions}</div>`;
+  }
+  function streamAssistantMessage(fault, payload) {
+    const ai = fault.repairAi; const config = diagnosticAgentRuntime();
+    const message = { role: "bot", text: "", streaming: Boolean(config.streaming), ...payload };
+    ai.messages.push(message); ai.streaming = Boolean(config.streaming);
+    const finish = () => { message.text = payload.text; message.streaming = false; ai.streaming = false; renderRepairAssistant(fault); };
+    if (!config.streaming) { finish(); return; }
+    let index = 0;
+    const timer = window.setInterval(() => {
+      index = Math.min(payload.text.length, index + 3);
+      message.text = payload.text.slice(0, index); renderRepairAssistant(fault);
+      if (index >= payload.text.length) { window.clearInterval(timer); message.streaming = false; ai.streaming = false; renderRepairAssistant(fault); }
+    }, 24);
+  }
+  function renderStartRepairActions(fault) {
+    const foot = $("#startRepairModal .fault-modal-foot"); const complete = fault?.repairAi?.status === "complete" && fault.repairAi.draft?.isComplete;
+    if (!foot) return;
+    foot.innerHTML = complete
+      ? '<button class="btn btn-secondary" type="button" data-start-direct>直接开始维修</button><button class="btn btn-primary" type="button" data-start-adopt>确认采纳 AI 建议并提交</button>'
+      : '<button class="btn btn-secondary" type="button" data-start-direct>直接开始维修</button><button class="btn btn-primary" type="button" disabled>等待诊断完成</button>';
+  }
+  function renderRepairAssistant(fault) {
+    if (!fault.repairAi) queueRepairPreDiagnosis(fault);
+    const ai = fault.repairAi; const config = diagnosticAgentRuntime(); const chat = $("#repairAgentChat"); const loading = $("#repairAgentLoading"); const row = $("#repairAgentInput")?.closest(".repair-agent-input-row");
+    $("#repairAgentSuggestion").innerHTML = ""; $("#repairAgentEvidence").hidden = true;
+    $("#repairAgentConfidence").textContent = config.enabled ? `已启用 · ${config.llm}` : "AI 诊断暂不可用";
+    if (!config.enabled) { ai.status = "unavailable"; if (loading) loading.hidden = true; if (row) row.hidden = true; if (chat) chat.innerHTML = '<div class="repair-agent-message bot">AI 诊断暂不可用，请直接开始维修。</div>'; renderStartRepairActions(fault); return; }
+    if (!ai.openedAt) ai.openedAt = Date.now();
+    const elapsed = Date.now() - ai.openedAt;
+    if (elapsed < 3000) {
+      renderRepairAgentLoading(ai); if (chat) chat.innerHTML = ""; if (row) row.hidden = true; renderStartRepairActions(fault);
+      window.clearTimeout(ai.loadingTimer); ai.loadingTimer = window.setTimeout(() => renderRepairAssistant(fault), 120); return;
+    }
+    if (loading) loading.hidden = true; if (row) row.hidden = false;
+    if (!ai.messages.length && !ai.streaming) { const first = repairQuestionPlan(fault)[0]; streamAssistantMessage(fault, { text: `我已完成同类设备历史维修记录和知识库检索。${repairQuestion(ai, fault)}`, suggestions: first.suggestions, sources: ai.draft.sources }); }
+    if (chat) { chat.innerHTML = ai.messages.map((message) => messageHTML(message, config)).join(""); chat.scrollTop = chat.scrollHeight; }
+    const input = $("#repairAgentInput"); const send = $("#repairAgentSend"); const requiredTag = $("#repairAgentRequiredTag");
+    const requiredAlarmCode = Boolean(ai.awaitingAlarmCode);
+    if (input) {
+      input.disabled = ai.streaming;
+      input.placeholder = requiredAlarmCode ? "请输入具体报警码，例如 P0xxx / 控制器报码" : "继续追问或修正判断，例如：优先排查冷却系统";
+      input.setAttribute("aria-label", requiredAlarmCode ? "请输入具体报警码" : "继续追问或补充诊断信息");
+      input.oninput = () => { if (send) send.disabled = ai.streaming || (requiredAlarmCode && !/\d/.test(input.value)); };
+    }
+    if (requiredTag) requiredTag.hidden = !requiredAlarmCode;
+    if (row) row.classList.toggle("is-required", requiredAlarmCode);
+    if (send) send.disabled = ai.streaming || (requiredAlarmCode && !/\d/.test(input?.value || ""));
+    if (requiredAlarmCode && !ai.streaming && input && document.activeElement !== input) window.requestAnimationFrame(() => input.focus());
+    renderStartRepairActions(fault);
+  }
+  function applyRepairAgentReply(fault, reply) {
+    const ai = fault?.repairAi; if (!ai || !reply || ai.streaming) return;
+    ai.messages.push({ role: "user", text: reply }); const fact = recordDiagnosticFacts(ai, fault, reply);
+    if (fact.key === "alarm") ai.awaitingAlarmCode = !fact.no;
+    if (fact.key === "alarmCode") ai.awaitingAlarmCode = false;
+    if (!diagnosticEnough(ai)) {
+      const acknowledgement = fact.no
+        ? "这一项暂未发现异常或暂无可用数据。"
+        : "";
+      const next = repairQuestionPlan(fault).find((item) => item.key !== "alarm" && !ai.facts.some((entry) => entry.key === item.key));
+      const nextSuggestions = fact.key === "alarm" && !fact.no ? ["暂无报码 / 未读取"] : next?.suggestions || ["上传现场日志", "上传现场图片", "暂无数据"];
+      streamAssistantMessage(fault, { text: `${acknowledgement}${repairQuestion(ai, fault)}`, suggestions: nextSuggestions, sources: [] });
+    } else {
+      ai.draft = composeDiagnosis(fault); ai.status = "complete";
+      streamAssistantMessage(fault, { text: "信息已满足当前诊断条件。我已结合故障描述、你的补充、同类设备案例和知识库，生成根因分析、维修检查清单及推荐维修方案。你可以展开查看；确认采纳后会自动预填结束维修字段。", detail: ai.draft, suggestions: ["继续补充现场情况", "请说明诊断依据"], sources: [] });
+    }
+    renderRepairAssistant(fault);
+  }
+  function handleRepairAgentSend() {
+    const fault = activeStartRepairFault(); const input = $("#repairAgentInput"); const text = input?.value.trim();
+    if (!fault || !text) return;
+    if (fault.repairAi?.awaitingAlarmCode && !/\d/.test(text)) { showToastLocal("请填写具体报警码（如 P0xxx / 控制器报码），或选择“暂无报码 / 未读取”。"); input.focus(); return; }
+    input.value = ""; applyRepairAgentReply(fault, text); renderRepairAssistant(fault);
+  }
+  function handleRepairAgentClick(event) {
+    const fault = activeStartRepairFault(); if (!fault) return;
+    const plan = event.target.closest("[data-repair-agent-plan]")?.dataset.repairAgentPlan;
+    if (plan) { fault.repairAi.selectedPlanId = plan; showToastLocal("已选择维修方案；也可以不选方案直接采纳诊断建议。"); return; }
+    const choice = event.target.closest("[data-repair-agent-choice]")?.dataset.repairAgentChoice; if (choice) applyRepairAgentReply(fault, choice);
+  }
+  function acceptRepairAgentDraft(fault) {
+    if (!fault?.repairAi?.draft?.isComplete) return;
+    const ai = fault.repairAi; const draft = ai.draft; ai.accepted = true;
+    const labels = { alarm: "报警码情况", alarmCode: "具体报警码 / 出现场景", temperature: "温升与测量数据", cooling: "冷却系统检查", pressure: "压力与油温数据", inspection: "液压部件检查", cellData: "电池单体与压差数据", sampling: "BMS 采样链路检查", signal: "信号与趋势数据", connection: "接口线束检查", condition: "故障复现工况", verification: "复测验证" };
+    const evidence = ai.facts.map((item) => `${labels[item.key] || "现场信息"}：${item.value}${item.absent ? "（未发现 / 暂无数据）" : ""}`).join("；");
+    ai.summary = `故障现象：${fault.phenomenon}。故障描述：${fault.description || "未补充"}。\n\n诊断过程关键信息：${evidence || "暂无额外现场证据"}。\n\nAI 诊断结论：${draft.faultReason}。建议维修人员按检查清单完成现场核对，并结合复测结果执行处理措施：${draft.handleMeasure}`;
+    startRepair(fault, { adoptAi: true });
+  }
+  function startRepair(fault, { adoptAi }) {
+    if (!fault) return; const d = fault.repairAi?.draft;
+    if (adoptAi && d?.isComplete) Object.assign(fault, { faultType: d.faultType, faultReason: d.faultReason, handleMeasure: d.handleMeasure, sparePartDesc: d.sparePartDesc, deviceStatus: d.deviceStatus, aiDiagnosticSummary: fault.repairAi.summary });
+    else { discardRepairAi(fault); fault.aiDiagnosticSummary = ""; }
+    fault.status = "repairing"; fault.repairPerson = $("#repairPerson").value.trim() || currentAccountName(); fault.repairStartTime = new Date().toISOString().slice(0, 19).replace("T", " ");
+    closeModal("#startRepairModal"); renderFaultTable(currentFilterData()); showToastLocal(adoptAi ? "已采纳 AI 建议并开始维修，结束维修时会自动预填。" : "已直接开始维修，AI 临时诊断不会带入结束维修。");
+  }
+  function confirmStartRepair() { startRepair(activeStartRepairFault(), { adoptAi: false }); }
+  $("#startRepairModal .fault-modal-foot")?.addEventListener("click", (event) => {
+    const fault = activeStartRepairFault(); if (!fault) return;
+    if (event.target.closest("[data-start-adopt]")) acceptRepairAgentDraft(fault);
+    if (event.target.closest("[data-start-direct]")) startRepair(fault, { adoptAi: false });
+  });
   faultList.filter((fault) => fault.status === "pending").forEach(queueRepairPreDiagnosis);
   initDeviceSelect();
   bindEvents();
