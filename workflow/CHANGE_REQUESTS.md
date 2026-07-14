@@ -54,8 +54,8 @@ This is the continuous change ledger for the project. Existing history must not 
 - Decision: Approved by the project owner in the deletion request; history remains recoverable from `snapshot/legacy-import-20260714`.
 - Updated Baselines: `03-ui-prototype/PROTOTYPE_BASELINE.md`, `02-product-interaction-design/PAGE_FUNCTION_MATRIX.md` remain consistent with data-import exclusion.
 - Implementation:
-  - Commit: pending
+  - Commit: `5d9b3c4`
   - Owner: workflow orchestrator
 - Verification:
-  - Status: Pending cleanup verification
-  - Evidence: post-cleanup `git diff --check`, static tests, prototype HTTP smoke
+  - Status: Verified
+  - Evidence: no stale references; 9/9 static checks; prototype index/config HTTP 200; deleted data-import HTTP 404; `git diff --check` passed
