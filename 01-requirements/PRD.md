@@ -3,7 +3,7 @@
 - Baseline: Candidate v1.0
 - Status: Awaiting Stage 1 user approval
 - Date: 2026-07-14
-- Source decision records: `workflow/CHANGE_REQUESTS.md`, `docs/superpowers/specs/2026-07-14-formal-stage-gate-migration-design.md`
+- Source decision records: `workflow/CHANGE_REQUESTS.md`, `workflow/STAGE_APPROVALS.md`
 
 ## 1. Product definition
 

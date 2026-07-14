@@ -59,3 +59,30 @@ This is the continuous change ledger for the project. Existing history must not 
 - Verification:
   - Status: Verified
   - Evidence: no stale references; 9/9 static checks; prototype index/config HTTP 200; deleted data-import HTTP 404; `git diff --check` passed
+
+### CR-003: Remove completed process-only documentation directory
+
+- Level: L1
+- Status: Approved
+- Raised By: project owner
+- Raised At: 2026-07-14
+- Current Stage: Cross-stage workspace hygiene
+- Original Request: Keep only formal Stage directories.
+- Clarified Requirement: Remove `docs/superpowers/` after its migration design and execution plan have been completed; retain formal stage artifacts, `workflow/`, source prototype, and `tests/`.
+- Reason: The directory contains process-session design/plan files, not current product or stage deliverables.
+- Impact:
+  - PRD: source references updated to workflow ledgers
+  - SPEC: none
+  - Prototype: none
+  - Architecture: none
+  - Implementation Plan: formal candidate remains at `04-architecture-plan/IMPLEMENTATION_PLAN.md`
+  - Test Cases: none
+  - Acceptance Criteria: none
+- Decision: Approved by the project owner in the cleanup request; deleted files remain recoverable through Git history.
+- Updated Baselines: `01-requirements/PRD.md`, root `README.md`
+- Implementation:
+  - Commit: pending
+  - Owner: workflow orchestrator
+- Verification:
+  - Status: Pending cleanup verification
+  - Evidence: path scan, tests and `git diff --check`
