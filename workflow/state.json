@@ -25,9 +25,10 @@
   },
   "lastApprovedStage": null,
   "pendingStageApproval": null,
-  "currentCommitSha": null,
+  "currentCommitSha": "c544c2d",
   "notes": [
-    "Workspace is not a Git repository as of 2026-07-14.",
+    "GitHub repository: https://github.com/QI-code1992/Equipment-repair.",
+    "Original imported workspace is recoverable at commit c544c2d and tag snapshot/legacy-import-20260714.",
     "No formal stage approval records were found.",
     "Current-rule overlays conflict with the full PRD/SPEC drafts and parts of the static prototype.",
     "Formal development must not start until Stage 1 canonical PRD, SPEC, acceptance criteria, and traceability are reconciled and explicitly approved."

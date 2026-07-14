@@ -7,7 +7,7 @@ This is the continuous change ledger for the project. Existing history must not 
 ### CR-001: Reconcile the canonical requirements baseline
 
 - Level: L2
-- Status: Needs Clarification
+- Status: Approved
 - Raised By: formal workflow takeover audit
 - Raised At: 2026-07-14
 - Current Stage: Stage 1 — Requirements Definition
@@ -22,7 +22,7 @@ This is the continuous change ledger for the project. Existing history must not 
   - Implementation Plan: existing plans cannot be promoted until baseline reconciliation
   - Test Cases: one current static test conflicts with the read-only metric baseline; documented test commands also reference missing files
   - Acceptance Criteria: standalone complete artifact is missing
-- Decision: Pending project-owner clarification and approval
+- Decision: User approved the snapshot-first formalization design on 2026-07-14. Proceed with canonical Stage 1 consolidation and candidate Stage 0–8 documentation; no stage transition is approved by this decision.
 - Updated Baselines: none
 - Implementation:
   - Commit: unavailable; workspace is not a Git repository
