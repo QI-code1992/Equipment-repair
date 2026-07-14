@@ -300,3 +300,5 @@
 - 决策：用户授权完成文档基线、变更登记和原型检查点；本记录不构成 Stage Gate 批准。
 - 实施：源代码版本 `fa8fa42ed64b1d892a701cea287f3ef69ce7a2c2`；候选基线文档提交 `25d4ba41e256b43c41fa707859801e7ea89ba3ed`。
 - 验证：全部 `06-testing/tests/*.test.js` 静态检查通过；待提交后以精确 SHA 更新检查点。
+
+- Stage 4 设计：已确认 `04-architecture-plan/维修故障诊断Agent架构设计.md` 的公网平台账号访问、本地结构化历史案例、本地 RAGFlow、受控外部 LLM API、授权隔离与降级边界；待实施计划审批。
