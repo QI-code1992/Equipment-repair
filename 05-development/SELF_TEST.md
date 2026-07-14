@@ -1,6 +1,6 @@
-# Self Test
+# 自测
 
-- Status: Not Run for production
-- Prototype evidence: Node static checks exist under `06-testing/tests/`; they are not production tests.
-- Required production checks: unit, API contract, permission, health-score, Agent/RAGFlow integration, security, performance and end-to-end.
-- Acceptance candidate requires an exact Commit SHA and fresh results.
+- 状态：尚未执行生产测试
+- 原型证据：Node 静态检查位于 `06-testing/tests/`，不属于生产测试。
+- 必要生产检查：单元、API 契约、权限、健康分、Agent/RAGFlow 集成、安全、性能和端到端测试。
+- 验收候选包必须绑定精确 Commit SHA 和最新结果。

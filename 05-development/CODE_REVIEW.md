@@ -1,5 +1,5 @@
-# Code Review
+# 代码评审
 
-- Status: Not Started
-- Scope: no production implementation exists.
-- Review gate: every meaningful implementation slice requires spec compliance, quality review, tests and a reachable feature/page checkpoint.
+- 状态：尚未开始
+- 范围：当前不存在生产实现。
+- 评审门禁：每个有意义的实现切片都必须完成规格符合性、质量评审、测试，并具备可追溯的功能/页面检查点。

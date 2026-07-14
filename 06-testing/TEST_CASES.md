@@ -1,6 +1,6 @@
-# Test Cases
+# 测试用例
 
-| ID range | Coverage | Source |
+| ID 范围 | 覆盖内容 | 来源 |
 |---|---|---|
 | TC-EQ-* | equipment CRUD, duplicate, owner, deactivation | AC-006–008 |
 | TC-KB-* | document lifecycle, failed retrieval, citations | AC-009 |
@@ -12,4 +12,4 @@
 | TC-SEC-* | login, permission, audit, secrets | AC-001–005 |
 | TC-RES-* | outage fallback, repeated submit, UI states | AC-029–031 |
 
-Detailed executable cases are blocked until Stage 4 API/data contracts are approved.
+详细可执行用例需等待 Stage 4 API/数据契约获批后编写。

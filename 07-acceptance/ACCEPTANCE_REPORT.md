@@ -1,8 +1,8 @@
-# Acceptance Report
+# 验收报告
 
-- Status: BLOCKED
-- Exact version / Commit SHA: none
-- Product baselines: Candidate Stage 1–4 documents
-- Test conclusion: production verification not run
-- Final verdict: BLOCKED
-- Blocking reason: no approved requirements/design/architecture gates and no production implementation Commit SHA.
+- 状态：受阻
+- 精确版本 / Commit SHA：无
+- 产品基线：Stage 1–4 候选文档
+- 测试结论：尚未执行生产验证
+- 最终结论：受阻
+- 受阻原因：需求/设计/架构门禁尚未批准，且不存在生产实现 Commit SHA。

@@ -208,3 +208,11 @@ This is the continuous change ledger for the project. Existing history must not 
 - Raised By: project owner
 - Scope: translate Stage 2 interaction/design and Stage 3 prototype document titles, metadata, table headers and explanatory text; preserve technical identifiers, routes, states and file paths.
 - Boundary: existing English filenames remain unchanged; architecture, development, testing, acceptance and release documents remain for the next batch.
+
+### CR-018: 中文化 Stage 4–8 架构、开发、测试、验收和交付文档
+
+- Level: L1
+- Status: Implemented / partial batch
+- Raised By: project owner
+- Scope: translate Stage 4–8 document titles, metadata, explanatory text, table headers and delivery statements; preserve technical identifiers, API routes, commands, states and Commit SHA.
+- Boundary: existing English filenames remain unchanged; code, tests, logs, variables and technical identifiers retain English where required.

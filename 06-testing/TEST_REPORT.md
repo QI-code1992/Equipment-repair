@@ -1,7 +1,7 @@
-# Test Report
+# 测试报告
 
-- Status: BLOCKED for production verification
-- Exact Commit SHA: none
-- Prototype static checks after formal migration: 9 passed.
-- The metric check was corrected to inspect the visible readonly metric modal rather than stale unreachable edit implementation strings; the current 40-metric readonly requirement remains unchanged.
-- Production test execution: NOT RUN.
+- 状态：生产验证受阻
+- 精确 Commit SHA：无
+- 正式迁移后的原型静态检查：通过。
+- 指标检查已改为检查可见的只读指标弹窗，而不是过期且不可达的编辑实现字符串；当前 40 项指标只读要求不变。
+- 生产测试执行情况：尚未执行。

@@ -1,6 +1,6 @@
-# Regression Report
+# 回归报告
 
-- Status: Candidate verification complete; production regression not run
-- Evidence: migrated prototype server returned HTTP 200 for config, index and CSS; 9/9 Node static checks passed; JSON and JavaScript syntax checks passed.
-- Remaining checks: canonical path scan, stale-rule scan, and browser review of P0 pages; production regression remains not run.
-- Any failure remains visible in this report and `workflow/CHANGE_REQUESTS.md`.
+- 状态：候选验证完成；尚未执行生产回归
+- 证据：迁移后的原型服务器对配置页、首页和 CSS 返回 HTTP 200；Node 静态检查通过；JSON 和 JavaScript 语法检查通过。
+- 剩余检查：规范路径扫描、过期规则扫描和 P0 页面浏览器评审；生产回归仍未执行。
+- 所有失败都必须记录在本报告和 `workflow/CHANGE_REQUESTS.md` 中。

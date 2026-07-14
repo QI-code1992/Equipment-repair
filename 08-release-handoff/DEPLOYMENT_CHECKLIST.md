@@ -1,4 +1,4 @@
-# Deployment Checklist
+# 部署检查清单
 
 - [ ] Stage 4 architecture and deployment topology approved
 - [ ] Production build and configuration documented

@@ -1,3 +1,3 @@
-# Release Handoff
+# 发布交付
 
-No production handoff is available. Handoff requires an approved architecture, exact acceptance SHA, deployment checklist, rollback validation, monitoring notes and known-issues list.
+当前没有生产交付包。交付需要已批准的架构、精确验收 SHA、部署检查清单、回滚验证、监控说明和已知问题清单。

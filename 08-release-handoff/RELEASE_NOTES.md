@@ -1,5 +1,5 @@
-# Release Notes Candidate
+# 发布说明（候选版）
 
-- Version: not assigned
-- Status: Not Ready
-- This package currently contains formal candidate documents and a static prototype; it does not contain a production release.
+- 版本：尚未分配
+- 状态：未就绪
+- 当前包包含正式候选文档和静态原型，不包含生产发布版本。

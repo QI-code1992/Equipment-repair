@@ -1,6 +1,6 @@
-# API Specification Candidate
+# API 规格（候选版）
 
-- Status: Awaiting Stage 4 approval
+- 状态：等待 Stage 4 审批
 
 | Method | Endpoint | Purpose | Authorization |
 |---|---|---|---|

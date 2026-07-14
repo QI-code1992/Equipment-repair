@@ -1,3 +1,3 @@
-# Acceptance Evidence
+# 验收证据
 
-No acceptance evidence exists. Prototype screenshots, static checks and HTTP smoke results are design/reference evidence only until bound to approved baselines and an exact production Commit SHA.
+当前不存在正式验收证据。原型截图、静态检查和 HTTP 冒烟结果仅是设计/参考证据，必须绑定已批准基线和精确生产 Commit SHA 后才能用于验收。
