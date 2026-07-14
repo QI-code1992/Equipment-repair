@@ -4290,6 +4290,7 @@ function initEquipmentDetailPage() {
     healthTrigger?.setAttribute("aria-expanded", "true");
     healthDrawer.focus();
   };
+  if (new URLSearchParams(window.location.search).get("openHealthScore") === "1") openHealthDrawer();
   healthTrigger?.addEventListener("click", openHealthDrawer);
   $("[data-health-score-close]", healthDrawer)?.addEventListener("click", closeHealthDrawer);
   healthDrawer?.addEventListener("click", (event) => {
