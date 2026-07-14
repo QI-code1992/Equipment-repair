@@ -20,4 +20,8 @@ assert(html.includes('data-bi-detail="ZL-2026-08"'), '设备健康列表应提�
 assert(!html.includes('生成工单'), '设备健康列表不应提供生成工单操作');
 assert(!html.includes('区域 / 组织 TOP 5') && !html.includes('工厂 TOP 5') && !html.includes('车间 TOP 5'), '排行区应从驾驶舱移除');
 assert(css.includes('.bi-analytics-panel + .dashboard-table-card{margin-top:24px}'), '效率分析与设备列表之间应保留明确间距');
+assert(html.includes('echarts@5.5.1/dist/echarts.min.js'), '趋势分析应加载 ECharts');
+assert(html.includes('data-bi-chart="health"') && html.includes('data-bi-chart="faults"') && html.includes('data-bi-chart="orders"'), '趋势分析应提供三个真实图表容器');
+assert(html.includes('data-bi-period'), '趋势分析应支持日周月切换');
+assert(!html.includes('class="line-chart'), '趋势分析不应继续使用 CSS 模拟线条');
 console.log('bi dashboard management analytics static checks passed');

@@ -74,11 +74,11 @@
         </section>
 
         <article class="card bi-analytics-panel" aria-labelledby="trend-title">
-          <div class="section-title"><div><h2 id="trend-title">趋势分析</h2><p class="muted">按时间观察健康、故障和工单的变化趋势</p></div><div class="segmented" role="group" aria-label="趋势粒度"><button class="is-active" type="button">日</button><button type="button">周</button><button type="button">月</button></div></div>
+          <div class="section-title"><div><h2 id="trend-title">趋势分析</h2><p class="muted">按时间观察健康、故障和工单的变化趋势</p></div><div class="segmented" data-bi-period role="group" aria-label="趋势粒度"><button class="is-active" type="button" data-period="day">日</button><button type="button" data-period="week">周</button><button type="button" data-period="month">月</button></div></div>
           <div class="grid grid-3 bi-trend-grid">
-            <div class="chart-panel"><h3>健康综合评分趋势</h3><div class="line-chart blue" aria-label="健康综合评分趋势图"><span class="line-path"></span><span class="axis-label">100</span><span class="axis-label bottom">60</span></div><small>05-12　05-17　05-22　05-27　06-01　06-06　06-10</small></div>
-            <div class="chart-panel"><h3>故障数量趋势</h3><div class="line-chart orange" aria-label="故障数量趋势图"><span class="line-path"></span><span class="axis-label">80</span><span class="axis-label bottom">0</span></div><small>05-12　05-17　05-22　05-27　06-01　06-06　06-10</small></div>
-            <div class="chart-panel"><h3>工单数量趋势</h3><div class="line-chart purple" aria-label="工单数量趋势图"><span class="line-path"></span><span class="axis-label">300</span><span class="axis-label bottom">0</span></div><small>05-12　05-17　05-22　05-27　06-01　06-06　06-10</small></div>
+            <div class="chart-panel"><h3>健康综合评分趋势</h3><div class="bi-echart" data-bi-chart="health" aria-label="健康综合评分趋势图"></div></div>
+            <div class="chart-panel"><h3>故障数量趋势</h3><div class="bi-echart" data-bi-chart="faults" aria-label="故障数量趋势图"></div></div>
+            <div class="chart-panel"><h3>工单数量趋势</h3><div class="bi-echart" data-bi-chart="orders" aria-label="工单数量趋势图"></div></div>
           </div>
         </article>
 
@@ -147,7 +147,43 @@
   </aside>
   <div class="agent-scrim" id="agentScrim"></div>
   <div class="toast" role="status" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
   <script src="../assets/health-score-service.js"></script>
+  <script>
+    (function () {
+      if (!window.echarts) return;
+      const datasets = {
+        day: { labels: ['05-12','05-17','05-22','05-27','06-01','06-06','06-10'], health: [68,74,79,84,82,88,90], faults: [42,28,35,56,31,44,22], orders: [142,180,156,204,168,228,192] },
+        week: { labels: ['第1周','第2周','第3周','第4周','第5周','第6周','第7周'], health: [72,76,80,82,85,87,90], faults: [168,142,130,118,104,92,76], orders: [680,720,768,812,846,902,944] },
+        month: { labels: ['12月','1月','2月','3月','4月','5月','6月'], health: [64,68,71,76,80,85,90], faults: [420,398,360,318,286,244,212], orders: [2420,2560,2688,2810,2960,3120,3280] }
+      };
+      const colors = { health: '#1677d2', faults: '#e99514', orders: '#7a5af8' };
+      const charts = {};
+      function render(period) {
+        const data = datasets[period];
+        Object.entries(colors).forEach(([key, color]) => {
+          const el = document.querySelector(`[data-bi-chart="${key}"]`);
+          if (!el) return;
+          charts[key] = charts[key] || window.echarts.init(el);
+          charts[key].setOption({
+            animationDuration: 500,
+            color: [color],
+            grid: { left: 34, right: 12, top: 18, bottom: 28 },
+            tooltip: { trigger: 'axis' },
+            xAxis: { type: 'category', boundaryGap: false, data: data.labels, axisLine: { lineStyle: { color: '#dbe4f0' } }, axisLabel: { color: '#8b9ab0', fontSize: 10 } },
+            yAxis: { type: 'value', splitLine: { lineStyle: { color: '#e9eff6' } }, axisLabel: { color: '#8b9ab0', fontSize: 10 } },
+            series: [{ name: key === 'health' ? '健康综合评分' : key === 'faults' ? '故障数量' : '工单数量', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, data: data[key], lineStyle: { width: 3 }, areaStyle: { opacity: .08 } }]
+          }, true);
+        });
+      }
+      render('day');
+      document.querySelectorAll('[data-bi-period] button').forEach((button) => button.addEventListener('click', () => {
+        document.querySelectorAll('[data-bi-period] button').forEach((item) => item.classList.toggle('is-active', item === button));
+        render(button.dataset.period);
+      }));
+      window.addEventListener('resize', () => Object.values(charts).forEach((chart) => chart.resize()));
+    }());
+  </script>
   <script>
     (function () {
       const service = window.HealthScoreService;
