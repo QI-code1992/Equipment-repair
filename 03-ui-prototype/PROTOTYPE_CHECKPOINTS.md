@@ -20,3 +20,10 @@
 - Related artifact: `03-ui-prototype/PROTOTYPE_AUDIT.md`
 - Findings: factory modeling, Agent report, intelligent configuration detail, AI duration gate, and work-order label mapping were added to canonical documents.
 - Limitation: no browser screenshot or production API verification was available in this audit.
+
+## PCP-003: User entry and scoped management interaction candidate
+
+- Status: Candidate / awaiting Stage 2 review
+- Scope: global user capsule, profile/security modals, permission-scoped user management, self-only account card
+- Commit SHA: `aa8a307`
+- Verification: static tests and HTTP 200 smoke checks passed; browser/runtime visual approval pending.
