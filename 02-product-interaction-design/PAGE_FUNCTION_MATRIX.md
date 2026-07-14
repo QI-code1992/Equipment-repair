@@ -16,7 +16,7 @@
 | Global Agent | three tabs, history, drawer | Agent-authorized users | closed/open/collecting/preview/error | global scripts |
 | Maintenance records | list/detail/knowledge status | admin/equipment admin/repair | empty/loading/error | `prototype/pages/maintenance-records.html` |
 | Repair execution | assigned work, result, submit | repair worker | editing/submitted/forbidden | `prototype/pages/repair-execution.html` |
-| System management | users, roles, menu/operation, audit | admin | tabs/permission/error | `prototype/pages/system-management.html` |
+| System management | users, roles, menu/operation, audit; permission-scoped self-only user view | admin / granted users / ordinary users | tabs/permission/self-only/error | `prototype/pages/system-management.html` |
 | Intelligent config | model resources, four Agents, KB pipeline/retry, call records, Token usage, readonly 40 metrics | admin | upload/index failure/test/readonly | `prototype/pages/intelligent-config.html` |
 | Data import | historical only | none current | excluded | retained in snapshot only |
 

@@ -18,6 +18,7 @@
 | Capability | Admin | Equipment admin | Repair worker | Line operator |
 |---|---:|---:|---:|---:|
 | User/role/menu/operation management | Manage | View | None | None |
+| User management scope (`user_management.view_all`) | All users | Granted scope | Self only | Self only |
 | Equipment list/detail | Manage | Manage | View | View assigned context |
 | Equipment knowledge | Manage | Manage | View | None |
 | Manual fault report | Create/view | Create/view | Create/view | Create/view |
