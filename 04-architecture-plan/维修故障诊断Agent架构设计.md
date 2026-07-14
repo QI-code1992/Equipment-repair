@@ -1,5 +1,7 @@
 # 维修故障诊断 Agent 架构设计
 
+> 状态：已被项目级架构设计取代（保留为子模块历史输入）。系统级架构以 [`平台级架构设计.md`](平台级架构设计.md) 为准；本文件中设备/工厂授权隔离内容不再有效。
+
 - 阶段：Stage 4 — Architecture and Development Plan
 - 状态：已确认设计，待实施计划审批
 - 关联需求：`01-requirements/PRD.md` 第 12 节、`01-requirements/SPEC.md` 第 12 节、CR-024

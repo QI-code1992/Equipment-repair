@@ -15,7 +15,7 @@
   "engineeringBaseline": {
     "status": "prototype-only-not-approved",
     "prototype": "03-ui-prototype/prototype/",
-    "architectureCandidate": "04-architecture-plan/",
+    "architectureCandidate": "04-architecture-plan/平台级架构设计.md",
     "automatedChecks": "06-testing/tests/"
   },
   "lastApprovedStage": "Stage 3 — UI and High-Fidelity Prototype",
@@ -30,6 +30,7 @@
     "Formal development must not start until Stage 1 canonical PRD, SPEC, acceptance criteria, and traceability are reconciled and explicitly approved.",
     "On 2026-07-14, the project owner explicitly approved a scoped waiver to enter Stage 3 directly. This authorizes prototype work only; it does not approve Stage 0–2 baselines or authorize development.",
     "The GitHub repository https://github.com/QI-code1992/Equipment-repair is the required remote system of record for all subsequent project artifacts. Before any formal stage checkpoint, gate recommendation, baseline, test/acceptance evidence, or handoff is reported complete, its files and the corresponding workflow ledgers must be committed and pushed to GitHub with the exact Commit SHA recorded.",
-    "CR-024 has updated the repair diagnosis Agent candidate requirements, interaction baseline and prototype checkpoint evidence. Stage 1, Stage 2 and Stage 3 were approved on 2026-07-14; Stage 4 architecture and development plan approval remains pending."
+    "CR-024 has updated the repair diagnosis Agent candidate requirements, interaction baseline and prototype checkpoint evidence. Stage 1, Stage 2 and Stage 3 were approved on 2026-07-14; Stage 4 architecture and development plan approval remains pending.",
+    "CR-026 corrects Stage 4 from a repair-Agent-only scope to a platform-wide architecture. It cancels factory/equipment data isolation and selects PostgreSQL; the platform architecture awaits written review before implementation planning."
   ]
 }
