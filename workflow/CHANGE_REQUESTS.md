@@ -127,3 +127,11 @@ This is the continuous change ledger for the project. Existing history must not 
 - Scope: merge four external documents into canonical requirements, architecture, testing and release artifacts; register source hashes and prohibit parallel external baselines.
 - Key impacts: health-score and SLA rules are reaffirmed; Python 3.13/FastAPI, PostgreSQL, MinIO/S3, Redis, independent RAGFlow, LangGraph threads/checkpoints/SSE, closed tool allowlist, citation lifecycle, security redaction and AI acceptance gates are now required.
 - Evidence: `workflow/EXTERNAL_BASELINE_INPUTS.md`, `04-architecture-plan/AI_RAGFLOW_LANGGRAPH_SPEC.md`.
+
+### CR-008: Promote notification entry to all page shells
+
+- Level: L1
+- Status: Implemented
+- Raised By: project owner
+- Scope: inject the approved SVG bell, unread badge and notification panel into every page containing a topbar; keep one consistent behavior instead of workbench-only behavior.
+- Verification: 11/11 static checks and JavaScript syntax check passed.

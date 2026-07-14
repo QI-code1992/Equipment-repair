@@ -33,3 +33,9 @@
 - Status: Candidate / awaiting Stage 2 review
 - Scope: topbar SVG bell, unread badge, local business notification list, read state and in-panel target navigation
 - Verification: static checks and JavaScript syntax checks passed; browser/runtime visual approval pending.
+
+## PCP-005: Global notification entry candidate
+
+- Status: Candidate / awaiting Stage 2 review
+- Scope: shared notification initialization across all topbar page shells
+- Verification: static checks and JavaScript syntax checks passed; browser/runtime visual approval pending.

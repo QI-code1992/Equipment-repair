@@ -988,8 +988,22 @@ function initUserEntry() {
 }
 
 function initNotificationCenter() {
-  const bell = $$(".topbar-actions .icon-btn").find((button) => button.textContent.trim() === "铃");
-  if (!bell || $("[data-notification-panel]")) return;
+  $$(".topbar-actions").forEach((actions) => {
+    let bell = $$(".icon-btn", actions).find((button) => button.getAttribute("aria-label") === "消息通知" || button.textContent.trim() === "铃");
+    if (!bell) {
+      bell = document.createElement("button");
+      bell.className = "icon-btn";
+      bell.type = "button";
+      bell.textContent = "铃";
+      actions.prepend(bell);
+    }
+    initNotificationCenterForBell(bell);
+  });
+}
+
+function initNotificationCenterForBell(bell) {
+  if (!bell || bell.dataset.notificationReady) return;
+  bell.dataset.notificationReady = "true";
   const notifications = [
     { id: "n1", type: "故障", tone: "critical", title: "非常紧急故障待接单", summary: "EL-2024-019 驱动电机温度快速升高，车辆限扭。", object: "FL-20260714-019", time: "10分钟前", unread: true, target: "fault-report.html" },
     { id: "n2", type: "工单", tone: "risk", title: "维修完成待验收", summary: "WO-240625-011 已提交维修结果，请完成验收。", object: "WO-240625-011", time: "35分钟前", unread: true, target: "repair-execution.html" },
@@ -1011,8 +1025,8 @@ function initNotificationCenter() {
   document.body.appendChild(panel);
   let filter = "all";
   const unreadCount = () => notifications.filter((item) => item.unread).length;
-  const updateBadge = () => { const count = unreadCount(); const badge = $(`[data-notification-badge]`); badge.textContent = count > 99 ? "99+" : count ? String(count) : ""; badge.hidden = count === 0; };
-  const render = () => { const list = $(`[data-notification-list]`); const items = notifications.filter((item) => filter === "all" || item.unread); if (!items.length) { list.innerHTML = `<div class="notification-empty">${filter === "unread" ? "暂无未读消息" : "暂无消息通知"}</div>`; return; } list.innerHTML = items.map((item) => `<button type="button" class="notification-item ${item.unread ? "is-unread" : "is-read"}" data-notification-id="${item.id}"><span class="notification-dot ${item.tone}"></span><span class="notification-copy"><strong><em class="notification-type ${item.tone}">${item.type}</em>${item.title}</strong><span>${item.summary}</span><small>${item.object} · ${item.time}</small></span></button>`).join(""); };
+  const updateBadge = () => { const count = unreadCount(); const badge = $("[data-notification-badge]", bell); badge.textContent = count > 99 ? "99+" : count ? String(count) : ""; badge.hidden = count === 0; };
+  const render = () => { const list = $("[data-notification-list]", panel); const items = notifications.filter((item) => filter === "all" || item.unread); if (!items.length) { list.innerHTML = `<div class="notification-empty">${filter === "unread" ? "暂无未读消息" : "暂无消息通知"}</div>`; return; } list.innerHTML = items.map((item) => `<button type="button" class="notification-item ${item.unread ? "is-unread" : "is-read"}" data-notification-id="${item.id}"><span class="notification-dot ${item.tone}"></span><span class="notification-copy"><strong><em class="notification-type ${item.tone}">${item.type}</em>${item.title}</strong><span>${item.summary}</span><small>${item.object} · ${item.time}</small></span></button>`).join(""); };
   const close = () => { panel.hidden = true; bell.setAttribute("aria-expanded", "false"); };
   bell.addEventListener("click", (event) => { event.stopPropagation(); panel.hidden = !panel.hidden; bell.setAttribute("aria-expanded", String(!panel.hidden)); if (!panel.hidden) render(); });
   panel.addEventListener("click", (event) => { const tab = event.target.closest("[data-notification-filter]"); if (tab) { filter = tab.dataset.notificationFilter; $$(`[data-notification-filter]`, panel).forEach((button) => button.classList.toggle("active", button === tab)); render(); return; } if (event.target.closest("[data-notification-read-all]")) { notifications.forEach((item) => { item.unread = false; }); updateBadge(); render(); showToast("已全部标记为已读"); return; } const itemButton = event.target.closest("[data-notification-id]"); if (itemButton) { const item = notifications.find((entry) => entry.id === itemButton.dataset.notificationId); if (!item) return; item.unread = false; updateBadge(); itemButton.classList.remove("is-unread"); showToast(`${item.title}已标记为已读`); if (item.target) { window.setTimeout(() => { location.href = item.target; }, 250); } } });
