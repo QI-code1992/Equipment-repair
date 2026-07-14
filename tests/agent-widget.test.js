@@ -2,12 +2,12 @@ const fs = require("fs");
 const path = require("path");
 
 const root = path.resolve(__dirname, "..");
-const appJs = fs.readFileSync(path.join(root, "prototype/prototype/assets/app.js"), "utf8");
-const appCss = fs.readFileSync(path.join(root, "prototype/prototype/assets/app.css"), "utf8");
-const globalAgentPath = path.join(root, "prototype/prototype/assets/global-agent.js");
+const appJs = fs.readFileSync(path.join(root, "03-ui-prototype/prototype/assets/app.js"), "utf8");
+const appCss = fs.readFileSync(path.join(root, "03-ui-prototype/prototype/assets/app.css"), "utf8");
+const globalAgentPath = path.join(root, "03-ui-prototype/prototype/assets/global-agent.js");
 const globalAgentJs = fs.existsSync(globalAgentPath) ? fs.readFileSync(globalAgentPath, "utf8") : "";
-const equipmentDetail = fs.readFileSync(path.join(root, "prototype/prototype/pages/equipment-detail.html"), "utf8");
-const pagesDir = path.join(root, "prototype/prototype/pages");
+const equipmentDetail = fs.readFileSync(path.join(root, "03-ui-prototype/prototype/pages/equipment-detail.html"), "utf8");
+const pagesDir = path.join(root, "03-ui-prototype/prototype/pages");
 const businessPages = fs.readdirSync(pagesDir)
   .filter((file) => file.endsWith(".html") && file !== "login.html")
   .map((file) => ({

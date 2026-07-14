@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const assert = require("assert");
 
-const htmlPath = path.join(__dirname, "..", "prototype", "prototype", "pages", "intelligent-config.html");
+const htmlPath = path.join(__dirname, "..", "03-ui-prototype", "prototype", "pages", "intelligent-config.html");
 const html = fs.readFileSync(htmlPath, "utf8");
 const agentPanel = html.match(/<section class="config-panel" data-config-panel="agents"[\s\S]*?<section class="config-panel" data-config-panel="knowledge"/)?.[0] || "";
 const profileBlock = html.match(/const agentKnowledgeProfiles = \{[\s\S]*?\n      \};/)?.[0] || "";

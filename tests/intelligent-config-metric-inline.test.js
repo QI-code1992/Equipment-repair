@@ -2,7 +2,9 @@ const fs = require("fs");
 const path = require("path");
 
 const root = path.resolve(__dirname, "..");
-const html = fs.readFileSync(path.join(root, "prototype/prototype/pages/intelligent-config.html"), "utf8");
+const html = fs.readFileSync(path.join(root, "03-ui-prototype/prototype/pages/intelligent-config.html"), "utf8");
+const metricModalStart = html.indexOf('data-modal="metricDictModal"');
+const metricModal = metricModalStart >= 0 ? html.slice(metricModalStart, metricModalStart + 6000) : "";
 
 function assertIncludes(source, needle) {
   if (!source.includes(needle)) {
@@ -18,29 +20,14 @@ function assertNotIncludes(source, needle) {
 
 assertIncludes(html, "智能问数指标管理");
 assertIncludes(html, "指标管理");
-assertIncludes(html, "新增指标");
-assertIncludes(html, "新增和编辑均在表格行内完成");
-assertIncludes(html, "data-metric-table-body");
-assertIncludes(html, "data-metric-add");
-assertIncludes(html, "editingMetricIndex");
-assertIncludes(html, "isAddingMetric");
-assertIncludes(html, "draftMetricRows");
-assertIncludes(html, "openMetricDictModal");
-assertIncludes(html, "saveMetricDraft");
-assertIncludes(html, "discardMetricDraft");
-assertIncludes(html, "renderMetricEditRow");
-assertIncludes(html, "data-metric-save-all");
-assertIncludes(html, "data-metric-close");
-assertIncludes(html, "data-metric-switch");
-assertIncludes(html, "data-metric-row-switch");
-assertIncludes(html, "data-metric-delete");
-assertIncludes(html, "metric-required");
-assertIncludes(html, "metric-field-error");
-assertIncludes(html, "metric-required-star");
-assertIncludes(html, "<th>指标名称</th><th>指标释义</th><th>计算口径</th><th>示例问法</th><th>单位</th><th>状态</th><th>操作</th>");
-assertIncludes(html, "请补齐指标名称、指标释义和计算口径");
-assertIncludes(html, "未保存修改会在关闭后丢弃");
-assertIncludes(html, "删除");
+assertIncludes(metricModal, "内置指标只读展示");
+assertIncludes(metricModal, "内置指标口径");
+assertIncludes(metricModal, "metric-card-list");
+assertNotIncludes(metricModal, "新增指标");
+assertNotIncludes(metricModal, "新增和编辑均在表格行内完成");
+assertNotIncludes(metricModal, "data-metric-add");
+assertNotIncludes(metricModal, "data-metric-delete");
+assertNotIncludes(metricModal, "data-metric-save-all");
 assertIncludes(html, "getConfiguredLlmModels");
 assertIncludes(html, "populateAgentLlmOptions");
 assertIncludes(html, "data-agent-llm-select");

@@ -25,10 +25,10 @@ This is the continuous change ledger for the project. Existing history must not 
 - Decision: User approved the snapshot-first formalization design on 2026-07-14. Proceed with canonical Stage 1 consolidation and candidate Stage 0–8 documentation; no stage transition is approved by this decision.
 - Updated Baselines: none
 - Implementation:
-  - Commit: unavailable; workspace is not a Git repository
+  - Commit: candidate changes are distributed across `08e9e13`, `f162333`, `468941c`, and `4e955b4`; verification correction pending
   - Owner: unassigned
 - Verification:
-  - Status: Blocked pending requirements baseline
+  - Status: Candidate package verified; Stage 1 approval still pending
   - Evidence: `workflow/PROJECT_ASSET_BASELINE.md`
 
 ## Closed

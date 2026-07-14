@@ -1,12 +1,12 @@
 # Defects
 
-### DEF-001: Legacy metric static test conflicts with current requirement
+### DEF-001: Legacy metric static test conflicted with current requirement
 
 - Severity: Major baseline inconsistency
-- Status: Open / Stage 1 reconciliation
+- Status: Resolved in candidate verification; production behavior still unverified
 - Evidence: imported `tests/intelligent-config-metric-inline.test.js`
 - Expected current behavior: fixed metric catalog is readonly.
-- Required action: update the test after Stage 1 approval, then rerun all checks.
+- Resolution: test now checks the visible readonly metric modal and the complete static suite passes; production metric API remains unimplemented.
 
 ### DEF-002: Prototype runbook paths were stale before migration
 
