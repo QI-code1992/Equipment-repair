@@ -69,3 +69,9 @@
 - Status: Candidate / awaiting Stage 2 review
 - Scope: remove the “AI诊断在线” card from the workbench sidebar.
 - Verification: static regression passed.
+
+## PCP-011: Global sidebar explanation cleanup
+
+- Status: Candidate / awaiting Stage 2 review
+- Scope: remove all shared sidebar bottom explanation cards across page shells.
+- Verification: static regression passed.

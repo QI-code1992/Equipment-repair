@@ -175,3 +175,11 @@ This is the continuous change ledger for the project. Existing history must not 
 - Raised By: project owner
 - Scope: remove the red-boxed “AI诊断在线” sidebar card from the workbench; retain navigation and main content.
 - Verification: static checks and `git diff --check` passed.
+
+### CR-014: Remove sidebar explanation cards globally
+
+- Level: L1
+- Status: Implemented
+- Raised By: project owner
+- Scope: hide the shared `.sidebar-foot` explanation card on every prototype page, including page-specific variants.
+- Verification: static checks and `git diff --check` passed.

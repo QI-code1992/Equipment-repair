@@ -19,4 +19,6 @@ for (const marker of ["user_management.view_all", "data-self-user-view", "tab=us
 }
 if (!app.includes('window.location.href = "login.html"')) throw new Error("logout must return to login page");
 if (workbench.includes("AI诊断在线") || workbench.includes("知识图谱覆盖 91%")) throw new Error("workbench AI status card should be removed");
+const sharedCss = fs.readFileSync(path.join(root, "03-ui-prototype/prototype/assets/app.css"), "utf8");
+if (!sharedCss.includes(".sidebar-foot{display:none!important}")) throw new Error("global sidebar explanation cards should be hidden");
 console.log("user entry and scoped management static checks passed");
