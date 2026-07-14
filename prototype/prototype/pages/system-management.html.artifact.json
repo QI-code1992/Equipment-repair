@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "pages/system-management.html",
+  "entry": "pages/system-management.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-06-25T07:59:00.825Z",
+  "updatedAt": "2026-06-25T07:59:00.825Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}

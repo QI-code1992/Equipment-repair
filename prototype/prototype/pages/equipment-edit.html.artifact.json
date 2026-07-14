@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "pages/equipment-edit.html",
+  "entry": "pages/equipment-edit.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-06-30T01:30:50.184Z",
+  "updatedAt": "2026-06-30T01:30:50.184Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}

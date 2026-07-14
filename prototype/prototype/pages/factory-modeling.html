@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>工厂建模 - 新能源装载机智能运维平台</title>
+<link rel="stylesheet" href="../assets/app.css?v=20260702a">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100..900&display=swap" rel="stylesheet"/>
+<script>tailwind.config={corePlugins:{preflight:false},theme:{extend:{colors:{primary:'#0057c2','primary-container':'#006ef2','primary-fixed':'#d9e2ff','page-bg':'#F5F7FA','panel-bg':'#FFFFFF','surface-container-low':'#f2f3ff','surface-container':'#ecedf9','surface-container-high':'#e6e7f3',border:'#E5EAF0',outline:'#727786','outline-variant':'#c1c6d7','text-main':'#303846','text-secondary':'#6B7280','on-surface':'#181b23','on-surface-variant':'#414755','status-success':'#22C55E','status-warning':'#F59E0B','status-error':'#EF4444','status-neutral':'#64748B','error-container':'#ffdad6','ai-accent':'#06B6D4'},borderRadius:{lg:'0.5rem',xl:'0.75rem',full:'9999px'},spacing:{'topbar-height':'64px','margin-page':'24px',gutter:'16px'},fontFamily:{'body-main':['Noto Sans SC'],'page-title':['Noto Sans SC'],'module-header':['Noto Sans SC'],'label-small':['Noto Sans SC'],'data-display':['Noto Sans SC']},fontSize:{'body-main':['14px',{lineHeight:'22px'}],'page-title':['22px',{lineHeight:'32px',fontWeight:'600'}],'module-header':['17px',{lineHeight:'24px',fontWeight:'600'}],'label-small':['12px',{lineHeight:'18px'}],'data-display':['28px',{lineHeight:'36px',fontWeight:'700'}]}}}}</script>
+<style>
+body{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;background:#F5F7FA}.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}.ui-truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ui-nowrap{white-space:nowrap}.ui-allow-wrap{white-space:normal;overflow-wrap:anywhere}.custom-scrollbar::-webkit-scrollbar{width:4px;height:4px}.custom-scrollbar::-webkit-scrollbar-thumb{background:#c1c6d7;border-radius:10px}.tree-row{height:36px;display:grid;grid-template-columns:minmax(0,1fr) 82px 56px;align-items:center;column-gap:6px;border:1px solid transparent;transition:background .16s ease,border-color .16s ease,box-shadow .16s ease}.tree-row:hover{background:#f6f8ff;border-color:#e5eaf0}.tree-row.active{background:linear-gradient(90deg,#d9e8ff,#eef5ff);border-color:#bcd3ff;color:#0057c2;box-shadow:inset 3px 0 0 #0057c2}.tree-row.disabled{opacity:.72;color:#64748B}.tree-toggle{width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px}.tree-toggle:hover{background:#e6e7f3}.status-chip{height:20px;padding:0 7px;border-radius:6px;display:inline-flex;align-items:center;font-size:12px;font-weight:800;white-space:nowrap}.status-on{background:#dcfce7;color:#22C55E}.status-off{background:#e6e7f3;color:#64748B}.toast{position:fixed;top:76px;left:50%;transform:translateX(-50%);z-index:120;background:#22C55E;color:white;border-radius:8px;box-shadow:0 10px 24px rgba(34,197,94,.24);min-width:160px;text-align:center}.popup{position:fixed;right:24px;top:72px;width:360px;display:none;z-index:90;padding:16px;background:#FFFFFF;border:1px solid #E5EAF0;border-radius:10px;box-shadow:0 18px 45px rgba(15,35,75,.16)}.popup.show{display:block}.modal-mask{position:fixed;inset:0;background:rgba(24,27,35,.32);z-index:100;display:none;align-items:center;justify-content:center}.modal-mask.show{display:flex}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;max-width:760px}.field{display:block;min-width:0}.field span{display:block;margin-bottom:5px}.field input,.field select{width:100%;height:38px;border:1px solid #c1c6d7;border-radius:8px;padding:0 11px;background:white}.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid rgba(0,87,194,.18);border-color:#0057c2}.field textarea{width:100%;height:92px;border:1px solid #c1c6d7;border-radius:8px;padding:9px 11px;background:white}.field-full{grid-column:1 / -1}.hint{font-size:12px;color:#6B7280;margin-top:5px}
+
+
+
+.factory-modeling-page{height:calc(100vh - var(--topbar));overflow:hidden;padding:14px 16px 18px}
+.factory-modeling-layout{height:100%;min-height:0;display:grid!important;grid-template-columns:minmax(340px,39%) minmax(0,1fr)!important;gap:12px}
+.factory-modeling-layout>aside,.factory-modeling-layout>section{min-height:0;border-color:#dce5f3;border-radius:10px;box-shadow:0 10px 26px rgba(15,35,75,.06)}
+.factory-modeling-layout>aside{grid-column:1!important}
+.factory-modeling-layout>section{grid-column:2!important}
+.factory-modeling-layout>aside>div:first-child,.factory-modeling-layout>section>div:first-child{padding:12px 14px}
+.factory-modeling-layout h3{letter-spacing:0;color:#172033}
+.factory-modeling-layout #tree{padding:8px 10px 10px}
+.factory-modeling-layout #content{padding:14px}
+.factory-panel-head{background:linear-gradient(180deg,#ffffff,#f8fbff)}
+.factory-tool-btn,.factory-action-bar button,.factory-form-actions button{height:34px;border-radius:8px;padding:0 12px;font-weight:800;transition:transform .16s ease,box-shadow .16s ease,background .16s ease,border-color .16s ease}
+.factory-tool-btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid #d8deea;background:#fff;color:#414755;font-size:13px}
+.factory-tool-btn.primary-soft{color:#0057c2;background:#f0f6ff;border-color:#c9dcff}
+.factory-tool-btn:hover,.factory-action-bar button:hover,.factory-form-actions button:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(15,35,75,.08)}
+.factory-detail-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.factory-detail-card{min-height:76px;padding:12px;border:1px solid #e3e9f4;border-radius:10px;background:linear-gradient(180deg,#fff,#f7faff)}
+.factory-detail-card p{margin:0}.factory-detail-card .value{margin-top:6px;color:#172033;font-size:15px;font-weight:900}
+.factory-note{padding:12px;border:1px solid #e3e9f4;border-radius:10px;background:#fff;margin-bottom:12px}
+.factory-table-card{border:1px solid #e3e9f4;border-radius:10px;overflow:hidden;background:#fff}
+.factory-table-head{padding:10px 12px;background:#f7faff;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e3e9f4}
+.factory-table-card th{padding:10px 12px;color:#6B7280;font-size:12px;font-weight:800;background:#fbfcff}.factory-table-card td{padding:10px 12px}
+.factory-form{max-width:820px;padding:14px;border:1px solid #e3e9f4;border-radius:10px;background:#fbfcff}.factory-form-actions{display:flex;justify-content:flex-end;gap:10px;padding-top:12px;border-top:1px solid #e3e9f4}
+.toast{right:24px;bottom:84px;top:auto;left:auto;display:none;min-width:240px;padding:12px 14px;transform:none;border-radius:12px;color:var(--surface);background:var(--fg);box-shadow:var(--shadow);text-align:left}
+.toast.show{display:block}
+@media(max-width:1180px){.factory-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.factory-modeling-layout{grid-template-columns:minmax(280px,36%) minmax(0,1fr)!important}}
+@media(max-width:900px){.factory-modeling-page{height:auto;overflow-x:hidden;overflow-y:visible;padding:12px}.factory-modeling-layout{grid-template-columns:1fr!important;height:auto;max-width:100%;overflow:hidden}.factory-modeling-layout>aside,.factory-modeling-layout>section{grid-column:1/-1!important;min-height:360px;max-width:100%;overflow:hidden}.factory-modeling-layout>section{min-height:520px}.tree-row{grid-template-columns:minmax(0,1fr) 66px 44px}.tree-row .material-symbols-outlined{font-size:16px!important}.form-grid{grid-template-columns:1fr}.factory-detail-grid{grid-template-columns:1fr}}</style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">智</div>
+        <div>
+          <p class="brand-title">新能源装载机<br>智能运维平台</p>
+          <div class="brand-subtitle">Fault Ops Console</div>
+        </div>
+      </div>
+      <nav class="nav-section" aria-label="业务导航">
+        <div class="nav-label">业务导航</div>
+        <div class="nav-list">
+          <a class="nav-item" href="workbench.html"><span class="nav-icon">01</span><span>工作台</span></a>
+          <a class="nav-item" href="bi-dashboard.html"><span class="nav-icon">02</span><span>驾驶舱 BI</span></a>
+          <a class="nav-item active" href="factory-modeling.html"><span class="nav-icon">03</span><span>工厂建模</span></a>
+          <a class="nav-item" href="equipment-ledger.html"><span class="nav-icon">04</span><span>设备台账</span></a>
+          <a class="nav-item" href="fault-report.html"><span class="nav-icon">05</span><span>故障上报</span></a>
+          
+          
+          <a class="nav-item" href="maintenance-records.html"><span class="nav-icon">07</span><span>维修记录</span></a>
+          <a class="nav-item" href="system-management.html"><span class="nav-icon">08</span><span>系统管理</span></a>
+          <a class="nav-item" href="intelligent-config.html"><span class="nav-icon">09</span><span>智能配置</span></a>
+        </div>
+      </nav>
+      <div class="sidebar-foot">
+        <strong>组织建模</strong>
+        <span>维护工厂、车间、产线层级，作为设备台账和驾驶舱筛选基础。</span>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" type="button" aria-label="展开导航">☰</button>
+          <div>
+            <h1 class="page-title">工厂建模</h1>
+            <div class="crumb">驾驶舱 BI / 工厂建模 / 组织结构</div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          
+          <div class="user-chip"><span class="avatar">管</span><span>管理员 · 运维部总监</span></div>
+        </div>
+      </header>
+
+      <section class="content factory-modeling-page">
+<section class="factory-modeling-layout grid grid-cols-12 gap-gutter"><aside class="col-span-4 bg-panel-bg border border-border rounded-lg shadow-sm flex flex-col overflow-hidden"><div class="factory-panel-head border-b border-border"><div class="flex items-center justify-between mb-2"><h3 class="font-module-header text-module-header">组织结构树</h3><span class="px-2 py-1 rounded-full bg-primary-fixed text-primary text-label-small font-bold">默认展开</span></div><div class="relative mb-2"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span><input id="treeSearch" class="w-full h-9 pl-9 rounded-lg bg-surface-container-low border-outline-variant" placeholder="搜索编码 / 名称"/></div><div class="flex items-center gap-2"><button id="expandAll" class="factory-tool-btn primary-soft">全部展开</button><button id="collapseAll" class="factory-tool-btn">全部折叠</button></div></div><div id="tree" class="flex-1 overflow-y-auto custom-scrollbar"></div></aside><section class="col-span-8 bg-panel-bg border border-border rounded-lg shadow-sm flex flex-col overflow-hidden"><div class="factory-panel-head border-b border-border flex items-center justify-between"><div><h3 id="panelTitle" class="font-module-header text-module-header">节点详情</h3><p id="panelSub" class="text-label-small text-text-secondary">维护工厂、车间、产线的组织关系</p></div><div id="actionBar" class="factory-action-bar flex items-center gap-2"></div></div><div id="content" class="flex-1 overflow-y-auto custom-scrollbar"></div></section></section>
+      </section>
+    </main>
+  </div>
+
+<div class="toast" role="status" aria-live="polite"></div><div id="confirmMask" class="modal-mask"><div class="bg-panel-bg rounded-lg border border-border w-[420px] p-5 shadow-xl"><h4 id="confirmTitle" class="font-module-header text-module-header mb-2">确认操作</h4><p id="confirmText" class="text-text-secondary ui-allow-wrap mb-5">确认继续？</p><div class="flex justify-end gap-3"><button id="confirmCancel" class="px-4 py-2 rounded-lg border border-border">取消</button><button id="confirmOk" class="px-4 py-2 rounded-lg bg-primary text-white">确认</button></div></div></div>
+<script>
+const root={id:'root',type:'root',code:'ROOT',name:'根节点',sort:0,status:'启用',remark:'工厂建模根节点，用于创建工厂。',expanded:true,referenced:true,children:[{id:'fac1',type:'factory',code:'FAC-001',name:'新能源一厂',sort:1,status:'启用',remark:'新能源装载机总装与测试基地',expanded:true,referenced:true,children:[{id:'ws1',type:'workshop',code:'WS-001',name:'总装一车间',sort:1,status:'启用',remark:'负责电驱装载机总装',expanded:true,referenced:true,children:[{id:'line1',type:'line',code:'LINE-A01',name:'A01产线',sort:1,status:'启用',remark:'5吨电驱装载机主产线',referenced:true,children:[]},{id:'line2',type:'line',code:'LINE-A02',name:'A02产线',sort:2,status:'启用',remark:'7吨电驱装载机产线',referenced:false,children:[]}]},{id:'ws2',type:'workshop',code:'WS-002',name:'电池装配车间',sort:2,status:'启用',remark:'负责电池包装配',expanded:true,referenced:false,children:[{id:'line3',type:'line',code:'LINE-B02',name:'B02产线',sort:1,status:'启用',remark:'电池包检测产线',referenced:false,children:[]}]}]},{id:'fac2',type:'factory',code:'FAC-002',name:'新能源二厂',sort:2,status:'停用',remark:'预留扩建工厂',expanded:true,referenced:false,children:[{id:'ws3',type:'workshop',code:'WS-009',name:'预留车间',sort:1,status:'停用',remark:'随上级停用',referenced:false,children:[]}]}]};
+let selected=root,mode='detail',dirty=false,pendingAction=null;const typeName={root:'根节点',factory:'工厂',workshop:'车间',line:'产线'};
+function flat(nodes=[root],arr=[]){nodes.forEach(n=>{arr.push(n);flat(n.children||[],arr)});return arr}function findParent(target,nodes=[root],parent=null){for(const n of nodes){if(n===target)return parent;const r=findParent(target,n.children||[],n);if(r)return r}return null}function effectiveStatus(n){let p=n;while(p){if(p.status==='停用')return '停用';p=findParent(p)}return '启用'}function canAddChild(n){return n.type!=='line'&&effectiveStatus(n)==='启用'}function cascadeStatus(n,status){n.status=status;(n.children||[]).forEach(c=>cascadeStatus(c,status))}
+function childTypeOf(n){return n.type==='root'?'factory':n.type==='factory'?'workshop':'line'}function childLabelOf(n){return n.type==='root'?'工厂':n.type==='factory'?'车间':'产线'}
+function sortedChildren(n){return [...(n.children||[])].sort((a,b)=>(Number(a.sort)||0)-(Number(b.sort)||0)||a.name.localeCompare(b.name,'zh-Hans-CN'))}
+function nodeMatches(n,q){return !q||n.code.toLowerCase().includes(q)||n.name.toLowerCase().includes(q)}
+function subtreeMatches(n,q){return nodeMatches(n,q)||sortedChildren(n).some(c=>subtreeMatches(c,q))}
+function renderTree(){const q=treeSearch.value.trim().toLowerCase();function row(n,level){const kids=sortedChildren(n),eff=effectiveStatus(n);const show=subtreeMatches(n,q);if(!show)return '';const icon=n.type==='root'?'account_tree':n.type==='factory'?'factory':n.type==='workshop'?'warehouse':'precision_manufacturing';let html=`<div class="tree-row ${selected===n?'active':''} ${eff==='停用'?'disabled':''} px-2 rounded-lg cursor-pointer" onclick="selectNode('${n.id}')"><div class="flex items-center gap-2 min-w-0" style="padding-left:${8+level*18}px"><button class="tree-toggle" onclick="toggleExpand(event,'${n.id}')"><span class="material-symbols-outlined text-[18px]">${kids.length?(n.expanded||q?'expand_more':'chevron_right'):'radio_button_unchecked'}</span></button><span class="material-symbols-outlined text-[18px]">${icon}</span><span class="ui-truncate">${n.name}</span></div><span class="text-label-small text-text-secondary ui-nowrap justify-self-end">${n.code}</span><span class="status-chip ${eff==='启用'?'status-on':'status-off'} justify-self-start">${eff}</span></div>`;if((n.expanded||q)&&kids.length)kids.forEach(c=>html+=row(c,level+1));return html}tree.innerHTML=row(root,0)}window.toggleExpand=(event,id)=>{event.stopPropagation();const n=flat().find(x=>x.id===id);if(n&&(n.children||[]).length){n.expanded=!n.expanded;renderTree()}};window.selectNode=id=>{const n=flat().find(x=>x.id===id);if(n){selected=n;mode='detail';dirty=false;render()}}
+function actionButtons(){const addAllowed=canAddChild(selected);const addTitle=childLabelOf(selected);actionBar.innerHTML=`${addAllowed?`<button onclick="startAdd()" class="bg-primary text-white">新增${addTitle}</button>`:''}${selected.type!=='root'?`<button onclick="startEdit()" class="border border-border text-primary bg-white">编辑</button><button onclick="toggleStatus()" class="border border-border bg-white">${selected.status==='启用'?'停用':'启用'}</button><button onclick="tryDelete()" class="border border-status-error/30 text-status-error bg-white">删除</button>`:''}${!addAllowed&&selected.type!=='line'?`<span class="text-label-small text-text-secondary ui-nowrap">停用状态不可新增下级</span>`:''}`}
+function statusBadge(s){return `<span class="status-chip ${s==='启用'?'status-on':'status-off'}">${s}</span>`}
+function detail(){panelTitle.textContent=`${typeName[selected.type]}详情`;panelSub.textContent=`${selected.name} / ${selected.code}`;actionButtons();const children=selected.children||[],eff=effectiveStatus(selected);content.innerHTML=`<div class="factory-detail-grid"><div class="factory-detail-card"><p class="text-label-small text-text-secondary">编码</p><p class="value ui-nowrap">${selected.code}</p></div><div class="factory-detail-card"><p class="text-label-small text-text-secondary">名称</p><p class="value ui-truncate">${selected.name}</p></div><div class="factory-detail-card"><p class="text-label-small text-text-secondary">排序号</p><p class="value">${selected.sort}</p></div><div class="factory-detail-card"><p class="text-label-small text-text-secondary">状态</p><p class="value">${statusBadge(eff)}</p></div></div><div class="factory-note"><p class="text-label-small text-text-secondary mb-1">备注</p><p class="ui-allow-wrap">${selected.remark||'无'}</p></div><div class="factory-table-card"><div class="factory-table-head"><h4 class="font-bold">下级节点</h4><span class="text-label-small text-text-secondary">${children.length} 个</span></div><table class="w-full text-left"><thead><tr class="border-b border-border"><th>编码</th><th>名称</th><th>类型</th><th>状态</th></tr></thead><tbody>${children.length?children.map(c=>`<tr class="border-b border-border hover:bg-surface-container-low cursor-pointer" onclick="selectNode('${c.id}')"><td class="ui-nowrap">${c.code}</td><td>${c.name}</td><td class="ui-nowrap">${typeName[c.type]}</td><td>${statusBadge(effectiveStatus(c))}</td></tr>`).join(''):`<tr><td class="text-text-secondary" colspan="4" style="padding:28px 12px">暂无下级节点</td></tr>`}</tbody></table></div>`}
+function form(kind){const add=kind==='add';const childType=childTypeOf(selected);const target=add?{type:childType,code:'',name:'',sort:1,status:'启用',remark:''}:selected;panelTitle.textContent=add?`新增${typeName[childType]}`:`编辑${typeName[selected.type]}`;panelSub.textContent=add?`父节点：${selected.name}`:`当前节点：${selected.name}`;actionBar.innerHTML='';content.innerHTML=`<form id="nodeForm" class="factory-form"><div class="form-grid"><label class="field"><span class="text-label-small text-text-secondary">编码 *</span><input name="code" value="${target.code}" placeholder="如 FAC-001 / WS-001 / LINE-A01"/><p class="hint">编码全局唯一，导入业务数据仍按设备编码匹配。</p></label><label class="field"><span class="text-label-small text-text-secondary">名称 *</span><input name="name" value="${target.name}" placeholder="请输入名称"/></label><label class="field"><span class="text-label-small text-text-secondary">排序号 *</span><input name="sort" type="number" value="${target.sort}"/></label><label class="field"><span class="text-label-small text-text-secondary">状态</span><select name="status"><option ${target.status==='启用'?'selected':''}>启用</option><option ${target.status==='停用'?'selected':''}>停用</option></select></label><label class="field field-full"><span class="text-label-small text-text-secondary">备注</span><textarea name="remark" placeholder="请输入备注">${target.remark}</textarea></label></div><div class="factory-form-actions"><button type="button" onclick="cancelForm()" class="border border-border bg-white">取消</button><button class="bg-primary text-white">保存</button></div></form>`;nodeForm.addEventListener('input',()=>dirty=true);nodeForm.addEventListener('submit',e=>{e.preventDefault();saveForm(add,target)})}
+window.startAdd=()=>{if(!canAddChild(selected)){showToast('停用状态不可新增下级');return}mode='add';dirty=false;render()};window.startEdit=()=>{mode='edit';dirty=false;render()};
+function saveForm(add,target){const fd=new FormData(nodeForm);const code=fd.get('code').trim(),name=fd.get('name').trim();if(!code||!name){showToast('编码和名称必填');return}const all=flat().filter(n=>n!==target);if(all.some(n=>n.code===code)){showToast('编码已存在');return}const siblings=add?(selected.children||[]):(findParent(selected)?.children||[root]);if(siblings.some(n=>n!==target&&n.name===name)){showToast('同级名称已存在');return}if(add){selected.children=selected.children||[];selected.expanded=true;selected.children.push({id:'n'+Date.now(),type:childTypeOf(selected),code,name,sort:+fd.get('sort'),status:fd.get('status'),remark:fd.get('remark'),referenced:false,expanded:true,children:[]})}else{Object.assign(target,{code,name,sort:+fd.get('sort'),status:fd.get('status'),remark:fd.get('remark')});if(target.status==='停用')cascadeStatus(target,'停用')}mode='detail';dirty=false;showToast('保存成功');render()}
+window.cancelForm=()=>{if(dirty)confirm('放弃修改确认','当前填写内容未保存，是否放弃？',()=>{mode='detail';dirty=false;render()});else{mode='detail';render()}};function confirm(title,text,ok){confirmTitle.textContent=title;confirmText.textContent=text;confirmMask.classList.add('show');pendingAction=ok}confirmCancel.onclick=()=>confirmMask.classList.remove('show');confirmOk.onclick=()=>{confirmMask.classList.remove('show');pendingAction&&pendingAction()}
+window.toggleStatus=()=>confirm(`${selected.status==='启用'?'停用':'启用'}确认`,`确认${selected.status==='启用'?'停用':'启用'} ${selected.name}？${selected.status==='启用'?'停用后下级节点将全部自动停用，且不可新增下级。':''}`,()=>{const next=selected.status==='启用'?'停用':'启用';if(next==='停用')cascadeStatus(selected,'停用');else selected.status='启用';showToast('状态已更新');render()})
+window.tryDelete=()=>{if((selected.children||[]).length||selected.referenced){confirm('无法删除','该节点存在下级节点或已被历史数据引用，不允许删除，请改为停用。',()=>{});return}confirm('删除确认',`确认删除 ${selected.name}？删除后不可恢复。`,()=>{const parent=findParent(selected);const arr=parent?parent.children:root.children;arr.splice(arr.indexOf(selected),1);selected=parent||root;showToast('删除成功');render()})}
+expandAll.onclick=()=>{flat().forEach(n=>n.expanded=true);renderTree()};collapseAll.onclick=()=>{flat().forEach(n=>n.expanded=false);root.expanded=true;renderTree()};treeSearch.oninput=renderTree;function render(){renderTree();mode==='detail'?detail():form(mode)}render();
+</script>
+<script src="../assets/app.js"></script><script src="../assets/global-agent.js?v=20260702a"></script>
+</body>
+</html>

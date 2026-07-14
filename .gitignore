@@ -1,0 +1,21 @@
+# macOS metadata
+.DS_Store
+**/.DS_Store
+
+# Local brainstorming and transient server state
+.superpowers/
+
+# Local logs and runtime files
+*.log
+*.pid
+
+# Secrets and local environment overrides
+.env
+.env.*
+!.env.example
+
+# Dependency and build output (when production code is added)
+node_modules/
+dist/
+build/
+coverage/

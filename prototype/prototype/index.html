@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>新能源装载机智能运维平台原型</title>
+  <link rel="stylesheet" href="assets/app.css?v=20260702a">
+</head>
+<body class="launcher">
+  <main class="launcher-main">
+    <section class="launcher-hero">
+      <div>
+        <span class="status info">高保真多页面原型</span>
+        <h1>新能源装载机设备故障智能运维平台</h1>
+        <p>按导航设计约束整理为“登录 + 10 个一级业务入口 + 设备新增/编辑/详情独立页面”：覆盖工作台、驾驶舱 BI、工厂建模、设备台账、故障上报、Agent 上报、数据导入、维修记录、系统管理和智能配置；全局 Agent 以右侧抽屉预收集，正式提交进入独立上报页。</p>
+      </div>
+      <div class="card">
+        <div class="section-title"><h3>原型入口</h3><span class="status ok">登录 + 10 主导航 + 独立详情</span></div>
+        <div class="progress"><span style="width:100%"></span></div>
+        <p class="muted">建议从“登录页”进入，使用默认账号通过后，再沿故障发现、Agent 预收集、维修执行、维修记录和知识沉淀流程浏览。</p>
+        <a class="btn btn-primary" href="pages/login.html">从登录页开始</a>
+      </div>
+    </section>
+    <section class="screen-grid">
+      <a class="screen-card" href="pages/login.html"><span class="status ok">00</span><strong>登录页</strong><span>账号密码登录、记住密码、忘记密码提示和连续失败锁定。</span></a>
+      <a class="screen-card" href="pages/workbench.html"><span class="status info">01</span><strong>运维工作台</strong><span>设备风险、待办任务、故障趋势和 Agent 诊断动态。</span></a>
+      <a class="screen-card" href="pages/bi-dashboard.html"><span class="status info">02</span><strong>驾驶舱 BI</strong><span>管理层查看健康评分、维修效率、工单闭环与图谱覆盖。</span></a>
+      <a class="screen-card" href="pages/factory-modeling.html"><span class="status info">03</span><strong>工厂建模</strong><span>维护工厂、车间、产线组织树，支持新增、编辑、停用和删除校验。</span></a>
+      <a class="screen-card" href="pages/equipment-ledger.html"><span class="status info">04</span><strong>设备台账</strong><span>设备列表、分页、筛选、新增设备入口、编辑入口和独立详情入口。</span></a>
+      <a class="screen-card" href="pages/equipment-edit.html"><span class="status info">04-编辑</span><strong>设备编辑</strong><span>沿用新增设备直接填报结构，并自动保留设备现有字段信息。</span></a>
+      <a class="screen-card" href="pages/equipment-detail.html"><span class="status info">04-详情</span><strong>设备详情</strong><span>设备概览、图谱关系、BOM 组成、额定参数、知识文档和维修记录只读查看。</span></a>
+      <a class="screen-card" href="pages/fault-report.html"><span class="status warn">05</span><strong>故障上报</strong><span>授权设备选择、必填校验、附件上传和提交诊断。</span></a>
+      <a class="screen-card" href="pages/agent-report.html"><span class="status warn">06</span><strong>Agent 上报</strong><span>对话式正式上报，右侧结构化摘要面板完成确认。</span></a>
+      <a class="screen-card" href="pages/data-import.html"><span class="status ok">07</span><strong>数据导入</strong><span>导入类型、模板下载、上传校验和异常记录处理。</span></a>
+      <a class="screen-card" href="pages/maintenance-records.html"><span class="status warn">08</span><strong>维修记录</strong><span>维修记录、知识沉淀状态、历史案例生成和新故障模式审核。</span></a>
+      <a class="screen-card" href="pages/system-management.html"><span class="status ok">09</span><strong>系统管理</strong><span>用户权限、角色矩阵、操作日志和负责人变更审计。</span></a>
+      <a class="screen-card" href="pages/intelligent-config.html"><span class="status info">10</span><strong>智能配置</strong><span>RAGFlow 连接、知识库配置、Agent 服务状态和模型配置占位。</span></a>
+    </section>
+  </main>
+</body>
+</html>

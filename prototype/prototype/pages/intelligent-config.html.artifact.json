@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "pages/intelligent-config.html",
+  "entry": "pages/intelligent-config.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-06-27T02:18:22.668Z",
+  "updatedAt": "2026-06-27T02:18:22.668Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}

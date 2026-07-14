@@ -1,0 +1,3123 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>故障上报 - 新能源装载机智能运维平台</title>
+  <link rel="stylesheet" href="../assets/app.css?v=20260702a">
+  <style>
+    .fault-page {
+      display: grid;
+      gap: 12px;
+      width: 100%;
+      max-width: none;
+      min-width: 0;
+      margin: 0 auto;
+    }
+
+    body:has(.fault-page) {
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    body:has(.fault-page) .main-area {
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    body:has(.fault-page) .main-area > .topbar {
+      position: sticky;
+      top: 0;
+      flex: 0 0 var(--topbar);
+    }
+
+    body:has(.fault-page) .main-area > .content {
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    .fault-filter-card {
+      padding: 10px 12px;
+      border-color: color-mix(in oklab, var(--border), var(--accent) 8%);
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.04);
+    }
+
+    .fault-sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .fault-page .card {
+      min-width: 0;
+    }
+
+    .fault-filter-card .section-title {
+      margin-bottom: 6px;
+    }
+
+    .fault-filter-card .section-title h3 {
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .fault-filter-card .field {
+      gap: 4px;
+    }
+
+    .fault-filter-card .field label {
+      margin-bottom: 0;
+      font-size: 12px;
+    }
+
+    .fault-filter-card .field input,
+    .fault-filter-card .field select {
+      min-height: 34px;
+      padding-top: 6px;
+      padding-bottom: 6px;
+      border-radius: 10px;
+    }
+
+    .fault-filter-grid {
+      display: grid;
+      grid-template-columns: minmax(170px, 0.9fr) minmax(220px, 1.1fr) minmax(160px, 0.72fr) max-content;
+      gap: 8px 10px;
+      align-items: end;
+    }
+
+    .fault-filter-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .fault-filter-actions .btn {
+      min-height: 34px;
+      padding: 0 14px;
+    }
+
+    .fault-list-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 10px;
+      min-width: 0;
+    }
+
+    .fault-list-card {
+      padding: 14px;
+      border-color: color-mix(in oklab, var(--border), var(--accent) 6%);
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.045);
+    }
+
+    .fault-list-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .fault-list-title::before {
+      content: "";
+      width: 4px;
+      height: 18px;
+      border-radius: 999px;
+      background: var(--accent);
+      flex: 0 0 auto;
+    }
+
+    .fault-list-title .section-title {
+      margin: 0;
+    }
+
+    .fault-total {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .fault-total strong {
+      color: var(--fg);
+      font-family: var(--mono);
+      font-size: 18px;
+    }
+
+    .fault-page .table-wrap {
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+
+    .fault-table {
+      width: max-content;
+      min-width: 1360px;
+      table-layout: auto;
+    }
+
+    .fault-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: color-mix(in oklab, var(--surface), var(--blue-50) 42%);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .fault-table th:nth-child(1),
+    .fault-table td:nth-child(1) {
+      min-width: 132px;
+      font-family: var(--mono);
+    }
+
+    .fault-table th:nth-child(2),
+    .fault-table td:nth-child(2) {
+      min-width: 232px;
+    }
+
+    .fault-table th:nth-child(3),
+    .fault-table td:nth-child(3),
+    .fault-table th:nth-child(4),
+    .fault-table td:nth-child(4) {
+      min-width: 130px;
+    }
+
+    .fault-table th:nth-child(5),
+    .fault-table td:nth-child(5) {
+      min-width: 214px;
+    }
+
+    .fault-table th:nth-child(6),
+    .fault-table td:nth-child(6),
+    .fault-table th:nth-child(8),
+    .fault-table td:nth-child(8) {
+      min-width: 110px;
+    }
+
+    .fault-table th:nth-child(7),
+    .fault-table td:nth-child(7) {
+      min-width: 168px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    .fault-table th,
+    .fault-table td {
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .fault-table th:last-child,
+    .fault-table td:last-child {
+      min-width: 250px;
+      white-space: nowrap;
+    }
+
+    .fault-table tbody tr {
+      transition: background 160ms ease, box-shadow 160ms ease;
+    }
+
+    .fault-table tbody tr:hover {
+      background: color-mix(in oklab, var(--blue-50), var(--surface) 62%);
+      box-shadow: inset 3px 0 0 var(--accent);
+    }
+
+    .fault-actions {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 6px;
+    }
+
+    .fault-action-link {
+      min-height: 27px;
+      padding: 0 8px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--accent);
+      cursor: pointer;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .fault-action-link:hover {
+      border-color: var(--blue-100);
+      background: var(--blue-50);
+      color: var(--accent-hover);
+    }
+
+    .fault-action-link:focus-visible,
+    .fault-page-btn:focus-visible {
+      outline: 3px solid oklch(62% 0.18 252 / 0.28);
+      outline-offset: 2px;
+      border-color: var(--accent);
+    }
+
+    .fault-action-link.danger {
+      border-color: oklch(90% 0.04 28);
+      background: var(--red-50);
+      color: var(--red);
+    }
+
+    .fault-action-link.danger:hover {
+      border-color: var(--red);
+      background: oklch(96% 0.025 28);
+    }
+
+    .fault-empty {
+      display: none;
+      padding: 34px 16px;
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      background: var(--blue-50);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .fault-list-card.is-loading .table-wrap {
+      opacity: 0.82;
+    }
+
+    .fault-list-card.is-loading .fault-pagination,
+    .fault-list-card.is-loading .fault-total {
+      pointer-events: none;
+      opacity: 0.58;
+    }
+
+    .fault-empty strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--fg);
+      font-size: 15px;
+    }
+
+    .fault-pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-top: 12px;
+      padding: 10px 2px 0;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .fault-page-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .fault-page-info strong {
+      color: var(--fg);
+      font-family: var(--mono);
+    }
+
+    .fault-page-btn {
+      min-height: 32px;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--fg);
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .fault-page-btn:hover:not(:disabled) {
+      border-color: var(--blue-100);
+      background: var(--blue-50);
+      color: var(--accent);
+    }
+
+    .fault-page-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    .fault-page-current {
+      min-width: 56px;
+      text-align: center;
+      color: var(--fg);
+      font-family: var(--mono);
+      font-weight: 700;
+    }
+
+    .fault-loading-row td {
+      padding: 28px 16px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .fault-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(5px);
+    }
+
+    .fault-modal[aria-hidden="true"] {
+      pointer-events: none;
+    }
+
+    .fault-modal.is-open {
+      display: flex;
+    }
+
+    body:has(.fault-modal.is-open) .ai-fab,
+    body:has(.fault-modal.is-open) .ops-agent-fab {
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    .fault-modal-panel {
+      width: min(960px, 100%);
+      min-width: 0;
+      max-height: min(820px, 92vh);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
+    }
+
+    .fault-modal-panel:focus {
+      outline: none;
+    }
+
+    #reportModal .fault-modal-panel {
+      width: min(1180px, 100%);
+      background:
+        linear-gradient(180deg, color-mix(in oklab, var(--blue-50), var(--surface) 46%), var(--surface) 320px);
+    }
+
+    #endRepairModal .fault-modal-panel {
+      width: min(880px, 100%);
+    }
+
+    #startRepairModal .fault-modal-panel {
+      width: min(1320px, 100%);
+      background:
+        linear-gradient(180deg, color-mix(in oklab, var(--blue-50), var(--surface) 36%), var(--surface) 280px);
+    }
+
+    #detailModal .fault-modal-panel {
+      width: min(1120px, 100%);
+      background:
+        linear-gradient(180deg, color-mix(in oklab, var(--blue-50), var(--surface) 34%), var(--surface) 260px);
+    }
+
+    .fault-modal-panel.small {
+      width: min(420px, 100%);
+    }
+
+    .fault-modal-head,
+    .fault-modal-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .fault-modal-head {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: oklch(100% 0 0 / 0.96);
+      backdrop-filter: blur(10px);
+    }
+
+    .fault-modal form {
+      min-height: 0;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      overflow: hidden;
+    }
+
+    .fault-modal-head h3 {
+      margin: 0;
+      color: oklch(23% 0.08 260);
+      font-size: 21px;
+      line-height: 1.2;
+    }
+
+    .fault-modal-title {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .fault-modal-subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .fault-modal-kicker {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .fault-modal-head .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      font-size: 24px;
+    }
+
+    .fault-modal-foot {
+      position: relative;
+      border-top: 1px solid var(--border);
+      border-bottom: 0;
+      justify-content: flex-end;
+      background: oklch(100% 0 0 / 0.94);
+      backdrop-filter: blur(8px);
+    }
+
+    .fault-modal-body {
+      padding: 22px 24px;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    #reportModal .fault-modal-body {
+      padding: 18px 24px 24px;
+    }
+
+    .fault-report-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .fault-report-main {
+      display: grid;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .fault-report-section {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: color-mix(in oklab, var(--surface), var(--blue-50) 18%);
+    }
+
+    .fault-report-section.is-primary {
+      background: var(--surface);
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.045);
+    }
+
+    .fault-report-section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .fault-report-section-head h4 {
+      margin: 0;
+      color: var(--fg);
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .fault-report-section-head p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .fault-report-form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px 16px;
+    }
+
+    .fault-report-form-grid .full {
+      grid-column: 1 / -1;
+    }
+
+    .fault-report-device-card {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid color-mix(in oklab, var(--border), var(--accent) 18%);
+      border-radius: 16px;
+      background: var(--surface);
+    }
+
+    .fault-device-summary {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .fault-device-summary div {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+      padding: 10px 11px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: color-mix(in oklab, var(--blue-50), var(--surface) 58%);
+    }
+
+    .fault-device-summary span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .fault-device-summary strong {
+      overflow: hidden;
+      color: var(--fg);
+      font-size: 13px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .fault-report-tip {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px;
+      border: 1px solid color-mix(in oklab, var(--border), var(--accent) 15%);
+      border-radius: 14px;
+      background: color-mix(in oklab, var(--blue-50), var(--surface) 34%);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .fault-report-tip strong {
+      display: block;
+      color: var(--fg);
+      font-size: 13px;
+    }
+
+    .fault-report-tip::before {
+      content: "";
+      flex: 0 0 auto;
+      width: 9px;
+      height: 9px;
+      margin-top: 5px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 5px color-mix(in oklab, var(--accent), transparent 84%);
+    }
+
+    .fault-modal .form-grid {
+      gap: 14px 18px;
+    }
+
+    .fault-modal .field label {
+      margin-bottom: 8px;
+      color: oklch(42% 0.055 260);
+      font-size: 14px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .fault-modal .field input,
+    .fault-modal .field select,
+    .fault-modal .field textarea {
+      min-height: 42px;
+      border-radius: 14px;
+      background: var(--surface);
+      min-width: 0;
+    }
+
+    .fault-modal .field textarea {
+      min-height: 96px;
+    }
+
+    .fault-readonly-box {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: linear-gradient(180deg, var(--blue-50), var(--surface));
+      overflow-x: auto;
+    }
+
+    .fault-readonly-box div {
+      display: grid;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .fault-readonly-box strong {
+      color: var(--fg);
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .start-repair-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, 0.86fr);
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .start-repair-left {
+      display: grid;
+      gap: 16px;
+      min-width: 0;
+      align-content: start;
+    }
+
+    .start-repair-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: start;
+      padding: 18px;
+      border: 1px solid color-mix(in oklab, var(--border), var(--accent) 16%);
+      border-radius: 18px;
+      background: var(--surface);
+    }
+
+    .start-repair-kicker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .start-repair-hero h4 {
+      margin: 0;
+      color: var(--fg);
+      font-size: 20px;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+
+    .start-repair-hero p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .start-repair-status-card {
+      min-width: 180px;
+      padding: 14px;
+      border: 1px solid color-mix(in oklab, var(--orange), var(--border) 62%);
+      border-radius: 16px;
+      background: color-mix(in oklab, var(--orange-50), var(--surface) 34%);
+    }
+
+    .start-repair-status-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .start-repair-status-card strong {
+      display: block;
+      margin-top: 6px;
+      color: var(--fg);
+      font-size: 18px;
+    }
+
+    .start-repair-status-card small {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .start-repair-summary {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      overflow: visible;
+    }
+
+    .start-repair-summary div {
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+
+    .start-repair-summary span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .start-repair-summary strong {
+      display: block;
+      margin-top: 5px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .start-repair-summary .wide {
+      grid-column: 2 / span 2;
+    }
+
+    .start-repair-summary .start-description-card {
+      grid-column: 1 / -1;
+      min-height: 84px;
+    }
+
+    .start-repair-summary .start-description-card strong {
+      white-space: normal;
+      line-height: 1.55;
+      display: block;
+      overflow: visible;
+      text-overflow: clip;
+    }
+
+    .start-repair-grid {
+      display: grid;
+      grid-template-columns: minmax(260px, 0.68fr) minmax(560px, 1.32fr);
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .start-repair-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: color-mix(in oklab, var(--surface), var(--blue-50) 14%);
+    }
+
+    .start-repair-card h4 {
+      margin: 0 0 12px;
+      color: var(--fg);
+      font-size: 15px;
+      line-height: 1.3;
+    }
+
+    .start-repair-attachment-note {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+      white-space: nowrap;
+    }
+
+    .start-repair-evidence {
+      flex: 1;
+      align-self: stretch;
+      min-height: 0;
+    }
+
+    .start-repair-intake {
+      margin-top: auto;
+      align-self: end;
+      display: grid;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .start-repair-intake input[readonly] {
+      color: var(--fg);
+      background: color-mix(in oklab, var(--surface), var(--blue-50) 28%);
+      border-color: color-mix(in oklab, var(--border), var(--blue-200) 36%);
+      cursor: default;
+    }
+
+    .start-repair-intake input[readonly]:focus {
+      box-shadow: none;
+      border-color: color-mix(in oklab, var(--border), var(--blue-200) 36%);
+    }
+
+    .repair-person-hint {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .start-repair-assistant {
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      gap: 12px;
+      min-width: 0;
+      min-height: 620px;
+      padding: 16px;
+      border: 1px solid color-mix(in oklab, var(--border), var(--accent) 22%);
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, color-mix(in oklab, var(--blue-50), var(--surface) 34%), var(--surface) 56%),
+        var(--surface);
+      box-shadow: inset 3px 0 0 color-mix(in oklab, var(--accent), transparent 24%);
+    }
+
+    .repair-agent-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .repair-agent-head h4 {
+      margin: 4px 0 4px;
+      color: var(--fg);
+      font-size: 17px;
+      line-height: 1.3;
+    }
+
+    .repair-agent-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .repair-agent-kicker {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .repair-agent-suggestion {
+      display: grid;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .repair-agent-suggestion-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .repair-agent-suggestion-grid div,
+    .repair-agent-advice,
+    .repair-agent-steps {
+      min-width: 0;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+
+    .repair-agent-suggestion-grid span,
+    .repair-agent-advice span,
+    .repair-agent-steps span {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .repair-agent-suggestion-grid strong {
+      display: block;
+      color: var(--fg);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .repair-agent-advice p {
+      margin: 0;
+      color: var(--fg);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .repair-agent-steps ol {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--fg);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .repair-agent-actions,
+    .repair-agent-quick {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .repair-agent-pill {
+      min-height: 30px;
+      padding: 0 10px;
+      border: 1px solid color-mix(in oklab, var(--border), var(--accent) 18%);
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--surface), var(--blue-50) 34%);
+      color: var(--accent);
+      cursor: pointer;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .repair-agent-pill:hover {
+      border-color: var(--accent);
+      background: var(--blue-50);
+    }
+
+    .repair-agent-chat {
+      display: grid;
+      gap: 9px;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: color-mix(in oklab, var(--blue-50), var(--surface) 48%);
+    }
+
+    .repair-agent-message {
+      max-width: 92%;
+      padding: 9px 11px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+      color: var(--fg);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .repair-agent-message.user {
+      justify-self: end;
+      border-color: color-mix(in oklab, var(--accent), var(--border) 52%);
+      background: color-mix(in oklab, var(--accent), var(--surface) 90%);
+    }
+
+    .repair-agent-input-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .repair-agent-input-row input {
+      width: 100%;
+      min-height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--fg);
+      font: inherit;
+      font-size: 13px;
+    }
+
+    .repair-agent-prefill-note {
+      border-color: color-mix(in oklab, var(--accent), var(--border) 46%);
+      background: color-mix(in oklab, var(--blue-50), var(--surface) 18%);
+      color: var(--fg);
+    }
+
+    .fault-end-summary {
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: var(--blue-50);
+    }
+
+    .fault-end-summary div {
+      min-width: 150px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+    }
+
+    .fault-end-summary .end-device-card {
+      min-width: 0;
+      position: relative;
+    }
+
+    .fault-end-summary span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .fault-end-summary strong {
+      margin-top: 3px;
+      display: block;
+    }
+
+    .fault-end-summary .end-device-name {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .fault-floating-tooltip {
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 10000;
+      max-width: min(420px, calc(100vw - 32px));
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: #111827;
+      color: #ffffff;
+      font-size: 12px;
+      line-height: 1.45;
+      white-space: normal;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.24);
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 120ms ease, transform 120ms ease;
+    }
+
+    .fault-floating-tooltip.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fault-resolution-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px 18px;
+    }
+
+    .fault-resolution-grid .full {
+      grid-column: 1 / -1;
+    }
+
+    .fault-resolution-grid .spare-part-field {
+      grid-column: 1 / -1;
+    }
+
+    .fault-resolution-note {
+      margin: 0 0 12px;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: oklch(98% 0.015 252);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    #endRepairModal .end-report-evidence-card {
+      height: auto;
+      min-height: 0;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      gap: 8px;
+    }
+
+    #endRepairModal .end-report-evidence-card h4 {
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    #endRepairModal .end-report-evidence-card .start-repair-attachment-note {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    #endRepairModal .end-report-evidence-card .fault-evidence-grid {
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    #endRepairModal .end-report-evidence-card .fault-evidence-card {
+      min-height: 0;
+      padding: 10px 12px;
+    }
+
+    #endRepairModal .end-report-evidence-card .fault-evidence-card > span {
+      margin-bottom: 7px;
+      font-size: 12px;
+    }
+
+    #endRepairModal .end-report-evidence-card .fault-media-downloads {
+      gap: 5px;
+    }
+
+    #endRepairModal .end-report-evidence-card .fault-media-download {
+      padding: 7px 10px;
+      min-height: 36px;
+      gap: 8px;
+    }
+
+    .fault-radio-row {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 10px;
+      overflow-x: auto;
+    }
+
+    .fault-radio-row label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 650;
+      white-space: nowrap;
+      transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+    }
+
+    .fault-radio-row label:has(input:checked) {
+      border-color: var(--accent);
+      background: var(--blue-50);
+      color: var(--fg);
+    }
+
+    .fault-radio-row input {
+      accent-color: var(--accent);
+    }
+
+    .fault-upload-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .fault-upload-card {
+      position: relative;
+      display: grid;
+      gap: 8px;
+      padding: 13px;
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      background: var(--blue-50);
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    .fault-upload-card:hover {
+      border-color: var(--accent);
+      background: oklch(97% 0.03 252);
+      transform: translateY(-1px);
+    }
+
+    .fault-upload-card input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .fault-upload-card strong {
+      color: var(--fg);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .fault-upload-card span {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .fault-detail-stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .fault-detail-section {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: color-mix(in oklab, var(--surface), var(--blue-50) 16%);
+    }
+
+    .fault-detail-section h4 {
+      margin: 0 0 12px;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+    }
+
+    .fault-detail-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: start;
+      padding: 20px;
+      border: 1px solid color-mix(in oklab, var(--border), var(--accent) 16%);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 100% 0%, color-mix(in oklab, var(--accent), transparent 86%), transparent 34%),
+        var(--surface);
+      box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+    }
+
+    .fault-detail-kicker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .fault-detail-hero h4 {
+      margin: 0;
+      color: var(--fg);
+      font-size: clamp(22px, 3vw, 32px);
+      line-height: 1.18;
+      letter-spacing: -0.02em;
+    }
+
+    .fault-detail-desc {
+      max-width: 760px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .fault-detail-id {
+      color: var(--fg);
+      font-family: var(--mono);
+    }
+
+    .fault-detail-status-card {
+      min-width: 190px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--surface);
+    }
+
+    .fault-detail-status-card span {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .fault-detail-status-card strong {
+      display: block;
+      color: var(--fg);
+      font-size: 22px;
+      line-height: 1.2;
+    }
+
+    .fault-detail-status-card small {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .fault-detail-status-card.detail-state-pending {
+      border-color: color-mix(in oklab, var(--orange), var(--border) 58%);
+      background: color-mix(in oklab, var(--orange-50), var(--surface) 38%);
+    }
+
+    .fault-detail-status-card.detail-state-repairing {
+      border-color: color-mix(in oklab, var(--accent), var(--border) 58%);
+      background: color-mix(in oklab, var(--blue-50), var(--surface) 28%);
+    }
+
+    .fault-detail-status-card.detail-state-completed {
+      border-color: color-mix(in oklab, var(--green), var(--border) 58%);
+      background: color-mix(in oklab, var(--green-50), var(--surface) 34%);
+    }
+
+    .fault-detail-timeline {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .fault-detail-step {
+      position: relative;
+      min-height: 72px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+
+    .fault-detail-step::before {
+      content: "";
+      display: block;
+      width: 9px;
+      height: 9px;
+      margin-bottom: 8px;
+      border-radius: 999px;
+      background: var(--border);
+    }
+
+    .fault-detail-step.is-done::before {
+      background: var(--green);
+    }
+
+    .fault-detail-step.is-current::before {
+      background: var(--accent);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent), transparent 78%);
+    }
+
+    .fault-detail-step strong {
+      display: block;
+      color: var(--fg);
+      font-size: 13px;
+    }
+
+    .fault-detail-step span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .fault-detail-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.18fr) minmax(280px, 0.82fr);
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .fault-detail-layout > .fault-detail-section {
+      min-height: 100%;
+    }
+
+    .fault-detail-layout > .fault-detail-section .fault-detail-copy {
+      min-height: 100%;
+    }
+
+    .fault-detail-card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .fault-detail-metric {
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+
+    .fault-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(240px, 1fr));
+      gap: 10px 14px;
+      font-size: 13px;
+      overflow-x: auto;
+    }
+
+    .fault-detail-metric span,
+    .fault-detail-grid span {
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .fault-detail-metric strong,
+    .fault-detail-grid strong {
+      color: var(--fg);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .fault-detail-metric strong {
+      display: block;
+      margin-top: 6px;
+      overflow: hidden;
+      font-size: 14px;
+      text-overflow: ellipsis;
+    }
+
+    .fault-detail-copy {
+      margin: 0;
+      color: var(--fg);
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .fault-detail-copy.muted {
+      color: var(--muted);
+    }
+
+    .fault-evidence-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .fault-evidence-card {
+      min-width: 0;
+      padding: 13px;
+      border: 1px dashed color-mix(in oklab, var(--border), var(--accent) 14%);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+
+    .fault-evidence-card span {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .fault-media-list {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+      white-space: nowrap;
+      overflow-x: auto;
+    }
+
+    .fault-evidence-card .fault-media-list {
+      white-space: normal;
+      overflow: visible;
+    }
+
+    .fault-media-downloads {
+      display: grid;
+      gap: 7px;
+    }
+
+    .fault-media-download {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      min-width: 0;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: color-mix(in oklab, var(--surface), var(--bg) 40%);
+      color: var(--fg);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 650;
+      font-family: inherit;
+      text-align: left;
+      cursor: default;
+    }
+
+    .fault-media-download:hover {
+      border-color: var(--border);
+      color: var(--fg);
+      background: color-mix(in oklab, var(--surface), var(--bg) 40%);
+    }
+
+    .fault-media-download .fault-media-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .fault-media-download .fault-media-action {
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+      cursor: pointer;
+      padding: 4px 8px;
+      font-family: inherit;
+    }
+
+    .fault-media-download .fault-media-action:hover {
+      background: color-mix(in oklab, var(--accent), transparent 90%);
+      color: var(--accent-hover);
+    }
+
+    .fault-media-download .fault-media-action:focus-visible {
+      outline: 2px solid color-mix(in oklab, var(--accent), transparent 65%);
+      outline-offset: 2px;
+    }
+
+    .report-existing-media {
+      margin-top: 10px;
+    }
+
+    .fault-inline-error {
+      display: none;
+      margin-top: 8px;
+      color: var(--red);
+      font-size: 12px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .fault-inline-error::before {
+      content: "!";
+      display: inline-grid;
+      place-items: center;
+      width: 16px;
+      height: 16px;
+      margin-right: 6px;
+      border-radius: 999px;
+      background: var(--red);
+      color: var(--surface);
+      font-size: 11px;
+      line-height: 1;
+    }
+
+    .fault-page .field label,
+    .fault-page .field input,
+    .fault-page .field select,
+    .fault-page .btn,
+    .fault-page .status,
+    .fault-modal .btn,
+    .fault-modal .status {
+      white-space: nowrap;
+    }
+
+    .fault-report-basic-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .fault-report-basic-grid .field.full {
+      grid-column: 1 / -1;
+    }
+
+    .fault-page input[readonly],
+    .fault-modal input[readonly] {
+      background: #f1f5f9;
+      border-color: #d8e0ea;
+      color: #64748b;
+      cursor: not-allowed;
+    }
+
+    .fault-radio-row.urgency-compact {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .fault-radio-row.urgency-compact label {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 6px 10px 6px 30px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+      white-space: nowrap;
+      cursor: pointer;
+      box-shadow: none;
+      outline: none;
+      transition: border-color .16s ease, background .16s ease;
+    }
+
+    .fault-radio-row.urgency-compact input {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      width: 14px;
+      height: 14px;
+      margin: 0;
+      transform: translateY(-50%);
+      accent-color: currentColor;
+      cursor: pointer;
+    }
+
+    .fault-radio-row.urgency-compact label:hover,
+    .fault-radio-row.urgency-compact label:active,
+    .fault-radio-row.urgency-compact label:focus,
+    .fault-radio-row.urgency-compact label:focus-within,
+    .fault-radio-row.urgency-compact label:has(input:checked) {
+      box-shadow: none;
+      outline: none;
+    }
+
+    .field label .required-mark {
+      color: var(--red);
+      font-weight: 750;
+    }
+
+    .fault-radio-row.urgency-compact .urgency-high {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #b91c1c;
+    }
+
+    .fault-radio-row.urgency-compact .urgency-high:has(input:checked) {
+      background: #fee2e2;
+      border-color: #ef4444;
+      color: #991b1b;
+    }
+
+    .fault-radio-row.urgency-compact .urgency-medium {
+      background: #fffbeb;
+      border-color: #fde68a;
+      color: #a16207;
+    }
+
+    .fault-radio-row.urgency-compact .urgency-medium:has(input:checked) {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      color: #854d0e;
+    }
+
+    .fault-radio-row.urgency-compact .urgency-low {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1d4ed8;
+    }
+
+    .fault-radio-row.urgency-compact .urgency-low:has(input:checked) {
+      background: #dbeafe;
+      border-color: #3b82f6;
+      color: #1e40af;
+    }
+
+    .field.is-error .fault-inline-error {
+      display: block;
+    }
+
+    .field.is-error input,
+    .field.is-error select,
+    .field.is-error textarea {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px oklch(58% 0.2 28 / 0.12);
+    }
+
+    @media (max-width: 1180px) {
+      .fault-filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .start-repair-shell {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .start-repair-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .start-repair-assistant {
+        min-height: 540px;
+      }
+
+      .start-repair-attachment-note {
+        white-space: normal;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .fault-filter-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .fault-readonly-box,
+      .fault-detail-grid,
+      .fault-detail-hero,
+      .fault-detail-layout,
+      .fault-detail-card-grid,
+      .fault-detail-timeline,
+      .fault-evidence-grid,
+      .fault-upload-grid,
+      .fault-report-basic-grid,
+      .fault-report-layout,
+      .fault-report-form-grid,
+      .fault-device-summary,
+      .start-repair-shell,
+      .start-repair-summary,
+      .start-repair-grid,
+      .start-repair-hero {
+        grid-template-columns: minmax(max-content, 1fr);
+      }
+
+      .fault-detail-grid,
+      .fault-detail-hero,
+      .fault-detail-layout,
+      .fault-detail-card-grid,
+      .fault-detail-timeline,
+      .fault-evidence-grid,
+      .start-repair-shell,
+      .start-repair-summary,
+      .start-repair-grid,
+      .start-repair-hero {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .start-repair-summary .wide {
+        grid-column: auto;
+      }
+
+      .fault-resolution-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .repair-agent-suggestion-grid,
+      .repair-agent-input-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .fault-list-head,
+      .fault-filter-actions,
+      .fault-pagination {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .fault-list-title {
+        align-items: flex-start;
+      }
+
+      .fault-modal {
+        padding: 12px;
+      }
+
+      .fault-modal-head,
+      .fault-modal-body,
+      .fault-modal-foot {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .fault-modal-head h3 {
+        font-size: 21px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fault-table tbody tr,
+      .fault-action-link,
+      .fault-upload-card {
+        transition: none;
+      }
+
+      .fault-upload-card:hover {
+        transform: none;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">智</div><div><p class="brand-title">新能源装载机<br>智能运维平台</p><div class="brand-subtitle">Fault Ops Console</div></div></div>
+    <nav class="nav-section">
+      <div class="nav-label">业务导航</div>
+      <div class="nav-list">
+        <a class="nav-item" href="workbench.html"><span class="nav-icon">01</span><span>工作台</span></a>
+        <a class="nav-item" href="bi-dashboard.html"><span class="nav-icon">02</span><span>驾驶舱 BI</span></a><a class="nav-item" href="factory-modeling.html"><span class="nav-icon">03</span><span>工厂建模</span></a>
+        <a class="nav-item" href="equipment-ledger.html"><span class="nav-icon">04</span><span>设备台账</span></a>
+        <a class="nav-item" href="fault-report.html"><span class="nav-icon">05</span><span>故障上报</span></a>
+        
+        
+        <a class="nav-item" href="maintenance-records.html"><span class="nav-icon">07</span><span>维修记录</span></a>
+        <a class="nav-item" href="system-management.html"><span class="nav-icon">08</span><span>系统管理</span></a>
+        <a class="nav-item" href="intelligent-config.html"><span class="nav-icon">09</span><span>智能配置</span></a>
+      </div>
+    </nav>
+    <div class="sidebar-foot"><strong>故障闭环</strong><span>上报、接单、维修、处理结果沉淀到同一张故障记录。</span></div>
+  </aside>
+
+  <main class="main-area">
+    <header class="topbar">
+      <div class="topbar-left"><button class="menu-btn" type="button">☰</button><div><h1 class="page-title">故障上报</h1><div class="crumb">故障管理 / 上报与维修闭环</div></div></div>
+      <div class="topbar-actions"><div class="user-chip"><span class="avatar">王</span><span>王磊 · 设备管理员</span></div></div>
+    </header>
+
+    <section class="content fault-page">
+      <article class="card fault-filter-card">
+        <div class="section-title"><h3>查询筛选</h3><span class="status info">点击查询后生效</span></div>
+        <div class="fault-filter-grid" data-fault-filter>
+          <div class="field"><label>故障编号</label><input id="searchId" type="text" placeholder="请输入故障编号"></div>
+          <div class="field"><label>设备名称</label><input id="searchDevice" type="text" placeholder="请输入设备名称"></div>
+          <div class="field"><label>故障状态</label><select id="searchStatus"><option value="">全部状态</option><option value="pending">待接单</option><option value="repairing">维修中</option><option value="completed">已处理</option></select></div>
+          <div class="fault-filter-actions"><button class="btn btn-primary" id="searchBtn" type="button">查询</button><button class="btn btn-secondary" id="resetBtn" type="button">重置</button></div>
+        </div>
+      </article>
+
+      <article class="card fault-list-card">
+        <div class="fault-list-head">
+          <div class="fault-list-title"><div><div class="section-title compact"><h3>故障上报列表</h3><span class="status warn">维修闭环</span></div><div class="fault-total">共 <strong id="totalCount">0</strong> 条记录</div></div></div>
+          <button class="btn btn-primary" id="addReportBtn" type="button">新增故障上报</button>
+        </div>
+        <div class="table-wrap">
+          <table class="fault-table" aria-describedby="pageInfo">
+            <caption class="fault-sr-only">故障上报列表，包含故障编号、设备名称、所属车间、所属产线、故障现象、紧急程度、上报时间、状态和操作。</caption>
+            <thead><tr><th>故障编号</th><th>设备名称</th><th>所属车间</th><th>所属产线</th><th>故障现象</th><th>紧急程度</th><th>上报时间</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody id="faultTableBody"></tbody>
+          </table>
+        </div>
+        <div class="fault-empty" id="emptyState" role="status" aria-live="polite"><strong>暂无匹配的故障记录</strong><span>请调整筛选条件，或新增一条故障上报。</span></div>
+        <div class="fault-pagination" aria-label="故障上报列表分页">
+          <div class="fault-page-info" id="pageInfo">显示 <strong>0-0</strong> 条，共 <strong>0</strong> 条</div>
+          <div class="fault-page-controls">
+            <button class="fault-page-btn" id="prevPageBtn" type="button">上一页</button>
+            <span class="fault-page-current" id="pageCurrent">1 / 1</span>
+            <button class="fault-page-btn" id="nextPageBtn" type="button">下一页</button>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+</div>
+
+<div class="fault-modal" id="reportModal" aria-hidden="true">
+  <div class="fault-modal-panel" role="dialog" aria-modal="true" aria-labelledby="reportModalTitle">
+    <div class="fault-modal-head">
+      <div class="fault-modal-title">
+        <h3 id="reportModalTitle">故障上报</h3>
+        <div class="fault-modal-subtitle">提交后生成待接单故障单，并进入故障分析与维修处理流转。</div>
+      </div>
+      <button class="icon-btn" id="closeReportModal" type="button" aria-label="关闭">×</button>
+    </div>
+    <form id="reportForm" novalidate>
+      <div class="fault-modal-body">
+        <input type="hidden" id="editFaultId">
+        <div class="fault-report-layout">
+          <div class="fault-report-main">
+            <section class="fault-report-section is-primary">
+              <div class="fault-report-section-head">
+                <div>
+                  <h4>基础信息</h4>
+                    <p>请选择设备，系统会自动带出车间与产线。</p>
+                </div>
+                <span class="status warn">待接单</span>
+              </div>
+              <div class="fault-report-basic-grid">
+                <div class="field full"><label for="selectDevice">选择设备 *</label><select id="selectDevice" required aria-describedby="selectDeviceError"><option value="">请选择设备</option></select><span class="fault-inline-error" id="selectDeviceError">请选择设备</span></div>
+                <div class="field"><label>所属车间</label><input id="deviceWorkshop" type="text" readonly placeholder="选择设备后自动带出"></div>
+                <div class="field"><label>所属产线</label><input id="deviceLine" type="text" readonly placeholder="选择设备后自动带出"></div>
+                <div class="field"><label>紧急程度 *</label><div class="fault-radio-row urgency-compact"><label class="urgency-high"><input type="radio" name="urgency" value="high"> 非常紧急</label><label class="urgency-medium"><input type="radio" name="urgency" value="medium" checked> 紧急</label><label class="urgency-low"><input type="radio" name="urgency" value="low"> 一般</label></div></div>
+              </div>
+            </section>
+
+            <section class="fault-report-section is-primary">
+              <div class="fault-report-section-head">
+                <div>
+                  <h4>故障描述</h4>
+                  <p>用现场可复核的语言描述现象、持续时间和影响范围。</p>
+                </div>
+              </div>
+              <div class="fault-report-form-grid">
+                <div class="field full"><label for="faultPhenomenon">故障现象 *</label><input id="faultPhenomenon" type="text" required placeholder="例如：驱动电机过温限扭，仪表持续报警" aria-describedby="faultPhenomenonError"><span class="fault-inline-error" id="faultPhenomenonError">请输入故障现象</span></div>
+                <div class="field"><label for="faultOccurTime">发生时间</label><input id="faultOccurTime" type="datetime-local"></div>
+                <div class="field"><label for="faultScene">可能故障位置</label><input id="faultScene" type="text" placeholder="例如：驱动电机、电池包 3 号模组、充电接口"></div>
+                <div class="field full"><label for="faultDescription">故障说明</label><textarea id="faultDescription" rows="4" placeholder="请描述“现象 + 条件 + 影响+已做的临时处置”，例如高负载作业 18 分钟后过温限扭，避免只写“设备异常”。"></textarea></div>
+              </div>
+            </section>
+
+            <section class="fault-report-section">
+              <div class="fault-report-section-head">
+                <div>
+                  <h4>现场附件</h4>
+                  <p>可上传仪表照片、故障视频或日志文件，便于诊断中心引用。</p>
+                </div>
+              </div>
+              <div class="fault-upload-grid">
+                <label class="fault-upload-card report-upload"><input id="reportImageUpload" type="file" accept="image/*" multiple><strong>现场图片</strong><span id="reportImageStatus">未选择图片</span></label>
+                <label class="fault-upload-card report-upload"><input id="reportLogUpload" type="file" multiple><strong>日志或视频</strong><span id="reportLogStatus">未选择附件</span></label>
+              </div>
+            </section>
+          </div>
+
+        </div>
+      </div>
+      <div class="fault-modal-foot"><button class="btn btn-secondary" id="cancelReportBtn" type="button">取消</button><button class="btn btn-primary" id="submitReportBtn" type="button">提交并生成故障单</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="fault-modal" id="startRepairModal" aria-hidden="true">
+  <div class="fault-modal-panel" role="dialog" aria-modal="true" aria-labelledby="startRepairTitle">
+    <div class="fault-modal-head"><h3 id="startRepairTitle"><span class="fault-modal-kicker">维修接单</span>开始维修</h3><button class="icon-btn" id="closeStartRepairModal" type="button" aria-label="关闭">×</button></div>
+    <div class="fault-modal-body">
+      <div class="start-repair-shell">
+        <div class="start-repair-left">
+          <section class="start-repair-hero">
+            <div>
+              <div class="start-repair-kicker"><span id="startFaultId">—</span><span class="status info" id="startUrgency">—</span><span id="startReportTime">—</span></div>
+              <h4 id="startPhenomenon">—</h4>
+              <p id="startDescription">—</p>
+            </div>
+            <aside class="start-repair-status-card">
+              <span>当前节点</span>
+              <strong>待接单</strong>
+              <small>确认维修人后进入维修中，故障上报附件会随单据带入。</small>
+            </aside>
+          </section>
+          <div class="fault-readonly-box start-repair-summary">
+            <div><span>设备名称</span><strong id="startDeviceName">—</strong></div>
+            <div><span>所属车间</span><strong id="startWorkshop">—</strong></div>
+            <div><span>所属产线</span><strong id="startLine">—</strong></div>
+            <div><span>可能故障位置</span><strong id="startScene">—</strong></div>
+            <div><span>故障发生时间</span><strong id="startFaultTime">—</strong></div>
+            <div><span>紧急程度</span><strong id="startUrgencyText">—</strong></div>
+            <div class="wide start-description-card"><span>故障说明</span><strong id="startDescriptionMirror">—</strong></div>
+          </div>
+          <div class="start-repair-grid">
+            <section class="start-repair-card">
+              <h4>维修接单信息</h4>
+              <div class="start-repair-intake">
+                <div class="field"><label for="repairPerson">维修人 *</label><input id="repairPerson" type="text" readonly aria-readonly="true" placeholder="由当前账号自动带出" aria-describedby="repairPersonError"><p class="repair-person-hint">由当前登录账号自动带出，不可手动选择。</p><span class="fault-inline-error" id="repairPersonError">当前账号未识别维修人</span></div>
+              </div>
+            </section>
+            <section class="start-repair-card">
+              <h4>故障上报现场附件</h4>
+              <p class="start-repair-attachment-note">以下附件来自新增故障上报，开始维修时自动带出，不需要重复上传。</p>
+              <div class="fault-evidence-grid start-repair-evidence">
+                <div class="fault-evidence-card"><span>现场图片</span><div class="fault-media-list" id="startReportImages">未上传</div></div>
+                <div class="fault-evidence-card"><span>日志 / 视频附件</span><div class="fault-media-list" id="startReportFiles">未上传</div></div>
+              </div>
+            </section>
+          </div>
+        </div>
+        <aside class="start-repair-assistant" aria-label="维修助手 Agent">
+          <div class="repair-agent-head">
+            <div>
+              <span class="repair-agent-kicker">维修助手 Agent</span>
+              <h4>接单前智能预判</h4>
+              <p>已读取左侧故障信息，建议会在维修结束时自动带入闭环字段。</p>
+            </div>
+            <span class="status ok" id="repairAgentConfidence">置信度 —</span>
+          </div>
+          <div class="repair-agent-suggestion" id="repairAgentSuggestion"></div>
+          <div class="repair-agent-chat" id="repairAgentChat" aria-live="polite"></div>
+          <div class="repair-agent-input-row">
+            <input id="repairAgentInput" type="text" placeholder="继续追问或修正判断，例如：优先排查冷却系统">
+            <button class="btn btn-primary" id="repairAgentSend" type="button">发送</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+    <div class="fault-modal-foot"><button class="btn btn-secondary" id="cancelStartRepairBtn" type="button">取消</button><button class="btn btn-primary" id="confirmStartRepairBtn" type="button">开始维修</button></div>
+  </div>
+</div>
+
+<div class="fault-modal" id="endRepairModal" aria-hidden="true">
+  <div class="fault-modal-panel" role="dialog" aria-modal="true" aria-labelledby="endRepairTitle">
+    <div class="fault-modal-head"><h3 id="endRepairTitle"><span class="fault-modal-kicker">维修闭环</span>维修结束</h3><button class="icon-btn" id="closeEndRepairModal" type="button" aria-label="关闭">×</button></div>
+    <form id="endRepairForm">
+      <div class="fault-modal-body">
+        <input type="hidden" id="endFaultId">
+        <div class="fault-readonly-box fault-end-summary">
+          <div><span>故障编号</span><strong id="endFaultIdDisplay">—</strong></div>
+          <div class="end-device-card" id="endDeviceCard" data-tooltip="—" tabindex="0" aria-describedby="faultFloatingTooltip"><span>设备名称</span><strong class="end-device-name" id="endDeviceName" title="—">—</strong></div>
+          <div><span>维修开始时间</span><strong id="endRepairStartTime">—</strong></div>
+          <div><span>维修人</span><strong id="endRepairPerson">—</strong></div>
+        </div>
+        <p class="fault-resolution-note">提交后该记录状态将更新为“已处理”，处理结论会进入故障详情和维修记录。</p>
+        <p class="fault-resolution-note repair-agent-prefill-note" id="endAgentPrefillNote" hidden>AI建议已带入，可根据实际维修结果修改后提交。</p>
+        <section class="start-repair-card end-report-evidence-card">
+          <h4>故障上报现场附件</h4>
+          <p class="start-repair-attachment-note">以下附件来自新增故障上报，维修结束时可再次核对并下载归档。</p>
+          <div class="fault-evidence-grid">
+            <div class="fault-evidence-card"><span>现场图片</span><div class="fault-media-list" id="endReportImages">未上传</div></div>
+            <div class="fault-evidence-card"><span>日志 / 视频附件</span><div class="fault-media-list" id="endReportFiles">未上传</div></div>
+          </div>
+        </section>
+        <div class="fault-resolution-grid">
+          <div class="field"><label for="faultType">故障类型 *</label><select id="faultType" aria-describedby="faultTypeError"><option value="">请选择故障类型</option><option value="battery">电池系统故障</option><option value="drive">电驱系统故障</option><option value="electric">整车电器故障</option><option value="can">CAN总线故障</option><option value="hydraulic">液压装置故障</option><option value="mechanical">机械传动故障</option><option value="cooling">冷却系统故障</option><option value="other">其他故障</option></select><span class="fault-inline-error" id="faultTypeError">请选择故障类型</span></div>
+          <div class="field"><label for="deviceStatus">设备状态 *</label><select id="deviceStatus" aria-describedby="deviceStatusError"><option value="">请选择设备状态</option><option value="normal">正常</option><option value="subhealth">带病运行</option><option value="stop">停机待修复</option></select><span class="fault-inline-error" id="deviceStatusError">请选择设备状态</span></div>
+          <div class="field full"><label for="faultReason">故障原因 *</label><textarea id="faultReason" rows="2" placeholder="请输入故障原因" aria-describedby="faultReasonError"></textarea><span class="fault-inline-error" id="faultReasonError">请输入故障原因</span></div>
+          <div class="field full"><label for="handleMeasure">处理措施 *</label><textarea id="handleMeasure" rows="2" placeholder="请输入故障处理措施" aria-describedby="handleMeasureError"></textarea><span class="fault-inline-error" id="handleMeasureError">请输入处理措施</span></div>
+          <div class="field spare-part-field"><label>备件更换说明</label><input id="sparePartDesc" type="text" placeholder="如有更换备件，请填写说明"></div>
+        </div>
+      </div>
+      <div class="fault-modal-foot"><button class="btn btn-secondary" id="cancelEndRepairBtn" type="button">取消</button><button class="btn btn-primary" id="submitEndRepairBtn" type="button">提交处理结果</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="fault-modal" id="detailModal" aria-hidden="true">
+  <div class="fault-modal-panel" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <div class="fault-modal-head"><h3 id="detailTitle">故障详情</h3><button class="icon-btn" id="closeDetailModal" type="button" aria-label="关闭">×</button></div>
+    <div class="fault-modal-body"><div class="fault-detail-stack" id="detailContent"></div></div>
+    <div class="fault-modal-foot"><button class="btn btn-secondary" id="closeDetailBtn" type="button">关闭</button></div>
+  </div>
+</div>
+
+<div class="fault-modal" id="deleteConfirmModal" aria-hidden="true">
+  <div class="fault-modal-panel small" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+    <div class="fault-modal-head"><h3 id="deleteTitle">确认删除</h3><button class="icon-btn" id="cancelDeleteBtn" type="button" aria-label="关闭">×</button></div>
+    <div class="fault-modal-body"><p class="muted">确定删除这条故障记录吗？删除后无法恢复。</p></div>
+    <div class="fault-modal-foot"><button class="btn btn-secondary" type="button" data-close-delete>取消</button><button class="btn btn-primary" id="confirmDeleteBtn" type="button">确认删除</button></div>
+  </div>
+</div>
+
+<button class="ai-fab" id="openAi" type="button" aria-controls="agentDrawer" aria-expanded="false"><span class="ai-dot"></span>Agent</button>
+<aside class="agent-drawer" id="agentDrawer" aria-hidden="true" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="agentDrawerTitle">
+  <div class="agent-drawer-head"><div><strong id="agentDrawerTitle">全局 Agent 助手</strong><div class="muted small" data-agent-context>正在识别当前页面上下文</div></div><button class="icon-btn" id="closeAi" type="button" aria-label="关闭 Agent 抽屉">×</button></div>
+  <div class="agent-permission"><span class="status ok">王磊 · 设备管理员</span><span class="status ok">权限已识别</span><span class="status ok">Agent 在线</span></div>
+  <div class="agent-quick-actions"><button type="button" data-agent-intent="故障上报">故障上报</button><button type="button" data-agent-intent="查询设备故障">查询设备故障</button><button type="button" data-agent-intent="解释诊断结果">解释诊断结果</button><button type="button" data-agent-intent="生成维修建议">生成维修建议</button><button type="button" data-agent-intent="查看工单进度">查看工单进度</button></div>
+  <div class="chat agent-drawer-chat" aria-live="polite"><div class="bubble">我会读取当前页面上下文，协助补全故障单、维修记录和现场附件。</div><div class="bubble" data-agent-reply>当前账号可查看授权设备范围，未授权设备会直接拒绝并隐藏详情。</div></div>
+  <div class="agent-input-row"><input id="agentInput" placeholder="描述故障、查询设备或询问工单进度"><button class="btn btn-secondary" type="button" data-agent-attach>附件</button><button class="btn btn-primary" type="button" id="agentSend">发送</button></div>
+  <a class="btn btn-primary agent-full-link" href="agent-report.html">进入完整上报页</a>
+</aside>
+<div class="agent-scrim" id="agentScrim"></div>
+<div class="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  const $ = (selector, root = document) => root.querySelector(selector);
+  const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+  const deviceList = [
+    { id: 1, name: "EL-2024-019 一号电动装载机", workshop: "总装一车间", line: "A1 产线" },
+    { id: 2, name: "EL-2024-022 二号电动装载机", workshop: "总装一车间", line: "A2 产线" },
+    { id: 3, name: "EL-2023-087 三号电动装载机", workshop: "结构件车间", line: "焊装 2 线" },
+    { id: 4, name: "EL-2022-031 四号电动装载机", workshop: "总装二车间", line: "B1 产线" }
+  ];
+  let faultList = [
+    { id: "FR-240630-018", deviceId: 1, deviceName: "EL-2024-019 一号电动装载机", workshop: "总装一车间", line: "A1 产线", phenomenon: "驱动电机过温限扭", description: "连续铲装 18 分钟后电机温度快速升高，仪表提示限扭。", urgency: "high", reportTime: "2026-06-30 09:30:00", status: "pending", repairStartTime: "", repairPerson: "", faultType: "", faultReason: "", handleMeasure: "", deviceStatus: "", sparePartDesc: "", mediaImages: [], mediaVideos: [] },
+    { id: "FR-240630-017", deviceId: 2, deviceName: "EL-2024-022 二号电动装载机", workshop: "总装一车间", line: "A2 产线", phenomenon: "电池包压差异常", description: "高负载作业后 3 号电池包单体压差超过阈值。", urgency: "high", reportTime: "2026-06-30 09:05:00", status: "pending", repairStartTime: "", repairPerson: "", faultType: "", faultReason: "", handleMeasure: "", deviceStatus: "", sparePartDesc: "", mediaImages: [], mediaVideos: [] },
+    { id: "FR-240630-016", deviceId: 3, deviceName: "EL-2023-087 三号电动装载机", workshop: "结构件车间", line: "焊装 2 线", phenomenon: "转向角传感器漂移", description: "低速转向时角度回正延迟，诊断中心提示传感器信号波动。", urgency: "medium", reportTime: "2026-06-30 08:56:00", status: "pending", repairStartTime: "", repairPerson: "", faultType: "", faultReason: "", handleMeasure: "", deviceStatus: "", sparePartDesc: "", mediaImages: [], mediaVideos: [] },
+    { id: "FR-240630-015", deviceId: 1, deviceName: "EL-2024-019 一号电动装载机", workshop: "总装一车间", line: "A1 产线", phenomenon: "充电接口温升偏高", description: "快充 20 分钟后接口温度升至预警区间。", urgency: "medium", reportTime: "2026-06-30 08:42:00", status: "repairing", repairStartTime: "2026-06-30 09:00:00", repairPerson: "陈工", faultType: "", faultReason: "", handleMeasure: "", deviceStatus: "", sparePartDesc: "", mediaImages: ["充电接口-温升.jpg"], mediaVideos: [] },
+    { id: "FR-240630-014", deviceId: 4, deviceName: "EL-2022-031 四号电动装载机", workshop: "总装二车间", line: "B1 产线", phenomenon: "制动压力低报警", description: "连续制动后压力恢复慢，报警持续 12 秒。", urgency: "high", reportTime: "2026-06-30 08:36:00", status: "repairing", repairStartTime: "2026-06-30 08:52:00", repairPerson: "刘维保", faultType: "", faultReason: "", handleMeasure: "", deviceStatus: "", sparePartDesc: "", mediaImages: ["制动压力表.jpg"], mediaVideos: ["制动报警现场.mp4"] },
+    { id: "FR-240630-013", deviceId: 2, deviceName: "EL-2024-022 二号电动装载机", workshop: "总装一车间", line: "A2 产线", phenomenon: "举升油缸轻微渗油", description: "油缸密封圈位置有油迹，暂未影响举升速度。", urgency: "low", reportTime: "2026-06-30 08:28:00", status: "completed", repairStartTime: "2026-06-30 08:39:00", repairPerson: "周师傅", faultType: "hydraulic", faultReason: "密封圈老化", handleMeasure: "更换密封圈并清洁油缸外壁。", deviceStatus: "normal", sparePartDesc: "更换举升油缸密封圈 1 件", mediaImages: ["油缸密封圈.jpg"], mediaVideos: [] },
+    { id: "FR-240630-012", deviceId: 3, deviceName: "EL-2023-087 三号电动装载机", workshop: "结构件车间", line: "焊装 2 线", phenomenon: "液压泵异响", description: "举升动作时液压泵有尖锐异响，压力波动较大。", urgency: "medium", reportTime: "2026-06-30 08:20:00", status: "repairing", repairStartTime: "2026-06-30 08:45:00", repairPerson: "张维修", faultType: "", faultReason: "", handleMeasure: "", deviceStatus: "", sparePartDesc: "", mediaImages: ["液压泵现场-1.jpg"], mediaVideos: [] },
+    { id: "FR-240630-011", deviceId: 1, deviceName: "EL-2024-019 一号电动装载机", workshop: "总装一车间", line: "A1 产线", phenomenon: "冷却风扇转速异常", description: "散热风扇转速忽高忽低，温控曲线出现毛刺。", urgency: "medium", reportTime: "2026-06-30 08:02:00", status: "completed", repairStartTime: "2026-06-30 08:18:00", repairPerson: "赵工", faultType: "cooling", faultReason: "风扇控制线束接插件松动", handleMeasure: "重新固定接插件并复测转速曲线。", deviceStatus: "normal", sparePartDesc: "未更换备件", mediaImages: ["风扇线束固定.jpg"], mediaVideos: [] },
+    { id: "FR-240629-010", deviceId: 2, deviceName: "EL-2024-022 二号电动装载机", workshop: "总装一车间", line: "A2 产线", phenomenon: "行走电机瞬时过流", description: "坡道起步时出现瞬时过流告警，复位后可继续运行。", urgency: "high", reportTime: "2026-06-29 17:40:00", status: "pending", repairStartTime: "", repairPerson: "", faultType: "", faultReason: "", handleMeasure: "", deviceStatus: "", sparePartDesc: "", mediaImages: [], mediaVideos: [] },
+    { id: "FR-240629-009", deviceId: 3, deviceName: "EL-2023-087 三号电动装载机", workshop: "结构件车间", line: "焊装 2 线", phenomenon: "仪表通信间歇中断", description: "仪表偶发黑屏 2-3 秒，CAN 通信错误计数升高。", urgency: "medium", reportTime: "2026-06-29 17:05:00", status: "completed", repairStartTime: "2026-06-29 17:21:00", repairPerson: "孙维保", faultType: "can", faultReason: "仪表 CAN 接头虚接", handleMeasure: "清洁端子并重新压接固定。", deviceStatus: "normal", sparePartDesc: "更换 CAN 接头 1 个", mediaImages: ["仪表接头.jpg"], mediaVideos: [] },
+    { id: "FR-240629-008", deviceId: 4, deviceName: "EL-2022-031 四号电动装载机", workshop: "总装二车间", line: "B1 产线", phenomenon: "倒车蜂鸣器无声", description: "倒车档位切入后蜂鸣器无提示音，现场安全员上报。", urgency: "low", reportTime: "2026-06-29 16:38:00", status: "completed", repairStartTime: "2026-06-29 16:50:00", repairPerson: "李师傅", faultType: "electric", faultReason: "蜂鸣器线路保险熔断", handleMeasure: "更换保险并复测倒车提示。", deviceStatus: "normal", sparePartDesc: "更换 10A 保险 1 个", mediaImages: ["蜂鸣器复测.jpg"], mediaVideos: [] },
+    { id: "FR-240629-006", deviceId: 4, deviceName: "EL-2022-031 四号电动装载机", workshop: "总装二车间", line: "B1 产线", phenomenon: "制动响应延迟", description: "低速入库时制动踏板响应迟滞，制动距离变长。", urgency: "low", reportTime: "2026-06-29 16:10:00", status: "completed", repairStartTime: "2026-06-29 16:28:00", repairPerson: "李师傅", faultType: "mechanical", faultReason: "制动油路空气未排净", handleMeasure: "重新排空气并复测制动压力，恢复正常。", deviceStatus: "normal", sparePartDesc: "未更换备件", mediaImages: ["制动油路复测.jpg"], mediaVideos: ["制动测试.mp4"] }
+  ];
+  let currentDeleteId = "";
+  let nextFaultId = 19;
+  let currentPage = 1;
+  let currentData = [...faultList];
+  let lastFocusedElement = null;
+  const pageSize = 10;
+
+  const statusMeta = {
+    pending: ["待接单", "warn"],
+    repairing: ["维修中", "info"],
+    completed: ["已处理", "ok"]
+  };
+
+  const faultTypeMeta = {
+    battery: "电池系统故障",
+    drive: "电驱系统故障",
+    electric: "整车电器故障",
+    can: "CAN总线故障",
+    hydraulic: "液压装置故障",
+    mechanical: "机械传动故障",
+    cooling: "冷却系统故障",
+    other: "其他故障"
+  };
+
+  const urgencyMeta = {
+    high: ["非常紧急", "bad"],
+    medium: ["紧急", "warn"],
+    low: ["一般", "info"]
+  };
+
+  function showToastLocal(message) {
+    const toast = $(".toast");
+    if (!toast) return alert(message);
+    toast.textContent = message;
+    toast.classList.add("show");
+    window.setTimeout(() => toast.classList.remove("show"), 1800);
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#39;"
+    }[char]));
+  }
+
+  function openModal(id) {
+    const modal = $(id);
+    lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    modal?.classList.add("is-open");
+    modal?.setAttribute("aria-hidden", "false");
+    $(".fault-modal-panel", modal)?.setAttribute("tabindex", "-1");
+    window.setTimeout(() => {
+      const target = $("input, select, textarea, button", modal);
+      (target || $(".fault-modal-panel", modal))?.focus();
+    }, 0);
+  }
+
+  function closeModal(id) {
+    const modal = $(id);
+    modal?.classList.remove("is-open");
+    modal?.setAttribute("aria-hidden", "true");
+    if (lastFocusedElement?.isConnected) {
+      lastFocusedElement.focus();
+    }
+  }
+
+  function keepFocusInModal(event) {
+    if (event.key !== "Tab") return;
+    const modal = $(".fault-modal.is-open");
+    if (!modal) return;
+    const focusable = $$("button, input, select, textarea, [href], [tabindex]:not([tabindex='-1'])", modal)
+      .filter((item) => !item.disabled && item.offsetParent !== null);
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  function formatFiles(input) {
+    const files = Array.from(input.files || []);
+    return files.map((file) => file.name);
+  }
+
+  function updateUploadStatus(input, status) {
+    const files = formatFiles(input);
+    status.textContent = files.length ? files.join("、") : status.dataset.empty;
+  }
+
+  function normalizeMediaItem(item, group = "附件") {
+    if (!item) return null;
+    if (typeof item === "string") return { name: item, url: "", group };
+    return {
+      name: item.name || item.fileName || "未命名附件",
+      url: item.url || "",
+      group: item.group || group
+    };
+  }
+
+  function normalizeMediaList(items, group = "附件") {
+    return (Array.isArray(items) ? items : []).map((item) => normalizeMediaItem(item, group)).filter(Boolean);
+  }
+
+  function captureUploadFiles(input, group) {
+    return Array.from(input?.files || []).map((file) => ({
+      name: file.name,
+      url: URL.createObjectURL(file),
+      group
+    }));
+  }
+
+  function mergeMediaUpload(existing, input, group) {
+    const incoming = captureUploadFiles(input, group);
+    return incoming.length ? incoming : normalizeMediaList(existing, group);
+  }
+
+  function ensureDownloadUrl(item) {
+    if (item.url) return item.url;
+    const blob = new Blob([`${item.name}\n该附件为原型样例记录，真实系统会下载原始上传文件。`], { type: "text/plain;charset=utf-8" });
+    item.url = URL.createObjectURL(blob);
+    return item.url;
+  }
+
+  function renderDownloadableMediaList(items, fallback = "未上传") {
+    const list = normalizeMediaList(items);
+    if (!list.length) return escapeHtml(fallback);
+    return `<div class="fault-media-downloads">${list.map((item) => {
+      const href = ensureDownloadUrl(item);
+      const name = escapeHtml(item.name);
+      return `<div class="fault-media-download" title="${name}"><span class="fault-media-name">${name}</span><a class="fault-media-action" href="${escapeHtml(href)}" download="${name}" rel="noopener" data-download-name="${name}">下载</a></div>`;
+    }).join("")}</div>`;
+  }
+
+  function handleMediaDownload(event) {
+    const button = event.target.closest(".fault-media-action");
+    if (!button) return;
+    event.stopPropagation();
+  }
+
+  function renderReportMediaGroups(fault, imageTarget, fileTarget) {
+    if (imageTarget) imageTarget.innerHTML = renderDownloadableMediaList(fault?.mediaImages || []);
+    if (fileTarget) fileTarget.innerHTML = renderDownloadableMediaList([...(fault?.mediaFiles || []), ...(fault?.mediaVideos || [])]);
+  }
+
+  function initDeviceSelect() {
+    const selectDevice = $("#selectDevice");
+    deviceList.forEach((device) => {
+      const option = document.createElement("option");
+      option.value = device.id;
+      option.textContent = device.name;
+      selectDevice.appendChild(option);
+    });
+  }
+
+  function renderFaultTable(data = currentData, options = {}) {
+    const tbody = $("#faultTableBody");
+    const emptyState = $("#emptyState");
+    const listCard = $(".fault-list-card");
+    currentData = [...data];
+    const total = currentData.length;
+    const pageTotal = Math.max(1, Math.ceil(total / pageSize));
+    if (options.resetPage) currentPage = 1;
+    currentPage = Math.min(Math.max(1, currentPage), pageTotal);
+    const pageStart = total ? (currentPage - 1) * pageSize : 0;
+    const pageRows = currentData.slice(pageStart, pageStart + pageSize);
+    const pageEnd = total ? pageStart + pageRows.length : 0;
+    $("#totalCount").textContent = data.length;
+    tbody.innerHTML = "";
+    emptyState.style.display = data.length ? "none" : "block";
+    $("#pageInfo").innerHTML = `显示 <strong>${total ? pageStart + 1 : 0}-${pageEnd}</strong> 条，共 <strong>${total}</strong> 条`;
+    $("#pageCurrent").textContent = `${currentPage} / ${pageTotal}`;
+    $("#prevPageBtn").disabled = currentPage <= 1;
+    $("#nextPageBtn").disabled = currentPage >= pageTotal;
+    listCard?.setAttribute("aria-busy", "false");
+    listCard?.classList.remove("is-loading");
+    pageRows.forEach((fault) => {
+      const [statusText, statusType] = statusMeta[fault.status];
+      const [urgencyText, urgencyType] = urgencyMeta[fault.urgency];
+      const actionButtons = [
+        `<button class="fault-action-link" type="button" data-action="detail" data-id="${fault.id}" aria-label="查看 ${escapeHtml(fault.id)} 详情">详情</button>`
+      ];
+      if (fault.status === "pending") {
+        actionButtons.push(`<button class="fault-action-link" type="button" data-action="edit" data-id="${fault.id}" aria-label="编辑 ${escapeHtml(fault.id)}">编辑</button>`);
+        actionButtons.push(`<button class="fault-action-link" type="button" data-action="start" data-id="${fault.id}" aria-label="开始维修 ${escapeHtml(fault.id)}">开始维修</button>`);
+        actionButtons.push(`<button class="fault-action-link danger" type="button" data-action="delete" data-id="${fault.id}" aria-label="删除 ${escapeHtml(fault.id)}">删除</button>`);
+      }
+      if (fault.status === "repairing") {
+        actionButtons.push(`<button class="fault-action-link" type="button" data-action="end" data-id="${fault.id}" aria-label="结束维修 ${escapeHtml(fault.id)}">结束维修</button>`);
+      }
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${escapeHtml(fault.id)}</td>
+        <td><strong>${escapeHtml(fault.deviceName)}</strong></td>
+        <td>${escapeHtml(fault.workshop)}</td>
+        <td>${escapeHtml(fault.line)}</td>
+        <td>${escapeHtml(fault.phenomenon)}</td>
+        <td><span class="status ${urgencyType}">${urgencyText}</span></td>
+        <td>${escapeHtml(fault.reportTime)}</td>
+        <td><span class="status ${statusType}">${statusText}</span></td>
+        <td><div class="fault-actions">${actionButtons.join("")}</div></td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  function currentFilterData() {
+    const searchId = $("#searchId").value.trim().toLowerCase();
+    const searchDevice = $("#searchDevice").value.trim().toLowerCase();
+    const searchStatus = $("#searchStatus").value;
+    return faultList.filter((fault) => {
+      if (searchId && !fault.id.toLowerCase().includes(searchId)) return false;
+      if (searchDevice && !fault.deviceName.toLowerCase().includes(searchDevice)) return false;
+      if (searchStatus && fault.status !== searchStatus) return false;
+      return true;
+    });
+  }
+
+  function handleSearch() {
+    const tbody = $("#faultTableBody");
+    const button = $("#searchBtn");
+    const listCard = $(".fault-list-card");
+    button.disabled = true;
+    button.textContent = "查询中";
+    listCard?.setAttribute("aria-busy", "true");
+    listCard?.classList.add("is-loading");
+    $("#emptyState").style.display = "none";
+    tbody.innerHTML = `<tr class="fault-loading-row"><td colspan="9">正在查询故障记录...</td></tr>`;
+    window.setTimeout(() => {
+      renderFaultTable(currentFilterData(), { resetPage: true });
+      button.disabled = false;
+      button.textContent = "查询";
+    }, 260);
+  }
+
+  function handleReset() {
+    $("#searchId").value = "";
+    $("#searchDevice").value = "";
+    $("#searchStatus").value = "";
+    renderFaultTable(faultList, { resetPage: true });
+  }
+
+  function clearFaultFilters() {
+    $("#searchId").value = "";
+    $("#searchDevice").value = "";
+    $("#searchStatus").value = "";
+  }
+
+  function setFieldError(field, hasError) {
+    const wrapper = field?.closest(".field");
+    if (!wrapper) return;
+    wrapper.classList.toggle("is-error", hasError);
+    field?.setAttribute("aria-invalid", hasError ? "true" : "false");
+  }
+
+  function clearFormErrors(root) {
+    $$(".field.is-error", root).forEach((field) => field.classList.remove("is-error"));
+    $$("[aria-invalid='true']", root).forEach((field) => field.setAttribute("aria-invalid", "false"));
+  }
+
+  function requireField(selector, message) {
+    const field = $(selector);
+    const invalid = !field?.value.trim();
+    setFieldError(field, invalid);
+    if (invalid) showToastLocal(message);
+    return !invalid;
+  }
+
+  function toDatetimeLocalValue(date = new Date()) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}T${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+  }
+
+  function reportTimeToInputValue(reportTime) {
+    const matched = String(reportTime || "").match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
+    return matched ? `${matched[1]}T${matched[2]}` : toDatetimeLocalValue();
+  }
+
+  function inputValueToReportTime(value) {
+    const fallback = toDatetimeLocalValue();
+    const source = value || fallback;
+    return `${source.replace("T", " ")}:00`;
+  }
+
+  function updateFaultOccurTimeMax() {
+    const timeInput = $("#faultOccurTime");
+    if (timeInput) timeInput.max = toDatetimeLocalValue();
+  }
+
+  function isFutureDatetimeLocalValue(value) {
+    if (!value) return false;
+    const selected = new Date(value);
+    return Number.isFinite(selected.getTime()) && selected.getTime() > Date.now();
+  }
+
+  function getUploadFileNames(input) {
+    return Array.from(input?.files || []).map((file) => file.name);
+  }
+
+  function enhanceRequiredMarks() {
+    $$("#reportForm .field label, #startRepairModal .field label, #endRepairForm .field label").forEach((label) => {
+      if (label.querySelector(".required-mark")) return;
+      label.innerHTML = label.innerHTML.replace(/\s\*/g, ' <span class="required-mark">*</span>');
+    });
+  }
+
+  function handleDeviceSelect() {
+    const device = deviceList.find((item) => String(item.id) === $("#selectDevice").value);
+    $("#deviceWorkshop").value = device?.workshop || "";
+    $("#deviceLine").value = device?.line || "";
+    setFieldError($("#selectDevice"), !device);
+  }
+
+  function resetReportAssistFields() {
+    updateFaultOccurTimeMax();
+    $("#faultOccurTime").value = toDatetimeLocalValue();
+    $("#faultScene").value = "";
+    $("#reportImageUpload").value = "";
+    $("#reportLogUpload").value = "";
+    $("#reportImageStatus").textContent = "未选择图片";
+    $("#reportLogStatus").textContent = "未选择附件";
+  }
+
+  function openAddReportModal() {
+    $("#reportModalTitle").textContent = "新增故障上报";
+    $("#reportForm").reset();
+    $("#editFaultId").value = "";
+    $("#deviceWorkshop").value = "";
+    $("#deviceLine").value = "";
+    resetReportAssistFields();
+    document.querySelector('input[name="urgency"][value="medium"]').checked = true;
+    clearFormErrors($("#reportForm"));
+    openModal("#reportModal");
+  }
+
+  function openEditReportModal(faultId) {
+    const fault = faultList.find((item) => item.id === faultId);
+    if (!fault) return;
+    $("#reportModalTitle").textContent = "编辑故障上报";
+    $("#editFaultId").value = fault.id;
+    $("#selectDevice").value = fault.deviceId;
+    $("#deviceWorkshop").value = fault.workshop;
+    $("#deviceLine").value = fault.line;
+    $("#faultPhenomenon").value = fault.phenomenon;
+    $("#faultDescription").value = fault.description;
+    resetReportAssistFields();
+    $("#faultScene").value = fault.scene || "";
+    $("#faultOccurTime").value = reportTimeToInputValue(fault.reportTime);
+    updateFaultOccurTimeMax();
+    document.querySelector(`input[name="urgency"][value="${fault.urgency}"]`).checked = true;
+    clearFormErrors($("#reportForm"));
+    openModal("#reportModal");
+  }
+
+  function handleReportSubmit(event) {
+    event.preventDefault();
+    const editId = $("#editFaultId").value;
+    const device = deviceList.find((item) => String(item.id) === $("#selectDevice").value);
+    const phenomenon = $("#faultPhenomenon").value.trim();
+    const description = $("#faultDescription").value.trim();
+    const occurTimeInput = $("#faultOccurTime");
+    updateFaultOccurTimeMax();
+    const reportTime = inputValueToReportTime(occurTimeInput.value);
+    const scene = $("#faultScene").value.trim();
+    const currentFault = editId ? faultList.find((item) => item.id === editId) : null;
+    const mediaImages = mergeMediaUpload(currentFault?.mediaImages, $("#reportImageUpload"), "现场图片");
+    const mediaFiles = mergeMediaUpload(currentFault?.mediaFiles, $("#reportLogUpload"), "日志或视频");
+    const urgency = document.querySelector('input[name="urgency"]:checked')?.value || "medium";
+    setFieldError($("#selectDevice"), !device);
+    setFieldError($("#faultPhenomenon"), !phenomenon);
+    setFieldError(occurTimeInput, isFutureDatetimeLocalValue(occurTimeInput.value));
+    if (!device) return showToastLocal("请选择设备");
+    if (!phenomenon) return showToastLocal("请输入故障现象");
+    if (isFutureDatetimeLocalValue(occurTimeInput.value)) return showToastLocal("发生时间不能晚于当前时间");
+    if (editId) {
+      const fault = faultList.find((item) => item.id === editId);
+      Object.assign(fault, { deviceId: device.id, deviceName: device.name, workshop: device.workshop, line: device.line, phenomenon, description, urgency, reportTime, scene, mediaImages, mediaFiles });
+      showToastLocal("故障上报已更新");
+    } else {
+      faultList.unshift({ id: `FR-240630-${String(nextFaultId++).padStart(3, "0")}`, deviceId: device.id, deviceName: device.name, workshop: device.workshop, line: device.line, phenomenon, description, urgency, reportTime, scene, status: "pending", repairStartTime: "", repairPerson: "", faultType: "", faultReason: "", handleMeasure: "", deviceStatus: "", sparePartDesc: "", mediaImages, mediaFiles, mediaVideos: [] });
+      showToastLocal("故障上报已新增");
+    }
+    clearFaultFilters();
+    closeModal("#reportModal");
+    renderFaultTable(faultList, { resetPage: true });
+  }
+
+  function currentAccountName() {
+    const userText = $(".user-chip span:last-child")?.textContent?.trim() || "";
+    const [name] = userText.split(/\s*[·•・/|｜]\s*/).map((item) => item.trim()).filter(Boolean);
+    return name || "王磊";
+  }
+
+  function repairAssistantText(fault, extra = "") {
+    return `${fault?.phenomenon || ""} ${fault?.description || ""} ${fault?.scene || ""} ${extra}`.trim();
+  }
+
+  function buildRepairAssistantSuggestion(fault, extraText = "") {
+    const text = repairAssistantText(fault, extraText);
+    const highRisk = fault?.urgency === "high";
+    const profiles = {
+      battery: {
+        faultReason: "电池包单体一致性异常或 BMS 采样链路波动，高负载后压差被放大并触发保护阈值。",
+        handleMeasure: "先执行高压下电和绝缘确认，读取 BMS 单体电压、温度和压差曲线；复核 3 号电池包采样线束与均衡状态，必要时做单体均衡或模组复测。",
+        sparePartDesc: "BMS 采样线束、均衡板或异常单体模组待复核",
+        steps: ["确认报警码与单体压差峰值", "检查电池包采样线束和接插件", "执行均衡测试并复测高负载工况"]
+      },
+      drive: {
+        faultReason: "驱动电机散热效率下降、温度传感器漂移或控制器限扭保护触发，连续高负载工况下温升加快。",
+        handleMeasure: "先降载停机并读取电驱温度曲线；检查冷却风道、冷却液循环、散热风扇和电机温度传感器，复测连续铲装工况后再放行。",
+        sparePartDesc: "温度传感器、冷却风扇继电器或冷却液管路待复核",
+        steps: ["读取电驱控制器温度与限扭记录", "检查散热风道、风扇和冷却液循环", "复测高负载作业 15 分钟温升曲线"]
+      },
+      cooling: {
+        faultReason: "冷却风扇控制链路、接插件或散热通道异常，导致温控曲线不稳定。",
+        handleMeasure: "检查风扇供电、继电器、接插件固定和散热通道；清洁风道后复测风扇转速曲线和温控响应。",
+        sparePartDesc: "风扇继电器、风扇控制线束或温度传感器待复核",
+        steps: ["检查风扇供电和控制信号", "清理散热通道并固定接插件", "复测温控曲线是否平稳"]
+      },
+      hydraulic: {
+        faultReason: "液压泵吸油阻力、密封件磨损或油液污染导致压力波动和异响。",
+        handleMeasure: "检查油液液位、滤芯压差、油管密封和液压泵工作噪声；必要时更换密封件或滤芯后复测举升压力。",
+        sparePartDesc: "液压滤芯、密封圈或液压油待复核",
+        steps: ["检查液压油液位和污染情况", "复核滤芯压差与吸油管密封", "复测举升动作压力波动"]
+      },
+      can: {
+        faultReason: "CAN 接插件虚接、终端电阻异常或线束屏蔽受干扰，引发通信间歇中断。",
+        handleMeasure: "检查仪表与控制器 CAN 接头、终端电阻和线束固定；清洁端子并重新压接后读取通信错误计数。",
+        sparePartDesc: "CAN 接头、端子或局部线束待复核",
+        steps: ["读取 CAN 错误计数和掉线时间", "测量终端电阻并检查屏蔽层", "清洁端子后复测通信稳定性"]
+      },
+      mechanical: {
+        faultReason: "制动执行机构、油路空气或机械间隙异常，导致响应延迟或压力恢复慢。",
+        handleMeasure: "检查制动油路、踏板机构和执行器间隙；排空气后复测制动压力建立时间和低速制动距离。",
+        sparePartDesc: "制动油、密封件或执行器连接件待复核",
+        steps: ["检查制动压力建立时间", "复核油路空气和连接件间隙", "完成低速制动距离复测"]
+      },
+      electric: {
+        faultReason: "传感器、接口或整车电器线束接触不良，导致信号漂移或局部温升。",
+        handleMeasure: "检查相关传感器、充电接口、保险和线束接插件；清洁端子并固定线束后复测信号稳定性。",
+        sparePartDesc: "传感器、保险、接插件或局部线束待复核",
+        steps: ["读取电器系统报警和实时信号", "检查接口温升、保险和接插件", "固定线束后复测信号稳定性"]
+      },
+      other: {
+        faultReason: "当前上报信息不足以直接锁定单一故障模式，需先完成现场基础排查。",
+        handleMeasure: "先确认报警码、复现条件、附件证据和设备运行参数；按电池、电驱、电器、液压和机械顺序排查并记录结论。",
+        sparePartDesc: "待现场排查后确认",
+        steps: ["补充报警码和复现工况", "核对现场附件与实时参数", "按系统分层记录排查结论"]
+      }
+    };
+    let faultType = "other";
+    if (/电池|压差|BMS|单体|模组/.test(text)) faultType = "battery";
+    else if (/驱动|行走电机|电机过温|限扭|过流/.test(text)) faultType = "drive";
+    else if (/冷却|风扇|散热|温控/.test(text)) faultType = "cooling";
+    else if (/CAN|通信|黑屏|总线/.test(text)) faultType = "can";
+    else if (/液压|油缸|油泵|渗油/.test(text)) faultType = "hydraulic";
+    else if (/制动|传动|机械|踏板/.test(text)) faultType = "mechanical";
+    else if (/充电|接口|传感器|仪表|蜂鸣器|线束|保险/.test(text)) faultType = "electric";
+    const profile = profiles[faultType];
+    return {
+      faultType,
+      faultTypeText: faultTypeMeta[faultType] || faultTypeMeta.other,
+      faultReason: profile.faultReason,
+      handleMeasure: profile.handleMeasure,
+      deviceStatus: highRisk ? "stop" : "subhealth",
+      sparePartDesc: profile.sparePartDesc,
+      steps: profile.steps,
+      confidence: highRisk ? "88%" : "82%",
+      safety: highRisk ? "建议接单后优先停机隔离，完成安全确认再开展拆检。" : "建议接单后先复核报警和复现条件，再决定是否停机。"
+    };
+  }
+
+  function repairAssistantMessageHTML(message) {
+    return `<div class="repair-agent-message ${message.role === "user" ? "user" : "bot"}">${escapeHtml(message.text)}</div>`;
+  }
+
+  function renderRepairAssistant(fault) {
+    const suggestion = fault.repairAssistantDraft || fault.repairAssistantSuggestion || buildRepairAssistantSuggestion(fault);
+    fault.repairAssistantDraft = suggestion;
+    $("#repairAgentConfidence").textContent = `置信度 ${suggestion.confidence}`;
+    $("#repairAgentSuggestion").innerHTML = `
+      <div class="repair-agent-suggestion-grid">
+        <div><span>预判故障类型</span><strong>${escapeHtml(suggestion.faultTypeText)}</strong></div>
+        <div><span>建议设备状态</span><strong>${deviceStatusText(suggestion.deviceStatus)}</strong></div>
+        <div><span>预判故障原因</span><strong>${escapeHtml(suggestion.faultReason)}</strong></div>
+        <div><span>备件关注</span><strong>${escapeHtml(suggestion.sparePartDesc)}</strong></div>
+      </div>
+      <div class="repair-agent-advice"><span>维修建议</span><p>${escapeHtml(suggestion.handleMeasure)}</p></div>
+      <div class="repair-agent-steps"><span>建议排查步骤</span><ol>${suggestion.steps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ol></div>
+      <div class="repair-agent-advice"><span>安全提示</span><p>${escapeHtml(suggestion.safety)}</p></div>
+      <div class="repair-agent-actions">
+        <button class="btn btn-primary" type="button" data-repair-agent-action="accept">接受建议</button>
+        <button class="repair-agent-pill" type="button" data-repair-agent-prompt="请按安全风险重写维修建议">安全风险</button>
+        <button class="repair-agent-pill" type="button" data-repair-agent-prompt="还需要准备哪些备件">备件建议</button>
+        <button class="repair-agent-pill" type="button" data-repair-agent-prompt="补充更细的排查步骤">排查步骤</button>
+      </div>
+    `;
+    const messages = fault.repairAssistantMessages || [];
+    $("#repairAgentChat").innerHTML = [
+      repairAssistantMessageHTML({ role: "bot", text: "已根据左侧故障信息生成预判。你可以接受建议，也可以继续追问后再接单。" }),
+      ...messages.map(repairAssistantMessageHTML)
+    ].join("");
+    $("#repairAgentChat").scrollTop = $("#repairAgentChat").scrollHeight;
+  }
+
+  function persistRepairAssistantSuggestion(fault, suggestion) {
+    fault.repairAssistantSuggestion = { ...suggestion, acceptedAt: new Date().toISOString() };
+    fault.faultType = fault.faultType || suggestion.faultType;
+    fault.faultReason = fault.faultReason || suggestion.faultReason;
+    fault.handleMeasure = fault.handleMeasure || suggestion.handleMeasure;
+    fault.deviceStatus = fault.deviceStatus || suggestion.deviceStatus;
+    fault.sparePartDesc = fault.sparePartDesc || suggestion.sparePartDesc;
+  }
+
+  function activeStartRepairFault() {
+    return faultList.find((item) => item.id === $("#startRepairModal").dataset.faultId);
+  }
+
+  function applyRepairAssistantSuggestion() {
+    const fault = activeStartRepairFault();
+    if (!fault) return;
+    const suggestion = fault.repairAssistantDraft || buildRepairAssistantSuggestion(fault);
+    persistRepairAssistantSuggestion(fault, suggestion);
+    fault.repairAssistantMessages = [
+      ...(fault.repairAssistantMessages || []),
+      { role: "bot", text: "已接受当前维修建议。接单后这些内容会在结束维修时自动回填，维修人员仍可修改。" }
+    ];
+    renderRepairAssistant(fault);
+    showToastLocal("已接受维修助手建议");
+  }
+
+  function refineRepairAssistantSuggestion(fault, text) {
+    const suggestion = buildRepairAssistantSuggestion(fault, text);
+    if (/安全|风险|高压|停机/.test(text)) {
+      suggestion.handleMeasure = `${suggestion.handleMeasure} 作业前补充挂牌上锁、高压下电和二次验电记录。`;
+      suggestion.safety = "按高风险维修处理，先隔离能源并确认现场无带载作业。";
+    }
+    if (/备件|物料|更换/.test(text)) {
+      suggestion.handleMeasure = `${suggestion.handleMeasure} 同步确认备件可用性，避免维修中断。`;
+    }
+    if (/确认|接受|采用|就按/.test(text)) {
+      persistRepairAssistantSuggestion(fault, suggestion);
+      return { suggestion, response: "已按本轮对话确认建议，结束维修时会自动带入闭环字段。" };
+    }
+    fault.repairAssistantDraft = suggestion;
+    if (fault.repairAssistantSuggestion) persistRepairAssistantSuggestion(fault, suggestion);
+    return { suggestion, response: `已根据“${text}”更新预判建议，请复核后再接单。` };
+  }
+
+  function handleRepairAgentSend() {
+    const fault = activeStartRepairFault();
+    const input = $("#repairAgentInput");
+    const text = input.value.trim();
+    if (!fault || !text) return;
+    const { response } = refineRepairAssistantSuggestion(fault, text);
+    fault.repairAssistantMessages = [
+      ...(fault.repairAssistantMessages || []),
+      { role: "user", text },
+      { role: "bot", text: response }
+    ];
+    input.value = "";
+    renderRepairAssistant(fault);
+  }
+
+  function handleRepairAgentClick(event) {
+    const action = event.target.closest("[data-repair-agent-action]")?.dataset.repairAgentAction;
+    if (action === "accept") {
+      applyRepairAssistantSuggestion();
+      return;
+    }
+    const prompt = event.target.closest("[data-repair-agent-prompt]")?.dataset.repairAgentPrompt;
+    if (!prompt) return;
+    $("#repairAgentInput").value = prompt;
+    handleRepairAgentSend();
+  }
+
+  function submitReportForm(event) {
+    event?.preventDefault();
+    handleReportSubmit({ preventDefault() {} });
+  }
+
+  function openStartRepairModal(faultId) {
+    const fault = faultList.find((item) => item.id === faultId);
+    if (!fault) return;
+    const [urgencyText, urgencyClass] = urgencyMeta[fault.urgency] || urgencyMeta.medium;
+    $("#startFaultId").textContent = fault.id;
+    $("#startDeviceName").textContent = fault.deviceName;
+    $("#startWorkshop").textContent = fault.workshop;
+    $("#startLine").textContent = fault.line;
+    $("#startPhenomenon").textContent = fault.phenomenon || "未填写故障现象";
+    $("#startDescription").textContent = fault.description || "暂无故障说明";
+    $("#startDescriptionMirror").textContent = fault.description || "暂无故障说明";
+    $("#startScene").textContent = fault.scene || "未填写";
+    $("#startFaultTime").textContent = fault.reportTime || "—";
+    $("#startReportTime").textContent = fault.reportTime ? `发生时间 ${fault.reportTime}` : "发生时间 —";
+    $("#startUrgency").textContent = urgencyText;
+    $("#startUrgency").className = `status ${urgencyClass}`;
+    $("#startUrgencyText").textContent = urgencyText;
+    renderReportMediaGroups(fault, $("#startReportImages"), $("#startReportFiles"));
+    $("#repairPerson").value = currentAccountName();
+    fault.repairAssistantDraft = fault.repairAssistantSuggestion || buildRepairAssistantSuggestion(fault);
+    fault.repairAssistantMessages = fault.repairAssistantMessages || [];
+    renderRepairAssistant(fault);
+    clearFormErrors($("#startRepairModal"));
+    $("#startRepairModal").dataset.faultId = faultId;
+    openModal("#startRepairModal");
+  }
+
+  function confirmStartRepair() {
+    const fault = faultList.find((item) => item.id === $("#startRepairModal").dataset.faultId);
+    if (!fault) return;
+    const repairPerson = $("#repairPerson").value.trim();
+    if (!requireField("#repairPerson", "请输入维修人员姓名")) return;
+    const now = new Date();
+    if (!fault.repairAssistantSuggestion) {
+      persistRepairAssistantSuggestion(fault, fault.repairAssistantDraft || buildRepairAssistantSuggestion(fault));
+    }
+    fault.status = "repairing";
+    fault.repairStartTime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:00`;
+    fault.repairPerson = repairPerson;
+    closeModal("#startRepairModal");
+    renderFaultTable(currentFilterData());
+    showToastLocal("维修已开始，AI建议将在闭环时带入");
+  }
+
+  function openEndRepairModal(faultId) {
+    const fault = faultList.find((item) => item.id === faultId);
+    if (!fault) return;
+    const suggestion = fault.repairAssistantSuggestion || {};
+    $("#endFaultId").value = fault.id;
+    $("#endFaultIdDisplay").textContent = fault.id;
+    $("#endDeviceName").textContent = fault.deviceName;
+    $("#endDeviceName").title = fault.deviceName;
+    $("#endDeviceCard").dataset.tooltip = fault.deviceName;
+    $("#endRepairStartTime").textContent = fault.repairStartTime;
+    $("#endRepairPerson").textContent = fault.repairPerson;
+    renderReportMediaGroups(fault, $("#endReportImages"), $("#endReportFiles"));
+    $("#endRepairForm").reset();
+    $("#endFaultId").value = fault.id;
+    $("#faultType").value = fault.faultType || suggestion.faultType || "";
+    $("#faultReason").value = fault.faultReason || suggestion.faultReason || "";
+    $("#handleMeasure").value = fault.handleMeasure || suggestion.handleMeasure || "";
+    $("#deviceStatus").value = fault.deviceStatus || suggestion.deviceStatus || "";
+    $("#sparePartDesc").value = fault.sparePartDesc || suggestion.sparePartDesc || "";
+    $("#endAgentPrefillNote").hidden = !fault.repairAssistantSuggestion;
+    clearFormErrors($("#endRepairForm"));
+    openModal("#endRepairModal");
+  }
+
+  function getFloatingTooltip() {
+    let tooltip = $("#faultFloatingTooltip");
+    if (!tooltip) {
+      tooltip = document.createElement("div");
+      tooltip.id = "faultFloatingTooltip";
+      tooltip.className = "fault-floating-tooltip";
+      tooltip.setAttribute("role", "tooltip");
+      document.body.appendChild(tooltip);
+    }
+    return tooltip;
+  }
+
+  function positionFloatingTooltip(target, tooltip) {
+    const rect = target.getBoundingClientRect();
+    const gap = 8;
+    tooltip.style.left = "0px";
+    tooltip.style.top = "0px";
+    const tooltipRect = tooltip.getBoundingClientRect();
+    let left = rect.left + 12;
+    let top = rect.top - tooltipRect.height - gap;
+
+    if (top < 12) top = rect.bottom + gap;
+    left = Math.min(Math.max(12, left), window.innerWidth - tooltipRect.width - 12);
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  }
+
+  function showFloatingTooltip(target) {
+    const text = target?.dataset?.tooltip || target?.getAttribute("title") || "";
+    if (!text || text === "—") return;
+    const tooltip = getFloatingTooltip();
+    tooltip.textContent = text;
+    tooltip.classList.add("is-visible");
+    positionFloatingTooltip(target, tooltip);
+  }
+
+  function hideFloatingTooltip() {
+    $("#faultFloatingTooltip")?.classList.remove("is-visible");
+  }
+
+  function submitEndRepairForm(event) {
+    event?.preventDefault();
+    handleEndRepairSubmit(event);
+  }
+
+  function handleEndRepairSubmit(event) {
+    event?.preventDefault();
+    const fault = faultList.find((item) => item.id === $("#endFaultId").value);
+    if (!fault) return;
+    const faultType = $("#faultType").value;
+    const faultReason = $("#faultReason").value.trim();
+    const handleMeasure = $("#handleMeasure").value.trim();
+    const deviceStatus = $("#deviceStatus").value;
+    const sparePartDesc = $("#sparePartDesc").value.trim();
+    setFieldError($("#faultType"), !faultType);
+    setFieldError($("#faultReason"), !faultReason);
+    setFieldError($("#handleMeasure"), !handleMeasure);
+    setFieldError($("#deviceStatus"), !deviceStatus);
+    if (!faultType) return showToastLocal("请选择故障类型");
+    if (!faultReason) return showToastLocal("请输入故障原因");
+    if (!handleMeasure) return showToastLocal("请输入处理措施");
+    if (!deviceStatus) return showToastLocal("请选择设备状态");
+    Object.assign(fault, { status: "completed", faultType, faultReason, handleMeasure, deviceStatus, sparePartDesc });
+    closeModal("#endRepairModal");
+    $("#searchId").value = "";
+    $("#searchDevice").value = "";
+    $("#searchStatus").value = "";
+    renderFaultTable(faultList, { resetPage: true });
+    showToastLocal("维修结果已提交，状态已更新为已处理");
+  }
+
+  function deviceStatusText(value) {
+    return { normal: "正常", subhealth: "带病运行", stop: "停机待修复" }[value] || "—";
+  }
+
+  function faultTypeText(value) {
+    return faultTypeMeta[value] || "—";
+  }
+
+  function detailValue(value, fallback = "—") {
+    const text = String(value ?? "").trim();
+    return escapeHtml(text || fallback);
+  }
+
+  function mediaText(items, fallback = "未上传") {
+    const list = Array.isArray(items) ? items.filter(Boolean) : [];
+    return list.length ? list.map(escapeHtml).join("、") : fallback;
+  }
+
+  function statusDetailMeta(status) {
+    return {
+      pending: {
+        className: "detail-state-pending",
+        title: "待接单",
+        note: "等待维修负责人接单确认",
+        summary: "已生成故障单，建议优先确认设备授权、故障等级和现场影响范围。"
+      },
+      repairing: {
+        className: "detail-state-repairing",
+        title: "维修中",
+        note: "维修人员已接单处理",
+        summary: "维修已开始，重点跟踪故障定位、备件需求和设备恢复风险。"
+      },
+      completed: {
+        className: "detail-state-completed",
+        title: "已处理",
+        note: "处理结论已归档",
+        summary: "故障已闭环，可复盘故障原因、处置措施和设备恢复状态。"
+      }
+    }[status] || {
+      className: "detail-state-pending",
+      title: "待接单",
+      note: "等待维修负责人接单确认",
+      summary: "已生成故障单，等待下一步处理。"
+    };
+  }
+
+  function detailStepClass(status, step) {
+    const rank = { pending: 1, repairing: 2, completed: 3 }[status] || 1;
+    if (rank > step) return "is-done";
+    if (rank === step) return "is-current";
+    return "";
+  }
+
+  function openDetailModal(faultId) {
+    const fault = faultList.find((item) => item.id === faultId);
+    if (!fault) return;
+    const [statusText] = statusMeta[fault.status];
+    const [urgencyText] = urgencyMeta[fault.urgency];
+    const detailMeta = statusDetailMeta(fault.status);
+    const repairStarted = fault.status !== "pending";
+    const closed = fault.status === "completed";
+    $("#detailContent").innerHTML = `
+      <section class="fault-detail-hero">
+        <div>
+          <div class="fault-detail-kicker"><span class="fault-detail-id">${escapeHtml(fault.id)}</span><span class="status ${urgencyMeta[fault.urgency][1]}">${urgencyText}</span><span>${detailMeta.summary}</span></div>
+          <h4>${detailValue(fault.phenomenon, "未填写故障现象")}</h4>
+          <p class="fault-detail-desc">${detailValue(fault.description, "暂无故障说明")}</p>
+        </div>
+        <aside class="fault-detail-status-card ${detailMeta.className}">
+          <span>当前状态</span>
+          <strong>${statusText}</strong>
+          <small>${detailMeta.note}</small>
+        </aside>
+      </section>
+
+      <section class="fault-detail-timeline" aria-label="故障处理进度">
+        <div class="fault-detail-step ${detailStepClass(fault.status, 1)}"><strong>01 上报受理</strong><span>${detailValue(fault.reportTime)} · ${detailValue(fault.workshop)}</span></div>
+        <div class="fault-detail-step ${detailStepClass(fault.status, 2)}"><strong>02 维修处理中</strong><span>${repairStarted ? `${detailValue(fault.repairStartTime)} · ${detailValue(fault.repairPerson)}` : "待维修负责人接单"}</span></div>
+        <div class="fault-detail-step ${detailStepClass(fault.status, 3)}"><strong>03 处理闭环</strong><span>${closed ? `${deviceStatusText(fault.deviceStatus)} · 结论已归档` : "等待维修结果提交"}</span></div>
+      </section>
+
+      <div class="fault-detail-card-grid">
+        <div class="fault-detail-metric"><span>设备名称</span><strong>${detailValue(fault.deviceName)}</strong></div>
+        <div class="fault-detail-metric"><span>所属车间 / 产线</span><strong>${detailValue(fault.workshop)} · ${detailValue(fault.line)}</strong></div>
+        <div class="fault-detail-metric"><span>可能故障位置</span><strong>${detailValue(fault.scene)}</strong></div>
+      </div>
+
+      <div class="fault-detail-layout">
+        <section class="fault-detail-section">
+          <h4>故障摘要</h4>
+          <div class="fault-detail-grid">
+            <div><span>故障编号：</span><strong>${detailValue(fault.id)}</strong></div>
+            <div><span>上报时间：</span><strong>${detailValue(fault.reportTime)}</strong></div>
+            <div><span>紧急程度：</span><strong>${urgencyText}</strong></div>
+            <div><span>当前状态：</span><strong>${detailMeta.title}</strong></div>
+            <div><span>设备名称：</span><strong>${detailValue(fault.deviceName)}</strong></div>
+            <div><span>故障现象：</span><strong>${detailValue(fault.phenomenon)}</strong></div>
+          </div>
+        </section>
+
+        <section class="fault-detail-section">
+          <h4>现场描述</h4>
+          <p class="fault-detail-copy">${detailValue(fault.description, "暂无故障说明")}</p>
+        </section>
+      </div>
+
+      <section class="fault-detail-section">
+        <h4>维修进度</h4>
+        <div class="fault-detail-grid">
+          <div><span>维修开始时间：</span><strong>${repairStarted ? detailValue(fault.repairStartTime) : "待接单"}</strong></div>
+          <div><span>维修负责人：</span><strong>${repairStarted ? detailValue(fault.repairPerson) : "待分配"}</strong></div>
+          <div><span>故障类型：</span><strong>${repairStarted ? faultTypeText(fault.faultType) : "待诊断"}</strong></div>
+          <div><span>设备状态：</span><strong>${closed ? deviceStatusText(fault.deviceStatus) : "待确认"}</strong></div>
+        </div>
+      </section>
+
+      <section class="fault-detail-section fault-detail-closure">
+        <h4>处理闭环</h4>
+        ${closed ? `
+          <div class="fault-detail-grid">
+            <div><span>故障原因：</span><strong>${detailValue(fault.faultReason)}</strong></div>
+            <div><span>备件更换说明：</span><strong>${detailValue(fault.sparePartDesc)}</strong></div>
+          </div>
+          <p class="fault-detail-copy">${detailValue(fault.handleMeasure, "暂无处理措施")}</p>
+        ` : `<p class="fault-detail-copy muted">${fault.status === "pending" ? "该故障仍在待接单阶段，处理结论将在维修结束后展示。" : "维修处理中，处理原因、处置措施和备件信息将在闭环后展示。"}</p>`}
+      </section>
+
+      <section class="fault-detail-section">
+        <h4>附件证据</h4>
+        <div class="fault-evidence-grid">
+          <div class="fault-evidence-card"><span>现场图片 / 维修图片</span><div class="fault-media-list">${renderDownloadableMediaList(fault.mediaImages)}</div></div>
+          <div class="fault-evidence-card"><span>日志 / 视频附件</span><div class="fault-media-list">${renderDownloadableMediaList([...(fault.mediaFiles || []), ...(fault.mediaVideos || [])])}</div></div>
+        </div>
+      </section>
+    `;
+    openModal("#detailModal");
+  }
+
+  function openDeleteConfirmModal(faultId) {
+    currentDeleteId = faultId;
+    openModal("#deleteConfirmModal");
+  }
+
+  function confirmDelete() {
+    faultList = faultList.filter((item) => item.id !== currentDeleteId);
+    currentDeleteId = "";
+    closeModal("#deleteConfirmModal");
+    renderFaultTable(currentFilterData());
+    showToastLocal("故障记录已删除");
+  }
+
+  function bindEvents() {
+    enhanceRequiredMarks();
+    updateFaultOccurTimeMax();
+    $("#searchBtn").addEventListener("click", handleSearch);
+    $("#resetBtn").addEventListener("click", handleReset);
+    $("#prevPageBtn").addEventListener("click", () => {
+      currentPage -= 1;
+      renderFaultTable(currentData);
+    });
+    $("#nextPageBtn").addEventListener("click", () => {
+      currentPage += 1;
+      renderFaultTable(currentData);
+    });
+    $("#addReportBtn").addEventListener("click", openAddReportModal);
+    $("#selectDevice").addEventListener("change", handleDeviceSelect);
+    $("#faultOccurTime").addEventListener("focus", updateFaultOccurTimeMax);
+    $("#faultOccurTime").addEventListener("change", updateFaultOccurTimeMax);
+    $("#reportForm").addEventListener("submit", handleReportSubmit);
+    $("#submitReportBtn")?.addEventListener("click", submitReportForm);
+    $("#endRepairForm").addEventListener("submit", handleEndRepairSubmit);
+    $("#submitEndRepairBtn")?.addEventListener("click", submitEndRepairForm);
+    $("#confirmStartRepairBtn").addEventListener("click", confirmStartRepair);
+    $("#repairAgentSend")?.addEventListener("click", handleRepairAgentSend);
+    $("#repairAgentInput")?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        handleRepairAgentSend();
+      }
+    });
+    $("#confirmDeleteBtn").addEventListener("click", confirmDelete);
+    $("#reportImageUpload").addEventListener("change", (event) => updateUploadStatus(event.currentTarget, $("#reportImageStatus")));
+    $("#reportLogUpload").addEventListener("change", (event) => updateUploadStatus(event.currentTarget, $("#reportLogStatus")));
+    $("#detailContent")?.addEventListener("click", handleMediaDownload);
+    $("#startRepairModal .fault-modal-body")?.addEventListener("click", handleMediaDownload);
+    $("#startRepairModal .fault-modal-body")?.addEventListener("click", handleRepairAgentClick);
+    $("#endRepairModal .fault-modal-body")?.addEventListener("click", handleMediaDownload);
+    $("#faultTableBody").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+      const faultId = button.dataset.id;
+      if (button.dataset.action === "detail") openDetailModal(faultId);
+      if (button.dataset.action === "edit") openEditReportModal(faultId);
+      if (button.dataset.action === "start") openStartRepairModal(faultId);
+      if (button.dataset.action === "end") openEndRepairModal(faultId);
+      if (button.dataset.action === "delete") openDeleteConfirmModal(faultId);
+    });
+    [
+      ["#closeReportModal", "#reportModal"],
+      ["#cancelReportBtn", "#reportModal"],
+      ["#closeStartRepairModal", "#startRepairModal"],
+      ["#cancelStartRepairBtn", "#startRepairModal"],
+      ["#closeEndRepairModal", "#endRepairModal"],
+      ["#cancelEndRepairBtn", "#endRepairModal"],
+      ["#closeDetailModal", "#detailModal"],
+      ["#closeDetailBtn", "#detailModal"],
+      ["#cancelDeleteBtn", "#deleteConfirmModal"],
+      ["[data-close-delete]", "#deleteConfirmModal"]
+    ].forEach(([trigger, modal]) => $(trigger)?.addEventListener("click", () => closeModal(modal)));
+    $$(".fault-modal").forEach((modal) => modal.addEventListener("click", (event) => {
+      if (event.target === modal) closeModal(`#${modal.id}`);
+    }));
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      const open = $(".fault-modal.is-open");
+      if (open) closeModal(`#${open.id}`);
+    });
+    document.addEventListener("keydown", keepFocusInModal);
+    $$(".fault-inline-error").forEach((error) => error.setAttribute("role", "alert"));
+    $$("#reportForm input, #reportForm select, #endRepairForm textarea, #endRepairForm select, #repairPerson").forEach((field) => {
+      field.addEventListener("input", () => setFieldError(field, false));
+      field.addEventListener("change", () => setFieldError(field, false));
+    });
+    const endDeviceCard = $("#endDeviceCard");
+    endDeviceCard?.addEventListener("mouseenter", () => showFloatingTooltip(endDeviceCard));
+    endDeviceCard?.addEventListener("mouseleave", hideFloatingTooltip);
+    endDeviceCard?.addEventListener("focusin", () => showFloatingTooltip(endDeviceCard));
+    endDeviceCard?.addEventListener("focusout", hideFloatingTooltip);
+    $("#endRepairModal .fault-modal-body")?.addEventListener("scroll", hideFloatingTooltip);
+    window.addEventListener("resize", hideFloatingTooltip);
+  }
+
+  initDeviceSelect();
+  bindEvents();
+  renderFaultTable();
+})();
+</script>
+<script src="../assets/app.js"></script><script src="../assets/global-agent.js?v=20260702a"></script>
+</body>
+</html>

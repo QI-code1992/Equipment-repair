@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>新增设备 - 新能源装载机智能运维平台</title><link rel="stylesheet" href="../assets/app.css?v=20260702a"></head>
+<body><div class="app-shell">
+  <aside class="sidebar"><div class="brand"><div class="brand-mark">智</div><div><p class="brand-title">新能源装载机<br>智能运维平台</p><div class="brand-subtitle">Fault Ops Console</div></div></div><nav class="nav-section"><div class="nav-label">业务导航</div><div class="nav-list">
+        <a class="nav-item" href="workbench.html"><span class="nav-icon">01</span><span>工作台</span></a>
+        <a class="nav-item" href="bi-dashboard.html"><span class="nav-icon">02</span><span>驾驶舱 BI</span></a><a class="nav-item" href="factory-modeling.html"><span class="nav-icon">03</span><span>工厂建模</span></a>
+        <a class="nav-item active" href="equipment-ledger.html"><span class="nav-icon">04</span><span>设备台账</span></a>
+        <a class="nav-item" href="fault-report.html"><span class="nav-icon">05</span><span>故障上报</span></a>
+        
+        
+        <a class="nav-item" href="maintenance-records.html"><span class="nav-icon">07</span><span>维修记录</span></a>
+        <a class="nav-item" href="system-management.html"><span class="nav-icon">08</span><span>系统管理</span></a>
+        <a class="nav-item" href="intelligent-config.html"><span class="nav-icon">09</span><span>智能配置</span></a>
+      </div></nav><div class="sidebar-foot"><strong>新增设备</strong><span>一次性维护基础信息、BOM、额定参数和知识资料。</span></div></aside>
+  <main class="main-area"><header class="topbar"><div class="topbar-left"><button class="menu-btn" type="button">☰</button><div><h1 class="page-title">新增设备</h1><div class="crumb">设备台账 / 新增设备 / 直接填报</div></div></div><div class="topbar-actions"><a class="btn btn-secondary" href="equipment-ledger.html">返回台账</a><button class="btn btn-primary" type="submit" form="equipmentAddForm">保存设备</button></div></header>
+    <section class="content equipment-add-page">
+      <form id="equipmentAddForm" data-equipment-add-form>
+        <article class="card equipment-add-section">
+          <div class="section-title"><h3>设备基础信息</h3><span class="muted small">设备主数据与组织归属</span></div>
+          <div class="form-grid equipment-add-basic-grid">
+            <div class="field"><label>设备编号 *</label><input required name="deviceCode" placeholder="EL-2026-005"><span class="error-text">请输入设备编号</span></div>
+            <div class="field"><label>设备名称 *</label><input required name="deviceName" data-equipment-name-source placeholder="例如：A3 电动装载机"><span class="error-text">请输入设备名称</span></div>
+            <div class="field"><label>设备型号 *</label><input required name="model" placeholder="请输入设备型号，如 ZL956EV"><span class="error-text">请输入设备型号</span></div>
+            <div class="field"><label>所属工厂 *</label><select required data-add-factory name="factory"><option value="">请选择工厂</option><option>华东总装厂</option><option>西南矿区保障中心</option></select><span class="error-text">请选择工厂</span></div>
+            <div class="field"><label>所属车间 *</label><select required data-add-workshop name="workshop" disabled><option value="">请选择车间</option></select><span class="error-text">请选择车间</span></div>
+            <div class="field"><label>所属产线 *</label><select required data-add-line name="line" disabled><option value="">请选择产线</option></select><span class="error-text">请选择产线</span></div>
+            <div class="field full"><label>负责人（可多选）*</label><div class="check-chip-group" data-owner-group><label><input type="checkbox" name="owners" value="王磊" required>王磊</label><label><input type="checkbox" name="owners" value="李明">李明</label><label><input type="checkbox" name="owners" value="赵敏">赵敏</label><label><input type="checkbox" name="owners" value="孙强">孙强</label><label><input type="checkbox" name="owners" value="陈佳">陈佳</label></div><span class="field-hint">至少选择 1 位负责人；多人负责时用于权限和通知同步。</span><span class="error-text">请选择负责人</span></div>
+          </div>
+        </article>
+
+        <article class="card equipment-add-section">
+          <div class="section-title"><h3>设备 BOM 组成</h3><div class="section-actions"><button class="btn btn-secondary" type="button" data-add-bom-row>新增分支节点</button></div></div>
+          <div class="bom-list-meta"><span>1级根节点：<strong data-bom-root-label>设备名称</strong><em>自动带出，不可修改</em></span><span>列表只维护 2-4 级分枝；删除父节点会同步删除下级节点。</span></div>
+          <div class="table-wrap bom-list-wrap"><table><thead><tr><th>层级</th><th>上级节点</th><th>分枝节点编码</th><th>分枝节点名称</th><th>描述</th><th>单位</th><th>BOM 用量</th><th>操作</th></tr></thead><tbody data-bom-table>
+            <tr data-bom-id="bom-001" data-parent-id="bom-root"><td><select data-bom-depth><option value="2" selected>2级</option><option value="3">3级</option><option value="4">4级</option></select></td><td><select data-bom-parent><option value="bom-root" selected>设备名称</option></select></td><td><input data-bom-code value="BOM-001"></td><td><input data-bom-name value="动力系统"></td><td><input value="电池、电机与控制器总成"></td><td><input value="套"></td><td><input type="number" min="1" value="1"></td><td><button class="link-btn danger-link" type="button" data-delete-bom-row>删除</button></td></tr>
+            <tr data-bom-id="bom-002" data-parent-id="bom-root"><td><select data-bom-depth><option value="2" selected>2级</option><option value="3">3级</option><option value="4">4级</option></select></td><td><select data-bom-parent><option value="bom-root" selected>设备名称</option></select></td><td><input data-bom-code value="BOM-002"></td><td><input data-bom-name value="液压系统"></td><td><input value="液压泵、阀组与油路"></td><td><input value="套"></td><td><input type="number" min="1" value="1"></td><td><button class="link-btn danger-link" type="button" data-delete-bom-row>删除</button></td></tr>
+          </tbody></table></div>
+        </article>
+
+        <article class="card equipment-add-section">
+          <div class="section-title"><h3>设备额定参数</h3><button class="btn btn-secondary" type="button" data-add-param-row>新增参数</button></div>
+          <div class="table-wrap editable-table-wrap param-table-wrap"><table><thead><tr><th>序号</th><th>参数名</th><th>额定参数值</th><th>浮动上限</th><th>浮动下限</th><th>单位</th><th>说明</th><th>操作</th></tr></thead><tbody data-param-table>
+            <tr><td data-param-index>1</td><td><input value="电机温度"></td><td><input value="85"></td><td><input value="95"></td><td><input value="0"></td><td><input value="℃"></td><td><input value="超过上限触发高温告警"></td><td><button class="link-btn" type="button" data-delete-param>删除</button></td></tr>
+            <tr><td data-param-index>2</td><td><input value="单体压差"></td><td><input value="80"></td><td><input value="100"></td><td><input value="0"></td><td><input value="mV"></td><td><input value="用于识别电池一致性风险"></td><td><button class="link-btn" type="button" data-delete-param>删除</button></td></tr>
+          </tbody></table></div>
+        </article>
+
+        <article class="card equipment-add-section">
+          <div class="section-title"><h3>知识资料</h3><button class="btn btn-secondary" type="button" data-open-doc-upload>上传资料</button></div>
+          <div class="table-wrap"><table><thead><tr><th>序号</th><th>文件类型</th><th>文件名</th><th>文件大小</th><th>上传时间</th><th>文件格式</th><th>操作</th></tr></thead><tbody data-doc-table>
+            <tr><td data-doc-index>1</td><td>维修手册</td><td>ZL956EV 驱动系统维修手册.pdf</td><td>8.6 MB</td><td>2026-06-29 10:12</td><td>PDF</td><td><button class="link-btn danger-link" type="button" data-delete-doc>删除</button></td></tr>
+            <tr><td data-doc-index>2</td><td>故障手册</td><td>电池系统故障码手册.docx</td><td>2.4 MB</td><td>2026-06-29 10:18</td><td>Word</td><td><button class="link-btn danger-link" type="button" data-delete-doc>删除</button></td></tr>
+          </tbody></table></div>
+        </article>
+
+        <div class="equipment-modal" data-doc-upload-modal aria-hidden="true">
+          <div class="equipment-modal-panel" role="dialog" aria-modal="true" aria-labelledby="docUploadTitle">
+            <div class="equipment-modal-head"><h3 id="docUploadTitle">上传知识资料</h3><button class="icon-btn" type="button" data-close-doc-upload aria-label="关闭上传弹窗">×</button></div>
+            <div class="equipment-modal-body">
+              <label class="field"><span>文件类型</span><select data-doc-type><option>维修手册</option><option>故障手册</option><option>历史案例</option><option>点检标准</option><option>安全规范</option><option>其他资料</option></select></label>
+              <label class="file-upload" data-doc-upload-zone><input class="file-upload-input" type="file" data-doc-upload multiple accept=".doc,.docx,.pdf"><span class="file-upload-icon" aria-hidden="true">文</span><span class="file-upload-copy"><strong>选择 Word / PDF 文件</strong><span data-doc-upload-status>未选择文件</span></span><span class="file-upload-action">选择文件</span></label>
+            </div>
+            <div class="equipment-modal-actions"><button class="btn btn-secondary" type="button" data-close-doc-upload>取消</button><button class="btn btn-primary" type="button" data-confirm-doc-upload>确认上传</button></div>
+          </div>
+        </div>
+
+        <div class="form-sticky-actions"><a class="btn btn-secondary" href="equipment-ledger.html">取消</a><button class="btn btn-primary" type="submit">保存设备</button></div>
+      </form>
+    </section></main></div>
+  <div class="toast" role="status" aria-live="polite"></div><script src="../assets/app.js"></script><script src="../assets/global-agent.js?v=20260702a"></script>
+</body></html>

@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "pages/repair-execution.html",
+  "entry": "pages/repair-execution.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-06-25T07:59:00.687Z",
+  "updatedAt": "2026-06-25T07:59:00.687Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}
