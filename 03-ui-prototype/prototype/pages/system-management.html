@@ -1139,7 +1139,7 @@
         </section>
 
         <section class="system-panel" id="systemPanelUsers" role="tabpanel" aria-labelledby="systemTabUsers" data-system-panel="users" hidden>
-          <div class="system-users-layout">
+          <div class="system-users-layout" data-user-management-layout>
             <aside class="org-panel">
               <div class="org-panel-head">
                 <div>
@@ -1202,6 +1202,11 @@
               </article>
             </section>
           </div>
+          <article class="system-table-card self-user-card" data-self-user-view hidden>
+            <div class="system-table-head"><div><h3>我的账号</h3><p>当前账号仅可查看自己的用户信息；角色和组织由具备授权范围的管理员维护。</p></div><span class="status ok">仅本人</span></div>
+            <dl class="user-entry-details"><div><dt>用户名</dt><dd data-self-username>liming</dd></div><div><dt>姓名</dt><dd data-self-name>李明</dd></div><div><dt>所属组织</dt><dd data-self-org>一号总装车间</dd></div><div><dt>当前角色</dt><dd data-self-role>设备管理员</dd></div><div><dt>账号状态</dt><dd data-self-status>启用</dd></div></dl>
+            <div class="user-entry-footer"><button class="btn btn-primary" type="button" data-self-password>修改密码</button></div>
+          </article>
         </section>
 
         <section class="system-panel" id="systemPanelLoginLogs" role="tabpanel" aria-labelledby="systemTabLoginLogs" data-system-panel="loginLogs" hidden>
@@ -1547,7 +1552,7 @@
         { id: "equipment", label: "设备台账", items: [["equipment:view", "查看设备"], ["equipment:create", "新增设备"], ["equipment:edit", "编辑设备"], ["equipment:delete", "删除设备"]] },
         { id: "fault", label: "故障上报", items: [["fault:view", "查看故障"], ["fault:create", "新增上报"], ["fault:repair", "开始维修"], ["fault:close", "提交处理结果"]] },
         { id: "maintenance", label: "维修记录", items: [["maintenance:view", "查看记录"], ["maintenance:detail", "查看详情"], ["maintenance:export", "导出记录"]] },
-        { id: "system", label: "系统管理", items: [["system:role", "角色管理"], ["system:user", "用户管理"], ["system:org", "组织管理"], ["system:audit", "审计查看"]] },
+        { id: "system", label: "系统管理", items: [["system:role", "角色管理"], ["system:user", "用户管理"], ["user_management.view_all", "用户管理-查看全部"], ["system:org", "组织管理"], ["system:audit", "审计查看"]] },
         { id: "intelligence", label: "智能配置", items: [["intelligence:view", "查看智能配置"], ["intelligence:model", "模型配置"], ["intelligence:agent", "智能体配置"], ["intelligence:knowledge", "知识库配置"], ["intelligence:audit", "查看调用记录"]] }
       ];
 
@@ -1617,6 +1622,9 @@
         operationLogPage: 1,
         logPageSize: 6
       };
+      const sessionMode = new URLSearchParams(location.search).get("as") || "admin";
+      const hasViewAllUsers = sessionMode === "admin" || sessionMode === "scoped";
+      const currentSessionUserId = sessionMode === "self" ? "u2" : "u1";
 
       function allPermissionIds() {
         return permissionCatalog.flatMap((group) => group.items.map((item) => item[0]));
@@ -1933,6 +1941,19 @@
       }
 
       function renderUsers() {
+        if (!hasViewAllUsers) {
+          const current = users.find((user) => user.id === currentSessionUserId) || users[0];
+          $("[data-user-management-layout]").hidden = true;
+          $("[data-self-user-view]").hidden = false;
+          $("[data-self-username]").textContent = current.username;
+          $("[data-self-name]").textContent = current.name;
+          $("[data-self-org]").textContent = orgName(current.orgId);
+          $("[data-self-role]").textContent = current.roles.map(roleName).join("、");
+          $("[data-self-status]").textContent = current.status;
+          return;
+        }
+        $("[data-user-management-layout]").hidden = false;
+        $("[data-self-user-view]").hidden = true;
         const tbody = $("[data-user-tbody]");
         const filtered = filteredUsers();
         const totalPages = Math.max(1, Math.ceil(filtered.length / state.pageSize));
@@ -2304,6 +2325,8 @@
         renderLoginLogs();
         renderOperationLogs();
         updateStats();
+        const tab = new URLSearchParams(location.search).get("tab");
+        if (tab && $("[data-system-tab='" + tab + "']")) setTab(tab);
       }
 
       function bindEvents() {

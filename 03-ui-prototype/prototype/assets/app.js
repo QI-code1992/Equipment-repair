@@ -945,6 +945,48 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
+function initUserEntry() {
+  const chip = $(".user-chip");
+  if (!chip || $("[data-global-user-menu]")) return;
+  const label = chip.querySelector("span:last-child")?.textContent?.trim() || "当前用户 · 平台用户";
+  const [name, role = "平台用户"] = label.split(" · ");
+  const isAdmin = /系统管理员/.test(label);
+  chip.setAttribute("data-user-menu-trigger", "true");
+  chip.setAttribute("role", "button");
+  chip.setAttribute("tabindex", "0");
+  chip.setAttribute("aria-haspopup", "menu");
+  chip.setAttribute("aria-expanded", "false");
+  chip.insertAdjacentHTML("beforeend", '<span class="user-menu-chevron" aria-hidden="true">⌄</span>');
+  const menu = document.createElement("div");
+  menu.className = "global-user-menu";
+  menu.dataset.globalUserMenu = "true";
+  menu.hidden = true;
+  menu.innerHTML = `<div class="global-menu-user"><span class="avatar">${escapeHtml(name.slice(0, 1))}</span><div><strong>${escapeHtml(name)}</strong><span>${escapeHtml(role)} · liming</span></div></div><div class="global-menu-divider"></div><button class="global-menu-item" data-user-action="profile">个人资料</button><button class="global-menu-item" data-user-action="security">安全设置 / 修改密码</button>${isAdmin ? '<button class="global-menu-item" data-user-action="management">进入用户管理</button>' : ""}<div class="global-menu-divider"></div><button class="global-menu-item danger" data-user-action="logout">退出登录</button>`;
+  document.body.appendChild(menu);
+  const modal = document.createElement("div");
+  modal.className = "user-entry-modal";
+  modal.hidden = true;
+  modal.innerHTML = `<div class="user-entry-backdrop" data-user-close></div><section class="user-entry-dialog" role="dialog" aria-modal="true"><button class="user-entry-close" type="button" data-user-close aria-label="关闭">×</button><div data-user-modal-content></div></section>`;
+  document.body.appendChild(modal);
+  const closeMenu = () => { menu.hidden = true; chip.setAttribute("aria-expanded", "false"); };
+  const openModal = (title, content) => { closeMenu(); modal.querySelector("[data-user-modal-content]").innerHTML = `<h2>${title}</h2>${content}`; modal.hidden = false; };
+  const closeModal = () => { modal.hidden = true; };
+  const openMenu = () => { menu.hidden = !menu.hidden; chip.setAttribute("aria-expanded", String(!menu.hidden)); };
+  chip.addEventListener("click", openMenu);
+  chip.addEventListener("keydown", event => { if (["Enter", " "].includes(event.key)) { event.preventDefault(); openMenu(); } });
+  document.addEventListener("click", event => { if (!menu.contains(event.target) && !chip.contains(event.target)) closeMenu(); });
+  document.addEventListener("keydown", event => { if (event.key === "Escape") { closeMenu(); closeModal(); } });
+  menu.addEventListener("click", event => {
+    const action = event.target.closest("[data-user-action]")?.dataset.userAction;
+    if (action === "profile") openModal("个人资料", `<div class="user-entry-profile"><span class="avatar large">${escapeHtml(name.slice(0, 1))}</span><strong>${escapeHtml(name)}</strong><span>${escapeHtml(role)} · 华东中心</span></div><dl class="user-entry-details"><div><dt>用户名</dt><dd>liming</dd></div><div><dt>所属组织</dt><dd>华东中心 / 总装一车间</dd></div><div><dt>账号状态</dt><dd><span class="status ok">已启用</span></dd></div><div><dt>最后登录</dt><dd>2026-07-14 09:32</dd></div></dl><div class="user-entry-footer"><button class="btn btn-secondary" data-user-close>关闭</button></div>`);
+    if (action === "security") openModal("安全设置", `<form data-user-password-form><label>当前密码<input type="password" name="current" required placeholder="请输入当前密码"></label><label>新密码<input type="password" name="next" required minlength="8" placeholder="至少 8 位，需包含字母和数字"></label><label>确认新密码<input type="password" name="confirm" required minlength="8" placeholder="请再次输入新密码"></label><p class="user-entry-hint">密码至少 8 位，并包含字母和数字。</p><div class="user-entry-footer"><button type="button" class="btn btn-secondary" data-user-close>取消</button><button class="btn btn-primary">保存密码</button></div></form>`);
+    if (action === "management") location.href = "system-management.html?tab=users";
+    if (action === "logout") { closeMenu(); if (window.confirm("确认退出当前账号？")) showToast("已安全退出登录"); }
+  });
+  modal.addEventListener("click", event => { if (event.target.closest("[data-user-close]")) closeModal(); });
+  modal.addEventListener("submit", event => { if (!event.target.matches("[data-user-password-form]")) return; event.preventDefault(); const form = event.target; const next = form.elements.next.value; if (next !== form.elements.confirm.value) { showToast("两次输入的新密码不一致"); return; } if (!/[A-Za-z]/.test(next) || !/\d/.test(next) || next.length < 8) { showToast("新密码需至少 8 位，并包含字母和数字"); return; } closeModal(); showToast("密码已更新"); });
+}
+
 /* global shell theme experiment reverted
   const actions = document.querySelector('.topbar-actions');
   if (!actions) return;
@@ -999,4 +1041,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initEquipmentAddPage();
   initEquipmentDetailPage();
   initAgentDrawer();
+  initUserEntry();
 });
