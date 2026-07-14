@@ -1,7 +1,7 @@
 {
-  "state": "PRODUCT_CLARIFICATION_REQUIRED",
+  "state": "PRODUCT_DESIGN",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-14",
+  "updatedAt": "2026-07-14T12:56:30+08:00",
   "productBaseline": {
     "status": "candidate-not-approved",
     "canonicalCandidate": [
@@ -18,15 +18,17 @@
     "architectureCandidate": "04-architecture-plan/",
     "automatedChecks": "06-testing/tests/"
   },
-  "lastApprovedStage": null,
-  "pendingStageApproval": null,
-  "currentCommitSha": "d965a97",
+  "lastApprovedStage": "Stage 3 entry (scoped waiver)",
+  "pendingStageApproval": "Stage 3 prototype and visual baseline approval",
+  "currentCommitSha": "f80a93b42a5e86216388e1003ed9bf77780c0ab0",
   "notes": [
     "GitHub repository: https://github.com/QI-code1992/Equipment-repair.",
     "Original imported workspace is recoverable at commit c544c2d and tag snapshot/legacy-import-20260714.",
     "No formal stage approval records were found.",
     "Stage 0–8 candidate documents are present; Stage 1 and Stage 2–4 baselines remain pending user approval.",
     "Candidate verification: 11/11 prototype static checks passed; external development baseline is incorporated; production implementation and production tests have not started.",
-    "Formal development must not start until Stage 1 canonical PRD, SPEC, acceptance criteria, and traceability are reconciled and explicitly approved."
+    "Formal development must not start until Stage 1 canonical PRD, SPEC, acceptance criteria, and traceability are reconciled and explicitly approved.",
+    "On 2026-07-14, the project owner explicitly approved a scoped waiver to enter Stage 3 directly. This authorizes prototype work only; it does not approve Stage 0–2 baselines or authorize development.",
+    "The GitHub repository https://github.com/QI-code1992/Equipment-repair is the required remote system of record for all subsequent project artifacts. Before any formal stage checkpoint, gate recommendation, baseline, test/acceptance evidence, or handoff is reported complete, its files and the corresponding workflow ledgers must be committed and pushed to GitHub with the exact Commit SHA recorded."
   ]
 }
