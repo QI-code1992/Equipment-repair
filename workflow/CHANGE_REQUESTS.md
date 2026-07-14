@@ -107,3 +107,13 @@ This is the continuous change ledger for the project. Existing history must not 
 - Implementation: commit `aa8a307`.
 - Verification: 10/10 static checks, JavaScript syntax checks, HTTP 200 smoke checks, and `git diff --check` passed.
 - Boundary: static prototype behavior only; no real authentication or server-side authorization is claimed.
+
+### CR-006: Implement approved business notification panel
+
+- Level: L2
+- Status: Implemented / awaiting Stage 2 review
+- Raised By: project owner
+- Raised At: 2026-07-14
+- Scope: SVG bell trigger, unread badge, all/unread tabs, in-panel business notifications, read-all, detail target and load-more simulation.
+- Exclusions: no system notifications, independent notification page, deletion, mute, sound, vibration or browser push.
+- Verification: 11/11 static checks, JavaScript syntax checks and `git diff --check` passed.

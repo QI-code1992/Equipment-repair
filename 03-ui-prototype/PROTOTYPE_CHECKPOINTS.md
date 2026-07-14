@@ -27,3 +27,9 @@
 - Scope: global user capsule, profile/security modals, permission-scoped user management, self-only account card
 - Commit SHA: `aa8a307`
 - Verification: static tests and HTTP 200 smoke checks passed; browser/runtime visual approval pending.
+
+## PCP-004: Business notification panel interaction candidate
+
+- Status: Candidate / awaiting Stage 2 review
+- Scope: topbar SVG bell, unread badge, local business notification list, read state and in-panel target navigation
+- Verification: static checks and JavaScript syntax checks passed; browser/runtime visual approval pending.

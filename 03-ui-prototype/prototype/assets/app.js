@@ -987,6 +987,41 @@ function initUserEntry() {
   modal.addEventListener("submit", event => { if (!event.target.matches("[data-user-password-form]")) return; event.preventDefault(); const form = event.target; const next = form.elements.next.value; if (next !== form.elements.confirm.value) { showToast("两次输入的新密码不一致"); return; } if (!/[A-Za-z]/.test(next) || !/\d/.test(next) || next.length < 8) { showToast("新密码需至少 8 位，并包含字母和数字"); return; } closeModal(); showToast("密码已更新"); });
 }
 
+function initNotificationCenter() {
+  const bell = $$(".topbar-actions .icon-btn").find((button) => button.textContent.trim() === "铃");
+  if (!bell || $("[data-notification-panel]")) return;
+  const notifications = [
+    { id: "n1", type: "故障", tone: "critical", title: "非常紧急故障待接单", summary: "EL-2024-019 驱动电机温度快速升高，车辆限扭。", object: "FL-20260714-019", time: "10分钟前", unread: true, target: "fault-report.html" },
+    { id: "n2", type: "工单", tone: "risk", title: "维修完成待验收", summary: "WO-240625-011 已提交维修结果，请完成验收。", object: "WO-240625-011", time: "35分钟前", unread: true, target: "repair-execution.html" },
+    { id: "n3", type: "健康风险", tone: "risk", title: "设备健康分进入关注区间", summary: "EL-2023-088 当前健康分 58，风险等级为高风险。", object: "EL-2023-088", time: "1小时前", unread: false, target: "equipment-detail.html" },
+    { id: "n4", type: "维修", tone: "success", title: "维修记录已提交", summary: "张师傅已提交液压压力波动处理结果。", object: "MR-20260714-007", time: "2小时前", unread: false, target: "maintenance-records.html" },
+    { id: "n5", type: "Agent", tone: "info", title: "诊断建议已生成", summary: "故障诊断 Agent 已完成冷却回路排查建议。", object: "FL-20260713-004", time: "昨天", unread: false, target: "fault-report.html" }
+  ];
+  bell.innerHTML = '<svg class="notification-bell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="notification-badge" data-notification-badge aria-label="未读消息数量"></span>';
+  bell.removeAttribute("data-toast");
+  bell.setAttribute("aria-label", "消息通知");
+  bell.setAttribute("aria-expanded", "false");
+  bell.setAttribute("aria-controls", "notificationPanel");
+  const panel = document.createElement("section");
+  panel.className = "notification-panel";
+  panel.id = "notificationPanel";
+  panel.dataset.notificationPanel = "true";
+  panel.hidden = true;
+  panel.innerHTML = '<div class="notification-head"><strong>消息通知</strong><button type="button" class="notification-read-all" data-notification-read-all>全部已读</button></div><div class="notification-tabs" role="tablist"><button type="button" class="active" data-notification-filter="all">全部</button><button type="button" data-notification-filter="unread">未读</button></div><div class="notification-list" data-notification-list></div><button type="button" class="notification-load-more" data-notification-more>加载更多</button>';
+  document.body.appendChild(panel);
+  let filter = "all";
+  const unreadCount = () => notifications.filter((item) => item.unread).length;
+  const updateBadge = () => { const count = unreadCount(); const badge = $(`[data-notification-badge]`); badge.textContent = count > 99 ? "99+" : count ? String(count) : ""; badge.hidden = count === 0; };
+  const render = () => { const list = $(`[data-notification-list]`); const items = notifications.filter((item) => filter === "all" || item.unread); if (!items.length) { list.innerHTML = `<div class="notification-empty">${filter === "unread" ? "暂无未读消息" : "暂无消息通知"}</div>`; return; } list.innerHTML = items.map((item) => `<button type="button" class="notification-item ${item.unread ? "is-unread" : "is-read"}" data-notification-id="${item.id}"><span class="notification-dot ${item.tone}"></span><span class="notification-copy"><strong><em class="notification-type ${item.tone}">${item.type}</em>${item.title}</strong><span>${item.summary}</span><small>${item.object} · ${item.time}</small></span></button>`).join(""); };
+  const close = () => { panel.hidden = true; bell.setAttribute("aria-expanded", "false"); };
+  bell.addEventListener("click", (event) => { event.stopPropagation(); panel.hidden = !panel.hidden; bell.setAttribute("aria-expanded", String(!panel.hidden)); if (!panel.hidden) render(); });
+  panel.addEventListener("click", (event) => { const tab = event.target.closest("[data-notification-filter]"); if (tab) { filter = tab.dataset.notificationFilter; $$(`[data-notification-filter]`, panel).forEach((button) => button.classList.toggle("active", button === tab)); render(); return; } if (event.target.closest("[data-notification-read-all]")) { notifications.forEach((item) => { item.unread = false; }); updateBadge(); render(); showToast("已全部标记为已读"); return; } const itemButton = event.target.closest("[data-notification-id]"); if (itemButton) { const item = notifications.find((entry) => entry.id === itemButton.dataset.notificationId); if (!item) return; item.unread = false; updateBadge(); itemButton.classList.remove("is-unread"); showToast(`${item.title}已标记为已读`); if (item.target) { window.setTimeout(() => { location.href = item.target; }, 250); } } });
+  document.addEventListener("click", (event) => { if (!panel.contains(event.target) && !bell.contains(event.target)) close(); });
+  document.addEventListener("keydown", (event) => { if (event.key === "Escape") close(); });
+  $(`[data-notification-more]`, panel).addEventListener("click", () => showToast("已加载更多业务通知"));
+  updateBadge(); render();
+}
+
 /* global shell theme experiment reverted
   const actions = document.querySelector('.topbar-actions');
   if (!actions) return;
@@ -1042,4 +1077,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initEquipmentDetailPage();
   initAgentDrawer();
   initUserEntry();
+  initNotificationCenter();
 });
