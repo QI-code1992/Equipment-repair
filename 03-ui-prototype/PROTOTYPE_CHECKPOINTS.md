@@ -94,7 +94,7 @@
 - 范围：`fault-report.html` 的开始维修双栏独立滚动、3 秒检索加载、配置驱动流式对话、设备/故障动态问题计划、报警码必填、证据不足保护、依据折叠、采纳/直接开始边界、结束维修和详情页 AI 摘要。
 - 来源：`03-ui-prototype/prototype/pages/fault-report.html`、`03-ui-prototype/prototype/pages/intelligent-config.html`
 - 关联基线：`01-requirements/PRD.md` 第 12 节、`01-requirements/SPEC.md` 第 12 节、AC-040 至 AC-044、CR-024。
-- Commit SHA：`fa8fa42ed64b1d892a701cea287f3ef69ce7a2c2`（原型实现来源）；文档检查点提交 SHA 待推送后补充。
+- Commit SHA：`fa8fa42ed64b1d892a701cea287f3ef69ce7a2c2`（原型实现来源）；候选基线文档提交 `25d4ba41e256b43c41fa707859801e7ea89ba3ed`。
 - 验证：`node 06-testing/tests/fault-report-repair-agent.test.js`；全量 `node 06-testing/tests/*.test.js`；`git diff --check`。
 - 结果：14 项静态检查全部通过；本地原型服务 HTTP 200。
 - 恢复：`git restore --source fa8fa42ed64b1d892a701cea287f3ef69ce7a2c2 -- 03-ui-prototype/prototype/pages/fault-report.html 03-ui-prototype/prototype/pages/intelligent-config.html 06-testing/tests/fault-report-repair-agent.test.js`
