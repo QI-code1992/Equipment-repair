@@ -251,3 +251,38 @@
 - 范围：驾驶舱 BI 面向管理层，聚焦管理摘要、趋势、效率、排行和历史分析；工作台聚焦当前风险、待办、超时提醒和快速处置。
 - 设计基线：`02-product-interaction-design/驾驶舱BI设计细化.md`，采用单页纵向分析结构。
 - 边界：本次仅确认信息架构和交互边界，尚未修改原型代码；原型实现需在该设计基线获得确认后进行。
+### CR-022：GitHub 作为后续项目产物的强制远程基线
+
+- 级别：L3
+- 状态：已批准
+- 提出人：项目负责人
+- 提出时间：2026-07-14
+- 当前阶段：Stage 3 — UI 与高保真原型
+- 原始请求：后续本项目产生的任何产物都按照 `formal-software-delivery-workflow` 流程要求上传至 GitHub。
+- 明确要求：`https://github.com/QI-code1992/Equipment-repair` 是本项目唯一的远程交付与可追溯基线。所有后续正式阶段产物、工作流台账、原型或功能检查点、测试与验收证据、交接材料，必须先提交并推送到该仓库；在审批、检查点或交接记录中写明精确 Commit SHA 后，才可报告该项完成。
+- 影响：
+  - PRD / SPEC / 原型 / 架构 / 测试 / 验收 / 发布交接：每次正式基线或阶段产物更新均需 Git 提交和远程推送。
+  - 原型检查点：必须在 `03-ui-prototype/PROTOTYPE_CHECKPOINTS.md` 记录可恢复的 Commit SHA 与证据路径。
+  - 开发检查点：必须在远程开发分支保留对应 Commit，并在 `05-development/CHECKPOINTS.md` 记录。
+  - 阶段审批：必须引用已推送的 Commit SHA；重要门禁通过后创建不可移动的 GitHub 里程碑标签。
+  - 本地工作区：仅保留当前有效文件和必要证据，不以本地副本作为历史归档。
+- 决定：项目负责人已明确批准；即刻生效。
+- 更新基线：`workflow/state.json`、本变更台账，以及后续所有阶段产物与交付记录。
+- 实施：由工作流协调者执行提交、推送、检查点与标签记录。
+- 验证：规则与工作流文件已提交并推送至 `origin/main`；Commit SHA：`919788e50175bf13bc8472ec7053385289acb051`。
+
+### CR-023：融合外部工作台原型并隔离共享依赖
+
+- 级别：L2
+- 状态：已实施 / 等待 Stage 3 审批
+- 提出人：项目负责人
+- 提出时间：2026-07-14
+- 当前阶段：Stage 3 — UI 与高保真原型
+- 原始请求：将外部 ZIP 内的工作台页面融合到现有原型，页面和交互保持一致。
+- 已批准范围：仅替换并适配工作台；其他页面不动。
+- 影响：`03-ui-prototype/prototype/pages/workbench.html`、必要的工作台专用资源、工作台回归检查、`03-ui-prototype/PROTOTYPE_CHECKPOINTS.md`。
+- 不影响：其他原型页面、共享 `app.js` / `app.css` / `global-agent.js` 的既有功能、全局 AI 助手、通知面板和导航。
+- 决定：采用页面级移植与最小依赖适配；禁止整包覆盖输入 ZIP 的旧版共享资源。
+- 设计基线：`03-ui-prototype/WORKBENCH_INTEGRATION_DESIGN.md`。
+- 实施：已按 `03-ui-prototype/WORKBENCH_INTEGRATION_PLAN.md` 在 `feature/workbench-integration` 实现；工作台页面与专用静态检查已提交。
+- 验证：Commit `4a5f302ffe42c972186426d5f8587cd8059adc6e` 已推送至 GitHub；工作台专用测试与现有 11 项静态回归共 12 项通过，`git diff --check` 通过；检查点见 `PCP-012`。

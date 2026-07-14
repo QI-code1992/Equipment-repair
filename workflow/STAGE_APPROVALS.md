@@ -14,6 +14,20 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 
 ## Candidate gate recommendations
 
+### Gate-001: Scoped waiver to enter Stage 3
+
+- Status: Approved with scope exception
+- Approver: project owner
+- Approved At: 2026-07-14T12:56:30+08:00
+- Current Stage: Stage 0–2 candidate package
+- Next Stage: Stage 3 — UI and High-Fidelity Prototype
+- Artifacts Reviewed: existing candidate package under `00-opportunity/`, `01-requirements/`, `02-product-interaction-design/`, and `03-ui-prototype/`
+- Evidence Reviewed: user instruction: “直接进入到原型阶段”; current repository Commit `f80a93b42a5e86216388e1003ed9bf77780c0ab0`
+- Version / Commit SHA: `f80a93b42a5e86216388e1003ed9bf77780c0ab0`
+- Decision: enter Stage 3 directly
+- Conditions / Scope Exceptions: this waives sequential Stage 0–2 gate entry only. It authorizes prototype and visual-baseline work; it does not approve the candidate requirements or interaction baselines, authorize production development, or permit Stage 4 entry. Before Stage 4, Stage 1 requirements and Stage 2 interaction baselines must be reconciled and explicitly approved.
+- Notes: record Stage 3 prototype checkpoints and retain the current prototype baseline as recoverable evidence.
+
 ### Gate-Candidate-001: Stage 0 -> Stage 1
 
 - Status: Pending user confirmation
