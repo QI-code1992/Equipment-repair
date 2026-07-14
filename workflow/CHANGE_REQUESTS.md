@@ -183,3 +183,12 @@ This is the continuous change ledger for the project. Existing history must not 
 - Raised By: project owner
 - Scope: hide the shared `.sidebar-foot` explanation card on every prototype page, including page-specific variants.
 - Verification: static checks and `git diff --check` passed.
+
+### CR-015: Establish Chinese-first stage artifact language convention
+
+- Level: L1
+- Status: Implemented
+- Raised By: project owner
+- Scope: Chinese by default for stage artifact content and newly created document filenames; preserve English for code, identifiers, logs, API/protocol/library names and compatibility-sensitive existing paths.
+- Governance source: `/Users/qiqi/.codex/skills/formal-software-delivery-workflow/SKILL.md`.
+- Boundary: no mass rename of existing English files in this change; any batch rename requires explicit reference migration and change control.
