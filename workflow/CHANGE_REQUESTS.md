@@ -33,4 +33,29 @@ This is the continuous change ledger for the project. Existing history must not 
 
 ## Closed
 
-None.
+### CR-002: Remove out-of-scope and transient workspace assets
+
+- Level: L2
+- Status: Approved
+- Raised By: project owner
+- Raised At: 2026-07-14
+- Current Stage: Stage 3 candidate prototype
+- Original Request: Delete files and folders that are not needed.
+- Clarified Requirement: Remove transient metadata, the unused 4208 server and icon-option exploratory page, and the current migrated data-import page/artifact; retain all formal artifacts, evidence ledgers, current prototype pages, and the original Git snapshot.
+- Reason: These assets are not part of the current effective product scope or are reproducible local noise.
+- Impact:
+  - PRD: none; data import remains explicitly out of scope
+  - SPEC: none
+  - Prototype: remove current data-import page and unused exploratory/server files
+  - Architecture: none
+  - Implementation Plan: none
+  - Test Cases: none
+  - Acceptance Criteria: none
+- Decision: Approved by the project owner in the deletion request; history remains recoverable from `snapshot/legacy-import-20260714`.
+- Updated Baselines: `03-ui-prototype/PROTOTYPE_BASELINE.md`, `02-product-interaction-design/PAGE_FUNCTION_MATRIX.md` remain consistent with data-import exclusion.
+- Implementation:
+  - Commit: pending
+  - Owner: workflow orchestrator
+- Verification:
+  - Status: Pending cleanup verification
+  - Evidence: post-cleanup `git diff --check`, static tests, prototype HTTP smoke
