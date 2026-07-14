@@ -131,3 +131,6 @@ Given an Agent requests an equipment outside the current user's grant, when the 
 
 ### AC-038 Audit redaction
 Given an Agent call completes or fails, when its audit event is stored, then tool/model/citation/timing/result/error metadata is traceable while secrets, passwords, cookies, tokens and sensitive attachment contents are absent.
+
+### AC-039 Logout navigation
+Given a signed-in user opens the global user menu, when the user confirms “退出登录”, then the session is ended for the prototype flow and the browser returns to `login.html`; cancelling keeps the current page and menu state closed.

@@ -45,3 +45,9 @@
 - Status: Candidate / awaiting Stage 2 review
 - Scope: remove obsolete `刷` actions from BI and equipment topbars while retaining global bell and user entry.
 - Verification: static checks and JavaScript syntax checks passed.
+
+## PCP-007: Logout navigation candidate
+
+- Status: Candidate / awaiting Stage 2 review
+- Scope: confirmed global logout returns to `login.html`; cancellation preserves the current page.
+- Verification: static regression and JavaScript syntax checks passed.

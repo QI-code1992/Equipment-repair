@@ -16,4 +16,5 @@ for (const page of shellPages) {
 for (const marker of ["user_management.view_all", "data-self-user-view", "tab=users", "当前账号仅可查看", "安全设置 / 修改密码"]) {
   if (!system.includes(marker) && !app.includes(marker)) throw new Error(`missing user management marker: ${marker}`);
 }
+if (!app.includes('window.location.href = "login.html"')) throw new Error("logout must return to login page");
 console.log("user entry and scoped management static checks passed");

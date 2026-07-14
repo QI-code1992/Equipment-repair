@@ -143,3 +143,11 @@ This is the continuous change ledger for the project. Existing history must not 
 - Raised By: project owner
 - Scope: remove the `刷` refresh buttons from BI, equipment ledger and equipment detail topbars; retain global notification and user entry actions.
 - Verification: 11/11 static checks and JavaScript syntax check passed.
+
+### CR-010: Complete logout delivery flow
+
+- Level: L1
+- Status: Implemented
+- Raised By: project owner
+- Scope: after logout confirmation, return to `login.html`; preserve cancel behavior and close the user menu.
+- Verification: static test, JavaScript syntax check and `git diff --check` passed.

@@ -24,6 +24,7 @@
 | NFR-007 Citation and tool boundary | 1, 7, 8 | AC-033, 036 | RAGFlow/LangGraph architecture candidate | TC-AI-BOUNDARY-* | Candidate |
 | NFR-008 Thread and device isolation | 2, 7, 8 | AC-034, 037 | Agent permission boundary | TC-AI-PERM-* | Candidate |
 | NFR-009 Audit redaction | 10 | AC-038 | audit contract candidate | TC-SEC-AI-* | Candidate |
+| FR-010 Logout navigation | 2, 9 | AC-039 | global user menu | TC-AUTH-LOGOUT-* | Candidate |
 
 ## Coverage rules
 
