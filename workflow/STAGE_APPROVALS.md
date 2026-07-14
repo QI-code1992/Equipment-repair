@@ -65,3 +65,17 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Decision: Stage 1 需求基线获得确认，可以开始 Stage 2 交互基线评审。
 - Conditions / Scope Exceptions: 本确认不等同于 Stage 2、Stage 3 或 Stage 4 批准；不授权生产开发。后续交互或需求变化必须进入变更台账并回到受影响的最早阶段。
 - Notes: Stage 0 的既有范围豁免保持不变；当前下一门禁为 Stage 2 的 P0 页面、功能、状态和异常覆盖确认。
+
+### Gate-003: Stage 2 -> Stage 3
+
+- Status: Approved
+- Approver: project owner
+- Approved At: 2026-07-14
+- Current Stage: Stage 2 — Product and Interaction Design
+- Next Stage: Stage 3 — UI and High-Fidelity Prototype
+- Artifacts Reviewed: `02-product-interaction-design/PAGE_FUNCTION_MATRIX.md`、`02-product-interaction-design/INTERACTION_SPEC.md`、`02-product-interaction-design/PROTOTYPE_COVERAGE.md`
+- Evidence Reviewed: 项目负责人对当前页面、功能、状态与异常交互覆盖的明确回复“确认”；现有原型静态回归检查 14/14 通过。
+- Version / Commit SHA: `c21240bcf9b6b130f6508de5db99c4d99493d913`；里程碑标签 `baseline/stage-02-interaction-v1.0`
+- Decision: Stage 2 交互基线获得确认，进入 Stage 3 原型与视觉基线工作。
+- Conditions / Scope Exceptions: 本确认不等同于 Stage 3 原型视觉基线批准，也不授权 Stage 4 架构或生产开发；Stage 3 结束前需覆盖并复核 P0 页面关键状态。
+- Notes: 维修接单前故障诊断 Agent 交互按 `INTERACTION_SPEC.md` 的“开始维修：故障诊断 Agent”章节作为 Stage 3 原型评审依据。
