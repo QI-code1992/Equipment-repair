@@ -22,7 +22,7 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Next Stage: Stage 1 candidate requirements package
 - Artifacts Reviewed: `00-opportunity/OPPORTUNITY.md`, `00-opportunity/COMPETITOR_ANALYSIS.md`, `00-opportunity/FEASIBILITY.md`
 - Evidence Reviewed: source workspace materials and `snapshot/legacy-import-20260714`
-- Version / Commit SHA: `c36d079`
+- Version / Commit SHA: `1504d9f`
 - Decision: AI recommendation only; not an approval
 - Conditions: confirm opportunity value, feasibility assumptions and MVP entry
 
@@ -34,6 +34,6 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Next Stage: Stage 2 candidate interaction package
 - Artifacts Reviewed: `01-requirements/PRD.md`, `01-requirements/SPEC.md`, `01-requirements/ACCEPTANCE_CRITERIA.md`, `01-requirements/REQUIREMENTS_TRACEABILITY_MATRIX.md`
 - Evidence Reviewed: `01-requirements/` and current prototype coverage
-- Version / Commit SHA: `c36d079`
+- Version / Commit SHA: `1504d9f`
 - Decision: AI recommendation only; not an approval
 - Conditions: confirm scope, roles, business rules, P0 pages and AC coverage

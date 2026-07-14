@@ -1,6 +1,6 @@
 # Stage 0 Opportunity Candidate
 
-状态：**Candidate / Awaiting user confirmation**（未自批准 Stage 0）  
+状态：**Candidate / Awaiting user confirmation**（未自批准 Stage 0）
 证据范围：当前有效 PRD、2026-07-13 对接结论、AI 技术 SPEC、现有原型交接文档。
 
 ## 机会摘要
