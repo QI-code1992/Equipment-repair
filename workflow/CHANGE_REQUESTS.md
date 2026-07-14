@@ -81,8 +81,8 @@ This is the continuous change ledger for the project. Existing history must not 
 - Decision: Approved by the project owner in the cleanup request; deleted files remain recoverable through Git history.
 - Updated Baselines: `01-requirements/PRD.md`, root `README.md`
 - Implementation:
-  - Commit: pending
+  - Commit: `062b4f1`
   - Owner: workflow orchestrator
 - Verification:
-  - Status: Pending cleanup verification
-  - Evidence: path scan, tests and `git diff --check`
+  - Status: Verified
+  - Evidence: `docs/superpowers/` and its untracked copy removed; 9/9 static checks; JSON/JavaScript checks; `git diff --check` passed
