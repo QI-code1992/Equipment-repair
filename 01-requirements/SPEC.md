@@ -38,9 +38,11 @@ Server-side authorization is mandatory. Device grants constrain Agent equipment 
 | Workbench | `/workbench` | default, empty, error, permission |
 | BI dashboard | `/bi-dashboard` | default, empty, error, filter |
 | Equipment ledger | `/equipment` | list, empty, loading, error, permission |
+| Factory modeling | `/factory-modeling` | tree, detail, add/edit, disable cascade, delete blocked |
 | Equipment add/edit/detail | `/equipment/new`, `/equipment/:id/edit`, `/equipment/:id` | validation, saving, error, forbidden |
 | Equipment knowledge/config | `/intelligent-config` | tab, upload states, failed index, readonly metrics |
 | Fault report | `/fault-report` | draft, validation, AI pending, submitted |
+| Agent report | `/agent-report` | permission identified, missing fields, handoff, submit gate |
 | Maintenance records | `/maintenance-records` | list, detail, empty, error |
 | Repair execution | `/repair-execution` | assigned, editing, submitted, forbidden |
 | System management | `/system-management` | user/role/menu/audit tabs, readonly/permission |
@@ -56,7 +58,7 @@ The historical data-import page is not a current route/menu/permission/API requi
 
 ### Fault report
 
-`id`, `equipmentId`, `submitterId`, `urgency`, `symptom`, `occurredAt <= now`, `possibleLocation`, `description`, `attachmentRefs`, `status`, `submittedAt`, `auditRefs`. Status: `AI_DRAFT -> PENDING_ACCEPT -> IN_REPAIR -> PROCESSED`.
+`id`, `equipmentId`, `submitterId`, `urgency`, `symptom`, `occurredAt <= now`, `duration`, `possibleLocation`, `description`, `attachmentRefs`, `status`, `submittedAt`, `auditRefs`. AI 上报正式提交前 `occurredAt` 与 `duration` 必填。Status: `AI_DRAFT -> PENDING_ACCEPT -> IN_REPAIR -> PROCESSED`.
 
 ### Work order
 
@@ -113,6 +115,7 @@ Low confidence, high-voltage, brake, or safety-critical cases require human revi
 - RAGFlow parse/index failure excludes a document from retrieval.
 - Agent unavailable does not block manual fault and work-order flows.
 - Permission failures are audit events.
+- Work-order UI labels map to API states: `待派单`=`DRAFT/PENDING_ACCEPT`, `维修中`=`IN_REPAIR`, `待验收`=`PENDING_INSPECTION`, `已关闭`=`COMPLETED`.
 
 ## 10. Non-functional traceability
 

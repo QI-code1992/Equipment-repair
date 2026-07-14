@@ -12,3 +12,11 @@
 - Verification: server start and HTTP 200 smoke test passed before migration; full post-migration check pending
 - Restore: `git restore --source 32d1b7b -- 03-ui-prototype/prototype`
 - Notes: not a formal Stage 3 baseline until user approves the visual and interaction package.
+
+## PCP-002: Prototype-to-document consistency audit
+
+- Status: Candidate / changes requested; not approved
+- Scope: static audit of 14 current pages and shared Agent/health-score assets
+- Related artifact: `03-ui-prototype/PROTOTYPE_AUDIT.md`
+- Findings: factory modeling, Agent report, intelligent configuration detail, AI duration gate, and work-order label mapping were added to canonical documents.
+- Limitation: no browser screenshot or production API verification was available in this audit.

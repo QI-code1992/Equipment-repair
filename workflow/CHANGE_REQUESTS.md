@@ -86,3 +86,13 @@ This is the continuous change ledger for the project. Existing history must not 
 - Verification:
   - Status: Verified
   - Evidence: `docs/superpowers/` and its untracked copy removed; 9/9 static checks; JSON/JavaScript checks; `git diff --check` passed
+
+### CR-004: Reconcile documents to unfinished prototype baseline
+
+- Level: L2
+- Status: In review
+- Raised By: project owner
+- Raised At: 2026-07-14
+- Scope: add factory modeling and Agent report pages; expand intelligent configuration; add AI report duration gate and work-order display-state mapping.
+- Impacted artifacts: `01-requirements/PRD.md`, `01-requirements/SPEC.md`, `02-product-interaction-design/PAGE_FUNCTION_MATRIX.md`, `03-ui-prototype/PROTOTYPE_AUDIT.md`.
+- Boundary: prototype remains unfinished; stale data-import strings are recorded as follow-up cleanup and do not restore the excluded feature.
