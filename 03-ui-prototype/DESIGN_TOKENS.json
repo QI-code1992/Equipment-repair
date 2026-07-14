@@ -1,0 +1,20 @@
+{
+  "baseline": "Candidate v1.0",
+  "status": "Awaiting Stage 3 approval",
+  "color": {
+    "brandPrimary": "#2563EB",
+    "canvas": "#F5F7FA",
+    "surface": "#FFFFFF",
+    "textPrimary": "#172033",
+    "textSecondary": "#64748B",
+    "border": "#E2E8F0",
+    "success": "#16A34A",
+    "warning": "#D97706",
+    "danger": "#DC2626",
+    "info": "#0EA5E9"
+  },
+  "spacing": {"xs": 4, "sm": 8, "md": 12, "lg": 16, "xl": 24, "xxl": 32},
+  "radius": {"sm": 6, "md": 10, "lg": 14},
+  "typography": {"body": 14, "label": 12, "title": 24, "section": 18},
+  "motion": {"fastMs": 120, "normalMs": 200, "drawerMs": 240}
+}
