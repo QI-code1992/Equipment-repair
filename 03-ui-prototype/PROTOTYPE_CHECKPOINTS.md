@@ -75,3 +75,15 @@
 - Status: Candidate / awaiting Stage 2 review
 - Scope: remove all shared sidebar bottom explanation cards across page shells.
 - Verification: static regression passed.
+
+## PCP-012: Workbench filter and detail-link integration
+
+- 状态：Stable / 等待 Stage 3 审批
+- 范围：工作台组织范围筛选、指标/待办联动、健康概览、趋势筛选、刷新反馈与设备详情跳转
+- 来源：`03-ui-prototype/prototype/pages/workbench.html`
+- 分支：`feature/workbench-integration`
+- Commit SHA：`4a5f302ffe42c972186426d5f8587cd8059adc6e`
+- 验证：`node 06-testing/tests/workbench-integration.test.js`；全量 `06-testing/tests/*.test.js`；`git diff --check`
+- 结果：12 项静态检查全部通过
+- 恢复：`git restore --source 4a5f302ffe42c972186426d5f8587cd8059adc6e -- 03-ui-prototype/prototype/pages/workbench.html 06-testing/tests/workbench-integration.test.js`
+- 备注：仅工作台页面和其专用测试发生变更；其他页面与共享 `app.js`、`app.css`、`global-agent.js` 未修改。
