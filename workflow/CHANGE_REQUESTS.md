@@ -192,3 +192,11 @@ This is the continuous change ledger for the project. Existing history must not 
 - Scope: Chinese by default for stage artifact content and newly created document filenames; preserve English for code, identifiers, logs, API/protocol/library names and compatibility-sensitive existing paths.
 - Governance source: `/Users/qiqi/.codex/skills/formal-software-delivery-workflow/SKILL.md`.
 - Boundary: no mass rename of existing English files in this change; any batch rename requires explicit reference migration and change control.
+
+### CR-016: 中文化 Stage 1 需求文档
+
+- Level: L1
+- Status: Implemented / partial batch
+- Raised By: project owner
+- Scope: translate Stage 1 PRD/SPEC/验收标准/需求追踪矩阵的标题、元数据、表头、章节说明和规则性文字；保留 `FR/NFR/AC/TC`、API、字段名、状态枚举和技术产品名。
+- Boundary: existing English filenames remain unchanged to preserve references; remaining Given/When/Then acceptance sentences and later-stage documents are queued for subsequent batches.

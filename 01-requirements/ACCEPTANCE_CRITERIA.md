@@ -35,7 +35,7 @@ Given an equipment has a pending or repairing fault, when a user attempts to dea
 ### AC-009 Knowledge failure
 Given a document fails parsing or indexing in RAGFlow, when an Agent searches knowledge, then the failed document is absent from citations and its failure reason is visible to an authorized operator.
 
-## Fault and Agent
+## 故障与 Agent
 
 ### AC-010 Manual validation
 Given a manual fault form lacks equipment, urgency or symptom, when submit is pressed, then submission is blocked and each missing field is identified.
@@ -55,7 +55,7 @@ Given an AI draft is formally submitted, when the business API succeeds, then st
 ### AC-015 Attachment failure
 Given a valid text collection and an attachment upload failure, when the Agent continues, then text is retained and the attachment failure is retryable.
 
-## Intelligent query and health
+## 智能问数与健康分
 
 ### AC-016 Fixed metric catalog
 Given the metric catalog page, when an authorized user views it, then all 40 built-in metrics show name, definition, formula, period, dimensions and examples, with no create/edit/delete/enable/disable/version controls.
@@ -81,7 +81,7 @@ Given an equipment existed before formal launch, when the health service initial
 ### AC-023 Score snapshot
 Given a score or component changes, when calculation completes, then one snapshot records before/after values, trigger, deductions/recoveries, references and calculation time.
 
-## Diagnosis, work order and maintenance
+## 诊断、工单与维修
 
 ### AC-024 Diagnosis evidence
 Given a complete fault, when diagnosis returns, then it shows fault type, risk, possible causes, confidence and RAG citations.
@@ -98,7 +98,7 @@ Given a work order lacks actual cause, actual solution or repair result, when cl
 ### AC-028 Knowledge sedimentation
 Given a work order closes with complete repair data, when sedimentation runs, then a historical case or review-needed knowledge entry is created.
 
-## Resilience and repeated operations
+## 容错与重复操作
 
 ### AC-029 Agent outage fallback
 Given Agent or RAGFlow is unavailable, when a user reports a fault, then manual reporting remains available and the unavailable capability is explained.
@@ -109,7 +109,7 @@ Given a fault or work-order submit request has already succeeded, when the same 
 ### AC-031 Empty/loading/error states
 Given any P0 list or dashboard page, when data is empty, loading, or fails, then the corresponding state is explicit and offers the permitted next action.
 
-## AI integration and delivery baseline
+## AI 集成与交付基线
 
 ### AC-032 Missing model configuration
 Given chat, Embedding or Rerank configuration is missing, when the AI health check runs, then it fails explicitly and no pseudo-answer is generated.

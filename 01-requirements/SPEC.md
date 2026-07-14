@@ -1,21 +1,21 @@
 # 新能源装载机设备智能运维平台 SPEC
 
-- Baseline: Candidate v1.0
-- Status: Awaiting Stage 1 user approval
-- Related PRD: `01-requirements/PRD.md`
+- 基线：候选版 v1.0
+- 状态：等待用户批准 Stage 1
+- 关联 PRD：`01-requirements/PRD.md`
 
-## 1. System boundary
+## 1. 系统边界
 
-| Component | Responsibilities | Prohibited |
+| 组件 | 职责 | 禁止事项 |
 |---|---|---|
-| Business system | Auth, menus, permissions, devices, faults, work orders, maintenance, health service, audit, UI | Treat static demo data as business fact |
-| LangGraph Agent | Intent, permission gate, missing-field collection, controlled tool calls, human confirmation, response | Direct database writes, health-score calculation, bypassing business API |
-| RAGFlow | Parse, chunk, embed, index, retrieve, rerank and cite documents | Store business facts, calculate metrics, create work orders |
-| LLM | Understand language, summarize API/RAG results | Guess numbers, diagnosis facts, sources or permissions |
+| 业务系统 | 认证、菜单、权限、设备、故障、工单、维修、健康分服务、审计和界面 | 将静态演示数据当作业务事实 |
+| LangGraph Agent | 意图识别、权限门禁、缺失字段收集、受控工具调用、人工确认和回复 | 直接写数据库、计算健康分、绕过业务 API |
+| RAGFlow | 文档解析、切片、向量化、索引、检索、重排和引用 | 保存业务事实、计算指标、创建工单 |
+| LLM | 理解语言、总结 API/RAG 结果 | 猜测数值、诊断事实、来源或权限 |
 
-## 2. Roles and permission matrix
+## 2. 角色与权限矩阵
 
-| Capability | Admin | Equipment admin | Repair worker | Line operator |
+| 能力 | 系统管理员 | 设备管理员 | 维修工 | 产线作业员 |
 |---|---:|---:|---:|---:|
 | User/role/menu/operation management | Manage | View | None | None |
 | User management scope (`user_management.view_all`) | All users | Granted scope | Self only | Self only |
@@ -29,13 +29,13 @@
 | Repair execution | View | View/accept | Execute/submit | View progress |
 | Health score/BI | View | View | View | View related |
 
-Server-side authorization is mandatory. Device grants constrain Agent equipment lookup/reporting only and do not become general data filtering.
+必须执行服务端授权。设备授予仅约束 Agent 的设备查询和上报，不扩展为通用数据过滤。
 
 `user_management.view_all` controls user-management visibility; it does not expand Agent device grants or create general data permissions.
 
-## 3. Page and route contract
+## 3. 页面与路由契约
 
-| Page | Route candidate | Required states |
+| 页面 | 候选路由 | 必要状态 |
 |---|---|---|
 | Login | `/login` | default, invalid, disabled, loading |
 | Workbench | `/workbench` | default, empty, error, permission |
@@ -51,9 +51,9 @@ Server-side authorization is mandatory. Device grants constrain Agent equipment 
 | System management | `/system-management` | user/role/menu/audit tabs, readonly/permission |
 | Global Agent | drawer on authorized pages | closed, open, tab history, collecting, preview, error |
 
-The historical data-import page is not a current route/menu/permission/API requirement.
+历史数据导入页面不是当前路由、菜单、权限或 API 需求。
 
-## 4. Data contracts
+## 4. 数据契约
 
 ### Equipment
 
@@ -75,41 +75,41 @@ The historical data-import page is not a current route/menu/permission/API requi
 
 `id`, `datasetId`, `ragDocumentId`, `name`, `mimeType`, `size <= 100MB`, `status`, `failureReason`, `sourceRefs`, timestamps. Only `READY` documents are retrievable.
 
-## 5. Health service contract
+## 5. 健康分服务契约
 
 `GET /api/equipment/{equipmentId}/health-score` returns score, grade, component breakdown, current period, snapshot summary and `serviceStatus`. On failure it returns an error status; clients must not substitute cached, zero or empty values. Workbench, BI, ledger, detail and metric-query adapters call this service.
 
-## 6. Metric query contract
+## 6. 指标查询契约
 
 `GET /api/metrics/catalog` returns the fixed 40 metric definitions, allowed dimensions, formula, period and examples. `POST /api/metrics/query` accepts only a catalog metric ID, allowed dimension values, and a date range. Agent tool `get_metric` may call only these endpoints. The LLM receives results and may summarize them but cannot create values.
 
-## 7. Agent tool allowlist
+## 7. Agent 工具白名单
 
 `get_metric`, `get_health_score`, `get_granted_equipment`, `retrieve_knowledge`, `create_fault_draft`, `submit_fault_report`, `get_fault_progress`. Every write tool requires a permission check and, where specified, human confirmation. RAG citations must include document and chunk identifiers.
 
 The allowlist is closed: no direct database, arbitrary SQL, health-score write, maintenance-record write, permission/user mutation or filesystem-execution tool may be registered.
 
-## 8. Agent state machines
+## 8. Agent 状态机
 
-### AI fault report
+### AI 故障上报
 
 `load_context -> check_permission -> collect_equipment -> collect_urgency -> collect_symptom -> collect_optional_context -> preview -> human_confirm -> create_fault_draft -> final_response`.
 
-Missing required fields loop back to collection. Permission denial ends in an explanatory response. Attachment failure preserves text context and reports retry.
+缺少必填字段时返回收集环节；权限拒绝时结束并说明原因；附件失败时保留文字上下文并提示重试。
 
-### Intelligent query
+### 智能问数
 
 `load_context -> detect_intent -> match_metric -> validate_dimensions -> ask_missing_or_query -> summarize -> final_response`.
 
-Unknown metrics, disallowed dimensions, and backend errors are explicit failures; no guessed values.
+未知指标、不允许的维度和后端错误都必须明确失败，不得猜测数值。
 
-### Diagnosis/advice
+### 诊断与维修建议
 
 `load_context -> check_permission -> retrieve_knowledge -> load_business_data -> generate_diagnosis -> generate_repair_advice -> human_review -> draft_work_order -> final_response`.
 
-Low confidence, high-voltage, brake, or safety-critical cases require human review and safety instructions.
+低置信度、高压、制动或其他安全关键场景必须人工复核并展示安全指引。
 
-### Agent runtime contract
+### Agent 运行契约
 
 - `POST /api/agent/threads` creates a user-bound thread.
 - `POST /api/agent/threads/{thread_id}/messages` streams `token`, `tool_started`, `tool_finished`, `interrupt`, `completed`, and `error` events through SSE.
@@ -117,7 +117,7 @@ Low confidence, high-voltage, brake, or safety-critical cases require human revi
 - `GET /api/agent/threads/{thread_id}` is visible only to the creator or system administrator.
 - Shared state includes `thread_id`, `user_id`, `role`, `page_context`, `messages`, `tool_results`, `citations`, `pending_confirmation`, and `audit_id`.
 
-## 9. Validation and exception rules
+## 9. 校验与异常规则
 
 - Equipment code duplicate blocks save.
 - Equipment deactivation is blocked by pending/repairing faults.
@@ -132,16 +132,16 @@ Low confidence, high-voltage, brake, or safety-critical cases require human revi
 - RAGFlow empty retrieval returns an explicit no-citation result; it must not be converted into a fabricated citation or answer.
 - Work-order UI labels map to API states: `待派单`=`DRAFT/PENDING_ACCEPT`, `维修中`=`IN_REPAIR`, `待验收`=`PENDING_INSPECTION`, `已关闭`=`COMPLETED`.
 
-## 10. Non-functional traceability
+## 10. 非功能需求追踪
 
-| NFR | Specification |
+| NFR | 规格说明 |
 |---|---|
-| NFR-001 Security | server-side auth, audit events, secrets out of Git |
-| NFR-002 Explainability | citation IDs, confidence, score components |
-| NFR-003 Availability | manual fallback when Agent/RAGFlow unavailable |
-| NFR-004 Traceability | exact Commit SHA, stage ledgers, change IDs |
-| NFR-005 Operations | Windows demo, 00:10 backup, 10-day retention, Tailscale Funnel |
+| NFR-001 安全 | 服务端认证、审计事件、密钥不得进入 Git |
+| NFR-002 可解释性 | 引用 ID、置信度、评分构成 |
+| NFR-003 可用性 | Agent/RAGFlow 不可用时保留人工流程 |
+| NFR-004 可追溯性 | 精确 Commit SHA、阶段台账和变更编号 |
+| NFR-005 运维 | Windows 演示、00:10 备份、保留 10 天、Tailscale Funnel |
 
-## 11. Open engineering decisions
+## 11. 待确认工程决策
 
 Confirm before Stage 4 approval: first equipment models, supported document MIME types, RAGFlow deployment, embedding/rerank models, LLM deployment/data boundary, metadata schema, database choice, API authentication, and backup storage.
