@@ -10,3 +10,5 @@
 | 2026-07-14 | `4e955b4` | formal entrypoints and migration cleanup | candidate workspace |
 
 Production feature commits will be appended with branch, files, verification and checkpoint ID.
+
+| 2026-07-14 | `handoff/candidate-v20260714-01` | project documents, workflow records, static prototype and regression checks | candidate handoff snapshot; tag points to exact commit |

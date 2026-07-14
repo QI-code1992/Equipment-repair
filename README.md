@@ -8,6 +8,7 @@
 - Stage 0–8：候选资料已整理，尚无阶段审批
 - 生产实现：尚未开始
 - 原始资产恢复点：`snapshot/legacy-import-20260714`
+- 当前交接版本候选：`handoff/candidate-v20260714-01`
 
 ## 阅读顺序
 
@@ -42,4 +43,5 @@ for f in 06-testing/tests/*.test.js; do node "$f"; done
 - `main`：正式仓库基线
 - `agent/formal-stage-gate-migration`：本次正式化资料整理分支
 - `snapshot/legacy-import-20260714`：接管前完整资产恢复点
+- `handoff/candidate-v20260714-01`：2026-07-14 项目文档与静态原型候选交接快照
 - 阶段审批通过后才创建 `baseline/stage-XX-...` 标签
