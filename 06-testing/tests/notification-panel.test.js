@@ -11,7 +11,7 @@ if (!workbench.includes('class="icon-btn"') || !workbench.includes("铃")) throw
 for (const marker of ["data-notification-filter", "data-notification-read-all", "data-notification-more", "暂无未读消息", "消息通知"]) {
   if (!app.includes(marker)) throw new Error(`missing notification behavior: ${marker}`);
 }
-for (const marker of ["notification-bell-icon", "notification-badge", "notification-panel"]) {
+for (const marker of ["notification-bell-icon", "notification-badge", "notification-panel", ".topbar-actions > .icon-btn{position:relative}"]) {
   if (!css.includes(marker)) throw new Error(`missing notification style: ${marker}`);
 }
 console.log("notification panel static checks passed");
