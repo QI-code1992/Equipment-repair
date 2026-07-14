@@ -34,9 +34,9 @@ The most recent documents define a credible candidate scope, but the canonical b
 | `prototype/prototype/` | 3 | Runnable static prototype; useful visual/interaction evidence, not production code | Preserve source; create prototype baseline and checkpoint ledger before further UI changes |
 | `prototype/*handoff*.md` | 3 | Historical handoff notes dated 2026-06-30/07-01 | Evidence only; not current baseline |
 | both `*产品设计方案-v2.1.pdf` files | 2/3 | Byte-identical historical PDF; one filename is mojibake | Keep one traceable copy after Git snapshot and user-approved cleanup |
-| `docs/engineering/AI_RAGFLOW_LANGGRAPH_SPEC.md` | 4 | Strong partial technical SPEC for the AI boundary; not a complete system architecture | Input to Stage 4 architecture/API/data documents after Stage 1–3 approval |
+| External `AI_RAGFLOW_LANGGRAPH_SPEC.md` | 4 | Technical baseline for AI boundary, runtime and delivery constraints | Registered by hash in `workflow/EXTERNAL_BASELINE_INPUTS.md`; canonical summary at `04-architecture-plan/AI_RAGFLOW_LANGGRAPH_SPEC.md` |
 | `docs/superpowers/plans/*` | 4 | Two current-looking implementation plans and one explicitly historical plan | Reconcile and replace with one approved `04-architecture-plan/IMPLEMENTATION_PLAN.md` |
-| `06-testing/tests/*.test.js` | 3/6 | Nine static prototype checks; current candidate suite passes | Keep as Stage 6 prototype regression evidence; production test package is still missing |
+| `06-testing/tests/*.test.js` | 3/6 | Eleven static prototype checks; current candidate suite passes | Keep as Stage 6 prototype regression evidence; production test package is still missing |
 | `README.md`, `docs/运行说明.md`, `prototype/prototype/README.md` | cross-stage | Entry documents disagree and contain broken paths/references | Replace with one root entrypoint after directory migration |
 | `.superpowers/brainstorm/` | working data | Local brainstorming/server state, not a formal product artifact | Exclude from version control unless a specific non-reproducible artifact is promoted |
 

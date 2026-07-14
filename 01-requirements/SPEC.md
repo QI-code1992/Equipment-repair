@@ -31,6 +31,8 @@
 
 Server-side authorization is mandatory. Device grants constrain Agent equipment lookup/reporting only and do not become general data filtering.
 
+`user_management.view_all` controls user-management visibility; it does not expand Agent device grants or create general data permissions.
+
 ## 3. Page and route contract
 
 | Page | Route candidate | Required states |
@@ -85,6 +87,8 @@ The historical data-import page is not a current route/menu/permission/API requi
 
 `get_metric`, `get_health_score`, `get_granted_equipment`, `retrieve_knowledge`, `create_fault_draft`, `submit_fault_report`, `get_fault_progress`. Every write tool requires a permission check and, where specified, human confirmation. RAG citations must include document and chunk identifiers.
 
+The allowlist is closed: no direct database, arbitrary SQL, health-score write, maintenance-record write, permission/user mutation or filesystem-execution tool may be registered.
+
 ## 8. Agent state machines
 
 ### AI fault report
@@ -105,6 +109,14 @@ Unknown metrics, disallowed dimensions, and backend errors are explicit failures
 
 Low confidence, high-voltage, brake, or safety-critical cases require human review and safety instructions.
 
+### Agent runtime contract
+
+- `POST /api/agent/threads` creates a user-bound thread.
+- `POST /api/agent/threads/{thread_id}/messages` streams `token`, `tool_started`, `tool_finished`, `interrupt`, `completed`, and `error` events through SSE.
+- `POST /api/agent/threads/{thread_id}/resume` resumes a LangGraph interrupt using the same `thread_id`.
+- `GET /api/agent/threads/{thread_id}` is visible only to the creator or system administrator.
+- Shared state includes `thread_id`, `user_id`, `role`, `page_context`, `messages`, `tool_results`, `citations`, `pending_confirmation`, and `audit_id`.
+
 ## 9. Validation and exception rules
 
 - Equipment code duplicate blocks save.
@@ -116,6 +128,8 @@ Low confidence, high-voltage, brake, or safety-critical cases require human revi
 - RAGFlow parse/index failure excludes a document from retrieval.
 - Agent unavailable does not block manual fault and work-order flows.
 - Permission failures are audit events.
+- AI fault reporting pauses on missing `occurredAt` or `duration` and resumes after user input; formal submission always requires explicit user confirmation.
+- RAGFlow empty retrieval returns an explicit no-citation result; it must not be converted into a fabricated citation or answer.
 - Work-order UI labels map to API states: `待派单`=`DRAFT/PENDING_ACCEPT`, `维修中`=`IN_REPAIR`, `待验收`=`PENDING_INSPECTION`, `已关闭`=`COMPLETED`.
 
 ## 10. Non-functional traceability

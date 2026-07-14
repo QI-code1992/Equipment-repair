@@ -13,11 +13,13 @@
 
 1. `workflow/state.json`
 2. `workflow/PROJECT_ASSET_BASELINE.md`
-3. `01-requirements/PRD.md`
-4. `01-requirements/SPEC.md`
-5. `01-requirements/ACCEPTANCE_CRITERIA.md`
-6. `01-requirements/REQUIREMENTS_TRACEABILITY_MATRIX.md`
-7. 各阶段目录中的候选资料
+3. `workflow/EXTERNAL_BASELINE_INPUTS.md`
+4. `01-requirements/PRD.md`
+5. `01-requirements/SPEC.md`
+6. `01-requirements/ACCEPTANCE_CRITERIA.md`
+7. `01-requirements/REQUIREMENTS_TRACEABILITY_MATRIX.md`
+8. `04-architecture-plan/AI_RAGFLOW_LANGGRAPH_SPEC.md`
+9. 各阶段目录中的候选资料
 
 ## 原型运行
 

@@ -10,6 +10,6 @@ Not ready for development.
 - Canonical PRD, SPEC, acceptance criteria, and requirements traceability matrix are not yet available as one consistent set.
 - No approved Stage 2/3 product-interaction and UI/prototype baselines.
 - No approved Stage 4 architecture and implementation-plan baseline.
-- No Git Commit SHA, remote branch, milestone snapshot, or checkpoint ledger exists.
+- No approved baseline Commit SHA or stage tag exists; candidate commits, remote branch and checkpoint ledgers are present.
 
-Development may begin only after the required stage gates are completed or the user records an explicit scoped exception in `workflow/STAGE_APPROVALS.md`.
+Production development may begin only after the required stage gates are completed or the user records an explicit scoped exception in `workflow/STAGE_APPROVALS.md`. Prototype/static implementation remains non-production evidence.

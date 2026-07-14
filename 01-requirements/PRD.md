@@ -130,6 +130,9 @@ Agent 只生成草稿工单；设备管理员确认后派发。工单经待接�
 - 可追溯：每个阶段基线绑定 Git Commit SHA；变更进入统一台账。
 - 附件：单文件最大 100MB。
 - 演示运维：Windows 环境；每日 00:10 备份，保留 10 天；临时外网访问采用 Tailscale Funnel。
+- AI 技术边界：业务后端是唯一业务事实源和写入口；LangGraph 仅编排受控工作流；RAGFlow 仅处理知识文档与引用；LLM 不得猜测指标、权限、故障结论或维修事实。
+- AI 运行约束：未配置聊天、Embedding 或 Rerank 模型时，AI 能力必须明确失败，不得伪造成功结果；Agent 会话绑定用户和 `thread_id`，不得跨用户复用。
+- 文件与安全：附件先经业务服务校验大小、类型和病毒扫描；密钥、密码、Cookie、令牌和敏感附件内容不得进入审计日志。
 
 ## 9. Product metrics
 
@@ -144,6 +147,7 @@ Agent 只生成草稿工单；设备管理员确认后派发。工单经待接�
 - 首批设备型号、知识文档格式、RAGFlow 部署方式、Embedding/Rerank 模型、LLM 部署方式和 metadata 标准需在 Stage 4 前确认。
 - 评分规则已固化，但首批真实设备数据和上线日期需在实施前确认。
 - 当前原型是交互证据，不是生产 API 或生产数据实现。
+- 正式开发前必须确认 Python 3.13 + FastAPI、PostgreSQL、MinIO/S3、Redis、RAGFlow 独立 Docker Compose 依赖栈及 OpenAI 兼容模型网关的环境配置；未完成 Stage 4 审批前不得开始生产业务开发。
 
 ## 11. Baseline status
 

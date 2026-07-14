@@ -108,3 +108,26 @@ Given a fault or work-order submit request has already succeeded, when the same 
 
 ### AC-031 Empty/loading/error states
 Given any P0 list or dashboard page, when data is empty, loading, or fails, then the corresponding state is explicit and offers the permitted next action.
+
+## AI integration and delivery baseline
+
+### AC-032 Missing model configuration
+Given chat, Embedding or Rerank configuration is missing, when the AI health check runs, then it fails explicitly and no pseudo-answer is generated.
+
+### AC-033 Citation integrity
+Given a knowledge search returns results, when an Agent uses knowledge content, then every cited item includes a business document ID and chunk identifier; an empty result is stated as no citable evidence.
+
+### AC-034 Agent thread isolation
+Given two users create Agent threads, when either user reads or resumes a thread, then only the creator or system administrator can access it and the other user receives no messages, citations or business details.
+
+### AC-035 Interrupt recovery
+Given an AI fault report lacks occurrence time or duration, when the Agent interrupts, then the user can provide the missing fields and resume the same `thread_id`; formal submission remains blocked until explicit confirmation.
+
+### AC-036 Tool boundary
+Given an Agent attempts a non-allowlisted operation such as direct SQL, health-score write, user mutation or filesystem execution, when the request is evaluated, then it is rejected and audited.
+
+### AC-037 Authorization detail protection
+Given an Agent requests an equipment outside the current user's grant, when the backend checks the request, then it rejects the request without returning that equipment's business details.
+
+### AC-038 Audit redaction
+Given an Agent call completes or fails, when its audit event is stored, then tool/model/citation/timing/result/error metadata is traceable while secrets, passwords, cookies, tokens and sensitive attachment contents are absent.

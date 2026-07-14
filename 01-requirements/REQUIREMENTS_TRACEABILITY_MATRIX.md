@@ -20,6 +20,10 @@
 | NFR-003 Availability | 8 | AC-029 | manual fallback pages | TC-RES-* | Candidate |
 | NFR-004 Traceability | workflow | all AC | workflow ledgers and Git | TC-GOV-* | Candidate |
 | NFR-005 Operations | 10 | release criteria | prototype run notes | TC-OPS-* | Candidate |
+| NFR-006 AI runtime/configuration | 10, SPEC Agent runtime contract | AC-032, 035 | `04-architecture-plan/AI_RAGFLOW_LANGGRAPH_SPEC.md` | TC-AI-CONFIG-* | Candidate |
+| NFR-007 Citation and tool boundary | 1, 7, 8 | AC-033, 036 | RAGFlow/LangGraph architecture candidate | TC-AI-BOUNDARY-* | Candidate |
+| NFR-008 Thread and device isolation | 2, 7, 8 | AC-034, 037 | Agent permission boundary | TC-AI-PERM-* | Candidate |
+| NFR-009 Audit redaction | 10 | AC-038 | audit contract candidate | TC-SEC-AI-* | Candidate |
 
 ## Coverage rules
 

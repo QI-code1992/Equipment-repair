@@ -117,3 +117,13 @@ This is the continuous change ledger for the project. Existing history must not 
 - Scope: SVG bell trigger, unread badge, all/unread tabs, in-panel business notifications, read-all, detail target and load-more simulation.
 - Exclusions: no system notifications, independent notification page, deletion, mute, sound, vibration or browser push.
 - Verification: 11/11 static checks, JavaScript syntax checks and `git diff --check` passed.
+
+### CR-007: Incorporate external development and AI integration baseline
+
+- Level: L2
+- Status: Implemented / awaiting Stage 1 and Stage 4 review
+- Raised By: project owner
+- Raised At: 2026-07-14
+- Scope: merge four external documents into canonical requirements, architecture, testing and release artifacts; register source hashes and prohibit parallel external baselines.
+- Key impacts: health-score and SLA rules are reaffirmed; Python 3.13/FastAPI, PostgreSQL, MinIO/S3, Redis, independent RAGFlow, LangGraph threads/checkpoints/SSE, closed tool allowlist, citation lifecycle, security redaction and AI acceptance gates are now required.
+- Evidence: `workflow/EXTERNAL_BASELINE_INPUTS.md`, `04-architecture-plan/AI_RAGFLOW_LANGGRAPH_SPEC.md`.

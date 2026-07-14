@@ -18,5 +18,11 @@
 | POST | `/api/work-orders/{id}/confirm` | confirm/dispatch draft | equipment manage |
 | POST | `/api/work-orders/{id}/repair-result` | submit repair result | repair execute |
 | POST | `/api/agent/runs` | run controlled Agent | Agent permission |
+| POST | `/api/agent/threads` | create user-bound LangGraph thread | authenticated user |
+| POST | `/api/agent/threads/{thread_id}/messages` | stream Agent events over SSE | thread owner |
+| POST | `/api/agent/threads/{thread_id}/resume` | resume interrupt or confirmation | thread owner |
+| GET | `/api/agent/threads/{thread_id}` | read visible thread and citations | thread owner or system admin |
 
-All write requests require authenticated actor, idempotency key where repeatable, validation errors with field paths, and audit event IDs. Exact schemas and auth mechanism are open Stage 4 decisions.
+Knowledge adapter methods: `ingest_document`, `get_ingestion_status`, `retrieve_knowledge`, `delete_document`. Document states are `UPLOADING`, `PARSING`, `READY`, `FAILED`; only `READY` participates in retrieval.
+
+All write requests require authenticated actor, idempotency key where repeatable, validation errors with field paths, and audit event IDs. SSE events are `token`, `tool_started`, `tool_finished`, `interrupt`, `completed`, `error`. Model/API inputs cannot override user identity, role, grants or confirmation state.
