@@ -988,6 +988,7 @@ function initUserEntry() {
 }
 
 function initNotificationCenter() {
+  $$(".topbar-actions [data-toast*='刷新'], .topbar-actions[aria-label*='刷新']").forEach((button) => button.remove());
   $$(".topbar-actions").forEach((actions) => {
     let bell = $$(".icon-btn", actions).find((button) => button.getAttribute("aria-label") === "消息通知" || button.textContent.trim() === "铃");
     if (!bell) {

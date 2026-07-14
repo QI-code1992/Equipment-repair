@@ -39,3 +39,9 @@
 - Status: Candidate / awaiting Stage 2 review
 - Scope: shared notification initialization across all topbar page shells
 - Verification: static checks and JavaScript syntax checks passed; browser/runtime visual approval pending.
+
+## PCP-006: Topbar refresh action cleanup
+
+- Status: Candidate / awaiting Stage 2 review
+- Scope: remove obsolete `刷` actions from BI and equipment topbars while retaining global bell and user entry.
+- Verification: static checks and JavaScript syntax checks passed.
