@@ -1,9 +1,9 @@
-# Interaction Specification
+# 交互规格
 
-- Baseline: Candidate v1.0
-- Status: Awaiting Stage 2 approval
+- 基线：候选版 v1.0
+- 状态：等待 Stage 2 审批
 
-## Shared rules
+## 通用规则
 
 - Navigation is permission-driven; unauthorized routes show a forbidden state.
 - Save operations show validating, saving, success and failure states.
@@ -11,9 +11,9 @@
 - Backend errors never become invented values; retry and fallback are explicit.
 - Destructive actions require permission and preserve audit evidence.
 
-## Agent states
+## Agent 状态
 
-| State | Entry | Exit |
+| 状态 | 进入条件 | 退出条件 |
 |---|---|---|
 | Closed | page loaded with Agent permission | click floating entry |
 | Open | click entry | close or switch page |
@@ -24,11 +24,11 @@
 
 History is independent per tab; clear only affects current tab; closing preserves all history.
 
-## Fault status
+## 故障状态
 
 `AI_DRAFT → PENDING_ACCEPT → IN_REPAIR → PROCESSED`. No reopen operation exists in this release.
 
-## Exception flows
+## 异常流程
 
 - Missing required field: identify field and continue collection.
 - Multiple equipment: request exactly one.

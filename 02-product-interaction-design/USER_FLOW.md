@@ -1,7 +1,7 @@
-# User Flow
+# 用户流程
 
-- Baseline: Candidate v1.0
-- Status: Awaiting Stage 2 approval
+- 基线：候选版 v1.0
+- 状态：等待 Stage 2 审批
 
 1. 登录并进入授权菜单。
 2. 设备管理员从台账查看或维护设备、负责人和知识。

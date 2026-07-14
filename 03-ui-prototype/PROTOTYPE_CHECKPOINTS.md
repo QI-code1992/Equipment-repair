@@ -1,12 +1,12 @@
-# Prototype/Page Checkpoints
+# 原型/页面检查点
 
 ## PCP-001: Imported multi-page prototype
 
-- Status: Candidate / awaiting Stage 3 approval
-- Scope: imported static pages, shared assets, Agent drawer and health-score adapter
-- Related baseline: Stage 1 candidate PRD/SPEC; Stage 2 candidate page matrix
-- Source: `03-ui-prototype/prototype/`
-- Commit SHA: `32d1b7b`
+- 状态：候选版 / 等待 Stage 3 审批
+- 范围：导入静态页面、共享资源、Agent 抽屉和健康分适配器
+- 关联基线：Stage 1 候选 PRD/SPEC；Stage 2 候选页面矩阵
+- 来源：`03-ui-prototype/prototype/`
+- Commit SHA：`32d1b7b`
 - Exported evidence: source HTML and original PDF are recoverable from `snapshot/legacy-import-20260714`
 - Screens/components/states: listed in `02-product-interaction-design/PAGE_FUNCTION_MATRIX.md`
 - Verification: server start and HTTP 200 smoke test passed before migration; full post-migration check pending

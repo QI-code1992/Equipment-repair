@@ -1,9 +1,9 @@
-# Prototype Coverage
+# 原型覆盖情况
 
-- Candidate baseline: `03-ui-prototype/PROTOTYPE_BASELINE.md`
-- Status: Awaiting Stage 2 approval
+- 候选基线：`03-ui-prototype/PROTOTYPE_BASELINE.md`
+- 状态：等待 Stage 2 审批
 
-| Flow | Prototype evidence | Coverage | Gap |
+| 流程 | 原型证据 | 覆盖情况 | 缺口 |
 |---|---|---|---|
 | Login and navigation | login/index/sidebar | partial | production auth and forbidden states |
 | Equipment CRUD | ledger/add/edit/detail | visual | API validation, duplicate and deactivation guards |

@@ -1,13 +1,13 @@
-# Visual Guidelines
+# 视觉规范
 
-- Baseline: Candidate v1.0
-- Status: Awaiting Stage 3 approval
+- 基线：候选版 v1.0
+- 状态：等待 Stage 3 审批
 
-## Direction
+## 设计方向
 
 Use a high-density industrial operations console: dark neutral navigation, light content canvas, blue primary actions, semantic amber/red risk states, clear table hierarchy, and persistent contextual Agent entry. Visual hierarchy prioritizes equipment identity, health/risk, fault status, next action and evidence.
 
-## Rules
+## 规则
 
 - Health colors are semantic and must match the Stage 1 grade bands.
 - Status badges use text plus color; color alone is never the only signal.

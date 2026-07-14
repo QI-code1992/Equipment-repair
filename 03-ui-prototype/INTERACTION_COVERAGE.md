@@ -1,6 +1,6 @@
-# Prototype Interaction Coverage
+# 原型交互覆盖
 
-| Area | Covered in source | Required verification before Stage 3 approval |
+| 范围 | 源码是否覆盖 | Stage 3 审批前必须验证 |
 |---|---|---|
 | Navigation/sidebar | yes | all authorized/forbidden combinations |
 | Agent open/close/tab history | yes | reload, clear-current-tab, cross-page persistence |

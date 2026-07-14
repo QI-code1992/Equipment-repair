@@ -1,9 +1,9 @@
-# Component Specification
+# 组件规格
 
-- Baseline: Candidate v1.0
-- Status: Awaiting Stage 3 approval
+- 基线：候选版 v1.0
+- 状态：等待 Stage 3 审批
 
-| Component | Required variants | Required states |
+| 组件 | 必要变体 | 必要状态 |
 |---|---|---|
 | Sidebar navigation | active, nested, hidden | authorized, forbidden |
 | Status badge | normal, warning, danger, neutral | text + color |

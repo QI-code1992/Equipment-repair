@@ -1,9 +1,9 @@
-# Page / Function Matrix
+# 页面与功能矩阵
 
-- Baseline: Candidate v1.0
-- Status: Awaiting Stage 2 approval
+- 基线：候选版 v1.0
+- 状态：等待 Stage 2 审批
 
-| Page | P0 functions | Roles | Key states | Prototype |
+| 页面 | P0 功能 | 角色 | 关键状态 | 原型 |
 |---|---|---|---|---|
 | Login | login/logout | all | default/error/disabled/loading | `prototype/pages/login.html` |
 | Workbench | todo, alert summary, shortcut | admin/equipment admin/repair | default/empty/error | `prototype/pages/workbench.html` |
@@ -20,6 +20,6 @@
 | Intelligent config | model resources, four Agents, KB pipeline/retry, call records, Token usage, readonly 40 metrics | admin | upload/index failure/test/readonly | `prototype/pages/intelligent-config.html` |
 | Data import | historical only | none current | excluded | retained in snapshot only |
 
-## State coverage gap
+## 状态覆盖缺口
 
 The prototype shows many default and demo states. Stage 3 must add or document verified loading, empty, error, disabled, permission and boundary evidence for each P0 page before approval.
