@@ -14,8 +14,7 @@ for (const metric of ['设备健康综合评分', '故障总数', '工单总数'
 }
 assert(html.includes('健康综合评分趋势') && html.includes('故障数量趋势') && html.includes('工单数量趋势'), '趋势区应包含三类趋势图');
 assert(html.includes('区域 / 组织 TOP 5') && html.includes('工厂 TOP 5') && html.includes('车间 TOP 5'), '排行区应包含组织层级排行');
-assert(html.includes('dashboard-table-card" aria-labelledby="health-table-title" hidden'), '重复的工作台设备列表必须保持隐藏');
-assert(html.includes('dashboard-table-card" aria-labelledby="health-table-title" hidden'), '工作台预警处置模块必须保持隐藏');
-assert(html.includes('class="grid grid-3 bi-analysis-grid" hidden'), '旧版三栏分析模块必须隐藏');
-assert(html.includes('class="grid grid-2 bi-state-grid" aria-label="数据同步与异常恢复状态" hidden'), '旧版状态模块必须隐藏');
+assert(!html.includes('设备健康列表'), '工作台设备列表必须从驾驶舱删除');
+assert(!html.includes('高风险设备 Top 5') && !html.includes('工单状态分布') && !html.includes('设备健康评分分布'), '旧版三栏分析模块必须从驾驶舱删除');
+assert(!html.includes('数据同步任务') && !html.includes('知识图谱接口'), '旧版状态模块必须从驾驶舱删除');
 console.log('bi dashboard management analytics static checks passed');

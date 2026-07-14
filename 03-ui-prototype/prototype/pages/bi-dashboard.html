@@ -99,96 +99,6 @@
         <div class="result-status" id="biResultStatus" role="status" aria-live="polite" data-bi-result>当前显示管理摘要、趋势、效率、排行和历史分析。</div>
       </section>
 
-        <article class="card dashboard-table-card" aria-labelledby="health-table-title" hidden>
-          <div class="section-title dashboard-section-title">
-            <div>
-              <h2 id="health-table-title">设备健康列表</h2>
-              <p class="muted">点击设备行进入设备驾驶舱详情，查看健康趋势、故障类型分布和工单分析。</p>
-            </div>
-            <div class="dashboard-table-actions">
-              <button class="btn btn-secondary" type="button" data-bi-warning aria-pressed="false" aria-controls="healthTableBody biResultStatus">只看预警</button>
-              <button class="btn btn-secondary" type="button" data-bi-export>导出</button>
-              <a class="btn btn-primary" href="equipment-ledger.html">查看全部设备</a>
-            </div>
-          </div>
-          <div class="table-wrap">
-            <table class="health-table">
-              <thead><tr><th>设备编号 / 名称</th><th>设备型号</th><th>负责人</th><th>健康评分</th><th>风险等级</th><th>近7天故障</th><th>工单状态</th><th>操作</th></tr></thead>
-              <tbody id="healthTableBody">
-                <tr class="is-selected" data-risk="ok"><td><a href="equipment-detail.html?device=ZL-2026-08"><strong>ZL-2026-08</strong><span>电动装载机 5吨</span></a></td><td>EWL50E</td><td>张伟</td><td><span class="score-pill ok">92</span> 低风险</td><td><span class="status ok">低风险</span></td><td>2次</td><td><span class="status info">维修中</span></td><td><div class="table-actions-inline"><button class="link-btn" type="button" data-bi-detail="ZL-2026-08">查看分析</button><button class="link-btn muted-action" type="button" disabled title="健康设备无需生成维修工单">生成工单</button></div></td></tr>
-                <tr data-risk="warn"><td><a href="equipment-detail.html?device=ZL-2026-07"><strong>ZL-2026-07</strong><span>电动装载机 3吨</span></a></td><td>EWL30E</td><td>李强</td><td><span class="score-pill warn">78</span> 中风险</td><td><span class="status warn">中风险</span></td><td>1次</td><td><span class="status ok">待验收</span></td><td><div class="table-actions-inline"><button class="link-btn" type="button" data-bi-detail="ZL-2026-07">查看分析</button><button class="link-btn muted-action" type="button" disabled title="健康设备无需生成维修工单">生成工单</button></div></td></tr>
-                <tr data-risk="warn"><td><a href="equipment-detail.html?device=ZL-2026-06"><strong>ZL-2026-06</strong><span>电动装载机 5吨</span></a></td><td>EWL50E</td><td>王磊</td><td><span class="score-pill warn">61</span> 中风险</td><td><span class="status warn">中风险</span></td><td>3次</td><td><span class="status warn">待派单</span></td><td><div class="table-actions-inline"><button class="link-btn" type="button" data-bi-detail="ZL-2026-06">查看分析</button><button class="link-btn" type="button" data-bi-detail="ZL-2026-06">生成工单</button></div></td></tr>
-                <tr data-risk="bad"><td><a href="equipment-detail.html?device=ZL-2026-05"><strong>ZL-2026-05</strong><span>电动装载机 3吨</span></a></td><td>EWL30E</td><td>赵敏</td><td><span class="score-pill bad">45</span> 高风险</td><td><span class="status bad">高风险</span></td><td>5次</td><td><span class="status purple">待诊断</span></td><td><div class="table-actions-inline"><button class="link-btn" type="button" data-bi-detail="ZL-2026-05">查看分析</button><button class="link-btn" type="button" data-bi-detail="ZL-2026-05">生成工单</button></div></td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="result-status" id="biResultStatus" role="status" aria-live="polite" data-bi-result>当前显示 4 台重点设备，其中 2 台需要预警处置。</div>
-          <div class="table-note"><span>共 128 台设备</span><span>数据更新于：2026-06-24 10:30:00</span><button class="link-btn" type="button" data-toast="已同步最新数据">重新同步</button></div>
-        </article>
-
-        <div class="grid grid-3 bi-analysis-grid" hidden>
-          <article class="card">
-            <div class="section-title"><h3>高风险设备 Top 5</h3><span class="status bad">需介入</span></div>
-            <div class="risk-list">
-              <div class="risk-head"><span>排名</span><span>设备编号</span><span>健康评分</span><span>风险等级</span></div>
-              <div class="risk-row"><span>1</span><strong>XL968E-00123</strong><em>42</em><b>高风险</b></div>
-              <div class="risk-row"><span>2</span><strong>XL958E-00087</strong><em>48</em><b>高风险</b></div>
-              <div class="risk-row warn"><span>3</span><strong>XL968E-00056</strong><em>53</em><b>中风险</b></div>
-              <div class="risk-row warn"><span>4</span><strong>XL958E-00176</strong><em>56</em><b>中风险</b></div>
-              <div class="risk-row warn"><span>5</span><strong>XL968E-00102</strong><em>59</em><b>中风险</b></div>
-            </div>
-            <a class="card-link" href="equipment-ledger.html">查看全部 ›</a>
-          </article>
-
-          <article class="card">
-            <div class="section-title"><h3>工单状态分布</h3><button class="link-btn" type="button" data-state-preview="loading" aria-controls="syncStateCard" aria-expanded="false">同步数据</button></div>
-            <div class="chart-legend"><span><i class="info-dot"></i>待派单</span><span><i class="ok-dot"></i>维修中</span><span><i class="warn-dot"></i>待验收</span><span><i class="purple-dot"></i>已关闭</span></div>
-            <div class="chart-frame">
-              <div class="chart-axis" aria-hidden="true"><span>1,500</span><span>1,250</span><span>1,000</span><span>750</span><span>500</span><span>250</span><span>0</span></div>
-              <div class="stacked-chart" aria-label="近五周工单状态堆叠柱图">
-                <div class="stack-col" style="--a:14%;--b:36%;--c:21%;--d:29%"><b>1,082</b><span>05-25</span></div>
-                <div class="stack-col" style="--a:13%;--b:39%;--c:18%;--d:30%"><b>1,156</b><span>06-01</span></div>
-                <div class="stack-col" style="--a:16%;--b:35%;--c:20%;--d:29%"><b>1,203</b><span>06-08</span></div>
-                <div class="stack-col" style="--a:18%;--b:34%;--c:22%;--d:26%"><b>1,268</b><span>06-15</span></div>
-                <div class="stack-col" style="--a:17%;--b:36%;--c:23%;--d:24%"><b>1,312</b><span>06-22</span></div>
-              </div>
-            </div>
-            <button class="card-link link-btn" type="button" data-bi-detail="工单状态分布" aria-controls="biInsightDrawer">查看详情 ›</button>
-          </article>
-
-          <article class="card">
-            <div class="section-title"><h3>设备健康评分分布</h3><button class="link-btn" type="button" data-state-preview="error" aria-controls="errorStateCard" aria-expanded="false">接口状态</button></div>
-            <div class="health-summary">
-              <div class="health-chip ok">正常设备<strong data-bi-health-count="normal">--台</strong></div>
-              <div class="health-chip info">低风险设备<strong data-bi-health-count="low">--台</strong></div>
-              <div class="health-chip warn">中风险设备<strong data-bi-health-count="medium">--台</strong></div>
-              <div class="health-chip bad">高风险设备<strong data-bi-health-count="high">--台</strong></div>
-              <div class="health-chip bad">严重风险设备<strong data-bi-health-count="severe">--台</strong></div>
-            </div>
-            <div class="health-band" aria-label="健康评分占比分布"><span class="ok" style="width:56%"></span><span class="info" style="width:25%"></span><span class="warn" style="width:13%"></span><span class="bad" style="width:6%"></span></div>
-            <div class="health-breakdown">
-              <div><span class="dot ok"></span><strong>100 正常</strong><em data-bi-health-summary="normal">--</em></div>
-              <div><span class="dot info"></span><strong>80-99 低风险</strong><em data-bi-health-summary="low">--</em></div>
-              <div><span class="dot warn"></span><strong>60-79 中风险</strong><em data-bi-health-summary="medium">--</em></div>
-              <div><span class="dot bad"></span><strong>40-59 高风险</strong><em data-bi-health-summary="high">--</em></div>
-              <div><span class="dot bad"></span><strong>0-39 严重风险</strong><em data-bi-health-summary="severe">--</em></div>
-            </div>
-            <div class="alert-strip">当前健康分快照仅用于风险识别；请进入故障上报查看和处理故障单。</div>
-          </article>
-        </div>
-
-        <div class="grid grid-2 bi-state-grid" aria-label="数据同步与异常恢复状态" hidden>
-          <article class="card state-card" id="syncStateCard" data-state-card="loading" role="status" aria-live="polite" hidden>
-            <div class="section-title"><h3>数据同步任务</h3><span class="status info">同步中</span></div>
-            <div class="skeleton-lines"><span></span><span></span><span></span></div>
-            <p class="muted">正在拉取最新设备健康分、故障趋势和工单状态，通常 3 秒内完成。</p>
-          </article>
-          <article class="card state-card" id="errorStateCard" data-state-card="error" role="status" aria-live="polite" hidden>
-            <div class="section-title"><h3>知识图谱接口</h3><span class="status bad">接口异常</span></div>
-            <p class="muted">知识图谱覆盖率接口暂时不可用，当前展示最近一次成功同步数据。</p>
-            <button class="btn btn-secondary" type="button" data-toast="已重新请求覆盖率接口">重试同步</button>
-          </article>
-        </div>
       </section>
     </main>
   </div>
@@ -235,29 +145,10 @@
     (function () {
       const service = window.HealthScoreService;
       if (!service) return;
-      const rows = [...document.querySelectorAll('#healthTableBody tr')];
-      const healthItems = rows.map((row) => {
-        const id = row.querySelector('td strong')?.textContent.trim();
-        const health = service.getEquipment(id);
-        if (!health) return null;
-        row.dataset.risk = health.riskClass === 'normal' || health.riskClass === 'low' ? 'ok' : health.riskClass === 'medium' ? 'warn' : 'bad';
-        const score = row.querySelector('.score-pill');
-        const risk = row.querySelector('td:nth-child(5) .status');
-        if (score) { score.textContent = health.score; score.className = `score-pill ${row.dataset.risk}`; }
-        if (risk) { risk.textContent = health.risk; risk.className = `status ${row.dataset.risk}`; }
-        return health;
-      }).filter(Boolean);
-      const average = healthItems.length ? Math.round(healthItems.reduce((sum, item) => sum + item.score, 0) / healthItems.length) : '--';
+      const items = Object.values(service.getAll ? service.getAll() : {});
+      const average = items.length ? Math.round(items.reduce((sum, item) => sum + item.score, 0) / items.length) : '--';
       const averageEl = document.querySelector('[data-bi-health-average]');
       if (averageEl) averageEl.innerHTML = `${average}<span>分</span>`;
-      const distribution = service.getDistribution();
-      const total = Object.values(distribution).reduce((sum, value) => sum + value, 0) || 1;
-      Object.entries(distribution).forEach(([key, value]) => {
-        const count = document.querySelector(`[data-bi-health-count="${key}"]`);
-        const summary = document.querySelector(`[data-bi-health-summary="${key}"]`);
-        if (count) count.textContent = `${value}台`;
-        if (summary) summary.textContent = `${Math.round(value / total * 100)}% / ${value}台`;
-      });
     }());
   </script>
   <script src="../assets/app.js"></script><script src="../assets/global-agent.js?v=20260702a"></script>
