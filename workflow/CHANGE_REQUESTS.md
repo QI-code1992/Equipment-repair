@@ -1,8 +1,10 @@
-# Change Requests
+# 变更请求台账
 
-This is the continuous change ledger for the project. Existing history must not be deleted; closed items should remain traceable.
+本文件是项目持续变更台账。已有历史不得删除，已关闭事项必须保持可追溯。
 
-## Open
+字段说明：`Level` 为变更级别，`Status` 为变更状态，`Raised By` 为提出人，`Raised At` 为提出时间，`Scope/Impact` 为影响范围，`Verification` 为验证结果。历史条目保留原始英文字段以维持追溯；新条目优先使用中文。
+
+## 进行中
 
 ### CR-001: Reconcile the canonical requirements baseline
 
@@ -31,7 +33,7 @@ This is the continuous change ledger for the project. Existing history must not 
   - Status: Candidate package verified; Stage 1 approval still pending
   - Evidence: `workflow/PROJECT_ASSET_BASELINE.md`
 
-## Closed
+## 已关闭
 
 ### CR-002: Remove out-of-scope and transient workspace assets
 
@@ -223,3 +225,11 @@ This is the continuous change ledger for the project. Existing history must not 
 - Status: Implemented
 - Raised By: project owner
 - Scope: translate README and workflow entry/handoff/approval headings while preserving commands, paths, identifiers and technical terms.
+
+### CR-020：中文化变更请求台账
+
+- 级别：L1
+- 状态：已实施
+- 提出人：项目负责人
+- 范围：将变更台账标题、说明和字段约定改为中文；历史条目保留原始字段以保证追溯。
+- 边界：`CR-xxx`、Commit、路径、技术标识和历史原文不翻译。
