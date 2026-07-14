@@ -200,3 +200,11 @@ This is the continuous change ledger for the project. Existing history must not 
 - Raised By: project owner
 - Scope: translate Stage 1 PRD/SPEC/验收标准/需求追踪矩阵的标题、元数据、表头、章节说明和规则性文字；保留 `FR/NFR/AC/TC`、API、字段名、状态枚举和技术产品名。
 - Boundary: existing English filenames remain unchanged to preserve references; remaining Given/When/Then acceptance sentences and later-stage documents are queued for subsequent batches.
+
+### CR-017: 中文化 Stage 2–3 设计与原型文档
+
+- Level: L1
+- Status: Implemented / partial batch
+- Raised By: project owner
+- Scope: translate Stage 2 interaction/design and Stage 3 prototype document titles, metadata, table headers and explanatory text; preserve technical identifiers, routes, states and file paths.
+- Boundary: existing English filenames remain unchanged; architecture, development, testing, acceptance and release documents remain for the next batch.
