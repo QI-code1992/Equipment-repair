@@ -159,3 +159,11 @@ This is the continuous change ledger for the project. Existing history must not 
 - Raised By: project owner
 - Scope: add notification scrim, lock main-page scrolling while open, preserve independent notification-list scrolling and in-panel loading.
 - Verification: static tests, JavaScript syntax check and `git diff --check` passed.
+
+### CR-012: Unread-only red notification marker
+
+- Level: L1
+- Status: Implemented
+- Raised By: project owner
+- Scope: show a red dot only for unread notifications; read notifications have no left marker. Type colors remain on labels.
+- Verification: static tests, JavaScript syntax check and `git diff --check` passed.

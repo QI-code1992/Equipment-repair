@@ -39,12 +39,9 @@
 
 ## 5. Visual states
 
-- Critical/very urgent: red.
-- Risk/pending: orange.
-- Normal reminder: blue.
-- Success/completed: green.
-- Read: gray text and lower-contrast surface.
-- Unread: 6px status dot and stronger title weight.
+- Notification type colors remain on the type label: critical red, risk/pending orange, normal blue, success green.
+- Read: no left status dot, gray text and lower-contrast surface.
+- Unread: red 6px status dot and stronger title weight. The dot represents unread state only, never notification type or risk.
 
 ## 6. Empty/error/detail states
 

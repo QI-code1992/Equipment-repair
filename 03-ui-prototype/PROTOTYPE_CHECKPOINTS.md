@@ -57,3 +57,9 @@
 - Status: Candidate / awaiting Stage 2 review
 - Scope: notification scrim, body scroll lock and independently scrollable notification list.
 - Verification: static regression and JavaScript syntax checks passed.
+
+## PCP-009: Unread notification marker candidate
+
+- Status: Candidate / awaiting Stage 2 review
+- Scope: unread items show a red dot; read items show no dot.
+- Verification: static regression and JavaScript syntax checks passed.
