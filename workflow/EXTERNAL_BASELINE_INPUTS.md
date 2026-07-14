@@ -9,7 +9,7 @@
 | `开发交付入口.md` | `be4ad84de0b44c28203b01748fa6467ba7d2c75bedd9a24431641761b1ab6846` | 本期开发/不开发范围、运行和验收入口 |
 | `AI_RAGFLOW_LANGGRAPH_SPEC.md` | `91e3a0026e6fecbadbc5f169c1f72f4e5248fb34ded4aecf2212ad2869eda77b` | AI 技术架构、边界、API、工具白名单、安全和 AI 验收 |
 
-## Canonical mapping
+## 规范文档映射
 
 - Requirements: `01-requirements/PRD.md`, `01-requirements/SPEC.md`, `01-requirements/ACCEPTANCE_CRITERIA.md`
 - Interaction/prototype: `02-product-interaction-design/`, `03-ui-prototype/`

@@ -1,4 +1,4 @@
-# Stage Approvals
+# 阶段审批记录
 
 No formal stage transition approval was found during the 2026-07-14 takeover audit.
 

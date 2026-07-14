@@ -1,10 +1,10 @@
-# PM to Development Handoff
+# 产品到开发交接
 
-## Status
+## 状态
 
 Not ready for development.
 
-## Blocking conditions
+## 阻塞条件
 
 - No user-approved Stage 1 requirements baseline.
 - Canonical PRD, SPEC, acceptance criteria, and requirements traceability matrix are not yet available as one consistent set.

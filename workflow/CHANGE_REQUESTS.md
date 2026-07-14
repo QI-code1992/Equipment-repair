@@ -216,3 +216,10 @@ This is the continuous change ledger for the project. Existing history must not 
 - Raised By: project owner
 - Scope: translate Stage 4–8 document titles, metadata, explanatory text, table headers and delivery statements; preserve technical identifiers, API routes, commands, states and Commit SHA.
 - Boundary: existing English filenames remain unchanged; code, tests, logs, variables and technical identifiers retain English where required.
+
+### CR-019: 中文化跨阶段入口与交接说明
+
+- Level: L1
+- Status: Implemented
+- Raised By: project owner
+- Scope: translate README and workflow entry/handoff/approval headings while preserving commands, paths, identifiers and technical terms.
