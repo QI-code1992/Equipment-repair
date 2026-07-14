@@ -6,6 +6,10 @@
 - Audit conclusion: inherited prototype/design package; not yet a controlled development baseline
 - Current formal state: `PRODUCT_CLARIFICATION_REQUIRED`
 
+## Post-migration update (2026-07-14)
+
+The original package is now recoverable from `snapshot/legacy-import-20260714`. Current canonical candidates are under `00-opportunity/` through `08-release-handoff/`; the migrated prototype is `03-ui-prototype/prototype/`; the Stage 1 four-file package is under `01-requirements/`. Historical overlay files and duplicate PDFs were removed from the effective workspace after their contents were incorporated or classified, not erased from Git history.
+
 ## 1. Executive assessment
 
 The workspace contains substantial product material: a historical full PRD and SPEC, later current-rule overlays, business and function diagrams, a multi-page static prototype, an AI integration SPEC, implementation plans, and nine static Node checks. It does not contain production application source, dependency/build manifests, database/API implementation, CI/CD, deployment assets, Git history, formal acceptance evidence, or release artifacts.
