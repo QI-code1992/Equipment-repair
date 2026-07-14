@@ -4,641 +4,1387 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>运维工作台 - 新能源装载机智能运维平台</title>
-  <link rel="stylesheet" href="../assets/app.css?v=20260702a">
+  <link rel="stylesheet" href="../assets/app.css?v=20260714-workbench-content-contained">
   <style>
-    .workbench-filter {
+    .content {
+      background:
+        radial-gradient(circle at 78% 0%, rgba(57, 139, 255, .08), transparent 24%),
+        linear-gradient(180deg, #f7faff 0%, var(--bg) 360px);
+    }
+
+    .workbench-head {
+      align-items: flex-end;
+      display: flex;
+      gap: 18px;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .workbench-head-copy h2 {
+      font-size: 22px;
+      letter-spacing: -.02em;
+      margin: 0 0 6px;
+    }
+
+    .workbench-head-copy p { margin: 0; }
+
+    .workbench-actions {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .update-time {
+      color: var(--muted);
+      font-size: 12px;
+      margin-right: 4px;
+    }
+
+    .scope-card {
       align-items: end;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.98), rgba(246,250,255,.96));
+      border-radius: 18px;
       display: grid;
-      gap: 12px;
-      grid-template-columns: repeat(3, minmax(150px, 1fr)) repeat(2, minmax(150px, 0.9fr));
+      gap: 14px;
+      grid-template-columns: repeat(3, minmax(160px, 1fr));
+      margin-bottom: 16px;
+      padding: 15px 17px;
+    }
+
+    .scope-card::after {
+      background: radial-gradient(circle, rgba(42,127,255,.13) 0 2px, transparent 2.5px);
+      background-size: 14px 14px;
+      content: "";
+      height: 48px;
+      opacity: .55;
+      pointer-events: none;
+      position: absolute;
+      right: 18px;
+      top: 8px;
+      width: 92px;
+    }
+
+    .scope-card .field { margin: 0; position: relative; z-index: 1; }
+    .scope-card .field span { display: block; margin-bottom: 6px; }
+
+    .metric-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .metric-action {
+      appearance: none;
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+      min-height: 122px;
+      overflow: hidden;
+      padding: 17px 18px;
+      text-align: left;
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
       width: 100%;
     }
 
-    .workbench-filter .field {
-      margin: 0;
+    .metric-action::after {
+      background: linear-gradient(135deg, rgba(71,151,255,.14), rgba(71,151,255,.03));
+      border-radius: 50%;
+      bottom: -42px;
+      content: "";
+      height: 116px;
+      position: absolute;
+      right: -35px;
+      width: 116px;
     }
 
-    .workbench-filter .field label {
-      display: block;
-      margin-bottom: 6px;
+    .metric-action:hover,
+    .metric-action:focus-visible,
+    .metric-action.active {
+      border-color: color-mix(in oklab, var(--accent), var(--surface) 42%);
+      box-shadow: 0 14px 34px oklch(24% 0.055 260 / 0.11);
+      outline: none;
+      transform: translateY(-2px);
     }
 
-    @media (max-width: 1180px) {
-      .workbench-filter {
-        grid-template-columns: repeat(3, minmax(160px, 1fr));
-      }
-    }
-
-    @media (max-width: 760px) {
-      .workbench-filter {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .fault-alert-card {
-      background: var(--red-50);
-      border-color: color-mix(in oklab, var(--red), var(--surface) 72%);
-    }
-
-    .fault-alert-badge {
-      align-items: center;
-      display: inline-flex;
-      gap: 6px;
-      min-width: 88px;
-      justify-content: center;
-    }
-
-    .fault-alert-badge::before {
-      background: var(--blue-600);
+    .metric-action.active::before {
+      background: linear-gradient(90deg, var(--accent), var(--cyan));
       border-radius: 999px;
       content: "";
-      height: 9px;
-      width: 9px;
+      height: 4px;
+      left: 18px;
+      position: absolute;
+      right: 18px;
+      top: 0;
     }
 
-    .fault-alert-list .timeline-dot {
-      background: var(--blue-600);
-      box-shadow: 0 0 0 10px color-mix(in oklab, var(--blue-600), transparent 82%);
-    }
-
-    .fault-alert-meta {
-      color: var(--muted);
-      display: block;
-      font-size: 12px;
-      margin-top: 3px;
-    }
-
-    .fault-device-list {
-      display: grid;
-      gap: 10px;
-      max-height: 340px;
-      overflow-y: auto;
-      overscroll-behavior: contain;
-      padding-right: 4px;
-      scrollbar-width: thin;
-    }
-
-    .fault-device-list::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .fault-device-list::-webkit-scrollbar-thumb {
-      background: color-mix(in oklab, var(--red), var(--surface) 55%);
-      border-radius: 999px;
-    }
-
-    .fault-device-card {
-      background: var(--bg);
-      border: 1px solid color-mix(in oklab, var(--red), var(--surface) 78%);
-      border-radius: 16px;
-      color: inherit;
-      display: grid;
-      gap: 10px;
-      padding: 13px 14px;
-      text-decoration: none;
-      transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
-    }
-
-    .fault-device-card:hover,
-    .fault-device-card:focus-visible {
-      border-color: color-mix(in oklab, var(--red), var(--surface) 35%);
-      box-shadow: 0 12px 26px rgba(204, 54, 54, 0.12);
-      outline: none;
-      transform: translateY(-1px);
-    }
-
-    .fault-device-head,
-    .fault-device-tags {
+    .metric-topline {
       align-items: center;
       display: flex;
       gap: 8px;
       justify-content: space-between;
-      min-width: 0;
+      position: relative;
+      z-index: 1;
     }
 
-    .fault-device-title {
-      min-width: 0;
+    .metric-icon {
+      align-items: center;
+      background: var(--blue-50);
+      border: 1px solid var(--blue-100);
+      border-radius: 10px;
+      color: var(--accent);
+      display: inline-flex;
+      font-size: 13px;
+      font-weight: 800;
+      height: 29px;
+      justify-content: center;
+      width: 29px;
     }
 
-    .fault-device-title strong,
-    .fault-device-title span,
-    .fault-device-desc {
-      display: block;
+    .metric-action .label,
+    .metric-action .value,
+    .metric-action .delta { position: relative; z-index: 1; }
+
+    .metric-action .value {
+      font-size: 30px;
+      margin: 10px 0 5px;
+    }
+
+    .metric-action[data-filter="veryUrgent"] .value,
+    .metric-action[data-filter="risk"] .value { color: var(--red); }
+    .metric-action[data-filter="urgent"] .value,
+    .metric-action[data-filter="repairing"] .value { color: var(--orange); }
+    .metric-action .delta { color: var(--muted); }
+    .metric-action .delta.bad { color: var(--red); }
+    .metric-action .delta.warn { color: var(--orange); }
+
+    .attention-strip {
+      align-items: center;
+      background: linear-gradient(90deg, #fff8ec, #fffdf7 55%, #f7fbff);
+      border: 1px solid #ffe2ad;
+      border-radius: 14px;
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      margin-top: 14px;
       overflow: hidden;
-      text-overflow: ellipsis;
+      padding: 11px 14px;
+      position: relative;
+    }
+
+    .attention-strip::before {
+      background: linear-gradient(180deg, var(--orange), #ff9a38);
+      content: "";
+      inset: 0 auto 0 0;
+      position: absolute;
+      width: 4px;
+    }
+
+    .attention-copy {
+      align-items: center;
+      display: flex;
+      font-size: 13px;
+      gap: 10px;
+    }
+
+    .attention-icon {
+      align-items: center;
+      background: var(--orange-50);
+      border-radius: 999px;
+      color: var(--orange);
+      display: inline-flex;
+      flex: 0 0 30px;
+      font-weight: 900;
+      height: 30px;
+      justify-content: center;
+    }
+
+    .attention-link {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
       white-space: nowrap;
     }
 
-    .fault-device-title span,
-    .fault-device-desc {
-      color: var(--muted);
-      font-size: 12px;
+    .primary-grid {
+      --primary-panel-height: clamp(520px, 68vh, 650px);
+      align-items: stretch;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: minmax(0, 2.3fr) minmax(320px, .9fr);
+      margin-top: 16px;
     }
 
-    .fault-device-code {
-      color: var(--red);
-      font-family: var(--mono);
-      font-size: 12px;
+    .queue-card,
+    .health-card,
+    .today-card,
+    .trend-card,
+    .activity-card {
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .queue-card {
+      display: flex;
+      flex-direction: column;
+      height: var(--primary-panel-height);
+      min-height: 0;
+      padding: 18px;
+    }
+
+    .queue-card::after {
+      background: radial-gradient(circle, rgba(51,135,255,.10), transparent 70%);
+      content: "";
+      height: 180px;
+      pointer-events: none;
+      position: absolute;
+      right: -70px;
+      top: -72px;
+      width: 180px;
+    }
+
+    .side-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: var(--primary-panel-height);
+      min-width: 0;
+    }
+
+    .module-heading,
+    .queue-head,
+    .trend-head {
+      align-items: flex-start;
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+    }
+
+    .module-title-wrap {
+      align-items: flex-start;
+      display: flex;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .module-icon {
+      align-items: center;
+      background: linear-gradient(145deg, #edf5ff, #f8fbff);
+      border: 1px solid #dceaff;
+      border-radius: 10px;
+      color: var(--accent);
+      display: inline-flex;
+      flex: 0 0 34px;
+      font-size: 14px;
+      font-weight: 800;
+      height: 34px;
+      justify-content: center;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+    }
+
+    .module-heading h3,
+    .module-heading p,
+    .queue-head h3,
+    .queue-head p,
+    .trend-head h3,
+    .trend-head p { margin: 0; }
+
+    .module-heading p,
+    .queue-head p,
+    .trend-head p { margin-top: 5px; }
+
+    .queue-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 15px 0 13px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .queue-tab {
+      background: #f6f9fd;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      min-height: 33px;
+      padding: 0 13px;
+      transition: all 150ms ease;
+    }
+
+    .queue-tab:hover { border-color: #bcd8ff; color: var(--accent); }
+
+    .queue-tab.active {
+      background: linear-gradient(180deg, #eef6ff, #e4f1ff);
+      border-color: #a7ceff;
+      box-shadow: 0 4px 12px rgba(46,127,235,.08);
+      color: var(--accent);
       font-weight: 700;
     }
 
-    .fault-device-tags {
-      justify-content: flex-start;
-      flex-wrap: wrap;
+    .queue-list {
+      align-content: start;
+      display: grid;
+      flex: 1 1 auto;
+      gap: 11px;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior-y: auto;
+      padding: 2px 7px 8px 0;
+      scrollbar-gutter: stable;
     }
 
-    .metric .value {
-      transition: color 0.18s ease, transform 0.18s ease;
+    .queue-list::-webkit-scrollbar { width: 7px; }
+    .queue-list::-webkit-scrollbar-track { background: transparent; }
+    .queue-list::-webkit-scrollbar-thumb {
+      background: #cbd9ea;
+      border-radius: 999px;
+    }
+    .queue-list::-webkit-scrollbar-thumb:hover { background: #aebfd4; }
+    .queue-list > .empty-state { min-height: 100%; }
+
+    .task-card {
+      background: linear-gradient(180deg, #fff, #fcfdff);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      box-sizing: border-box;
+      height: 143px;
+      min-height: 143px;
+      overflow: hidden;
+      padding: 14px 16px;
+      position: relative;
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
     }
 
-    .metric.is-updating .value {
-      color: var(--blue-600);
+    .task-card:hover {
+      border-color: #a9cfff;
+      box-shadow: 0 10px 26px rgba(31,80,143,.10);
       transform: translateY(-1px);
     }
 
-    .severity-grid,
-    .health-level-grid {
-      display: grid;
-      gap: 10px;
+    .task-card.very-urgent {
+      background: linear-gradient(90deg, #fff8f7, #fff 34%);
+      border-left: 4px solid var(--red);
     }
 
-    .severity-row,
-    .health-level-row {
-      align-items: center;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      display: grid;
-      gap: 10px;
-      grid-template-columns: 76px 1fr 44px;
-      padding: 10px 12px;
+    .task-card.urgent {
+      background: linear-gradient(90deg, #fffaf2, #fff 34%);
+      border-left: 4px solid var(--orange);
     }
 
-    .severity-name,
-    .health-level-name {
-      font-weight: 700;
-    }
-
-    .severity-track,
-    .health-level-track,
-    .summary-track {
-      background: var(--border);
-      border-radius: 999px;
-      height: 8px;
-      overflow: hidden;
-    }
-
-    .severity-track span,
-    .health-level-track span,
-    .summary-track span {
-      background: var(--blue-600);
-      border-radius: inherit;
-      display: block;
+    .task-main {
+      display: flex;
+      flex-direction: column;
       height: 100%;
-      min-width: 4px;
-      transition: width 0.2s ease;
-    }
-
-    .severity-row[data-level="严重"] .severity-track span,
-    .health-level-row[data-level="严重"] .health-level-track span {
-      background: var(--red);
-    }
-
-    .severity-row[data-level="高"] .severity-track span,
-    .health-level-row[data-level="风险"] .health-level-track span {
-      background: var(--orange);
-    }
-
-    .severity-row[data-level="中"] .severity-track span,
-    .health-level-row[data-level="关注"] .health-level-track span {
-      background: var(--blue-600);
-    }
-
-    .severity-row[data-level="低"] .severity-track span,
-    .health-level-row[data-level="健康"] .health-level-track span {
-      background: var(--green);
-    }
-
-    .ranking-mode {
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: -4px;
-      margin-bottom: 10px;
-    }
-
-    .rank-meta {
-      color: var(--muted);
-      display: block;
-      font-size: 12px;
-      margin-top: 3px;
-    }
-
-    .trend-summary-grid {
-      display: grid;
-      gap: 14px;
-      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
-    }
-
-    .trend-panel {
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 14px;
-    }
-
-    .trend-bars {
-      align-items: end;
-      display: grid;
-      gap: 9px;
-      grid-auto-flow: column;
-      grid-auto-columns: 1fr;
-      height: 184px;
-      padding-top: 10px;
-    }
-
-    .trend-bar {
-      align-items: center;
-      display: grid;
-      gap: 8px;
-      grid-template-rows: 1fr auto;
       min-width: 0;
     }
 
-    .trend-bar span {
-      align-self: end;
-      background: linear-gradient(180deg, var(--blue-600), var(--accent));
-      border-radius: 999px 999px 6px 6px;
-      min-height: 8px;
-      transition: height 0.2s ease;
+    .task-title-row,
+    .task-meta,
+    .task-actions,
+    .health-top,
+    .activity-row,
+    .trend-legend {
+      align-items: center;
+      display: flex;
+      gap: 9px;
     }
 
-    .trend-bar em {
+    .task-title-row {
+      flex-wrap: wrap;
+      margin-bottom: 7px;
+      min-height: 28px;
+    }
+
+    .task-title-row strong {
+      font-size: 16px;
+      margin-left: 2px;
+    }
+
+    .task-code {
       color: var(--muted);
+      font-family: var(--mono);
       font-size: 11px;
-      font-style: normal;
+    }
+
+    .task-desc-row {
+      align-items: center;
+      display: flex;
+      gap: 12px;
+      margin-bottom: 8px;
+      min-width: 0;
+    }
+
+    .task-desc {
+      color: var(--fg);
+      flex: 1 1 auto;
+      font-size: 13px;
+      line-height: 1.6;
+      min-width: 0;
       overflow: hidden;
-      text-align: center;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    .summary-metrics {
-      display: grid;
-      gap: 10px;
-      grid-template-columns: repeat(3, 1fr);
-      margin-bottom: 14px;
+    .task-owner-inline {
+      color: var(--muted);
+      flex: 0 0 auto;
+      font-size: 11px;
+      white-space: nowrap;
     }
 
-    .mini-metric {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 10px;
-    }
-
-    .mini-metric strong {
-      display: block;
-      font-size: 20px;
-      line-height: 1.2;
-    }
-
-    .summary-ratio {
-      display: flex;
-      height: 12px;
-      margin: 12px 0 14px;
-      overflow: hidden;
-    }
-
-    .summary-ratio span {
-      min-width: 2%;
-    }
-
-    .summary-ratio .pending {
-      background: var(--red);
-    }
-
-    .summary-ratio .processing {
-      background: var(--orange);
-    }
-
-    .summary-ratio .closed {
-      background: var(--green);
-    }
-
-    .summary-bottom {
-      display: grid;
-      gap: 10px;
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    .work-order-list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .work-order-item {
+    .task-footer {
       align-items: center;
-      border: 1px solid var(--border);
-      border-radius: 14px;
+      border-top: 1px dashed #e0e7f0;
       display: grid;
       gap: 10px;
-      grid-template-columns: minmax(0, 1fr) auto;
-      padding: 11px 12px;
+      grid-template-columns: minmax(0, 1fr) max-content;
+      margin-top: auto;
+      min-width: 0;
+      padding-top: 9px;
     }
 
-    .work-order-item strong,
-    .work-order-item span {
+    .task-meta {
+      color: var(--muted);
+      display: grid;
+      font-size: 11px;
+      gap: 6px;
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.08fr) minmax(0, .95fr);
       min-width: 0;
     }
 
-    @media (max-width: 980px) {
-      .trend-summary-grid,
-      .summary-metrics,
-      .summary-bottom {
-        grid-template-columns: 1fr;
+    .task-meta span {
+      align-items: center;
+      background: #f7f9fc;
+      border: 1px solid #e5ecf5;
+      border-radius: 9px;
+      display: flex;
+      line-height: 1.25;
+      min-width: 0;
+      overflow: hidden;
+      padding: 7px 8px;
+      text-overflow: clip;
+      white-space: nowrap;
+    }
+
+    .task-meta b.bad,
+    .task-meta b.warn,
+    .task-meta b.ok { background: transparent; padding: 0; }
+
+    .task-actions {
+      flex: 0 0 auto;
+      flex-wrap: nowrap;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 0;
+      padding-left: 0;
+      white-space: nowrap;
+    }
+
+    .task-actions .btn {
+      border-radius: 999px;
+      flex: 0 0 auto;
+      min-height: 34px;
+      min-width: 90px;
+      padding: 0 13px;
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      align-items: center;
+      border: 1px dashed var(--border);
+      border-radius: 15px;
+      color: var(--muted);
+      display: flex;
+      justify-content: center;
+      min-height: 250px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .health-card,
+    .today-card { padding: 17px; }
+
+    .health-card { min-height: 0; }
+
+    .health-layout {
+      align-items: center;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 126px minmax(0, 1fr);
+      margin-top: 16px;
+    }
+
+    .health-donut {
+      align-items: center;
+      border-radius: 50%;
+      display: flex;
+      height: 126px;
+      justify-content: center;
+      margin: auto;
+      position: relative;
+      width: 126px;
+    }
+
+    .health-donut::after {
+      background: var(--surface);
+      border-radius: 50%;
+      box-shadow: inset 0 0 0 1px #eaf0f7;
+      content: "";
+      height: 82px;
+      position: absolute;
+      width: 82px;
+    }
+
+    .health-donut-center {
+      position: relative;
+      text-align: center;
+      z-index: 1;
+    }
+
+    .health-donut-center strong {
+      display: block;
+      font-family: var(--mono);
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .health-donut-center span {
+      color: var(--muted);
+      display: block;
+      font-size: 11px;
+      margin-top: 5px;
+    }
+
+    .health-legend { display: grid; gap: 8px; }
+
+    .health-legend-row {
+      align-items: center;
+      display: grid;
+      font-size: 12px;
+      gap: 8px;
+      grid-template-columns: 9px minmax(0,1fr) auto;
+    }
+
+    .risk-dot { border-radius: 999px; height: 8px; width: 8px; }
+    .risk-dot.normal { background: var(--green); }
+    .risk-dot.low { background: var(--cyan); }
+    .risk-dot.medium { background: var(--blue-600); }
+    .risk-dot.high { background: var(--orange); }
+    .risk-dot.severe { background: var(--red); }
+
+    .health-meta {
+      align-items: center;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      display: flex;
+      font-size: 11px;
+      justify-content: space-between;
+      margin-top: 16px;
+      padding-top: 12px;
+    }
+
+    .health-rule {
+      align-items: center;
+      background: #f5f9ff;
+      border: 1px solid #e3edf9;
+      border-radius: 999px;
+      color: var(--muted);
+      cursor: help;
+      display: inline-flex;
+      gap: 5px;
+      min-height: 27px;
+      padding: 0 10px;
+    }
+
+    .health-error {
+      background: var(--red-50);
+      border: 1px solid color-mix(in oklab, var(--red), var(--surface) 70%);
+      border-radius: 14px;
+      margin-top: 16px;
+      padding: 18px;
+    }
+
+    .health-error strong { color: var(--red); display: block; margin-bottom: 7px; }
+
+    .today-card {
+      background:
+        linear-gradient(145deg, #ffffff, #f8fbff);
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+      min-height: 222px;
+    }
+
+    .today-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 15px;
+    }
+
+    .today-item {
+      background: rgba(246,249,253,.9);
+      border: 1px solid #e2eaf4;
+      border-radius: 13px;
+      min-height: 73px;
+      padding: 11px;
+    }
+
+    .today-item span { color: var(--muted); display: block; font-size: 11px; }
+    .today-item strong { display: block; font-family: var(--mono); font-size: 21px; margin-top: 7px; }
+
+    .today-progress {
+      align-items: center;
+      display: grid;
+      gap: 9px;
+      grid-template-columns: auto minmax(0,1fr) auto;
+      margin-top: auto;
+      padding-top: 16px;
+    }
+
+    .today-progress span { color: var(--muted); font-size: 11px; }
+
+    .progress-track {
+      background: #e7eef7;
+      border-radius: 999px;
+      height: 7px;
+      overflow: hidden;
+    }
+
+    .progress-track i {
+      background: linear-gradient(90deg, var(--accent), var(--cyan));
+      border-radius: inherit;
+      display: block;
+      height: 100%;
+    }
+
+    .trend-card,
+    .activity-card { margin-top: 16px; }
+
+    .trend-head { margin-bottom: 17px; }
+
+    .trend-controls {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .trend-mode {
+      background: #f3f7fc;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      display: inline-flex;
+      padding: 3px;
+    }
+
+    .trend-mode button {
+      background: transparent;
+      border-radius: 999px;
+      color: var(--muted);
+      min-height: 29px;
+      padding: 0 11px;
+    }
+
+    .trend-mode button.active {
+      background: var(--surface);
+      box-shadow: 0 3px 10px rgba(40,80,130,.09);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .trend-range {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .trend-range select,
+    .trend-range input { border-radius: 10px; min-height: 36px; }
+    .custom-dates { display: none; gap: 8px; }
+    .custom-dates.visible { display: flex; }
+
+    .trend-layout {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: minmax(0, 1.55fr) minmax(370px, .8fr);
+    }
+
+    .chart-panel {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      min-height: 286px;
+      overflow: hidden;
+      padding: 14px;
+      position: relative;
+    }
+
+    .chart-panel::before {
+      background: linear-gradient(180deg, rgba(242,247,253,.6), transparent);
+      content: "";
+      inset: 0;
+      pointer-events: none;
+      position: absolute;
+    }
+
+    .trend-legend {
+      color: var(--muted);
+      font-size: 12px;
+      justify-content: flex-end;
+      margin-bottom: 6px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .legend-dot { background: var(--accent); border-radius: 999px; height: 8px; width: 8px; }
+    .legend-dot.closed { background: var(--green); }
+
+    .trend-chart {
+      align-items: end;
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(7, minmax(42px, 1fr));
+      height: 225px;
+      padding: 14px 6px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .day-column { align-items: stretch; display: grid; gap: 8px; grid-template-rows: minmax(0, 1fr) auto; }
+    .bar-stack { align-items: end; display: flex; gap: 6px; height: 178px; justify-content: center; }
+    .bar-stack span { border-radius: 8px 8px 3px 3px; min-height: 4px; width: 13px; }
+    .bar-new { background: linear-gradient(180deg, #5aafff, var(--blue-600)); box-shadow: 0 5px 10px rgba(36,126,230,.16); }
+    .bar-closed { background: linear-gradient(180deg, #57d49a, var(--green)); }
+    .day-column em { color: var(--muted); font-size: 11px; font-style: normal; text-align: center; }
+
+    .trend-efficiency-view {
+      display: none;
+      gap: 12px;
+      padding: 18px 8px 4px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .trend-efficiency-view.visible { display: grid; }
+    .trend-count-view.hidden { display: none; }
+
+    .efficiency-line {
+      background: #f8fbff;
+      border: 1px solid #e4edf8;
+      border-radius: 14px;
+      display: grid;
+      gap: 14px;
+      grid-template-columns: 122px minmax(0,1fr) auto;
+      padding: 13px;
+    }
+
+    .efficiency-line strong { font-size: 13px; }
+    .efficiency-line small { color: var(--muted); display: block; margin-top: 4px; }
+
+    .mini-bars { align-items: end; display: flex; gap: 7px; height: 38px; }
+    .mini-bars i { background: linear-gradient(180deg, #76bbff, #2f80ed); border-radius: 4px 4px 2px 2px; flex: 1; min-width: 7px; }
+    .efficiency-line > b { align-self: center; font-family: var(--mono); font-size: 18px; }
+
+    .efficiency-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .efficiency-item {
+      background: linear-gradient(145deg, #f8fbff, #f4f8fd);
+      border: 1px solid #e1eaf5;
+      border-radius: 14px;
+      min-height: 89px;
+      padding: 12px;
+    }
+
+    .efficiency-item span { color: var(--muted); display: block; font-size: 11px; }
+    .efficiency-item strong { display: block; font-family: var(--mono); font-size: 22px; margin: 8px 0 4px; }
+    .efficiency-item small { color: var(--muted); font-size: 10px; }
+
+    .activity-list { display: grid; gap: 0; }
+
+    .activity-row {
+      align-items: flex-start;
+      border-bottom: 1px solid var(--border);
+      padding: 12px 2px;
+    }
+
+    .activity-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .activity-time { color: var(--muted); flex: 0 0 96px; font-family: var(--mono); font-size: 12px; }
+    .activity-dot { background: var(--accent); border-radius: 999px; box-shadow: 0 0 0 5px var(--blue-50); flex: 0 0 8px; height: 8px; margin-top: 5px; width: 8px; }
+    .activity-text { font-size: 13px; line-height: 1.55; }
+    .activity-text strong { margin-right: 5px; }
+
+    @media (max-width: 1280px) {
+      .metric-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+      .metric-action:nth-child(4), .metric-action:nth-child(5) { min-height: 110px; }
+    }
+
+    @media (max-width: 1120px) {
+      .primary-grid,
+      .trend-layout { grid-template-columns: 1fr; }
+      .queue-card { height: clamp(500px, 65vh, 620px); }
+      .side-stack {
+        display: grid;
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        grid-template-rows: auto;
+        height: auto;
       }
     }
+
+    @media (max-width: 920px) {
+      .scope-card { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .scope-card .field:last-child { grid-column: span 2; }
+      .metric-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    }
+
+    @media (max-width: 1360px) and (min-width: 1121px) {
+      .task-meta {
+        font-size: 10.5px;
+        grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.08fr) minmax(0, .95fr);
+      }
+      .task-meta span { padding-inline: 7px; }
+      .task-actions .btn { min-width: 86px; padding: 0 11px; }
+    }
+
+    @media (max-width: 1180px) and (min-width: 901px) {
+      .task-meta { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, .9fr); }
+      .task-meta span { font-size: 10px; padding-inline: 6px; }
+      .task-owner-inline { display: none; }
+      .task-actions .btn { min-width: 84px; padding: 0 10px; }
+    }
+
+    @media (max-width: 720px) {
+      .workbench-head,
+      .queue-head,
+      .trend-head,
+      .attention-strip { align-items: stretch; flex-direction: column; }
+      .workbench-actions,
+      .trend-controls,
+      .trend-range { justify-content: flex-start; }
+      .scope-card,
+      .metric-grid,
+      .efficiency-grid,
+      .side-stack { grid-template-columns: 1fr; }
+      .queue-card { height: 520px; }
+      .scope-card .field:last-child { grid-column: auto; }
+      .task-footer { grid-template-columns: 1fr; }
+      .task-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .task-actions { justify-content: flex-end; }
+      .task-actions .btn { flex: 0 0 auto; }
+      .trend-chart { gap: 6px; overflow-x: auto; }
+      .health-layout { grid-template-columns: 1fr; }
+      .health-legend { width: 100%; }
+    }
+
   </style>
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <div class="brand"><div class="brand-mark">智</div><div><p class="brand-title">新能源装载机<br>智能运维平台</p><div class="brand-subtitle">Fault Ops Console</div></div></div>
-      <nav class="nav-section"><div class="nav-label">业务导航</div><div class="nav-list">
-        <a class="nav-item" href="workbench.html"><span class="nav-icon">01</span><span>工作台</span></a>
-        <a class="nav-item" href="bi-dashboard.html"><span class="nav-icon">02</span><span>驾驶舱 BI</span></a><a class="nav-item" href="factory-modeling.html"><span class="nav-icon">03</span><span>工厂建模</span></a>
-        <a class="nav-item" href="equipment-ledger.html"><span class="nav-icon">04</span><span>设备台账</span></a>
-        <a class="nav-item" href="fault-report.html"><span class="nav-icon">05</span><span>故障上报</span></a>
-        
-        
-        <a class="nav-item" href="maintenance-records.html"><span class="nav-icon">07</span><span>维修记录</span></a>
-        <a class="nav-item" href="system-management.html"><span class="nav-icon">08</span><span>系统管理</span></a>
-        <a class="nav-item" href="intelligent-config.html"><span class="nav-icon">09</span><span>智能配置</span></a>
-      </div></nav>
+      <div class="brand">
+        <div class="brand-mark">智</div>
+        <div><p class="brand-title">新能源装载机<br>智能运维平台</p><div class="brand-subtitle">Fault Ops Console</div></div>
+      </div>
+      <nav class="nav-section">
+        <div class="nav-label">业务导航</div>
+        <div class="nav-list">
+          <a class="nav-item active" href="workbench.html"><span class="nav-icon">01</span><span>工作台</span></a>
+          <a class="nav-item" href="bi-dashboard.html"><span class="nav-icon">02</span><span>驾驶舱 BI</span></a>
+          <a class="nav-item" href="factory-modeling.html"><span class="nav-icon">03</span><span>工厂建模</span></a>
+          <a class="nav-item" href="equipment-ledger.html"><span class="nav-icon">04</span><span>设备台账</span></a>
+          <a class="nav-item" href="fault-report.html"><span class="nav-icon">05</span><span>故障上报</span></a>
+          <a class="nav-item" href="maintenance-records.html"><span class="nav-icon">06</span><span>维修记录</span></a>
+          <a class="nav-item" href="system-management.html"><span class="nav-icon">07</span><span>系统管理</span></a>
+          <a class="nav-item" href="intelligent-config.html"><span class="nav-icon">08</span><span>智能配置</span></a>
+        </div>
+      </nav>
     </aside>
+
     <main class="main-area">
-      <header class="topbar"><div class="topbar-left"><button class="menu-btn" type="button">☰</button><div><h1 class="page-title">运维工作台</h1><div class="crumb">首页 / 实时风险总览</div></div></div><div class="topbar-actions"><button class="icon-btn" type="button" data-toast="暂无新的系统公告">铃</button><div class="user-chip"><span class="avatar">李</span><span>李明 · 运维主管</span></div></div></header>
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" type="button" aria-label="展开菜单">☰</button>
+          <div><h1 class="page-title">运维工作台</h1><div class="crumb">首页 / 实时处置中心</div></div>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" type="button" data-toast="暂无新的系统公告" aria-label="系统通知">铃</button>
+          <div class="user-chip"><span class="avatar">李</span><span>李明 · 设备管理员</span></div>
+        </div>
+      </header>
+
       <section class="content">
-        <div class="toolbar toolbar-wrap">
-          <form class="workbench-filter" aria-label="工作台筛选条件">
-            <label class="field"><span>工厂</span><select name="factory"><option>全部工厂</option><option>华东总装工厂</option><option>西南电动化工厂</option><option>华北交付中心</option></select></label>
-            <label class="field"><span>车间</span><select name="workshop"><option>全部车间</option><option>电池装配车间</option><option>电驱测试车间</option><option>整机调试车间</option><option>售后返修车间</option></select></label>
-            <label class="field"><span>产线</span><select name="line"><option>全部产线</option><option>L1 重载装载机线</option><option>L2 中型装载机线</option><option>L3 高压系统线</option><option>L4 返修复测线</option></select></label>
-            <label class="field"><span>开始时间</span><input type="date" name="startDate" value="2026-06-01"></label>
-            <label class="field"><span>结束时间</span><input type="date" name="endDate" value="2026-06-29"></label>
-          </form>
+        <div class="workbench-head">
+          <div class="workbench-head-copy">
+            <h2>实时处置中心</h2>
+            <p class="muted small">聚焦待接单、维修中和高紧急程度故障，健康分为当前快照，不受趋势时间范围影响。</p>
+          </div>
+          <div class="workbench-actions">
+            <span class="update-time">数据更新时间：<b data-update-time>2026-07-14 10:30</b></span>
+            <button class="btn btn-secondary" type="button" data-refresh>↻ 刷新</button>
+            <a class="btn btn-primary" href="fault-report.html">＋ 故障上报</a>
+          </div>
         </div>
-        <div class="grid grid-6">
-          <article class="card metric" data-metric="total"><div class="label">设备总数</div><div class="value">0</div><div class="delta">按筛选范围统计</div></article>
-          <article class="card metric" data-metric="normal"><div class="label">正常设备</div><div class="value">0</div><div class="delta">健康评分 = 100</div></article>
-          <article class="card metric" data-metric="fault"><div class="label">故障设备</div><div class="value">0</div><div class="delta bad">存在未闭环故障</div></article>
-          <article class="card metric" data-metric="repairing"><div class="label">维修中工单</div><div class="value">0</div><div class="delta warn">状态为处理中</div></article>
-          <article class="card metric" data-metric="pending"><div class="label">待处理工单</div><div class="value">0</div><div class="delta bad">待诊断 / 待派工</div></article>
-          <article class="card metric" data-metric="lowHealth"><div class="label">严重风险设备数</div><div class="value">0</div><div class="delta">健康评分 &lt; 40</div></article>
+
+        <form class="card scope-card" aria-label="组织范围筛选">
+          <label class="field"><span>工厂</span><select name="factory"><option value="all">全部工厂</option><option>华东总装工厂</option><option>西南电动化工厂</option><option>华北交付中心</option></select></label>
+          <label class="field"><span>车间</span><select name="workshop"><option value="all">全部车间</option><option>电池装配车间</option><option>电驱测试车间</option><option>整机调试车间</option><option>售后返修车间</option></select></label>
+          <label class="field"><span>产线</span><select name="line"><option value="all">全部产线</option><option>L1 重载装载机线</option><option>L2 中型装载机线</option><option>L3 高压系统线</option><option>L4 返修复测线</option></select></label>
+        </form>
+
+        <div class="metric-grid" data-metric-grid>
+          <button class="card metric metric-action active" type="button" data-filter="pending">
+            <span class="metric-topline"><span class="label">待接单故障</span><span class="metric-icon">待</span></span>
+            <span class="value" data-metric="pending">0</span><span class="delta">等待设备管理员接单</span>
+          </button>
+          <button class="card metric metric-action" type="button" data-filter="repairing">
+            <span class="metric-topline"><span class="label">维修中故障</span><span class="metric-icon">修</span></span>
+            <span class="value" data-metric="repairing">0</span><span class="delta warn">正在现场处置</span>
+          </button>
+          <button class="card metric metric-action" type="button" data-filter="veryUrgent">
+            <span class="metric-topline"><span class="label">非常紧急故障</span><span class="metric-icon">急</span></span>
+            <span class="value" data-metric="veryUrgent">0</span><span class="delta bad">建议优先查看</span>
+          </button>
+          <button class="card metric metric-action" type="button" data-filter="urgent">
+            <span class="metric-topline"><span class="label">紧急故障</span><span class="metric-icon">重</span></span>
+            <span class="value" data-metric="urgent">0</span><span class="delta warn">关注当前处置进展</span>
+          </button>
+          <button class="card metric metric-action" type="button" data-filter="risk">
+            <span class="metric-topline"><span class="label">高/严重风险设备</span><span class="metric-icon">险</span></span>
+            <span class="value" data-metric="risk">0</span><span class="delta bad">当前健康分快照</span>
+          </button>
         </div>
-        <div class="grid grid-2" style="margin-top:16px">
-          <article class="card"><div class="section-title"><h3>车间 / 产线健康排行</h3><a class="small muted" href="equipment-ledger.html">查看台账</a></div><p class="ranking-mode" data-ranking-mode>按工厂 / 车间 / 产线筛选自动切换排行口径</p><div class="list" data-ranking-list>
-          </div></article>
-          <article class="card fault-alert-card" data-fault-alerts><div class="section-title"><h3>故障与告警</h3><span class="status info fault-alert-badge" data-alert-count>0 台</span></div><div class="fault-device-list" data-alert-device-list>
-          </div></article>
-          <article class="card span-2"><div class="section-title"><h3>故障趋势与处理汇总</h3><span class="status ok" data-trend-range>按时间区间</span></div><div class="trend-summary-grid">
-            <div class="trend-panel"><div class="muted small">故障趋势</div><div class="trend-bars" data-trend-bars></div></div>
-            <div class="trend-panel"><div class="summary-metrics">
-              <div class="mini-metric"><span class="muted small">待处理</span><strong data-summary="pending">0</strong></div>
-              <div class="mini-metric"><span class="muted small">处理中</span><strong data-summary="processing">0</strong></div>
-              <div class="mini-metric"><span class="muted small">已闭环</span><strong data-summary="closed">0</strong></div>
-            </div><div class="summary-track summary-ratio" data-summary-ratio><span class="pending"></span><span class="processing"></span><span class="closed"></span></div><div class="summary-bottom">
-              <div class="mini-metric"><span class="muted small">平均处理时间</span><strong data-summary="avgHours">0h</strong></div>
-              <div class="mini-metric"><span class="muted small">闭环率</span><strong data-summary="closeRate">0%</strong></div>
-              <div class="mini-metric"><span class="muted small">超时数</span><strong data-summary="overdue">0</strong></div>
-            </div></div>
-          </div></article>
-          <article class="card"><div class="section-title"><h3>设备状态分布</h3><span class="status ok">健康等级</span></div><div class="health-level-grid" data-health-levels></div></article>
-          <article class="card"><div class="section-title"><h3>维修 / 工单处理列表</h3><a class="small muted" href="maintenance-records.html">查看维修记录</a></div><div class="work-order-list" data-work-orders></div></article>
+
+        <div class="attention-strip" data-attention-strip>
+          <div class="attention-copy"><span class="attention-icon">!</span><span data-attention-text>正在汇总当前处置提醒……</span></div>
         </div>
+
+        <div class="primary-grid">
+          <article class="card queue-card">
+            <div class="queue-head">
+              <div class="module-title-wrap"><span class="module-icon">故</span><div><h3>故障待办</h3><p class="muted small">按紧急程度和正式提交时间排序</p></div></div>
+              <span class="status info" data-queue-count>0 条任务</span>
+            </div>
+            <div class="queue-tabs" role="tablist" aria-label="故障待办筛选">
+              <button class="queue-tab" type="button" data-tab="all">全部</button>
+              <button class="queue-tab active" type="button" data-tab="pending">待接单</button>
+              <button class="queue-tab" type="button" data-tab="repairing">维修中</button>
+              <button class="queue-tab" type="button" data-tab="veryUrgent">非常紧急</button>
+              <button class="queue-tab" type="button" data-tab="urgent">紧急</button>
+              <button class="queue-tab" type="button" data-tab="risk">高风险关联</button>
+            </div>
+            <div class="queue-list" data-queue-list></div>
+          </article>
+
+          <div class="side-stack">
+            <article class="card health-card">
+              <div class="module-heading">
+                <div class="module-title-wrap"><span class="module-icon">健</span><div><h3>当前健康风险概览</h3><p class="muted small">统一健康分服务实时快照</p></div></div>
+                <span class="status ok">当前快照</span>
+              </div>
+              <div data-health-content></div>
+            </article>
+
+            <article class="card today-card">
+              <div class="module-heading">
+                <div class="module-title-wrap"><span class="module-icon">今</span><div><h3>今日处置概览</h3><p class="muted small">截至当前更新时间</p></div></div>
+                <span class="status info">今日</span>
+              </div>
+              <div class="today-grid">
+                <div class="today-item"><span>今日新增故障</span><strong data-today="new">0</strong></div>
+                <div class="today-item"><span>今日已处理</span><strong data-today="closed">0</strong></div>
+                <div class="today-item"><span>平均处理时长</span><strong data-today="avg">0h</strong></div>
+                <div class="today-item"><span>平均响应时长</span><strong data-today="response">0min</strong></div>
+              </div>
+              <div class="today-progress"><span>今日处理完成率</span><span class="progress-track"><i data-today-progress style="width:0%"></i></span><b data-today="completion">0%</b></div>
+            </article>
+          </div>
+        </div>
+
+        <article class="card trend-card">
+          <div class="trend-head">
+            <div class="module-title-wrap"><span class="module-icon">趋</span><div><h3>故障趋势</h3><p class="muted small">时间范围只影响历史故障统计，不影响当前健康分。</p></div></div>
+            <div class="trend-controls">
+              <div class="trend-range">
+                <select aria-label="趋势时间范围" data-range><option value="7">近 7 天</option><option value="30">近 30 天</option><option value="custom">自定义</option></select>
+                <span class="custom-dates" data-custom-dates><input type="date" value="2026-07-01" aria-label="开始日期"><input type="date" value="2026-07-14" aria-label="结束日期"></span>
+              </div>
+            </div>
+          </div>
+          <div class="trend-layout">
+            <div class="chart-panel">
+              <div class="trend-count-view" data-trend-count-view>
+                <div class="trend-legend"><span class="legend-dot"></span>新增故障 <span class="legend-dot closed"></span>已处理</div>
+                <div class="trend-chart" data-trend-chart></div>
+              </div>
+            </div>
+            <div class="efficiency-grid">
+              <div class="efficiency-item"><span>新增故障</span><strong data-efficiency="new">0</strong><small>当前周期</small></div>
+              <div class="efficiency-item"><span>已处理</span><strong data-efficiency="closed">0</strong><small>当前周期</small></div>
+              <div class="efficiency-item"><span>处理完成率</span><strong data-efficiency="completion">0%</strong><small>已处理 / 新增</small></div>
+              <div class="efficiency-item"><span>平均响应时长</span><strong data-efficiency="response">0min</strong><small>首次接单耗时</small></div>
+              <div class="efficiency-item"><span>平均处理时长</span><strong data-efficiency="avg">0h</strong><small>仅统计已处理故障</small></div>
+              <div class="efficiency-item"><span>一次修复率</span><strong data-efficiency="firstFix">0%</strong><small>无需再次返修</small></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="card activity-card">
+          <div class="module-heading"><div class="module-title-wrap"><span class="module-icon">动</span><div><h3>最新维修动态</h3><p class="muted small">接单、维修与处理结果实时汇总</p></div></div><a class="small muted" href="maintenance-records.html?tab=records">查看全部维修记录 →</a></div>
+          <div class="activity-list" data-activity-list></div>
+        </article>
       </section>
     </main>
   </div>
-  <button class="ai-fab" id="openAi" type="button" aria-controls="agentDrawer" aria-expanded="false"><span class="ai-dot"></span>Agent</button>
-  <aside class="agent-drawer" id="agentDrawer" aria-hidden="true" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="agentDrawerTitle">
-    <div class="agent-drawer-head"><div><strong id="agentDrawerTitle">全局 Agent 助手</strong><div class="muted small" data-agent-context>正在识别当前页面上下文</div></div><button class="icon-btn" id="closeAi" type="button" aria-label="关闭 Agent 抽屉">×</button></div>
-    <div class="agent-permission"><span class="status ok">李明 · 设备管理员</span><span class="status ok">权限已识别</span><span class="status ok">Agent 在线</span></div>
-    <div class="agent-quick-actions"><button type="button" data-agent-intent="故障上报">故障上报</button><button type="button" data-agent-intent="查询设备故障">查询设备故障</button><button type="button" data-agent-intent="解释诊断结果">解释诊断结果</button><button type="button" data-agent-intent="生成维修建议">生成维修建议</button><button type="button" data-agent-intent="查看工单进度">查看工单进度</button></div>
-    <div class="chat agent-drawer-chat" aria-live="polite"><div class="bubble">我会读取当前页面上下文，先做咨询和上报预收集；正式提交需进入 Agent 上报页。</div><div class="bubble" data-agent-reply>当前账号可查看授权设备范围，未授权设备会直接拒绝并隐藏详情。</div></div>
-    <div class="agent-progress"><div class="section-title"><h3>上报预收集</h3><span class="status warn">60%</span></div><div class="progress"><span style="width:60%"></span></div><div class="summary-box vertical"><div><strong>上下文</strong><br><span data-agent-summary>当前页面</span></div><div><strong>已收集</strong><br>设备 EL-2024-019、故障现象：电机过温限扭</div><div><strong>缺失项</strong><br>发生时间、持续时长、现场附件</div></div></div>
-    <div class="agent-input-row"><input id="agentInput" placeholder="描述故障、查询设备或询问工单进度"><button class="btn btn-secondary" type="button" data-agent-attach>附件</button><button class="btn btn-primary" type="button" id="agentSend">发送</button></div>
-    <a class="btn btn-primary agent-full-link" href="agent-report.html">进入完整上报页</a>
-  </aside>
-  <div class="agent-scrim" id="agentScrim"></div>
-  <div class="toast" role="status" aria-live="polite"></div>
+
   <script src="../assets/health-score-service.js"></script>
   <script>
     (function () {
+      const urgencyRank = { "非常紧急": 0, "紧急": 1, "一般": 2 };
+
       const devices = [
-        { id: "EL-2024-019", name: "桥臂电机温升异常", model: "ZL956EV", factory: "华东总装工厂", workshop: "电驱测试车间", line: "L3 高压系统线", health: 42, faulty: true },
-        { id: "EL-2023-088", name: "液压压力波动", model: "ZL940EV", factory: "华东总装工厂", workshop: "整机调试车间", line: "L2 中型装载机线", health: 58, faulty: true },
-        { id: "EL-2022-031", name: "BMS 通讯丢包", model: "ZL936EV", factory: "华东总装工厂", workshop: "电池装配车间", line: "L1 重载装载机线", health: 67, faulty: true },
-        { id: "EL-2024-105", name: "传感器校准偏移", model: "ZL940EV", factory: "西南电动化工厂", workshop: "电驱测试车间", line: "L3 高压系统线", health: 74, faulty: false },
-        { id: "EL-2023-062", name: "充电继电器抖动", model: "ZL956EV", factory: "西南电动化工厂", workshop: "电池装配车间", line: "L1 重载装载机线", health: 55, faulty: true },
-        { id: "EL-2024-076", name: "动力电池温差过大", model: "ZL936EV", factory: "华北交付中心", workshop: "售后返修车间", line: "L4 返修复测线", health: 39, faulty: true },
-        { id: "EL-2022-044", name: "远程终端离线", factory: "华北交付中心", workshop: "整机调试车间", line: "L2 中型装载机线", health: 82, faulty: false },
-        { id: "EL-2024-122", name: "整机控制器正常", factory: "华东总装工厂", workshop: "整机调试车间", line: "L2 中型装载机线", health: 91, faulty: false },
-        { id: "EL-2023-156", name: "电池包巡检正常", factory: "西南电动化工厂", workshop: "电池装配车间", line: "L1 重载装载机线", health: 88, faulty: false },
-        { id: "EL-2022-209", name: "返修复测正常", factory: "华北交付中心", workshop: "售后返修车间", line: "L4 返修复测线", health: 79, faulty: false }
+        { id: "EL-2022-031", name: "2号电池测试台", model: "BMS-X8", factory: "华东总装工厂", workshop: "电池装配车间", line: "L3 高压系统线" },
+        { id: "EL-2024-019", name: "1号驱动电机台架", model: "EM-420", factory: "华东总装工厂", workshop: "电驱测试车间", line: "L1 重载装载机线" },
+        { id: "EL-2023-088", name: "液压性能试验台", model: "HYD-Pro", factory: "华东总装工厂", workshop: "整机调试车间", line: "L2 中型装载机线" },
+        { id: "EL-2021-047", name: "高压绝缘检测台", model: "HV-900", factory: "西南电动化工厂", workshop: "电池装配车间", line: "L3 高压系统线" },
+        { id: "EL-2022-044", name: "远程终端复测台", model: "TCU-5G", factory: "华北交付中心", workshop: "售后返修车间", line: "L4 返修复测线" },
+        { id: "EL-2022-209", name: "充电继电器试验台", model: "CHG-220", factory: "西南电动化工厂", workshop: "售后返修车间", line: "L4 返修复测线" },
+        { id: "EL-2024-105", name: "整机通讯检测位", model: "CAN-Pro", factory: "华东总装工厂", workshop: "整机调试车间", line: "L2 中型装载机线" },
+        { id: "EL-2024-076", name: "动力电池热管理台", model: "BTM-600", factory: "西南电动化工厂", workshop: "电池装配车间", line: "L3 高压系统线" },
+        { id: "EL-2024-122", name: "电控标定台", model: "VCU-Lab", factory: "华北交付中心", workshop: "电驱测试车间", line: "L1 重载装载机线" },
+        { id: "EL-2025-018", name: "下线综合检测位", model: "EOL-X", factory: "华东总装工厂", workshop: "整机调试车间", line: "L1 重载装载机线" }
       ];
 
-      const healthOf = (item) => window.HealthScoreService?.getEquipment(item.id) || {
-        score: item.health,
-        risk: item.health === 100 ? "正常" : item.health >= 80 ? "低风险" : item.health >= 60 ? "中风险" : item.health >= 40 ? "高风险" : "严重风险",
-        riskClass: item.health === 100 ? "normal" : item.health >= 80 ? "low" : item.health >= 60 ? "medium" : item.health >= 40 ? "high" : "severe"
+      let faults = [
+        { id: "GD-20260714-018", deviceId: "EL-2022-031", description: "电池管理系统通讯间歇丢包，需复核线束与终端电阻。", urgency: "非常紧急", status: "待接单", submittedAt: "2026-07-14T07:20:00", owner: "接单后确定", responseMinutes: 12 },
+        { id: "GD-20260714-016", deviceId: "EL-2024-019", description: "驱动桥臂温度持续高于阈值，设备已触发限扭保护。", urgency: "紧急", status: "维修中", submittedAt: "2026-07-14T05:50:00", owner: "电驱维修组", responseMinutes: 16 },
+        { id: "GD-20260714-021", deviceId: "EL-2021-047", description: "高压绝缘阻值波动，复测结果接近停机阈值。", urgency: "紧急", status: "待接单", submittedAt: "2026-07-14T08:10:00", owner: "接单后确定", responseMinutes: 20 },
+        { id: "GD-20260714-023", deviceId: "EL-2023-088", description: "液压主回路压力波动超出稳定范围，需检查比例阀。", urgency: "一般", status: "维修中", submittedAt: "2026-07-14T07:00:00", owner: "液压维修组", responseMinutes: 22 },
+        { id: "GD-20260714-027", deviceId: "EL-2022-044", description: "远程终端离线，现场网络正常，等待终端硬件复核。", urgency: "一般", status: "待接单", submittedAt: "2026-07-14T09:15:00", owner: "接单后确定", responseMinutes: 18 },
+        { id: "GD-20260714-010", deviceId: "EL-2024-105", description: "整机通讯检测异常，已完成网关参数修正并复测通过。", urgency: "一般", status: "已处理", submittedAt: "2026-07-14T06:10:00", owner: "整机调试组", completedHours: 2.1, responseMinutes: 14 },
+        { id: "GD-20260714-012", deviceId: "EL-2024-122", description: "标定数据校验不一致，已回滚配置并完成验证。", urgency: "紧急", status: "已处理", submittedAt: "2026-07-14T06:45:00", owner: "电控维修组", completedHours: 3.5, responseMinutes: 19 },
+        { id: "GD-20260714-014", deviceId: "EL-2025-018", description: "下线检测结果波动，已重新标定传感器并归档。", urgency: "一般", status: "已处理", submittedAt: "2026-07-14T07:30:00", owner: "质量复测组", completedHours: 1.4, responseMinutes: 17 },
+        { id: "GD-20260713-044", deviceId: "EL-2022-209", description: "充电继电器动作抖动，已完成现场处置并归档。", urgency: "紧急", status: "已处理", submittedAt: "2026-07-13T14:20:00", owner: "售后返修组", completedHours: 3.2, responseMinutes: 24 },
+        { id: "GD-20260712-031", deviceId: "EL-2024-076", description: "动力电池温差过大，已完成热管理系统排查。", urgency: "非常紧急", status: "已处理", submittedAt: "2026-07-12T09:10:00", owner: "电池诊断组", completedHours: 2.6, responseMinutes: 11 }
+      ];
+
+      let activities = [
+        { time: "2026-07-14 10:18", actor: "液压维修组", text: "更新 GD-20260714-023：已完成比例阀外观检查，进入压力复测。" },
+        { time: "2026-07-14 09:58", actor: "系统", text: "GD-20260714-016 已补充现场检测结果，当前保持维修中。" },
+        { time: "2026-07-14 09:42", actor: "电驱维修组", text: "接单 GD-20260714-016，当前状态变更为维修中。" },
+        { time: "2026-07-14 09:20", actor: "系统", text: "GD-20260714-018 被标记为非常紧急，已进入优先任务列表。" },
+        { time: "2026-07-14 08:46", actor: "李明", text: "查看 EL-2021-047 当前健康分与近 30 天重复故障记录。" }
+      ];
+
+      const trendSets = {
+        "7": [
+          { day: "07-08", added: 3, closed: 2 }, { day: "07-09", added: 5, closed: 3 }, { day: "07-10", added: 4, closed: 5 },
+          { day: "07-11", added: 6, closed: 4 }, { day: "07-12", added: 3, closed: 4 }, { day: "07-13", added: 7, closed: 5 }, { day: "07-14", added: 5, closed: 2 }
+        ],
+        "30": [
+          { day: "第1周", added: 18, closed: 16 }, { day: "第2周", added: 22, closed: 20 }, { day: "第3周", added: 17, closed: 19 },
+          { day: "第4周", added: 24, closed: 21 }, { day: "本周", added: 12, closed: 9 }
+        ]
       };
 
-      const faults = [
-        { date: "2026-06-28", device: "EL-2024-019", faultCode: "P1A72", description: "驱动桥臂温度持续高于阈值，触发限扭保护。", severity: "严重", status: "处理中", cardStatus: "维修中", hours: 9, overdue: false },
-        { date: "2026-06-27", device: "EL-2022-031", faultCode: "BMS-104", description: "电池管理系统通讯间歇丢包，需复核线束与终端。", severity: "高", status: "待处理", cardStatus: "待接单", hours: 0, overdue: true },
-        { date: "2026-06-25", device: "EL-2023-088", faultCode: "HYD-212", description: "液压主回路压力波动超出稳定范围。", severity: "中", status: "处理中", cardStatus: "维修中", hours: 14, overdue: false },
-        { date: "2026-06-21", device: "EL-2024-105", faultCode: "SNS-033", description: "位移传感器校准偏移，已完成复测闭环。", severity: "中", status: "已闭环", cardStatus: "已处理", hours: 6, overdue: false },
-        { date: "2026-06-18", device: "EL-2023-062", faultCode: "CHG-017", description: "充电继电器动作抖动，等待现场确认。", severity: "低", status: "待处理", cardStatus: "待接单", hours: 0, overdue: false },
-        { date: "2026-06-11", device: "EL-2024-076", faultCode: "BAT-409", description: "动力电池温差过大，已完成热管理排查。", severity: "严重", status: "已闭环", cardStatus: "已处理", hours: 22, overdue: true },
-        { date: "2026-06-04", device: "EL-2022-044", faultCode: "TCU-008", description: "远程终端离线告警，已恢复连接。", severity: "低", status: "已闭环", cardStatus: "已处理", hours: 4, overdue: false }
-      ];
+      const scopeForm = document.querySelector(".scope-card");
+      const queueList = document.querySelector("[data-queue-list]");
+      const queueCount = document.querySelector("[data-queue-count]");
+      let currentFilter = "pending";
 
-      const workOrders = [
-        { id: "WO-0628-014", device: "EL-2024-019", status: "处理中", owner: "电驱维修组", date: "2026-06-28" },
-        { id: "WO-0627-009", device: "EL-2022-031", status: "待处理", owner: "电池诊断组", date: "2026-06-27" },
-        { id: "WO-0625-021", device: "EL-2023-088", status: "处理中", owner: "液压维修组", date: "2026-06-25" },
-        { id: "WO-0621-008", device: "EL-2024-105", status: "已闭环", owner: "整机调试组", date: "2026-06-21" },
-        { id: "WO-0618-016", device: "EL-2023-062", status: "待处理", owner: "售后返修组", date: "2026-06-18" }
-      ];
-
-      const form = document.querySelector(".workbench-filter");
-      if (!form) return;
-
-      function scopeDevices() {
-        const factory = form.elements.factory.value;
-        const workshop = form.elements.workshop.value;
-        const line = form.elements.line.value;
-        return devices.filter((item) => {
-          if (factory !== "全部工厂" && item.factory !== factory) return false;
-          if (workshop !== "全部车间" && item.workshop !== workshop) return false;
-          if (line !== "全部产线" && item.line !== line) return false;
-          return true;
-        });
+      function deviceOf(id) {
+        return devices.find((item) => item.id === id) || { id, name: id, model: "未知型号", factory: "-", workshop: "-", line: "-" };
       }
 
-      function scopeFaults(scope) {
-        const start = form.elements.startDate.value || "1900-01-01";
-        const end = form.elements.endDate.value || "2999-12-31";
-        const ids = new Set(scope.map((item) => item.id));
-        return faults.filter((item) => ids.has(item.device) && item.date >= start && item.date <= end);
+      function healthOf(id) {
+        return window.HealthScoreService?.getEquipment(id) || null;
       }
 
-      function setMetric(name, value, detail) {
-        const card = document.querySelector(`[data-metric="${name}"]`);
-        if (!card) return;
-        card.querySelector(".value").textContent = value;
-        if (detail) card.querySelector(".delta").textContent = detail;
-        card.classList.add("is-updating");
-        window.setTimeout(() => card.classList.remove("is-updating"), 180);
+      function scopedDevices() {
+        const factory = scopeForm.elements.factory.value;
+        const workshop = scopeForm.elements.workshop.value;
+        const line = scopeForm.elements.line.value;
+        if (!factory || !workshop || !line) return [];
+        return devices.filter((item) => (factory === "all" || item.factory === factory) && (workshop === "all" || item.workshop === workshop) && (line === "all" || item.line === line));
       }
 
-      function renderMetrics(scope, scopedFaults, scopedOrders) {
-        setMetric("total", scope.length, "当前筛选范围设备");
-        setMetric("normal", scope.filter((item) => healthOf(item).score === 100).length, "健康评分 = 100");
-        setMetric("fault", new Set(scopedFaults.filter((item) => item.status !== "已闭环").map((item) => item.device)).size, "存在未闭环故障");
-        setMetric("repairing", scopedOrders.filter((item) => item.status === "处理中").length, "工单状态为处理中");
-        setMetric("pending", scopedOrders.filter((item) => item.status === "待处理").length, "待诊断 / 待派工");
-        setMetric("lowHealth", scope.filter((item) => healthOf(item).score < 40).length, "健康评分 < 40");
+      function fillScopeOptions(select, placeholder, values, allLabel) {
+        const options = [`<option value="">${placeholder}</option>`];
+        if (allLabel) options.push(`<option value="all">${allLabel}</option>`);
+        values.forEach((value) => options.push(`<option value="${value}">${value}</option>`));
+        select.innerHTML = options.join("");
+        select.value = "";
       }
 
-      function renderFaultCards(scopedFaults) {
-        const deviceById = Object.fromEntries(devices.map((item) => [item.id, item]));
-        const list = document.querySelector("[data-alert-device-list]");
-        const riskOrder = { "严重": 0, "高": 1, "中": 2, "低": 3 };
-        const statusOrder = { "待接单": 1, "维修中": 2 };
-        const riskOf = (fault) => {
-          const device = deviceById[fault.device] || {};
-          const health = healthOf(device);
-          return health.riskClass === "severe" ? "严重" : health.riskClass === "high" ? "高" : health.riskClass === "medium" ? "中" : "低";
-        };
-        const visibleFaults = scopedFaults
-          .filter((fault) => ["待接单", "维修中"].includes(fault.cardStatus))
-          .sort((a, b) => {
-            const riskDelta = riskOrder[riskOf(a)] - riskOrder[riskOf(b)];
-            if (riskDelta !== 0) return riskDelta;
-            const statusDelta = statusOrder[a.cardStatus] - statusOrder[b.cardStatus];
-            if (statusDelta !== 0) return statusDelta;
-            return b.date.localeCompare(a.date);
-          });
-        document.querySelector("[data-alert-count]").textContent = `${visibleFaults.length} 台`;
-        list.innerHTML = visibleFaults.map((fault) => {
-          const device = deviceById[fault.device] || { name: fault.device, model: "未知型号" };
-          const risk = riskOf(fault);
-          const riskClass = risk === "严重" || risk === "高" ? "bad" : risk === "中" ? "warn" : "ok";
-          const statusClass = fault.cardStatus === "维修中" ? "warn" : "info";
-          const href = `equipment-detail.html?device=${encodeURIComponent(fault.device)}`;
-          return `<a class="fault-device-card" href="${href}" aria-label="查看 ${fault.device} 设备详情">
-            <div class="fault-device-head"><span class="fault-device-title"><strong>${device.name}</strong><span>${fault.device} / ${device.model}</span></span><span class="fault-device-code">${fault.faultCode}</span></div>
-            <span class="fault-device-desc">${fault.description}</span>
-            <div class="fault-device-tags"><span class="status ${riskClass}">风险${risk}</span><span class="status ${statusClass}">${fault.cardStatus}</span><span class="fault-alert-meta">${fault.date}</span></div>
-          </a>`;
-        }).join("") || '<div class="muted small">当前筛选条件暂无故障与告警设备</div>';
+      function updateWorkshopOptions() {
+        const factory = scopeForm.elements.factory.value;
+        const workshopSelect = scopeForm.elements.workshop;
+        const lineSelect = scopeForm.elements.line;
+        const matching = factory && factory !== "all" ? devices.filter((item) => item.factory === factory) : devices;
+        const workshops = [...new Set(matching.map((item) => item.workshop))];
+        fillScopeOptions(workshopSelect, "请选择车间", workshops, "全部车间");
+        fillScopeOptions(lineSelect, "请选择产线", [], null);
+        lineSelect.disabled = true;
       }
 
-      function average(items, key) {
-        if (!items.length) return 0;
-        return items.reduce((sum, item) => sum + item[key], 0) / items.length;
-      }
-
-      function renderRanking(scope) {
-        const factory = form.elements.factory.value;
-        const workshop = form.elements.workshop.value;
-        const line = form.elements.line.value;
-        const mode = document.querySelector("[data-ranking-mode]");
-        const list = document.querySelector("[data-ranking-list]");
-        if (line !== "全部产线") {
-          mode.textContent = "已选择产线：按设备健康分从低到高排序，可点击查看设备。";
-          list.innerHTML = [...scope].sort((a, b) => healthOf(a).score - healthOf(b).score).slice(0, 4).map((item, index) => {
-            const health = healthOf(item);
-            return `<a class="list-row" href="equipment-detail.html?device=${encodeURIComponent(item.id)}"><span class="rank">${index + 1}</span><span>${item.id} · ${item.name}<span class="rank-meta">${item.workshop} / ${item.line}</span></span><span class="status ${health.riskClass === "high" || health.riskClass === "severe" ? "bad" : health.riskClass === "medium" ? "warn" : "ok"}">${health.score}分</span></a>`;
-          }).join("");
+      function updateLineOptions() {
+        const factory = scopeForm.elements.factory.value;
+        const workshop = scopeForm.elements.workshop.value;
+        const lineSelect = scopeForm.elements.line;
+        if (!workshop) {
+          fillScopeOptions(lineSelect, "请选择产线", [], null);
+          lineSelect.disabled = true;
           return;
         }
-        const key = workshop !== "全部车间" ? "line" : factory !== "全部工厂" ? "workshop" : "factory";
-        mode.textContent = key === "factory" ? "未限定工厂：按工厂设备总数排序，显示平均健康度。" : key === "workshop" ? "已选择工厂：按车间设备总数排序，显示平均健康度。" : "已选择车间：按产线设备总数排序，显示平均健康度。";
-        const groups = Object.values(scope.reduce((acc, item) => {
-          acc[item[key]] ||= { name: item[key], items: [] };
-          acc[item[key]].items.push(item);
-          return acc;
-        }, {})).sort((a, b) => b.items.length - a.items.length);
-        list.innerHTML = groups.slice(0, 4).map((group, index) => {
-          const avg = Math.round(group.items.reduce((sum, item) => sum + healthOf(item).score, 0) / group.items.length);
-          return `<a class="list-row" href="equipment-ledger.html"><span class="rank">${index + 1}</span><span>${group.name}<span class="rank-meta">设备总数 ${group.items.length} 台</span></span><span class="status ${avg < 60 ? "bad" : avg < 80 ? "warn" : "ok"}">${avg}分</span></a>`;
-        }).join("") || '<div class="muted small">当前筛选条件暂无排行数据</div>';
+        const matching = devices.filter((item) => (factory === "all" || item.factory === factory) && (workshop === "all" || item.workshop === workshop));
+        const lines = [...new Set(matching.map((item) => item.line))];
+        fillScopeOptions(lineSelect, "请选择产线", lines, "全部产线");
+        lineSelect.disabled = false;
       }
 
-      function renderTrend(scopedFaults) {
-        const byDate = scopedFaults.reduce((acc, item) => {
-          acc[item.date] = (acc[item.date] || 0) + 1;
-          return acc;
-        }, {});
-        const dates = Object.keys(byDate).sort();
-        const max = Math.max(1, ...Object.values(byDate));
-        document.querySelector("[data-trend-bars]").innerHTML = dates.length ? dates.map((date) => `
-          <div class="trend-bar"><span title="${date}：${byDate[date]} 起" style="height:${Math.max(8, Math.round(byDate[date] / max * 150))}px"></span><em>${date.slice(5)}</em></div>
-        `).join("") : '<div class="muted small">当前时间区间暂无故障趋势数据</div>';
-        const pending = scopedFaults.filter((item) => item.status === "待处理").length;
-        const processing = scopedFaults.filter((item) => item.status === "处理中").length;
-        const closed = scopedFaults.filter((item) => item.status === "已闭环").length;
-        const total = Math.max(1, scopedFaults.length);
-        document.querySelector('[data-summary="pending"]').textContent = pending;
-        document.querySelector('[data-summary="processing"]').textContent = processing;
-        document.querySelector('[data-summary="closed"]').textContent = closed;
-        document.querySelector('[data-summary="avgHours"]').textContent = `${Math.round(average(scopedFaults.filter((item) => item.hours), "hours"))}h`;
-        document.querySelector('[data-summary="closeRate"]').textContent = `${Math.round(closed / total * 100)}%`;
-        document.querySelector('[data-summary="overdue"]').textContent = scopedFaults.filter((item) => item.overdue).length;
-        const bars = document.querySelectorAll("[data-summary-ratio] span");
-        [pending, processing, closed].forEach((value, index) => {
-          bars[index].style.width = `${Math.max(2, value / total * 100)}%`;
+      function activeFaults() {
+        const ids = new Set(scopedDevices().map((item) => item.id));
+        return faults.filter((fault) => ids.has(fault.deviceId) && fault.status !== "已处理");
+      }
+
+      function urgencyClass(value) {
+        return value === "非常紧急" ? "bad" : value === "紧急" ? "warn" : "info";
+      }
+
+      function healthStatusClass(health) {
+        if (!health) return "bad";
+        if (["severe", "high"].includes(health.riskClass)) return "bad";
+        if (health.riskClass === "medium") return "warn";
+        return "ok";
+      }
+
+      function sortedFaults(items) {
+        return [...items].sort((a, b) => {
+          const urgencyDelta = urgencyRank[a.urgency] - urgencyRank[b.urgency];
+          if (urgencyDelta) return urgencyDelta;
+          return new Date(a.submittedAt) - new Date(b.submittedAt);
         });
-        document.querySelector("[data-trend-range]").textContent = `${form.elements.startDate.value} 至 ${form.elements.endDate.value}`;
       }
 
-      function renderHealthLevels(scope) {
-        const distribution = window.HealthScoreService?.getDistribution(scope.map((item) => item.id));
-        const rules = [["正常", "normal"], ["低风险", "low"], ["中风险", "medium"], ["高风险", "high"], ["严重风险", "severe"]];
-        const max = Math.max(1, ...rules.map(([, key]) => distribution?.[key] || 0));
-        document.querySelector("[data-health-levels]").innerHTML = rules.map(([label, key]) => {
-          const value = distribution?.[key] || 0;
-          return `<div class="health-level-row" data-level="${label}"><span class="health-level-name">${label}</span><span class="health-level-track"><span style="width:${Math.round(value / max * 100)}%"></span></span><strong>${value}</strong></div>`;
+      function filterFaults(items) {
+        if (currentFilter === "pending") return items.filter((item) => item.status === "待接单");
+        if (currentFilter === "repairing") return items.filter((item) => item.status === "维修中");
+        if (currentFilter === "veryUrgent") return items.filter((item) => item.urgency === "非常紧急");
+        if (currentFilter === "urgent") return items.filter((item) => item.urgency === "紧急");
+        if (currentFilter === "risk") return items.filter((item) => ["high", "severe"].includes(healthOf(item.deviceId)?.riskClass));
+        return items;
+      }
+
+      function renderMetrics() {
+        const items = activeFaults();
+        const scoped = scopedDevices();
+        document.querySelector('[data-metric="pending"]').textContent = items.filter((item) => item.status === "待接单").length;
+        document.querySelector('[data-metric="repairing"]').textContent = items.filter((item) => item.status === "维修中").length;
+        document.querySelector('[data-metric="veryUrgent"]').textContent = items.filter((item) => item.urgency === "非常紧急").length;
+        document.querySelector('[data-metric="urgent"]').textContent = items.filter((item) => item.urgency === "紧急").length;
+        document.querySelector('[data-metric="risk"]').textContent = scoped.filter((item) => ["high", "severe"].includes(healthOf(item.id)?.riskClass)).length;
+      }
+
+      function renderQueue() {
+        const items = sortedFaults(filterFaults(activeFaults()));
+        queueCount.textContent = `${items.length} 条任务`;
+        if (!items.length) {
+          queueList.innerHTML = '<div class="empty-state">当前筛选条件下暂无需要处理的故障任务</div>';
+          return;
+        }
+
+        queueList.innerHTML = items.map((fault) => {
+          const device = deviceOf(fault.deviceId);
+          const health = healthOf(fault.deviceId);
+          const healthText = health ? `${health.score} 分 / ${health.risk}` : "健康分计算失败";
+          const ownerText = fault.status === "待接单" ? "接单后确定" : fault.owner;
+          const submitted = new Date(fault.submittedAt);
+          const submittedText = `${String(submitted.getMonth() + 1).padStart(2, "0")}-${String(submitted.getDate()).padStart(2, "0")} ${String(submitted.getHours()).padStart(2, "0")}:${String(submitted.getMinutes()).padStart(2, "0")}`;
+          const urgencyCardClass = fault.urgency === "非常紧急" ? "very-urgent" : fault.urgency === "紧急" ? "urgent" : "";
+          return `<div class="task-card ${urgencyCardClass}" data-fault-id="${fault.id}">
+            <div class="task-main">
+              <div class="task-title-row">
+                <span class="status ${urgencyClass(fault.urgency)}">${fault.urgency}</span>
+                <span class="status ${fault.status === "待接单" ? "info" : "warn"}">${fault.status}</span>
+                <strong>${device.name}</strong>
+                <span class="task-code">${fault.id}</span>
+              </div>
+              <div class="task-desc-row">
+                <div class="task-desc">${fault.description}</div>
+                <span class="task-owner-inline">责任人：${ownerText}</span>
+              </div>
+              <div class="task-footer">
+                <div class="task-meta">
+                  <span>${fault.deviceId} · ${device.model}</span>
+                  <span>健康 <b class="${healthStatusClass(health)}">${healthText.replace(" 分 / ", " · ")}</b></span>
+                  <span>提交 ${submittedText}</span>
+                </div>
+                <div class="task-actions">
+                  <a class="btn btn-secondary" href="equipment-detail.html?device=${encodeURIComponent(fault.deviceId)}">查看详情</a>
+                  ${fault.status === "待接单" ? `<a class="btn btn-primary" href="fault-report.html">立即接单</a>` : `<a class="btn btn-primary" href="maintenance-records.html">继续维修</a>`}
+                </div>
+              </div>
+            </div>
+          </div>`;
         }).join("");
       }
 
-      function renderOrders(scope) {
-        const start = form.elements.startDate.value || "1900-01-01";
-        const end = form.elements.endDate.value || "2999-12-31";
-        const ids = new Set(scope.map((item) => item.id));
-        const scopedOrders = workOrders.filter((item) => ids.has(item.device) && item.date >= start && item.date <= end);
-        document.querySelector("[data-work-orders]").innerHTML = scopedOrders.slice(0, 5).map((item) => `
-          <a class="work-order-item" href="maintenance-records.html"><span><strong>${item.id} · ${item.device}</strong><span class="rank-meta">${item.owner} / ${item.date}</span></span><span class="status ${item.status === "已闭环" ? "ok" : item.status === "处理中" ? "warn" : "bad"}">${item.status}</span></a>
-        `).join("") || '<div class="muted small">当前筛选条件暂无工单记录</div>';
-        return scopedOrders;
+      function renderHealth() {
+        const container = document.querySelector("[data-health-content]");
+        if (!window.HealthScoreService) {
+          container.innerHTML = '<div class="health-error"><strong>健康分计算失败</strong><div class="muted small">暂时无法获取当前设备健康状态，页面不使用旧值、0 分或空值兜底。</div><button class="btn btn-secondary" type="button" style="margin-top:12px" data-health-retry>重新加载</button></div>';
+          return;
+        }
+        const scoped = scopedDevices();
+        const valid = scoped.map((item) => healthOf(item.id)).filter(Boolean);
+        if (valid.length !== scoped.length) {
+          container.innerHTML = '<div class="health-error"><strong>健康分计算失败</strong><div class="muted small">部分设备未返回健康分快照，已停止生成风险统计。</div><button class="btn btn-secondary" type="button" style="margin-top:12px" data-health-retry>重新加载</button></div>';
+          return;
+        }
+        const distribution = window.HealthScoreService?.getDistribution(scoped.map((item) => item.id));
+        if (!distribution) {
+          container.innerHTML = '<div class="health-error"><strong>健康分计算失败</strong><div class="muted small">健康分服务未返回统计结果，已停止生成风险统计。</div><button class="btn btn-secondary" type="button" style="margin-top:12px" data-health-retry>重新加载</button></div>';
+          return;
+        }
+        const rows = [["正常", "normal"], ["低风险", "low"], ["中风险", "medium"], ["高风险", "high"], ["严重风险", "severe"]];
+        const colors = { normal: "#24a865", low: "#0eb3c7", medium: "#347fd3", high: "#ed8b00", severe: "#d9443f" };
+        const total = Math.max(1, scoped.length);
+        let cursor = 0;
+        const segments = rows.map(([, key]) => {
+          const start = cursor;
+          cursor += distribution[key] / total * 360;
+          return `${colors[key]} ${start}deg ${cursor}deg`;
+        }).join(",");
+        const updatedAt = valid.map((item) => item.updatedAt).sort().at(-1) || "-";
+        container.innerHTML = `<div class="health-layout">
+          <div class="health-donut" style="background:conic-gradient(${segments})"><div class="health-donut-center"><strong>${scoped.length}</strong><span>当前设备</span></div></div>
+          <div class="health-legend">${rows.map(([label, key]) => `<div class="health-legend-row"><i class="risk-dot ${key}"></i><span>${label}</span><strong>${distribution[key]}</strong></div>`).join("")}</div>
+        </div>
+        <div class="health-meta"><span>更新于 ${updatedAt}</span></div>`;
       }
 
-      function renderWorkbench() {
-        const scopedDevices = scopeDevices();
-        const scopedFaults = scopeFaults(scopedDevices);
-        const scopedOrders = renderOrders(scopedDevices);
-        renderMetrics(scopedDevices, scopedFaults, scopedOrders);
-        renderFaultCards(scopedFaults);
-        renderRanking(scopedDevices);
-        renderTrend(scopedFaults);
-        renderHealthLevels(scopedDevices);
+      function setFilter(filter) {
+        currentFilter = filter;
+        document.querySelectorAll("[data-filter]").forEach((button) => button.classList.toggle("active", button.dataset.filter === filter));
+        document.querySelectorAll("[data-tab]").forEach((button) => button.classList.toggle("active", button.dataset.tab === filter));
+        renderQueue();
       }
 
-      form.addEventListener("change", renderWorkbench);
-      renderWorkbench();
-    })();
+      function renderAttention() {
+        const items = activeFaults();
+        const veryUrgentCount = items.filter((item) => item.urgency === "非常紧急").length;
+        const urgentCount = items.filter((item) => item.urgency === "紧急").length;
+        const pendingCount = items.filter((item) => item.status === "待接单").length;
+        const text = veryUrgentCount || urgentCount
+          ? `当前有 ${veryUrgentCount} 条非常紧急故障、${urgentCount} 条紧急故障，${pendingCount} 条任务等待接单，建议按紧急程度优先处理。`
+          : `当前共有 ${pendingCount} 条故障等待接单，暂无高紧急程度任务。`;
+        document.querySelector("[data-attention-text]").textContent = text;
+      }
+
+      function renderTodaySummary() {
+        const ids = new Set(scopedDevices().map((item) => item.id));
+        const today = faults.filter((fault) => ids.has(fault.deviceId) && fault.submittedAt.startsWith("2026-07-14"));
+        const closed = today.filter((fault) => fault.status === "已处理");
+        const responseItems = today.filter((fault) => Number.isFinite(fault.responseMinutes));
+        const avgResponse = responseItems.length ? Math.round(responseItems.reduce((sum, fault) => sum + fault.responseMinutes, 0) / responseItems.length) : 0;
+        const durationItems = closed.filter((fault) => Number.isFinite(fault.completedHours));
+        const avgDuration = durationItems.length ? (durationItems.reduce((sum, fault) => sum + fault.completedHours, 0) / durationItems.length).toFixed(1) : "0.0";
+        const completion = today.length ? Math.round(closed.length / today.length * 100) : 0;
+        document.querySelector('[data-today="new"]').textContent = today.length;
+        document.querySelector('[data-today="closed"]').textContent = closed.length;
+        document.querySelector('[data-today="avg"]').textContent = `${avgDuration}h`;
+        document.querySelector('[data-today="response"]').textContent = `${avgResponse}min`;
+        document.querySelector('[data-today="completion"]').textContent = `${completion}%`;
+        document.querySelector("[data-today-progress]").style.width = `${completion}%`;
+      }
+
+      function renderTrend(range) {
+        const data = trendSets[range] || trendSets["7"];
+        const max = Math.max(1, ...data.flatMap((item) => [item.added, item.closed]));
+        document.querySelector("[data-trend-chart]").innerHTML = data.map((item) => `<div class="day-column"><div class="bar-stack"><span class="bar-new" title="新增 ${item.added}" style="height:${Math.max(4, item.added / max * 160)}px"></span><span class="bar-closed" title="已处理 ${item.closed}" style="height:${Math.max(4, item.closed / max * 160)}px"></span></div><em>${item.day}</em></div>`).join("");
+        const added = data.reduce((sum, item) => sum + item.added, 0);
+        const closed = data.reduce((sum, item) => sum + item.closed, 0);
+        const completion = added ? Math.round(closed / added * 100) : 0;
+        const avg = range === "30" ? "4.8h" : "4.3h";
+        const firstFix = range === "30" ? "91%" : "93%";
+        const response = range === "30" ? "22min" : "18min";
+        document.querySelector('[data-efficiency="new"]').textContent = added;
+        document.querySelector('[data-efficiency="closed"]').textContent = closed;
+        document.querySelector('[data-efficiency="completion"]').textContent = `${completion}%`;
+        document.querySelector('[data-efficiency="response"]').textContent = response;
+        document.querySelector('[data-efficiency="avg"]').textContent = avg;
+        document.querySelector('[data-efficiency="firstFix"]').textContent = firstFix;
+      }
+
+      function renderActivities() {
+        document.querySelector("[data-activity-list]").innerHTML = activities.slice(0, 6).map((item) => `<div class="activity-row"><span class="activity-time">${item.time.slice(5)}</span><span class="activity-dot"></span><span class="activity-text"><strong>${item.actor}</strong>${item.text}</span></div>`).join("");
+      }
+
+      function renderAll() {
+        renderMetrics();
+        renderAttention();
+        renderQueue();
+        renderHealth();
+        renderTodaySummary();
+        renderActivities();
+      }
+
+      document.addEventListener("click", (event) => {
+        const metric = event.target.closest("[data-filter]");
+        if (metric) setFilter(metric.dataset.filter);
+        const tab = event.target.closest("[data-tab]");
+        if (tab) setFilter(tab.dataset.tab);
+        if (event.target.closest("[data-refresh]")) {
+          document.querySelector("[data-update-time]").textContent = "2026-07-14 10:30（刚刚）";
+          renderAll();
+          window.showToast?.("工作台数据已刷新");
+        }
+        if (event.target.closest("[data-health-retry]")) renderHealth();
+      });
+
+      scopeForm.addEventListener("change", (event) => {
+        if (event.target.name === "factory") updateWorkshopOptions();
+        if (event.target.name === "workshop") updateLineOptions();
+        setFilter("all");
+        renderMetrics();
+        renderAttention();
+        renderHealth();
+        renderTodaySummary();
+      });
+
+      queueList.addEventListener("wheel", (event) => {
+        const atTop = queueList.scrollTop <= 0;
+        const atBottom = Math.ceil(queueList.scrollTop + queueList.clientHeight) >= queueList.scrollHeight;
+        const leavingTop = event.deltaY < 0 && atTop;
+        const leavingBottom = event.deltaY > 0 && atBottom;
+        if (leavingTop || leavingBottom) {
+          event.preventDefault();
+          window.scrollBy({ top: event.deltaY, left: 0, behavior: "auto" });
+        }
+      }, { passive: false });
+
+      document.querySelector("[data-range]").addEventListener("change", (event) => {
+        const custom = event.target.value === "custom";
+        document.querySelector("[data-custom-dates]").classList.toggle("visible", custom);
+        renderTrend(custom ? "7" : event.target.value);
+      });
+
+      renderTrend("7");
+      renderAll();
+    }());
   </script>
-  <script src="../assets/app.js"></script><script src="../assets/global-agent.js?v=20260702a"></script>
+  <script src="../assets/app.js"></script>
+  <script src="../assets/global-agent.js?v=20260714-workbench-content-contained"></script>
 </body>
 </html>
