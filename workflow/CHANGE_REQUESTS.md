@@ -167,3 +167,11 @@ This is the continuous change ledger for the project. Existing history must not 
 - Raised By: project owner
 - Scope: show a red dot only for unread notifications; read notifications have no left marker. Type colors remain on labels.
 - Verification: static tests, JavaScript syntax check and `git diff --check` passed.
+
+### CR-013: Remove workbench AI status card
+
+- Level: L1
+- Status: Implemented
+- Raised By: project owner
+- Scope: remove the red-boxed “AI诊断在线” sidebar card from the workbench; retain navigation and main content.
+- Verification: static checks and `git diff --check` passed.

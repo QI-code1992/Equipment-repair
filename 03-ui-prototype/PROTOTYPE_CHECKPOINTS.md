@@ -63,3 +63,9 @@
 - Status: Candidate / awaiting Stage 2 review
 - Scope: unread items show a red dot; read items show no dot.
 - Verification: static regression and JavaScript syntax checks passed.
+
+## PCP-010: Workbench sidebar status card cleanup
+
+- Status: Candidate / awaiting Stage 2 review
+- Scope: remove the “AI诊断在线” card from the workbench sidebar.
+- Verification: static regression passed.

@@ -5,6 +5,7 @@ const root = path.resolve(__dirname, "../..");
 const pages = fs.readdirSync(path.join(root, "03-ui-prototype/prototype/pages")).filter((file) => file.endsWith(".html"));
 const app = fs.readFileSync(path.join(root, "03-ui-prototype/prototype/assets/app.js"), "utf8");
 const system = fs.readFileSync(path.join(root, "03-ui-prototype/prototype/pages/system-management.html"), "utf8");
+const workbench = fs.readFileSync(path.join(root, "03-ui-prototype/prototype/pages/workbench.html"), "utf8");
 
 const shellPages = pages.filter((file) => !file.endsWith(".artifact.json"));
 for (const page of shellPages) {
@@ -17,4 +18,5 @@ for (const marker of ["user_management.view_all", "data-self-user-view", "tab=us
   if (!system.includes(marker) && !app.includes(marker)) throw new Error(`missing user management marker: ${marker}`);
 }
 if (!app.includes('window.location.href = "login.html"')) throw new Error("logout must return to login page");
+if (workbench.includes("AI诊断在线") || workbench.includes("知识图谱覆盖 91%")) throw new Error("workbench AI status card should be removed");
 console.log("user entry and scoped management static checks passed");
