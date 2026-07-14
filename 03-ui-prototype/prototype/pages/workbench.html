@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>运维工作台 - 新能源装载机智能运维平台</title>
+  <link rel="stylesheet" href="../assets/app.css?v=20260702a">
+  <style>
+    .workbench-filter {
+      align-items: end;
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(3, minmax(150px, 1fr)) repeat(2, minmax(150px, 0.9fr));
+      width: 100%;
+    }
+
+    .workbench-filter .field {
+      margin: 0;
+    }
+
+    .workbench-filter .field label {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    @media (max-width: 1180px) {
+      .workbench-filter {
+        grid-template-columns: repeat(3, minmax(160px, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .workbench-filter {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .fault-alert-card {
+      background: var(--red-50);
+      border-color: color-mix(in oklab, var(--red), var(--surface) 72%);
+    }
+
+    .fault-alert-badge {
+      align-items: center;
+      display: inline-flex;
+      gap: 6px;
+      min-width: 88px;
+      justify-content: center;
+    }
+
+    .fault-alert-badge::before {
+      background: var(--blue-600);
+      border-radius: 999px;
+      content: "";
+      height: 9px;
+      width: 9px;
+    }
+
+    .fault-alert-list .timeline-dot {
+      background: var(--blue-600);
+      box-shadow: 0 0 0 10px color-mix(in oklab, var(--blue-600), transparent 82%);
+    }
+
+    .fault-alert-meta {
+      color: var(--muted);
+      display: block;
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .fault-device-list {
+      display: grid;
+      gap: 10px;
+      max-height: 340px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-right: 4px;
+      scrollbar-width: thin;
+    }
+
+    .fault-device-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .fault-device-list::-webkit-scrollbar-thumb {
+      background: color-mix(in oklab, var(--red), var(--surface) 55%);
+      border-radius: 999px;
+    }
+
+    .fault-device-card {
+      background: var(--bg);
+      border: 1px solid color-mix(in oklab, var(--red), var(--surface) 78%);
+      border-radius: 16px;
+      color: inherit;
+      display: grid;
+      gap: 10px;
+      padding: 13px 14px;
+      text-decoration: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+
+    .fault-device-card:hover,
+    .fault-device-card:focus-visible {
+      border-color: color-mix(in oklab, var(--red), var(--surface) 35%);
+      box-shadow: 0 12px 26px rgba(204, 54, 54, 0.12);
+      outline: none;
+      transform: translateY(-1px);
+    }
+
+    .fault-device-head,
+    .fault-device-tags {
+      align-items: center;
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+      min-width: 0;
+    }
+
+    .fault-device-title {
+      min-width: 0;
+    }
+
+    .fault-device-title strong,
+    .fault-device-title span,
+    .fault-device-desc {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .fault-device-title span,
+    .fault-device-desc {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .fault-device-code {
+      color: var(--red);
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .fault-device-tags {
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .metric .value {
+      transition: color 0.18s ease, transform 0.18s ease;
+    }
+
+    .metric.is-updating .value {
+      color: var(--blue-600);
+      transform: translateY(-1px);
+    }
+
+    .severity-grid,
+    .health-level-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .severity-row,
+    .health-level-row {
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 76px 1fr 44px;
+      padding: 10px 12px;
+    }
+
+    .severity-name,
+    .health-level-name {
+      font-weight: 700;
+    }
+
+    .severity-track,
+    .health-level-track,
+    .summary-track {
+      background: var(--border);
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .severity-track span,
+    .health-level-track span,
+    .summary-track span {
+      background: var(--blue-600);
+      border-radius: inherit;
+      display: block;
+      height: 100%;
+      min-width: 4px;
+      transition: width 0.2s ease;
+    }
+
+    .severity-row[data-level="严重"] .severity-track span,
+    .health-level-row[data-level="严重"] .health-level-track span {
+      background: var(--red);
+    }
+
+    .severity-row[data-level="高"] .severity-track span,
+    .health-level-row[data-level="风险"] .health-level-track span {
+      background: var(--orange);
+    }
+
+    .severity-row[data-level="中"] .severity-track span,
+    .health-level-row[data-level="关注"] .health-level-track span {
+      background: var(--blue-600);
+    }
+
+    .severity-row[data-level="低"] .severity-track span,
+    .health-level-row[data-level="健康"] .health-level-track span {
+      background: var(--green);
+    }
+
+    .ranking-mode {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: -4px;
+      margin-bottom: 10px;
+    }
+
+    .rank-meta {
+      color: var(--muted);
+      display: block;
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .trend-summary-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+    }
+
+    .trend-panel {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .trend-bars {
+      align-items: end;
+      display: grid;
+      gap: 9px;
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      height: 184px;
+      padding-top: 10px;
+    }
+
+    .trend-bar {
+      align-items: center;
+      display: grid;
+      gap: 8px;
+      grid-template-rows: 1fr auto;
+      min-width: 0;
+    }
+
+    .trend-bar span {
+      align-self: end;
+      background: linear-gradient(180deg, var(--blue-600), var(--accent));
+      border-radius: 999px 999px 6px 6px;
+      min-height: 8px;
+      transition: height 0.2s ease;
+    }
+
+    .trend-bar em {
+      color: var(--muted);
+      font-size: 11px;
+      font-style: normal;
+      overflow: hidden;
+      text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .summary-metrics {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(3, 1fr);
+      margin-bottom: 14px;
+    }
+
+    .mini-metric {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px;
+    }
+
+    .mini-metric strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .summary-ratio {
+      display: flex;
+      height: 12px;
+      margin: 12px 0 14px;
+      overflow: hidden;
+    }
+
+    .summary-ratio span {
+      min-width: 2%;
+    }
+
+    .summary-ratio .pending {
+      background: var(--red);
+    }
+
+    .summary-ratio .processing {
+      background: var(--orange);
+    }
+
+    .summary-ratio .closed {
+      background: var(--green);
+    }
+
+    .summary-bottom {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .work-order-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .work-order-item {
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      display: grid;
+      gap: 10px;
+      grid-template-columns: minmax(0, 1fr) auto;
+      padding: 11px 12px;
+    }
+
+    .work-order-item strong,
+    .work-order-item span {
+      min-width: 0;
+    }
+
+    @media (max-width: 980px) {
+      .trend-summary-grid,
+      .summary-metrics,
+      .summary-bottom {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">智</div><div><p class="brand-title">新能源装载机<br>智能运维平台</p><div class="brand-subtitle">Fault Ops Console</div></div></div>
+      <nav class="nav-section"><div class="nav-label">业务导航</div><div class="nav-list">
+        <a class="nav-item" href="workbench.html"><span class="nav-icon">01</span><span>工作台</span></a>
+        <a class="nav-item" href="bi-dashboard.html"><span class="nav-icon">02</span><span>驾驶舱 BI</span></a><a class="nav-item" href="factory-modeling.html"><span class="nav-icon">03</span><span>工厂建模</span></a>
+        <a class="nav-item" href="equipment-ledger.html"><span class="nav-icon">04</span><span>设备台账</span></a>
+        <a class="nav-item" href="fault-report.html"><span class="nav-icon">05</span><span>故障上报</span></a>
+        
+        
+        <a class="nav-item" href="maintenance-records.html"><span class="nav-icon">07</span><span>维修记录</span></a>
+        <a class="nav-item" href="system-management.html"><span class="nav-icon">08</span><span>系统管理</span></a>
+        <a class="nav-item" href="intelligent-config.html"><span class="nav-icon">09</span><span>智能配置</span></a>
+      </div></nav>
+    </aside>
+    <main class="main-area">
+      <header class="topbar"><div class="topbar-left"><button class="menu-btn" type="button">☰</button><div><h1 class="page-title">运维工作台</h1><div class="crumb">首页 / 实时风险总览</div></div></div><div class="topbar-actions"><button class="icon-btn" type="button" data-toast="暂无新的系统公告">铃</button><div class="user-chip"><span class="avatar">李</span><span>李明 · 运维主管</span></div></div></header>
+      <section class="content">
+        <div class="toolbar toolbar-wrap">
+          <form class="workbench-filter" aria-label="工作台筛选条件">
+            <label class="field"><span>工厂</span><select name="factory"><option>全部工厂</option><option>华东总装工厂</option><option>西南电动化工厂</option><option>华北交付中心</option></select></label>
+            <label class="field"><span>车间</span><select name="workshop"><option>全部车间</option><option>电池装配车间</option><option>电驱测试车间</option><option>整机调试车间</option><option>售后返修车间</option></select></label>
+            <label class="field"><span>产线</span><select name="line"><option>全部产线</option><option>L1 重载装载机线</option><option>L2 中型装载机线</option><option>L3 高压系统线</option><option>L4 返修复测线</option></select></label>
+            <label class="field"><span>开始时间</span><input type="date" name="startDate" value="2026-06-01"></label>
+            <label class="field"><span>结束时间</span><input type="date" name="endDate" value="2026-06-29"></label>
+          </form>
+        </div>
+        <div class="grid grid-6">
+          <article class="card metric" data-metric="total"><div class="label">设备总数</div><div class="value">0</div><div class="delta">按筛选范围统计</div></article>
+          <article class="card metric" data-metric="normal"><div class="label">正常设备</div><div class="value">0</div><div class="delta">健康评分 = 100</div></article>
+          <article class="card metric" data-metric="fault"><div class="label">故障设备</div><div class="value">0</div><div class="delta bad">存在未闭环故障</div></article>
+          <article class="card metric" data-metric="repairing"><div class="label">维修中工单</div><div class="value">0</div><div class="delta warn">状态为处理中</div></article>
+          <article class="card metric" data-metric="pending"><div class="label">待处理工单</div><div class="value">0</div><div class="delta bad">待诊断 / 待派工</div></article>
+          <article class="card metric" data-metric="lowHealth"><div class="label">严重风险设备数</div><div class="value">0</div><div class="delta">健康评分 &lt; 40</div></article>
+        </div>
+        <div class="grid grid-2" style="margin-top:16px">
+          <article class="card"><div class="section-title"><h3>车间 / 产线健康排行</h3><a class="small muted" href="equipment-ledger.html">查看台账</a></div><p class="ranking-mode" data-ranking-mode>按工厂 / 车间 / 产线筛选自动切换排行口径</p><div class="list" data-ranking-list>
+          </div></article>
+          <article class="card fault-alert-card" data-fault-alerts><div class="section-title"><h3>故障与告警</h3><span class="status info fault-alert-badge" data-alert-count>0 台</span></div><div class="fault-device-list" data-alert-device-list>
+          </div></article>
+          <article class="card span-2"><div class="section-title"><h3>故障趋势与处理汇总</h3><span class="status ok" data-trend-range>按时间区间</span></div><div class="trend-summary-grid">
+            <div class="trend-panel"><div class="muted small">故障趋势</div><div class="trend-bars" data-trend-bars></div></div>
+            <div class="trend-panel"><div class="summary-metrics">
+              <div class="mini-metric"><span class="muted small">待处理</span><strong data-summary="pending">0</strong></div>
+              <div class="mini-metric"><span class="muted small">处理中</span><strong data-summary="processing">0</strong></div>
+              <div class="mini-metric"><span class="muted small">已闭环</span><strong data-summary="closed">0</strong></div>
+            </div><div class="summary-track summary-ratio" data-summary-ratio><span class="pending"></span><span class="processing"></span><span class="closed"></span></div><div class="summary-bottom">
+              <div class="mini-metric"><span class="muted small">平均处理时间</span><strong data-summary="avgHours">0h</strong></div>
+              <div class="mini-metric"><span class="muted small">闭环率</span><strong data-summary="closeRate">0%</strong></div>
+              <div class="mini-metric"><span class="muted small">超时数</span><strong data-summary="overdue">0</strong></div>
+            </div></div>
+          </div></article>
+          <article class="card"><div class="section-title"><h3>设备状态分布</h3><span class="status ok">健康等级</span></div><div class="health-level-grid" data-health-levels></div></article>
+          <article class="card"><div class="section-title"><h3>维修 / 工单处理列表</h3><a class="small muted" href="maintenance-records.html">查看维修记录</a></div><div class="work-order-list" data-work-orders></div></article>
+        </div>
+      </section>
+    </main>
+  </div>
+  <button class="ai-fab" id="openAi" type="button" aria-controls="agentDrawer" aria-expanded="false"><span class="ai-dot"></span>Agent</button>
+  <aside class="agent-drawer" id="agentDrawer" aria-hidden="true" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="agentDrawerTitle">
+    <div class="agent-drawer-head"><div><strong id="agentDrawerTitle">全局 Agent 助手</strong><div class="muted small" data-agent-context>正在识别当前页面上下文</div></div><button class="icon-btn" id="closeAi" type="button" aria-label="关闭 Agent 抽屉">×</button></div>
+    <div class="agent-permission"><span class="status ok">李明 · 设备管理员</span><span class="status ok">权限已识别</span><span class="status ok">Agent 在线</span></div>
+    <div class="agent-quick-actions"><button type="button" data-agent-intent="故障上报">故障上报</button><button type="button" data-agent-intent="查询设备故障">查询设备故障</button><button type="button" data-agent-intent="解释诊断结果">解释诊断结果</button><button type="button" data-agent-intent="生成维修建议">生成维修建议</button><button type="button" data-agent-intent="查看工单进度">查看工单进度</button></div>
+    <div class="chat agent-drawer-chat" aria-live="polite"><div class="bubble">我会读取当前页面上下文，先做咨询和上报预收集；正式提交需进入 Agent 上报页。</div><div class="bubble" data-agent-reply>当前账号可查看授权设备范围，未授权设备会直接拒绝并隐藏详情。</div></div>
+    <div class="agent-progress"><div class="section-title"><h3>上报预收集</h3><span class="status warn">60%</span></div><div class="progress"><span style="width:60%"></span></div><div class="summary-box vertical"><div><strong>上下文</strong><br><span data-agent-summary>当前页面</span></div><div><strong>已收集</strong><br>设备 EL-2024-019、故障现象：电机过温限扭</div><div><strong>缺失项</strong><br>发生时间、持续时长、现场附件</div></div></div>
+    <div class="agent-input-row"><input id="agentInput" placeholder="描述故障、查询设备或询问工单进度"><button class="btn btn-secondary" type="button" data-agent-attach>附件</button><button class="btn btn-primary" type="button" id="agentSend">发送</button></div>
+    <a class="btn btn-primary agent-full-link" href="agent-report.html">进入完整上报页</a>
+  </aside>
+  <div class="agent-scrim" id="agentScrim"></div>
+  <div class="toast" role="status" aria-live="polite"></div>
+  <script src="../assets/health-score-service.js"></script>
+  <script>
+    (function () {
+      const devices = [
+        { id: "EL-2024-019", name: "桥臂电机温升异常", model: "ZL956EV", factory: "华东总装工厂", workshop: "电驱测试车间", line: "L3 高压系统线", health: 42, faulty: true },
+        { id: "EL-2023-088", name: "液压压力波动", model: "ZL940EV", factory: "华东总装工厂", workshop: "整机调试车间", line: "L2 中型装载机线", health: 58, faulty: true },
+        { id: "EL-2022-031", name: "BMS 通讯丢包", model: "ZL936EV", factory: "华东总装工厂", workshop: "电池装配车间", line: "L1 重载装载机线", health: 67, faulty: true },
+        { id: "EL-2024-105", name: "传感器校准偏移", model: "ZL940EV", factory: "西南电动化工厂", workshop: "电驱测试车间", line: "L3 高压系统线", health: 74, faulty: false },
+        { id: "EL-2023-062", name: "充电继电器抖动", model: "ZL956EV", factory: "西南电动化工厂", workshop: "电池装配车间", line: "L1 重载装载机线", health: 55, faulty: true },
+        { id: "EL-2024-076", name: "动力电池温差过大", model: "ZL936EV", factory: "华北交付中心", workshop: "售后返修车间", line: "L4 返修复测线", health: 39, faulty: true },
+        { id: "EL-2022-044", name: "远程终端离线", factory: "华北交付中心", workshop: "整机调试车间", line: "L2 中型装载机线", health: 82, faulty: false },
+        { id: "EL-2024-122", name: "整机控制器正常", factory: "华东总装工厂", workshop: "整机调试车间", line: "L2 中型装载机线", health: 91, faulty: false },
+        { id: "EL-2023-156", name: "电池包巡检正常", factory: "西南电动化工厂", workshop: "电池装配车间", line: "L1 重载装载机线", health: 88, faulty: false },
+        { id: "EL-2022-209", name: "返修复测正常", factory: "华北交付中心", workshop: "售后返修车间", line: "L4 返修复测线", health: 79, faulty: false }
+      ];
+
+      const healthOf = (item) => window.HealthScoreService?.getEquipment(item.id) || {
+        score: item.health,
+        risk: item.health === 100 ? "正常" : item.health >= 80 ? "低风险" : item.health >= 60 ? "中风险" : item.health >= 40 ? "高风险" : "严重风险",
+        riskClass: item.health === 100 ? "normal" : item.health >= 80 ? "low" : item.health >= 60 ? "medium" : item.health >= 40 ? "high" : "severe"
+      };
+
+      const faults = [
+        { date: "2026-06-28", device: "EL-2024-019", faultCode: "P1A72", description: "驱动桥臂温度持续高于阈值，触发限扭保护。", severity: "严重", status: "处理中", cardStatus: "维修中", hours: 9, overdue: false },
+        { date: "2026-06-27", device: "EL-2022-031", faultCode: "BMS-104", description: "电池管理系统通讯间歇丢包，需复核线束与终端。", severity: "高", status: "待处理", cardStatus: "待接单", hours: 0, overdue: true },
+        { date: "2026-06-25", device: "EL-2023-088", faultCode: "HYD-212", description: "液压主回路压力波动超出稳定范围。", severity: "中", status: "处理中", cardStatus: "维修中", hours: 14, overdue: false },
+        { date: "2026-06-21", device: "EL-2024-105", faultCode: "SNS-033", description: "位移传感器校准偏移，已完成复测闭环。", severity: "中", status: "已闭环", cardStatus: "已处理", hours: 6, overdue: false },
+        { date: "2026-06-18", device: "EL-2023-062", faultCode: "CHG-017", description: "充电继电器动作抖动，等待现场确认。", severity: "低", status: "待处理", cardStatus: "待接单", hours: 0, overdue: false },
+        { date: "2026-06-11", device: "EL-2024-076", faultCode: "BAT-409", description: "动力电池温差过大，已完成热管理排查。", severity: "严重", status: "已闭环", cardStatus: "已处理", hours: 22, overdue: true },
+        { date: "2026-06-04", device: "EL-2022-044", faultCode: "TCU-008", description: "远程终端离线告警，已恢复连接。", severity: "低", status: "已闭环", cardStatus: "已处理", hours: 4, overdue: false }
+      ];
+
+      const workOrders = [
+        { id: "WO-0628-014", device: "EL-2024-019", status: "处理中", owner: "电驱维修组", date: "2026-06-28" },
+        { id: "WO-0627-009", device: "EL-2022-031", status: "待处理", owner: "电池诊断组", date: "2026-06-27" },
+        { id: "WO-0625-021", device: "EL-2023-088", status: "处理中", owner: "液压维修组", date: "2026-06-25" },
+        { id: "WO-0621-008", device: "EL-2024-105", status: "已闭环", owner: "整机调试组", date: "2026-06-21" },
+        { id: "WO-0618-016", device: "EL-2023-062", status: "待处理", owner: "售后返修组", date: "2026-06-18" }
+      ];
+
+      const form = document.querySelector(".workbench-filter");
+      if (!form) return;
+
+      function scopeDevices() {
+        const factory = form.elements.factory.value;
+        const workshop = form.elements.workshop.value;
+        const line = form.elements.line.value;
+        return devices.filter((item) => {
+          if (factory !== "全部工厂" && item.factory !== factory) return false;
+          if (workshop !== "全部车间" && item.workshop !== workshop) return false;
+          if (line !== "全部产线" && item.line !== line) return false;
+          return true;
+        });
+      }
+
+      function scopeFaults(scope) {
+        const start = form.elements.startDate.value || "1900-01-01";
+        const end = form.elements.endDate.value || "2999-12-31";
+        const ids = new Set(scope.map((item) => item.id));
+        return faults.filter((item) => ids.has(item.device) && item.date >= start && item.date <= end);
+      }
+
+      function setMetric(name, value, detail) {
+        const card = document.querySelector(`[data-metric="${name}"]`);
+        if (!card) return;
+        card.querySelector(".value").textContent = value;
+        if (detail) card.querySelector(".delta").textContent = detail;
+        card.classList.add("is-updating");
+        window.setTimeout(() => card.classList.remove("is-updating"), 180);
+      }
+
+      function renderMetrics(scope, scopedFaults, scopedOrders) {
+        setMetric("total", scope.length, "当前筛选范围设备");
+        setMetric("normal", scope.filter((item) => healthOf(item).score === 100).length, "健康评分 = 100");
+        setMetric("fault", new Set(scopedFaults.filter((item) => item.status !== "已闭环").map((item) => item.device)).size, "存在未闭环故障");
+        setMetric("repairing", scopedOrders.filter((item) => item.status === "处理中").length, "工单状态为处理中");
+        setMetric("pending", scopedOrders.filter((item) => item.status === "待处理").length, "待诊断 / 待派工");
+        setMetric("lowHealth", scope.filter((item) => healthOf(item).score < 40).length, "健康评分 < 40");
+      }
+
+      function renderFaultCards(scopedFaults) {
+        const deviceById = Object.fromEntries(devices.map((item) => [item.id, item]));
+        const list = document.querySelector("[data-alert-device-list]");
+        const riskOrder = { "严重": 0, "高": 1, "中": 2, "低": 3 };
+        const statusOrder = { "待接单": 1, "维修中": 2 };
+        const riskOf = (fault) => {
+          const device = deviceById[fault.device] || {};
+          const health = healthOf(device);
+          return health.riskClass === "severe" ? "严重" : health.riskClass === "high" ? "高" : health.riskClass === "medium" ? "中" : "低";
+        };
+        const visibleFaults = scopedFaults
+          .filter((fault) => ["待接单", "维修中"].includes(fault.cardStatus))
+          .sort((a, b) => {
+            const riskDelta = riskOrder[riskOf(a)] - riskOrder[riskOf(b)];
+            if (riskDelta !== 0) return riskDelta;
+            const statusDelta = statusOrder[a.cardStatus] - statusOrder[b.cardStatus];
+            if (statusDelta !== 0) return statusDelta;
+            return b.date.localeCompare(a.date);
+          });
+        document.querySelector("[data-alert-count]").textContent = `${visibleFaults.length} 台`;
+        list.innerHTML = visibleFaults.map((fault) => {
+          const device = deviceById[fault.device] || { name: fault.device, model: "未知型号" };
+          const risk = riskOf(fault);
+          const riskClass = risk === "严重" || risk === "高" ? "bad" : risk === "中" ? "warn" : "ok";
+          const statusClass = fault.cardStatus === "维修中" ? "warn" : "info";
+          const href = `equipment-detail.html?device=${encodeURIComponent(fault.device)}`;
+          return `<a class="fault-device-card" href="${href}" aria-label="查看 ${fault.device} 设备详情">
+            <div class="fault-device-head"><span class="fault-device-title"><strong>${device.name}</strong><span>${fault.device} / ${device.model}</span></span><span class="fault-device-code">${fault.faultCode}</span></div>
+            <span class="fault-device-desc">${fault.description}</span>
+            <div class="fault-device-tags"><span class="status ${riskClass}">风险${risk}</span><span class="status ${statusClass}">${fault.cardStatus}</span><span class="fault-alert-meta">${fault.date}</span></div>
+          </a>`;
+        }).join("") || '<div class="muted small">当前筛选条件暂无故障与告警设备</div>';
+      }
+
+      function average(items, key) {
+        if (!items.length) return 0;
+        return items.reduce((sum, item) => sum + item[key], 0) / items.length;
+      }
+
+      function renderRanking(scope) {
+        const factory = form.elements.factory.value;
+        const workshop = form.elements.workshop.value;
+        const line = form.elements.line.value;
+        const mode = document.querySelector("[data-ranking-mode]");
+        const list = document.querySelector("[data-ranking-list]");
+        if (line !== "全部产线") {
+          mode.textContent = "已选择产线：按设备健康分从低到高排序，可点击查看设备。";
+          list.innerHTML = [...scope].sort((a, b) => healthOf(a).score - healthOf(b).score).slice(0, 4).map((item, index) => {
+            const health = healthOf(item);
+            return `<a class="list-row" href="equipment-detail.html?device=${encodeURIComponent(item.id)}"><span class="rank">${index + 1}</span><span>${item.id} · ${item.name}<span class="rank-meta">${item.workshop} / ${item.line}</span></span><span class="status ${health.riskClass === "high" || health.riskClass === "severe" ? "bad" : health.riskClass === "medium" ? "warn" : "ok"}">${health.score}分</span></a>`;
+          }).join("");
+          return;
+        }
+        const key = workshop !== "全部车间" ? "line" : factory !== "全部工厂" ? "workshop" : "factory";
+        mode.textContent = key === "factory" ? "未限定工厂：按工厂设备总数排序，显示平均健康度。" : key === "workshop" ? "已选择工厂：按车间设备总数排序，显示平均健康度。" : "已选择车间：按产线设备总数排序，显示平均健康度。";
+        const groups = Object.values(scope.reduce((acc, item) => {
+          acc[item[key]] ||= { name: item[key], items: [] };
+          acc[item[key]].items.push(item);
+          return acc;
+        }, {})).sort((a, b) => b.items.length - a.items.length);
+        list.innerHTML = groups.slice(0, 4).map((group, index) => {
+          const avg = Math.round(group.items.reduce((sum, item) => sum + healthOf(item).score, 0) / group.items.length);
+          return `<a class="list-row" href="equipment-ledger.html"><span class="rank">${index + 1}</span><span>${group.name}<span class="rank-meta">设备总数 ${group.items.length} 台</span></span><span class="status ${avg < 60 ? "bad" : avg < 80 ? "warn" : "ok"}">${avg}分</span></a>`;
+        }).join("") || '<div class="muted small">当前筛选条件暂无排行数据</div>';
+      }
+
+      function renderTrend(scopedFaults) {
+        const byDate = scopedFaults.reduce((acc, item) => {
+          acc[item.date] = (acc[item.date] || 0) + 1;
+          return acc;
+        }, {});
+        const dates = Object.keys(byDate).sort();
+        const max = Math.max(1, ...Object.values(byDate));
+        document.querySelector("[data-trend-bars]").innerHTML = dates.length ? dates.map((date) => `
+          <div class="trend-bar"><span title="${date}：${byDate[date]} 起" style="height:${Math.max(8, Math.round(byDate[date] / max * 150))}px"></span><em>${date.slice(5)}</em></div>
+        `).join("") : '<div class="muted small">当前时间区间暂无故障趋势数据</div>';
+        const pending = scopedFaults.filter((item) => item.status === "待处理").length;
+        const processing = scopedFaults.filter((item) => item.status === "处理中").length;
+        const closed = scopedFaults.filter((item) => item.status === "已闭环").length;
+        const total = Math.max(1, scopedFaults.length);
+        document.querySelector('[data-summary="pending"]').textContent = pending;
+        document.querySelector('[data-summary="processing"]').textContent = processing;
+        document.querySelector('[data-summary="closed"]').textContent = closed;
+        document.querySelector('[data-summary="avgHours"]').textContent = `${Math.round(average(scopedFaults.filter((item) => item.hours), "hours"))}h`;
+        document.querySelector('[data-summary="closeRate"]').textContent = `${Math.round(closed / total * 100)}%`;
+        document.querySelector('[data-summary="overdue"]').textContent = scopedFaults.filter((item) => item.overdue).length;
+        const bars = document.querySelectorAll("[data-summary-ratio] span");
+        [pending, processing, closed].forEach((value, index) => {
+          bars[index].style.width = `${Math.max(2, value / total * 100)}%`;
+        });
+        document.querySelector("[data-trend-range]").textContent = `${form.elements.startDate.value} 至 ${form.elements.endDate.value}`;
+      }
+
+      function renderHealthLevels(scope) {
+        const distribution = window.HealthScoreService?.getDistribution(scope.map((item) => item.id));
+        const rules = [["正常", "normal"], ["低风险", "low"], ["中风险", "medium"], ["高风险", "high"], ["严重风险", "severe"]];
+        const max = Math.max(1, ...rules.map(([, key]) => distribution?.[key] || 0));
+        document.querySelector("[data-health-levels]").innerHTML = rules.map(([label, key]) => {
+          const value = distribution?.[key] || 0;
+          return `<div class="health-level-row" data-level="${label}"><span class="health-level-name">${label}</span><span class="health-level-track"><span style="width:${Math.round(value / max * 100)}%"></span></span><strong>${value}</strong></div>`;
+        }).join("");
+      }
+
+      function renderOrders(scope) {
+        const start = form.elements.startDate.value || "1900-01-01";
+        const end = form.elements.endDate.value || "2999-12-31";
+        const ids = new Set(scope.map((item) => item.id));
+        const scopedOrders = workOrders.filter((item) => ids.has(item.device) && item.date >= start && item.date <= end);
+        document.querySelector("[data-work-orders]").innerHTML = scopedOrders.slice(0, 5).map((item) => `
+          <a class="work-order-item" href="maintenance-records.html"><span><strong>${item.id} · ${item.device}</strong><span class="rank-meta">${item.owner} / ${item.date}</span></span><span class="status ${item.status === "已闭环" ? "ok" : item.status === "处理中" ? "warn" : "bad"}">${item.status}</span></a>
+        `).join("") || '<div class="muted small">当前筛选条件暂无工单记录</div>';
+        return scopedOrders;
+      }
+
+      function renderWorkbench() {
+        const scopedDevices = scopeDevices();
+        const scopedFaults = scopeFaults(scopedDevices);
+        const scopedOrders = renderOrders(scopedDevices);
+        renderMetrics(scopedDevices, scopedFaults, scopedOrders);
+        renderFaultCards(scopedFaults);
+        renderRanking(scopedDevices);
+        renderTrend(scopedFaults);
+        renderHealthLevels(scopedDevices);
+      }
+
+      form.addEventListener("change", renderWorkbench);
+      renderWorkbench();
+    })();
+  </script>
+  <script src="../assets/app.js"></script><script src="../assets/global-agent.js?v=20260702a"></script>
+</body>
+</html>

@@ -4,32 +4,29 @@
   "updatedAt": "2026-07-14",
   "productBaseline": {
     "status": "candidate-not-approved",
-    "currentRuleOverlay": [
-      "docs/开发交付入口.md",
-      "docs/PRD-当前有效版.md",
-      "docs/今日对接结论.md",
-      "docs/开发基线说明.md"
+    "canonicalCandidate": [
+      "01-requirements/PRD.md",
+      "01-requirements/SPEC.md",
+      "01-requirements/ACCEPTANCE_CRITERIA.md",
+      "01-requirements/REQUIREMENTS_TRACEABILITY_MATRIX.md"
     ],
-    "legacyDraftsNeedingReconciliation": [
-      "prd/新能源装载机设备故障智能运维平台-PRD.md",
-      "prd/新能源装载机设备故障智能运维平台-PRD.docx",
-      "prd/新能源装载机设备故障智能运维平台-SPEC.md",
-      "prd/新能源装载机设备故障智能运维平台-SPEC.docx"
-    ]
+    "historicalSources": "snapshot/legacy-import-20260714"
   },
   "engineeringBaseline": {
     "status": "prototype-only-not-approved",
-    "prototype": "prototype/prototype/",
-    "aiTechnicalSpec": "docs/engineering/AI_RAGFLOW_LANGGRAPH_SPEC.md",
-    "automatedChecks": "tests/"
+    "prototype": "03-ui-prototype/prototype/",
+    "architectureCandidate": "04-architecture-plan/",
+    "automatedChecks": "06-testing/tests/"
   },
   "lastApprovedStage": null,
   "pendingStageApproval": null,
-  "currentCommitSha": null,
+  "currentCommitSha": "d965a97",
   "notes": [
-    "Workspace is not a Git repository as of 2026-07-14.",
+    "GitHub repository: https://github.com/QI-code1992/Equipment-repair.",
+    "Original imported workspace is recoverable at commit c544c2d and tag snapshot/legacy-import-20260714.",
     "No formal stage approval records were found.",
-    "Current-rule overlays conflict with the full PRD/SPEC drafts and parts of the static prototype.",
+    "Stage 0–8 candidate documents are present; Stage 1 and Stage 2–4 baselines remain pending user approval.",
+    "Candidate verification: 11/11 prototype static checks passed; external development baseline is incorporated; production implementation and production tests have not started.",
     "Formal development must not start until Stage 1 canonical PRD, SPEC, acceptance criteria, and traceability are reconciled and explicitly approved."
   ]
 }

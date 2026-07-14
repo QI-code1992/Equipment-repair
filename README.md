@@ -1,45 +1,47 @@
-# 智能配置专项交接包
+# 新能源装载机设备智能运维平台
 
-生成日期：2026-07-10
+当前仓库按 `formal-software-delivery-workflow` 管理，所有阶段资料以编号目录为准。
 
-这是面向开发、联调和测试的完整交接包。它包含当前本地原型的完整页面目录、智能配置专项开发手册、页面功能追溯、原型静态检查和本地运行脚本。
+## 当前状态
 
-## 先读什么
+- 工作流状态：`PRODUCT_CLARIFICATION_REQUIRED`
+- Stage 0–8：候选资料已整理，尚无阶段审批
+- 生产实现：尚未开始
+- 原始资产恢复点：`snapshot/legacy-import-20260714`
+- 当前交接版本候选：`handoff/candidate-v20260714-01`
 
-1. `docs/智能配置专项开发交接文档-2026-07-10.md`：开发规则、RAGFlow 对接、数据模型、接口边界、验收清单。
-2. `docs/原型页面功能与需求追溯.md`：从 HTML 原型逐项提取的页面、控件、状态与交互说明。
-3. `docs/交接包清单.md`：文件清单、运行方式、校验方式和交付边界。
+## 阅读顺序
 
-## 最重要的开发门禁
+1. `workflow/state.json`
+2. `workflow/PROJECT_ASSET_BASELINE.md`
+3. `workflow/EXTERNAL_BASELINE_INPUTS.md`
+4. `01-requirements/PRD.md`
+5. `01-requirements/SPEC.md`
+6. `01-requirements/ACCEPTANCE_CRITERIA.md`
+7. `01-requirements/REQUIREMENTS_TRACEABILITY_MATRIX.md`
+8. `04-architecture-plan/AI_RAGFLOW_LANGGRAPH_SPEC.md`
+9. 各阶段目录中的候选资料
 
-收到任何开发指令后，在开始任何代码、接口、页面或配置开发前，必须先向产品确认：**指标管理需要内置哪些真实业务指标**。
+## 原型运行
 
-未获得当次明确确认，不得开始任何开发。不得以原型示例、Demo 数据、已有页面展示内容或开发人员推测替代确认。
-
-## 原型启动
-
-在 `prototype/prototype` 目录中运行：
-
-```powershell
-node local-server-4209.js
+```bash
+node 03-ui-prototype/prototype/local-server-4209.js
 ```
 
-访问：`http://127.0.0.1:4209/pages/intelligent-config.html`
+访问 `http://127.0.0.1:4209/pages/intelligent-config.html`。
 
-如果 4209 已被占用，可修改 `local-server-4209.js` 中的端口后再启动。
+## 静态检查
 
-## 原型检查
-
-在交接包根目录运行：
-
-```powershell
-Get-ChildItem .\tests -Filter '*.test.js' | Sort-Object Name | ForEach-Object { node $_.FullName }
+```bash
+for f in 06-testing/tests/*.test.js; do node "$f"; done
 ```
 
-这些检查验证原型关键规则，不等于真实后端服务验收。正式开发仍需补充单元测试、接口测试、权限测试和端到端测试。
+这些检查只证明静态原型规则，不等同于生产接口、权限、安全或验收测试。
 
-## 交付边界
+## 版本管理
 
-- `prototype` 目录包含完整本地原型，其他业务页面用于理解既有业务上下文。
-- 智能配置专项不修改其他同事已完成的业务流程；只在原型合并后按实际接口完成对接。
-- 本包不包含真实 API Key、密码、供应商密钥或生产配置。
+- `main`：正式仓库基线
+- `agent/formal-stage-gate-migration`：本次正式化资料整理分支
+- `snapshot/legacy-import-20260714`：接管前完整资产恢复点
+- `handoff/candidate-v20260714-01`：2026-07-14 项目文档与静态原型候选交接快照
+- 阶段审批通过后才创建 `baseline/stage-XX-...` 标签

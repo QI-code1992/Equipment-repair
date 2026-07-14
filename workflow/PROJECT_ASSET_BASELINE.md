@@ -6,6 +6,10 @@
 - Audit conclusion: inherited prototype/design package; not yet a controlled development baseline
 - Current formal state: `PRODUCT_CLARIFICATION_REQUIRED`
 
+## Post-migration update (2026-07-14)
+
+The original package is now recoverable from `snapshot/legacy-import-20260714`. Current canonical candidates are under `00-opportunity/` through `08-release-handoff/`; the migrated prototype is `03-ui-prototype/prototype/`; the Stage 1 four-file package is under `01-requirements/`. Historical overlay files and duplicate PDFs were removed from the effective workspace after their contents were incorporated or classified, not erased from Git history.
+
 ## 1. Executive assessment
 
 The workspace contains substantial product material: a historical full PRD and SPEC, later current-rule overlays, business and function diagrams, a multi-page static prototype, an AI integration SPEC, implementation plans, and nine static Node checks. It does not contain production application source, dependency/build manifests, database/API implementation, CI/CD, deployment assets, Git history, formal acceptance evidence, or release artifacts.
@@ -30,9 +34,9 @@ The most recent documents define a credible candidate scope, but the canonical b
 | `prototype/prototype/` | 3 | Runnable static prototype; useful visual/interaction evidence, not production code | Preserve source; create prototype baseline and checkpoint ledger before further UI changes |
 | `prototype/*handoff*.md` | 3 | Historical handoff notes dated 2026-06-30/07-01 | Evidence only; not current baseline |
 | both `*产品设计方案-v2.1.pdf` files | 2/3 | Byte-identical historical PDF; one filename is mojibake | Keep one traceable copy after Git snapshot and user-approved cleanup |
-| `docs/engineering/AI_RAGFLOW_LANGGRAPH_SPEC.md` | 4 | Strong partial technical SPEC for the AI boundary; not a complete system architecture | Input to Stage 4 architecture/API/data documents after Stage 1–3 approval |
+| External `AI_RAGFLOW_LANGGRAPH_SPEC.md` | 4 | Technical baseline for AI boundary, runtime and delivery constraints | Registered by hash in `workflow/EXTERNAL_BASELINE_INPUTS.md`; canonical summary at `04-architecture-plan/AI_RAGFLOW_LANGGRAPH_SPEC.md` |
 | `docs/superpowers/plans/*` | 4 | Two current-looking implementation plans and one explicitly historical plan | Reconcile and replace with one approved `04-architecture-plan/IMPLEMENTATION_PLAN.md` |
-| `tests/*.test.js` | 3/6 | Nine static prototype checks; eight pass, one conflicts with current rules | Keep as prototype regression evidence; production test package is still missing |
+| `06-testing/tests/*.test.js` | 3/6 | Eleven static prototype checks; current candidate suite passes | Keep as Stage 6 prototype regression evidence; production test package is still missing |
 | `README.md`, `docs/运行说明.md`, `prototype/prototype/README.md` | cross-stage | Entry documents disagree and contain broken paths/references | Replace with one root entrypoint after directory migration |
 | `.superpowers/brainstorm/` | working data | Local brainstorming/server state, not a formal product artifact | Exclude from version control unless a specific non-reproducible artifact is promoted |
 
@@ -74,7 +78,7 @@ This precedence is temporary. The formal target is one canonical file per artifa
 - Prototype server: `prototype/prototype/local-server-4209.js` starts successfully.
 - HTTP smoke check: `/pages/intelligent-config.html` and `/index.html` both returned HTTP 200.
 - Static checks: 8 passed, 1 failed.
-- Failing check: `tests/intelligent-config-metric-inline.test.js` expects editable/addable/deletable metrics (`新增指标`, switches, delete actions), which contradicts the current read-only metric baseline. Treat the test as stale until Stage 1 reconciliation confirms the rule.
+- Historical check conflict: `06-testing/tests/intelligent-config-metric-inline.test.js` was reconciled to inspect the visible readonly metric modal; production metric API remains unimplemented.
 - No dependency manifest or test runner configuration exists; tests are standalone Node scripts.
 
 ## 5. Stage-Gate completeness
