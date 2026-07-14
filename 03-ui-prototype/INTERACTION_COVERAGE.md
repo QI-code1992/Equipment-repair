@@ -9,4 +9,5 @@
 | Health displays | partial | same service result on five surfaces and explicit failure |
 | Equipment forms | yes visual | duplicate, future date, deactivation guard, save failure |
 | Work-order/repair | yes visual | state transitions, closure validation, human confirmation |
+| Start-repair diagnosis Agent | yes | loading, stream, dynamic question plan, alarm-code required, evidence-insufficient, unavailable, adopted/direct-start and end-summary boundary |
 | Empty/loading/error/disabled | partial | capture evidence for every P0 page |

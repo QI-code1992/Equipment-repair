@@ -286,3 +286,17 @@
 - 设计基线：`03-ui-prototype/WORKBENCH_INTEGRATION_DESIGN.md`。
 - 实施：已按 `03-ui-prototype/WORKBENCH_INTEGRATION_PLAN.md` 在 `feature/workbench-integration` 实现；工作台页面与专用静态检查已提交。
 - 验证：Commit `4a5f302ffe42c972186426d5f8587cd8059adc6e` 已推送至 GitHub；工作台专用测试与现有 11 项静态回归共 12 项通过，`git diff --check` 通过；检查点见 `PCP-012`。
+
+### CR-024：维修接单前故障诊断 Agent 原型基线
+
+- 级别：L2
+- 状态：Ready For Verification
+- 提出人：项目负责人
+- 提出时间：2026-07-14
+- 当前阶段：Stage 1/2/3 候选基线整理
+- 原始请求：将开始维修页接入智能配置中的故障诊断 Agent，实现预诊断、动态追问、历史案例与知识库依据、采纳后的结束维修预填和摘要。
+- 明确需求：不同设备及不同故障必须由 Agent 根据故障上下文生成不同问题与问题建议；“有报警码”必须追问具体报码；证据不足不得生成根因采纳；直接开始维修不得保存 AI 内容；采纳后摘要应保留故障现象与关键诊断证据。
+- 影响：PRD/SPEC/AC/追踪矩阵增量 v1.1；开始维修和结束维修交互、原型覆盖、原型静态测试；生产模型、历史工单、知识库、流式接口及预诊断缓存待 Stage 4 设计。
+- 决策：用户授权完成文档基线、变更登记和原型检查点；本记录不构成 Stage Gate 批准。
+- 实施：源代码版本 `fa8fa42ed64b1d892a701cea287f3ef69ce7a2c2`；本次文档提交 SHA 待推送后登记。
+- 验证：全部 `06-testing/tests/*.test.js` 静态检查通过；待提交后以精确 SHA 更新检查点。

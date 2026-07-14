@@ -12,6 +12,7 @@
 | Equipment ledger | list/filter/detail entry | admin/equipment admin/repair/operator | loading/empty/error/permission | `prototype/pages/equipment-ledger.html` |
 | Equipment add/edit/detail | CRUD, owner, health, history | admin/equipment admin | validation/saving/error/forbidden | add/edit/detail pages |
 | Fault report | manual submit, AI draft review | all with fault permission | draft/validation/submitted/error | `prototype/pages/fault-report.html` |
+| Fault report / start repair diagnosis | prediagnosis loading, configuration-driven dialogue, citations, dynamic evidence questions, adopt/direct-start boundary, end-repair summary | repair worker / equipment admin | loading/questioning/alarm-code-required/evidence-insufficient/diagnosis-ready/unavailable/adopted/direct-start | `prototype/pages/fault-report.html` |
 | Agent report | authorized-device context, structured summary, required-field completion, handoff, formal submit gate | Agent-authorized users | collecting/missing fields/disabled submit/ready | `prototype/pages/agent-report.html` |
 | Global Agent | three tabs, history, drawer | Agent-authorized users | closed/open/collecting/preview/error | global scripts |
 | Maintenance records | list/detail/knowledge status | admin/equipment admin/repair | empty/loading/error | `prototype/pages/maintenance-records.html` |

@@ -145,3 +145,24 @@ The allowlist is closed: no direct database, arbitrary SQL, health-score write, 
 ## 11. 待确认工程决策
 
 Confirm before Stage 4 approval: first equipment models, supported document MIME types, RAGFlow deployment, embedding/rerank models, LLM deployment/data boundary, metadata schema, database choice, API authentication, and backup storage.
+
+## 12. 接单前故障诊断 Agent 交互规格（候选 v1.1）
+
+### 12.1 配置读取
+
+页面读取“故障诊断 Agent”的 `enabled`、`streaming`、`suggestions`、`sources`、默认 LLM 与上下文轮数配置。配置关闭、缺失、调用失败或超过 30 秒时，状态为 `UNAVAILABLE`，仅提供人工直接开始维修。
+
+### 12.2 状态机
+
+`PRE_DIAGNOSIS_QUEUED -> OPEN_LOADING -> QUESTIONING -> EVIDENCE_PENDING -> DIAGNOSIS_READY -> ADOPTED | DIRECT_START | UNAVAILABLE`。
+
+- `OPEN_LOADING`：固定展示理解故障、检索同类维修、检索知识库、形成首问四个阶段，约 3 秒后转入 `QUESTIONING`。
+- `QUESTIONING`：Agent 主动提出一个当前最重要的问题；输入区固定在右侧底部，消息区独立滚动。
+- `EVIDENCE_PENDING`：如用户确认有报警码，输入区进入 `报警码` 必填状态，自动聚焦，发送按钮仅在输入含数字的具体报码后可用；“暂无报码/未读取”可作为否定证据完成该项。
+- `DIAGNOSIS_READY`：至少收集故障复现工况和两类以上有效技术证据后，输出可折叠的根因、检查清单、维修方案、备件与安全建议，并开放采纳按钮。
+- `DIRECT_START`：删除临时 Agent 状态与摘要，不预填结束维修字段。
+- `ADOPTED`：持久化人工可编辑的预填字段与 AI 对话摘要；结束维修详情仅展示摘要，不展示原始模型消息或思维过程。
+
+### 12.3 动态问题计划
+
+问题计划由设备型号、故障现象、故障描述、检索案例、知识库和已确认事实共同决定。至少覆盖电池压差、转向角传感器、液压、驱动过温/限扭和通用电气故障。每种计划的“报警码、关键测量、部件检查、复现工况”问题及快捷建议不同；生产环境由模型返回下一问、建议和依据。

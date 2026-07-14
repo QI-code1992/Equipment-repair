@@ -134,3 +134,20 @@ Given an Agent call completes or fails, when its audit event is stored, then too
 
 ### AC-039 Logout navigation
 Given a signed-in user opens the global user menu, when the user confirms “退出登录”, then the session is ended for the prototype flow and the browser returns to `login.html`; cancelling keeps the current page and menu state closed.
+
+## 接单前诊断 Agent
+
+### AC-040 动态诊断追问
+Given different equipment systems or different fault phenomena, when the repair Agent starts diagnosis, then it asks system-specific evidence questions and shows matching suggestions rather than a universal fixed sequence.
+
+### AC-041 报警码必填追问
+Given a user selects “有报警码”, when the Agent asks for the code, then the composer enters a required alarm-code mode and does not advance until a concrete code is entered or “暂无报码/未读取” is explicitly selected.
+
+### AC-042 证据不足保护
+Given the user only provides negative, missing or unverified information, when diagnosis continues, then the Agent requests another verifiable datum and does not generate a root-cause adoption action.
+
+### AC-043 采纳与直接开始边界
+Given diagnosis is ready, when the user adopts the AI suggestion, then end-repair fields and a readonly evidence-based summary are prefilled; when the user directly starts repair, then no AI summary or prefill is shown at end repair.
+
+### AC-044 Agent 降级
+Given the diagnosis Agent is disabled, incomplete, timed out or failed, when start repair opens, then the page explains that AI diagnosis is unavailable and preserves direct manual start repair.

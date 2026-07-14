@@ -16,6 +16,10 @@ Login, workbench, BI, factory model, equipment ledger/add/edit/detail, fault rep
 - `assets/health-score-service.js` is an adapter shape only; production health calculation belongs to the backend service.
 - P0 state coverage still needs verification for loading, empty, error, disabled, permission and boundary cases.
 
+## 候选增量 v1.1：维修接单前诊断 Agent
+
+当前 `fault-report.html` 包含开始维修双栏独立滚动、3 秒检索加载、配置驱动的流式对话、动态问题计划、报警码必填、证据不足保护、采纳/直接开始边界、结束维修预填与 AI 摘要展示。该增量仍是 Stage 3 候选原型，不构成生产模型/RAG 集成承诺。
+
 ## 恢复
 
 ```bash

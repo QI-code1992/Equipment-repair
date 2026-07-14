@@ -25,6 +25,10 @@
 | NFR-008 Thread and device isolation | 2, 7, 8 | AC-034, 037 | Agent permission boundary | TC-AI-PERM-* | Candidate |
 | NFR-009 Audit redaction | 10 | AC-038 | audit contract candidate | TC-SEC-AI-* | Candidate |
 | FR-010 Logout navigation | 2, 9 | AC-039 | global user menu | TC-AUTH-LOGOUT-* | Candidate |
+| FR-RA-001 动态诊断追问与建议 | PRD 12、SPEC 12.3 | AC-040 | `fault-report.html` | `fault-report-repair-agent.test.js` | Candidate v1.1 |
+| FR-RA-002 报警码必填与否定证据 | PRD 12、SPEC 12.2 | AC-041、AC-042 | `fault-report.html` | `fault-report-repair-agent.test.js` | Candidate v1.1 |
+| FR-RA-003 采纳/直接开始与摘要边界 | PRD 12、SPEC 12.2 | AC-043 | `fault-report.html` | `fault-report-repair-agent.test.js` | Candidate v1.1 |
+| FR-RA-004 Agent 降级 | PRD 12、SPEC 12.1 | AC-044 | `fault-report.html` | `fault-report-repair-agent.test.js` | Candidate v1.1 |
 
 ## 覆盖规则
 

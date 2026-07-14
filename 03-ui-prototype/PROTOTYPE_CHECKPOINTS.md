@@ -87,3 +87,15 @@
 - 结果：12 项静态检查全部通过
 - 恢复：`git restore --source 4a5f302ffe42c972186426d5f8587cd8059adc6e -- 03-ui-prototype/prototype/pages/workbench.html 06-testing/tests/workbench-integration.test.js`
 - 备注：仅工作台页面和其专用测试发生变更；其他页面与共享 `app.js`、`app.css`、`global-agent.js` 未修改。
+
+## PCP-013：维修接单前故障诊断 Agent
+
+- 状态：Stable / 等待 Stage 3 审批
+- 范围：`fault-report.html` 的开始维修双栏独立滚动、3 秒检索加载、配置驱动流式对话、设备/故障动态问题计划、报警码必填、证据不足保护、依据折叠、采纳/直接开始边界、结束维修和详情页 AI 摘要。
+- 来源：`03-ui-prototype/prototype/pages/fault-report.html`、`03-ui-prototype/prototype/pages/intelligent-config.html`
+- 关联基线：`01-requirements/PRD.md` 第 12 节、`01-requirements/SPEC.md` 第 12 节、AC-040 至 AC-044、CR-024。
+- Commit SHA：`fa8fa42ed64b1d892a701cea287f3ef69ce7a2c2`（原型实现来源）；文档检查点提交 SHA 待推送后补充。
+- 验证：`node 06-testing/tests/fault-report-repair-agent.test.js`；全量 `node 06-testing/tests/*.test.js`；`git diff --check`。
+- 结果：14 项静态检查全部通过；本地原型服务 HTTP 200。
+- 恢复：`git restore --source fa8fa42ed64b1d892a701cea287f3ef69ce7a2c2 -- 03-ui-prototype/prototype/pages/fault-report.html 03-ui-prototype/prototype/pages/intelligent-config.html 06-testing/tests/fault-report-repair-agent.test.js`
+- 备注：该检查点仅证明静态原型交互；真实 LLM、RAG、历史工单检索、SSE 与数据持久化必须在 Stage 4/5 实现并重新测试。
