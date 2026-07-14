@@ -151,3 +151,11 @@ This is the continuous change ledger for the project. Existing history must not 
 - Raised By: project owner
 - Scope: after logout confirmation, return to `login.html`; preserve cancel behavior and close the user menu.
 - Verification: static test, JavaScript syntax check and `git diff --check` passed.
+
+### CR-011: Modal notification panel scroll and page-lock behavior
+
+- Level: L1
+- Status: Implemented
+- Raised By: project owner
+- Scope: add notification scrim, lock main-page scrolling while open, preserve independent notification-list scrolling and in-panel loading.
+- Verification: static tests, JavaScript syntax check and `git diff --check` passed.

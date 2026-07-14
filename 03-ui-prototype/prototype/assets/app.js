@@ -1024,15 +1024,21 @@ function initNotificationCenterForBell(bell) {
   panel.hidden = true;
   panel.innerHTML = '<div class="notification-head"><strong>消息通知</strong><button type="button" class="notification-read-all" data-notification-read-all>全部已读</button></div><div class="notification-tabs" role="tablist"><button type="button" class="active" data-notification-filter="all">全部</button><button type="button" data-notification-filter="unread">未读</button></div><div class="notification-list" data-notification-list></div><button type="button" class="notification-load-more" data-notification-more>加载更多</button>';
   document.body.appendChild(panel);
+  const scrim = document.createElement("div");
+  scrim.className = "notification-scrim";
+  scrim.dataset.notificationScrim = "true";
+  scrim.hidden = true;
+  document.body.appendChild(scrim);
   let filter = "all";
   const unreadCount = () => notifications.filter((item) => item.unread).length;
   const updateBadge = () => { const count = unreadCount(); const badge = $("[data-notification-badge]", bell); badge.textContent = count > 99 ? "99+" : count ? String(count) : ""; badge.hidden = count === 0; };
   const render = () => { const list = $("[data-notification-list]", panel); const items = notifications.filter((item) => filter === "all" || item.unread); if (!items.length) { list.innerHTML = `<div class="notification-empty">${filter === "unread" ? "暂无未读消息" : "暂无消息通知"}</div>`; return; } list.innerHTML = items.map((item) => `<button type="button" class="notification-item ${item.unread ? "is-unread" : "is-read"}" data-notification-id="${item.id}"><span class="notification-dot ${item.tone}"></span><span class="notification-copy"><strong><em class="notification-type ${item.tone}">${item.type}</em>${item.title}</strong><span>${item.summary}</span><small>${item.object} · ${item.time}</small></span></button>`).join(""); };
-  const close = () => { panel.hidden = true; bell.setAttribute("aria-expanded", "false"); };
-  bell.addEventListener("click", (event) => { event.stopPropagation(); panel.hidden = !panel.hidden; bell.setAttribute("aria-expanded", String(!panel.hidden)); if (!panel.hidden) render(); });
+  const close = () => { panel.hidden = true; scrim.hidden = true; document.body.classList.remove("notification-open"); bell.setAttribute("aria-expanded", "false"); };
+  bell.addEventListener("click", (event) => { event.stopPropagation(); panel.hidden = !panel.hidden; scrim.hidden = panel.hidden; document.body.classList.toggle("notification-open", !panel.hidden); bell.setAttribute("aria-expanded", String(!panel.hidden)); if (!panel.hidden) render(); });
   panel.addEventListener("click", (event) => { const tab = event.target.closest("[data-notification-filter]"); if (tab) { filter = tab.dataset.notificationFilter; $$(`[data-notification-filter]`, panel).forEach((button) => button.classList.toggle("active", button === tab)); render(); return; } if (event.target.closest("[data-notification-read-all]")) { notifications.forEach((item) => { item.unread = false; }); updateBadge(); render(); showToast("已全部标记为已读"); return; } const itemButton = event.target.closest("[data-notification-id]"); if (itemButton) { const item = notifications.find((entry) => entry.id === itemButton.dataset.notificationId); if (!item) return; item.unread = false; updateBadge(); itemButton.classList.remove("is-unread"); showToast(`${item.title}已标记为已读`); if (item.target) { window.setTimeout(() => { location.href = item.target; }, 250); } } });
   document.addEventListener("click", (event) => { if (!panel.contains(event.target) && !bell.contains(event.target)) close(); });
   document.addEventListener("keydown", (event) => { if (event.key === "Escape") close(); });
+  scrim.addEventListener("click", close);
   $(`[data-notification-more]`, panel).addEventListener("click", () => showToast("已加载更多业务通知"));
   updateBadge(); render();
 }

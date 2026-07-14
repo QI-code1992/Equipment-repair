@@ -51,3 +51,9 @@
 - Status: Candidate / awaiting Stage 2 review
 - Scope: confirmed global logout returns to `login.html`; cancellation preserves the current page.
 - Verification: static regression and JavaScript syntax checks passed.
+
+## PCP-008: Modal notification scroll candidate
+
+- Status: Candidate / awaiting Stage 2 review
+- Scope: notification scrim, body scroll lock and independently scrollable notification list.
+- Verification: static regression and JavaScript syntax checks passed.

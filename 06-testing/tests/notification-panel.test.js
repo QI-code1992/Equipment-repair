@@ -12,7 +12,7 @@ for (const page of ["bi-dashboard.html", "equipment-ledger.html", "equipment-det
   const source = fs.readFileSync(path.join(root, "03-ui-prototype/prototype/pages", page), "utf8");
   if (/topbar-actions[^>]*>[\s\S]{0,220}(data-toast="[^"]*刷新|>刷<)/.test(source)) throw new Error(`${page} still contains a topbar refresh action`);
 }
-for (const marker of ["data-notification-filter", "data-notification-read-all", "data-notification-more", "暂无未读消息", "消息通知"]) {
+for (const marker of ["data-notification-filter", "data-notification-read-all", "data-notification-more", "notification-scrim", "notification-open", "暂无未读消息", "消息通知"]) {
   if (!app.includes(marker)) throw new Error(`missing notification behavior: ${marker}`);
 }
 for (const marker of ["notification-bell-icon", "notification-badge", "notification-panel", ".topbar-actions > .icon-btn{position:relative}"]) {

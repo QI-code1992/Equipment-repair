@@ -27,13 +27,14 @@
 - Default list: latest 10 notifications.
 - Each item includes type label, title, short summary, related object ID, time and unread state.
 - Click outside or Escape closes the panel.
+- Opening the panel shows a page scrim and locks the main page scroll; only the notification list can scroll vertically. The scrim, Escape or the bell closes the panel and restores page scrolling.
 
 ## 4. Notification behavior
 
 - Clicking an item marks it read immediately.
 - If a business target exists, the item opens the target page/detail; otherwise it stays in the panel and only changes read state.
 - “全部已读” clears unread state but never deletes records.
-- Additional records use in-panel “加载更多”; no independent-page navigation.
+- Additional records use in-panel “加载更多” (the list is independently scrollable); no independent-page navigation.
 - No delete, bulk delete, notification preferences, mute, sound, vibration or browser push in this increment.
 
 ## 5. Visual states
