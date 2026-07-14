@@ -16,4 +16,6 @@ assert(html.includes('健康综合评分趋势') && html.includes('故障数量�
 assert(html.includes('区域 / 组织 TOP 5') && html.includes('工厂 TOP 5') && html.includes('车间 TOP 5'), '排行区应包含组织层级排行');
 assert(html.includes('dashboard-table-card" aria-labelledby="health-table-title" hidden'), '重复的工作台设备列表必须保持隐藏');
 assert(html.includes('dashboard-table-card" aria-labelledby="health-table-title" hidden'), '工作台预警处置模块必须保持隐藏');
+assert(html.includes('class="grid grid-3 bi-analysis-grid" hidden'), '旧版三栏分析模块必须隐藏');
+assert(html.includes('class="grid grid-2 bi-state-grid" aria-label="数据同步与异常恢复状态" hidden'), '旧版状态模块必须隐藏');
 console.log('bi dashboard management analytics static checks passed');
