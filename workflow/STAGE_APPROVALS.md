@@ -79,3 +79,17 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Decision: Stage 2 交互基线获得确认，进入 Stage 3 原型与视觉基线工作。
 - Conditions / Scope Exceptions: 本确认不等同于 Stage 3 原型视觉基线批准，也不授权 Stage 4 架构或生产开发；Stage 3 结束前需覆盖并复核 P0 页面关键状态。
 - Notes: 维修接单前故障诊断 Agent 交互按 `INTERACTION_SPEC.md` 的“开始维修：故障诊断 Agent”章节作为 Stage 3 原型评审依据。
+
+### Gate-004: Stage 3 -> Stage 4
+
+- Status: Approved
+- Approver: project owner
+- Approved At: 2026-07-14
+- Current Stage: Stage 3 — UI and High-Fidelity Prototype
+- Next Stage: Stage 4 — Architecture and Development Plan
+- Artifacts Reviewed: `03-ui-prototype/VISUAL_GUIDELINES.md`、`03-ui-prototype/COMPONENT_SPEC.md`、`03-ui-prototype/PROTOTYPE_BASELINE.md`、`03-ui-prototype/INTERACTION_COVERAGE.md`、`03-ui-prototype/prototype/`
+- Evidence Reviewed: 项目负责人对 Stage 3 原型与视觉基线的明确回复“确认”；开始维修诊断 Agent 和既有 P0 页面静态回归检查 14/14 通过。
+- Version / Commit SHA: `ce772957d77119a031d09a5fcbe744f5a00f9cdc`；里程碑标签 `baseline/stage-03-ui-v1.0`
+- Decision: Stage 3 原型与视觉基线获得确认，进入 Stage 4 架构与开发计划。
+- Conditions / Scope Exceptions: Stage 4 仅产出架构、API/数据契约、ADR、实施计划与验证策略；生产实现需等待 Stage 4 门禁批准后才可进入 Stage 5。
+- Notes: 任何后续视觉或交互偏离应回到 Stage 2 或 Stage 3，走变更台账。

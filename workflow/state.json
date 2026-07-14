@@ -1,9 +1,9 @@
 {
-  "state": "PRODUCT_DESIGN",
+  "state": "AWAITING_PRODUCT_CONFIRMATION",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-14T17:25:00+08:00",
+  "updatedAt": "2026-07-14T17:35:00+08:00",
   "productBaseline": {
-    "status": "requirements-and-interaction-approved-prototype-pending",
+    "status": "requirements-interaction-and-prototype-approved",
     "canonicalCandidate": [
       "01-requirements/PRD.md",
       "01-requirements/SPEC.md",
@@ -18,9 +18,9 @@
     "architectureCandidate": "04-architecture-plan/",
     "automatedChecks": "06-testing/tests/"
   },
-  "lastApprovedStage": "Stage 2 — Product and Interaction Design",
-  "pendingStageApproval": "Stage 3 prototype and visual baseline approval",
-  "currentCommitSha": "c21240bcf9b6b130f6508de5db99c4d99493d913",
+  "lastApprovedStage": "Stage 3 — UI and High-Fidelity Prototype",
+  "pendingStageApproval": "Stage 4 architecture and development plan approval",
+  "currentCommitSha": "ce7729535d8e2ad376d6f107d212f9ef48d97b8a",
   "notes": [
     "GitHub repository: https://github.com/QI-code1992/Equipment-repair.",
     "Original imported workspace is recoverable at commit c544c2d and tag snapshot/legacy-import-20260714.",
@@ -30,6 +30,6 @@
     "Formal development must not start until Stage 1 canonical PRD, SPEC, acceptance criteria, and traceability are reconciled and explicitly approved.",
     "On 2026-07-14, the project owner explicitly approved a scoped waiver to enter Stage 3 directly. This authorizes prototype work only; it does not approve Stage 0–2 baselines or authorize development.",
     "The GitHub repository https://github.com/QI-code1992/Equipment-repair is the required remote system of record for all subsequent project artifacts. Before any formal stage checkpoint, gate recommendation, baseline, test/acceptance evidence, or handoff is reported complete, its files and the corresponding workflow ledgers must be committed and pushed to GitHub with the exact Commit SHA recorded.",
-    "CR-024 has updated the repair diagnosis Agent candidate requirements, interaction baseline and prototype checkpoint evidence. Stage 1 and Stage 2 were approved on 2026-07-14; Stage 3 prototype and visual baseline approval remains pending."
+    "CR-024 has updated the repair diagnosis Agent candidate requirements, interaction baseline and prototype checkpoint evidence. Stage 1, Stage 2 and Stage 3 were approved on 2026-07-14; Stage 4 architecture and development plan approval remains pending."
   ]
 }
