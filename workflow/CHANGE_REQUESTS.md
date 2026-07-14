@@ -68,7 +68,7 @@ This is the continuous change ledger for the project. Existing history must not 
 - Raised At: 2026-07-14
 - Current Stage: Cross-stage workspace hygiene
 - Original Request: Keep only formal Stage directories.
-- Clarified Requirement: Remove `docs/superpowers/` after its migration design and execution plan have been completed; retain formal stage artifacts, `workflow/`, source prototype, and `tests/`.
+- Clarified Requirement: Remove `docs/superpowers/` after its migration design and execution plan have been completed; retain formal stage artifacts, `workflow/`, source prototype, and Stage 6 tests under `06-testing/tests/`.
 - Reason: The directory contains process-session design/plan files, not current product or stage deliverables.
 - Impact:
   - PRD: source references updated to workflow ledgers

@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const root = path.resolve(__dirname, "..");
+const root = path.resolve(__dirname, "..", "..");
 const appJs = fs.readFileSync(path.join(root, "03-ui-prototype/prototype/assets/app.js"), "utf8");
 const appCss = fs.readFileSync(path.join(root, "03-ui-prototype/prototype/assets/app.css"), "utf8");
 const globalAgentPath = path.join(root, "03-ui-prototype/prototype/assets/global-agent.js");

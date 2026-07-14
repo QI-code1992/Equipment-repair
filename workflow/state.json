@@ -16,7 +16,7 @@
     "status": "prototype-only-not-approved",
     "prototype": "03-ui-prototype/prototype/",
     "architectureCandidate": "04-architecture-plan/",
-    "automatedChecks": "tests/"
+    "automatedChecks": "06-testing/tests/"
   },
   "lastApprovedStage": null,
   "pendingStageApproval": null,

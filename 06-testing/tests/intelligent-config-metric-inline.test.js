@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const root = path.resolve(__dirname, "..");
+const root = path.resolve(__dirname, "..", "..");
 const html = fs.readFileSync(path.join(root, "03-ui-prototype/prototype/pages/intelligent-config.html"), "utf8");
 const metricModalStart = html.indexOf('data-modal="metricDictModal"');
 const metricModal = metricModalStart >= 0 ? html.slice(metricModalStart, metricModalStart + 6000) : "";

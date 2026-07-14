@@ -30,7 +30,7 @@ node 03-ui-prototype/prototype/local-server-4209.js
 ## 静态检查
 
 ```bash
-for f in tests/*.test.js; do node "$f"; done
+for f in 06-testing/tests/*.test.js; do node "$f"; done
 ```
 
 这些检查只证明静态原型规则，不等同于生产接口、权限、安全或验收测试。

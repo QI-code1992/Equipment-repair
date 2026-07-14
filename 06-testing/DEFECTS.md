@@ -4,7 +4,7 @@
 
 - Severity: Major baseline inconsistency
 - Status: Resolved in candidate verification; production behavior still unverified
-- Evidence: imported `tests/intelligent-config-metric-inline.test.js`
+- Evidence: imported `06-testing/tests/intelligent-config-metric-inline.test.js`
 - Expected current behavior: fixed metric catalog is readonly.
 - Resolution: test now checks the visible readonly metric modal and the complete static suite passes; production metric API remains unimplemented.
 

@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const assert = require("assert");
 
-const htmlPath = path.join(__dirname, "..", "03-ui-prototype", "prototype", "pages", "intelligent-config.html");
+const htmlPath = path.join(__dirname, "..", "..", "03-ui-prototype", "prototype", "pages", "intelligent-config.html");
 const html = fs.readFileSync(htmlPath, "utf8");
 const tokenPanel = html.match(/<section class="config-panel" data-config-panel="tokens"[\s\S]*?<\/section>\s*<\/div>\s*<\/section>/)?.[0] || "";
 const callModal = html.match(/<div class="modal-mask" data-modal="callRecordModal"[\s\S]*?<div class="modal-mask" data-modal="knowledgeFileModal"/)?.[0] || "";

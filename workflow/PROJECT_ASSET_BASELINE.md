@@ -36,7 +36,7 @@ The most recent documents define a credible candidate scope, but the canonical b
 | both `*产品设计方案-v2.1.pdf` files | 2/3 | Byte-identical historical PDF; one filename is mojibake | Keep one traceable copy after Git snapshot and user-approved cleanup |
 | `docs/engineering/AI_RAGFLOW_LANGGRAPH_SPEC.md` | 4 | Strong partial technical SPEC for the AI boundary; not a complete system architecture | Input to Stage 4 architecture/API/data documents after Stage 1–3 approval |
 | `docs/superpowers/plans/*` | 4 | Two current-looking implementation plans and one explicitly historical plan | Reconcile and replace with one approved `04-architecture-plan/IMPLEMENTATION_PLAN.md` |
-| `tests/*.test.js` | 3/6 | Nine static prototype checks; eight pass, one conflicts with current rules | Keep as prototype regression evidence; production test package is still missing |
+| `06-testing/tests/*.test.js` | 3/6 | Nine static prototype checks; current candidate suite passes | Keep as Stage 6 prototype regression evidence; production test package is still missing |
 | `README.md`, `docs/运行说明.md`, `prototype/prototype/README.md` | cross-stage | Entry documents disagree and contain broken paths/references | Replace with one root entrypoint after directory migration |
 | `.superpowers/brainstorm/` | working data | Local brainstorming/server state, not a formal product artifact | Exclude from version control unless a specific non-reproducible artifact is promoted |
 
@@ -78,7 +78,7 @@ This precedence is temporary. The formal target is one canonical file per artifa
 - Prototype server: `prototype/prototype/local-server-4209.js` starts successfully.
 - HTTP smoke check: `/pages/intelligent-config.html` and `/index.html` both returned HTTP 200.
 - Static checks: 8 passed, 1 failed.
-- Failing check: `tests/intelligent-config-metric-inline.test.js` expects editable/addable/deletable metrics (`新增指标`, switches, delete actions), which contradicts the current read-only metric baseline. Treat the test as stale until Stage 1 reconciliation confirms the rule.
+- Historical check conflict: `06-testing/tests/intelligent-config-metric-inline.test.js` was reconciled to inspect the visible readonly metric modal; production metric API remains unimplemented.
 - No dependency manifest or test runner configuration exists; tests are standalone Node scripts.
 
 ## 5. Stage-Gate completeness
