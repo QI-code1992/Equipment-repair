@@ -27,3 +27,5 @@
 - 未完成：数据库仓储、迁移、事务与并发唯一性、认证/权限/审计接入、正式路由挂载、真实模型测试、前端集成。
 - 依赖边界：数据库部分继续 Blocked By TASK-002；TASK-007 不得解锁。DEV-002 未执行或宣称 Docker、Compose、RAGFlow 验证通过。
 - 工程声明：未新增生产依赖、兼容代码或范围外抽象；未修改 `app/main.py`、数据库、infra、前端或原型，无无关修改。
+- 验证环境与结果：Python 3.13.14；模块测试 `21 passed, 1 warning`，后端全量 `25 passed, 1 warning`。两次测试均为同一条第三方 `StarletteDeprecationWarning`，无 skip 或失败。
+- Task 2 非阻塞 Minor：补充空仓库 `list_all()`/未初始化读取；补充路径与请求体身份不匹配的隔离断言；对全部快照字段使用 sentinel 验证完整复制；补充数值范围精确上下边界回归。

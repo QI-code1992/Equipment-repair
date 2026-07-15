@@ -19,6 +19,7 @@
 
 - 状态：TASK-006 非数据库切片已验证；TASK-006 总任务仍未完成。本次只交接 `FCP-006-NDB` 可恢复检查点，不请求将其认定为 TASK-006 完成门禁。
 - 精确实现：`33d7712334044437eba0d3fc884859d48a3c71ed`、`7cbf76bb9ae627e023cbeaa86fd883b18a916373`、`f7da3393f8861e3f7b8a453629fce7079915e58e`（实现 HEAD），分支 `codex/task-006-agent-config`；Tasks 1–3 已逐任务审查。
+- 远端证据与恢复提交：`56a3c1028ee0731d6b6ec4bc51e7dd6d73679608`；它记录六份 Stage 5 台账并形成远端恢复点，不替代实现 HEAD `f7da3393f8861e3f7b8a453629fce7079915e58e`。
 - 已完成：领域模型、两个外部端口、独立初始化/读取/保存、模型推理能力校验、不可变配置快照、未挂载 API 契约。
 - 验证：Python 3.13.14 模块 `21 passed, 1 warning`，后端全量 `25 passed, 1 warning`；warning 为现有第三方 `StarletteDeprecationWarning`。编译、空白与范围检查通过。
 - 非阻塞关注：Task 2 后续可增强空列表/未初始化、身份不匹配隔离、完整快照 sentinel、精确范围边界四类测试；不影响当前非数据库切片检查点。

@@ -16,6 +16,7 @@
 - 状态：TASK-006 非数据库切片已验证；这是可恢复的非数据库实现检查点，不是 TASK-006 完成门禁。
 - 范围：不可变领域模型、`AgentConfigRepository` 与 `ModelCatalog` 两个外部端口、四 Agent 单独初始化/读取/保存、模型推理能力校验、不可变配置快照、未挂载 API 契约。
 - 精确实现提交：`33d7712334044437eba0d3fc884859d48a3c71ed`、`7cbf76bb9ae627e023cbeaa86fd883b18a916373`、`f7da3393f8861e3f7b8a453629fce7079915e58e`；实现 HEAD 为 `f7da3393f8861e3f7b8a453629fce7079915e58e`，分支 `codex/task-006-agent-config`。
+- 远端证据提交：`56a3c1028ee0731d6b6ec4bc51e7dd6d73679608`。该 SHA 是证据台账与恢复点提交；实现 HEAD 仍为 `f7da3393f8861e3f7b8a453629fce7079915e58e`，两者不得混同。
 - 验证：Python 3.13.14 下模块 `21 passed, 1 warning`，后端全量 `25 passed, 1 warning`；warning 为同一条第三方 `StarletteDeprecationWarning`。`compileall` 与 `git diff --check` 退出码 0，范围检查未发现数据库、前端、infra、原型、迁移或 `app/main.py` 变更。
 - 审查：Tasks 1–3 已逐任务审查；Task 2 保留四项非阻塞 Minor 测试增强（空列表/未初始化、身份不匹配隔离、完整快照 sentinel、精确范围边界）。
 - 未完成：数据库仓储、迁移、事务/并发唯一性、认证/权限/审计接入、正式路由挂载、真实模型测试、前端集成。因此 TASK-006 总任务仍未完成。
