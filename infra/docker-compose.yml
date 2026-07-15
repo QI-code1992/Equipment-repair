@@ -10,6 +10,10 @@ services:
     environment:
       POSTGRES_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       REDIS_URL: ${REDIS_URL}
+    networks: [platform]
+
+  postgres:
+    image: ${DOCKER_IMAGE_PREFIX:-}postgres:17-alpine
     networks: [app]
 
   postgres:
@@ -23,6 +27,10 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    networks: [platform]
+
+  redis:
+    image: ${DOCKER_IMAGE_PREFIX:-}redis:7-alpine
     networks: [app]
 
   redis:
@@ -32,6 +40,10 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    networks: [platform]
+
+networks:
+  platform:
     networks: [app]
 
 networks:

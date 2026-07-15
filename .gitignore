@@ -5,6 +5,9 @@
 # Local brainstorming and transient server state
 .superpowers/
 .worktrees/
+.pytest_cache/
+__pycache__/
+*.py[cod]
 
 # Local logs and runtime files
 *.log
