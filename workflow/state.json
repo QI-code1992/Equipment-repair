@@ -1,7 +1,7 @@
 {
-  "state": "AWAITING_PRODUCT_CONFIRMATION",
+  "state": "READY_FOR_DEVELOPMENT",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-15T12:00:00+08:00",
+  "updatedAt": "2026-07-15T12:15:00+08:00",
   "productBaseline": {
     "status": "requirements-interaction-and-prototype-approved",
     "canonicalCandidate": [
@@ -19,8 +19,8 @@
     "automatedChecks": "06-testing/tests/"
   },
   "lastApprovedStage": "Stage 4 — Architecture and Development Plan",
-  "pendingStageApproval": "项目负责人审核 AGENTS.md 并明确决定是否解除 Hold-001、启动 Stage 5",
-  "currentCommitSha": "d178f9c429ab401c3e264e413ccb4c1a76cc6cfa",
+  "pendingStageApproval": null,
+  "currentCommitSha": "185e5cc",
   "notes": [
     "GitHub repository: https://github.com/QI-code1992/Equipment-repair.",
     "Original imported workspace is recoverable at commit c544c2d and tag snapshot/legacy-import-20260714.",
@@ -35,6 +35,7 @@
     "The platform architecture v2.1 was approved in written review on 2026-07-15. SYSTEM_ARCHITECTURE, DATA_MODEL, API_SPEC, ADR-001, AI_RAGFLOW_LANGGRAPH_SPEC and IMPLEMENTATION_PLAN are prepared as one Stage 4 candidate package and await project-owner review before the Stage 4 -> Stage 5 gate.",
     "The project owner approved the Stage 4 package on 2026-07-15. Stage 5 may begin only on codex/* development branches; direct pushes to main are prohibited.",
     "On 2026-07-15, the project owner instructed that Stage 5 must not start yet. Any experimental Stage 5 branch was deleted. Stage 4 remains the current completed baseline; Stage 5 is paused until the project owner explicitly reconfirms its start.",
-    "Stage 5 entry materials have been supplemented with 04-architecture-plan/AGENTS.md. The project is awaiting product-owner confirmation to retain or release Hold-001; no development has started."
+    "Stage 5 entry materials have been supplemented with 04-architecture-plan/AGENTS.md. The project is awaiting product-owner confirmation to retain or release Hold-001; no development has started.",
+    "On 2026-07-15, the project owner explicitly released Hold-001 and approved entering Stage 5 from the reviewed baseline commit 185e5cc."
   ]
 }
