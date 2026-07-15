@@ -12,3 +12,10 @@
 - 已知项：测试环境存在 FastAPI/Starlette 的弃用警告；在后续依赖锁定任务中统一处理，不作为本任务阻塞。
 - 独立审查：审查范围 `e0a69bf..87538b0`；结论为通过，无阻断、重要或次要问题。确认仅保留一个 `create_app`、一个 `/healthz` 契约和一个 Compose `platform` 内部网络；未发现接口漂移、依赖变更、兼容层或额外抽象。
 - 审查证据：Python 3.13 测试 4 passed；Compose 配置通过；PostgreSQL、Redis healthy；容器内 `/healthz` 返回 200。工作区中未提交的 API 健康检查配置不属于 `87538b0`，未纳入本次审查或交接基线。
+
+## TASK-001 API Compose 健康检查补充评审（2026-07-15）
+
+- 审查范围：`42098613ffa20faed3bb0dcb842a0121722565bd..cabd276fc9de922f9615131ee52fa837447810b5`。
+- 结论：通过；独立 Reviewer 未发现 Critical、Important 或 Minor 问题。
+- 核查：仅变更 `api` 的 `healthcheck`，未改变端口、网络或服务依赖；容器内 `CMD python -c` 对 `/healthz` 返回 200 时退出 0，503 或连接失败时以非零退出使健康检查失败；`interval: 5s`、`timeout: 3s`、`retries: 10` 与获批范围一致。
+- 证据：Compose 解析通过，`git diff --check` 通过；API 重建后状态为 `healthy`，容器内 `/healthz` 返回 200。

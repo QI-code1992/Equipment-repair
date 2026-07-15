@@ -21,6 +21,13 @@
 - Compose：`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet` 通过。
 - 联调：`docker compose -p equipment-task1 --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml up -d --build` 通过；PostgreSQL、Redis 状态为 `healthy`，API 容器内请求 `http://127.0.0.1:8000/healthz` 返回 `{'status': 'ok', 'service': 'equipment-operations-platform'}`。
 
+## TASK-001 API Compose 健康检查补充（2026-07-15）
+
+- 范围：`codebase/infra/docker-compose.yml` 的 `api` 服务新增 `healthcheck`，以容器内 Python 请求 `http://127.0.0.1:8000/healthz`；间隔 5 秒、超时 3 秒、连续失败 10 次才标记为不健康。
+- Python：`D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests/test_health.py -q`，结果 `4 passed, 1 warning`；警告为 FastAPI/Starlette 的第三方弃用提示。
+- Compose：`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet`，通过。
+- 容器：重建后 API 初始状态为 `health: starting`；按 Docker 健康状态轮询后为 `healthy`，健康日志退出码为 `0`。API 容器内 `/healthz` 返回 HTTP `200` 与 `{"status":"ok","service":"equipment-operations-platform"}`。
+
 ## CR-032 目录迁移验证（2026-07-15）
 
 - 当前后端测试入口：`pytest codebase/backend/tests/test_health.py -q`。

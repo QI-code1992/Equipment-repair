@@ -7,6 +7,7 @@
 - 远端提交：修复 `87538b04a168cb3c11c2e65dfb976d3a206d8218`，验证证据 `45725ac083c98ea999492b709e9792082c3db284`，分支 `codex/task-001-runtime-baseline`。
 - 验证：Python 3.13.14 下健康检查测试 4 passed（仅一个第三方弃用警告）；Compose 配置通过；PostgreSQL、Redis healthy；API 容器内 `/healthz` 返回 `200` 与 `{'status': 'ok', 'service': 'equipment-operations-platform'}`。
 - 缺陷：`DEF-003`、`DEF-004` 已解决并更新台账；独立 Review 通过，无阻断、重要或次要问题。
+- 运行时补充：`cabd276fc9de922f9615131ee52fa837447810b5` 为 API 添加 Compose 健康检查。重建后 API 为 `healthy`，健康检查日志退出码为 `0`，容器内 `/healthz` 保持返回 200；独立 Review 通过、无 Critical/Important/Minor 问题。该补充不改变 TASK-002 依赖关系。
 
 ## DEV-002 启动边界
 
