@@ -89,6 +89,8 @@
   - Status: Verified
   - Evidence: `docs/superpowers/` and its untracked copy removed; 9/9 static checks; JSON/JavaScript checks; `git diff --check` passed
 
+- 2026-07-15 复发处理：后续设计技能再次按历史默认路径创建了 `docs/superpowers/specs/2026-07-14-start-repair-agent-design.md`。该内容已被当前 PRD、SPEC、交互规格、Stage 3 原型及 Stage 4 架构基线吸收，项目负责人再次确认删除；Git 提交 `209bb3c` 保留原文恢复点，清理提交为 `abf9787c15db91f9e1b7cf9e130330c5861cad9b`。全局 `formal-software-delivery-workflow` 已新增约束，禁止正式阶段文档散落到通用 `docs/`。
+
 ### CR-004: Reconcile documents to unfinished prototype baseline
 
 - Level: L2
@@ -377,3 +379,72 @@
 - 决策：工作包 A 负责业务平台内核与事务事实；工作包 B 负责 AI、知识与交互；Task 1 为共同前置，按 FCP-001 解锁并行。
 - 影响：新增团队分工文档，不改变产品、架构、API 或实现范围。
 - 验证：工作包覆盖实施计划 Task 1 至 Task 10，且依赖与禁止交叉修改范围明确。
+
+### CR-032：建立统一代码库目录并固定 Stage 3 原型归档边界
+
+- 级别：L3
+- 状态：Implemented / Verification constrained
+- 提出人：项目负责人
+- 提出时间：2026-07-15
+- 当前阶段：Stage 5 — 开发实施；本变更返回 Stage 4 更新工程目录基线
+- 原始请求：将 `backend/`、`frontend/`、`infra/` 和工程测试等非阶段工程文件统一归入“代码库”，并把该规则同步到 `formal-software-delivery-workflow` 技能。
+- 明确要求：统一目录使用 `codebase/`；Stage 3 原型及原型专用资源继续位于 `03-ui-prototype/`，作为该阶段正式交付物，不进入或复制到 `codebase/`。
+- 原因：区分阶段档案、跨阶段治理材料和长期演进的正式工程文件，避免原型与正式前端形成两个事实来源。
+- 影响：
+  - PRD / SPEC / Prototype：不改变产品范围、交互或原型内容；仅固定原型归档边界。
+  - Architecture：新增 `04-architecture-plan/代码库目录归档设计.md`，更新工程目录和路径约束。
+  - Implementation Plan / AGENTS：实施时更新所有 `backend/`、`frontend/`、`infra/` 路径。
+  - Tests：服务测试随代码迁移；当前 Stage 3 原型静态检查继续保留在 `06-testing/tests/`。
+  - Acceptance Criteria：不改变产品验收标准；增加目录与路径迁移验证。
+  - Workflow Skill：书面设计复核后更新 `/Users/qiqi/.codex/skills/formal-software-delivery-workflow/SKILL.md` 及必要的工件目录参考。
+- 决定：采用根级 `codebase/`；不采用把正式代码放进 `05-development/`，不创建 `codebase/prototype/`。
+- 更新基线：`04-architecture-plan/代码库目录归档设计.md`；实施后更新受影响的 Stage 4—8 文档和工作流状态。
+- 实施：项目负责人已复核并明确确认；`backend/`、`frontend/`、`infra/` 已迁移到 `codebase/`，Stage 3 原型保持原位；当前有效路径和正式工作流技能约束已同步，无旧目录兼容副本。迁移提交：`20fc10f9e0af3e420283814a3eb02ab744aaf869`。
+- 验证：目录断言、原型静态回归 14/14、技能规则扫描和 `git diff --check` 通过。后端测试被迁移前已有的重复定义冲突阻断，记录为 `DEF-003`；当前环境缺少 Docker，Compose 未验证。待提交后回填精确 Commit SHA。
+
+### CR-033：删除未跟踪的 `* 2.md` 重复副本
+
+- 级别：L0
+- 状态：Done
+- 提出人：项目负责人
+- 提出时间：2026-07-15
+- 当前阶段：跨阶段工作区卫生清理
+- 原始请求：删除工作区中 12 个文件名以 ` 2.md` 结尾的未跟踪副本。
+- 核对结论：8 个副本与正式文件字节完全一致；4 个副本是 `DEV_NOTES.md`、`CHECKPOINTS.md`、`SELF_TEST.md`、`DEFECTS.md` 的较旧子集，没有独有的新内容。
+- 决定：删除全部 12 个副本；保留不带 ` 2` 的当前正式文件作为唯一事实来源，历史由 Git 保留。
+- 影响：不改变 PRD、SPEC、原型、架构、代码、测试契约或验收标准。
+- 验证：删除后不得存在 `* 2.md`；正式对应文件必须全部存在；`git diff --check` 与原型静态回归必须通过。
+
+### CR-034：补齐两人制 Stage 5 开发任务书
+
+- 级别：L2
+- 状态：Done / 任务书已批准
+- 提出人：项目负责人
+- 提出时间：2026-07-15
+- 当前阶段：Stage 4 补充整改
+- 原始请求：继续完成 Stage 5 正式准入所需的下一步。
+- 人员确认：Stage 5 共 2 名开发人员；`DEV-001` 负责最终集成且具备 Docker/Compose 校验环境；`DEV-002` 不具备 Docker 环境。
+- 决定：创建 `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` 候选 v1.0；DEV-001 负责平台事实、基础设施、容器验证和最终集成，DEV-002 负责 AI、知识适配与正式前端；所有容器相关证据必须由 DEV-001 提供。
+- 候选提交：`8272a8ed161b787098660f61ebb86fa5ccada564`。
+- 审批记录提交：`20261a80f01de8d18e18a2acf9c97e07087e04bc`。
+- 审批证据：项目负责人于 2026-07-15 明确回复“批准任务书”，批准候选提交对应的任务书 v1.0 及两人制任务分配。
+- 影响：补齐 Stage 4 开发任务分配与集成基线，不改变 PRD、SPEC、AC、原型、架构/API/数据契约或产品范围。
+- 审批边界：任务书已获书面批准，但不构成更新后的 Stage 4 → Stage 5 门禁批准，也不单独授权 TASK-001；其余准入阻塞关闭后仍须绑定精确 Commit SHA 重新批准门禁。
+- 验证：检查人员数量、任务 ID、追踪关系、负责人、依赖、共享契约、Docker 边界、验证命令、集成顺序和回滚策略均无缺项。
+
+### CR-035：纠正 TASK-001 与 Stage 5 门禁顺序
+
+- 级别：L2
+- 状态：Done / Gate-007 approved
+- 提出人：项目负责人
+- 提出时间：2026-07-15
+- 当前阶段：Stage 4 补充整改
+- 原始请求：确认 TASK-001 应在 Stage 4 → Stage 5 门禁批准后执行，并指令继续修订。
+- 原因：任务书 v1.0 同时把 TASK-001 定义为 Stage 5 开发任务和门禁前置修复，形成循环依赖并违反 Stage-Gate 顺序。
+- 决定：TASK-001 改为门禁后的首个阻塞任务；`DEF-003`、`DEF-004` 作为 Stage 5 已知风险，由 DEV-001 在 TASK-001 中修复和真实验证；门禁前不得修改相关代码或 Compose 配置。
+- 影响：更新 DEVELOPMENT_TASK_BOOK、IMPLEMENTATION_PLAN、AGENTS、缺陷台账、PM→开发交接、阶段评审和状态记录；不改变 PRD、SPEC、AC、原型、架构/API/数据契约或产品范围。
+- 审批结果：项目负责人已明确批准任务书 v1.1 所在候选 Commit `25e15709a3f1d92f661d37acdb8aa3e1e0e41346` 作为更新后的 Stage 4 基线，并通过 Stage 4 → Stage 5 门禁。
+- 后续边界：DEV-001 可开始 TASK-001；TASK-001 通过前不得启动下游任务，本批准不构成 Stage 6/7/8 批准。
+- 实施提交：`25e15709a3f1d92f661d37acdb8aa3e1e0e41346`。
+- 门禁审批记录提交：`c9eb206c6517b9c3afd7f33a86e3c383d84d12aa`。
+- 验证：检查所有 TASK-001 开始条件均位于门禁之后；Stage 5 准入清单不再要求先修复 TASK-001；JSON 可解析；`git diff --check` 通过。

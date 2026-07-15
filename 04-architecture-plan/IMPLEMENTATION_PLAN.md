@@ -15,28 +15,30 @@
 - 历史维修案例只能查询 PostgreSQL；文档引用只能通过本地 RAGFlow。
 - 每个 `agent_id` 独立配置；禁用共享配置覆盖；不实现 Agent 版本、发布或回滚 UI。
 - 深度思考必须驱动实际模型推理参数和图执行；不输出、不存储原始思维链。
-- 生产代码、测试和部署文件的确切目录须在任务 1 建立后保持稳定，后续任务不得重命名。
+- 正式工程文件统一位于 `codebase/`；Stage 3 原型保留在 `03-ui-prototype/`，不得移入或复制到代码库。后续任务不得重命名这些目录。
 
 ---
 
 ### Task 1：建立生产工程与本地容器基线
 
-**文件：**
-- Create：`backend/pyproject.toml`、`backend/app/main.py`、`backend/app/core/config.py`
-- Create：`infra/docker-compose.yml`、`infra/.env.example`、`frontend/`
-- Test：`backend/tests/test_health.py`
+> 当前工作区存在尚未验收且有重复定义冲突的导入实现。以下复选框表示更新后的 Stage 5 完成状态，不代表历史文件存在即已完成；本任务只能在 Stage 4 → Stage 5 门禁批准后开始。
 
-- [x] 写出 `/healthz` 的失败测试，分别断言应用、PostgreSQL 和 Redis 未配置时返回健康检查失败。
-- [x] 运行 `pytest backend/tests/test_health.py -v`，确认初始失败。
-- [x] 实现配置加载、FastAPI 应用工厂、`GET /healthz` 和 Docker Compose 内部网络；只暴露 Nginx HTTPS。
-- [x] 运行 `docker compose -f infra/docker-compose.yml config` 与 `pytest backend/tests/test_health.py -v`，预期均通过。
-- [x] 提交：`feat: bootstrap platform runtime`。
+**文件：**
+- Create：`codebase/backend/pyproject.toml`、`codebase/backend/app/main.py`、`codebase/backend/app/core/config.py`
+- Create：`codebase/infra/docker-compose.yml`、`codebase/infra/.env.example`、`codebase/frontend/`
+- Test：`codebase/backend/tests/test_health.py`
+
+- [ ] 写出 `/healthz` 的失败测试，分别断言应用、PostgreSQL 和 Redis 未配置时返回健康检查失败。
+- [ ] 运行 `cd codebase/backend && python3.13 -m pytest tests/test_health.py -q`，记录初始失败并关联 `DEF-003`。
+- [ ] 修复配置加载、FastAPI 应用工厂、`GET /healthz` 和 Docker Compose 内部网络；只暴露 Nginx HTTPS。
+- [ ] 运行 `docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet` 与后端健康测试，确认通过并关闭 `DEF-003`、`DEF-004`。
+- [ ] 提交：`feat: bootstrap platform runtime`。
 
 ### Task 2：认证、权限、审计与核心业务数据迁移
 
 **文件：**
-- Create：`backend/app/modules/identity/`、`backend/app/modules/audit/`、`backend/app/modules/equipment/`
-- Create：`backend/alembic/versions/`、`backend/tests/modules/test_identity_permissions.py`
+- Create：`codebase/backend/app/modules/identity/`、`codebase/backend/app/modules/audit/`、`codebase/backend/app/modules/equipment/`
+- Create：`codebase/backend/alembic/versions/`、`codebase/backend/tests/modules/test_identity_permissions.py`
 
 - [ ] 为平台账号、角色、菜单/操作权限、设备、审计和幂等键写失败测试；明确不创建 `EquipmentGrant`。
 - [ ] 实现 PostgreSQL 迁移、认证中间件、操作权限依赖和审计写入。
@@ -46,8 +48,8 @@
 ### Task 3：故障、工单、维修与结构化案例闭环
 
 **文件：**
-- Create：`backend/app/modules/maintenance/`、`backend/tests/modules/test_maintenance_lifecycle.py`
-- Modify：`backend/app/main.py`
+- Create：`codebase/backend/app/modules/maintenance/`、`codebase/backend/tests/modules/test_maintenance_lifecycle.py`
+- Modify：`codebase/backend/app/main.py`
 
 - [ ] 为故障、工单、维修状态迁移、最终人工字段、直接开始维修不保留 AI 摘要写失败测试。
 - [ ] 实现故障上报、开始维修、结束维修与案例沉淀 API；以数据库事务保护状态迁移和幂等。
@@ -58,8 +60,8 @@
 ### Task 4：知识文档与 RAGFlow 独立适配器
 
 **文件：**
-- Create：`backend/app/integrations/ragflow/`、`backend/app/modules/knowledge/`
-- Create：`backend/tests/integrations/test_ragflow_adapter.py`
+- Create：`codebase/backend/app/integrations/ragflow/`、`codebase/backend/app/modules/knowledge/`
+- Create：`codebase/backend/tests/integrations/test_ragflow_adapter.py`
 
 - [ ] 下载并锁定 RAGFlow 官方 Docker 镜像及 Elasticsearch 8.11 依赖版本，在 Docker Desktop/WSL2 内创建独立 `ragflow` 网络、MySQL、Redis、MinIO、Elasticsearch 与 RAGFlow 容器；不得复用平台数据库、缓存或对象存储账号。
 - [ ] 为上传、`UPLOADING -> PARSING -> READY|FAILED`、引用 ID 映射、超时降级写失败测试。
@@ -71,8 +73,8 @@
 ### Task 5：智能配置控制面与模型能力校验
 
 **文件：**
-- Create：`backend/app/modules/agent_config/`、`backend/tests/modules/test_agent_config.py`
-- Modify：`frontend/src/pages/intelligent-config/`
+- Create：`codebase/backend/app/modules/agent_config/`、`codebase/backend/tests/modules/test_agent_config.py`
+- Modify：`codebase/frontend/src/pages/intelligent-config/`
 
 - [ ] 为四个 `agent_id` 独立读取/保存、首次单独初始化、更新一个 Agent 不影响另外三个写失败测试。
 - [ ] 实现 `AgentConfig`、模型能力 `supports_reasoning`、配置 API 与运行配置快照。
@@ -83,8 +85,8 @@
 ### Task 6：Agent Runtime、SSE 与安全过程事件
 
 **文件：**
-- Create：`backend/app/modules/agent_runtime/`、`backend/tests/modules/test_agent_runtime.py`
-- Create：`frontend/src/components/agent/AgentConversation.tsx`
+- Create：`codebase/backend/app/modules/agent_runtime/`、`codebase/backend/tests/modules/test_agent_runtime.py`
+- Create：`codebase/frontend/src/components/agent/AgentConversation.tsx`
 
 - [ ] 为线程归属、运行快照、SSE 顺序、恢复、原始思维链不入库不出流写失败测试。
 - [ ] 实现 `AgentThread`、`AgentRun`、`ToolCall`、`AgentConfirmation`、LangGraph checkpoint 和 SSE 事件端点。
@@ -95,8 +97,8 @@
 ### Task 7：实现 AI 故障上报与智能问数 Agent
 
 **文件：**
-- Create：`backend/app/modules/agents/fault_reporting.py`、`backend/app/modules/agents/metric_query.py`
-- Create：`backend/tests/agents/test_fault_reporting.py`、`backend/tests/agents/test_metric_query.py`
+- Create：`codebase/backend/app/modules/agents/fault_reporting.py`、`codebase/backend/app/modules/agents/metric_query.py`
+- Create：`codebase/backend/tests/agents/test_fault_reporting.py`、`codebase/backend/tests/agents/test_metric_query.py`
 
 - [ ] 为缺失字段追问、人工确认后提交、最多五个指标批量查询、错误口径重新澄清写失败测试。
 - [ ] 实现字段采集和指标查询状态机，使用配置中心提供的模型、上下文、流式、建议和引用开关。
@@ -106,8 +108,8 @@
 ### Task 8：实现操作指引与故障诊断 Agent
 
 **文件：**
-- Create：`backend/app/modules/agents/operation_guidance.py`、`backend/app/modules/agents/fault_diagnosis.py`
-- Create：`backend/tests/agents/test_operation_guidance.py`、`backend/tests/agents/test_fault_diagnosis.py`
+- Create：`codebase/backend/app/modules/agents/operation_guidance.py`、`codebase/backend/app/modules/agents/fault_diagnosis.py`
+- Create：`codebase/backend/tests/agents/test_operation_guidance.py`、`codebase/backend/tests/agents/test_fault_diagnosis.py`
 
 - [ ] 为页面能力优先、最多两次定向检索、报警码具体追问、否定证据、证据不足、诊断采纳门槛和 8/24/4 上限写失败测试。
 - [ ] 实现操作指引状态机与受约束的诊断“思考—行动—核验”图，使用受控工具和模型推理参数。
@@ -118,8 +120,8 @@
 ### Task 9：完成前端集成与结束维修摘要
 
 **文件：**
-- Modify：`frontend/src/pages/fault-report/`、`frontend/src/pages/repair-execution/`、`frontend/src/pages/intelligent-config/`
-- Test：`frontend/src/pages/**/*.test.tsx`
+- Modify：`codebase/frontend/src/pages/fault-report/`、`codebase/frontend/src/pages/repair-execution/`、`codebase/frontend/src/pages/intelligent-config/`
+- Test：`codebase/frontend/src/pages/**/*.test.tsx`
 
 - [ ] 为独立左右滚动、固定底部输入、真实流式展示、引用折叠展开、诊断采纳按钮门槛和摘要位置写失败测试。
 - [ ] 用 API 客户端替换静态原型数据源；保持已批准原型的直接开始、采纳开始与结束维修交互。
@@ -130,7 +132,7 @@
 ### Task 10：补齐平台能力、部署、安全与回归
 
 **文件：**
-- Create：`backend/tests/e2e/`、`infra/nginx/`、`08-release-handoff/DEPLOYMENT_CHECKLIST.md`
+- Create：`codebase/backend/tests/e2e/`、`codebase/infra/nginx/`、`08-release-handoff/DEPLOYMENT_CHECKLIST.md`
 - Modify：`06-testing/TEST_PLAN.md`、`06-testing/TEST_CASES.md`
 
 - [ ] 为健康分、固定指标、附件扫描、超时降级、配置不可用、备份恢复写端到端失败测试。
