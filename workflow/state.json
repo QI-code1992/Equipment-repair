@@ -1,5 +1,5 @@
 {
-  "state": "READY_FOR_DEVELOPMENT",
+  "state": "AWAITING_STAGE_APPROVAL",
   "updatedBy": "formal-software-delivery-workflow",
   "updatedAt": "2026-07-15T12:15:00+08:00",
   "productBaseline": {
@@ -13,14 +13,14 @@
     "historicalSources": "snapshot/legacy-import-20260714"
   },
   "engineeringBaseline": {
-    "status": "stage-4-approved-stage-5-entry-materials-ready",
+    "status": "stage-4-refresh-in-progress",
     "prototype": "03-ui-prototype/prototype/",
     "codebase": "codebase/",
     "architectureCandidate": "04-architecture-plan/平台级架构设计.md",
     "automatedChecks": "06-testing/tests/"
   },
   "lastApprovedStage": "Stage 4 — Architecture and Development Plan",
-  "pendingStageApproval": null,
+  "pendingStageApproval": "Refreshed Stage 4 baseline -> Stage 5",
   "currentCommitSha": "abf9787c15db91f9e1b7cf9e130330c5861cad9b",
   "notes": [
     "GitHub repository: https://github.com/QI-code1992/Equipment-repair.",
@@ -37,6 +37,7 @@
     "The project owner approved the Stage 4 package on 2026-07-15. Stage 5 may begin only on codex/* development branches; direct pushes to main are prohibited.",
     "On 2026-07-15, the project owner instructed that Stage 5 must not start yet. Any experimental Stage 5 branch was deleted. Stage 4 remains the current completed baseline; Stage 5 is paused until the project owner explicitly reconfirms its start.",
     "Stage 5 entry materials have been supplemented with 04-architecture-plan/AGENTS.md. The project is awaiting product-owner confirmation to retain or release Hold-001; no development has started.",
-    "On 2026-07-15, the project owner explicitly released Hold-001 and approved entering Stage 5 from the reviewed baseline commit 185e5cc."
+    "On 2026-07-15, the project owner explicitly released Hold-001 and approved entering Stage 5 from the reviewed baseline commit 185e5cc.",
+    "On 2026-07-15, the project owner confirmed two Stage 5 developers: DEV-001 is the final integration owner with Docker/Compose validation capability; DEV-002 has no Docker environment. DEVELOPMENT_TASK_BOOK.md candidate v1.0 is awaiting review, and the refreshed Stage 4 -> Stage 5 gate remains pending."
   ]
 }
