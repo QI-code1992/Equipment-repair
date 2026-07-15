@@ -223,7 +223,7 @@ git commit -m "feat(identity): add session authentication and permissions"
 - Produces: `execute_idempotent(...) -> tuple[int, dict[str, object]]`。
 - Produces: protected organization/equipment list and create/update endpoints.
 
-- [ ] **Step 1: 写唯一性、审计和幂等 RED 测试**
+- [x] **Step 1: 写唯一性、审计和幂等 RED 测试**
 
 ```python
 def test_duplicate_equipment_code_is_rejected(client: TestClient, equipment_writer_headers: dict[str, str]) -> None:
@@ -249,13 +249,13 @@ def test_audit_metadata_excludes_credentials(db_session: Session) -> None:
     assert "bearer" not in rendered.lower()
 ```
 
-- [ ] **Step 2: 运行 RED**
+- [x] **Step 2: 运行 RED**
 
 Run: `D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests/modules/test_identity_permissions.py -q`
 
 Expected: organization/equipment routes are missing or do not enforce idempotency.
 
-- [ ] **Step 3: 实现审计净化与幂等服务**
+- [x] **Step 3: 实现审计净化与幂等服务**
 
 ```python
 SENSITIVE_KEYS = {"password", "token", "authorization", "cookie", "secret", "api_key"}
@@ -272,17 +272,17 @@ def sanitize_audit_metadata(value: object) -> object:
 
 `execute_idempotent` queries by `(user_id, method, path, key)`, replays the saved status/body when present, and saves the successful response in the same transaction as the audit event and equipment write.
 
-- [ ] **Step 4: 实现组织和设备 API**
+- [x] **Step 4: 实现组织和设备 API**
 
 Create/list/update organization and equipment endpoints. Every protected write requires `Idempotency-Key`; create/update equipment uses `equipment:write`, reads use `equipment:read`, and no query filters by organization membership. Duplicate code returns `409 EQUIPMENT_CODE_EXISTS`. Every successful write includes the persisted `audit_event_id`.
 
-- [ ] **Step 5: 运行 GREEN 与完整模块回归**
+- [x] **Step 5: 运行 GREEN 与完整模块回归**
 
 Run: `D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests/modules/test_identity_permissions.py codebase/backend/tests/test_health.py -q`
 
 Expected: permissions, uniqueness, audit sanitization, idempotency, and health tests pass.
 
-- [ ] **Step 6: 提交业务基础切片**
+- [x] **Step 6: 提交业务基础切片**
 
 ```powershell
 git add codebase/backend/app codebase/backend/tests/modules/test_identity_permissions.py
