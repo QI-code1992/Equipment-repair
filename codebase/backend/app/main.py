@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from fastapi import Response
 
 from app.core.config import Settings
+from app.core.database import create_database_engine, session_factory
+from app.modules.equipment.router import router as equipment_router
+from app.modules.identity.router import router as identity_router
 
 
 def create_app(
@@ -16,6 +19,11 @@ def create_app(
         service_name=service_name,
     )
     app = FastAPI(title=settings.service_name or "unconfigured-application")
+    if settings.postgres_dsn:
+        app.state.engine = create_database_engine(settings.postgres_dsn)
+        app.state.session_factory = session_factory(app.state.engine)
+    app.include_router(identity_router)
+    app.include_router(equipment_router)
 
     @app.get("/healthz")
     def healthz(response: Response) -> dict[str, object]:

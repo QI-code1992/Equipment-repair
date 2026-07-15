@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from sqlalchemy import ForeignKey, Integer, JSON, String, UniqueConstraint
@@ -11,6 +11,10 @@ def new_id() -> str:
     return str(uuid4())
 
 
+def utc_now() -> datetime:
+    return datetime.now(UTC)
+
+
 class AuditEvent(Base):
     __tablename__ = "audit_events"
 
@@ -21,7 +25,7 @@ class AuditEvent(Base):
     resource_id: Mapped[str | None] = mapped_column(String(100))
     result: Mapped[str] = mapped_column(String(30), nullable=False)
     metadata_json: Mapped[dict[str, object]] = mapped_column(JSON, nullable=False, default=dict)
-    created_at: Mapped[datetime] = mapped_column(nullable=False, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(nullable=False, default=utc_now)
 
 
 class IdempotencyRecord(Base):

@@ -140,7 +140,7 @@ git commit -m "feat(identity): add database foundation"
 - Produces: `get_current_user(...) -> User`、`require_permission(code: str) -> Callable`。
 - Produces: `POST /api/auth/login`、`DELETE /api/auth/session`、`GET /api/auth/me`。
 
-- [ ] **Step 1: 写认证与权限 RED 测试**
+- [x] **Step 1: 写认证与权限 RED 测试**
 
 ```python
 def test_protected_request_requires_login(client: TestClient) -> None:
@@ -157,13 +157,13 @@ def test_authorized_user_can_read_equipment(client: TestClient, equipment_reader
     assert response.status_code == 200
 ```
 
-- [ ] **Step 2: 运行 RED**
+- [x] **Step 2: 运行 RED**
 
 Run: `D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests/modules/test_identity_permissions.py -q`
 
 Expected: routes return 404 because identity router is not registered.
 
-- [ ] **Step 3: 实现密码和会话服务**
+- [x] **Step 3: 实现密码和会话服务**
 
 ```python
 def hash_password(password: str) -> str:
@@ -182,7 +182,7 @@ def verify_password(password: str, encoded: str) -> bool:
 
 Login creates a random `secrets.token_urlsafe(32)` token, stores only `sha256(token).hexdigest()`, and returns the raw token once. Logout sets `revoked_at`; `get_current_user` rejects missing, expired, revoked, or disabled sessions.
 
-- [ ] **Step 4: 实现权限依赖和路由注册**
+- [x] **Step 4: 实现权限依赖和路由注册**
 
 ```python
 def require_permission(code: str) -> Callable[..., User]:
@@ -195,13 +195,13 @@ def require_permission(code: str) -> Callable[..., User]:
 
 `create_app()` creates the engine without connecting, stores the session factory on `app.state`, includes identity and equipment routers, and preserves existing `/healthz` behavior.
 
-- [ ] **Step 5: 运行 GREEN 和健康回归**
+- [x] **Step 5: 运行 GREEN 和健康回归**
 
 Run: `D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests/modules/test_identity_permissions.py codebase/backend/tests/test_health.py -q`
 
 Expected: authentication tests and all four health tests pass.
 
-- [ ] **Step 6: 提交认证切片**
+- [x] **Step 6: 提交认证切片**
 
 ```powershell
 git add codebase/backend/app codebase/backend/tests/modules/test_identity_permissions.py
