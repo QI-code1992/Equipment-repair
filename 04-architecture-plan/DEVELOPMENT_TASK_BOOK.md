@@ -6,6 +6,7 @@
 - 当前阶段：Stage 4 补充整改，等待重新执行 Stage 4 → Stage 5 门禁
 - 任务书版本：候选 v1.0
 - 状态：待项目负责人审批；未批准前不得作为 Stage 5 开发授权
+- 候选提交：`8272a8ed161b787098660f61ebb86fa5ccada564`
 - 关联基线：
   - PRD：`01-requirements/PRD.md`，已批准 v1.1
   - SPEC：`01-requirements/SPEC.md`，已批准 v1.1
