@@ -12,7 +12,8 @@
 - 数据与运行：PostgreSQL、Redis、MinIO、Docker Compose、Nginx。
 - AI：LangGraph、独立 RAGFlow + Elasticsearch 8.11、外部 OpenAI 兼容 LLM API。
 - 前端：TypeScript Web 前端；现有静态原型位于 `03-ui-prototype/prototype/`。
-- 包管理：Python 依赖以 `backend/pyproject.toml` 为准；前端依赖以 Stage 5 创建后的 `frontend/package.json` 为准。
+- 工程代码库：正式后端、正式前端和基础设施统一位于 `codebase/`；Stage 3 静态原型仍位于 `03-ui-prototype/prototype/`，不得复制到代码库。
+- 包管理：Python 依赖以 `codebase/backend/pyproject.toml` 为准；前端依赖以 Stage 5 创建后的 `codebase/frontend/package.json` 为准。
 
 ## 3. 命令与验证
 
@@ -22,11 +23,11 @@
 Get-ChildItem '06-testing\tests' -Filter '*.test.js' | ForEach-Object { node $_.FullName }
 ```
 
-Stage 5 新增命令必须同步写入 `backend/pyproject.toml` 或 `frontend/package.json`，并在 `05-development/SELF_TEST.md` 记录真实结果。每次修改至少运行最小相关测试、格式/静态检查（如项目已配置）及 `git diff --check`。
+Stage 5 新增命令必须同步写入 `codebase/backend/pyproject.toml` 或 `codebase/frontend/package.json`，并在 `05-development/SELF_TEST.md` 记录真实结果。每次修改至少运行最小相关测试、格式/静态检查（如项目已配置）及 `git diff --check`。
 
 ## 4. 修改边界
 
-允许按已批准实施计划修改：`backend/`、`frontend/`、`infra/`、对应测试目录、`05-development/`、`06-testing/`、`08-release-handoff/`。
+允许按已批准实施计划修改：`codebase/backend/`、`codebase/frontend/`、`codebase/infra/`、对应工程测试目录、`05-development/`、`06-testing/`、`08-release-handoff/`。正式代码不得放入 `05-development/`；原型及其专用资源只归档于 `03-ui-prototype/`。
 
 禁止修改：`.env`、密钥、生成目录、`node_modules/`、容器卷数据、已归档证据；不得直接向 `main` 推送。
 

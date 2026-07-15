@@ -14,3 +14,13 @@
 - 状态：候选迁移修复
 - 证据：原 README 和运行说明引用了缺失文件/根目录服务器路径。
 - 必要动作：更新根入口并验证迁移后的服务器路径。
+
+### DEF-003：后端健康检查基线存在重复定义冲突
+
+- 严重程度：阻断后端测试收集
+- 状态：已发现 / 未纳入 CR-032 修复范围
+- 发现时间：2026-07-15
+- 复现命令：`python -m pytest codebase/backend/tests/test_health.py -q`
+- 实际结果：导入 `codebase/backend/app/main.py` 时调用 `Settings()`，因缺少 `postgres_dsn` 和 `redis_url` 触发 `TypeError`，测试在收集阶段中止。
+- 初步证据：`codebase/backend/app/main.py` 和 `codebase/backend/app/core/config.py` 均包含重复定义；该内容在本次目录迁移前已存在，CR-032 只执行 Git 路径重命名，没有修改业务代码。
+- 处理边界：需要单独诊断与修复，不得通过修改测试或弱化健康检查要求使迁移验证通过。

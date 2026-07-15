@@ -381,7 +381,7 @@
 ### CR-032：建立统一代码库目录并固定 Stage 3 原型归档边界
 
 - 级别：L3
-- 状态：已批准方向 / 等待书面设计复核后实施
+- 状态：Implemented / Verification constrained
 - 提出人：项目负责人
 - 提出时间：2026-07-15
 - 当前阶段：Stage 5 — 开发实施；本变更返回 Stage 4 更新工程目录基线
@@ -397,5 +397,5 @@
   - Workflow Skill：书面设计复核后更新 `/Users/qiqi/.codex/skills/formal-software-delivery-workflow/SKILL.md` 及必要的工件目录参考。
 - 决定：采用根级 `codebase/`；不采用把正式代码放进 `05-development/`，不创建 `codebase/prototype/`。
 - 更新基线：`04-architecture-plan/代码库目录归档设计.md`；实施后更新受影响的 Stage 4—8 文档和工作流状态。
-- 实施：等待项目负责人复核书面设计后执行目录迁移、引用更新和技能约束同步。
-- 验证：等待实施；必须包含路径引用扫描、最小相关测试、原型回归、Compose 配置校验或未验证原因、`git diff --check`。
+- 实施：项目负责人已复核并明确确认；`backend/`、`frontend/`、`infra/` 已迁移到 `codebase/`，Stage 3 原型保持原位；当前有效路径和正式工作流技能约束已同步，无旧目录兼容副本。
+- 验证：目录断言、原型静态回归 14/14、技能规则扫描和 `git diff --check` 通过。后端测试被迁移前已有的重复定义冲突阻断，记录为 `DEF-003`；当前环境缺少 Docker，Compose 未验证。待提交后回填精确 Commit SHA。

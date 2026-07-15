@@ -4,9 +4,9 @@
 
 ## 当前状态
 
-- 工作流状态：`PRODUCT_CLARIFICATION_REQUIRED`
-- Stage 0–8：候选资料已整理，尚无阶段审批
-- 生产实现：尚未开始
+- 工作流状态：`READY_FOR_DEVELOPMENT`
+- Stage 1–4：已批准；Stage 5 已建立 Task 1 工程运行基线
+- 正式工程：统一位于 `codebase/`
 - 原始资产恢复点：`snapshot/legacy-import-20260714`
 - 当前交接版本候选：`handoff/candidate-v20260714-01`
 
@@ -21,6 +21,15 @@
 7. `01-requirements/REQUIREMENTS_TRACEABILITY_MATRIX.md`
 8. `04-architecture-plan/AI_RAGFLOW_LANGGRAPH_SPEC.md`
 9. 各阶段目录中的候选资料
+
+## 目录归档
+
+- `00-opportunity/`—`08-release-handoff/`：对应阶段的正式文档与交付物。
+- `03-ui-prototype/prototype/`：Stage 3 原型唯一事实来源，不进入代码库。
+- `workflow/`：跨阶段状态、审批、变更和交接台账。
+- `codebase/backend/`：正式后端代码及后端测试。
+- `codebase/frontend/`：正式前端代码及前端测试。
+- `codebase/infra/`：Docker、环境模板和后续部署配置。
 
 ## 原型运行
 

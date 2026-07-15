@@ -15,6 +15,7 @@
   "engineeringBaseline": {
     "status": "stage-4-approved-stage-5-entry-materials-ready",
     "prototype": "03-ui-prototype/prototype/",
+    "codebase": "codebase/",
     "architectureCandidate": "04-architecture-plan/平台级架构设计.md",
     "automatedChecks": "06-testing/tests/"
   },

@@ -12,8 +12,8 @@
 负责人：工作包 A。工作包 B 在此项通过前只可审阅接口和准备测试用例，不创建生产目录或依赖。
 
 - 范围：实施计划 Task 1。
-- 交付：`backend/`、`frontend/`、`infra/` 的稳定目录边界，Python 3.13 FastAPI 健康检查，PostgreSQL/Redis Docker 内部网络与可执行测试命令。
-- 接口冻结点：`GET /healthz`、`backend/pyproject.toml`、`infra/docker-compose.yml`、环境变量命名。
+- 交付：`codebase/backend/`、`codebase/frontend/`、`codebase/infra/` 的稳定目录边界，Python 3.13 FastAPI 健康检查，PostgreSQL/Redis Docker 内部网络与可执行测试命令。
+- 接口冻结点：`GET /healthz`、`codebase/backend/pyproject.toml`、`codebase/infra/docker-compose.yml`、环境变量命名。
 - 验收：健康测试、Compose 配置检查、容器健康检查通过；创建 FCP-001 后，两个包才可并行实施。
 
 ## 工作包 A：业务平台内核
@@ -87,4 +87,4 @@
 
 - 工作包 B 不修改 A 负责的故障、工单、维修、历史案例状态迁移和数据库业务事实。
 - 工作包 A 不修改 B 负责的 Agent 编排、RAGFlow 适配器、配置中心或对话组件。
-- `backend/app/main.py`、`infra/docker-compose.yml`、共享迁移基线只由当前对应责任方在评审后合并；另一方通过小型、可审阅的集成提交接入。
+- `codebase/backend/app/main.py`、`codebase/infra/docker-compose.yml`、共享迁移基线只由当前对应责任方在评审后合并；另一方通过小型、可审阅的集成提交接入。
