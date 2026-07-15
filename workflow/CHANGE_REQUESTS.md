@@ -397,5 +397,5 @@
   - Workflow Skill：书面设计复核后更新 `/Users/qiqi/.codex/skills/formal-software-delivery-workflow/SKILL.md` 及必要的工件目录参考。
 - 决定：采用根级 `codebase/`；不采用把正式代码放进 `05-development/`，不创建 `codebase/prototype/`。
 - 更新基线：`04-architecture-plan/代码库目录归档设计.md`；实施后更新受影响的 Stage 4—8 文档和工作流状态。
-- 实施：项目负责人已复核并明确确认；`backend/`、`frontend/`、`infra/` 已迁移到 `codebase/`，Stage 3 原型保持原位；当前有效路径和正式工作流技能约束已同步，无旧目录兼容副本。
+- 实施：项目负责人已复核并明确确认；`backend/`、`frontend/`、`infra/` 已迁移到 `codebase/`，Stage 3 原型保持原位；当前有效路径和正式工作流技能约束已同步，无旧目录兼容副本。迁移提交：`20fc10f9e0af3e420283814a3eb02ab744aaf869`。
 - 验证：目录断言、原型静态回归 14/14、技能规则扫描和 `git diff --check` 通过。后端测试被迁移前已有的重复定义冲突阻断，记录为 `DEF-003`；当前环境缺少 Docker，Compose 未验证。待提交后回填精确 Commit SHA。

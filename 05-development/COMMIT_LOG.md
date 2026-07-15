@@ -14,3 +14,5 @@ Production feature commits will be appended with branch, files, verification and
 | 2026-07-15 | `e742fb0` | Task 1 platform runtime baseline (`backend/`, `frontend/`, `infra/`) | pushed to `codex/stage-05-development`; FCP-001 |
 
 | 2026-07-14 | `handoff/candidate-v20260714-01` | project documents, workflow records, static prototype and regression checks | candidate handoff snapshot; tag points to exact commit |
+
+| 2026-07-15 | `20fc10f9e0af3e420283814a3eb02ab744aaf869` | CR-032 unified `codebase/` directory migration | directory and prototype regression checks passed; backend blocked by DEF-003; Compose unverified without Docker |
