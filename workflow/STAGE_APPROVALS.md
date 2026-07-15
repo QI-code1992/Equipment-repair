@@ -66,6 +66,20 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Conditions / Scope Exceptions: 仍禁止直接推送 `main`；每个稳定功能单元须先验证并记录远端开发检查点；所有基线变更仍须按变更控制执行。
 - Notes: 本批准仅授权 Stage 5 开发，不代表 Stage 6 测试、Stage 7 验收或 Stage 8 发布批准。
 
+### Review-006: Stage 5 开发任务书书面评审
+
+- Status: Approved
+- Approver: project owner
+- Approved At: 2026-07-15
+- Current Stage: Stage 4 — 补充整改
+- Next Step: 关闭更新后的 Stage 5 准入阻塞并重新执行 Stage 4 → Stage 5 门禁
+- Artifacts Reviewed: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md`
+- Evidence Reviewed: 项目负责人对任务书候选稿明确回复“批准任务书”。
+- Version / Commit SHA: `8272a8ed161b787098660f61ebb86fa5ccada564`
+- Decision: 批准 Stage 5 开发任务书 v1.0 及两人制任务分配；`DEV-001` 负责最终集成和 Docker/Compose 验证，`DEV-002` 不具备 Docker 环境。
+- Conditions / Scope Exceptions: 本记录仅批准任务分配基线，不是更新后的 Stage 4 → Stage 5 门禁批准，也不单独授权执行 TASK-001；`DEF-003`、`AGENTS.md` 命令、Compose 验证、同一精确 SHA 和新基线标签等准入项仍须关闭。
+- Notes: 下游开发任务继续受 TASK-001 和最终门禁阻塞。
+
 ## Candidate gate recommendations
 
 ### Gate-001: Scoped waiver to enter Stage 3
