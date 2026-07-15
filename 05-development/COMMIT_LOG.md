@@ -20,8 +20,9 @@ Production feature commits will be appended with branch, files, verification and
 | 2026-07-15 | `45725ac083c98ea999492b709e9792082c3db284` | TASK-001 verification evidence | updated FCP, self-test and DEF-003/DEF-004 evidence; pushed to task branch |
 | 2026-07-15 | `33d7712334044437eba0d3fc884859d48a3c71ed` | TASK-006 immutable Agent configuration domain | Task 1 review passed; non-database slice only |
 | 2026-07-15 | `7cbf76bb9ae627e023cbeaa86fd883b18a916373` | TASK-006 independent configuration service and two external ports | Task 2 review passed with four non-blocking Minor test enhancements |
-| 2026-07-15 | `f7da3393f8861e3f7b8a453629fce7079915e58e` | TASK-006 injectable, formally unmounted API contract | Task 3 review passed; module 21 passed, backend 25 passed, each with one third-party deprecation warning; FCP-006-NDB candidate |
+| 2026-07-15 | `f7da3393f8861e3f7b8a453629fce7079915e58e` | TASK-006 初始 API 实现提交（可注入、正式未挂载） | Task 3 review passed; module 21 passed, backend 25 passed, each with one third-party deprecation warning; FCP-006-NDB candidate |
 | 2026-07-15 | `04e651c1453fbd0551303aff9f4d6236ea2e59d4` | TASK-006 sanitize FastAPI/Pydantic request validation errors | Final-review Important closed; API 7 passed, module 24 passed, backend 28 passed; route remains unmounted |
+| 2026-07-15 | `2a7ca4eeec9857f361039736ec2576658832df52` | TASK-006 final security validation evidence | Current remote evidence and recoverable checkpoint for safety HEAD `04e651c1453fbd0551303aff9f4d6236ea2e59d4`; API 7 passed, module 24 passed, backend 28 passed |
 
 TASK-006 验证环境：Python 3.13.14。已完成领域模型、`AgentConfigRepository` 与 `ModelCatalog` 两个外部端口、独立初始化/读取/保存、模型推理能力校验、不可变配置快照与未挂载 API 契约。
 
