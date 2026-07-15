@@ -1,8 +1,12 @@
 """FastAPI routes for agent configuration."""
 
+from collections.abc import Awaitable, Callable
 from typing import NoReturn
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from fastapi.routing import APIRoute
 from pydantic import BaseModel
 
 from .domain import AgentConfig, DeepThinkingLevel
@@ -33,6 +37,37 @@ class ModelCapabilityResponse(BaseModel):
 
 class AgentConfigResponse(AgentConfigRequest):
     model_capability: ModelCapabilityResponse | None
+
+
+class _SanitizedValidationRoute(APIRoute):
+    def get_route_handler(self) -> Callable[[Request], Awaitable[Response]]:
+        route_handler = super().get_route_handler()
+
+        async def sanitized_route_handler(request: Request) -> Response:
+            try:
+                return await route_handler(request)
+            except RequestValidationError as error:
+                fields = [
+                    {
+                        "field": ".".join(
+                            str(part) for part in issue["loc"] if part != "body"
+                        ),
+                        "message": "请求字段无效。",
+                    }
+                    for issue in error.errors()
+                ]
+                return JSONResponse(
+                    status_code=422,
+                    content={
+                        "detail": {
+                            "code": "AGENT_CONFIG_INVALID",
+                            "message": "Agent 配置请求无效。",
+                            "fields": fields,
+                        }
+                    },
+                )
+
+        return sanitized_route_handler
 
 
 def _raise_http(error: AgentConfigError) -> NoReturn:
@@ -83,7 +118,11 @@ def _response(service: AgentConfigService, config: AgentConfig) -> AgentConfigRe
 
 
 def create_agent_config_router(service: AgentConfigService) -> APIRouter:
-    router = APIRouter(prefix="/api/agent-configs", tags=["agent-configs"])
+    router = APIRouter(
+        prefix="/api/agent-configs",
+        tags=["agent-configs"],
+        route_class=_SanitizedValidationRoute,
+    )
 
     @router.get("", response_model=list[AgentConfigResponse])
     def list_agent_configs() -> list[AgentConfigResponse]:
