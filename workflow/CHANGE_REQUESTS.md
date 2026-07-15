@@ -89,6 +89,8 @@
   - Status: Verified
   - Evidence: `docs/superpowers/` and its untracked copy removed; 9/9 static checks; JSON/JavaScript checks; `git diff --check` passed
 
+- 2026-07-15 复发处理：后续设计技能再次按历史默认路径创建了 `docs/superpowers/specs/2026-07-14-start-repair-agent-design.md`。该内容已被当前 PRD、SPEC、交互规格、Stage 3 原型及 Stage 4 架构基线吸收，项目负责人再次确认删除；Git 提交 `209bb3c` 保留原文恢复点。全局 `formal-software-delivery-workflow` 已新增约束，禁止正式阶段文档散落到通用 `docs/`。
+
 ### CR-004: Reconcile documents to unfinished prototype baseline
 
 - Level: L2
