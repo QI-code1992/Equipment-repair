@@ -21,16 +21,18 @@
 
 ### Task 1：建立生产工程与本地容器基线
 
+> 当前工作区存在尚未验收且有重复定义冲突的导入实现。以下复选框表示更新后的 Stage 5 完成状态，不代表历史文件存在即已完成；本任务只能在 Stage 4 → Stage 5 门禁批准后开始。
+
 **文件：**
 - Create：`codebase/backend/pyproject.toml`、`codebase/backend/app/main.py`、`codebase/backend/app/core/config.py`
 - Create：`codebase/infra/docker-compose.yml`、`codebase/infra/.env.example`、`codebase/frontend/`
 - Test：`codebase/backend/tests/test_health.py`
 
-- [x] 写出 `/healthz` 的失败测试，分别断言应用、PostgreSQL 和 Redis 未配置时返回健康检查失败。
-- [x] 运行 `pytest codebase/backend/tests/test_health.py -v`，确认初始失败。
-- [x] 实现配置加载、FastAPI 应用工厂、`GET /healthz` 和 Docker Compose 内部网络；只暴露 Nginx HTTPS。
-- [x] 运行 `docker compose -f codebase/infra/docker-compose.yml config` 与 `pytest codebase/backend/tests/test_health.py -v`，预期均通过。
-- [x] 提交：`feat: bootstrap platform runtime`。
+- [ ] 写出 `/healthz` 的失败测试，分别断言应用、PostgreSQL 和 Redis 未配置时返回健康检查失败。
+- [ ] 运行 `cd codebase/backend && python3.13 -m pytest tests/test_health.py -q`，记录初始失败并关联 `DEF-003`。
+- [ ] 修复配置加载、FastAPI 应用工厂、`GET /healthz` 和 Docker Compose 内部网络；只暴露 Nginx HTTPS。
+- [ ] 运行 `docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet` 与后端健康测试，确认通过并关闭 `DEF-003`、`DEF-004`。
+- [ ] 提交：`feat: bootstrap platform runtime`。
 
 ### Task 2：认证、权限、审计与核心业务数据迁移
 

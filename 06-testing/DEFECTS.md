@@ -24,3 +24,12 @@
 - 实际结果：导入 `codebase/backend/app/main.py` 时调用 `Settings()`，因缺少 `postgres_dsn` 和 `redis_url` 触发 `TypeError`，测试在收集阶段中止。
 - 初步证据：`codebase/backend/app/main.py` 和 `codebase/backend/app/core/config.py` 均包含重复定义；该内容在本次目录迁移前已存在，CR-032 只执行 Git 路径重命名，没有修改业务代码。
 - 处理边界：需要单独诊断与修复，不得通过修改测试或弱化健康检查要求使迁移验证通过。
+
+### DEF-004：Compose 基线存在重复服务和网络定义
+
+- 严重程度：阻断 Compose 配置验证
+- 状态：已发现 / 计划在 Stage 5 TASK-001 修复
+- 发现时间：2026-07-15
+- 静态证据：`codebase/infra/docker-compose.yml` 重复定义 `postgres`、`redis` 和顶层 `networks`，且网络结构互相矛盾。
+- 未验证项：当前协调环境没有 Docker，未运行 `docker compose config`；不得据此声称 Compose 的具体运行错误或容器状态。
+- 处理边界：Stage 4 只登记风险和修正任务顺序；任何 Compose 配置修改及真实运行验证必须在 Stage 4 → Stage 5 门禁批准后由 `DEV-001` 执行。

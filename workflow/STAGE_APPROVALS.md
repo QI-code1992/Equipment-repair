@@ -81,6 +81,19 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Conditions / Scope Exceptions: 本记录仅批准任务分配基线，不是更新后的 Stage 4 → Stage 5 门禁批准，也不单独授权执行 TASK-001；`DEF-003`、`AGENTS.md` 命令、Compose 验证、同一精确 SHA 和新基线标签等准入项仍须关闭。
 - Notes: 下游开发任务继续受 TASK-001 和最终门禁阻塞。
 
+### Review-007: Stage 5 开发任务书门禁顺序修订
+
+- Status: Changes Requested / Incorporated into candidate
+- Requester: project owner
+- Requested At: 2026-07-15
+- Current Stage: Stage 4 — 补充整改
+- Artifact Affected: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md`
+- Evidence Reviewed: 项目负责人明确指出“DEV-001 执行 TASK-001 应该是需要 Stage 4 → Stage 5 门禁批准后才能进行”，随后指令“继续”。
+- Decision: TASK-001 必须调整为 Stage 5 门禁后的首个阻塞任务；不得以修复 TASK-001 作为 Stage 4 门禁前置条件。
+- Candidate Version / Commit SHA: v1.1 / 待提交后回填
+- Approval Boundary: 本记录批准纠正方向，不批准修订候选或 Stage 4 → Stage 5 门禁；门禁必须绑定新的精确 Commit SHA 另行明确批准。
+- Notes: Review-006 对 v1.0 两人分配的历史批准保留；其中将 `DEF-003`、Compose 验证视为门禁前关闭项的表述由本记录纠正，不再作为当前门禁依据。
+
 ## Candidate gate recommendations
 
 ### Gate-001: Scoped waiver to enter Stage 3

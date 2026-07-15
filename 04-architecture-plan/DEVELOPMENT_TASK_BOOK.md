@@ -4,13 +4,14 @@
 
 - 项目：新能源装载机设备智能运维平台
 - 当前阶段：Stage 4 补充整改，等待重新执行 Stage 4 → Stage 5 门禁
-- 任务书版本：v1.0
-- 状态：已批准，作为两人制任务分配基线；不等同于 Stage 4 → Stage 5 最终门禁或 TASK-001 执行授权
-- 候选提交：`8272a8ed161b787098660f61ebb86fa5ccada564`
-- 审批记录提交：`20261a80f01de8d18e18a2acf9c97e07087e04bc`
-- 批准人：项目负责人
-- 批准时间：2026-07-15
-- 批准证据：项目负责人明确回复“批准任务书”
+- 任务书版本：修订候选 v1.1
+- 状态：等待项目负责人将本修订版与 Stage 4 包一并批准；门禁批准前不得执行任何 Stage 5 任务
+- v1.0 候选提交：`8272a8ed161b787098660f61ebb86fa5ccada564`
+- v1.0 审批记录提交：`20261a80f01de8d18e18a2acf9c97e07087e04bc`
+- v1.0 批准人：项目负责人
+- v1.0 批准时间：2026-07-15
+- v1.0 批准证据：项目负责人明确回复“批准任务书”
+- 修订原因：项目负责人指出 TASK-001 属于 Stage 5，必须在 Stage 4 → Stage 5 门禁批准后执行；v1.0 的门禁顺序不再作为当前准入依据
 - 关联基线：
   - PRD：`01-requirements/PRD.md`，已批准 v1.1
   - SPEC：`01-requirements/SPEC.md`，已批准 v1.1
@@ -23,7 +24,8 @@
   - Coding Constraints：`04-architecture-plan/AGENTS.md`
 - 编写人：工作流协调者
 - 人员配置确认时间：2026-07-15
-- 已知准入阻塞：`DEF-003`、当前 Compose 尚未在 DEV-001 环境重新验证、`AGENTS.md` 命令需刷新、最新 Stage 4 包尚未重新审批
+- 已知 Stage 5 首任务风险：`DEF-003`、`DEF-004`；后端测试和 Compose 真实运行验证由 TASK-001 在门禁后关闭
+- 当前门禁阻塞：修订任务书与更新后的 Stage 4 包尚未绑定同一精确 Commit SHA 并获项目负责人批准
 
 ## 2. 开发人员配置
 
@@ -99,22 +101,22 @@
 
 ### TASK-001：修复并重新验证平台运行基线
 
-- 状态：Planned / Stage 5 准入前置修复
+- 状态：Planned / Stage 5 首个阻塞任务
 - 优先级：P0
 - 负责人：`DEV-001`
 - 任务类型：后端 / 基础设施 / 测试
 - 并行属性：无；所有其他任务均受其阻塞
 - 需求映射：NFR-003、NFR-004、NFR-005；AC-029、AC-031；实施计划 Task 1
-- 范围：修复 `DEF-003` 中重复定义冲突；确定唯一 `/healthz` 契约；刷新 Python 3.13、测试、启动和 Compose 命令；验证 PostgreSQL/Redis/API 容器。
+- 范围：修复 `DEF-003`、`DEF-004` 中的重复定义冲突；确定唯一 `/healthz` 契约；执行 Python 3.13、测试、启动和 Compose 命令；验证 PostgreSQL/Redis/API 容器。
 - 不包含：新增业务模块、认证、RAGFlow 或前端功能。
-- 前置条件：本任务书获得项目负责人批准，允许执行准入修复。
-- 预计修改：`codebase/backend/app/main.py`、`codebase/backend/app/core/config.py`、`codebase/backend/tests/test_health.py`、`codebase/infra/docker-compose.yml`、`04-architecture-plan/AGENTS.md`、Stage 5 自测与缺陷记录。
+- 前置条件：更新后的 Stage 4 → Stage 5 门禁已针对精确 Commit SHA 获项目负责人批准并完成记录；无需另行进行任务级授权。
+- 预计修改：`codebase/backend/app/main.py`、`codebase/backend/app/core/config.py`、`codebase/backend/tests/test_health.py`、`codebase/infra/docker-compose.yml`、Stage 5 自测与缺陷记录。
 - 禁止修改：PRD、SPEC、原型、公开业务 API。
 - 实施步骤：
   1. 以当前失败堆栈建立最小回归测试，确认合并残留的两套契约。
   2. 依据已批准 Task 1 健康契约保留一套实现，删除重复定义和矛盾测试。
   3. 在 Python 3.13 与 DEV-001 Docker 环境运行后端、Compose 和 HTTP 健康检查。
-  4. 更新 `AGENTS.md` 的真实命令并关闭或更新 `DEF-003`。
+  4. 关闭或更新 `DEF-003`、`DEF-004`，记录真实命令结果。
 - 验收标准：测试收集成功且全部通过；Compose 配置通过；PostgreSQL/Redis healthy；API `/healthz` 返回已批准结果；无旧实现兼容副本。
 - 验证：`python -m pytest codebase/backend/tests/test_health.py -q`；`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet`；容器启动后的 HTTP `/healthz` 冒烟测试；`git diff --check`。
 - 分支：`codex/task-001-runtime-baseline`
@@ -312,7 +314,7 @@
 
 | 任务 | 负责人 | 优先级 | 依赖模式 | 可开始条件 |
 |---|---|---:|---|---|
-| TASK-001 | DEV-001 | P0 | 无 | 任务书获批并授权准入修复 |
+| TASK-001 | DEV-001 | P0 | 无 | 更新后的 Stage 4 → Stage 5 门禁已批准并完成记录 |
 | TASK-002 | DEV-001 | P0 | Sequential After TASK-001 | TASK-001 测试、Compose、Review、FCP 均通过 |
 | TASK-003 | DEV-001 | P0 | Sequential After TASK-002 | 身份、审计和迁移基础已合并 |
 | TASK-004 | DEV-001 | P0 | Sequential After TASK-002 | 业务容器基线与网络契约稳定 |
@@ -363,13 +365,12 @@
 
 ## 12. Stage 5 准入检查
 
-本任务书 v1.0 已作为任务分配基线获得书面批准。只有以下条件全部满足后，项目才能通过更新后的 Stage 4 → Stage 5 门禁并启动正式开发：
+本任务书 v1.1 是对已批准 v1.0 的门禁顺序修订。只有以下条件全部满足后，项目才能进入 Stage 5；TASK-001 只能在门禁批准后开始：
 
-- [x] 项目负责人明确审批本任务书及两人分配。
-- [ ] TASK-001 的准入修复范围获得授权，`DEF-003` 被修复并验证。
-- [ ] `AGENTS.md` 更新为当前 `codebase/` 的真实命令并通过审计。
-- [ ] DEV-001 在 Docker 环境重新验证业务 Compose。
-- [ ] 最新 Stage 4 架构、目录规范、实施计划、AGENTS 与任务书形成同一精确 Commit SHA。
-- [ ] `workflow/state.json`、`PM_TO_DEV_HANDOFF.md` 和 Stage 审批记录相互一致。
+- [x] Stage 5 两人配置、职责和 Docker 能力边界已确认。
+- [x] `DEF-003`、`DEF-004` 已登记为 Stage 5 首任务风险，不要求在 Stage 4 门禁前修改代码或配置。
+- [x] `AGENTS.md` 已更新当前 `codebase/` 命令、目标环境和已知未验证项。
+- [ ] 最新 Stage 4 架构、目录规范、实施计划、AGENTS、任务书和工作流台账形成同一精确候选 Commit SHA 并推送远端。
+- [ ] 项目负责人确认修订后的任务书 v1.1 属于 Stage 4 开发基线。
 - [ ] 项目负责人对更新后的精确 SHA 明确批准 Stage 4 → Stage 5。
-- [ ] 新 Stage 4 基线标签已推送至 GitHub，且标签不可移动。
+- [ ] 门禁批准记录已提交并推送，新 Stage 4 基线标签已绑定获批 SHA 且不可移动。

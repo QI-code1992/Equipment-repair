@@ -1,7 +1,7 @@
 {
   "state": "AWAITING_STAGE_APPROVAL",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-15T12:40:00+08:00",
+  "updatedAt": "2026-07-15T14:35:00+08:00",
   "productBaseline": {
     "status": "requirements-interaction-and-prototype-approved",
     "canonicalCandidate": [
@@ -13,7 +13,7 @@
     "historicalSources": "snapshot/legacy-import-20260714"
   },
   "engineeringBaseline": {
-    "status": "stage-4-task-book-approved-entry-remediation-pending",
+    "status": "stage-4-task-book-v1.1-candidate-awaiting-gate-approval",
     "prototype": "03-ui-prototype/prototype/",
     "codebase": "codebase/",
     "architectureCandidate": "04-architecture-plan/平台级架构设计.md",
@@ -39,6 +39,7 @@
     "Stage 5 entry materials have been supplemented with 04-architecture-plan/AGENTS.md. The project is awaiting product-owner confirmation to retain or release Hold-001; no development has started.",
     "On 2026-07-15, the project owner explicitly released Hold-001 and approved entering Stage 5 from the reviewed baseline commit 185e5cc.",
     "On 2026-07-15, the project owner confirmed two Stage 5 developers: DEV-001 is the final integration owner with Docker/Compose validation capability; DEV-002 has no Docker environment.",
-    "On 2026-07-15, the project owner explicitly approved DEVELOPMENT_TASK_BOOK.md v1.0 at candidate commit 8272a8ed161b787098660f61ebb86fa5ccada564. This approves the task allocation baseline only; it does not approve the refreshed Stage 4 -> Stage 5 gate or independently authorize TASK-001. Entry remediation and exact-SHA approval remain pending."
+    "On 2026-07-15, the project owner explicitly approved DEVELOPMENT_TASK_BOOK.md v1.0 at candidate commit 8272a8ed161b787098660f61ebb86fa5ccada564. This approved the two-person task allocation baseline only.",
+    "On 2026-07-15, the project owner corrected the gate sequence: TASK-001 is a Stage 5 task and may start only after the refreshed Stage 4 -> Stage 5 gate is explicitly approved for an exact Commit SHA. DEVELOPMENT_TASK_BOOK.md v1.1 is a revision candidate; DEF-003 and DEF-004 are Stage 5 TASK-001 risks, not pre-gate code-remediation requirements."
   ]
 }
