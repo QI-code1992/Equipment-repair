@@ -386,7 +386,7 @@ Expected: all backend tests pass, Compose config exits 0, and diff check exits 0
 
 Review exact range from the design commit through the final implementation commit. Reject Critical/Important findings before proceeding; record Minor findings and disposition.
 
-- [ ] **Step 4: 更新正式工件**
+- [x] **Step 4: 更新正式工件**
 
 Record exact commands/results, migration revision, remote commits, FCP recovery point, no compatibility code, no extra abstraction, no unrelated changes, residual warning, rollback via application revert plus tested Alembic downgrade, and DEV-002 authentication-context handoff.
 
