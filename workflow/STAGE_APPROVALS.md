@@ -90,9 +90,22 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Artifact Affected: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md`
 - Evidence Reviewed: 项目负责人明确指出“DEV-001 执行 TASK-001 应该是需要 Stage 4 → Stage 5 门禁批准后才能进行”，随后指令“继续”。
 - Decision: TASK-001 必须调整为 Stage 5 门禁后的首个阻塞任务；不得以修复 TASK-001 作为 Stage 4 门禁前置条件。
-- Candidate Version / Commit SHA: v1.1 / 待提交后回填
+- Candidate Version / Commit SHA: v1.1 / `25e15709a3f1d92f661d37acdb8aa3e1e0e41346`
 - Approval Boundary: 本记录批准纠正方向，不批准修订候选或 Stage 4 → Stage 5 门禁；门禁必须绑定新的精确 Commit SHA 另行明确批准。
 - Notes: Review-006 对 v1.0 两人分配的历史批准保留；其中将 `DEF-003`、Compose 验证视为门禁前关闭项的表述由本记录纠正，不再作为当前门禁依据。
+
+### Gate-Candidate-007: 更新后的 Stage 4 → Stage 5
+
+- Status: Pending project owner approval
+- Approver: none recorded
+- Current Stage: Stage 4 — Architecture and Development Plan
+- Next Stage: Stage 5 — Development Implementation
+- Artifacts Reviewed: `04-architecture-plan/平台级架构设计.md`、`SYSTEM_ARCHITECTURE.md`、`DATA_MODEL.md`、`API_SPEC.md`、`AI_RAGFLOW_LANGGRAPH_SPEC.md`、`ADR/`、`IMPLEMENTATION_PLAN.md`、`AGENTS.md`、`DEVELOPMENT_TASK_BOOK.md`、工作流台账
+- Evidence Reviewed: 两人配置和 Docker 边界已确认；任务书 v1.1 已消除门禁循环；AGENTS 已列出当前命令及未验证环境；`DEF-003`、`DEF-004` 已登记为门禁后 TASK-001 风险；JSON 与文档一致性检查通过。
+- Version / Commit SHA: `25e15709a3f1d92f661d37acdb8aa3e1e0e41346`
+- Recommendation: 批准该精确 Commit 作为更新后的 Stage 4 开发基线并进入 Stage 5；批准记录完成后由 `DEV-001` 开始 TASK-001，无需额外任务级授权。
+- Conditions / Scope Exceptions: `DEF-003`、`DEF-004` 尚未修复；当前协调环境缺少 Python 3.13 和 Docker，未验证后端或 Compose。它们必须由 `DEV-001` 在 TASK-001 中提供真实证据，TASK-001 通过前不得启动下游任务。
+- Notes: 本候选建议不是审批记录；未经项目负责人明确批准，不得进入 Stage 5 或修改生产代码/Compose 配置。
 
 ## Candidate gate recommendations
 

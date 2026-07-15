@@ -435,7 +435,7 @@
 ### CR-035：纠正 TASK-001 与 Stage 5 门禁顺序
 
 - 级别：L2
-- 状态：Ready For Verification
+- 状态：Done / Gate approval pending
 - 提出人：项目负责人
 - 提出时间：2026-07-15
 - 当前阶段：Stage 4 补充整改
@@ -444,4 +444,5 @@
 - 决定：TASK-001 改为门禁后的首个阻塞任务；`DEF-003`、`DEF-004` 作为 Stage 5 已知风险，由 DEV-001 在 TASK-001 中修复和真实验证；门禁前不得修改相关代码或 Compose 配置。
 - 影响：更新 DEVELOPMENT_TASK_BOOK、IMPLEMENTATION_PLAN、AGENTS、缺陷台账、PM→开发交接、阶段评审和状态记录；不改变 PRD、SPEC、AC、原型、架构/API/数据契约或产品范围。
 - 审批边界：项目负责人已批准纠正方向，但修订候选 v1.1 和更新后的 Stage 4 → Stage 5 精确 SHA 仍需明确批准。
+- 实施提交：`25e15709a3f1d92f661d37acdb8aa3e1e0e41346`。
 - 验证：检查所有 TASK-001 开始条件均位于门禁之后；Stage 5 准入清单不再要求先修复 TASK-001；JSON 可解析；`git diff --check` 通过。

@@ -11,6 +11,6 @@
 - 实施顺序：[IMPLEMENTATION_PLAN.md](../04-architecture-plan/IMPLEMENTATION_PLAN.md)。
 - 开发任务书：[DEVELOPMENT_TASK_BOOK.md](../04-architecture-plan/DEVELOPMENT_TASK_BOOK.md)，修订候选 v1.1；v1.0 的两人分配已获确认，但门禁顺序修订须纳入新的 Stage 4 基线批准。
 - 人员配置：`DEV-001` 负责最终集成和全部 Docker/Compose 验证；`DEV-002` 负责 AI、知识适配和正式前端，不具备 Docker 环境。
-- 当前任务：形成并推送更新后的 Stage 4 精确候选 SHA，提交项目负责人批准 Stage 4 → Stage 5 门禁；门禁批准前不执行 TASK-001。
+- 当前任务：请项目负责人审阅精确候选 Commit `25e15709a3f1d92f661d37acdb8aa3e1e0e41346`，批准任务书 v1.1 与更新后的 Stage 4 → Stage 5 门禁；门禁批准前不执行 TASK-001。
 
 门禁批准并完成记录后，`DEV-001` 无需额外任务级授权即可开始 TASK-001。所有开发只允许在新的 `codex/*` 隔离分支和独立工作区执行；不得直接向 `main` 推送，也不得在 TASK-001 通过前启动下游任务。
