@@ -18,3 +18,12 @@
 - 将正式工程目录统一迁移为 `codebase/backend/`、`codebase/frontend/`、`codebase/infra/`。
 - `03-ui-prototype/prototype/` 保持原位，继续作为 Stage 3 原型唯一事实来源；未创建 `codebase/prototype/`。
 - 未保留旧目录兼容副本；后续开发、测试和部署命令必须使用 `codebase/` 路径。
+
+## 2026-07-15 · TASK-006 非数据库切片
+
+- 状态：TASK-006 非数据库切片已验证；TASK-006 总任务仍未完成。验证输入 HEAD 为 `f7da3393f8861e3f7b8a453629fce7079915e58e`。
+- 实现提交：`33d7712334044437eba0d3fc884859d48a3c71ed`（不可变领域模型）、`7cbf76bb9ae627e023cbeaa86fd883b18a916373`（独立配置服务与两个外部端口）、`f7da3393f8861e3f7b8a453629fce7079915e58e`（未挂载 API 契约）。Tasks 1–3 已逐任务审查。
+- 已完成：四个稳定 Agent ID 的领域模型、`AgentConfigRepository` 与 `ModelCatalog` 两个外部端口、单独初始化/读取/保存、模型推理能力校验、不可变且无密钥的配置快照、未挂载正式应用的 API 契约。
+- 未完成：数据库仓储、迁移、事务与并发唯一性、认证/权限/审计接入、正式路由挂载、真实模型测试、前端集成。
+- 依赖边界：数据库部分继续 Blocked By TASK-002；TASK-007 不得解锁。DEV-002 未执行或宣称 Docker、Compose、RAGFlow 验证通过。
+- 工程声明：未新增生产依赖、兼容代码或范围外抽象；未修改 `app/main.py`、数据库、infra、前端或原型，无无关修改。
