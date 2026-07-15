@@ -1,5 +1,7 @@
 # 原型/页面检查点
 
+- 状态：Stage 3 已批准；检查点保留原始验证状态。
+
 ## PCP-001: Imported multi-page prototype
 
 - 状态：候选版 / 等待 Stage 3 审批

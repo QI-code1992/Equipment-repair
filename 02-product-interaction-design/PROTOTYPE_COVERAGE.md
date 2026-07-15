@@ -1,7 +1,7 @@
 # 原型覆盖情况
 
 - 候选基线：`03-ui-prototype/PROTOTYPE_BASELINE.md`
-- 状态：等待 Stage 2 审批
+- 状态：Stage 2 已批准；见 `workflow/STAGE_APPROVALS.md` 的 Gate-003
 
 | 流程 | 原型证据 | 覆盖情况 | 缺口 |
 |---|---|---|---|

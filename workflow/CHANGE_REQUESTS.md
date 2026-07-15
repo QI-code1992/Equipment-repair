@@ -354,3 +354,14 @@
 - 影响：新增 `04-architecture-plan/AGENTS.md`；更新 `workflow/state.json` 与 `workflow/PM_TO_DEV_HANDOFF.md`，不改变产品需求、交互、原型、架构、API 或业务代码。
 - 决策：项目负责人已审核编码约束并明确解除 `Hold-001`，允许进入 Stage 5。
 - 验证：`workflow/state.json` 可解析；文档路径与 Stage 5 实施计划一致；不创建开发分支或生产代码。
+
+### CR-030：已批准基线状态同步
+
+- 级别：L0
+- 状态：Done
+- 提出人：项目负责人
+- 提出时间：2026-07-15
+- 当前阶段：Stage 5 — 开发实施
+- 原始请求：同步 Stage 5 进入前的文档状态，消除已批准门禁与候选状态标记的冲突。
+- 影响：仅更新 Stage 1 至 Stage 4 文档页首状态、原型检查点总状态与 PM→开发交接状态；不改变需求、交互、原型、架构、API 或代码内容。
+- 验证：状态文件可解析；文档状态引用 Gate-002 至 Gate-006；`git diff --check` 通过。

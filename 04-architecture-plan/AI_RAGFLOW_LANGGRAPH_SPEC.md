@@ -1,6 +1,6 @@
 # AI/RAGFlow/LangGraph 集成基线摘要
 
-- 状态：候选版 v2.1 / 等待 Stage 4 文档包评审
+- 状态：已批准 v2.1；见 `workflow/STAGE_APPROVALS.md` 的 Gate-005 与 Gate-006
 - 主依据：`平台级架构设计.md`
 
 ## 技术与边界

@@ -1,7 +1,7 @@
 # 原型基线
 
-- 基线：候选版 v1.0
-- 状态：等待 Stage 3 审批
+- 基线：已批准 v1.0
+- 状态：Stage 3 已批准；见 `workflow/STAGE_APPROVALS.md` 的 Gate-004
 - 来源：`03-ui-prototype/prototype/`
 - 导入源码 Commit：`c544c2d`（原始快照）；迁移 Commit：`32d1b7b`
 

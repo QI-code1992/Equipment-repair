@@ -1,7 +1,7 @@
 # 新能源装载机设备智能运维平台 SPEC
 
-- 基线：候选版 v1.0
-- 状态：等待用户批准 Stage 1
+- 基线：已批准 v1.1
+- 状态：Stage 1 已批准；见 `workflow/STAGE_APPROVALS.md` 的 Gate-002
 - 关联 PRD：`01-requirements/PRD.md`
 
 ## 1. 系统边界
