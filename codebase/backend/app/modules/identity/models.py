@@ -38,7 +38,9 @@ class User(Base):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now
+    )
     roles: Mapped[list["Role"]] = relationship(secondary=user_roles, back_populates="users")
 
 

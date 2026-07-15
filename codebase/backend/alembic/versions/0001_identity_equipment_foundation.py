@@ -86,9 +86,10 @@ def upgrade() -> None:
         sa.Column("method", sa.String(10), nullable=False),
         sa.Column("path", sa.String(255), nullable=False),
         sa.Column("idempotency_key", sa.String(255), nullable=False),
+        sa.Column("request_hash", sa.String(64), nullable=False),
         sa.Column("response_status", sa.Integer(), nullable=False),
         sa.Column("response_body", sa.JSON(), nullable=False),
-        sa.UniqueConstraint("user_id", "method", "path", "idempotency_key", name="uq_idempotency_scope"),
+        sa.UniqueConstraint("user_id", "idempotency_key", name="uq_idempotency_owner_key"),
     )
 
 

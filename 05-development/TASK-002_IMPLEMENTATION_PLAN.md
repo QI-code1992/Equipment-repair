@@ -289,7 +289,65 @@ git add codebase/backend/app codebase/backend/tests/modules/test_identity_permis
 git commit -m "feat(equipment): add audited idempotent master data APIs"
 ```
 
-### Task 4: PostgreSQL 联调、契约冻结与正式交接
+### Task 4: Review 整改——引导、完整契约与安全边界
+
+**Files:**
+- Create: `codebase/backend/app/modules/identity/bootstrap.py`
+- Modify: `codebase/backend/app/modules/identity/admin_router.py`
+- Modify: `codebase/backend/app/modules/identity/router.py`
+- Modify: `codebase/backend/app/modules/identity/service.py`
+- Modify: `codebase/backend/app/modules/identity/dependencies.py`
+- Modify: `codebase/backend/app/modules/equipment/router.py`
+- Modify: `codebase/backend/app/modules/equipment/organization_router.py`
+- Modify: `codebase/backend/app/core/idempotency.py`
+- Modify: `codebase/backend/app/modules/audit/models.py`
+- Modify: `codebase/backend/app/modules/audit/service.py`
+- Modify: `codebase/backend/alembic/versions/0001_identity_equipment_foundation.py`
+- Modify: `codebase/backend/Dockerfile`
+- Test: `codebase/backend/tests/modules/test_identity_permissions.py`
+- Test: `codebase/backend/tests/test_health.py`
+
+**Interfaces:**
+- Produces: `bootstrap_admin(db, username, password) -> User`，仅允许空用户库首次引导。
+- Produces: permission/role queries, equipment/organization updates, idempotent audited logout.
+- Freezes: `(user_id, idempotency_key)` global idempotency ownership and PostgreSQL advisory transaction lock.
+
+- [x] **Step 1: 写首个管理员、查询和更新契约 RED 测试**
+
+Assert that bootstrap creates fixed permissions and an admin able to log in; a second bootstrap is rejected; permission/role queries work; equipment and organization PATCH operations require idempotency and return `audit_event_id`.
+
+- [x] **Step 2: 实现管理员引导和完整管理契约**
+
+The CLI reads `POSTGRES_DSN`, `BOOTSTRAP_ADMIN_USERNAME`, and `BOOTSTRAP_ADMIN_PASSWORD`; it has no default credential and refuses to run when users already exist. Add protected queries and PATCH endpoints without row-level filtering.
+
+- [x] **Step 3: 写登录/拒绝/登出审计和脱敏 RED 测试**
+
+Assert login success/failure and permission denial create audit events; logout requires `Idempotency-Key`, returns `audit_event_id`, and replays after the token is revoked; keys such as `access_token`, `password_hash`, and Bearer strings are redacted.
+
+- [x] **Step 4: 实现安全审计与恒定密码校验路径**
+
+Use a dummy scrypt hash for unknown/disabled users, audit login and denial outcomes, and make logout resolve its session before revoked-state rejection so a saved response can replay.
+
+- [x] **Step 5: 写全局幂等键和数据库竞态 RED 测试**
+
+Assert reusing one key on another path returns `409 IDEMPOTENCY_KEY_REUSED`; verify PostgreSQL lock acquisition is called before lookup; duplicate database constraints are translated to stable 409 errors.
+
+- [x] **Step 6: 实现全局键所有权、事务锁和唯一冲突映射**
+
+Make `(user_id, idempotency_key)` unique, store method/path, acquire `pg_advisory_xact_lock` on PostgreSQL, reject mismatched target reuse, and catch `IntegrityError` around commits with rollback and stable 409 responses.
+
+- [x] **Step 7: 修复两个 Minor 并执行回归**
+
+Use explicit `DateTime(timezone=True)` for audit timestamps and `onupdate=utc_now` for `User.updated_at`; run all backend tests and migration upgrade/downgrade/upgrade.
+
+- [x] **Step 8: 提交 Review 整改**
+
+```powershell
+git add codebase/backend 05-development/TASK-002_IMPLEMENTATION_PLAN.md
+git commit -m "fix(identity): close bootstrap audit and idempotency gaps"
+```
+
+### Task 5: PostgreSQL 联调、契约冻结与正式交接
 
 **Files:**
 - Modify: `05-development/SELF_TEST.md`
@@ -302,7 +360,7 @@ git commit -m "feat(equipment): add audited idempotent master data APIs"
 **Interfaces:**
 - Freezes: authentication dependency, permission code format, model/table names, audit fields, migration revision and TASK-003/TASK-006 consumption boundary.
 
-- [ ] **Step 1: 在真实 PostgreSQL 执行迁移升级/降级/升级**
+- [x] **Step 1: 在真实 PostgreSQL 执行迁移升级/降级/升级**
 
 Run within the API container or a temporary Python 3.13 container attached to `equipment-task2_platform`:
 
@@ -314,7 +372,7 @@ alembic -c codebase/backend/alembic.ini upgrade head
 
 Expected: all commands exit 0; the final current revision is `0001`.
 
-- [ ] **Step 2: 执行完整验证**
+- [x] **Step 2: 执行完整验证**
 
 ```powershell
 D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests -q
@@ -324,7 +382,7 @@ git diff --check
 
 Expected: all backend tests pass, Compose config exits 0, and diff check exits 0.
 
-- [ ] **Step 3: 独立 Review**
+- [x] **Step 3: 独立 Review**
 
 Review exact range from the design commit through the final implementation commit. Reject Critical/Important findings before proceeding; record Minor findings and disposition.
 

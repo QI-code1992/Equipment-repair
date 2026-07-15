@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -26,6 +27,33 @@ class UserCreate(BaseModel):
     role_ids: list[str]
 
 
+@router.get("/permissions")
+def list_permissions(
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permission("identity:read")),
+) -> list[dict[str, str]]:
+    del user
+    permissions = db.scalars(select(Permission).order_by(Permission.code)).all()
+    return [{"code": permission.code} for permission in permissions]
+
+
+@router.get("/roles")
+def list_roles(
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permission("identity:read")),
+) -> list[dict[str, object]]:
+    del user
+    roles = db.scalars(select(Role).order_by(Role.name)).unique().all()
+    return [
+        {
+            "id": role.id,
+            "name": role.name,
+            "permission_codes": sorted(permission.code for permission in role.permissions),
+        }
+        for role in roles
+    ]
+
+
 @router.post("/roles", status_code=201, response_model=None)
 def create_role(
     payload: RoleCreate,
@@ -33,8 +61,14 @@ def create_role(
     db: Session = Depends(get_db),
     user: User = Depends(require_permission("identity:write")),
 ) -> dict[str, object] | JSONResponse:
+    request_body = payload.model_dump(mode="json")
     replay = find_idempotent_response(
-        db, user_id=user.id, method="POST", path="/api/roles", key=idempotency_key
+        db,
+        user_id=user.id,
+        method="POST",
+        path="/api/roles",
+        key=idempotency_key,
+        request_body=request_body,
     )
     if replay is not None:
         status, body = replay
@@ -49,7 +83,11 @@ def create_role(
 
     role = Role(name=payload.name, permissions=permissions)
     db.add(role)
-    db.flush()
+    try:
+        db.flush()
+    except IntegrityError as error:
+        db.rollback()
+        raise HTTPException(status_code=409, detail={"code": "ROLE_NAME_EXISTS"}) from error
     event = write_audit_event(
         db,
         actor_user_id=user.id,
@@ -57,7 +95,7 @@ def create_role(
         resource_type="role",
         resource_id=role.id,
         result="success",
-        metadata=payload.model_dump(),
+        metadata=request_body,
     )
     body: dict[str, object] = {
         "id": role.id,
@@ -71,10 +109,15 @@ def create_role(
         method="POST",
         path="/api/roles",
         key=idempotency_key,
+        request_body=request_body,
         status=201,
         body=body,
     )
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as error:
+        db.rollback()
+        raise HTTPException(status_code=409, detail={"code": "ROLE_NAME_EXISTS"}) from error
     return body
 
 
@@ -85,8 +128,14 @@ def create_user(
     db: Session = Depends(get_db),
     user: User = Depends(require_permission("identity:write")),
 ) -> dict[str, object] | JSONResponse:
+    request_body = payload.model_dump(mode="json")
     replay = find_idempotent_response(
-        db, user_id=user.id, method="POST", path="/api/users", key=idempotency_key
+        db,
+        user_id=user.id,
+        method="POST",
+        path="/api/users",
+        key=idempotency_key,
+        request_body=request_body,
     )
     if replay is not None:
         status, body = replay
@@ -104,7 +153,11 @@ def create_user(
         roles=roles,
     )
     db.add(created_user)
-    db.flush()
+    try:
+        db.flush()
+    except IntegrityError as error:
+        db.rollback()
+        raise HTTPException(status_code=409, detail={"code": "USERNAME_EXISTS"}) from error
     event = write_audit_event(
         db,
         actor_user_id=user.id,
@@ -112,7 +165,7 @@ def create_user(
         resource_type="user",
         resource_id=created_user.id,
         result="success",
-        metadata=payload.model_dump(),
+        metadata=request_body,
     )
     body: dict[str, object] = {
         "id": created_user.id,
@@ -127,8 +180,13 @@ def create_user(
         method="POST",
         path="/api/users",
         key=idempotency_key,
+        request_body=request_body,
         status=201,
         body=body,
     )
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as error:
+        db.rollback()
+        raise HTTPException(status_code=409, detail={"code": "USERNAME_EXISTS"}) from error
     return body

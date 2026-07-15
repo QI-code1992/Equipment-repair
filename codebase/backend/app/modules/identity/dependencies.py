@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.modules.identity.models import User
 from app.modules.identity.service import permission_codes_for_user, user_for_token
+from app.modules.audit.service import write_audit_event
 
 
 bearer = HTTPBearer(auto_error=False)
@@ -28,6 +29,16 @@ def require_permission(code: str) -> Callable[..., User]:
         db: Session = Depends(get_db),
     ) -> User:
         if code not in permission_codes_for_user(db, user.id):
+            write_audit_event(
+                db,
+                actor_user_id=user.id,
+                action="permission.denied",
+                resource_type="permission",
+                resource_id=code,
+                result="denied",
+                metadata={"permission_code": code},
+            )
+            db.commit()
             raise HTTPException(status_code=403, detail={"code": "PERMISSION_DENIED"})
         return user
 

@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from sqlalchemy import ForeignKey, Integer, JSON, String, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, Integer, JSON, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -25,13 +25,15 @@ class AuditEvent(Base):
     resource_id: Mapped[str | None] = mapped_column(String(100))
     result: Mapped[str] = mapped_column(String(30), nullable=False)
     metadata_json: Mapped[dict[str, object]] = mapped_column(JSON, nullable=False, default=dict)
-    created_at: Mapped[datetime] = mapped_column(nullable=False, default=utc_now)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utc_now
+    )
 
 
 class IdempotencyRecord(Base):
     __tablename__ = "idempotency_records"
     __table_args__ = (
-        UniqueConstraint("user_id", "method", "path", "idempotency_key", name="uq_idempotency_scope"),
+        UniqueConstraint("user_id", "idempotency_key", name="uq_idempotency_owner_key"),
     )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
@@ -39,5 +41,6 @@ class IdempotencyRecord(Base):
     method: Mapped[str] = mapped_column(String(10), nullable=False)
     path: Mapped[str] = mapped_column(String(255), nullable=False)
     idempotency_key: Mapped[str] = mapped_column(String(255), nullable=False)
+    request_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     response_status: Mapped[int] = mapped_column(Integer, nullable=False)
     response_body: Mapped[dict[str, object]] = mapped_column(JSON, nullable=False)
