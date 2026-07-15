@@ -141,7 +141,7 @@
 - 不包含：Agent 编排、知识检索、维修闭环。
 - 预计修改：`codebase/backend/app/modules/identity/`、`audit/`、`equipment/`、共享迁移、业务 API 注册。
 - 共享契约：冻结认证依赖、`User/Role/Permission/Organization/Equipment` 模型和审计字段。
-- 实施步骤：先写权限/唯一性/停用保护/审计脱敏失败测试；实现迁移和 API；发布迁移 revision 与认证依赖；完成 Review。
+- 实施步骤：先写权限/唯一性/审计脱敏/幂等失败测试；实现迁移和 API；发布迁移 revision 与认证依赖；完成 Review。设备存在活跃故障时的停用保护因依赖 TASK-003 的故障与维修事实，改由 TASK-003 实现并验证。
 - 验收标准：未登录和无操作权限请求被拒；合法用户按操作权限访问平台数据；设备编码唯一；审计不含敏感凭据。
 - 验证：`python -m pytest codebase/backend/tests/modules/test_identity_permissions.py -q`；迁移升级/降级测试；API 契约测试；`git diff --check`。
 - 分支：`codex/task-002-identity-equipment`
@@ -159,8 +159,8 @@
 - 不包含：RAGFlow 文档检索、诊断 Agent 生成逻辑。
 - 预计修改：`codebase/backend/app/modules/maintenance/`、业务迁移、`codebase/backend/app/main.py`、相关测试。
 - 共享契约：提供 `/api/fault-reports`、`/start-repair`、`/repair-result`、`/api/repair-cases/similar`；直接开始维修不保存 AI 摘要。
-- 实施步骤：写状态/幂等/直接开始失败测试；实现事务闭环；实现结构化案例沉淀与查询；向 `DEV-002` 交付已认证契约。
-- 验收标准：非法状态迁移被拒；重复请求不重复写入；维修最终字段以人工提交为准；结构化案例查询不调用 RAGFlow。
+- 实施步骤：写状态/幂等/直接开始/活跃故障设备停用保护失败测试；实现事务闭环及设备停用保护；实现结构化案例沉淀与查询；向 `DEV-002` 交付已认证契约。
+- 验收标准：非法状态迁移被拒；重复请求不重复写入；维修最终字段以人工提交为准；存在待处理或维修中故障的设备不可停用；结构化案例查询不调用 RAGFlow。
 - 验证：`python -m pytest codebase/backend/tests/modules/test_maintenance_lifecycle.py -q`；API 契约和事务回滚测试；`git diff --check`。
 - 分支：`codex/task-003-maintenance-lifecycle`
 - Review：`DEV-002` 复核诊断上下文和采纳接口；`DEV-001` 负责最终合并。
