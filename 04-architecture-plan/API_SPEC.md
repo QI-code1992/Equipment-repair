@@ -1,7 +1,7 @@
 # API 规格
 
-- 基线：候选版 v2.1
-- 状态：等待 Stage 4 文档包评审
+- 基线：已批准 v2.1
+- 状态：Stage 4 已批准；见 `workflow/STAGE_APPROVALS.md` 的 Gate-005 与 Gate-006
 
 所有写请求要求平台账号认证；可重复写请求需携带 `Idempotency-Key`；响应包含字段级校验错误和 `audit_event_id`。权限仅校验角色、菜单和操作权限，不按工厂或设备进行数据行过滤。
 

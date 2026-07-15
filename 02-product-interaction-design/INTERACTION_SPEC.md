@@ -1,7 +1,7 @@
 # 交互规格
 
-- 基线：候选版 v1.0
-- 状态：等待 Stage 2 审批
+- 基线：已批准 v1.0
+- 状态：Stage 2 已批准；见 `workflow/STAGE_APPROVALS.md` 的 Gate-003
 
 ## 通用规则
 

@@ -1,7 +1,7 @@
 # 数据模型
 
-- 基线：候选版 v2.1
-- 状态：等待 Stage 4 文档包评审
+- 基线：已批准 v2.1
+- 状态：Stage 4 已批准；见 `workflow/STAGE_APPROVALS.md` 的 Gate-005 与 Gate-006
 
 ## 核心聚合
 

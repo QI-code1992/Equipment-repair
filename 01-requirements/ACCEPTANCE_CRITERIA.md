@@ -1,7 +1,7 @@
 # Acceptance Criteria
 
-- Baseline: Candidate v1.0
-- Status: Awaiting Stage 1 user approval
+- Baseline: Approved v1.1
+- Status: Stage 1 approved; see Gate-002 in `workflow/STAGE_APPROVALS.md`
 - Format: Given / When / Then
 
 ## Account, permission and audit

@@ -1,7 +1,7 @@
 # 新能源装载机设备智能运维平台 PRD
 
-- Baseline: Candidate v1.0
-- Status: Awaiting Stage 1 user approval
+- Baseline: Approved v1.1
+- Status: Stage 1 approved; see Gate-002 in `workflow/STAGE_APPROVALS.md`
 - Date: 2026-07-14
 - Source decision records: `workflow/CHANGE_REQUESTS.md`, `workflow/STAGE_APPROVALS.md`
 
