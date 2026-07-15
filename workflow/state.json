@@ -14,6 +14,7 @@
   },
   "engineeringBaseline": {
     "status": "stage-4-v1.1-approved-stage-5-ready",
+    "approvalRecordCommit": "c9eb206c6517b9c3afd7f33a86e3c383d84d12aa",
     "prototype": "03-ui-prototype/prototype/",
     "codebase": "codebase/",
     "architectureCandidate": "04-architecture-plan/平台级架构设计.md",

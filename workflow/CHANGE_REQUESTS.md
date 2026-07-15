@@ -446,4 +446,5 @@
 - 审批结果：项目负责人已明确批准任务书 v1.1 所在候选 Commit `25e15709a3f1d92f661d37acdb8aa3e1e0e41346` 作为更新后的 Stage 4 基线，并通过 Stage 4 → Stage 5 门禁。
 - 后续边界：DEV-001 可开始 TASK-001；TASK-001 通过前不得启动下游任务，本批准不构成 Stage 6/7/8 批准。
 - 实施提交：`25e15709a3f1d92f661d37acdb8aa3e1e0e41346`。
+- 门禁审批记录提交：`c9eb206c6517b9c3afd7f33a86e3c383d84d12aa`。
 - 验证：检查所有 TASK-001 开始条件均位于门禁之后；Stage 5 准入清单不再要求先修复 TASK-001；JSON 可解析；`git diff --check` 通过。

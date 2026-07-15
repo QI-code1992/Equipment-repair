@@ -16,6 +16,7 @@
 - v1.1 批准人：项目负责人
 - v1.1 批准时间：2026-07-15
 - v1.1 批准证据：项目负责人明确批准候选 Commit 作为更新后的 Stage 4 基线并通过 Stage 4 → Stage 5 门禁
+- v1.1 审批记录提交：`c9eb206c6517b9c3afd7f33a86e3c383d84d12aa`
 - Stage 4 基线标签：`baseline/stage-04-development-v1.1`
 - 关联基线：
   - PRD：`01-requirements/PRD.md`，已批准 v1.1
