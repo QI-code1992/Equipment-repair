@@ -17,7 +17,8 @@
 - 不修改 `codebase/infra/`、`codebase/frontend/`、`03-ui-prototype/`、数据库迁移或公开 Stage 4 规格。
 - 不新增生产依赖，不实现 Agent 版本、发布、回滚或兼容层。
 - 配置、响应、异常和日志不得包含密码、Token、API Key、请求头或供应商凭据。
-- 严格执行 RED → GREEN → REFACTOR；首次缺少目标模块属于预期 RED，其余 RED 必须确认因目标行为缺失而失败，不能因环境、第三方依赖或语法错误冒充失败测试。
+- 严格执行 RED → GREEN → REFACTOR；每次 RED 必须表现为预期行为断言失败，测试收集、导入、环境、第三方依赖或语法错误均不能冒充 RED。
+- 各任务展示的测试代码是最终目标状态，不得一次性粘贴后再实现；必须逐个行为加入测试并运行。新模块尚不存在时，首个测试使用 `importlib` 捕获 `ModuleNotFoundError` 并调用 `pytest.fail()` 形成明确失败，再创建最小模块；后续每个类型、方法和分支继续独立完成 RED → GREEN。
 - 正式验收使用 Python `>=3.13,<3.14`；本机 bundled Python 3.12 只允许做语法检查，不能替代 pytest 验收。
 - 本计划不修改 `pyproject.toml`，沿用现有 FastAPI、httpx、pytest 版本范围。
 
@@ -106,7 +107,7 @@ cd codebase/backend
 python3.13 -m pytest tests/modules/test_agent_config.py -q
 ```
 
-Expected: collection fails because `app.modules.agent_config.domain` does not exist. If `python3.13` itself is unavailable, stop for environment setup; that is not a valid RED.
+Expected: 首个逐行为测试以 `pytest.fail("agent_config domain module is missing")` 失败；不得出现收集错误。随后只创建使该断言通过的最小包/模块，再逐项加入本任务其余测试并观察各自的行为断言失败。若 `python3.13` 不可用，必须停止处理环境，不能记录为 RED。
 
 - [ ] **Step 3: 实现最小领域模型**
 
@@ -388,7 +389,7 @@ def test_out_of_range_parameter_is_rejected(
 
 Run: `cd codebase/backend && python3.13 -m pytest tests/modules/test_agent_config.py -q`
 
-Expected: collection fails because the newly referenced `service.py` does not exist; this is the expected first RED for the service slice。
+Expected: 首个服务测试通过 `importlib` 捕获缺失模块并以 `pytest.fail("agent_config service module is missing")` 形成失败；不得出现收集错误。创建最小模块后，按初始化、隔离保存、推理能力、快照和参数边界顺序逐个加入测试，每个测试都先因目标行为缺失而失败。
 
 - [ ] **Step 4: 实现服务、端口、稳定错误和共享校验**
 
@@ -664,7 +665,7 @@ def test_get_exposes_capability_without_provider_secret(repository, model_catalo
 
 Run: `cd codebase/backend && python3.13 -m pytest tests/modules/test_agent_config_api.py -q`
 
-Expected: collection fails because `app.modules.agent_config.api` does not exist。
+Expected: 首个 API 测试通过 `importlib` 捕获缺失模块并以 `pytest.fail("agent_config api module is missing")` 形成失败；不得出现收集错误。创建最小模块后，按列表、未知 Agent、推理错误和敏感字段顺序逐个加入契约测试并分别确认 RED。
 
 - [ ] **Step 3: 实现 Pydantic 映射、错误响应和路由工厂**
 
