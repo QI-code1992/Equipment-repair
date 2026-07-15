@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Response
 from fastapi import FastAPI
+from fastapi import Response
 
 from app.core.config import Settings
 
@@ -31,12 +31,7 @@ def create_app(
         if missing:
             response.status_code = 503
             return {"status": "unavailable", "missing": missing}
-def create_app() -> FastAPI:
-    settings = Settings()
-    app = FastAPI(title=settings.service_name)
 
-    @app.get("/healthz")
-    def healthz() -> dict[str, str]:
         return {"status": "ok", "service": settings.service_name}
 
     return app

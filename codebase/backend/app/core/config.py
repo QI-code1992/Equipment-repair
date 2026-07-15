@@ -14,4 +14,3 @@ class Settings:
             postgres_dsn=os.getenv("POSTGRES_DSN"),
             redis_url=os.getenv("REDIS_URL"),
         )
-    service_name: str = "equipment-operations-platform"
