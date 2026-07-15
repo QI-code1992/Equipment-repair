@@ -14,6 +14,13 @@
 
 以上 Task 1 命令与结果是迁移前历史证据，保留原路径用于精确追溯。
 
+## TASK-001 运行基线重新验证（2026-07-15）
+
+- RED：`D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests/test_health.py -q` 在收集阶段失败；`app = create_app()` 命中重复定义并因 `Settings()` 缺少 `postgres_dsn`、`redis_url` 触发 `TypeError`。`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet` 因顶层 `networks` 重复定义失败。
+- GREEN：清理重复应用工厂、配置字段、Compose 服务与网络定义后，同一后端测试为 `4 passed, 1 warning`；警告为 FastAPI/Starlette 的 `httpx` 兼容层弃用提示，未影响断言。
+- Compose：`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet` 通过。
+- 联调：`docker compose -p equipment-task1 --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml up -d --build` 通过；PostgreSQL、Redis 状态为 `healthy`，API 容器内请求 `http://127.0.0.1:8000/healthz` 返回 `{'status': 'ok', 'service': 'equipment-operations-platform'}`。
+
 ## CR-032 目录迁移验证（2026-07-15）
 
 - 当前后端测试入口：`pytest codebase/backend/tests/test_health.py -q`。
@@ -21,6 +28,5 @@
 - Stage 3 原型静态回归仍从 `06-testing/tests/*.test.js` 执行。
 - 目录结构：`codebase/backend/`、`codebase/frontend/`、`codebase/infra/` 均存在；根目录旧路径和 `codebase/prototype/` 均不存在；通过。
 - 原型回归：执行全部 `06-testing/tests/*.test.js`，14/14 通过。
-- 后端：使用 `/tmp/equipment-repair-verify` 一次性 Python 3.12 环境安装项目已声明的 FastAPI、httpx、pytest 后执行；测试收集失败，`Settings()` 缺少 `postgres_dsn` 与 `redis_url`，见 `DEF-003`。本机没有项目要求的 Python 3.13，因此未宣称后端通过。
-- Compose：未验证；当前执行环境缺少 `docker` 命令。
+- 后端与 Compose：后续由 TASK-001 重新验证，结果见“TASK-001 运行基线重新验证”。
 - 路径与差异：目录断言和 `git diff --check` 通过；技能与工件参考中的归档规则一致性扫描通过。

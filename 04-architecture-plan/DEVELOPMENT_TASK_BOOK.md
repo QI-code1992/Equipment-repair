@@ -3,7 +3,7 @@
 ## 1. 基线信息
 
 - 项目：新能源装载机设备智能运维平台
-- 当前阶段：Stage 5 — 开发实施已获授权，等待 DEV-001 启动 TASK-001
+- 当前阶段：Stage 5 — TASK-001 已完成并完成正式交接；DEV-001 可启动 TASK-002，DEV-002 可启动 TASK-006 的非数据库部分
 - 任务书版本：v1.1
 - 状态：已批准，作为 Stage 5 任务分配与集成基线
 - v1.0 候选提交：`8272a8ed161b787098660f61ebb86fa5ccada564`
@@ -31,7 +31,7 @@
 - 编写人：工作流协调者
 - 人员配置确认时间：2026-07-15
 - 已知 Stage 5 首任务风险：`DEF-003`、`DEF-004`；后端测试和 Compose 真实运行验证由 TASK-001 在门禁后关闭
-- 当前首要任务：`DEV-001` 按本任务书启动 TASK-001；TASK-001 通过前所有下游任务继续阻塞
+- 当前首要任务：`DEV-001` 启动 TASK-002；`DEV-002` 可启动 TASK-006 的领域测试和非数据库实现，数据库迁移与集成继续等待 TASK-002
 
 ## 2. 开发人员配置
 
@@ -107,7 +107,7 @@
 
 ### TASK-001：修复并重新验证平台运行基线
 
-- 状态：Planned / Stage 5 首个阻塞任务
+- 状态：Completed / 已审查并完成正式交接
 - 优先级：P0
 - 负责人：`DEV-001`
 - 任务类型：后端 / 基础设施 / 测试
@@ -116,7 +116,7 @@
 - 范围：修复 `DEF-003`、`DEF-004` 中的重复定义冲突；确定唯一 `/healthz` 契约；执行 Python 3.13、测试、启动和 Compose 命令；验证 PostgreSQL/Redis/API 容器。
 - 不包含：新增业务模块、认证、RAGFlow 或前端功能。
 - 前置条件：更新后的 Stage 4 → Stage 5 门禁已针对精确 Commit SHA 获项目负责人批准并完成记录；无需另行进行任务级授权。
-- 预计修改：`codebase/backend/app/main.py`、`codebase/backend/app/core/config.py`、`codebase/backend/tests/test_health.py`、`codebase/infra/docker-compose.yml`、Stage 5 自测与缺陷记录。
+- 实际修改：`codebase/backend/app/main.py`、`codebase/backend/app/core/config.py`、`codebase/backend/tests/test_health.py`、`codebase/infra/docker-compose.yml`、Stage 5 自测、检查点、评审与缺陷记录。
 - 禁止修改：PRD、SPEC、原型、公开业务 API。
 - 实施步骤：
   1. 以当前失败堆栈建立最小回归测试，确认合并残留的两套契约。
@@ -128,6 +128,7 @@
 - 分支：`codex/task-001-runtime-baseline`
 - Review：`DEV-002` 检查接口可消费性，`DEV-001` 自检并提交集成证据。
 - 回滚：按本任务独立 Commit 反向恢复；不得恢复重复实现。
+- 交接：修复提交 `87538b04a168cb3c11c2e65dfb976d3a206d8218`，验证证据提交 `45725ac083c98ea999492b709e9792082c3db284`，均已推送至 `codex/task-001-runtime-baseline`；独立 Review 通过。
 
 ### TASK-002：认证、权限、审计与设备基础
 
@@ -185,7 +186,7 @@
 
 ### TASK-005：知识文档生命周期与 RAGFlow 适配器
 
-- 状态：Planned
+- 状态：Planned / 仍阻塞于 TASK-002、TASK-004
 - 优先级：P0
 - 负责人：`DEV-002`
 - 并行属性：Blocked By TASK-002, TASK-004
@@ -203,10 +204,10 @@
 
 ### TASK-006：四个 Agent 独立配置与模型能力校验
 
-- 状态：Planned
+- 状态：Authorized to start / 仅限非数据库部分
 - 优先级：P0
 - 负责人：`DEV-002`
-- 并行属性：Parallel After TASK-001；数据库集成 Blocked By TASK-002
+- 并行属性：TASK-001 正式交接后可并行启动领域测试和非数据库实现；数据库集成、迁移和共享数据模型仍 Blocked By TASK-002
 - 需求映射：FR-012、NFR-006；AC-032、AC-034；实施计划 Task 5
 - 范围：四个 `agent_id` 独立配置、首次单独初始化、模型能力、深度思考校验和运行配置快照输入。
 - 不包含：Agent 图执行、前端对话和版本/发布/回滚能力。
