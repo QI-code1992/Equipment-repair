@@ -3,7 +3,7 @@
 ## 1. 基线信息
 
 - 项目：新能源装载机设备智能运维平台
-- 当前阶段：Stage 5 — TASK-002 任务分支开发与 Review 已完成，待合入集成分支；DEV-002 可继续 TASK-006 的非数据库部分
+- 当前阶段：Stage 5 — TASK-002 Draft PR #15 已创建，待 Review 后合入集成分支；DEV-002 可继续 TASK-006 的非数据库部分
 - 任务书版本：v1.1
 - 状态：已批准，作为 Stage 5 任务分配与集成基线
 - v1.0 候选提交：`8272a8ed161b787098660f61ebb86fa5ccada564`
@@ -31,7 +31,7 @@
 - 编写人：工作流协调者
 - 人员配置确认时间：2026-07-15
 - 已知 Stage 5 首任务风险：`DEF-003`、`DEF-004`；后端测试和 Compose 真实运行验证由 TASK-001 在门禁后关闭
-- 当前首要任务：`DEV-001` 提交 TASK-002 PR 并合入 `codex/stage-05-integration`；`DEV-002` 可继续 TASK-006 的领域测试和非数据库实现，数据库迁移与集成继续等待该合入
+- 当前首要任务：`DEV-001` 完成 TASK-002 PR #15 Review 并合入 `codex/stage-05-integration`；`DEV-002` 可继续 TASK-006 的领域测试和非数据库实现，数据库迁移与集成继续等待该合入
 
 ## 2. 开发人员配置
 
@@ -132,7 +132,7 @@
 
 ### TASK-002：认证、权限、审计与设备基础
 
-- 状态：Review Passed / 任务分支已完成并推送，待 PR 与集成
+- 状态：Draft PR Open / PR #15 待 Review 与集成
 - 优先级：P0
 - 负责人：`DEV-001`
 - 并行属性：Sequential After TASK-001
@@ -148,6 +148,7 @@
 - Review：`DEV-002` 复核 Agent 可使用的认证上下文；`DEV-001` 决定迁移合并顺序。
 - 回滚：回退任务 Commit，并按迁移文档执行对应 downgrade；生产数据存在时不得直接删除表。
 - 交接：实现恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12` 与证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 已推送；Python 3.13、Compose、容器健康、真实 PostgreSQL 迁移与并发验证通过；最终独立 Review 为 0/0/0。合入集成分支前不解锁 TASK-003 或数据库集成。
+- PR：[#15](https://github.com/QI-code1992/Equipment-repair/pull/15)，`codex/task-002-identity-equipment` → `codex/stage-05-integration`，Draft。
 
 ### TASK-003：故障、工单、维修与结构化案例闭环
 

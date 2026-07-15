@@ -13,7 +13,7 @@
 
 ## FCP-002：身份、审计与设备主数据基础
 
-- 状态：任务分支已验证并推送；待 PR 合入 `codex/stage-05-integration` 后解锁依赖 TASK-002 的数据库集成。
+- 状态：任务分支已验证并推送；Draft PR [#15](https://github.com/QI-code1992/Equipment-repair/pull/15) 待 Review，合入 `codex/stage-05-integration` 后解锁依赖 TASK-002 的数据库集成。
 - 范围：TASK-002；Alembic revision `0001`、会话认证、角色/权限、审计、全局请求指纹幂等、组织树和设备主数据 API。
 - 远端恢复点：`0b0d9cf0dc066143c0a57d4683567fadb4714c12`（`codex/task-002-identity-equipment`）。
 - 交接证据：`9f162b421f4fefae4cdd69a001891c7e83d4bc13` 已推送至同一任务分支。
