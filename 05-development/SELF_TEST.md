@@ -46,3 +46,13 @@
 - Task 2 非阻塞 Minor：空仓库 `list_all()`/未初始化读取、路径与请求体身份不匹配隔离、全部快照字段 sentinel 完整复制、数值范围精确上下边界四项测试增强尚未补充，不影响当前非数据库切片验收。
 - 结论：TASK-006 非数据库切片已验证；TASK-006 总任务仍未完成。数据库/迁移/事务/认证审计/正式路由挂载/真实模型测试/前端均未完成；数据库继续 Blocked By TASK-002，TASK-007 不解锁。DEV-002 未执行或宣称 Docker、Compose、RAGFlow 通过。
 - 工程声明：本切片未新增生产依赖、兼容代码、范围外抽象或无关修改。
+
+### 请求校验安全加固补充验证（2026-07-15）
+
+- 修复提交：`04e651c1453fbd0551303aff9f4d6236ea2e59d4`；以下结果补充原 `21/25` 历史证据，不替代或抹除原记录。
+- RED 1：非法 `deep_thinking_level=never-return-this-sensitive-level` 返回默认 Pydantic `detail[]`，断言失败差异显示原始 sentinel 位于 `input`。
+- RED 2：缺失 `max_reply_tokens` 返回默认 `missing` 错误，断言失败差异显示完整请求对象位于 `input`。
+- RED 3：`context_turns="not-an-integer"` 返回默认 `int_parsing` 错误，未满足稳定错误结构。三次均为真实断言失败，各为 `1 failed, 1 warning`，无收集或导入错误。
+- GREEN：三个新增场景聚焦运行 `3 passed, 1 warning`；API 测试 `7 passed, 1 warning in 0.08s`；模块测试 `24 passed, 1 warning in 0.08s`；后端全量 `28 passed, 1 warning in 0.25s`。
+- `codebase/backend/.venv/bin/python -m compileall -q codebase/backend/app codebase/backend/tests` 与 `git diff --check` 均退出 0、无输出；禁止范围扫描无命中，仅 `api.py` 与 API 测试进入安全修复提交。
+- 唯一 warning 仍是既有 `StarletteDeprecationWarning`；无失败或 skip。四项 Minor 测试增强及 `_validate` 约 50 行长度关注仍为非阻塞，本次未处理。

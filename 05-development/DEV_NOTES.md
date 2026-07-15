@@ -29,3 +29,10 @@
 - 工程声明：未新增生产依赖、兼容代码或范围外抽象；未修改 `app/main.py`、数据库、infra、前端或原型，无无关修改。
 - 验证环境与结果：Python 3.13.14；模块测试 `21 passed, 1 warning`，后端全量 `25 passed, 1 warning`。两次测试均为同一条第三方 `StarletteDeprecationWarning`，无 skip 或失败。
 - Task 2 非阻塞 Minor：补充空仓库 `list_all()`/未初始化读取；补充路径与请求体身份不匹配的隔离断言；对全部快照字段使用 sentinel 验证完整复制；补充数值范围精确上下边界回归。
+
+### 2026-07-15 · TASK-006 请求校验安全加固补充
+
+- 安全修复提交：`04e651c1453fbd0551303aff9f4d6236ea2e59d4`。路由级 `APIRoute` 捕获 FastAPI/Pydantic 前置 `RequestValidationError`，固定返回 `AGENT_CONFIG_INVALID`、安全 message 与字段列表，不返回 `input`、原始异常或请求体；路由工厂签名、Pydantic schema 和 OpenAPI 结构保持不变。
+- 严格 RED/GREEN：非法 `deep_thinking_level` 敏感 sentinel、缺失 `max_reply_tokens`、`context_turns` 类型错误三个场景先分别得到预期行为断言失败，修复后三者 `3 passed`。补充验证：API `7 passed`、模块 `24 passed`、后端全量 `28 passed`，均只有既有第三方弃用 warning。
+- 最终审查 Important 已关闭。正式路由仍未挂载；数据库仓储、迁移、事务/并发唯一性、认证/权限/审计、真实模型测试和前端集成仍未完成，数据库部分继续由 TASK-002 后续处理，TASK-007 不解锁。
+- 既有四项 Minor 测试增强与 `AgentConfigService._validate` 约 50 行的长度关注继续作为非阻塞项，本次未扩大范围处理。未新增生产依赖、兼容代码、抽象层或无关修改。

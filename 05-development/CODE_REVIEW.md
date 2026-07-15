@@ -24,3 +24,11 @@
 - 测试证据：Python 3.13.14 模块 21 passed、后端全量 25 passed；两者各有同一条第三方 `StarletteDeprecationWarning`。错误码与字段断言明确，Tasks 1–3 的 RED 证据已逐任务审查。
 - 结论边界：TASK-006 非数据库切片已验证，TASK-006 总任务仍未完成；数据库仓储/迁移/事务与并发唯一性/认证权限审计/正式路由挂载/真实模型/前端未审查且未完成。数据库继续 Blocked By TASK-002，TASK-007 不解锁。
 - 环境声明：DEV-002 未执行 Docker、Compose 或 RAGFlow 验证，也未宣称这些环境验证通过。
+
+### TASK-006 最终审查安全修复（2026-07-15）
+
+- 最终审查 Important 已关闭：提交 `04e651c1453fbd0551303aff9f4d6236ea2e59d4` 在可注入路由自身的 `APIRoute` 边界捕获前置 `RequestValidationError`，返回稳定 `AGENT_CONFIG_INVALID` 与脱敏字段错误，不泄露 Pydantic `input`、请求体、敏感 sentinel 或原始异常；未要求正式应用注册额外 handler。
+- 契约保持：`create_agent_config_router(service)` 签名、Pydantic 请求 schema、OpenAPI 结构与正式未挂载状态保持不变；未修改 `app.main`。
+- 回归证据：三个新增安全场景均先 RED 后 GREEN；API `7 passed`、模块 `24 passed`、后端全量 `28 passed`，各只有同一条既有第三方弃用 warning；compileall、diff check 与禁止范围扫描通过。
+- 非阻塞项保持：Task 2 四项 Minor 测试增强建议不变；`AgentConfigService._validate` 约 50 行的长度关注无需在本安全修复中拆分。未发现新的阻断或 Important。
+- 边界不变：数据库仓储/迁移/事务与并发唯一性/认证权限审计/正式路由挂载/真实模型/前端仍未完成；TASK-002 继续负责数据库部分，TASK-007 不解锁。
