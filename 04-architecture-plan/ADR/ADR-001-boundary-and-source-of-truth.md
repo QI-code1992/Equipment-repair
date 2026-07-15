@@ -1,7 +1,8 @@
-# ADR-001: Business Source of Truth and AI Boundaries
+# ADR-001：业务事实来源与 Agent 运行边界
 
-- Status: Proposed
-- Decision: Business API/database owns business facts and health-score results; LangGraph orchestrates; RAGFlow retrieves citations; LLM summarizes tool output.
-- Context: Mixing static demo values, model guesses and knowledge-store facts creates unsafe and unauditable maintenance decisions.
-- Consequences: More explicit APIs and audit records; safer fallback and test boundaries; Agent cannot directly write or calculate business state.
-- Revisit when: production data contracts, compliance requirements or deployment topology materially change.
+- 状态：已接受（架构设计书面评审通过，Stage 4 门禁待定）
+- 决策：业务 API/PostgreSQL 是业务事实和健康分结果的唯一来源；LangGraph 只编排四个受约束 Agent；RAGFlow 只检索非结构化文档引用；LLM 只基于受控工具结果与独立 Agent 配置生成语言输出。
+- 背景：静态演示值、模型猜测、结构化历史案例与知识库文档混用，会产生不安全且不可审计的维修决策。将四个 Agent 写成同一默认配置也会使配置中心失去实际控制能力。
+- 结果：历史维修案例只来自 PostgreSQL，文档引用只来自 RAGFlow；每个 `agent_id` 独立配置并在运行时保存快照；模型不得直接写业务事实、计算健康分或生成指标数值。真实深度思考通过推理模型参数与图执行实现，但原始思维链不可返回或持久化。
+- 不采纳：不使用 `EquipmentGrant` 或工厂/设备行级隔离；不创建全局第五 Agent；不实现 Agent 配置版本、发布或回滚；不允许任意 SQL 或文件系统工具。
+- 重新评估条件：生产数据契约、合规要求、外部模型推理接口或部署拓扑发生实质变化。

@@ -1,9 +1,9 @@
 {
-  "state": "CHANGES_REQUESTED",
+  "state": "READY_FOR_DEVELOPMENT",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-14T16:45:00+08:00",
+  "updatedAt": "2026-07-15T00:10:00+08:00",
   "productBaseline": {
-    "status": "candidate-not-approved",
+    "status": "requirements-interaction-and-prototype-approved",
     "canonicalCandidate": [
       "01-requirements/PRD.md",
       "01-requirements/SPEC.md",
@@ -15,12 +15,12 @@
   "engineeringBaseline": {
     "status": "prototype-only-not-approved",
     "prototype": "03-ui-prototype/prototype/",
-    "architectureCandidate": "04-architecture-plan/",
+    "architectureCandidate": "04-architecture-plan/平台级架构设计.md",
     "automatedChecks": "06-testing/tests/"
   },
-  "lastApprovedStage": "Stage 3 entry (scoped waiver)",
-  "pendingStageApproval": "Stage 3 prototype and visual baseline approval",
-  "currentCommitSha": "25d4ba41e256b43c41fa707859801e7ea89ba3ed",
+  "lastApprovedStage": "Stage 4 — Architecture and Development Plan",
+  "pendingStageApproval": null,
+  "currentCommitSha": "d178f9c429ab401c3e264e413ccb4c1a76cc6cfa",
   "notes": [
     "GitHub repository: https://github.com/QI-code1992/Equipment-repair.",
     "Original imported workspace is recoverable at commit c544c2d and tag snapshot/legacy-import-20260714.",
@@ -30,6 +30,9 @@
     "Formal development must not start until Stage 1 canonical PRD, SPEC, acceptance criteria, and traceability are reconciled and explicitly approved.",
     "On 2026-07-14, the project owner explicitly approved a scoped waiver to enter Stage 3 directly. This authorizes prototype work only; it does not approve Stage 0–2 baselines or authorize development.",
     "The GitHub repository https://github.com/QI-code1992/Equipment-repair is the required remote system of record for all subsequent project artifacts. Before any formal stage checkpoint, gate recommendation, baseline, test/acceptance evidence, or handoff is reported complete, its files and the corresponding workflow ledgers must be committed and pushed to GitHub with the exact Commit SHA recorded.",
-    "CR-024 has updated the repair diagnosis Agent candidate requirements, interaction baseline and prototype checkpoint evidence. Stage 1/2/3 approvals remain pending."
+    "CR-024 has updated the repair diagnosis Agent candidate requirements, interaction baseline and prototype checkpoint evidence. Stage 1, Stage 2 and Stage 3 were approved on 2026-07-14; Stage 4 architecture and development plan approval remains pending.",
+    "CR-026 corrects Stage 4 from a repair-Agent-only scope to a platform-wide architecture. It cancels factory/equipment data isolation and selects PostgreSQL; the platform architecture awaits written review before implementation planning.",
+    "The platform architecture v2.1 was approved in written review on 2026-07-15. SYSTEM_ARCHITECTURE, DATA_MODEL, API_SPEC, ADR-001, AI_RAGFLOW_LANGGRAPH_SPEC and IMPLEMENTATION_PLAN are prepared as one Stage 4 candidate package and await project-owner review before the Stage 4 -> Stage 5 gate.",
+    "The project owner approved the Stage 4 package on 2026-07-15. Stage 5 may begin only on codex/* development branches; direct pushes to main are prohibited."
   ]
 }
