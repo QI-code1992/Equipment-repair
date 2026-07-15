@@ -18,7 +18,7 @@
 ## TASK-002 开发交接（2026-07-15）
 
 - 分支与恢复点：`codex/task-002-identity-equipment`，远端实现 Commit `0b0d9cf0dc066143c0a57d4683567fadb4714c12`，交接证据 Commit `9f162b421f4fefae4cdd69a001891c7e83d4bc13`，PR 目标为 `codex/stage-05-integration`。
-- PR：Draft [#15](https://github.com/QI-code1992/Equipment-repair/pull/15) 已创建，待 Review 与集成。
+- PR：[#15](https://github.com/QI-code1992/Equipment-repair/pull/15) 已 Ready for review，待 Review 与集成。
 - 交付契约：会话认证、操作权限依赖、角色/权限查询、登录/登出/拒绝审计、全局请求指纹幂等、组织树、设备主数据和 Alembic `0001`。
 - 验证：Python 3.13.14 下 38 tests passed；Compose 配置、API 镜像构建、PostgreSQL downgrade/upgrade/current、`/healthz` 200、真实并发幂等/唯一冲突/组织树竞争均通过。
 - Review：最终独立复审 Critical 0、Important 0、Minor 0。

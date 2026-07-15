@@ -3,7 +3,7 @@
 ## 1. 基线信息
 
 - 项目：新能源装载机设备智能运维平台
-- 当前阶段：Stage 5 — TASK-002 Draft PR #15 已创建，待 Review 后合入集成分支；DEV-002 可继续 TASK-006 的非数据库部分
+- 当前阶段：Stage 5 — TASK-002 PR #15 已 Ready for review，待 Review 后合入集成分支；DEV-002 可继续 TASK-006 的非数据库部分
 - 任务书版本：v1.1
 - 状态：已批准，作为 Stage 5 任务分配与集成基线
 - v1.0 候选提交：`8272a8ed161b787098660f61ebb86fa5ccada564`
@@ -132,7 +132,7 @@
 
 ### TASK-002：认证、权限、审计与设备基础
 
-- 状态：Draft PR Open / PR #15 待 Review 与集成
+- 状态：Ready for Review / PR #15 待 Review 与集成
 - 优先级：P0
 - 负责人：`DEV-001`
 - 并行属性：Sequential After TASK-001
@@ -148,7 +148,7 @@
 - Review：`DEV-002` 复核 Agent 可使用的认证上下文；`DEV-001` 决定迁移合并顺序。
 - 回滚：回退任务 Commit，并按迁移文档执行对应 downgrade；生产数据存在时不得直接删除表。
 - 交接：实现恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12` 与证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 已推送；Python 3.13、Compose、容器健康、真实 PostgreSQL 迁移与并发验证通过；最终独立 Review 为 0/0/0。合入集成分支前不解锁 TASK-003 或数据库集成。
-- PR：[#15](https://github.com/QI-code1992/Equipment-repair/pull/15)，`codex/task-002-identity-equipment` → `codex/stage-05-integration`，Draft。
+- PR：[#15](https://github.com/QI-code1992/Equipment-repair/pull/15)，`codex/task-002-identity-equipment` → `codex/stage-05-integration`，Ready for review。
 
 ### TASK-003：故障、工单、维修与结构化案例闭环
 
