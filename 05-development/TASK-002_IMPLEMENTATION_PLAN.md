@@ -36,7 +36,7 @@
 - Produces: `Base`, `create_database_engine(database_url: str) -> Engine`, `session_factory(engine: Engine) -> sessionmaker[Session]`。
 - Produces: `User`、`Role`、`Permission`、`UserRole`、`RolePermission`、`LoginSession`、`Organization`、`Equipment`、`AuditEvent`、`IdempotencyRecord`。
 
-- [ ] **Step 1: 写模型约束失败测试**
+- [x] **Step 1: 写模型约束失败测试**
 
 ```python
 def test_equipment_code_is_unique(db_session: Session) -> None:
@@ -52,13 +52,13 @@ def test_schema_has_no_equipment_grant_table(engine: Engine) -> None:
     assert "equipment_grant" not in inspect(engine).get_table_names()
 ```
 
-- [ ] **Step 2: 运行 RED**
+- [x] **Step 2: 运行 RED**
 
 Run: `D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests/modules/test_identity_permissions.py -q`
 
 Expected: collection fails because `app.core.database` and models do not exist.
 
-- [ ] **Step 3: 增加数据库依赖和基础接口**
+- [x] **Step 3: 增加数据库依赖和基础接口**
 
 ```toml
 dependencies = [
@@ -86,7 +86,7 @@ def session_factory(engine: Engine) -> sessionmaker[Session]:
     return sessionmaker(bind=engine, expire_on_commit=False)
 ```
 
-- [ ] **Step 4: 实现模型与 revision**
+- [x] **Step 4: 实现模型与 revision**
 
 Use SQLAlchemy 2 typed mappings. Required database constraints:
 
@@ -108,7 +108,7 @@ class Equipment(Base):
 
 The revision creates all listed tables and association tables and has a complete `downgrade()` dropping them in reverse foreign-key order.
 
-- [ ] **Step 5: 运行 GREEN 与迁移回归**
+- [x] **Step 5: 运行 GREEN 与迁移回归**
 
 Run: `D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests/modules/test_identity_permissions.py -q`
 
@@ -118,7 +118,7 @@ Run Alembic from the API container attached to the internal Compose network; do 
 
 Expected: model tests pass; upgrade creates revision `0001`; downgrade and second upgrade both exit 0.
 
-- [ ] **Step 6: 提交数据库基础**
+- [x] **Step 6: 提交数据库基础**
 
 ```powershell
 git add codebase/backend/pyproject.toml codebase/backend/alembic.ini codebase/backend/alembic codebase/backend/app/core/database.py codebase/backend/app/modules codebase/backend/tests/modules/test_identity_permissions.py
