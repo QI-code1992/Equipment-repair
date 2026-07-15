@@ -16,6 +16,7 @@
 - 状态：任务分支已验证并推送；待 PR 合入 `codex/stage-05-integration` 后解锁依赖 TASK-002 的数据库集成。
 - 范围：TASK-002；Alembic revision `0001`、会话认证、角色/权限、审计、全局请求指纹幂等、组织树和设备主数据 API。
 - 远端恢复点：`0b0d9cf0dc066143c0a57d4683567fadb4714c12`（`codex/task-002-identity-equipment`）。
+- 交接证据：`9f162b421f4fefae4cdd69a001891c7e83d4bc13` 已推送至同一任务分支。
 - 已验证：Python 3.13.14 下 38 tests passed；Compose 配置和 API 镜像构建通过；PostgreSQL downgrade/upgrade/current 通过；容器 `/healthz` 为 200；真实并发幂等、唯一冲突和组织树竞争通过。
 - 接口冻结：`get_current_user`、`require_permission(code)`、`User/Role/Permission/LoginSession/AuditEvent/IdempotencyRecord/Organization/Equipment`、`0001`、`Idempotency-Key` 与 `audit_event_id`。
 - 边界：不提供行级数据过滤；设备存在活跃故障时的停用保护由 TASK-003 实现；在合入集成分支前，TASK-003 与 DEV-002 的数据库集成仍保持阻塞。

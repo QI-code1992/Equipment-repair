@@ -390,7 +390,7 @@ Review exact range from the design commit through the final implementation commi
 
 Record exact commands/results, migration revision, remote commits, FCP recovery point, no compatibility code, no extra abstraction, no unrelated changes, residual warning, rollback via application revert plus tested Alembic downgrade, and DEV-002 authentication-context handoff.
 
-- [ ] **Step 5: 提交并推送**
+- [x] **Step 5: 提交并推送**
 
 ```powershell
 git add 04-architecture-plan/DEVELOPMENT_TASK_BOOK.md 05-development workflow/DEV_TO_PM_HANDOFF.md

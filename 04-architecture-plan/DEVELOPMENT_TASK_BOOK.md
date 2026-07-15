@@ -147,7 +147,7 @@
 - 分支：`codex/task-002-identity-equipment`
 - Review：`DEV-002` 复核 Agent 可使用的认证上下文；`DEV-001` 决定迁移合并顺序。
 - 回滚：回退任务 Commit，并按迁移文档执行对应 downgrade；生产数据存在时不得直接删除表。
-- 交接：实现恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12` 已推送；Python 3.13、Compose、容器健康、真实 PostgreSQL 迁移与并发验证通过；最终独立 Review 为 0/0/0。合入集成分支前不解锁 TASK-003 或数据库集成。
+- 交接：实现恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12` 与证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 已推送；Python 3.13、Compose、容器健康、真实 PostgreSQL 迁移与并发验证通过；最终独立 Review 为 0/0/0。合入集成分支前不解锁 TASK-003 或数据库集成。
 
 ### TASK-003：故障、工单、维修与结构化案例闭环
 
