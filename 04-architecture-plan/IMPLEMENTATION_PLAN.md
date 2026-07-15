@@ -61,9 +61,11 @@
 - Create：`backend/app/integrations/ragflow/`、`backend/app/modules/knowledge/`
 - Create：`backend/tests/integrations/test_ragflow_adapter.py`
 
+- [ ] 下载并锁定 RAGFlow 官方 Docker 镜像及 Elasticsearch 8.11 依赖版本，在 Docker Desktop/WSL2 内创建独立 `ragflow` 网络、MySQL、Redis、MinIO、Elasticsearch 与 RAGFlow 容器；不得复用平台数据库、缓存或对象存储账号。
 - [ ] 为上传、`UPLOADING -> PARSING -> READY|FAILED`、引用 ID 映射、超时降级写失败测试。
-- [ ] 实现 MinIO 文件元数据、RAGFlow ingest/status/retrieve/delete 适配器与 Worker 同步任务。
-- [ ] 验证只有 `READY` 文档可检索，RAGFlow 依赖与平台 PostgreSQL/Redis/MinIO 不共享账户。
+- [ ] 实现 MinIO 文件元数据、RAGFlow ingest/status/retrieve/delete 适配器与 Worker 同步任务，并配置服务地址、凭据引用、数据集 ID 和健康检查。
+- [ ] 用真实文档执行上传、解析、切片、索引、混合检索与引用回传联调；验证只有 `READY` 文档可检索，RAGFlow 依赖与平台 PostgreSQL/Redis/MinIO 不共享账户。
+- [ ] 模拟 RAGFlow 超时与容器重启，验证业务人工降级、错误审计和恢复后再次检索；将启动、排障和备份步骤写入 `08-release-handoff/RUNBOOK.md`。
 - [ ] 提交：`feat: integrate isolated ragflow knowledge lifecycle`。
 
 ### Task 5：智能配置控制面与模型能力校验
