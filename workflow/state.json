@@ -1,7 +1,7 @@
 {
-  "state": "AWAITING_PRODUCT_CONFIRMATION",
+  "state": "READY_FOR_DEVELOPMENT",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-15T00:00:00+08:00",
+  "updatedAt": "2026-07-15T00:10:00+08:00",
   "productBaseline": {
     "status": "requirements-interaction-and-prototype-approved",
     "canonicalCandidate": [
@@ -18,9 +18,9 @@
     "architectureCandidate": "04-architecture-plan/平台级架构设计.md",
     "automatedChecks": "06-testing/tests/"
   },
-  "lastApprovedStage": "Stage 3 — UI and High-Fidelity Prototype",
-  "pendingStageApproval": "Stage 4 architecture and development plan approval",
-  "currentCommitSha": "ce7729535d8e2ad376d6f107d212f9ef48d97b8a",
+  "lastApprovedStage": "Stage 4 — Architecture and Development Plan",
+  "pendingStageApproval": null,
+  "currentCommitSha": "d178f9c429ab401c3e264e413ccb4c1a76cc6cfa",
   "notes": [
     "GitHub repository: https://github.com/QI-code1992/Equipment-repair.",
     "Original imported workspace is recoverable at commit c544c2d and tag snapshot/legacy-import-20260714.",
@@ -32,6 +32,7 @@
     "The GitHub repository https://github.com/QI-code1992/Equipment-repair is the required remote system of record for all subsequent project artifacts. Before any formal stage checkpoint, gate recommendation, baseline, test/acceptance evidence, or handoff is reported complete, its files and the corresponding workflow ledgers must be committed and pushed to GitHub with the exact Commit SHA recorded.",
     "CR-024 has updated the repair diagnosis Agent candidate requirements, interaction baseline and prototype checkpoint evidence. Stage 1, Stage 2 and Stage 3 were approved on 2026-07-14; Stage 4 architecture and development plan approval remains pending.",
     "CR-026 corrects Stage 4 from a repair-Agent-only scope to a platform-wide architecture. It cancels factory/equipment data isolation and selects PostgreSQL; the platform architecture awaits written review before implementation planning.",
-    "The platform architecture v2.1 was approved in written review on 2026-07-15. SYSTEM_ARCHITECTURE, DATA_MODEL, API_SPEC, ADR-001, AI_RAGFLOW_LANGGRAPH_SPEC and IMPLEMENTATION_PLAN are prepared as one Stage 4 candidate package and await project-owner review before the Stage 4 -> Stage 5 gate."
+    "The platform architecture v2.1 was approved in written review on 2026-07-15. SYSTEM_ARCHITECTURE, DATA_MODEL, API_SPEC, ADR-001, AI_RAGFLOW_LANGGRAPH_SPEC and IMPLEMENTATION_PLAN are prepared as one Stage 4 candidate package and await project-owner review before the Stage 4 -> Stage 5 gate.",
+    "The project owner approved the Stage 4 package on 2026-07-15. Stage 5 may begin only on codex/* development branches; direct pushes to main are prohibited."
   ]
 }

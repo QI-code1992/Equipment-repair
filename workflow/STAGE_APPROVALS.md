@@ -26,6 +26,20 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Conditions / Scope Exceptions: 这不是 Stage 4 -> Stage 5 门禁批准；必须继续完成并评审系统架构、数据模型、API 规格和实施计划，且不得开始生产开发。
 - Notes: 四个 Agent 独立配置、真实深度思考、无 Agent 版本和无工厂/设备行级隔离是后续设计与开发的强制约束。
 
+### Gate-005: Stage 4 -> Stage 5
+
+- Status: Approved
+- Approver: project owner
+- Approved At: 2026-07-15
+- Current Stage: Stage 4 — Architecture and Development Plan
+- Next Stage: Stage 5 — Development Implementation
+- Artifacts Reviewed: `04-architecture-plan/平台级架构设计.md`、`04-architecture-plan/SYSTEM_ARCHITECTURE.md`、`04-architecture-plan/DATA_MODEL.md`、`04-architecture-plan/API_SPEC.md`、`04-architecture-plan/AI_RAGFLOW_LANGGRAPH_SPEC.md`、`04-architecture-plan/ADR/ADR-001-boundary-and-source-of-truth.md`、`04-architecture-plan/IMPLEMENTATION_PLAN.md`
+- Evidence Reviewed: 项目负责人对包含 RAGFlow 实际下载、部署、调试和联调责任的 Stage 4 文档包明确回复“通过”；`git diff --check` 通过，JSON 状态文件可解析。
+- Version / Commit SHA: `d178f9c429ab401c3e264e413ccb4c1a76cc6cfa`；里程碑标签待创建 `baseline/stage-04-architecture-v2.1`
+- Decision: Stage 4 架构与开发计划获得确认，可以进入 Stage 5 生产开发准备与实现。
+- Conditions / Scope Exceptions: 所有生产实现只在 `codex/*` 开发分支提交和推送，禁止直接推送 `main`；RAGFlow 必须真实部署和联调，不得以 mock 替代；每个稳定功能单元须经过测试并记录开发检查点。
+- Notes: Stage 5 开始前建立隔离开发工作区；Stage 6 测试与 Stage 7 验收仍需针对精确 Commit SHA 单独批准。
+
 ## Candidate gate recommendations
 
 ### Gate-001: Scoped waiver to enter Stage 3
