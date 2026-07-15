@@ -12,6 +12,20 @@ No formal stage transition approval was found during the 2026-07-14 takeover aud
 
 Do not add an `Approved` record unless the user explicitly approves the transition and the reviewed artifact versions or Commit SHA are exact.
 
+### Review-005: Stage 4 平台级架构设计书面评审
+
+- Status: Approved
+- Approver: project owner
+- Approved At: 2026-07-15
+- Current Stage: Stage 4 — Architecture and Development Plan
+- Next Stage: Stage 4 — API、数据模型与实施计划细化
+- Artifacts Reviewed: `04-architecture-plan/平台级架构设计.md`
+- Evidence Reviewed: 项目负责人对书面架构候选稿的明确回复“通过”。
+- Version / Commit SHA: `a1f27431c9f79dbda310bd9c216e6a5ca75a72c3`
+- Decision: 平台级架构设计 v2.1 获得书面评审通过。
+- Conditions / Scope Exceptions: 这不是 Stage 4 -> Stage 5 门禁批准；必须继续完成并评审系统架构、数据模型、API 规格和实施计划，且不得开始生产开发。
+- Notes: 四个 Agent 独立配置、真实深度思考、无 Agent 版本和无工厂/设备行级隔离是后续设计与开发的强制约束。
+
 ## Candidate gate recommendations
 
 ### Gate-001: Scoped waiver to enter Stage 3
