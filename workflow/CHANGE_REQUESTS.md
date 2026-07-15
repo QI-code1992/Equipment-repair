@@ -377,3 +377,25 @@
 - 决策：工作包 A 负责业务平台内核与事务事实；工作包 B 负责 AI、知识与交互；Task 1 为共同前置，按 FCP-001 解锁并行。
 - 影响：新增团队分工文档，不改变产品、架构、API 或实现范围。
 - 验证：工作包覆盖实施计划 Task 1 至 Task 10，且依赖与禁止交叉修改范围明确。
+
+### CR-032：建立统一代码库目录并固定 Stage 3 原型归档边界
+
+- 级别：L3
+- 状态：已批准方向 / 等待书面设计复核后实施
+- 提出人：项目负责人
+- 提出时间：2026-07-15
+- 当前阶段：Stage 5 — 开发实施；本变更返回 Stage 4 更新工程目录基线
+- 原始请求：将 `backend/`、`frontend/`、`infra/` 和工程测试等非阶段工程文件统一归入“代码库”，并把该规则同步到 `formal-software-delivery-workflow` 技能。
+- 明确要求：统一目录使用 `codebase/`；Stage 3 原型及原型专用资源继续位于 `03-ui-prototype/`，作为该阶段正式交付物，不进入或复制到 `codebase/`。
+- 原因：区分阶段档案、跨阶段治理材料和长期演进的正式工程文件，避免原型与正式前端形成两个事实来源。
+- 影响：
+  - PRD / SPEC / Prototype：不改变产品范围、交互或原型内容；仅固定原型归档边界。
+  - Architecture：新增 `04-architecture-plan/代码库目录归档设计.md`，更新工程目录和路径约束。
+  - Implementation Plan / AGENTS：实施时更新所有 `backend/`、`frontend/`、`infra/` 路径。
+  - Tests：服务测试随代码迁移；当前 Stage 3 原型静态检查继续保留在 `06-testing/tests/`。
+  - Acceptance Criteria：不改变产品验收标准；增加目录与路径迁移验证。
+  - Workflow Skill：书面设计复核后更新 `/Users/qiqi/.codex/skills/formal-software-delivery-workflow/SKILL.md` 及必要的工件目录参考。
+- 决定：采用根级 `codebase/`；不采用把正式代码放进 `05-development/`，不创建 `codebase/prototype/`。
+- 更新基线：`04-architecture-plan/代码库目录归档设计.md`；实施后更新受影响的 Stage 4—8 文档和工作流状态。
+- 实施：等待项目负责人复核书面设计后执行目录迁移、引用更新和技能约束同步。
+- 验证：等待实施；必须包含路径引用扫描、最小相关测试、原型回归、Compose 配置校验或未验证原因、`git diff --check`。
