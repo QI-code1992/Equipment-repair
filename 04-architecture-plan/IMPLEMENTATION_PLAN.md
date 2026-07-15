@@ -26,11 +26,11 @@
 - Create：`infra/docker-compose.yml`、`infra/.env.example`、`frontend/`
 - Test：`backend/tests/test_health.py`
 
-- [ ] 写出 `/healthz` 的失败测试，分别断言应用、PostgreSQL 和 Redis 未配置时返回健康检查失败。
-- [ ] 运行 `pytest backend/tests/test_health.py -v`，确认初始失败。
-- [ ] 实现配置加载、FastAPI 应用工厂、`GET /healthz` 和 Docker Compose 内部网络；只暴露 Nginx HTTPS。
-- [ ] 运行 `docker compose -f infra/docker-compose.yml config` 与 `pytest backend/tests/test_health.py -v`，预期均通过。
-- [ ] 提交：`feat: bootstrap platform runtime`。
+- [x] 写出 `/healthz` 的失败测试，分别断言应用、PostgreSQL 和 Redis 未配置时返回健康检查失败。
+- [x] 运行 `pytest backend/tests/test_health.py -v`，确认初始失败。
+- [x] 实现配置加载、FastAPI 应用工厂、`GET /healthz` 和 Docker Compose 内部网络；只暴露 Nginx HTTPS。
+- [x] 运行 `docker compose -f infra/docker-compose.yml config` 与 `pytest backend/tests/test_health.py -v`，预期均通过。
+- [x] 提交：`feat: bootstrap platform runtime`。
 
 ### Task 2：认证、权限、审计与核心业务数据迁移
 
