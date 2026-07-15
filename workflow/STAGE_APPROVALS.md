@@ -40,6 +40,18 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Conditions / Scope Exceptions: 所有生产实现只在 `codex/*` 开发分支提交和推送，禁止直接推送 `main`；RAGFlow 必须真实部署和联调，不得以 mock 替代；每个稳定功能单元须经过测试并记录开发检查点。
 - Notes: Stage 5 开始前建立隔离开发工作区；Stage 6 测试与 Stage 7 验收仍需针对精确 Commit SHA 单独批准。
 
+### Hold-001: Stage 5 启动暂缓
+
+- Status: Active hold
+- Decider: project owner
+- Recorded At: 2026-07-15
+- Current Stage: Stage 4 — Architecture and Development Plan
+- Affected Next Stage: Stage 5 — Development Implementation
+- Decision: 保留 Gate-005 的“可进入开发”资格，但暂不启动 Stage 5；未经项目负责人再次明确确认，不得创建或继续任何生产开发任务、开发分支或功能检查点。
+- Reason: 项目负责人尚未做好进入开发阶段的准备。
+- Scope: 不撤销已批准的 Stage 4 架构基线；不改变 PRD、SPEC、交互、原型、架构或实施计划的内容。
+- Evidence: 项目负责人指令“这个开发的内容暂时不要。我还没做好进入开发的阶段”。
+
 ## Candidate gate recommendations
 
 ### Gate-001: Scoped waiver to enter Stage 3

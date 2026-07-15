@@ -1,7 +1,7 @@
 {
-  "state": "READY_FOR_DEVELOPMENT",
+  "state": "DEVELOPMENT_PAUSED_AWAITING_RECONFIRMATION",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-15T00:10:00+08:00",
+  "updatedAt": "2026-07-15T11:30:00+08:00",
   "productBaseline": {
     "status": "requirements-interaction-and-prototype-approved",
     "canonicalCandidate": [
@@ -13,13 +13,13 @@
     "historicalSources": "snapshot/legacy-import-20260714"
   },
   "engineeringBaseline": {
-    "status": "prototype-only-not-approved",
+    "status": "stage-4-approved-development-paused",
     "prototype": "03-ui-prototype/prototype/",
     "architectureCandidate": "04-architecture-plan/平台级架构设计.md",
     "automatedChecks": "06-testing/tests/"
   },
   "lastApprovedStage": "Stage 4 — Architecture and Development Plan",
-  "pendingStageApproval": null,
+  "pendingStageApproval": "Stage 5 启动需项目负责人再次明确确认",
   "currentCommitSha": "d178f9c429ab401c3e264e413ccb4c1a76cc6cfa",
   "notes": [
     "GitHub repository: https://github.com/QI-code1992/Equipment-repair.",
@@ -33,6 +33,7 @@
     "CR-024 has updated the repair diagnosis Agent candidate requirements, interaction baseline and prototype checkpoint evidence. Stage 1, Stage 2 and Stage 3 were approved on 2026-07-14; Stage 4 architecture and development plan approval remains pending.",
     "CR-026 corrects Stage 4 from a repair-Agent-only scope to a platform-wide architecture. It cancels factory/equipment data isolation and selects PostgreSQL; the platform architecture awaits written review before implementation planning.",
     "The platform architecture v2.1 was approved in written review on 2026-07-15. SYSTEM_ARCHITECTURE, DATA_MODEL, API_SPEC, ADR-001, AI_RAGFLOW_LANGGRAPH_SPEC and IMPLEMENTATION_PLAN are prepared as one Stage 4 candidate package and await project-owner review before the Stage 4 -> Stage 5 gate.",
-    "The project owner approved the Stage 4 package on 2026-07-15. Stage 5 may begin only on codex/* development branches; direct pushes to main are prohibited."
+    "The project owner approved the Stage 4 package on 2026-07-15. Stage 5 may begin only on codex/* development branches; direct pushes to main are prohibited.",
+    "On 2026-07-15, the project owner instructed that Stage 5 must not start yet. Any experimental Stage 5 branch was deleted. Stage 4 remains the current completed baseline; Stage 5 is paused until the project owner explicitly reconfirms its start."
   ]
 }
