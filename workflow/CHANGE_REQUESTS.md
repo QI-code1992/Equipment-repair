@@ -448,3 +448,31 @@
 - 实施提交：`25e15709a3f1d92f661d37acdb8aa3e1e0e41346`。
 - 门禁审批记录提交：`c9eb206c6517b9c3afd7f33a86e3c383d84d12aa`。
 - 验证：检查所有 TASK-001 开始条件均位于门禁之后；Stage 5 准入清单不再要求先修复 TASK-001；JSON 可解析；`git diff --check` 通过。
+
+### CR-036：修复 TASK-002 正式审核阻断项
+
+- Level: L2
+- Status: In Development
+- Raised By: DEV-002 独立审核
+- Raised At: 2026-07-16
+- Current Stage: Stage 5 — 开发实施 / TASK-002 修复周期
+- Original Request: DEV-002 对 PR #15 的精确提交 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 提交 `Changes requested`，指出公开 API 契约未同步、受保护写操作失败审计不完整，以及设备字段、组织层级、用户/固定角色/菜单操作权限和附件敏感内容脱敏未完整实现。
+- Clarified Requirement: 采用“契约完整、定向补齐”方案，在现有 FastAPI、SQLAlchemy、Alembic 架构内完成 TASK-002；不提前实现 TASK-003 的活动故障停用保护，也不提前实现附件存储、扫描和生命周期。
+- Reason: 当前实现缩减了已批准的 FR-001、FR-010、FR-011 和任务书范围，且未满足 `API_SPEC` 对写操作审计与 `audit_event_id` 的统一要求，PR #15 当前不得合并。
+- Impact:
+  - PRD: 不修改，继续作为权威需求基线。
+  - SPEC: 不修改，继续作为字段、角色和组织规则基线。
+  - Prototype: 不修改，继续作为系统管理、工厂建模和设备台账交互基线。
+  - Architecture: 同步 `API_SPEC.md`；必要时同步 `DATA_MODEL.md`，不改变技术栈或部署拓扑。
+  - Implementation Plan: 新增 TASK-002 修复设计与实施计划，保持 TASK-003/TASK-004 依赖边界。
+  - Development Task Book: 修复完成后更新 TASK-002 状态和远端候选 Commit。
+  - Test Cases: 增加设备完整字段、组织层级、用户/角色权限、失败审计、幂等、脱敏和迁移测试。
+  - Acceptance Criteria: 不降低或改写现有 AC；新增评审阻断项的可复现验证证据。
+- Decision: 项目负责人于 2026-07-16 明确确认方案 1、数据模型、API/失败审计、迁移/测试和交付设计，授权 DEV-001 进入修复周期。
+- Updated Baselines: 设计阶段仅新增 `05-development/TASK-002_REMEDIATION_DESIGN.md`；代码和契约基线待实施、Review 和新 Commit 后更新。
+- Implementation:
+  - Commit: 待生成新的修复候选 Commit；不得复用被拒绝的 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77`。
+  - Owner: DEV-001
+- Verification:
+  - Status: 设计已获确认，待书面设计复核、实施计划、TDD 实现、完整回归和 DEV-002 复审。
+  - Evidence: PR #15 的 DEV-002 `Changes requested` 审核；`05-development/TASK-002_REMEDIATION_DESIGN.md`。
