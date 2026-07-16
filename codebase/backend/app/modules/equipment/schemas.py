@@ -23,7 +23,9 @@ class EquipmentWrite(BaseModel):
     manufacturer: str = Field(min_length=1, max_length=200)
     manufactured_at: date | None = None
     commissioned_at: date | None = None
-    operating_hours: Decimal = Field(ge=0)
+    operating_hours: Decimal = Field(
+        ge=0, max_digits=12, decimal_places=2
+    )
     status: EquipmentStatus
     organization_id: str
     owner_user_id: str | None = None

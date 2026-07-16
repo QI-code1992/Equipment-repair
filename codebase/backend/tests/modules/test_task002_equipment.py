@@ -410,6 +410,67 @@ def test_equipment_success_is_idempotent_and_audited_once(client: TestClient) ->
     assert item is not None and item.image_refs == payload["image_refs"]
 
 
+@pytest.mark.parametrize("method", ["POST", "PATCH"])
+@pytest.mark.parametrize(
+    ("operating_hours", "error_type"),
+    [
+        ("1.001", "decimal_max_places"),
+        ("10000000000.00", "decimal_whole_digits"),
+    ],
+)
+def test_equipment_rejects_hours_outside_numeric_12_2_contract(
+    client: TestClient, method: str, operating_hours: str, error_type: str
+) -> None:
+    payload, headers = valid_equipment_payload(client)
+    equipment_id = "unused"
+    if method == "PATCH":
+        created = client.post(
+            "/api/equipment",
+            headers={**headers, "Idempotency-Key": f"hours-seed-{operating_hours}"},
+            json=payload,
+        )
+        assert created.status_code == 201
+        equipment_id = created.json()["id"]
+    response = (
+        client.post(
+            "/api/equipment",
+            headers={**headers, "Idempotency-Key": f"hours-create-{operating_hours}"},
+            json={**payload, "operating_hours": operating_hours},
+        )
+        if method == "POST"
+        else client.patch(
+            f"/api/equipment/{equipment_id}",
+            headers={**headers, "Idempotency-Key": f"hours-update-{operating_hours}"},
+            json={**payload, "operating_hours": operating_hours},
+        )
+    )
+    assert response.status_code == 422
+    assert response.json()["detail"]["code"] == "VALIDATION_ERROR"
+    assert {"field": "operating_hours", "type": error_type} in response.json()[
+        "detail"
+    ]["fields"]
+    assert "audit_event_id" in response.json()["detail"]
+
+
+def test_equipment_max_hours_is_stable_across_create_replay_and_detail(
+    client: TestClient,
+) -> None:
+    payload, headers = valid_equipment_payload(client)
+    payload = {**payload, "operating_hours": "9999999999.99"}
+    request_headers = {**headers, "Idempotency-Key": "max-hours"}
+    first = client.post("/api/equipment", headers=request_headers, json=payload)
+    replay = client.post("/api/equipment", headers=request_headers, json=payload)
+    assert first.status_code == replay.status_code == 201
+    assert first.json() == replay.json()
+
+    detail = client.get(f"/api/equipment/{first.json()['id']}", headers=headers)
+    assert detail.status_code == 200
+    assert {key: detail.json()[key] for key in payload} == {
+        key: first.json()[key] for key in payload
+    }
+    assert detail.json()["operating_hours"] == 9999999999.99
+
+
 def test_equipment_has_no_physical_delete_endpoint(client: TestClient) -> None:
     payload, headers = valid_equipment_payload(client)
     created = client.post(
