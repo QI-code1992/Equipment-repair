@@ -6,6 +6,9 @@
 - 当前阶段：Stage 5 — TASK-002 / CR-036 修复中；生产代码和未提交契约草稿保持原状，等待本任务书 v1.2 协作基线修订获批后继续
 - 任务书版本：v1.2 候选
 - 状态：待项目负责人针对精确候选 Commit 书面批准；获批前暂停 TASK-002 后续开发、正式 PR 创建和集成
+- 当前阶段：Stage 5 — TASK-002 任务分支开发与 Review 已完成，待合入集成分支；DEV-002 可继续 TASK-006 的非数据库部分
+- 任务书版本：v1.1
+- 状态：已批准，作为 Stage 5 任务分配与集成基线
 - v1.0 候选提交：`8272a8ed161b787098660f61ebb86fa5ccada564`
 - v1.0 审批记录提交：`20261a80f01de8d18e18a2acf9c97e07087e04bc`
 - v1.0 批准人：项目负责人
@@ -34,6 +37,7 @@
 - 人员配置确认时间：2026-07-15
 - 已知 Stage 5 首任务风险：`DEF-003`、`DEF-004`；后端测试和 Compose 真实运行验证由 TASK-001 在门禁后关闭
 - 当前首要任务：完成任务书 v1.2 候选、台账一致性检查和项目负责人书面批准；之后 `DEV-001` 才可继续 TASK-002 内部整改工作包 R6/R7。TASK-003、TASK-004 和 DEV-002 的数据库集成继续等待 TASK-002 正式 Review 通过并合入 `codex/stage-05-integration`。
+- 当前首要任务：`DEV-001` 提交 TASK-002 PR 并合入 `codex/stage-05-integration`；`DEV-002` 可继续 TASK-006 的领域测试和非数据库实现，数据库迁移与集成继续等待该合入
 
 ## 2. 开发人员配置
 
@@ -153,6 +157,7 @@
 ### TASK-002：认证、权限、审计与设备基础
 
 - 状态：Changes Requested / CR-036 In Development；任务书 v1.2 获批前暂停后续整改
+- 状态：Review Passed / 任务分支已完成并推送，待 PR 与集成
 - 优先级：P0
 - 负责人：`DEV-001`
 - 任务开发者：`DEV-001`
@@ -176,6 +181,7 @@
 - 回滚：回退任务 Commit，并按迁移文档执行对应 downgrade；生产数据存在时不得直接删除表。
 - 交接：旧恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12` 与证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 的历史保留；DEV-002 已对后续候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 请求修改。CR-036 新实现目前仅在本地，真实 PostgreSQL/Compose 汇总验证、正式证据、远端候选和 DEV-002 复审均未完成。
 - PR：[#15](https://github.com/QI-code1992/Equipment-repair/pull/15) 状态为 `Changes requested`，保留但不得作为正式集成 PR；后继正式 PR 编号待 DEV-002 审核通过后生成。
+- 交接：实现恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12` 与证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 已推送；Python 3.13、Compose、容器健康、真实 PostgreSQL 迁移与并发验证通过；最终独立 Review 为 0/0/0。合入集成分支前不解锁 TASK-003 或数据库集成。
 
 ### TASK-003：故障、工单、维修与结构化案例闭环
 
