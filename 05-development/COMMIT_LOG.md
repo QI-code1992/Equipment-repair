@@ -18,10 +18,12 @@ Production feature commits will be appended with branch, files, verification and
 | 2026-07-15 | `20fc10f9e0af3e420283814a3eb02ab744aaf869` | CR-032 unified `codebase/` directory migration | directory and prototype regression checks passed; backend blocked by DEF-003; Compose unverified without Docker |
 | 2026-07-15 | `87538b04a168cb3c11c2e65dfb976d3a206d8218` | TASK-001 runtime baseline repair | Python 3.13 test, Compose configuration, container health and `/healthz` verified; FCP-001 |
 | 2026-07-15 | `45725ac083c98ea999492b709e9792082c3db284` | TASK-001 verification evidence | updated FCP, self-test and DEF-003/DEF-004 evidence; pushed to task branch |
-| 2026-07-15 | `8174fd869f53d2a7140b19f36f93323edb41b59e` | TASK-002 approved design and TASK-003 boundary | pushed to `codex/task-002-identity-equipment` |
-| 2026-07-15 | `9ecffccb448eb0a195fa889bc15c594760f05dec` | TASK-002 implementation plan | included in remote task branch |
-| 2026-07-15 | `eb207b6c0eed05565a23b7dbb5ec20915d62c957` | TASK-002 SQLAlchemy/Alembic database foundation | included in remote task branch |
-| 2026-07-15 | `fbeb785a8f4dc7a345d505aee904ce9da57f46c9` | TASK-002 session authentication and permissions | included in remote task branch |
-| 2026-07-15 | `43cfe291dee642a5591d4d79d8b9272e8e79b424` | TASK-002 audited idempotent identity/equipment APIs | included in remote task branch |
-| 2026-07-15 | `0b0d9cf0dc066143c0a57d4683567fadb4714c12` | TASK-002 review remediation and final implementation | pushed; FCP-002 implementation recovery point |
-| 2026-07-15 | `9f162b421f4fefae4cdd69a001891c7e83d4bc13` | TASK-002 verification, review and handoff evidence | pushed to task branch |
+| 2026-07-16 | `e328cec64f1aa9c7cdc383579af042692dce5679` | PR #15 TASK-002 merge into `codex/stage-05-integration` | governance-invalid merge; review gate remained `Changes requested`; not a task completion or dependency-unlock commit |
+| 2026-07-16 | `6650f615e48d88b9a54179c27a7f03d1bf48f391` | CR-038 remediation authorization | project-owner approval and rollback constraints recorded |
+| 2026-07-16 | `5d91e83679acefa5486a25bf5b921e9c12fd52d6` | non-destructive revert of PR #15 merge | verified rollback candidate on `codex/cr-038-revert-pr-15-gate-violation`; pending remediation PR |
+| 2026-07-16 | `d37698c6e51df1701bbdfcf12ec6fa329241e0bd` | CR-038 PR #17 merge | invalid PR #15 integration reverted; post-merge Python, Compose, container health and `/healthz` passed |
+| 2026-07-16 | `e0f60f84d5ed31b693ad4f617b7b4c02ded0f718` | CR-037 PR #18 review correction | synchronized task-book approval status with governance ledgers; no codebase change; re-review passed |
+| 2026-07-16 | `e6b571d16192fb4462b7c118ef977df8f6ce186a` | CR-037 PR #18 approved head | approval record only after project-owner approval of `1d4405e`; task-book and codebase unchanged |
+| 2026-07-16 | `18485653a94cd033cfc82e8d6c7e40c35fcfbe33` | CR-037 PR #18 merge | task-book v1.2 and governance ledgers merged into `codex/stage-05-integration`; post-merge governance and minimal runtime verification passed |
+| 2026-07-16 | `35119954ba1d9ca475f03d1faa026bf6a474b18f` | TASK-002 CR-036 R6 contract and migration repair | API/Data Model contract frozen; Alembic legacy repair and local regression passed |
+| 2026-07-16 | `11dbb226e9b77ff5185fed5fa1434b0de6749206` | TASK-002 CR-036 R7 PostgreSQL and review remediation | real PostgreSQL concurrency, stable failure fields, safe destructive-test gate, test responsibility split; internal review blockers closed |

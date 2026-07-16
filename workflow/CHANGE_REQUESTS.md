@@ -473,7 +473,6 @@
 - Implementation:
   - Commit: 待生成新的修复候选 Commit；不得复用被拒绝的 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77`。
   - Owner: DEV-001
-  - R6 L0 纠偏：静态契约 Review 要求 OpenAPI 精确冻结逐路由权限、请求必填/可选字段、默认值、可空性、关键限制和成功响应字段；实施计划 Task 6 文件清单补入对应 router/schema/dependency、实施计划和变更台账文件。Review 同时发现旧设备迁移未回填正式必填主数据，已补充确定性占位值、合法兜底产线、同级名称避冲突和非空收口。`0002 -> 0001` 的结构降级命令保持可执行，但按迁移设计属于有损降级：原空组织或非 `LINE` 组织映射降级后为 `NULL`，执行前必须备份。上述调整不改变运行时响应序列化、授权规则、产品范围、架构或依赖。
 - Verification:
   - Status: 设计已获确认，待书面设计复核、实施计划、TDD 实现、完整回归和 DEV-002 复审。
   - Evidence: PR #15 的 DEV-002 `Changes requested` 审核；`05-development/TASK-002_REMEDIATION_DESIGN.md`。
@@ -481,7 +480,7 @@
 ### CR-037：补齐 Stage 5 交叉审核与正式 PR 集成控制
 
 - Level: L1
-- Status: Proposed / Awaiting Approval
+- Status: Done / PR #18 Merged
 - Raised By: 工作流一致性审计
 - Raised At: 2026-07-16
 - Current Stage: Stage 5 — 开发实施 / TASK-002 修复暂停点
@@ -496,11 +495,71 @@
   - Effective Boundary: v1.2 从尚未完成的 TASK-002 起生效；不追溯撤销已完成的 TASK-001、FCP-001 或其历史 Review/集成记录。
   - PR #15: 保留为被拒绝候选的审核历史和 Review Request 载体，不作为 v1.2 下的正式集成触发源。
   - Checkpoints / Review / Handoff: 旧记录保留并追加 `Changes Requested` / `Superseded` 状态，不删除历史。
-- Decision: 项目负责人已授权制作本修订候选；该授权不等同于批准尚未生成的 v1.2 精确 Commit，也不批准 TASK-002 完成、正式 PR 或集成。
-- Updated Baselines: 待生成 `DEVELOPMENT_TASK_BOOK.md` v1.2 候选 Commit；获批后再记录审批 Commit，并恢复 TASK-002 R6/R7。
+- Decision: 项目负责人已针对精确 Commit `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b` 明确批准任务书 v1.2 协作基线并授权推送隔离治理分支。该批准不等同于 TASK-002 完成、正式 PR、集成或 Stage 6 准入；治理记录与任务书合入 `codex/stage-05-integration` 前，TASK-002 R6/R7 继续暂停。
+- Updated Baselines: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.2 获批候选 Commit `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`，远端分支 `codex/taskbook-v1-2-governance`；后续已通过 PR #18 合入并成为 Stage 5 当前协作基线。
 - Implementation:
   - Owner: DEV-001（工作流协调与集成责任）
-  - Candidate Commit: 待本次候选提交生成
+  - Candidate Commit: `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`
+  - Remote Branch: `codex/taskbook-v1-2-governance`
+  - Integration Base: `d37698c6e51df1701bbdfcf12ec6fa329241e0bd`
+  - Historical Wrong-Target PR: [#16](https://github.com/QI-code1992/Equipment-repair/pull/16) 曾以 `main` 为目标并显示合并，但当前远端 `main` 为 `e0a69bfb3854d9280218d01415d2f5377f1dc181`，任务书 Blob `6ba993881159f6faabfba96e45da33aabde51e06` 不等于获批 v1.2 Blob `132aa80e06ffd31154440056ab18618689738761`；PR #16 不构成当前有效基线或 CR-037 完成依据。
+  - Correct Pull Request: [#18](https://github.com/QI-code1992/Equipment-repair/pull/18)（Merged），目标 `codex/stage-05-integration`
+  - Review Correction: 正式审查发现任务书正文仍保留“v1.2 候选 / 等待批准”措辞，与 `STAGE_APPROVALS.md` 已批准状态冲突；已退回治理分支修正。该修正只同步状态，不改变任务内容、人员、范围、依赖或契约。
+  - Merge Approval: 项目负责人于 2026-07-16T15:25:08+08:00 明确批准精确 HEAD `1d4405e1ff6066df25c896deb57248353d8695b7` 转为 Ready 并手动合入；批准后的新增提交仅允许记录该批准。
+  - Merged Head: `e6b571d16192fb4462b7c118ef977df8f6ce186a`
+  - Merge Commit: `18485653a94cd033cfc82e8d6c7e40c35fcfbe33`
+  - Merged At: 2026-07-16T15:27:01+08:00
 - Verification:
-  - Status: 待完成任务分配矩阵、PR/集成规则、台账一致性和 `git diff --check` 审查。
-  - Evidence: 当前技能 `references/stage-gate.md`、`references/development-task-book.md`；任务书 v1.1；PR #15 `Changes requested`；CR-036。
+  - Status: Done。PR #18 Merge Commit 树与合并前 HEAD `e6b571d16192fb4462b7c118ef977df8f6ce186a` 一致；Python 3.13.14 为 `4 passed, 1 warning`；`compileall`、Compose 配置、治理 JSON 和 `git diff --check` 通过；相对第一父提交无 `codebase/` 修改。
+  - Evidence: 当前技能 `references/stage-gate.md`、`references/development-task-book.md`；任务书 v1.1 缺口审计；PR #15 `Changes requested`；PR #16 错误目标审计；CR-036；CR-038 Merge Commit `d37698c6e51df1701bbdfcf12ec6fa329241e0bd`；PR #18 Merge Commit `18485653a94cd033cfc82e8d6c7e40c35fcfbe33`。
+
+### CR-038：回滚未经审核门禁批准的 PR #15 集成结果
+
+- Level: L2
+- Status: Done / PR #17 Merged
+- Raised By: 项目负责人
+- Raised At: 2026-07-16T14:48:01+08:00
+- Current Stage: Stage 5 — Development Implementation
+- Original Request: PR #15 未满足指定审核人批准、任务边界验证和正式集成门禁即被合入 `codex/stage-05-integration`，不能仅记录异常，必须恢复合规的集成状态。
+- Clarified Requirement: 保留 TASK-002 开发分支、提交和审计历史；通过独立补救分支对合并提交 `e328cec64f1aa9c7cdc383579af042692dce5679` 执行非破坏性 `git revert -m 1`，经补救 PR 合入后再继续 CR-037 和 TASK-002 整改。
+- Reason: PR #15 的审核结论仍为 `Changes requested`，被拒绝候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 不得因误合并而成为 TASK-002 完成、依赖解锁或 Stage 6 准入依据。
+- Impact:
+  - PRD / SPEC / Prototype / Acceptance Criteria: 不变。
+  - Architecture / API / Data Model: 不变；仅撤销未经批准的集成结果。
+  - Development Task Book: TASK-002 继续处于 `Changes requested`；TASK-003、TASK-004 和所有依赖 TASK-002 的数据库集成继续阻塞。
+  - Code: 从集成分支有效树撤销 PR #15 引入内容，但原提交继续由 Git 历史和本地任务工作树保存。
+- Decision: 项目负责人于 2026-07-16 明确批准“保留开发成果、回滚不合规集成、不改写历史”的补救方案。
+- Implementation:
+  - Owner: DEV-001 / Stage 5 integration owner
+  - Source Branch: `codex/cr-038-revert-pr-15-gate-violation`
+  - Target Branch: `codex/stage-05-integration`
+  - Pull Request: [#17](https://github.com/QI-code1992/Equipment-repair/pull/17)（Merged）
+  - Merge Approval: 项目负责人于 2026-07-16T15:00:35+08:00 明确批准审查候选 `3f02ac1021ffb2f189ee53120d4b3523415bff60` 转为 Ready 并手动合入；批准后的唯一允许变更是记录本批准的治理文档提交，且必须重新验证无代码或回滚边界变化。
+  - Merge Commit To Revert: `e328cec64f1aa9c7cdc383579af042692dce5679`
+  - Approval Record Commit: `6650f615e48d88b9a54179c27a7f03d1bf48f391`
+  - Revert Commit: `5d91e83679acefa5486a25bf5b921e9c12fd52d6`
+  - Merge Commit: `d37698c6e51df1701bbdfcf12ec6fa329241e0bd`
+- Verification:
+  - Status: Done
+  - Evidence: Merge Commit 树与获批 PR 头一致；Python 3.13.14 `4 passed, 1 warning`；`compileall`、Compose 构建、PostgreSQL/Redis/API 健康和容器内 `/healthz` 通过；验证容器与网络已清理。
+  - Remaining Gate: CR-037 尚未合入；TASK-002、R6/R7 和依赖任务继续暂停。
+
+### CR-036 R6-R7 实施更新（2026-07-16）
+
+- Status: Ready For Verification / Awaiting DEV-002 Re-review
+- Implementation:
+  - R6 Commit: `35119954ba1d9ca475f03d1faa026bf6a474b18f`
+  - R7 Commit: `11dbb226e9b77ff5185fed5fa1434b0de6749206`
+  - Branch: `codex/task-002-identity-equipment`
+  - Owner: DEV-001
+- Verification:
+  - Python 3.13.14：`125 passed, 5 skipped`；PostgreSQL 专用集成：`5 passed`。
+  - PostgreSQL 17：`0002 -> 0001 -> 0002`，最终 `0002 (head)`。
+  - Compose：配置和构建通过；PostgreSQL/Redis healthy；`/healthz` 正常。
+  - Review：内部独立复审 Critical 0、Important 0；历史 `.superpowers` 证据已迁入正式 `CODE_REVIEW.md` 并删除重复工作文件。
+- Scope Result:
+  - 已关闭 DEV-002 提出的 API 契约、失败审计、设备字段、组织层级、用户/固定角色/权限和附件引用脱敏阻断。
+  - 未进入 TASK-003 活跃故障停用保护、TASK-004 RAGFlow 或后续业务范围。
+- Remaining Gate:
+  - 正式证据提交和远端精确 HEAD 完成后，由 DEV-001 发送书面审核请求。
+  - DEV-002 审核通过后创建后继正式 PR；在正式合入前 TASK-002 不算接受，依赖不解锁。

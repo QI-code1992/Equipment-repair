@@ -32,3 +32,11 @@
 - 发现时间：2026-07-15
 - 静态证据：`codebase/infra/docker-compose.yml` 重复定义 `postgres`、`redis` 和顶层 `networks`，且网络结构互相矛盾。
 - 处理：删除重复 `postgres`、`redis` 与顶层 `networks` 定义，保留唯一 `platform` 内部网络。`docker compose ... config --quiet` 通过；独立 `equipment-task1` 项目中 PostgreSQL、Redis 均为 `healthy`，API 实际健康检查返回 200。
+
+## TASK-002 / CR-036 缺陷复核（2026-07-16）
+
+- DEV-002 对 PR #15 提出的 Standards 与 Spec 阻断统一由 CR-036 管理，不另行拆成重复 DEF。
+- R6/R7 已修复公开契约、失败审计、完整设备字段、组织层级、固定角色/用户权限、附件引用脱敏和迁移问题。
+- DEV-001 最终独立复审为 Critical 0、Important 0；未发现需要保持 Open 的新缺陷。
+- 唯一非阻断提醒：Alembic `0002` 接近规模上限，后续数据库变化必须新增 revision；第三方 TestClient/httpx 弃用警告留待依赖维护任务处理。
+- TASK-002 仍待 DEV-002 复审；若正式审核发现新阻断项，应在本台账新增 DEF 或重新打开 CR-036，不得改写本次历史结果。

@@ -1,7 +1,7 @@
 # 代码评审
 
-- 状态：TASK-001 已完成独立审查
-- 范围：已审查 TASK-001 平台运行基线修复；后续生产实现仍须逐任务审查。
+- 状态：TASK-001 已完成独立审查；TASK-002 CR-036 已完成 DEV-001 内部复审，等待 DEV-002 正式复审
+- 范围：已审查 TASK-001 平台运行基线与 TASK-002 CR-036 修复候选；后续任务仍须逐任务交叉审核。
 - 评审门禁：每个有意义的实现切片都必须完成规格符合性、质量评审、测试，并具备可追溯的功能/页面检查点。
 
 ## Task 1 评审（2026-07-15）
@@ -31,4 +31,60 @@
 - Standards 阻断：公开 API 契约未同步；受保护写操作失败审计与失败 `audit_event_id` 不完整。
 - Spec 阻断：设备字段、组织层级、用户/固定角色/菜单操作权限及附件敏感内容脱敏未完整实现。
 - 处置：进入 CR-036 修复周期；被拒绝 SHA 不得复用为完成、正式 PR、FCP 或集成依据。新候选必须完成 PostgreSQL/Compose 真实验证、完整独立 Review 和 DEV-002 复审。
-- PR 边界：按任务书 v1.2 候选，PR #15 保留为被拒绝历史和 Review Request 载体，不作为后继正式集成 PR。
+- PR 边界：按获批任务书 v1.2 精确候选 `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`，PR #15 保留为被拒绝历史和 Review Request 载体，不作为后继正式集成 PR；治理 PR 合入前不恢复 TASK-002 R6/R7。
+
+## CR-038 补救审查（2026-07-16）
+
+- 原因：PR #15 在正式审核结论仍为 `Changes requested` 时被合入集成分支，违反任务书和 Stage 5 集成门禁。
+- 审查范围：授权记录 `6650f615e48d88b9a54179c27a7f03d1bf48f391` 与回滚候选 `5d91e83679acefa5486a25bf5b921e9c12fd52d6`。
+- 边界检查：使用 `git revert -m 1 e328cec` 的非破坏性反向提交；未使用 reset、force-push 或历史改写；TASK-002 原提交仍可恢复。
+- 树状态：相对 PR #15 第一父提交 `42098613ffa20faed3bb0dcb842a0121722565bd`，仅保留 CR-038 治理记录。
+- 验证：Python 3.13.14 后端测试 `4 passed, 1 warning`；`compileall`、Compose 配置、`git diff --check` 通过。
+- 结论：回滚候选满足创建补救 PR 的条件；在补救 PR 合入前，TASK-002 仍为 `Changes requested`，所有依赖保持阻塞。
+- 正式治理审查：PR #17 当前头 `3f02ac1021ffb2f189ee53120d4b3523415bff60` 的源/目标分支、36 个文件边界、4 个提交、回滚树一致性和治理证据均通过；GitHub 状态为 `clean`，无评论、无 Review、无 CI checks。
+- 合并决定：项目负责人已于 2026-07-16T15:00:35+08:00 明确批准将 PR #17 转为 Ready 并手动合入。
+- 合并结果：PR #17 已合入 `codex/stage-05-integration`，Merge Commit 为 `d37698c6e51df1701bbdfcf12ec6fa329241e0bd`。
+- 合并后验证：Merge Commit 树与获批 PR 头 `9c1ff88a6842ffa1cb79bd63807b3d41d830d5bd` 一致；Python 3.13.14 `4 passed, 1 warning`；Compose 构建和容器健康通过；`/healthz` 返回正常。
+- 结论：CR-038 技术补救通过；TASK-002 仍为 `Changes requested`，CR-037 合入前不恢复 R6/R7。
+
+## CR-037 PR 目标审查（2026-07-16）
+
+- 历史发现：PR #16 曾以 `main` 为目标并显示合并，不符合任务书规定的 `codex/stage-05-integration` 目标。
+- 当前事实：`origin/main` 为 `e0a69bfb3854d9280218d01415d2f5377f1dc181`；其任务书 Blob 不等于获批 v1.2 Blob，因此错误目标 PR 未形成当前有效基线。
+- 处置：PR #16 仅保留为错误目标历史；CR-037 已创建新的 Draft PR [#18](https://github.com/QI-code1992/Equipment-repair/pull/18)，目标严格为 `codex/stage-05-integration`。
+
+## CR-037 PR #18 正式审查（2026-07-16）
+
+- 审查对象：PR #18 首轮 HEAD `3231c9e191d33ee7132a5ea9dff13e29cf7af856`，目标 `codex/stage-05-integration`。
+- 范围检查：9 个文件均为任务书或治理台账；相对目标分支无 `codebase/` 修改，无产品、架构、API、数据模型或业务代码变更。
+- 已通过项：目标分支正确；11 个 TASK 协作字段完整；TASK-002—011 均由对方审核并创建正式 PR；依赖矩阵、集成触发、自动化边界和 PR #15 / CR-038 状态基本一致；`workflow/state.json` 可解析；`git diff --check` 通过。
+- 阻断项：任务书正文仍写“v1.2 候选、等待项目负责人批准、获批前暂停”，但 `workflow/STAGE_APPROVALS.md` 与 CR-037 已记录精确 Commit `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b` 获批，形成当前基线状态矛盾。
+- 首轮结论：Changes Requested；PR #18 不得转 Ready 或合并。
+- 修正边界：只同步任务书和治理台账状态，不修改已批准任务内容、人员、范围、依赖、API、数据或代码；修正后重新检查完整 diff，并由项目负责人批准新的精确 HEAD 后再转 Ready。
+- 修正提交：`e0f60f84d5ed31b693ad4f617b7b4c02ded0f718`。
+- 修正复审：旧状态措辞已从任务书清除；11 项任务矩阵和 TASK-002—011 交叉审核规则通过；`workflow/state.json` 解析、Python 3.13 健康测试、`compileall`、Compose 配置和 `git diff --check` 通过；相对目标分支仍无 `codebase/` 修改。
+- 复审结论：通过；等待项目负责人批准包含本复审证据的最终精确 HEAD，未获批准前 PR #18 保持 Draft。
+- 合并批准：项目负责人于 2026-07-16T15:25:08+08:00 明确批准精确 HEAD `1d4405e1ff6066df25c896deb57248353d8695b7` 转为 Ready 并手动合入；批准记录提交后必须复核任务书和 `codebase/` 相对获批 HEAD 未变化。
+
+## CR-037 PR #18 合并后审查（2026-07-16）
+
+- 合并结果：PR #18 已合入 `codex/stage-05-integration`，Merge Commit 为 `18485653a94cd033cfc82e8d6c7e40c35fcfbe33`。
+- 边界复核：批准记录 HEAD `e6b571d16192fb4462b7c118ef977df8f6ce186a` 相对获批 HEAD `1d4405e1ff6066df25c896deb57248353d8695b7` 只修改 4 个批准记录文件；任务书 Blob 与 `codebase/` 均未变化。
+- 合并树：Merge Commit 树与 `e6b571d16192fb4462b7c118ef977df8f6ce186a` 树一致。
+- 验证：Python 3.13.14 `4 passed, 1 warning`；`compileall`、Compose 配置、`workflow/state.json` 解析和 `git diff --check` 通过；相对第一父提交无 `codebase/` 修改。
+- 结论：CR-037 技术与治理集成通过；本结论不代表 TASK-002 完成，也不解锁 TASK-003、TASK-004 或依赖 TASK-002 的数据库集成。
+
+## TASK-002 / CR-036 R6-R7 独立复审（2026-07-16）
+
+- 审查范围：拒绝前基线 `53e01e6b9f212c6965414654805979bdd59838ce..11dbb22`，并复核当前正式证据差异。
+- 首轮 R7：发现 1 Critical、6 Important、2 Minor。Critical 为 PostgreSQL 测试可对任意 DSN 执行清理；Important 包括失败响应契约、真实失败事务/审计、幂等并发、最后管理员认证竞态、非规范证据文件和测试规模。
+- 安全修复：PostgreSQL 集成测试仅允许 Compose 主机 `postgres`、数据库名 `equipment_task2_validation*`，且必须显式设置 `TASK002_ALLOW_DESTRUCTIVE_TESTS=1`；测试前后均清理专用数据。
+- 契约修复：失败 `detail` 固定为 `code,message,fields`，受保护写失败再含真实 `audit_event_id`；稳定字段映射覆盖幂等 Key、用户名、组织 code/name 和设备 code；`AUDIT_PERSIST_FAILED` 不伪造审计 ID。
+- 真实数据库修复：新增五项 PostgreSQL 17 测试，证明业务失败事务回滚后独立失败审计恰好一次、幂等并发序列化、最后系统管理员保护和组织同级冲突。
+- 规模修复：拆分审计、组织冲突和 identity 回归测试；`test_identity_permissions.py` 从约 700 行降至 461 行，未改变断言行为。
+- Task 3 历史 TDD 证据归档：固定角色与用户管理首次聚焦测试为 `7 failed`，实现后 `7 passed`；并发管理员保护补测首次 `3 failed, 7 passed`，加 PostgreSQL advisory transaction lock 后 `10 passed`；相关 identity 回归最终 `42 passed`，当时未验证真实 PostgreSQL 并发，本轮 R7 已补齐。
+- Task 4 历史 TDD 证据归档：组织合同首次 `6 failed`，基础实现后聚焦 `41 passed`；锁顺序、唯一/外键竞态和非法环补测分别先失败后通过，审查后聚焦 `64 passed`、完整后端 `90 passed`；当时仅 recording-session/SQLite 覆盖，本轮 R7 已补齐真实 PostgreSQL 并发。
+- 非规范证据处置：上述两份 `.superpowers/sdd/task-3-report.md`、`task-4-report.md` 的唯一 RED/GREEN、Review 和未验证项已完整迁入本节；文件按项目资产基线删除，Git 历史仍可追溯。
+- 最终复审：Critical 0、Important 0；Minor 仅提示 `0002` 已接近规模上限，后续数据库变化必须新增 revision，以及 PostgreSQL 测试函数可在未来不损害可读性时继续缩短。
+- 边界：未实现 TASK-003 的活跃故障停用保护，未进入 TASK-004/RAGFlow，未增加兼容层、通用抽象或生产依赖。
+- 结论：DEV-001 内部 Review 门禁通过，可形成书面审核请求；TASK-002 是否接受仍由 DEV-002 决定。

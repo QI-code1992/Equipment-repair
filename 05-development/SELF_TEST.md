@@ -1,6 +1,6 @@
 # 自测
 
-- 状态：尚未执行生产测试
+- 状态：Stage 5 开发自测与真实 PostgreSQL/Compose 验证已执行；Stage 6 独立测试和生产环境验收尚未执行
 - 原型证据：Node 静态检查位于 `06-testing/tests/`，不属于生产测试。
 - 必要生产检查：单元、API 契约、权限、健康分、Agent/RAGFlow 集成、安全、性能和端到端测试。
 - 验收候选包必须绑定精确 Commit SHA 和最新结果。
@@ -31,14 +31,62 @@
 - 后端与 Compose：后续由 TASK-001 重新验证，结果见“TASK-001 运行基线重新验证”。
 - 路径与差异：目录断言和 `git diff --check` 通过；技能与工件参考中的归档规则一致性扫描通过。
 
-## TASK-002 认证、权限、审计与设备基础（2026-07-15）
+## CR-038 PR #15 门禁违规合并补救（2026-07-16）
 
-- TDD：首个管理员引导、权限/角色查询、组织/设备更新、登录/登出/权限拒绝审计、全局请求指纹幂等、唯一冲突、外键、组织循环和脱敏均先得到失败用例，再完成实现；审查整改累计关闭 1 个 Critical、13 个 Important、4 个 Minor。
-- Python：`D:\codex\tools\equipment-task1-py313\Scripts\python.exe --version` 返回 `Python 3.13.14`；`python -m pytest codebase/backend/tests -q` 最终为 `38 passed, 1 warning`。唯一告警来自 FastAPI/Starlette TestClient 的第三方弃用提示。
-- Compose：`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet` 通过；API 镜像重建成功，并已将 `alembic.ini` 与 migration revisions 纳入镜像。
-- 迁移：在 `equipment-task2` PostgreSQL 17 容器执行 `alembic downgrade base`、`alembic upgrade head`、`alembic current` 均成功，最终为 `0001 (head)`。
-- 健康：新镜像容器内请求 `/healthz` 返回 HTTP 200 与 `{"status":"ok","service":"equipment-operations-platform"}`。
-- Bootstrap：首次管理员引导成功并写入 1 条 `user.bootstrap` 系统审计（`actor_user_id` 为空）；空凭据和第二次引导均被拒绝。
-- PostgreSQL 竞争：同一幂等键的两个并发创建设备请求均为 201 且响应一致；不同键同时创建同一设备编码为 201/409，冲突码为 `EQUIPMENT_CODE_EXISTS`。
-- 组织完整性：未知 `organization_id` 返回 404；顺序成环返回 422；并发 A→B/B→A 更新在共享事务锁下返回 200/422，未形成循环。
-- 静态：`python -m compileall -q app` 与 `git diff --check` 通过；Git 仅提示工作树 LF→CRLF 转换，不是内容错误。
+- 回滚前基线：`py -3.13 -m pytest tests -q` 为 `38 passed, 1 warning`；Compose 配置通过。
+- 回滚方式：在隔离分支执行 `git revert -m 1 --no-commit e328cec64f1aa9c7cdc383579af042692dce5679`，审查暂存差异后提交为 `5d91e83679acefa5486a25bf5b921e9c12fd52d6`。
+- 树状态：`git diff --name-status 42098613ffa20faed3bb0dcb842a0121722565bd` 仅显示 CR-038 的三份治理记录。
+- Python 3.13：回滚后 `py -3.13 -m pytest tests -q` 为 `4 passed, 1 warning`。
+- 静态检查：`py -3.13 -m compileall -q app tests` 通过。
+- Compose：`docker compose --env-file ../infra/.env.example -f ../infra/docker-compose.yml config --quiet` 通过。
+- 差异检查：`git diff --cached --check` 通过。
+- 未执行：未启动容器和真实 PostgreSQL；本补救目标是恢复 PR #15 合并前的已验证 TASK-001 集成树，不重新验收 TASK-002。
+
+### CR-038 合并后验证
+
+- Merge Commit：`d37698c6e51df1701bbdfcf12ec6fa329241e0bd`，文件树与获批 PR 头 `9c1ff88a6842ffa1cb79bd63807b3d41d830d5bd` 一致。
+- Python 3.13：`4 passed, 1 warning`；`compileall` 通过。
+- Compose：配置、镜像构建和启动通过；PostgreSQL、Redis、API 均为 healthy。
+- HTTP：API 容器内 `/healthz` 返回 `{"status":"ok","service":"equipment-operations-platform"}`。
+- 清理：验证容器和网络已移除，未执行数据卷删除。
+- 结论：CR-038 技术补救完成；该验证不验收 TASK-002，TASK-002 仍为 `Changes requested`。
+
+## CR-037 PR #18 治理状态修正验证（2026-07-16）
+
+- 修正提交：`e0f60f84d5ed31b693ad4f617b7b4c02ded0f718`。
+- 任务书状态：旧的“v1.2 候选 / 等待批准 / 获批前暂停”当前状态措辞已清除；保留历史变更说明，不改写原审批记录。
+- 任务矩阵：11 个 TASK 存在；TASK-002—011 均具备任务开发者、指定审核者、正式 PR 创建者、开发者不得自建正式 PR 和目标分支字段；开发者与审核者/PR 创建者不同。
+- Python 3.13：`py -3.13 -m pytest codebase/backend/tests/test_health.py -q` 为 `4 passed, 1 warning`。
+- 静态检查：`py -3.13 -m compileall -q codebase/backend/app codebase/backend/tests` 通过。
+- Compose：`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet` 通过。
+- 治理文件：`workflow/state.json` 解析通过；`git diff --check` 通过。
+- 范围：相对 `codex/stage-05-integration` 无 `codebase/` 修改；未运行容器启动和数据库验证，因为本修正仅涉及治理状态文本。
+
+## CR-037 PR #18 合并后验证（2026-07-16）
+
+- Merge Commit：`18485653a94cd033cfc82e8d6c7e40c35fcfbe33`。
+- 树一致性：Merge Commit 树与 PR 合并前 HEAD `e6b571d16192fb4462b7c118ef977df8f6ce186a` 一致。
+- Python 3.13：`py -3.13 -m pytest codebase/backend/tests/test_health.py -q` 为 `4 passed, 1 warning`。
+- 静态检查：`py -3.13 -m compileall -q codebase/backend/app codebase/backend/tests` 通过。
+- Compose：`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet` 通过。
+- 治理检查：11 个 TASK 存在；`workflow/state.json` 解析通过；`git diff --check` 通过。
+- 范围：相对 Merge Commit 第一父提交无 `codebase/` 修改；未启动容器或数据库，因为 PR #18 仅包含任务书和治理文档。
+- 结论：CR-037 合并后验证通过；TASK-002 仍为 `Changes requested`，仅允许恢复 CR-036 R6/R7，依赖任务继续阻塞。
+
+## TASK-002 / CR-036 R6-R7 修复验证（2026-07-16）
+
+- Python：本机与 API 容器均为 `Python 3.13.14`。
+- R6 契约与迁移提交：`35119954ba1d9ca475f03d1faa026bf6a474b18f`。
+- R7 PostgreSQL 与审查修复提交：`11dbb226e9b77ff5185fed5fa1434b0de6749206`。
+- 完整后端：`python -m pytest tests -q`，结果 `125 passed, 5 skipped, 1 warning`；5 个跳过项是带专用数据库与显式破坏性开关的 PostgreSQL 集成测试。
+- 聚焦回归：审计、失败响应、设备、组织、迁移共 `58 passed, 1 warning`；测试职责搬迁后 identity 相关两文件共 `32 passed, 1 warning`。
+- 编译：`python -m compileall -q app alembic`，退出码 0。
+- 规模检查：`test_identity_permissions.py` 461 行；新增 `test_task002_identity_regressions.py` 262 行；审计、组织和 PostgreSQL 集成测试均不超过 500 行；迁移测试函数均不超过 60 行。
+- Compose 配置：`docker compose ... config --quiet`，退出码 0。
+- 连续迁移：真实 PostgreSQL 17 执行 `0002 -> 0001 -> 0002` 成功；`alembic current` 为 `0002 (head)`。
+- 真实 PostgreSQL：专用数据库 `equipment_task2_validation`，同时要求 `TASK002_ALLOW_DESTRUCTIVE_TESTS=1`；集成测试连续两轮均为 `5 passed`，最终修复镜像复验为 `5 passed, 1 warning`。
+- 并发覆盖：失败写事务回滚与恰好一条失败审计、同 Key 同请求回放、同 Key 不同请求拒绝、最后一个系统管理员保护、同级组织名称唯一。
+- 容器：PostgreSQL 与 Redis 为 `healthy`，API 正常启动；容器内 `/healthz` 返回 `{'status': 'ok', 'service': 'equipment-operations-platform'}`。
+- 静态差异：`git diff --check` 通过。
+- 唯一警告：FastAPI/Starlette TestClient 对 `httpx` 兼容层的第三方弃用提示；未新增生产依赖。
+- 未验证：尚未取得 DEV-002 对新候选的正式批准，尚未创建后继正式 PR，尚未合入 `codex/stage-05-integration`。

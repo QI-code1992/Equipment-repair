@@ -28,9 +28,45 @@
 ## TASK-002 交接状态更正（2026-07-16）
 
 - 原因：DEV-002 对 PR #15 候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 提交 `Changes requested`；上节“Ready for review”不再代表当前有效交接状态。
-- 当前状态：TASK-002 / CR-036 `In Development`；本地整改代码和契约草稿保持原状，任务书 v1.2 协作基线获批前暂停后续 R6/R7。
+- 当前状态：TASK-002 / CR-036 `In Development`；本地整改代码和契约草稿保持原状。任务书 v1.2 已通过 PR #18 合入 `codex/stage-05-integration`，CR-037 收尾记录合入后可恢复 R6/R7。
 - 旧证据边界：`0b0d9cf`、`9f162b4` 和 PR #15 历史继续保留，但不得作为 TASK-002 完成、FCP、正式 PR 或集成依据。
-- 协作分工候选：DEV-001 为任务开发者和集成负责人；DEV-002 为指定审核者及后继正式 PR 创建者。DEV-001 只能推送任务分支并发送书面审核请求。
+- 协作分工：DEV-001 为任务开发者和集成负责人；DEV-002 为指定审核者及后继正式 PR 创建者。DEV-001 只能推送任务分支并发送书面审核请求。
 - PR #15：保留为被拒绝候选的审核历史和本轮 Review Request 载体；DEV-002 审核新候选通过后创建后继正式 PR。
 - 依赖边界：TASK-003、TASK-004、TASK-005 及 DEV-002 的数据库集成继续按任务书阻塞；TASK-006 仅保留已允许的非数据库范围。
-- 下一次有效交接条件：任务书 v1.2 获批；CR-036 R6/R7 完成；PostgreSQL/Compose 和完整回归通过；正式证据提交并推送；DEV-002 复审通过。
+- 下一次有效交接条件：任务书 v1.2 与本审批记录已通过治理 PR 合入集成分支；CR-036 R6/R7 完成；PostgreSQL/Compose 和完整回归通过；正式证据提交并推送；DEV-002 复审通过。
+- PR #16 更正：历史 PR #16 错误指向 `main`，且当前远端 `main` 不包含获批任务书 v1.2；该 PR 不构成 CR-037 完成或 Stage 5 协作基线。必须重新创建目标为 `codex/stage-05-integration` 的治理 PR。
+- CR-037 正确 PR：[PR #18](https://github.com/QI-code1992/Equipment-repair/pull/18)，已合入 `codex/stage-05-integration`；Merged Head 为 `e6b571d16192fb4462b7c118ef977df8f6ce186a`，Merge Commit 为 `18485653a94cd033cfc82e8d6c7e40c35fcfbe33`。合并树、Python 3.13、`compileall`、Compose 配置和治理一致性验证通过。
+- CR-037 收尾边界：本收尾 PR 仅把合并结果写回治理台账；合入后 DEV-001 可恢复 TASK-002 / CR-036 R6/R7。TASK-002 仍未完成，TASK-003、TASK-004、TASK-005 及依赖 TASK-002 的数据库集成继续阻塞。
+
+## CR-038 治理补救交接（2026-07-16）
+
+- 事件：PR #15 在审核结论仍为 `Changes requested` 时被合入 `codex/stage-05-integration`，合并提交为 `e328cec64f1aa9c7cdc383579af042692dce5679`。
+- 批准：项目负责人批准保留开发成果并通过独立 PR 非破坏性回滚该集成结果。
+- 补救分支：`codex/cr-038-revert-pr-15-gate-violation`。
+- 授权记录：`6650f615e48d88b9a54179c27a7f03d1bf48f391`。
+- 回滚候选：`5d91e83679acefa5486a25bf5b921e9c12fd52d6`。
+- 补救 PR：[PR #17](https://github.com/QI-code1992/Equipment-repair/pull/17)，已合入 `codex/stage-05-integration`。
+- 合并批准：项目负责人于 2026-07-16T15:00:35+08:00 明确批准审查候选 `3f02ac1021ffb2f189ee53120d4b3523415bff60` 转为 Ready 并手动合入；批准后的治理文档提交不得修改代码或回滚边界。
+- Merge Commit：`d37698c6e51df1701bbdfcf12ec6fa329241e0bd`。
+- 验证：Python 3.13.14 `4 passed, 1 warning`；`compileall`、Compose 构建、PostgreSQL/Redis/API 健康和容器内 `/healthz` 通过。
+- 当前边界：CR-038 已完成；TASK-002 仍为 `Changes requested`；CR-037、TASK-002 R6/R7、TASK-003、TASK-004 和依赖 TASK-002 的数据库集成继续暂停。
+- 下一步：完成 CR-037 治理 PR；合入后恢复 TASK-002 R6/R7 和 DEV-002 复审。
+
+## TASK-002 / CR-036 新候选审核请求（2026-07-16）
+
+- 任务开发者：DEV-001。
+- 指定审核者与正式 PR 创建者：DEV-002。
+- 任务分支：`codex/task-002-identity-equipment`。
+- 目标分支：`codex/stage-05-integration`。
+- 实现提交：R6 `35119954ba1d9ca475f03d1faa026bf6a474b18f`；R7 `11dbb226e9b77ff5185fed5fa1434b0de6749206`。
+- 正式证据：本轮 `docs(task-002): record review remediation handoff` 提交后，以推送后的任务分支精确 HEAD 作为审核对象，并在 GitHub 审核请求中补记。
+- 需求/AC：FR-001、FR-010、FR-011、NFR-001、NFR-009；AC-001—008、AC-038、AC-039；不改写 PRD/SPEC/AC。
+- 修改范围：身份、固定角色和权限目录、失败审计与脱敏、组织层级、完整设备主数据、Alembic `0002`、API/Data Model 契约和相关测试。
+- 验证：Python 3.13.14 全套 `125 passed, 5 skipped`；专用 PostgreSQL 17 集成 `5 passed`；迁移 `0002 -> 0001 -> 0002`；Compose、PostgreSQL/Redis 健康、API `/healthz`、compileall 和 diff check 通过。
+- Review：DEV-001 内部独立复审 Critical 0、Important 0；Minor 为未来迁移 revision/测试函数可读性提醒，不阻塞本候选。
+- 未验证：DEV-002 尚未批准；后继正式 PR 尚未创建；任务尚未正式集成。
+- 依赖：无新增生产依赖；TASK-003/TASK-004 未实施；TASK-003、TASK-004、TASK-005 和依赖 TASK-002 的数据库工作继续阻塞。
+- 兼容与抽象：未新增兼容分支；仅保留任务所需领域 service/schema 与测试职责拆分，无通用框架。
+- 风险：Alembic `0002` downgrade 会丢弃完整合同新增字段，只允许在已备份或专用验证环境执行；PostgreSQL 集成测试有专用库名、主机和显式开关三重保护。
+- 回退：应用与契约按独立任务 Commit 选择性 revert；数据库按已验证 downgrade 或前向修复策略处理，不对生产数据执行未授权删除。
+- 请求动作：请 DEV-002 对推送后的精确 HEAD 复审；若通过，由 DEV-002 创建后继正式 PR。PR #15 仅保留被拒绝和违规合并/回滚历史，不得再次作为正式集成触发源。
