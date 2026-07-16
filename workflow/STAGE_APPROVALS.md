@@ -191,3 +191,17 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Decision: Stage 3 原型与视觉基线获得确认，进入 Stage 4 架构与开发计划。
 - Conditions / Scope Exceptions: Stage 4 仅产出架构、API/数据契约、ADR、实施计划与验证策略；生产实现需等待 Stage 4 门禁批准后才可进入 Stage 5。
 - Notes: 任何后续视觉或交互偏离应回到 Stage 2 或 Stage 3，走变更台账。
+
+### Governance-Decision-002: CR-038 PR #15 门禁违规合并补救
+
+- Status: Approved
+- Approver: project owner
+- Approved At: 2026-07-16T14:48:01+08:00
+- Current Stage: Stage 5 — Development Implementation
+- Artifacts Reviewed: PR #15 合并提交 `e328cec64f1aa9c7cdc383579af042692dce5679`、审核结论 `Changes requested`、被拒绝候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77`
+- Evidence Reviewed: 远端 `codex/stage-05-integration` 当前头为 `e328cec64f1aa9c7cdc383579af042692dce5679`；该提交直接合并 PR #15，未满足交叉审核和正式集成门禁。
+- Decision: 批准创建 CR-038 隔离补救分支，以非破坏性 revert 撤销 PR #15 在集成分支上的有效内容；保留全部原始提交和历史。
+- Conditions: 补救必须通过独立 PR；禁止 `reset`、强制推送或删除本地 TASK-002 工作内容；补救 PR 不得自动合并；回滚后 TASK-002 仍为 `Changes requested`。
+- Next Step: 完成回滚候选、验证和治理证据后创建 `[CR-038]` 补救 PR，目标为 `codex/stage-05-integration`。
+- Version / Commit SHA: merge `e328cec64f1aa9c7cdc383579af042692dce5679`; first parent `42098613ffa20faed3bb0dcb842a0121722565bd`
+- Notes: 本批准不代表 TASK-002 完成，不解锁其下游依赖，也不批准进入 Stage 6。
