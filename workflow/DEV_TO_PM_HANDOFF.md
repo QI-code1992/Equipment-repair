@@ -14,3 +14,14 @@
 - 禁止提前：TASK-006 的数据库迁移、数据库集成和共享数据模型，直到 TASK-002 完成并合入。
 - 仍阻塞：TASK-005 必须等待 TASK-002 与 TASK-004；其他任务继续严格遵循任务书依赖矩阵。
 - 容器责任：DEV-002 不得自行宣称 Docker、Compose 或 RAGFlow 验证通过；相关真实环境验证仍由 DEV-001 提供。
+
+## CR-038 治理补救交接（2026-07-16）
+
+- 事件：PR #15 在审核结论仍为 `Changes requested` 时被合入 `codex/stage-05-integration`，合并提交为 `e328cec64f1aa9c7cdc383579af042692dce5679`。
+- 批准：项目负责人批准保留开发成果并通过独立 PR 非破坏性回滚该集成结果。
+- 补救分支：`codex/cr-038-revert-pr-15-gate-violation`。
+- 授权记录：`6650f615e48d88b9a54179c27a7f03d1bf48f391`。
+- 回滚候选：`5d91e83679acefa5486a25bf5b921e9c12fd52d6`。
+- 验证：Python 3.13.14 `4 passed, 1 warning`；`compileall`、Compose 配置和差异检查通过。
+- 当前边界：补救 PR 未合入；TASK-002 仍为 `Changes requested`；CR-037、TASK-002 R6/R7、TASK-003、TASK-004 和依赖 TASK-002 的数据库集成继续暂停。
+- 下一步：创建 CR-038 补救 PR；合入后同步 CR-037 治理分支，再恢复 TASK-002 整改与 DEV-002 复审。

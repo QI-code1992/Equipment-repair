@@ -452,7 +452,7 @@
 ### CR-038：回滚未经审核门禁批准的 PR #15 集成结果
 
 - Level: L2
-- Status: Approved / In Development
+- Status: Ready For Verification / Pending PR
 - Raised By: 项目负责人
 - Raised At: 2026-07-16T14:48:01+08:00
 - Current Stage: Stage 5 — Development Implementation
@@ -470,7 +470,9 @@
   - Source Branch: `codex/cr-038-revert-pr-15-gate-violation`
   - Target Branch: `codex/stage-05-integration`
   - Merge Commit To Revert: `e328cec64f1aa9c7cdc383579af042692dce5679`
-  - Revert Commit: Pending
+  - Approval Record Commit: `6650f615e48d88b9a54179c27a7f03d1bf48f391`
+  - Revert Commit: `5d91e83679acefa5486a25bf5b921e9c12fd52d6`
 - Verification:
-  - Status: Pending
-  - Required Evidence: 回滚后树与 PR #15 第一父提交 `42098613ffa20faed3bb0dcb842a0121722565bd` 的业务代码状态一致；Python 3.13 测试、Compose 配置、`compileall`、`git diff --check` 通过；补救 PR 不自动合并。
+  - Status: Passed for PR creation
+  - Evidence: 回滚候选相对第一父提交仅保留 CR-038 治理记录；Python 3.13.14 后端测试 `4 passed, 1 warning`；`compileall`、Compose 配置和 `git diff --check` 通过。
+  - Remaining Gate: 补救 PR 尚未合入；TASK-002、CR-037 和依赖任务继续暂停。

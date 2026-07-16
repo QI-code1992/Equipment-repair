@@ -10,3 +10,12 @@
 - 已验证：Python 3.13.14 下 `pytest codebase/backend/tests/test_health.py -q` 为 4 passed；`docker compose ... config --quiet` 通过；独立 Compose 项目 `equipment-task1` 中 PostgreSQL、Redis 为 healthy，API 容器内实际请求 `/healthz` 返回 200。
 - 接口冻结：`GET /healthz`、`codebase/backend/pyproject.toml`、`codebase/infra/docker-compose.yml`、`POSTGRES_DSN`、`REDIS_URL`。
 - 限制：本检查点未发布公网端口；Nginx HTTPS 的实际公网入口与证书配置归 Task 10 部署工作处理。
+
+## FCP-002：TASK-002 被拒候选恢复点
+
+- 状态：Rejected / Preserved；不是稳定检查点，不得解锁依赖。
+- 范围：PR #15 的 TASK-002 身份、权限、审计、组织和设备基础候选。
+- 被拒候选：`cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77`；审核结论为 `Changes requested`。
+- 异常集成：合并提交 `e328cec64f1aa9c7cdc383579af042692dce5679` 未满足审核门禁，已由 CR-038 回滚候选 `5d91e83679acefa5486a25bf5b921e9c12fd52d6` 撤销有效树内容。
+- 恢复性：原提交仍可从 Git 合并历史检出，本地 TASK-002 工作树继续保留；不得把该恢复点作为完成、正式集成或 Stage 6 证据。
+- 后续：CR-038 补救 PR 合入并完成 CR-037 后，DEV-001 继续 TASK-002 R6/R7；DEV-002 复审通过后创建新的正式 TASK-002 PR。

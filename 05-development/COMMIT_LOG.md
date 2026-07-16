@@ -18,3 +18,6 @@ Production feature commits will be appended with branch, files, verification and
 | 2026-07-15 | `20fc10f9e0af3e420283814a3eb02ab744aaf869` | CR-032 unified `codebase/` directory migration | directory and prototype regression checks passed; backend blocked by DEF-003; Compose unverified without Docker |
 | 2026-07-15 | `87538b04a168cb3c11c2e65dfb976d3a206d8218` | TASK-001 runtime baseline repair | Python 3.13 test, Compose configuration, container health and `/healthz` verified; FCP-001 |
 | 2026-07-15 | `45725ac083c98ea999492b709e9792082c3db284` | TASK-001 verification evidence | updated FCP, self-test and DEF-003/DEF-004 evidence; pushed to task branch |
+| 2026-07-16 | `e328cec64f1aa9c7cdc383579af042692dce5679` | PR #15 TASK-002 merge into `codex/stage-05-integration` | governance-invalid merge; review gate remained `Changes requested`; not a task completion or dependency-unlock commit |
+| 2026-07-16 | `6650f615e48d88b9a54179c27a7f03d1bf48f391` | CR-038 remediation authorization | project-owner approval and rollback constraints recorded |
+| 2026-07-16 | `5d91e83679acefa5486a25bf5b921e9c12fd52d6` | non-destructive revert of PR #15 merge | verified rollback candidate on `codex/cr-038-revert-pr-15-gate-violation`; pending remediation PR |

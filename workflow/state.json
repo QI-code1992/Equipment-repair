@@ -22,16 +22,19 @@
   },
   "lastApprovedStage": "Stage 4 — Architecture and Development Plan",
   "pendingStageApproval": null,
-  "currentCommitSha": "e328cec64f1aa9c7cdc383579af042692dce5679",
+  "currentCommitSha": "5d91e83679acefa5486a25bf5b921e9c12fd52d6",
   "governanceIncident": {
     "changeRequest": "CR-038",
-    "status": "ROLLBACK_AUTHORIZED",
+    "status": "ROLLBACK_CANDIDATE_VERIFIED",
     "invalidMergeCommit": "e328cec64f1aa9c7cdc383579af042692dce5679",
     "rejectedTaskCommit": "cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77",
+    "approvalRecordCommit": "6650f615e48d88b9a54179c27a7f03d1bf48f391",
+    "revertCandidateCommit": "5d91e83679acefa5486a25bf5b921e9c12fd52d6",
     "sourceBranch": "codex/cr-038-revert-pr-15-gate-violation",
     "targetBranch": "codex/stage-05-integration",
     "task002Status": "CHANGES_REQUESTED",
-    "dependencyUnlockAllowed": false
+    "dependencyUnlockAllowed": false,
+    "verification": "Python 3.13.14: 4 passed, 1 warning; compileall passed; Compose config passed; git diff --check passed"
   },
   "notes": [
     "GitHub repository: https://github.com/QI-code1992/Equipment-repair.",
