@@ -125,6 +125,11 @@
 - 状态：Completed / 已审查并完成正式交接
 - 优先级：P0
 - 负责人：`DEV-001`
+- 任务开发者：`DEV-001`
+- 审核方式：历史独立审查已通过；v1.2 不追溯指定新的交叉审核者
+- 正式 PR 创建者：不适用；TASK-001 在 v1.2 生效前已完成，不追溯补建正式 PR
+- 开发者是否允许创建正式 PR：不适用；保留原始交接与 Review 历史
+- PR 目标分支：不适用；以已形成的远端 FCP-001 和交接记录为准
 - 任务类型：后端 / 基础设施 / 测试
 - 并行属性：无；所有其他任务均受其阻塞
 - 需求映射：NFR-003、NFR-004、NFR-005；AC-029、AC-031；实施计划 Task 1
@@ -141,7 +146,7 @@
 - 验收标准：测试收集成功且全部通过；Compose 配置通过；PostgreSQL/Redis healthy；API `/healthz` 返回已批准结果；无旧实现兼容副本。
 - 验证：`python -m pytest codebase/backend/tests/test_health.py -q`；`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet`；容器启动后的 HTTP `/healthz` 冒烟测试；`git diff --check`。
 - 分支：`codex/task-001-runtime-baseline`
-- Review：`DEV-002` 检查接口可消费性，`DEV-001` 自检并提交集成证据。
+- 历史 Review：`DEV-002` 检查接口可消费性，`DEV-001` 自检并提交集成证据；该记录按 v1.2 生效边界保留，不重写为 v1.2 的指定审核或正式 PR 流程。
 - 回滚：按本任务独立 Commit 反向恢复；不得恢复重复实现。
 - 交接：修复提交 `87538b04a168cb3c11c2e65dfb976d3a206d8218`，验证证据提交 `45725ac083c98ea999492b709e9792082c3db284`，均已推送至 `codex/task-001-runtime-baseline`；独立 Review 通过。
 
@@ -177,6 +182,11 @@
 - 状态：Planned / Blocked until TASK-002 is merged into `codex/stage-05-integration`
 - 优先级：P0
 - 负责人：`DEV-001`
+- 任务开发者：`DEV-001`
+- 指定审核者：`DEV-002`
+- 正式 PR 创建者：`DEV-002`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Sequential After TASK-002
 - 需求映射：FR-003、FR-008、FR-RA-003；AC-010、AC-014、AC-026—028、AC-030、AC-043；实施计划 Task 3
 - 范围：故障上报、工单、开始/结束维修、幂等状态迁移、人工最终字段、历史维修案例和相似案例查询。
@@ -187,7 +197,9 @@
 - 验收标准：非法状态迁移被拒；重复请求不重复写入；维修最终字段以人工提交为准；存在待处理或维修中故障的设备不可停用；结构化案例查询不调用 RAGFlow。
 - 验证：`python -m pytest codebase/backend/tests/modules/test_maintenance_lifecycle.py -q`；API 契约和事务回滚测试；`git diff --check`。
 - 分支：`codex/task-003-maintenance-lifecycle`
-- Review：`DEV-002` 复核诊断上下文和采纳接口；`DEV-001` 负责最终合并。
+- PR 审核请求：`DEV-001` 完成本任务验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-002` 发送书面审核请求。
+- Review：`DEV-002` 复核诊断上下文、采纳接口、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-001` 修复。
+- 正式 PR：仅在 `DEV-002` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-002` 创建至 `codex/stage-05-integration`。
 - 回滚：回退应用 Commit；数据库迁移按已验证 downgrade 或前向修复策略处理。
 
 ### TASK-004：部署独立 RAGFlow 容器环境
@@ -195,6 +207,11 @@
 - 状态：Planned / Blocked until TASK-002 is merged into `codex/stage-05-integration`
 - 优先级：P0
 - 负责人：`DEV-001`
+- 任务开发者：`DEV-001`
+- 指定审核者：`DEV-002`
+- 正式 PR 创建者：`DEV-002`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Sequential After TASK-002，可与 DEV-002 的 TASK-006 并行
 - 需求映射：FR-002、NFR-003、NFR-005、NFR-007；AC-009、AC-029、AC-033；实施计划 Task 4 的容器部分
 - 范围：在 Windows Docker Desktop/WSL2 部署独立 RAGFlow、MySQL、Redis、MinIO、Elasticsearch 8.11，配置网络、健康检查、持久化和安全环境模板。
@@ -205,7 +222,9 @@
 - 验收标准：全部容器 healthy；Elasticsearch 版本为 8.11；重启后数据与配置可恢复；无公网暴露的内部依赖。
 - 验证：`docker compose --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml config --quiet`；`docker compose -p equipment-ragflow --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml up -d`；`docker compose -p equipment-ragflow -f codebase/infra/ragflow/docker-compose.yml ps`；执行重启和网络隔离检查并保存真实输出。
 - 分支：`codex/task-004-ragflow-infra`
-- Review：`DEV-002` 复核适配器所需契约；Docker 通过结论只能由 `DEV-001` 提供。
+- PR 审核请求：`DEV-001` 完成本任务验收、Docker 真实验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-002` 发送书面审核请求。
+- Review：`DEV-002` 复核适配器所需契约、任务范围和验证证据；Docker 通过结论只能由 `DEV-001` 提供；任何 Critical/Important 均退回 `DEV-001` 修复。
+- 正式 PR：仅在 `DEV-002` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-002` 创建至 `codex/stage-05-integration`。
 - 回滚：停止并移除项目容器；卷删除属于数据删除，必须单独获得授权。
 
 ### TASK-005：知识文档生命周期与 RAGFlow 适配器
@@ -213,6 +232,11 @@
 - 状态：Planned / 仍阻塞于 TASK-002、TASK-004
 - 优先级：P0
 - 负责人：`DEV-002`
+- 任务开发者：`DEV-002`
+- 指定审核者：`DEV-001`
+- 正式 PR 创建者：`DEV-001`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Blocked By TASK-002, TASK-004
 - 需求映射：FR-002、FR-007、NFR-002、NFR-007；AC-009、AC-024、AC-025、AC-033、AC-036；实施计划 Task 4 的应用部分
 - 范围：知识文档元数据、对象存储引用、上传/状态/检索/删除适配器、引用映射、Worker 同步和超时降级。
@@ -223,7 +247,9 @@
 - 验收标准：真实文档可上传、解析、切片、索引、混合检索和引用；失败原因可追踪；结构化案例不进入 RAGFlow。
 - 验证：`python -m pytest codebase/backend/tests/integrations/test_ragflow_adapter.py -q`；由 `DEV-001` 在 Docker 环境执行真实文档联调和重启验证。
 - 分支：`codex/task-005-knowledge-ragflow`
-- Review：`DEV-001` 复核网络、凭据、迁移和真实环境证据。
+- PR 审核请求：`DEV-002` 完成本任务验收、必要真实环境验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
+- Review：`DEV-001` 复核网络、凭据、迁移、任务范围和真实环境证据；任何 Critical/Important 均退回 `DEV-002` 修复。
+- 正式 PR：仅在 `DEV-001` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-001` 创建至 `codex/stage-05-integration`。
 - 回滚：回退适配器 Commit；外部文档删除必须遵循业务删除和审计规则。
 
 ### TASK-006：四个 Agent 独立配置与模型能力校验
@@ -231,6 +257,11 @@
 - 状态：Authorized to start / 仅限非数据库部分
 - 优先级：P0
 - 负责人：`DEV-002`
+- 任务开发者：`DEV-002`
+- 指定审核者：`DEV-001`
+- 正式 PR 创建者：`DEV-001`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：TASK-001 正式交接后可并行启动领域测试和非数据库实现；数据库集成、迁移和共享数据模型仍 Blocked By TASK-002
 - 需求映射：FR-012、NFR-006；AC-032、AC-034；实施计划 Task 5
 - 范围：四个 `agent_id` 独立配置、首次单独初始化、模型能力、深度思考校验和运行配置快照输入。
@@ -241,7 +272,9 @@
 - 验收标准：四个 Agent 可独立读取和保存；错误模型配置被明确拒绝；密钥不返回前端。
 - 验证：`python -m pytest codebase/backend/tests/modules/test_agent_config.py -q`；API 契约测试；智能配置相关前端测试。
 - 分支：`codex/task-006-agent-config`
-- Review：`DEV-001` 复核认证、迁移和审计；数据库部分未合并前不得标记完成。
+- PR 审核请求：`DEV-002` 完成本任务全部范围、验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求；仅完成非数据库部分时不得请求完成态审核。
+- Review：`DEV-001` 复核认证、迁移、审计、任务范围和验证证据；数据库部分未合并前不得标记完成；任何 Critical/Important 均退回 `DEV-002` 修复。
+- 正式 PR：仅在 TASK-002 依赖满足、`DEV-001` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-001` 创建至 `codex/stage-05-integration`。
 - 回滚：回退模块 Commit；配置数据迁移按明确 downgrade 执行。
 
 ### TASK-007：Agent Runtime、LangGraph、SSE 与恢复
@@ -249,6 +282,11 @@
 - 状态：Planned
 - 优先级：P0
 - 负责人：`DEV-002`
+- 任务开发者：`DEV-002`
+- 指定审核者：`DEV-001`
+- 正式 PR 创建者：`DEV-001`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Blocked By TASK-002, TASK-006
 - 需求映射：FR-005、NFR-006、NFR-008、NFR-009；AC-003、AC-029、AC-034—038；实施计划 Task 6
 - 范围：线程归属、运行快照、LangGraph checkpoint、工具审计、人工中断/恢复和安全 SSE 事件。
@@ -259,7 +297,9 @@
 - 验收标准：SSE 顺序稳定；刷新或重启可恢复；未授权线程不可读；错误不被吞掉；日志无敏感信息。
 - 验证：`python -m pytest codebase/backend/tests/modules/test_agent_runtime.py -q`；SSE 契约测试；PostgreSQL checkpoint 集成测试由 `DEV-001` 提供环境。
 - 分支：`codex/task-007-agent-runtime`
-- Review：`DEV-001` 复核权限、审计和数据库边界。
+- PR 审核请求：`DEV-002` 完成本任务验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
+- Review：`DEV-001` 复核权限、审计、数据库边界、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-002` 修复。
+- 正式 PR：仅在 `DEV-001` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-001` 创建至 `codex/stage-05-integration`。
 - 回滚：回退 Runtime Commit；保留既有运行审计，不直接删除线程数据。
 
 ### TASK-008：AI 故障上报、智能问数与健康分读取
@@ -267,6 +307,11 @@
 - 状态：Planned
 - 优先级：P0
 - 负责人：`DEV-002`
+- 任务开发者：`DEV-002`
+- 指定审核者：`DEV-001`
+- 正式 PR 创建者：`DEV-001`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Blocked By TASK-002, TASK-006, TASK-007
 - 需求映射：FR-004、FR-006、FR-009；AC-011—023；实施计划 Task 7 与 Task 10 的健康分契约
 - 范围：AI 故障字段采集、人工确认提交、固定指标目录、最多五项批量查询、健康分统一读取和失败降级。
@@ -277,7 +322,9 @@
 - 验收标准：不完整草稿不能提交；一次查询最多五项；非法指标/维度被拒；服务失败不生成数值。
 - 验证：`python -m pytest codebase/backend/tests/agents/test_fault_reporting.py codebase/backend/tests/agents/test_metric_query.py codebase/backend/tests/modules/test_health_score.py -q`；指标 API 契约测试；全部 `06-testing/tests/*.test.js`。
 - 分支：`codex/task-008-fault-metric-agents`
-- Review：`DEV-001` 复核业务写入、指标服务和权限边界。
+- PR 审核请求：`DEV-002` 完成本任务验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
+- Review：`DEV-001` 复核业务写入、指标服务、权限边界、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-002` 修复。
+- 正式 PR：仅在 `DEV-001` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-001` 创建至 `codex/stage-05-integration`。
 - 回滚：回退 Agent Commit，不影响业务 API 已有人工流程。
 
 ### TASK-009：操作指引与维修前故障诊断 Agent
@@ -285,6 +332,11 @@
 - 状态：Planned
 - 优先级：P0
 - 负责人：`DEV-002`
+- 任务开发者：`DEV-002`
+- 指定审核者：`DEV-001`
+- 正式 PR 创建者：`DEV-001`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Blocked By TASK-003, TASK-005, TASK-006, TASK-007
 - 需求映射：FR-007、FR-RA-001—004、NFR-002、NFR-003；AC-024、AC-025、AC-040—044；实施计划 Task 8
 - 范围：操作指引最多两次定向检索；维修前诊断的预诊断、动态追问、报警码、证据门槛、采纳/直接开始、降级与摘要。
@@ -295,7 +347,9 @@
 - 验收标准：证据不足不能产生可采纳根因；报警码问题不可跳过；直接开始不保留 AI 摘要；失败保留人工流程。
 - 验证：`python -m pytest codebase/backend/tests/agents/test_operation_guidance.py codebase/backend/tests/agents/test_fault_diagnosis.py -q`；真实 RAGFlow 引用测试由 `DEV-001` 提供 Docker 环境；`node 06-testing/tests/fault-report-repair-agent.test.js`。
 - 分支：`codex/task-009-guidance-diagnosis`
-- Review：`DEV-001` 复核业务写入、Docker/RAGFlow 证据、安全与降级。
+- PR 审核请求：`DEV-002` 完成本任务验收、真实 RAGFlow/数据库验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
+- Review：`DEV-001` 复核业务写入、Docker/RAGFlow 证据、安全、降级、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-002` 修复。
+- 正式 PR：仅在 `DEV-001` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-001` 创建至 `codex/stage-05-integration`。
 - 回滚：回退 Agent Commit，人工开始/结束维修流程必须继续可用。
 
 ### TASK-010：正式前端与批准原型流程集成
@@ -303,6 +357,11 @@
 - 状态：Planned
 - 优先级：P0
 - 负责人：`DEV-002`
+- 任务开发者：`DEV-002`
+- 指定审核者：`DEV-001`
+- 正式 PR 创建者：`DEV-001`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Blocked By TASK-003, TASK-008, TASK-009
 - 需求映射：页面功能矩阵全部 P0 页面；AC-012—015、AC-031、AC-039—044；实施计划 Task 9
 - 范围：建立正式 TypeScript 前端工程；以 API 替代静态数据；接入流式对话、引用、采纳/直接开始、结束维修摘要和权限状态。
@@ -313,7 +372,9 @@
 - 验收标准：关键加载/空/错/权限状态存在；SSE 与引用真实；摘要显隐符合 AC；正式代码不依赖原型运行目录。
 - 验证：`npm --prefix codebase/frontend test`；`npm --prefix codebase/frontend run build`；全部 `06-testing/tests/*.test.js`；浏览器关键流程检查。
 - 分支：`codex/task-010-frontend-integration`
-- Review：`DEV-001` 复核 API、权限和端到端可运行性。
+- PR 审核请求：`DEV-002` 完成本任务验收、前端验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
+- Review：`DEV-001` 复核 API、权限、端到端可运行性、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-002` 修复。
+- 正式 PR：仅在 `DEV-001` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-001` 创建至 `codex/stage-05-integration`。
 - 回滚：按页面/功能 Commit 回退，保持其他已集成页面不受影响。
 
 ### TASK-011：平台补齐、端到端、安全与发布准备
@@ -321,6 +382,11 @@
 - 状态：Planned
 - 优先级：P0
 - 负责人：`DEV-001`
+- 任务开发者：`DEV-001`
+- 指定审核者：`DEV-002`
+- 正式 PR 创建者：`DEV-002`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Blocked By TASK-003, TASK-004, TASK-005, TASK-007, TASK-008, TASK-009, TASK-010
 - 需求映射：NFR-001—009、AC-029—038、Stage 8 部署要求；实施计划 Task 10
 - 范围：健康分服务最终闭环、附件安全、Nginx HTTPS、备份恢复、超时降级、全量 E2E、安全与恢复演练、开发交接。
@@ -331,7 +397,9 @@
 - 验收标准：全量测试和构建通过；容器重启可恢复；备份可还原；内部服务不暴露公网；无高危未关闭缺陷。
 - 验证：`python -m pytest codebase/backend/tests -q`；`npm --prefix codebase/frontend test`；`npm --prefix codebase/frontend run build`；`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet`；业务栈和 RAGFlow 栈真实联调；全部 `06-testing/tests/*.test.js`；备份恢复演练；`git diff --check`。
 - 分支：`codex/task-011-e2e-release-readiness`
-- Review：`DEV-002` 复核 Agent/前端回归；`DEV-001` 输出最终集成结论。
+- PR 审核请求：`DEV-001` 完成本任务验收、全量验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-002` 发送书面审核请求。
+- Review：`DEV-002` 复核 Agent/前端回归、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-001` 修复。
+- 正式 PR：仅在 `DEV-002` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-002` 创建至 `codex/stage-05-integration`；`DEV-001` 仍负责最终集成结论。
 - 回滚：以最近稳定 FCP 和独立任务 Commit 选择性回退；不得整体回退丢失其他已接受功能。
 
 ## 7. 人员分配与交叉审核矩阵
@@ -339,13 +407,13 @@
 | 开发人员 | 分配开发任务 | 默认审核任务 | 默认创建正式 PR 的任务 | 主要范围 | Docker 责任 | 集成责任 |
 |---|---|---|---|---|---|---|
 | DEV-001 | TASK-001、002、003、004、011 | TASK-005、006、007、008、009、010 | TASK-005、006、007、008、009、010 | 平台事实、权限、维修、基础设施、E2E | 唯一验证人 | 最终集成负责人 |
-| DEV-002 | TASK-005、006、007、008、009、010 | TASK-001、002、003、004、011 | TASK-001、002、003、004、011 | 知识适配、Agent、正式前端 | 无本地 Docker；提交给 DEV-001 验证 | 提供模块审核、正式 PR 与回归证据 |
+| DEV-002 | TASK-005、006、007、008、009、010 | TASK-002、003、004、011；TASK-001 仅保留历史独立审查 | TASK-002、003、004、011；TASK-001 不追溯补建正式 PR | 知识适配、Agent、正式前端 | 无本地 Docker；提交给 DEV-001 验证 | 提供模块审核、正式 PR 与回归证据 |
 
 ## 8. 依赖、并行与协作矩阵
 
 | 任务 | 开发者 | 指定审核者 | 正式 PR 创建者 | 优先级 | 依赖模式 | 可开始条件 |
 |---|---|---|---|---:|---|---|
-| TASK-001 | DEV-001 | DEV-002 | DEV-002 | P0 | 无 | 更新后的 Stage 4 → Stage 5 门禁已批准并完成记录 |
+| TASK-001 | DEV-001 | 历史独立审查（v1.2 不追溯指定） | 不适用（v1.2 不追溯补建） | P0 | 无 | 已完成并形成远端 FCP-001；保留真实历史记录 |
 | TASK-002 | DEV-001 | DEV-002 | DEV-002 | P0 | Sequential After TASK-001 | TASK-001 测试、Compose、Review、FCP 均通过 |
 | TASK-003 | DEV-001 | DEV-002 | DEV-002 | P0 | Sequential After TASK-002 | 身份、审计和迁移基础已审核、正式集成并完成回归 |
 | TASK-004 | DEV-001 | DEV-002 | DEV-002 | P0 | Sequential After TASK-002 | 业务容器基线与网络契约已审核、正式集成并稳定 |
