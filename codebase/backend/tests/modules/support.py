@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
@@ -60,3 +62,55 @@ def create_user_token(
     )
     assert response.status_code == 200
     return user_id, response.json()["access_token"]
+
+
+def valid_equipment_body(
+    client: TestClient, *, code: str, name: str = "Loader"
+) -> dict[str, object]:
+    suffix = uuid4().hex[:8]
+    with client.app.state.session_factory() as db:
+        root = db.scalar(
+            select(Organization).where(Organization.type == OrganizationType.ROOT)
+        )
+        assert root is not None
+        factory = Organization(
+            type=OrganizationType.FACTORY,
+            code=f"FAC-{suffix}",
+            name=f"Factory {suffix}",
+            parent_id=root.id,
+        )
+        workshop = Organization(
+            type=OrganizationType.WORKSHOP,
+            code=f"WS-{suffix}",
+            name=f"Workshop {suffix}",
+            parent_id=factory.id,
+        )
+        line = Organization(
+            type=OrganizationType.LINE,
+            code=f"LINE-{suffix}",
+            name=f"Line {suffix}",
+            parent_id=workshop.id,
+        )
+        owner = User(
+            username=f"owner-{suffix}",
+            password_hash=hash_password("owner-password"),
+            enabled=True,
+        )
+        db.add_all([factory, workshop, line, owner])
+        db.commit()
+        line_id = line.id
+        owner_id = owner.id
+    return {
+        "code": code,
+        "name": name,
+        "model": "MODEL-1",
+        "type": "LOADER",
+        "manufacturer": "Example",
+        "manufactured_at": "2026-01-10",
+        "commissioned_at": "2026-02-01",
+        "operating_hours": 0,
+        "status": "NORMAL",
+        "organization_id": line_id,
+        "owner_user_id": owner_id,
+        "image_refs": [],
+    }

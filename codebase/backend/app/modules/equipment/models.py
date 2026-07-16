@@ -80,7 +80,7 @@ class Equipment(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     code: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
-    model: Mapped[str | None] = mapped_column(String(100))
+    model: Mapped[str | None] = mapped_column(String(200))
     type: Mapped[str | None] = mapped_column(String(100))
     manufacturer: Mapped[str | None] = mapped_column(String(200))
     manufactured_at: Mapped[date | None] = mapped_column(Date)
@@ -93,7 +93,9 @@ class Equipment(Base):
     )
     organization_id: Mapped[str | None] = mapped_column(ForeignKey("organizations.id"))
     owner_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
-    image_refs: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    image_refs: Mapped[list[dict[str, str]]] = mapped_column(
+        JSON, nullable=False, default=list
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=utc_now
     )

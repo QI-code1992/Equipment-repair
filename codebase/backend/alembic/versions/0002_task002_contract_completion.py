@@ -259,7 +259,7 @@ def _add_equipment_columns() -> sa.Enum:
     equipment_status = sa.Enum(
         *EQUIPMENT_STATUSES, name="equipment_status", native_enum=False
     )
-    op.add_column("equipment", sa.Column("model", sa.String(100), nullable=True))
+    op.add_column("equipment", sa.Column("model", sa.String(200), nullable=True))
     op.add_column("equipment", sa.Column("type", sa.String(100), nullable=True))
     op.add_column("equipment", sa.Column("manufacturer", sa.String(200), nullable=True))
     op.add_column("equipment", sa.Column("manufactured_at", sa.Date(), nullable=True))

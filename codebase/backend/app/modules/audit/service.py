@@ -23,6 +23,7 @@ ATTACHMENT_CONTEXT_KEYS = {
     "upload",
     "document",
     "image",
+    "image_refs",
 }
 ATTACHMENT_CONTENT_KEYS = {"body", "content", "data", "bytes", "text", "base64"}
 DIRECT_ATTACHMENT_CONTENT_KEYS = {

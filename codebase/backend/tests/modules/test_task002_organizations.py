@@ -11,6 +11,7 @@ import app.modules.equipment.router as equipment_router
 from app.modules.audit.models import AuditEvent
 from app.modules.equipment.models import Equipment, Organization, OrganizationType
 from tests.modules.support import create_user_token
+from tests.modules.support import valid_equipment_body
 
 
 def organization_writer_headers(client: TestClient) -> dict[str, str]:
@@ -392,7 +393,7 @@ def test_equipment_writes_lock_tree_before_idempotency(
     created = client.post(
         "/api/equipment",
         headers={**headers, "Idempotency-Key": "equipment-lock-create"},
-        json={"code": "EQ-LOCK", "name": "锁设备", "organization_id": None},
+        json=valid_equipment_body(client, code="EQ-LOCK", name="锁设备"),
     )
     assert created.status_code == 200
     assert calls == ["tree", "idempotency"]
@@ -401,7 +402,7 @@ def test_equipment_writes_lock_tree_before_idempotency(
     updated = client.patch(
         "/api/equipment/any-id",
         headers={**headers, "Idempotency-Key": "equipment-lock-update"},
-        json={"name": "锁设备", "organization_id": None, "status": "NORMAL"},
+        json=valid_equipment_body(client, code="EQ-LOCK", name="锁设备"),
     )
     assert updated.status_code == 200
     assert calls == ["tree", "idempotency"]

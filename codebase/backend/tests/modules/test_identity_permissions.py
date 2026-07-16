@@ -28,6 +28,7 @@ from app.modules.identity.bootstrap import (
 )
 from app.modules.identity.security import hash_password
 from app.main import create_app
+from tests.modules.support import valid_equipment_body
 
 
 pytestmark = pytest.mark.filterwarnings("error:datetime.datetime.utcnow")
@@ -233,7 +234,7 @@ def writer_headers(client: TestClient, idempotency_key: str) -> dict[str, str]:
 
 
 def test_duplicate_equipment_code_is_rejected(client: TestClient) -> None:
-    payload = {"code": "EQ-101", "name": "Loader", "organization_id": None}
+    payload = valid_equipment_body(client, code="EQ-101")
     headers = writer_headers(client, "first")
     first = client.post("/api/equipment", json=payload, headers=headers)
 
@@ -247,7 +248,7 @@ def test_duplicate_equipment_code_is_rejected(client: TestClient) -> None:
 
 
 def test_same_idempotency_key_replays_response(client: TestClient) -> None:
-    payload = {"code": "EQ-102", "name": "Loader", "organization_id": None}
+    payload = valid_equipment_body(client, code="EQ-102")
     headers = writer_headers(client, "same-request")
 
     first = client.post("/api/equipment", json=payload, headers=headers)
@@ -263,7 +264,7 @@ def test_protected_write_requires_idempotency_key(client: TestClient) -> None:
 
     response = client.post(
         "/api/equipment",
-        json={"code": "EQ-103", "name": "Loader", "organization_id": None},
+        json=valid_equipment_body(client, code="EQ-103"),
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -381,10 +382,13 @@ def test_equipment_rejects_unknown_organization(
     client: TestClient, method: str
 ) -> None:
     headers = writer_headers(client, f"unknown-org-{method}")
+    payload = valid_equipment_body(client, code="EQ-NO-ORG") | {
+        "organization_id": "missing"
+    }
     if method == "post":
         response = client.post(
             "/api/equipment",
-            json={"code": "EQ-NO-ORG", "name": "Loader", "organization_id": "missing"},
+            json=payload,
             headers=headers,
         )
     else:
@@ -401,12 +405,12 @@ def test_equipment_rejects_unknown_organization(
             equipment_id = equipment.id
         response = client.patch(
             f"/api/equipment/{equipment_id}",
-            json={"name": "Loader", "organization_id": "missing", "status": "NORMAL"},
+            json=payload,
             headers=headers,
         )
 
     assert response.status_code == 404
-    assert response.json()["detail"]["code"] == "ORGANIZATION_NOT_FOUND"
+    assert response.json()["detail"]["code"] == "EQUIPMENT_ORGANIZATION_NOT_FOUND"
 
 
 def test_identity_admin_can_create_user_with_fixed_role(client: TestClient) -> None:
@@ -504,9 +508,10 @@ def test_equipment_and_organization_can_be_updated(client: TestClient) -> None:
     ).json()
     create_equipment_headers = dict(headers)
     create_equipment_headers["Idempotency-Key"] = "create-equipment-for-update"
+    equipment_payload = valid_equipment_body(client, code="EQ-UPDATE", name="Old Name")
     equipment = client.post(
         "/api/equipment",
-        json={"code": "EQ-UPDATE", "name": "Old Name", "organization_id": organization["id"]},
+        json=equipment_payload,
         headers=create_equipment_headers,
     ).json()
     assert equipment["status"] == "NORMAL"
@@ -528,7 +533,7 @@ def test_equipment_and_organization_can_be_updated(client: TestClient) -> None:
     update_equipment_headers["Idempotency-Key"] = "update-equipment"
     updated_equipment = client.patch(
         f"/api/equipment/{equipment['id']}",
-        json={"name": "New Name", "organization_id": organization["id"], "status": "REPAIRING"},
+        json={**equipment_payload, "name": "New Name", "status": "REPAIRING"},
         headers=update_equipment_headers,
     )
 
@@ -592,7 +597,7 @@ def test_idempotency_key_cannot_be_reused_for_another_target(client: TestClient)
 
     equipment = client.post(
         "/api/equipment",
-        json={"code": "EQ-GLOBAL", "name": "Loader", "organization_id": None},
+        json=valid_equipment_body(client, code="EQ-GLOBAL"),
         headers=headers,
     )
 
@@ -605,12 +610,12 @@ def test_idempotency_key_rejects_changed_request_body(client: TestClient) -> Non
     headers = writer_headers(client, "body-key")
     first = client.post(
         "/api/equipment",
-        json={"code": "EQ-BODY-A", "name": "A", "organization_id": None},
+        json=valid_equipment_body(client, code="EQ-BODY-A", name="A"),
         headers=headers,
     )
     second = client.post(
         "/api/equipment",
-        json={"code": "EQ-BODY-B", "name": "B", "organization_id": None},
+        json=valid_equipment_body(client, code="EQ-BODY-B", name="B"),
         headers=headers,
     )
 
@@ -627,13 +632,15 @@ def test_equipment_unique_conflict_is_mapped_to_409(
 
     def conflicting_flush(session: Session, objects: object = None) -> None:
         if any(isinstance(item, Equipment) for item in session.new):
-            raise IntegrityError("insert", {}, RuntimeError("unique conflict"))
+            raise IntegrityError(
+                "insert", {}, RuntimeError("UNIQUE constraint failed: equipment.code")
+            )
         real_flush(session, objects)
 
     monkeypatch.setattr(Session, "flush", conflicting_flush)
     response = client.post(
         "/api/equipment",
-        json={"code": "EQ-RACE", "name": "Loader", "organization_id": None},
+        json=valid_equipment_body(client, code="EQ-RACE"),
         headers=headers,
     )
 

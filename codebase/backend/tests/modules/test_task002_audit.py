@@ -15,7 +15,7 @@ from app.modules.equipment.organization_router import router as organization_rou
 from app.modules.equipment.router import router as equipment_router
 from app.modules.identity.admin_router import router as identity_admin_router
 from app.modules.identity.router import router as identity_router
-from tests.modules.support import create_user_token
+from tests.modules.support import create_user_token, valid_equipment_body
 
 
 def event_from_response(client: TestClient, response: Response) -> AuditEvent:
@@ -146,9 +146,11 @@ def test_validation_failure_returns_one_persisted_audit_id(
     )
 
     assert response.status_code == 422
-    assert response.json()["detail"]["fields"] == [
-        {"field": "name", "type": "missing"}
-    ]
+    fields = response.json()["detail"]["fields"]
+    assert {item["field"] for item in fields} == {
+        "name", "model", "type", "manufacturer", "operating_hours", "status",
+        "organization_id", "attachment", "password", "authorization", "content",
+    }
     event = event_from_response(client, response)
     assert event.actor_user_id == user_id
     assert event.action == "equipment.create"
@@ -239,7 +241,7 @@ def test_logout_idempotency_failure_recovers_actor_from_bearer(
     created = client.post(
         "/api/equipment",
         headers=headers,
-        json={"code": "EQ-LOGOUT", "name": "Logout"},
+        json=valid_equipment_body(client, code="EQ-LOGOUT", name="Logout"),
     )
 
     response = client.delete("/api/auth/session", headers=headers)
@@ -265,7 +267,7 @@ def test_http_failure_returns_one_persisted_audit_id(client: TestClient) -> None
             "Authorization": f"Bearer {token}",
             "Idempotency-Key": "missing-equipment",
         },
-        json={"name": "Missing", "organization_id": None, "status": "NORMAL"},
+        json=valid_equipment_body(client, code="EQ-MISSING", name="Missing"),
     )
 
     assert response.status_code == 404
@@ -274,11 +276,8 @@ def test_http_failure_returns_one_persisted_audit_id(client: TestClient) -> None
     assert event.actor_user_id == user_id
     assert event.action == "equipment.update"
     assert event.result == "failure"
-    assert event.metadata_json["request"] == {
-        "name": "Missing",
-        "organization_id": None,
-        "status": "NORMAL",
-    }
+    assert event.metadata_json["request"]["code"] == "EQ-MISSING"
+    assert event.metadata_json["request"]["name"] == "Missing"
     assert [
         item.id
         for item in failure_events(
@@ -303,13 +302,13 @@ def test_idempotency_failure_returns_one_persisted_audit_id(
     first = client.post(
         "/api/equipment",
         headers=headers,
-        json={"code": "EQ-FIRST", "name": "First"},
+        json=valid_equipment_body(client, code="EQ-FIRST", name="First"),
     )
 
     response = client.post(
         "/api/equipment",
         headers=headers,
-        json={"code": "EQ-SECOND", "name": "Second"},
+        json=valid_equipment_body(client, code="EQ-SECOND", name="Second"),
     )
 
     assert first.status_code == 201
