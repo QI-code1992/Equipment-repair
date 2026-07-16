@@ -112,17 +112,34 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 
 ### Review-008: Stage 5 开发任务书 v1.2 协作基线修订
 
-- Status: Pending user approval
-- Approver: none recorded
+- Status: Approved
+- Approver: project owner
 - Prepared At: 2026-07-16
+- Approved At: 2026-07-16
 - Current Stage: Stage 5 — Development Implementation / TASK-002 repair paused
-- Next Step: 项目负责人针对候选精确 Commit 审阅并决定是否批准任务书 v1.2；批准前不恢复 TASK-002 R6/R7
+- Next Step: 审查 Draft PR [#18](https://github.com/QI-code1992/Equipment-repair/pull/18)；通过并由项目负责人批准合并后，将获批任务书与一致性台账合入 `codex/stage-05-integration`。合入前不恢复 TASK-002 R6/R7。
 - Artifacts Reviewed: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.2 候选、`workflow/CHANGE_REQUESTS.md` CR-037、PR #15 / CR-036 状态记录
 - Evidence Reviewed: 当前 `formal-software-delivery-workflow` 的交叉审核、reviewer-created PR、正式 PR 集成触发和 checkpoint 约束；任务书 v1.1 缺口审计
-- Version / Commit SHA: 待候选提交生成后填写；不得使用工作区状态或“最新版本”
-- Decision: AI 仅准备候选，不构成批准。
+- Version / Commit SHA: `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`，远端分支 `codex/taskbook-v1-2-governance`
+- Decision: 项目负责人明确批准该精确 Commit 作为任务书 v1.2 协作基线，并授权推送隔离治理分支。
 - Conditions / Scope Exceptions: 本修订不改变产品、架构、API、数据模型、开发人数、任务负责人、任务范围或依赖矩阵；现有 TASK-002 代码和未提交契约文件保持原状。PR #15 保留为审核历史，不作为正式集成触发源。
-- Notes: 若项目负责人批准，另行追加精确批准记录和审批记录 Commit；不重写 Gate-007 历史。
+- PR Target Correction: 历史 PR #16 错误指向 `main`，且当前 `origin/main` 不包含获批 v1.2 任务书 Blob，因此不构成有效集成；CR-037 必须重新通过目标为 `codex/stage-05-integration` 的治理 PR 完成。
+- Notes: 本记录不重写 Gate-007 历史，不批准 TASK-002 完成、PR #15 合并、Stage 5 完成或进入 Stage 6。获批任务书及本审批记录合入 `codex/stage-05-integration` 后，DEV-001 才可恢复 TASK-002 R6/R7。
+- PR #18 Review Correction: 首轮正式审查发现任务书正文仍保留“等待批准”状态，与本审批记录冲突。治理分支仅同步状态字段，不改变已批准协作内容；修正后的新精确 HEAD 必须由项目负责人再次明确批准合并，才可转为 Ready。
+- PR #18 Merge Approval:
+  - Status: Approved
+  - Approver: project owner
+  - Approved At: 2026-07-16T15:25:08+08:00
+  - Approved Head: `1d4405e1ff6066df25c896deb57248353d8695b7`
+  - Decision: 项目负责人明确回复“批准”，授权将 PR #18 当前精确 HEAD 转为 Ready，并由集成负责人手动合入 `codex/stage-05-integration`。
+  - Conditions: 批准后的新增提交只能记录本次批准，不得修改任务书正文、代码、任务范围、人员、依赖或共享契约；推送后必须验证任务书 Blob 和 `codebase/` 相对获批 HEAD 均未变化。
+- PR #19 Closure Merge Approval:
+  - Status: Approved
+  - Approver: project owner
+  - Approved At: 2026-07-16T15:33:48+08:00
+  - Approved Head: `df53489842e68037d3a2205b18f9e69fef903473`
+  - Decision: 项目负责人明确回复“批准”，授权将 CR-037 合并后治理记录收尾 PR #19 转为 Ready，并由集成负责人手动合入 `codex/stage-05-integration`。
+  - Conditions: 批准后的新增提交只能记录本次批准；不得修改 PR #19 已审核的 6 个收尾文件、任务书正文或 `codebase/`。PR #19 自身 Merge Commit 由 GitHub 历史作为证据，不再递归创建收尾 PR。
 
 ## Candidate gate recommendations
 
@@ -205,3 +222,20 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Decision: Stage 3 原型与视觉基线获得确认，进入 Stage 4 架构与开发计划。
 - Conditions / Scope Exceptions: Stage 4 仅产出架构、API/数据契约、ADR、实施计划与验证策略；生产实现需等待 Stage 4 门禁批准后才可进入 Stage 5。
 - Notes: 任何后续视觉或交互偏离应回到 Stage 2 或 Stage 3，走变更台账。
+
+### Governance-Decision-002: CR-038 PR #15 门禁违规合并补救
+
+- Status: Approved
+- Approver: project owner
+- Approved At: 2026-07-16T14:48:01+08:00
+- Current Stage: Stage 5 — Development Implementation
+- Artifacts Reviewed: PR #15 合并提交 `e328cec64f1aa9c7cdc383579af042692dce5679`、审核结论 `Changes requested`、被拒绝候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77`
+- Evidence Reviewed: 远端 `codex/stage-05-integration` 当前头为 `e328cec64f1aa9c7cdc383579af042692dce5679`；该提交直接合并 PR #15，未满足交叉审核和正式集成门禁。
+- Decision: 批准创建 CR-038 隔离补救分支，以非破坏性 revert 撤销 PR #15 在集成分支上的有效内容；保留全部原始提交和历史。
+- Merge Approval: 项目负责人于 2026-07-16T15:00:35+08:00 明确批准 PR #17 审查候选 `3f02ac1021ffb2f189ee53120d4b3523415bff60` 转为 Ready，并由集成负责人手动合入 `codex/stage-05-integration`；批准后的唯一允许变更是记录本批准的治理文档提交，且必须重新验证无代码或回滚边界变化。
+- Conditions: 补救必须通过独立 PR；禁止 `reset`、强制推送或删除本地 TASK-002 工作内容；补救 PR 不得自动合并；回滚后 TASK-002 仍为 `Changes requested`。
+- Next Step: 推送本批准记录，重新验证 PR 最新头后转为 Ready 并手动合入；合入后执行集成分支回归。
+- Version / Commit SHA: merge `e328cec64f1aa9c7cdc383579af042692dce5679`; first parent `42098613ffa20faed3bb0dcb842a0121722565bd`; verified revert candidate `5d91e83679acefa5486a25bf5b921e9c12fd52d6`
+- Merge Result: PR #17 已合入 `codex/stage-05-integration`，Merge Commit `d37698c6e51df1701bbdfcf12ec6fa329241e0bd`。
+- Post-Merge Verification: Python 3.13.14 `4 passed, 1 warning`；`compileall`、Compose 构建、PostgreSQL/Redis/API 健康和容器内 `/healthz` 通过；验证容器与网络已清理。
+- Notes: CR-038 已完成，但本批准不代表 TASK-002 完成，不解锁其下游依赖，也不批准进入 Stage 6；下一治理门禁为 CR-037。
