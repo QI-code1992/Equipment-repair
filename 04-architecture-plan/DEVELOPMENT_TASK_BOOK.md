@@ -3,7 +3,7 @@
 ## 1. 基线信息
 
 - 项目：新能源装载机设备智能运维平台
-- 当前阶段：Stage 5 — TASK-001 已完成并完成正式交接；DEV-001 可启动 TASK-002，DEV-002 可启动 TASK-006 的非数据库部分
+- 当前阶段：Stage 5 — TASK-002 PR #15 已 Ready for review，待 Review 后合入集成分支；DEV-002 可继续 TASK-006 的非数据库部分
 - 任务书版本：v1.1
 - 状态：已批准，作为 Stage 5 任务分配与集成基线
 - v1.0 候选提交：`8272a8ed161b787098660f61ebb86fa5ccada564`
@@ -31,7 +31,7 @@
 - 编写人：工作流协调者
 - 人员配置确认时间：2026-07-15
 - 已知 Stage 5 首任务风险：`DEF-003`、`DEF-004`；后端测试和 Compose 真实运行验证由 TASK-001 在门禁后关闭
-- 当前首要任务：`DEV-001` 启动 TASK-002；`DEV-002` 可启动 TASK-006 的领域测试和非数据库实现，数据库迁移与集成继续等待 TASK-002
+- 当前首要任务：`DEV-001` 完成 TASK-002 PR #15 Review 并合入 `codex/stage-05-integration`；`DEV-002` 可继续 TASK-006 的领域测试和非数据库实现，数据库迁移与集成继续等待该合入
 
 ## 2. 开发人员配置
 
@@ -132,7 +132,7 @@
 
 ### TASK-002：认证、权限、审计与设备基础
 
-- 状态：Planned
+- 状态：Ready for Review / PR #15 待 Review 与集成
 - 优先级：P0
 - 负责人：`DEV-001`
 - 并行属性：Sequential After TASK-001
@@ -141,16 +141,18 @@
 - 不包含：Agent 编排、知识检索、维修闭环。
 - 预计修改：`codebase/backend/app/modules/identity/`、`audit/`、`equipment/`、共享迁移、业务 API 注册。
 - 共享契约：冻结认证依赖、`User/Role/Permission/Organization/Equipment` 模型和审计字段。
-- 实施步骤：先写权限/唯一性/停用保护/审计脱敏失败测试；实现迁移和 API；发布迁移 revision 与认证依赖；完成 Review。
+- 实施步骤：先写权限/唯一性/审计脱敏/幂等失败测试；实现迁移和 API；发布迁移 revision 与认证依赖；完成 Review。设备存在活跃故障时的停用保护因依赖 TASK-003 的故障与维修事实，改由 TASK-003 实现并验证。
 - 验收标准：未登录和无操作权限请求被拒；合法用户按操作权限访问平台数据；设备编码唯一；审计不含敏感凭据。
 - 验证：`python -m pytest codebase/backend/tests/modules/test_identity_permissions.py -q`；迁移升级/降级测试；API 契约测试；`git diff --check`。
 - 分支：`codex/task-002-identity-equipment`
 - Review：`DEV-002` 复核 Agent 可使用的认证上下文；`DEV-001` 决定迁移合并顺序。
 - 回滚：回退任务 Commit，并按迁移文档执行对应 downgrade；生产数据存在时不得直接删除表。
+- 交接：实现恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12` 与证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 已推送；Python 3.13、Compose、容器健康、真实 PostgreSQL 迁移与并发验证通过；最终独立 Review 为 0/0/0。合入集成分支前不解锁 TASK-003 或数据库集成。
+- PR：[#15](https://github.com/QI-code1992/Equipment-repair/pull/15)，`codex/task-002-identity-equipment` → `codex/stage-05-integration`，Ready for review。
 
 ### TASK-003：故障、工单、维修与结构化案例闭环
 
-- 状态：Planned
+- 状态：Planned / Blocked until TASK-002 is merged into `codex/stage-05-integration`
 - 优先级：P0
 - 负责人：`DEV-001`
 - 并行属性：Sequential After TASK-002
@@ -159,8 +161,8 @@
 - 不包含：RAGFlow 文档检索、诊断 Agent 生成逻辑。
 - 预计修改：`codebase/backend/app/modules/maintenance/`、业务迁移、`codebase/backend/app/main.py`、相关测试。
 - 共享契约：提供 `/api/fault-reports`、`/start-repair`、`/repair-result`、`/api/repair-cases/similar`；直接开始维修不保存 AI 摘要。
-- 实施步骤：写状态/幂等/直接开始失败测试；实现事务闭环；实现结构化案例沉淀与查询；向 `DEV-002` 交付已认证契约。
-- 验收标准：非法状态迁移被拒；重复请求不重复写入；维修最终字段以人工提交为准；结构化案例查询不调用 RAGFlow。
+- 实施步骤：写状态/幂等/直接开始/活跃故障设备停用保护失败测试；实现事务闭环及设备停用保护；实现结构化案例沉淀与查询；向 `DEV-002` 交付已认证契约。
+- 验收标准：非法状态迁移被拒；重复请求不重复写入；维修最终字段以人工提交为准；存在待处理或维修中故障的设备不可停用；结构化案例查询不调用 RAGFlow。
 - 验证：`python -m pytest codebase/backend/tests/modules/test_maintenance_lifecycle.py -q`；API 契约和事务回滚测试；`git diff --check`。
 - 分支：`codex/task-003-maintenance-lifecycle`
 - Review：`DEV-002` 复核诊断上下文和采纳接口；`DEV-001` 负责最终合并。
@@ -168,7 +170,7 @@
 
 ### TASK-004：部署独立 RAGFlow 容器环境
 
-- 状态：Planned
+- 状态：Planned / Blocked until TASK-002 is merged into `codex/stage-05-integration`
 - 优先级：P0
 - 负责人：`DEV-001`
 - 并行属性：Sequential After TASK-002，可与 DEV-002 的 TASK-006 并行

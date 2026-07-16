@@ -18,3 +18,10 @@ Production feature commits will be appended with branch, files, verification and
 | 2026-07-15 | `20fc10f9e0af3e420283814a3eb02ab744aaf869` | CR-032 unified `codebase/` directory migration | directory and prototype regression checks passed; backend blocked by DEF-003; Compose unverified without Docker |
 | 2026-07-15 | `87538b04a168cb3c11c2e65dfb976d3a206d8218` | TASK-001 runtime baseline repair | Python 3.13 test, Compose configuration, container health and `/healthz` verified; FCP-001 |
 | 2026-07-15 | `45725ac083c98ea999492b709e9792082c3db284` | TASK-001 verification evidence | updated FCP, self-test and DEF-003/DEF-004 evidence; pushed to task branch |
+| 2026-07-15 | `8174fd869f53d2a7140b19f36f93323edb41b59e` | TASK-002 approved design and TASK-003 boundary | pushed to `codex/task-002-identity-equipment` |
+| 2026-07-15 | `9ecffccb448eb0a195fa889bc15c594760f05dec` | TASK-002 implementation plan | included in remote task branch |
+| 2026-07-15 | `eb207b6c0eed05565a23b7dbb5ec20915d62c957` | TASK-002 SQLAlchemy/Alembic database foundation | included in remote task branch |
+| 2026-07-15 | `fbeb785a8f4dc7a345d505aee904ce9da57f46c9` | TASK-002 session authentication and permissions | included in remote task branch |
+| 2026-07-15 | `43cfe291dee642a5591d4d79d8b9272e8e79b424` | TASK-002 audited idempotent identity/equipment APIs | included in remote task branch |
+| 2026-07-15 | `0b0d9cf0dc066143c0a57d4683567fadb4714c12` | TASK-002 review remediation and final implementation | pushed; FCP-002 implementation recovery point |
+| 2026-07-15 | `9f162b421f4fefae4cdd69a001891c7e83d4bc13` | TASK-002 verification, review and handoff evidence | pushed to task branch |
