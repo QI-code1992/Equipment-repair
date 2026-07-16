@@ -110,6 +110,30 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Conditions / Scope Exceptions: `DEF-003`、`DEF-004` 尚未修复；当前协调环境缺少 Python 3.13 和 Docker，未验证后端或 Compose。它们必须由 `DEV-001` 在 TASK-001 中提供真实证据，TASK-001 通过前不得启动下游任务。
 - Notes: 本批准只允许进入 Stage 5，不代表 TASK-001 已通过，也不批准 Stage 6、Stage 7 或 Stage 8。
 
+### Review-008: Stage 5 开发任务书 v1.2 协作基线修订
+
+- Status: Approved
+- Approver: project owner
+- Prepared At: 2026-07-16
+- Approved At: 2026-07-16
+- Current Stage: Stage 5 — Development Implementation / TASK-002 repair paused
+- Next Step: 审查 Draft PR [#18](https://github.com/QI-code1992/Equipment-repair/pull/18)；通过并由项目负责人批准合并后，将获批任务书与一致性台账合入 `codex/stage-05-integration`。合入前不恢复 TASK-002 R6/R7。
+- Artifacts Reviewed: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.2 候选、`workflow/CHANGE_REQUESTS.md` CR-037、PR #15 / CR-036 状态记录
+- Evidence Reviewed: 当前 `formal-software-delivery-workflow` 的交叉审核、reviewer-created PR、正式 PR 集成触发和 checkpoint 约束；任务书 v1.1 缺口审计
+- Version / Commit SHA: `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`，远端分支 `codex/taskbook-v1-2-governance`
+- Decision: 项目负责人明确批准该精确 Commit 作为任务书 v1.2 协作基线，并授权推送隔离治理分支。
+- Conditions / Scope Exceptions: 本修订不改变产品、架构、API、数据模型、开发人数、任务负责人、任务范围或依赖矩阵；现有 TASK-002 代码和未提交契约文件保持原状。PR #15 保留为审核历史，不作为正式集成触发源。
+- PR Target Correction: 历史 PR #16 错误指向 `main`，且当前 `origin/main` 不包含获批 v1.2 任务书 Blob，因此不构成有效集成；CR-037 必须重新通过目标为 `codex/stage-05-integration` 的治理 PR 完成。
+- Notes: 本记录不重写 Gate-007 历史，不批准 TASK-002 完成、PR #15 合并、Stage 5 完成或进入 Stage 6。获批任务书及本审批记录合入 `codex/stage-05-integration` 后，DEV-001 才可恢复 TASK-002 R6/R7。
+- PR #18 Review Correction: 首轮正式审查发现任务书正文仍保留“等待批准”状态，与本审批记录冲突。治理分支仅同步状态字段，不改变已批准协作内容；修正后的新精确 HEAD 必须由项目负责人再次明确批准合并，才可转为 Ready。
+- PR #18 Merge Approval:
+  - Status: Approved
+  - Approver: project owner
+  - Approved At: 2026-07-16T15:25:08+08:00
+  - Approved Head: `1d4405e1ff6066df25c896deb57248353d8695b7`
+  - Decision: 项目负责人明确回复“批准”，授权将 PR #18 当前精确 HEAD 转为 Ready，并由集成负责人手动合入 `codex/stage-05-integration`。
+  - Conditions: 批准后的新增提交只能记录本次批准，不得修改任务书正文、代码、任务范围、人员、依赖或共享契约；推送后必须验证任务书 Blob 和 `codebase/` 相对获批 HEAD 均未变化。
+
 ## Candidate gate recommendations
 
 ### Gate-001: Scoped waiver to enter Stage 3
@@ -205,4 +229,6 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Conditions: 补救必须通过独立 PR；禁止 `reset`、强制推送或删除本地 TASK-002 工作内容；补救 PR 不得自动合并；回滚后 TASK-002 仍为 `Changes requested`。
 - Next Step: 推送本批准记录，重新验证 PR 最新头后转为 Ready 并手动合入；合入后执行集成分支回归。
 - Version / Commit SHA: merge `e328cec64f1aa9c7cdc383579af042692dce5679`; first parent `42098613ffa20faed3bb0dcb842a0121722565bd`; verified revert candidate `5d91e83679acefa5486a25bf5b921e9c12fd52d6`
-- Notes: 本批准不代表 TASK-002 完成，不解锁其下游依赖，也不批准进入 Stage 6。
+- Merge Result: PR #17 已合入 `codex/stage-05-integration`，Merge Commit `d37698c6e51df1701bbdfcf12ec6fa329241e0bd`。
+- Post-Merge Verification: Python 3.13.14 `4 passed, 1 warning`；`compileall`、Compose 构建、PostgreSQL/Redis/API 健康和容器内 `/healthz` 通过；验证容器与网络已清理。
+- Notes: CR-038 已完成，但本批准不代表 TASK-002 完成，不解锁其下游依赖，也不批准进入 Stage 6；下一治理门禁为 CR-037。

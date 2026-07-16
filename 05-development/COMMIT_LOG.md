@@ -21,3 +21,5 @@ Production feature commits will be appended with branch, files, verification and
 | 2026-07-16 | `e328cec64f1aa9c7cdc383579af042692dce5679` | PR #15 TASK-002 merge into `codex/stage-05-integration` | governance-invalid merge; review gate remained `Changes requested`; not a task completion or dependency-unlock commit |
 | 2026-07-16 | `6650f615e48d88b9a54179c27a7f03d1bf48f391` | CR-038 remediation authorization | project-owner approval and rollback constraints recorded |
 | 2026-07-16 | `5d91e83679acefa5486a25bf5b921e9c12fd52d6` | non-destructive revert of PR #15 merge | verified rollback candidate on `codex/cr-038-revert-pr-15-gate-violation`; pending remediation PR |
+| 2026-07-16 | `d37698c6e51df1701bbdfcf12ec6fa329241e0bd` | CR-038 PR #17 merge | invalid PR #15 integration reverted; post-merge Python, Compose, container health and `/healthz` passed |
+| 2026-07-16 | `e0f60f84d5ed31b693ad4f617b7b4c02ded0f718` | CR-037 PR #18 review correction | synchronized task-book approval status with governance ledgers; no codebase change; re-review passed |

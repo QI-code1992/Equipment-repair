@@ -3,9 +3,9 @@
 ## 1. 基线信息
 
 - 项目：新能源装载机设备智能运维平台
-- 当前阶段：Stage 5 — TASK-001 已完成并完成正式交接；DEV-001 可启动 TASK-002，DEV-002 可启动 TASK-006 的非数据库部分
-- 任务书版本：v1.1
-- 状态：已批准，作为 Stage 5 任务分配与集成基线
+- 当前阶段：Stage 5 — TASK-002 / CR-036 修复暂停；任务书 v1.2 协作内容已获批，PR #18 治理修正已复审通过，等待项目负责人针对新精确 SHA 的合并批准
+- 任务书版本：v1.2（协作内容已批准，待治理 PR 合入）
+- 状态：原始协作内容已于 Commit `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b` 获批；PR #18 正文状态同步修正完成后，须以新的精确 HEAD 重新取得合并批准
 - v1.0 候选提交：`8272a8ed161b787098660f61ebb86fa5ccada564`
 - v1.0 审批记录提交：`20261a80f01de8d18e18a2acf9c97e07087e04bc`
 - v1.0 批准人：项目负责人
@@ -18,6 +18,12 @@
 - v1.1 批准证据：项目负责人明确批准候选 Commit 作为更新后的 Stage 4 基线并通过 Stage 4 → Stage 5 门禁
 - v1.1 审批记录提交：`c9eb206c6517b9c3afd7f33a86e3c383d84d12aa`
 - Stage 4 基线标签：`baseline/stage-04-development-v1.1`
+- v1.2 修订原因：补齐交叉审核、PR 审核请求、指定审核者、正式 PR 创建者、集成触发条件和自动化边界；同步 PR #15 `Changes requested` 后的真实状态。该修订不改变产品、架构、API、数据、任务范围、负责人或依赖顺序。
+- v1.2 原始获批候选：`cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`
+- v1.2 批准人：项目负责人
+- v1.2 批准时间：2026-07-16
+- v1.2 批准证据：项目负责人明确批准上述精确 Commit 作为任务书 v1.2 协作基线并授权推送隔离治理分支
+- PR #18 修正说明：正式审查发现任务书正文仍保留“等待批准”措辞，与审批台账冲突；本轮仅同步治理状态，不改变已批准的任务内容、人员、范围、依赖或契约。修正后的新精确 HEAD 仍须项目负责人批准后才能转为 Ready 并合入。
 - 关联基线：
   - PRD：`01-requirements/PRD.md`，已批准 v1.1
   - SPEC：`01-requirements/SPEC.md`，已批准 v1.1
@@ -31,7 +37,7 @@
 - 编写人：工作流协调者
 - 人员配置确认时间：2026-07-15
 - 已知 Stage 5 首任务风险：`DEF-003`、`DEF-004`；后端测试和 Compose 真实运行验证由 TASK-001 在门禁后关闭
-- 当前首要任务：`DEV-001` 启动 TASK-002；`DEV-002` 可启动 TASK-006 的领域测试和非数据库实现，数据库迁移与集成继续等待 TASK-002
+- 当前首要任务：由项目负责人批准 PR #18 修正后的新精确 HEAD；批准后转为 Ready 并手动合入 `codex/stage-05-integration`。合入后 `DEV-001` 才可继续 TASK-002 内部整改工作包 R6/R7。TASK-003、TASK-004 和 DEV-002 的数据库集成继续等待 TASK-002 正式 Review 通过并合入。
 
 ## 2. 开发人员配置
 
@@ -41,6 +47,12 @@
   - `DEV-001`：业务平台内核、共享数据库迁移、基础设施、Docker/Compose/RAGFlow 运行环境、最终集成与回归负责人。
   - `DEV-002`：AI、知识适配、Agent 配置与运行时、正式前端集成负责人。
 - 最终集成负责人：`DEV-001`
+- 是否启用交叉审核 PR 机制：是；两人相互审核并为对方创建正式 PR。
+- 默认审核轮转：`DEV-001` 开发的任务由 `DEV-002` 审核并创建正式 PR；`DEV-002` 开发的任务由 `DEV-001` 审核并创建正式 PR。
+- 是否允许任务开发者创建自己的正式 PR：否；任务开发者只能推送任务分支并发送书面 PR 审核请求。
+- 集成目标分支：`codex/stage-05-integration`
+- 集成触发源：满足本任务书合并条件的正式 PR。
+- 自动化级别：L1 自动检查、L2 PR 规则校验、L3 通知允许；L4 自动创建 PR、L5 auto-merge/merge queue、L6 自动进入 Stage 6 均不允许。
 - Docker 能力：
   - `DEV-001` 具备 Docker 环境，负责所有 Compose、容器健康、RAGFlow、PostgreSQL、Redis、MinIO、Elasticsearch、Nginx 与恢复验证。
   - `DEV-002` 不具备 Docker 环境，不得单独将容器相关任务标记完成；其容器相关变更必须交由 `DEV-001` 执行真实验证。
@@ -62,9 +74,16 @@
 - 任务分支：`codex/task-<task-id>-<short-name>`，例如 `codex/task-001-runtime-baseline`
 - 每位开发人员使用独立工作区或 Git worktree，不共享未提交文件。
 - PR 目标分支：`codex/stage-05-integration`；未经 Stage 6/7，不直接合入 `main`。
+- PR 审核请求：任务开发者完成自测和必要真实环境验证后，在 `workflow/DEV_TO_PM_HANDOFF.md` 记录任务分支、精确 HEAD、验证证据、未验证项和请求动作，并将任务分支提交给指定审核者。该记录不是正式 Pull Request，也不能触发集成。
+- 正式 PR：指定审核者完成范围、证据和任务边界审查并明确通过后，由指定审核者为开发者创建；集成负责人仅在自己不是该任务开发者时可作为 PR 创建者。
+- 正式 PR 创建条件：审核请求记录存在；指定审核者结论为通过；验证证据完整；目标分支和依赖正确；共享契约无未批准漂移；无未解决 Critical/Important。
+- 正式 PR 禁止条件：开发者自建自己的正式 PR；审核未通过；Required checks 未通过；依赖未满足；存在未批准范围或共享契约变更。
+- PR #15 处置：保留为 TASK-002 被拒绝候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 的审核历史和本轮 Review Request 载体，不作为 v1.2 下的正式集成触发源。DEV-002 对新候选审核通过后，由 DEV-002 创建后继正式 PR；PR #15 随后标记为被后继 PR 取代，不删除历史。
+- 生效边界：v1.2 适用于尚未完成的 TASK-002 及后续正式 PR/集成；不追溯撤销已完成并形成远端 FCP-001 的 TASK-001，也不改写其历史 Review 和集成记录。
 - PR 标题：`[TASK-xxx] <type>: <summary>`
 - Commit：遵循 `04-architecture-plan/AGENTS.md` 的 `type(scope): summary`。
-- 每个 PR 必须包含任务 ID、需求/AC 映射、修改文件、真实验证结果、未验证项、风险、回退方式、依赖/兼容/抽象层变化和共享契约影响。
+- 每个 PR 审核请求必须包含任务 ID、任务开发者、指定审核者、任务分支、目标分支、精确 HEAD、需求/AC 映射、修改文件、真实验证结果、未验证项、风险、回退方式、依赖/兼容/抽象层变化、共享契约影响，以及“审核通过后由指定审核者创建正式 PR”的请求动作。
+- 每个正式 PR 必须包含任务 ID、任务开发者、审核请求来源、指定审核者/PR 创建者、需求/AC 映射、修改文件、真实验证结果、未验证项、风险、回退方式、依赖/兼容/抽象层变化和共享契约影响。
 - 共享文件发生冲突时暂停合并，由 `DEV-001` 根据已批准 API、数据模型和本任务书决定；不能用后合并覆盖先合并。
 
 ## 5. 共享契约与所有权
@@ -110,6 +129,11 @@
 - 状态：Completed / 已审查并完成正式交接
 - 优先级：P0
 - 负责人：`DEV-001`
+- 任务开发者：`DEV-001`
+- 审核方式：历史独立审查已通过；v1.2 不追溯指定新的交叉审核者
+- 正式 PR 创建者：不适用；TASK-001 在 v1.2 生效前已完成，不追溯补建正式 PR
+- 开发者是否允许创建正式 PR：不适用；保留原始交接与 Review 历史
+- PR 目标分支：不适用；以已形成的远端 FCP-001 和交接记录为准
 - 任务类型：后端 / 基础设施 / 测试
 - 并行属性：无；所有其他任务均受其阻塞
 - 需求映射：NFR-003、NFR-004、NFR-005；AC-029、AC-031；实施计划 Task 1
@@ -126,51 +150,72 @@
 - 验收标准：测试收集成功且全部通过；Compose 配置通过；PostgreSQL/Redis healthy；API `/healthz` 返回已批准结果；无旧实现兼容副本。
 - 验证：`python -m pytest codebase/backend/tests/test_health.py -q`；`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet`；容器启动后的 HTTP `/healthz` 冒烟测试；`git diff --check`。
 - 分支：`codex/task-001-runtime-baseline`
-- Review：`DEV-002` 检查接口可消费性，`DEV-001` 自检并提交集成证据。
+- 历史 Review：`DEV-002` 检查接口可消费性，`DEV-001` 自检并提交集成证据；该记录按 v1.2 生效边界保留，不重写为 v1.2 的指定审核或正式 PR 流程。
 - 回滚：按本任务独立 Commit 反向恢复；不得恢复重复实现。
 - 交接：修复提交 `87538b04a168cb3c11c2e65dfb976d3a206d8218`，验证证据提交 `45725ac083c98ea999492b709e9792082c3db284`，均已推送至 `codex/task-001-runtime-baseline`；独立 Review 通过。
 
 ### TASK-002：认证、权限、审计与设备基础
 
-- 状态：Planned
+- 状态：Changes Requested / CR-036 In Development；PR #18 合入前暂停后续整改
 - 优先级：P0
 - 负责人：`DEV-001`
+- 任务开发者：`DEV-001`
+- 指定审核者：`DEV-002`
+- 正式 PR 创建者：`DEV-002`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Sequential After TASK-001
 - 需求映射：FR-001、FR-010、FR-011、NFR-001、NFR-009；AC-001—008、AC-038、AC-039；实施计划 Task 2
 - 范围：平台账号、角色、菜单/操作权限、会话、审计、幂等键、组织树和设备主数据；明确不实现工厂/设备行级授权。
 - 不包含：Agent 编排、知识检索、维修闭环。
 - 预计修改：`codebase/backend/app/modules/identity/`、`audit/`、`equipment/`、共享迁移、业务 API 注册。
 - 共享契约：冻结认证依赖、`User/Role/Permission/Organization/Equipment` 模型和审计字段。
-- 实施步骤：先写权限/唯一性/停用保护/审计脱敏失败测试；实现迁移和 API；发布迁移 revision 与认证依赖；完成 Review。
+- 实施步骤：先写权限/唯一性/审计脱敏/幂等失败测试；实现迁移和 API；发布迁移 revision 与认证依赖；完成 Review。设备存在活跃故障时的停用保护因依赖 TASK-003 的故障与维修事实，改由 TASK-003 实现并验证。
 - 验收标准：未登录和无操作权限请求被拒；合法用户按操作权限访问平台数据；设备编码唯一；审计不含敏感凭据。
 - 验证：`python -m pytest codebase/backend/tests/modules/test_identity_permissions.py -q`；迁移升级/降级测试；API 契约测试；`git diff --check`。
 - 分支：`codex/task-002-identity-equipment`
-- Review：`DEV-002` 复核 Agent 可使用的认证上下文；`DEV-001` 决定迁移合并顺序。
+- PR 审核请求：`DEV-001` 在完成 CR-036 全部实现、PostgreSQL/Compose 真实验证、完整独立 Review 和正式证据更新后，推送任务分支并向 `DEV-002` 发送书面审核请求；请求必须绑定新候选精确 SHA。
+- Review：`DEV-002` 复核 Agent 可使用的认证上下文、任务范围、共享契约和真实验证证据；任何 Critical/Important 均退回 `DEV-001` 修复。
+- 正式 PR：仅在 `DEV-002` 审核通过后，由 `DEV-002` 创建后继正式 PR；PR #15 只保留被拒绝历史和审核请求证据，不触发集成。
 - 回滚：回退任务 Commit，并按迁移文档执行对应 downgrade；生产数据存在时不得直接删除表。
+- 交接：旧恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12` 与证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 的历史保留；DEV-002 已对后续候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 请求修改。CR-036 新实现目前仅在本地，真实 PostgreSQL/Compose 汇总验证、正式证据、远端候选和 DEV-002 复审均未完成。
+- PR：[#15](https://github.com/QI-code1992/Equipment-repair/pull/15) 状态为 `Changes requested`，保留但不得作为正式集成 PR；后继正式 PR 编号待 DEV-002 审核通过后生成。
 
 ### TASK-003：故障、工单、维修与结构化案例闭环
 
-- 状态：Planned
+- 状态：Planned / Blocked until TASK-002 is merged into `codex/stage-05-integration`
 - 优先级：P0
 - 负责人：`DEV-001`
+- 任务开发者：`DEV-001`
+- 指定审核者：`DEV-002`
+- 正式 PR 创建者：`DEV-002`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Sequential After TASK-002
 - 需求映射：FR-003、FR-008、FR-RA-003；AC-010、AC-014、AC-026—028、AC-030、AC-043；实施计划 Task 3
 - 范围：故障上报、工单、开始/结束维修、幂等状态迁移、人工最终字段、历史维修案例和相似案例查询。
 - 不包含：RAGFlow 文档检索、诊断 Agent 生成逻辑。
 - 预计修改：`codebase/backend/app/modules/maintenance/`、业务迁移、`codebase/backend/app/main.py`、相关测试。
 - 共享契约：提供 `/api/fault-reports`、`/start-repair`、`/repair-result`、`/api/repair-cases/similar`；直接开始维修不保存 AI 摘要。
-- 实施步骤：写状态/幂等/直接开始失败测试；实现事务闭环；实现结构化案例沉淀与查询；向 `DEV-002` 交付已认证契约。
-- 验收标准：非法状态迁移被拒；重复请求不重复写入；维修最终字段以人工提交为准；结构化案例查询不调用 RAGFlow。
+- 实施步骤：写状态/幂等/直接开始/活跃故障设备停用保护失败测试；实现事务闭环及设备停用保护；实现结构化案例沉淀与查询；向 `DEV-002` 交付已认证契约。
+- 验收标准：非法状态迁移被拒；重复请求不重复写入；维修最终字段以人工提交为准；存在待处理或维修中故障的设备不可停用；结构化案例查询不调用 RAGFlow。
 - 验证：`python -m pytest codebase/backend/tests/modules/test_maintenance_lifecycle.py -q`；API 契约和事务回滚测试；`git diff --check`。
 - 分支：`codex/task-003-maintenance-lifecycle`
-- Review：`DEV-002` 复核诊断上下文和采纳接口；`DEV-001` 负责最终合并。
+- PR 审核请求：`DEV-001` 完成本任务验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-002` 发送书面审核请求。
+- Review：`DEV-002` 复核诊断上下文、采纳接口、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-001` 修复。
+- 正式 PR：仅在 `DEV-002` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-002` 创建至 `codex/stage-05-integration`。
 - 回滚：回退应用 Commit；数据库迁移按已验证 downgrade 或前向修复策略处理。
 
 ### TASK-004：部署独立 RAGFlow 容器环境
 
-- 状态：Planned
+- 状态：Planned / Blocked until TASK-002 is merged into `codex/stage-05-integration`
 - 优先级：P0
 - 负责人：`DEV-001`
+- 任务开发者：`DEV-001`
+- 指定审核者：`DEV-002`
+- 正式 PR 创建者：`DEV-002`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Sequential After TASK-002，可与 DEV-002 的 TASK-006 并行
 - 需求映射：FR-002、NFR-003、NFR-005、NFR-007；AC-009、AC-029、AC-033；实施计划 Task 4 的容器部分
 - 范围：在 Windows Docker Desktop/WSL2 部署独立 RAGFlow、MySQL、Redis、MinIO、Elasticsearch 8.11，配置网络、健康检查、持久化和安全环境模板。
@@ -181,7 +226,9 @@
 - 验收标准：全部容器 healthy；Elasticsearch 版本为 8.11；重启后数据与配置可恢复；无公网暴露的内部依赖。
 - 验证：`docker compose --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml config --quiet`；`docker compose -p equipment-ragflow --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml up -d`；`docker compose -p equipment-ragflow -f codebase/infra/ragflow/docker-compose.yml ps`；执行重启和网络隔离检查并保存真实输出。
 - 分支：`codex/task-004-ragflow-infra`
-- Review：`DEV-002` 复核适配器所需契约；Docker 通过结论只能由 `DEV-001` 提供。
+- PR 审核请求：`DEV-001` 完成本任务验收、Docker 真实验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-002` 发送书面审核请求。
+- Review：`DEV-002` 复核适配器所需契约、任务范围和验证证据；Docker 通过结论只能由 `DEV-001` 提供；任何 Critical/Important 均退回 `DEV-001` 修复。
+- 正式 PR：仅在 `DEV-002` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-002` 创建至 `codex/stage-05-integration`。
 - 回滚：停止并移除项目容器；卷删除属于数据删除，必须单独获得授权。
 
 ### TASK-005：知识文档生命周期与 RAGFlow 适配器
@@ -189,6 +236,11 @@
 - 状态：Planned / 仍阻塞于 TASK-002、TASK-004
 - 优先级：P0
 - 负责人：`DEV-002`
+- 任务开发者：`DEV-002`
+- 指定审核者：`DEV-001`
+- 正式 PR 创建者：`DEV-001`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Blocked By TASK-002, TASK-004
 - 需求映射：FR-002、FR-007、NFR-002、NFR-007；AC-009、AC-024、AC-025、AC-033、AC-036；实施计划 Task 4 的应用部分
 - 范围：知识文档元数据、对象存储引用、上传/状态/检索/删除适配器、引用映射、Worker 同步和超时降级。
@@ -199,7 +251,9 @@
 - 验收标准：真实文档可上传、解析、切片、索引、混合检索和引用；失败原因可追踪；结构化案例不进入 RAGFlow。
 - 验证：`python -m pytest codebase/backend/tests/integrations/test_ragflow_adapter.py -q`；由 `DEV-001` 在 Docker 环境执行真实文档联调和重启验证。
 - 分支：`codex/task-005-knowledge-ragflow`
-- Review：`DEV-001` 复核网络、凭据、迁移和真实环境证据。
+- PR 审核请求：`DEV-002` 完成本任务验收、必要真实环境验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
+- Review：`DEV-001` 复核网络、凭据、迁移、任务范围和真实环境证据；任何 Critical/Important 均退回 `DEV-002` 修复。
+- 正式 PR：仅在 `DEV-001` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-001` 创建至 `codex/stage-05-integration`。
 - 回滚：回退适配器 Commit；外部文档删除必须遵循业务删除和审计规则。
 
 ### TASK-006：四个 Agent 独立配置与模型能力校验
@@ -207,6 +261,11 @@
 - 状态：Authorized to start / 仅限非数据库部分
 - 优先级：P0
 - 负责人：`DEV-002`
+- 任务开发者：`DEV-002`
+- 指定审核者：`DEV-001`
+- 正式 PR 创建者：`DEV-001`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：TASK-001 正式交接后可并行启动领域测试和非数据库实现；数据库集成、迁移和共享数据模型仍 Blocked By TASK-002
 - 需求映射：FR-012、NFR-006；AC-032、AC-034；实施计划 Task 5
 - 范围：四个 `agent_id` 独立配置、首次单独初始化、模型能力、深度思考校验和运行配置快照输入。
@@ -217,7 +276,9 @@
 - 验收标准：四个 Agent 可独立读取和保存；错误模型配置被明确拒绝；密钥不返回前端。
 - 验证：`python -m pytest codebase/backend/tests/modules/test_agent_config.py -q`；API 契约测试；智能配置相关前端测试。
 - 分支：`codex/task-006-agent-config`
-- Review：`DEV-001` 复核认证、迁移和审计；数据库部分未合并前不得标记完成。
+- PR 审核请求：`DEV-002` 完成本任务全部范围、验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求；仅完成非数据库部分时不得请求完成态审核。
+- Review：`DEV-001` 复核认证、迁移、审计、任务范围和验证证据；数据库部分未合并前不得标记完成；任何 Critical/Important 均退回 `DEV-002` 修复。
+- 正式 PR：仅在 TASK-002 依赖满足、`DEV-001` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-001` 创建至 `codex/stage-05-integration`。
 - 回滚：回退模块 Commit；配置数据迁移按明确 downgrade 执行。
 
 ### TASK-007：Agent Runtime、LangGraph、SSE 与恢复
@@ -225,6 +286,11 @@
 - 状态：Planned
 - 优先级：P0
 - 负责人：`DEV-002`
+- 任务开发者：`DEV-002`
+- 指定审核者：`DEV-001`
+- 正式 PR 创建者：`DEV-001`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Blocked By TASK-002, TASK-006
 - 需求映射：FR-005、NFR-006、NFR-008、NFR-009；AC-003、AC-029、AC-034—038；实施计划 Task 6
 - 范围：线程归属、运行快照、LangGraph checkpoint、工具审计、人工中断/恢复和安全 SSE 事件。
@@ -235,7 +301,9 @@
 - 验收标准：SSE 顺序稳定；刷新或重启可恢复；未授权线程不可读；错误不被吞掉；日志无敏感信息。
 - 验证：`python -m pytest codebase/backend/tests/modules/test_agent_runtime.py -q`；SSE 契约测试；PostgreSQL checkpoint 集成测试由 `DEV-001` 提供环境。
 - 分支：`codex/task-007-agent-runtime`
-- Review：`DEV-001` 复核权限、审计和数据库边界。
+- PR 审核请求：`DEV-002` 完成本任务验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
+- Review：`DEV-001` 复核权限、审计、数据库边界、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-002` 修复。
+- 正式 PR：仅在 `DEV-001` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-001` 创建至 `codex/stage-05-integration`。
 - 回滚：回退 Runtime Commit；保留既有运行审计，不直接删除线程数据。
 
 ### TASK-008：AI 故障上报、智能问数与健康分读取
@@ -243,6 +311,11 @@
 - 状态：Planned
 - 优先级：P0
 - 负责人：`DEV-002`
+- 任务开发者：`DEV-002`
+- 指定审核者：`DEV-001`
+- 正式 PR 创建者：`DEV-001`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Blocked By TASK-002, TASK-006, TASK-007
 - 需求映射：FR-004、FR-006、FR-009；AC-011—023；实施计划 Task 7 与 Task 10 的健康分契约
 - 范围：AI 故障字段采集、人工确认提交、固定指标目录、最多五项批量查询、健康分统一读取和失败降级。
@@ -253,7 +326,9 @@
 - 验收标准：不完整草稿不能提交；一次查询最多五项；非法指标/维度被拒；服务失败不生成数值。
 - 验证：`python -m pytest codebase/backend/tests/agents/test_fault_reporting.py codebase/backend/tests/agents/test_metric_query.py codebase/backend/tests/modules/test_health_score.py -q`；指标 API 契约测试；全部 `06-testing/tests/*.test.js`。
 - 分支：`codex/task-008-fault-metric-agents`
-- Review：`DEV-001` 复核业务写入、指标服务和权限边界。
+- PR 审核请求：`DEV-002` 完成本任务验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
+- Review：`DEV-001` 复核业务写入、指标服务、权限边界、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-002` 修复。
+- 正式 PR：仅在 `DEV-001` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-001` 创建至 `codex/stage-05-integration`。
 - 回滚：回退 Agent Commit，不影响业务 API 已有人工流程。
 
 ### TASK-009：操作指引与维修前故障诊断 Agent
@@ -261,6 +336,11 @@
 - 状态：Planned
 - 优先级：P0
 - 负责人：`DEV-002`
+- 任务开发者：`DEV-002`
+- 指定审核者：`DEV-001`
+- 正式 PR 创建者：`DEV-001`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Blocked By TASK-003, TASK-005, TASK-006, TASK-007
 - 需求映射：FR-007、FR-RA-001—004、NFR-002、NFR-003；AC-024、AC-025、AC-040—044；实施计划 Task 8
 - 范围：操作指引最多两次定向检索；维修前诊断的预诊断、动态追问、报警码、证据门槛、采纳/直接开始、降级与摘要。
@@ -271,7 +351,9 @@
 - 验收标准：证据不足不能产生可采纳根因；报警码问题不可跳过；直接开始不保留 AI 摘要；失败保留人工流程。
 - 验证：`python -m pytest codebase/backend/tests/agents/test_operation_guidance.py codebase/backend/tests/agents/test_fault_diagnosis.py -q`；真实 RAGFlow 引用测试由 `DEV-001` 提供 Docker 环境；`node 06-testing/tests/fault-report-repair-agent.test.js`。
 - 分支：`codex/task-009-guidance-diagnosis`
-- Review：`DEV-001` 复核业务写入、Docker/RAGFlow 证据、安全与降级。
+- PR 审核请求：`DEV-002` 完成本任务验收、真实 RAGFlow/数据库验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
+- Review：`DEV-001` 复核业务写入、Docker/RAGFlow 证据、安全、降级、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-002` 修复。
+- 正式 PR：仅在 `DEV-001` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-001` 创建至 `codex/stage-05-integration`。
 - 回滚：回退 Agent Commit，人工开始/结束维修流程必须继续可用。
 
 ### TASK-010：正式前端与批准原型流程集成
@@ -279,6 +361,11 @@
 - 状态：Planned
 - 优先级：P0
 - 负责人：`DEV-002`
+- 任务开发者：`DEV-002`
+- 指定审核者：`DEV-001`
+- 正式 PR 创建者：`DEV-001`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Blocked By TASK-003, TASK-008, TASK-009
 - 需求映射：页面功能矩阵全部 P0 页面；AC-012—015、AC-031、AC-039—044；实施计划 Task 9
 - 范围：建立正式 TypeScript 前端工程；以 API 替代静态数据；接入流式对话、引用、采纳/直接开始、结束维修摘要和权限状态。
@@ -289,7 +376,9 @@
 - 验收标准：关键加载/空/错/权限状态存在；SSE 与引用真实；摘要显隐符合 AC；正式代码不依赖原型运行目录。
 - 验证：`npm --prefix codebase/frontend test`；`npm --prefix codebase/frontend run build`；全部 `06-testing/tests/*.test.js`；浏览器关键流程检查。
 - 分支：`codex/task-010-frontend-integration`
-- Review：`DEV-001` 复核 API、权限和端到端可运行性。
+- PR 审核请求：`DEV-002` 完成本任务验收、前端验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
+- Review：`DEV-001` 复核 API、权限、端到端可运行性、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-002` 修复。
+- 正式 PR：仅在 `DEV-001` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-001` 创建至 `codex/stage-05-integration`。
 - 回滚：按页面/功能 Commit 回退，保持其他已集成页面不受影响。
 
 ### TASK-011：平台补齐、端到端、安全与发布准备
@@ -297,6 +386,11 @@
 - 状态：Planned
 - 优先级：P0
 - 负责人：`DEV-001`
+- 任务开发者：`DEV-001`
+- 指定审核者：`DEV-002`
+- 正式 PR 创建者：`DEV-002`
+- 开发者是否允许创建正式 PR：否
+- PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Blocked By TASK-003, TASK-004, TASK-005, TASK-007, TASK-008, TASK-009, TASK-010
 - 需求映射：NFR-001—009、AC-029—038、Stage 8 部署要求；实施计划 Task 10
 - 范围：健康分服务最终闭环、附件安全、Nginx HTTPS、备份恢复、超时降级、全量 E2E、安全与恢复演练、开发交接。
@@ -307,39 +401,47 @@
 - 验收标准：全量测试和构建通过；容器重启可恢复；备份可还原；内部服务不暴露公网；无高危未关闭缺陷。
 - 验证：`python -m pytest codebase/backend/tests -q`；`npm --prefix codebase/frontend test`；`npm --prefix codebase/frontend run build`；`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet`；业务栈和 RAGFlow 栈真实联调；全部 `06-testing/tests/*.test.js`；备份恢复演练；`git diff --check`。
 - 分支：`codex/task-011-e2e-release-readiness`
-- Review：`DEV-002` 复核 Agent/前端回归；`DEV-001` 输出最终集成结论。
+- PR 审核请求：`DEV-001` 完成本任务验收、全量验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-002` 发送书面审核请求。
+- Review：`DEV-002` 复核 Agent/前端回归、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-001` 修复。
+- 正式 PR：仅在 `DEV-002` 明确审核通过且第 4 节创建条件全部满足后，由 `DEV-002` 创建至 `codex/stage-05-integration`；`DEV-001` 仍负责最终集成结论。
 - 回滚：以最近稳定 FCP 和独立任务 Commit 选择性回退；不得整体回退丢失其他已接受功能。
 
-## 7. 人员分配矩阵
+## 7. 人员分配与交叉审核矩阵
 
-| 开发人员 | 分配任务 | 主要范围 | Docker 责任 | 集成责任 |
-|---|---|---|---|---|
-| DEV-001 | TASK-001、002、003、004、011 | 平台事实、权限、维修、基础设施、E2E | 唯一验证人 | 最终集成负责人 |
-| DEV-002 | TASK-005、006、007、008、009、010 | 知识适配、Agent、正式前端 | 无本地 Docker；提交给 DEV-001 验证 | 提供模块 PR 与回归证据 |
+| 开发人员 | 分配开发任务 | 默认审核任务 | 默认创建正式 PR 的任务 | 主要范围 | Docker 责任 | 集成责任 |
+|---|---|---|---|---|---|---|
+| DEV-001 | TASK-001、002、003、004、011 | TASK-005、006、007、008、009、010 | TASK-005、006、007、008、009、010 | 平台事实、权限、维修、基础设施、E2E | 唯一验证人 | 最终集成负责人 |
+| DEV-002 | TASK-005、006、007、008、009、010 | TASK-002、003、004、011；TASK-001 仅保留历史独立审查 | TASK-002、003、004、011；TASK-001 不追溯补建正式 PR | 知识适配、Agent、正式前端 | 无本地 Docker；提交给 DEV-001 验证 | 提供模块审核、正式 PR 与回归证据 |
 
-## 8. 依赖与并行矩阵
+## 8. 依赖、并行与协作矩阵
 
-| 任务 | 负责人 | 优先级 | 依赖模式 | 可开始条件 |
-|---|---|---:|---|---|
-| TASK-001 | DEV-001 | P0 | 无 | 更新后的 Stage 4 → Stage 5 门禁已批准并完成记录 |
-| TASK-002 | DEV-001 | P0 | Sequential After TASK-001 | TASK-001 测试、Compose、Review、FCP 均通过 |
-| TASK-003 | DEV-001 | P0 | Sequential After TASK-002 | 身份、审计和迁移基础已合并 |
-| TASK-004 | DEV-001 | P0 | Sequential After TASK-002 | 业务容器基线与网络契约稳定 |
-| TASK-005 | DEV-002 | P0 | Blocked By TASK-002, TASK-004 | 数据迁移基础和 RAGFlow 环境均可用 |
-| TASK-006 | DEV-002 | P0 | Parallel After TASK-001；DB 集成 Blocked By TASK-002 | 可先做领域测试；迁移合并等待 TASK-002 |
-| TASK-007 | DEV-002 | P0 | Blocked By TASK-002, TASK-006 | 认证、迁移和 Agent 配置契约已合并 |
-| TASK-008 | DEV-002 | P0 | Blocked By TASK-002, TASK-006, TASK-007 | 业务工具、配置和 Runtime 可用 |
-| TASK-009 | DEV-002 | P0 | Blocked By TASK-003, TASK-005, TASK-006, TASK-007 | 维修、案例、知识和 Runtime 全部可用 |
-| TASK-010 | DEV-002 | P0 | Blocked By TASK-003, TASK-008, TASK-009 | 所有正式页面所需 API 与 Agent 已合并 |
-| TASK-011 | DEV-001 | P0 | Blocked By TASK-003—010 | 所有模块 PR 已 Review 并进入集成分支 |
+| 任务 | 开发者 | 指定审核者 | 正式 PR 创建者 | 优先级 | 依赖模式 | 可开始条件 |
+|---|---|---|---|---:|---|---|
+| TASK-001 | DEV-001 | 历史独立审查（v1.2 不追溯指定） | 不适用（v1.2 不追溯补建） | P0 | 无 | 已完成并形成远端 FCP-001；保留真实历史记录 |
+| TASK-002 | DEV-001 | DEV-002 | DEV-002 | P0 | Sequential After TASK-001 | TASK-001 测试、Compose、Review、FCP 均通过 |
+| TASK-003 | DEV-001 | DEV-002 | DEV-002 | P0 | Sequential After TASK-002 | 身份、审计和迁移基础已审核、正式集成并完成回归 |
+| TASK-004 | DEV-001 | DEV-002 | DEV-002 | P0 | Sequential After TASK-002 | 业务容器基线与网络契约已审核、正式集成并稳定 |
+| TASK-005 | DEV-002 | DEV-001 | DEV-001 | P0 | Blocked By TASK-002, TASK-004 | 数据迁移基础和 RAGFlow 环境均已审核、正式集成并可用 |
+| TASK-006 | DEV-002 | DEV-001 | DEV-001 | P0 | Parallel After TASK-001；DB 集成 Blocked By TASK-002 | 可先做领域测试；迁移合并等待 TASK-002 正式集成 |
+| TASK-007 | DEV-002 | DEV-001 | DEV-001 | P0 | Blocked By TASK-002, TASK-006 | 认证、迁移和 Agent 配置契约已审核并正式集成 |
+| TASK-008 | DEV-002 | DEV-001 | DEV-001 | P0 | Blocked By TASK-002, TASK-006, TASK-007 | 业务工具、配置和 Runtime 可用 |
+| TASK-009 | DEV-002 | DEV-001 | DEV-001 | P0 | Blocked By TASK-003, TASK-005, TASK-006, TASK-007 | 维修、案例、知识和 Runtime 全部已审核并正式集成 |
+| TASK-010 | DEV-002 | DEV-001 | DEV-001 | P0 | Blocked By TASK-003, TASK-008, TASK-009 | 所有正式页面所需 API 与 Agent 已审核并正式集成 |
+| TASK-011 | DEV-001 | DEV-002 | DEV-002 | P0 | Blocked By TASK-003—010 | 所有模块正式 PR 已 Review、合入集成分支并完成回归 |
 
 ## 9. 集成计划
 
 - 集成负责人：`DEV-001`
+- 集成负责人已由项目负责人确认：是。
+- 集成目标分支：`codex/stage-05-integration`
+- 唯一集成触发源：满足本节全部合并条件的正式 PR。
+- 不得作为集成触发源：任务分支 push、PR 审核请求、评论命令、单独 CI 通过、PR #15 被拒绝历史或未绑定任务书的自动化事件。
+- 自动化策略：允许 L1 自动检查、L2 PR 元信息规则校验和 L3 通知；禁止 L4 自动创建 PR、L5 auto-merge/merge queue 和 L6 自动进入 Stage 6。
 - 推荐集成顺序：TASK-001 → TASK-002 → TASK-006 → TASK-007 → TASK-004 → TASK-005 → TASK-003 → TASK-008 → TASK-009 → TASK-010 → TASK-011。
 - 顺序允许在依赖满足后微调，但必须先更新本任务书；不得仅在聊天中改变。
-- 每次集成前检查：PR Review 通过、真实命令结果齐全、共享契约未漂移、无禁止范围修改、相关文档已更新。
-- 每次集成后执行：最小相关测试、受影响模块回归、`git diff --check`；涉及容器时由 `DEV-001` 执行 Compose/健康检查。
+- 每次集成前检查：审核请求记录存在；指定审核者已明确通过；正式 PR 由矩阵指定的审核者创建；开发者、审核者和 PR 创建者匹配；目标分支正确；required checks 通过；依赖已正式集成；真实命令结果齐全；共享契约未漂移；无禁止范围修改；相关文档已更新；无未解决 review comment。
+- 集成执行：`DEV-001` 核查 PR 元信息和任务边界，确认合并条件后手动合并；不使用 auto-merge 或 merge queue。合并失败或发现契约冲突时停止集成，不覆盖既有提交。
+- 每次集成后执行：记录 Merge Commit SHA；运行最小相关测试、受影响模块回归、`git diff --check`；涉及容器时由 `DEV-001` 执行 Compose/健康检查；记录风险和回滚方式。
 - 功能检查点：每个任务集成并通过回归后，在 `05-development/CHECKPOINTS.md` 新增 FCP，记录远程 Commit SHA、范围、证据和恢复命令。
 - 冲突处理：
   1. 普通文件冲突由文件所有者提出解决方案，`DEV-001` 审核。
@@ -349,7 +451,7 @@
 
 ## 10. 变更规则
 
-以下情况必须先更新本任务书：开发人数、负责人、Docker 能力、任务范围、依赖、集成顺序、共享 API/数据/权限/状态/事件、基础设施所有权发生变化。
+以下情况必须先更新本任务书：开发人数、负责人、任务开发者、指定审核者、正式 PR 创建者、审核轮转、PR 目标分支、集成负责人、集成触发方式、自动化级别、Docker 能力、任务范围、依赖、集成顺序、共享 API/数据/权限/状态/事件、基础设施所有权发生变化。
 
 - 仅实现细节变化且不影响契约：L0，更新任务记录并正常 Review。
 - 任务或协作方式变化：更新本任务书并由项目负责人确认。
@@ -358,7 +460,7 @@
 
 ## 11. 完成与交接
 
-每个任务必须提交：任务 ID、PR/Commit、修改文件、验证命令与真实结果、未验证项、依赖变化、兼容代码、抽象层、共享契约影响、风险和回滚方式。
+每个任务必须提交：任务 ID、任务开发者、PR 审核请求记录、指定审核者、正式 PR 创建者、正式 PR/Commit、修改文件、验证命令与真实结果、未验证项、依赖变化、兼容代码、抽象层、共享契约影响、风险和回滚方式。
 
 所有任务完成后，`DEV-001` 必须输出：
 

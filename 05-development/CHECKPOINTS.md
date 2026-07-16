@@ -13,9 +13,11 @@
 
 ## FCP-002：TASK-002 被拒候选恢复点
 
-- 状态：Rejected / Preserved；不是稳定检查点，不得解锁依赖。
-- 范围：PR #15 的 TASK-002 身份、权限、审计、组织和设备基础候选。
+- 状态：Rejected / Preserved / Superseded；不是稳定检查点，不得解锁依赖。
+- 范围：PR #15 的 TASK-002 身份、权限、审计、组织和设备基础候选；历史恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12`，交接证据 `9f162b421f4fefae4cdd69a001891c7e83d4bc13`。
 - 被拒候选：`cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77`；审核结论为 `Changes requested`。
-- 异常集成：合并提交 `e328cec64f1aa9c7cdc383579af042692dce5679` 未满足审核门禁，已由 CR-038 回滚候选 `5d91e83679acefa5486a25bf5b921e9c12fd52d6` 撤销有效树内容。
+- 历史验证：Python 3.13.14 下 38 tests passed，Compose、PostgreSQL 迁移和并发验证曾通过；该证据不能覆盖 DEV-002 后续正式审核阻断项。
+- 异常集成：违规合并 `e328cec64f1aa9c7cdc383579af042692dce5679` 已由 CR-038 回滚，并通过 PR #17 合入修复提交 `d37698c6e51df1701bbdfcf12ec6fa329241e0bd`。
+- 回滚后验证：Python 3.13.14 为 `4 passed, 1 warning`；Compose 构建通过；PostgreSQL、Redis、API healthy；容器内 `/healthz` 返回正常。
 - 恢复性：原提交仍可从 Git 合并历史检出，本地 TASK-002 工作树继续保留；不得把该恢复点作为完成、正式集成或 Stage 6 证据。
-- 后续：CR-038 补救 PR 合入并完成 CR-037 后，DEV-001 继续 TASK-002 R6/R7；DEV-002 复审通过后创建新的正式 TASK-002 PR。
+- 后续：CR-037 合入后，DEV-001 才可继续 TASK-002 R6/R7；DEV-002 复审通过后创建新的正式 TASK-002 PR。
