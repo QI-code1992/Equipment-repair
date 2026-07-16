@@ -97,4 +97,5 @@
 - 合并检查：集成分支成为任务分支祖先，ahead/behind 为 `19/0`；`git merge-tree --write-tree` 只返回结果树，无冲突。
 - 差异检查：相对集成分支仅恢复 TASK-002 设计、契约、迁移、后端实现、测试和本任务证据；未引入 TASK-003/TASK-004 业务实现。
 - 复验：完整后端 `125 passed, 5 skipped`；真实 PostgreSQL `5 passed`；迁移、Compose 实际状态、容器健康和 `/healthz` 通过。
-- 结论：分支同步阻断已关闭，可在更新精确证据 HEAD 后重新请求 DEV-002 审核。
+- 同步验证候选：`4c111d0243d947a32d555bd48b1b72cab552bac4`。
+- 结论：分支同步阻断和内部 Review 门禁均已关闭；正式台账回填后可重新请求 DEV-002 审核。

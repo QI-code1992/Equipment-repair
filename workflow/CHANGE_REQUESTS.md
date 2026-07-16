@@ -570,4 +570,5 @@
 - Correction: 通过 Merge Commit `0aac415d18aee256c237adb508d2ab24314a7486` 合入当前集成基线 `ac767c83128cb89ceea8e28c518be0adfbe1984c`。
 - Boundary: TASK-002 代码与证据保留；CR-037、CR-038 和 Stage Approval 采用当前集成历史；不改写或删除既有远端提交。
 - Verification: 集成分支已成为任务分支祖先；模拟合并无冲突；完整后端 `125 passed, 5 skipped`；PostgreSQL `5 passed`；迁移、Compose 实际状态和 `/healthz` 通过。
-- Status: 修正完成，等待生成并推送新的精确审核 HEAD；依赖不解锁。
+- Synchronized Candidate: `4c111d0243d947a32d555bd48b1b72cab552bac4`，已推送并完成第二次自查。
+- Status: 修正与台账证据完成，等待 DEV-002 对最终远端分支 HEAD 正式复审；依赖不解锁。

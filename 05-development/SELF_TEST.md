@@ -93,6 +93,7 @@
 
 ## TASK-002 集成基线同步后复验（2026-07-16）
 
+- 同步验证候选：`4c111d0243d947a32d555bd48b1b72cab552bac4`。
 - 同步基线：`origin/codex/stage-05-integration` 精确 SHA `ac767c83128cb89ceea8e28c518be0adfbe1984c`。
 - 同步 Merge Commit：`0aac415d18aee256c237adb508d2ab24314a7486`；当前集成基线是任务分支祖先，`git merge-tree --write-tree` 无冲突。
 - 完整后端：同步解决后和 Merge Commit 后均执行 `python -m pytest tests -q`，结果 `125 passed, 5 skipped, 1 warning`。
