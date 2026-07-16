@@ -448,3 +448,33 @@
 - 实施提交：`25e15709a3f1d92f661d37acdb8aa3e1e0e41346`。
 - 门禁审批记录提交：`c9eb206c6517b9c3afd7f33a86e3c383d84d12aa`。
 - 验证：检查所有 TASK-001 开始条件均位于门禁之后；Stage 5 准入清单不再要求先修复 TASK-001；JSON 可解析；`git diff --check` 通过。
+
+### CR-038：回滚未经审核门禁批准的 PR #15 集成结果
+
+- Level: L2
+- Status: Approved For Merge / PR #17
+- Raised By: 项目负责人
+- Raised At: 2026-07-16T14:48:01+08:00
+- Current Stage: Stage 5 — Development Implementation
+- Original Request: PR #15 未满足指定审核人批准、任务边界验证和正式集成门禁即被合入 `codex/stage-05-integration`，不能仅记录异常，必须恢复合规的集成状态。
+- Clarified Requirement: 保留 TASK-002 开发分支、提交和审计历史；通过独立补救分支对合并提交 `e328cec64f1aa9c7cdc383579af042692dce5679` 执行非破坏性 `git revert -m 1`，经补救 PR 合入后再继续 CR-037 和 TASK-002 整改。
+- Reason: PR #15 的审核结论仍为 `Changes requested`，被拒绝候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 不得因误合并而成为 TASK-002 完成、依赖解锁或 Stage 6 准入依据。
+- Impact:
+  - PRD / SPEC / Prototype / Acceptance Criteria: 不变。
+  - Architecture / API / Data Model: 不变；仅撤销未经批准的集成结果。
+  - Development Task Book: TASK-002 继续处于 `Changes requested`；TASK-003、TASK-004 和所有依赖 TASK-002 的数据库集成继续阻塞。
+  - Code: 从集成分支有效树撤销 PR #15 引入内容，但原提交继续由 Git 历史和本地任务工作树保存。
+- Decision: 项目负责人于 2026-07-16 明确批准“保留开发成果、回滚不合规集成、不改写历史”的补救方案。
+- Implementation:
+  - Owner: DEV-001 / Stage 5 integration owner
+  - Source Branch: `codex/cr-038-revert-pr-15-gate-violation`
+  - Target Branch: `codex/stage-05-integration`
+  - Pull Request: [#17](https://github.com/QI-code1992/Equipment-repair/pull/17)（Draft）
+  - Merge Approval: 项目负责人于 2026-07-16T15:00:35+08:00 明确批准审查候选 `3f02ac1021ffb2f189ee53120d4b3523415bff60` 转为 Ready 并手动合入；批准后的唯一允许变更是记录本批准的治理文档提交，且必须重新验证无代码或回滚边界变化。
+  - Merge Commit To Revert: `e328cec64f1aa9c7cdc383579af042692dce5679`
+  - Approval Record Commit: `6650f615e48d88b9a54179c27a7f03d1bf48f391`
+  - Revert Commit: `5d91e83679acefa5486a25bf5b921e9c12fd52d6`
+- Verification:
+  - Status: Passed for PR creation
+  - Evidence: 回滚候选相对第一父提交仅保留 CR-038 治理记录；Python 3.13.14 后端测试 `4 passed, 1 warning`；`compileall`、Compose 配置和 `git diff --check` 通过。
+  - Remaining Gate: PR #17 尚未合入；TASK-002、CR-037 和依赖任务继续暂停。

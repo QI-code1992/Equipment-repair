@@ -1,7 +1,7 @@
 {
-  "state": "READY_FOR_DEVELOPMENT",
+  "state": "IN_DEVELOPMENT",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-15T15:10:00+08:00",
+  "updatedAt": "2026-07-16T14:48:01+08:00",
   "productBaseline": {
     "status": "requirements-interaction-and-prototype-approved",
     "canonicalCandidate": [
@@ -22,7 +22,30 @@
   },
   "lastApprovedStage": "Stage 4 — Architecture and Development Plan",
   "pendingStageApproval": null,
-  "currentCommitSha": "25e15709a3f1d92f661d37acdb8aa3e1e0e41346",
+  "currentCommitSha": "5d91e83679acefa5486a25bf5b921e9c12fd52d6",
+  "governanceIncident": {
+    "changeRequest": "CR-038",
+    "status": "ROLLBACK_PR_APPROVED_FOR_MERGE",
+    "invalidMergeCommit": "e328cec64f1aa9c7cdc383579af042692dce5679",
+    "rejectedTaskCommit": "cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77",
+    "approvalRecordCommit": "6650f615e48d88b9a54179c27a7f03d1bf48f391",
+    "revertCandidateCommit": "5d91e83679acefa5486a25bf5b921e9c12fd52d6",
+    "sourceBranch": "codex/cr-038-revert-pr-15-gate-violation",
+    "targetBranch": "codex/stage-05-integration",
+    "pullRequest": {
+      "number": 17,
+      "url": "https://github.com/QI-code1992/Equipment-repair/pull/17",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": true,
+      "approvedHead": "3f02ac1021ffb2f189ee53120d4b3523415bff60",
+      "approvedAt": "2026-07-16T15:00:35+08:00",
+      "approvedBy": "project owner"
+    },
+    "task002Status": "CHANGES_REQUESTED",
+    "dependencyUnlockAllowed": false,
+    "verification": "Python 3.13.14: 4 passed, 1 warning; compileall passed; Compose config passed; git diff --check passed"
+  },
   "notes": [
     "GitHub repository: https://github.com/QI-code1992/Equipment-repair.",
     "Original imported workspace is recoverable at commit c544c2d and tag snapshot/legacy-import-20260714.",
@@ -42,6 +65,7 @@
     "On 2026-07-15, the project owner confirmed two Stage 5 developers: DEV-001 is the final integration owner with Docker/Compose validation capability; DEV-002 has no Docker environment.",
     "On 2026-07-15, the project owner explicitly approved DEVELOPMENT_TASK_BOOK.md v1.0 at candidate commit 8272a8ed161b787098660f61ebb86fa5ccada564. This approved the two-person task allocation baseline only.",
     "On 2026-07-15, the project owner corrected the gate sequence: TASK-001 is a Stage 5 task and may start only after the refreshed Stage 4 -> Stage 5 gate is explicitly approved for an exact Commit SHA. DEF-003 and DEF-004 are Stage 5 TASK-001 risks, not pre-gate code-remediation requirements.",
-    "On 2026-07-15, the project owner explicitly approved commit 25e15709a3f1d92f661d37acdb8aa3e1e0e41346 as the refreshed Stage 4 baseline and passed Gate-007 into Stage 5. The immutable milestone tag is baseline/stage-04-development-v1.1. DEV-001 may start TASK-001; downstream tasks remain blocked until TASK-001 passes."
+    "On 2026-07-15, the project owner explicitly approved commit 25e15709a3f1d92f661d37acdb8aa3e1e0e41346 as the refreshed Stage 4 baseline and passed Gate-007 into Stage 5. The immutable milestone tag is baseline/stage-04-development-v1.1. DEV-001 may start TASK-001; downstream tasks remain blocked until TASK-001 passes.",
+    "On 2026-07-16, PR #15 was merged as e328cec64f1aa9c7cdc383579af042692dce5679 while its formal review gate remained Changes requested. The project owner approved CR-038 to revert the merge through a separate pull request without rewriting history or deleting TASK-002 development work. TASK-002 and its dependent integration remain blocked."
   ]
 }

@@ -31,14 +31,13 @@
 - 后端与 Compose：后续由 TASK-001 重新验证，结果见“TASK-001 运行基线重新验证”。
 - 路径与差异：目录断言和 `git diff --check` 通过；技能与工件参考中的归档规则一致性扫描通过。
 
-## TASK-002 认证、权限、审计与设备基础（2026-07-15）
+## CR-038 PR #15 门禁违规合并补救（2026-07-16）
 
-- TDD：首个管理员引导、权限/角色查询、组织/设备更新、登录/登出/权限拒绝审计、全局请求指纹幂等、唯一冲突、外键、组织循环和脱敏均先得到失败用例，再完成实现；审查整改累计关闭 1 个 Critical、13 个 Important、4 个 Minor。
-- Python：`D:\codex\tools\equipment-task1-py313\Scripts\python.exe --version` 返回 `Python 3.13.14`；`python -m pytest codebase/backend/tests -q` 最终为 `38 passed, 1 warning`。唯一告警来自 FastAPI/Starlette TestClient 的第三方弃用提示。
-- Compose：`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet` 通过；API 镜像重建成功，并已将 `alembic.ini` 与 migration revisions 纳入镜像。
-- 迁移：在 `equipment-task2` PostgreSQL 17 容器执行 `alembic downgrade base`、`alembic upgrade head`、`alembic current` 均成功，最终为 `0001 (head)`。
-- 健康：新镜像容器内请求 `/healthz` 返回 HTTP 200 与 `{"status":"ok","service":"equipment-operations-platform"}`。
-- Bootstrap：首次管理员引导成功并写入 1 条 `user.bootstrap` 系统审计（`actor_user_id` 为空）；空凭据和第二次引导均被拒绝。
-- PostgreSQL 竞争：同一幂等键的两个并发创建设备请求均为 201 且响应一致；不同键同时创建同一设备编码为 201/409，冲突码为 `EQUIPMENT_CODE_EXISTS`。
-- 组织完整性：未知 `organization_id` 返回 404；顺序成环返回 422；并发 A→B/B→A 更新在共享事务锁下返回 200/422，未形成循环。
-- 静态：`python -m compileall -q app` 与 `git diff --check` 通过；Git 仅提示工作树 LF→CRLF 转换，不是内容错误。
+- 回滚前基线：`py -3.13 -m pytest tests -q` 为 `38 passed, 1 warning`；Compose 配置通过。
+- 回滚方式：在隔离分支执行 `git revert -m 1 --no-commit e328cec64f1aa9c7cdc383579af042692dce5679`，审查暂存差异后提交为 `5d91e83679acefa5486a25bf5b921e9c12fd52d6`。
+- 树状态：`git diff --name-status 42098613ffa20faed3bb0dcb842a0121722565bd` 仅显示 CR-038 的三份治理记录。
+- Python 3.13：回滚后 `py -3.13 -m pytest tests -q` 为 `4 passed, 1 warning`。
+- 静态检查：`py -3.13 -m compileall -q app tests` 通过。
+- Compose：`docker compose --env-file ../infra/.env.example -f ../infra/docker-compose.yml config --quiet` 通过。
+- 差异检查：`git diff --cached --check` 通过。
+- 未执行：未启动容器和真实 PostgreSQL；本补救目标是恢复 PR #15 合并前的已验证 TASK-001 集成树，不重新验收 TASK-002。

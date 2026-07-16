@@ -15,12 +15,15 @@
 - 仍阻塞：TASK-005 必须等待 TASK-002 与 TASK-004；其他任务继续严格遵循任务书依赖矩阵。
 - 容器责任：DEV-002 不得自行宣称 Docker、Compose 或 RAGFlow 验证通过；相关真实环境验证仍由 DEV-001 提供。
 
-## TASK-002 开发交接（2026-07-15）
+## CR-038 治理补救交接（2026-07-16）
 
-- 分支与恢复点：`codex/task-002-identity-equipment`，远端实现 Commit `0b0d9cf0dc066143c0a57d4683567fadb4714c12`，交接证据 Commit `9f162b421f4fefae4cdd69a001891c7e83d4bc13`，PR 目标为 `codex/stage-05-integration`。
-- PR：[#15](https://github.com/QI-code1992/Equipment-repair/pull/15) 已 Ready for review，待 Review 与集成。
-- 交付契约：会话认证、操作权限依赖、角色/权限查询、登录/登出/拒绝审计、全局请求指纹幂等、组织树、设备主数据和 Alembic `0001`。
-- 验证：Python 3.13.14 下 38 tests passed；Compose 配置、API 镜像构建、PostgreSQL downgrade/upgrade/current、`/healthz` 200、真实并发幂等/唯一冲突/组织树竞争均通过。
-- Review：最终独立复审 Critical 0、Important 0、Minor 0。
-- DEV-002 消费边界：可基于冻结的认证上下文继续 TASK-006 非数据库实现；只有 TASK-002 合入集成分支后，才可开始 TASK-006 数据库迁移/集成以及其他依赖 TASK-002 的数据库工作。
-- DEV-001 下一步：提交并完成 TASK-002 PR/集成；合入后按依赖矩阵启动 TASK-003，并通知 DEV-002 数据库边界已解锁。
+- 事件：PR #15 在审核结论仍为 `Changes requested` 时被合入 `codex/stage-05-integration`，合并提交为 `e328cec64f1aa9c7cdc383579af042692dce5679`。
+- 批准：项目负责人批准保留开发成果并通过独立 PR 非破坏性回滚该集成结果。
+- 补救分支：`codex/cr-038-revert-pr-15-gate-violation`。
+- 授权记录：`6650f615e48d88b9a54179c27a7f03d1bf48f391`。
+- 回滚候选：`5d91e83679acefa5486a25bf5b921e9c12fd52d6`。
+- 补救 PR：[PR #17](https://github.com/QI-code1992/Equipment-repair/pull/17)，Draft、Open，目标 `codex/stage-05-integration`；创建时 GitHub 显示 `MERGEABLE`，尚无 status checks。
+- 合并批准：项目负责人于 2026-07-16T15:00:35+08:00 明确批准审查候选 `3f02ac1021ffb2f189ee53120d4b3523415bff60` 转为 Ready 并手动合入；批准后的治理文档提交不得修改代码或回滚边界。
+- 验证：Python 3.13.14 `4 passed, 1 warning`；`compileall`、Compose 配置和差异检查通过。
+- 当前边界：PR #17 尚未合入；TASK-002 仍为 `Changes requested`；CR-037、TASK-002 R6/R7、TASK-003、TASK-004 和依赖 TASK-002 的数据库集成继续暂停。
+- 下一步：完成 PR #17 治理审查并由集成负责人手动合入；合入后同步 CR-037 治理分支，再恢复 TASK-002 整改与 DEV-002 复审。
