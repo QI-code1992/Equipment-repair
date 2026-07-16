@@ -34,3 +34,17 @@
 - PR #15：保留为被拒绝候选的审核历史和本轮 Review Request 载体；DEV-002 审核新候选通过后创建后继正式 PR。
 - 依赖边界：TASK-003、TASK-004、TASK-005 及 DEV-002 的数据库集成继续按任务书阻塞；TASK-006 仅保留已允许的非数据库范围。
 - 下一次有效交接条件：任务书 v1.2 与本审批记录已通过治理 PR 合入集成分支；CR-036 R6/R7 完成；PostgreSQL/Compose 和完整回归通过；正式证据提交并推送；DEV-002 复审通过。
+
+## CR-038 治理补救交接（2026-07-16）
+
+- 事件：PR #15 在审核结论仍为 `Changes requested` 时被合入 `codex/stage-05-integration`，合并提交为 `e328cec64f1aa9c7cdc383579af042692dce5679`。
+- 批准：项目负责人批准保留开发成果并通过独立 PR 非破坏性回滚该集成结果。
+- 补救分支：`codex/cr-038-revert-pr-15-gate-violation`。
+- 授权记录：`6650f615e48d88b9a54179c27a7f03d1bf48f391`。
+- 回滚候选：`5d91e83679acefa5486a25bf5b921e9c12fd52d6`。
+- 补救 PR：[PR #17](https://github.com/QI-code1992/Equipment-repair/pull/17)，已合入 `codex/stage-05-integration`。
+- 合并批准：项目负责人于 2026-07-16T15:00:35+08:00 明确批准审查候选 `3f02ac1021ffb2f189ee53120d4b3523415bff60` 转为 Ready 并手动合入；批准后的治理文档提交不得修改代码或回滚边界。
+- Merge Commit：`d37698c6e51df1701bbdfcf12ec6fa329241e0bd`。
+- 验证：Python 3.13.14 `4 passed, 1 warning`；`compileall`、Compose 构建、PostgreSQL/Redis/API 健康和容器内 `/healthz` 通过。
+- 当前边界：CR-038 已完成；TASK-002 仍为 `Changes requested`；CR-037、TASK-002 R6/R7、TASK-003、TASK-004 和依赖 TASK-002 的数据库集成继续暂停。
+- 下一步：完成 CR-037 治理 PR；合入后恢复 TASK-002 R6/R7 和 DEV-002 复审。

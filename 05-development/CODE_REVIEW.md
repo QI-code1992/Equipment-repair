@@ -32,3 +32,17 @@
 - Spec 阻断：设备字段、组织层级、用户/固定角色/菜单操作权限及附件敏感内容脱敏未完整实现。
 - 处置：进入 CR-036 修复周期；被拒绝 SHA 不得复用为完成、正式 PR、FCP 或集成依据。新候选必须完成 PostgreSQL/Compose 真实验证、完整独立 Review 和 DEV-002 复审。
 - PR 边界：按获批任务书 v1.2 精确候选 `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`，PR #15 保留为被拒绝历史和 Review Request 载体，不作为后继正式集成 PR；治理 PR 合入前不恢复 TASK-002 R6/R7。
+
+## CR-038 补救审查（2026-07-16）
+
+- 原因：PR #15 在正式审核结论仍为 `Changes requested` 时被合入集成分支，违反任务书和 Stage 5 集成门禁。
+- 审查范围：授权记录 `6650f615e48d88b9a54179c27a7f03d1bf48f391` 与回滚候选 `5d91e83679acefa5486a25bf5b921e9c12fd52d6`。
+- 边界检查：使用 `git revert -m 1 e328cec` 的非破坏性反向提交；未使用 reset、force-push 或历史改写；TASK-002 原提交仍可恢复。
+- 树状态：相对 PR #15 第一父提交 `42098613ffa20faed3bb0dcb842a0121722565bd`，仅保留 CR-038 治理记录。
+- 验证：Python 3.13.14 后端测试 `4 passed, 1 warning`；`compileall`、Compose 配置、`git diff --check` 通过。
+- 结论：回滚候选满足创建补救 PR 的条件；在补救 PR 合入前，TASK-002 仍为 `Changes requested`，所有依赖保持阻塞。
+- 正式治理审查：PR #17 当前头 `3f02ac1021ffb2f189ee53120d4b3523415bff60` 的源/目标分支、36 个文件边界、4 个提交、回滚树一致性和治理证据均通过；GitHub 状态为 `clean`，无评论、无 Review、无 CI checks。
+- 合并决定：项目负责人已于 2026-07-16T15:00:35+08:00 明确批准将 PR #17 转为 Ready 并手动合入。
+- 合并结果：PR #17 已合入 `codex/stage-05-integration`，Merge Commit 为 `d37698c6e51df1701bbdfcf12ec6fa329241e0bd`。
+- 合并后验证：Merge Commit 树与获批 PR 头 `9c1ff88a6842ffa1cb79bd63807b3d41d830d5bd` 一致；Python 3.13.14 `4 passed, 1 warning`；Compose 构建和容器健康通过；`/healthz` 返回正常。
+- 结论：CR-038 技术补救通过；TASK-002 仍为 `Changes requested`，CR-037 合入前不恢复 R6/R7。

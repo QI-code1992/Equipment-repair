@@ -30,3 +30,23 @@
 - 原型回归：执行全部 `06-testing/tests/*.test.js`，14/14 通过。
 - 后端与 Compose：后续由 TASK-001 重新验证，结果见“TASK-001 运行基线重新验证”。
 - 路径与差异：目录断言和 `git diff --check` 通过；技能与工件参考中的归档规则一致性扫描通过。
+
+## CR-038 PR #15 门禁违规合并补救（2026-07-16）
+
+- 回滚前基线：`py -3.13 -m pytest tests -q` 为 `38 passed, 1 warning`；Compose 配置通过。
+- 回滚方式：在隔离分支执行 `git revert -m 1 --no-commit e328cec64f1aa9c7cdc383579af042692dce5679`，审查暂存差异后提交为 `5d91e83679acefa5486a25bf5b921e9c12fd52d6`。
+- 树状态：`git diff --name-status 42098613ffa20faed3bb0dcb842a0121722565bd` 仅显示 CR-038 的三份治理记录。
+- Python 3.13：回滚后 `py -3.13 -m pytest tests -q` 为 `4 passed, 1 warning`。
+- 静态检查：`py -3.13 -m compileall -q app tests` 通过。
+- Compose：`docker compose --env-file ../infra/.env.example -f ../infra/docker-compose.yml config --quiet` 通过。
+- 差异检查：`git diff --cached --check` 通过。
+- 未执行：未启动容器和真实 PostgreSQL；本补救目标是恢复 PR #15 合并前的已验证 TASK-001 集成树，不重新验收 TASK-002。
+
+### CR-038 合并后验证
+
+- Merge Commit：`d37698c6e51df1701bbdfcf12ec6fa329241e0bd`，文件树与获批 PR 头 `9c1ff88a6842ffa1cb79bd63807b3d41d830d5bd` 一致。
+- Python 3.13：`4 passed, 1 warning`；`compileall` 通过。
+- Compose：配置、镜像构建和启动通过；PostgreSQL、Redis、API 均为 healthy。
+- HTTP：API 容器内 `/healthz` 返回 `{"status":"ok","service":"equipment-operations-platform"}`。
+- 清理：验证容器和网络已移除，未执行数据卷删除。
+- 结论：CR-038 技术补救完成；该验证不验收 TASK-002，TASK-002 仍为 `Changes requested`。

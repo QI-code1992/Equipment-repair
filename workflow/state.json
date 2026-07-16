@@ -1,7 +1,7 @@
 {
   "state": "IN_DEVELOPMENT",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-16T14:20:32+08:00",
+  "updatedAt": "2026-07-16T15:08:57+08:00",
   "productBaseline": {
     "status": "requirements-interaction-and-prototype-approved",
     "canonicalCandidate": [
@@ -22,7 +22,7 @@
   },
   "lastApprovedStage": "Stage 4 — Architecture and Development Plan",
   "pendingStageApproval": null,
-  "currentCommitSha": "cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77",
+  "currentCommitSha": "d37698c6e51df1701bbdfcf12ec6fa329241e0bd",
   "repairCycle": {
     "taskId": "TASK-002",
     "pullRequest": 15,
@@ -37,16 +37,42 @@
     "changeRequest": "CR-037",
     "artifact": "04-architecture-plan/DEVELOPMENT_TASK_BOOK.md",
     "candidateVersion": "v1.2",
-    "status": "APPROVED_PENDING_INTEGRATION",
+    "status": "APPROVED_READY_FOR_PR",
     "approvedCandidateCommit": "cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b",
     "approvedBy": "project owner",
     "approvedAt": "2026-07-16",
     "remoteBranch": "codex/taskbook-v1-2-governance",
     "integrationTarget": "codex/stage-05-integration",
     "governancePullRequest": null,
+    "integrationBase": "d37698c6e51df1701bbdfcf12ec6fa329241e0bd",
     "scope": "Stage 5 cross-review, reviewer-created formal PR, integration trigger, automation boundary and stale TASK-002 ledger correction",
     "preserveExistingWork": true,
     "resumeCondition": "The approved v1.2 task book and approval ledgers are merged into codex/stage-05-integration"
+  },
+  "governanceIncident": {
+    "changeRequest": "CR-038",
+    "status": "DONE",
+    "invalidMergeCommit": "e328cec64f1aa9c7cdc383579af042692dce5679",
+    "rejectedTaskCommit": "cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77",
+    "approvalRecordCommit": "6650f615e48d88b9a54179c27a7f03d1bf48f391",
+    "revertCandidateCommit": "5d91e83679acefa5486a25bf5b921e9c12fd52d6",
+    "sourceBranch": "codex/cr-038-revert-pr-15-gate-violation",
+    "targetBranch": "codex/stage-05-integration",
+    "pullRequest": {
+      "number": 17,
+      "url": "https://github.com/QI-code1992/Equipment-repair/pull/17",
+      "state": "MERGED",
+      "draft": false,
+      "mergeable": true,
+      "approvedHead": "3f02ac1021ffb2f189ee53120d4b3523415bff60",
+      "mergedHead": "9c1ff88a6842ffa1cb79bd63807b3d41d830d5bd",
+      "mergeCommit": "d37698c6e51df1701bbdfcf12ec6fa329241e0bd",
+      "approvedAt": "2026-07-16T15:00:35+08:00",
+      "approvedBy": "project owner"
+    },
+    "task002Status": "CHANGES_REQUESTED",
+    "dependencyUnlockAllowed": false,
+    "verification": "Merge tree matched approved PR head; Python 3.13.14: 4 passed, 1 warning; compileall passed; Compose build passed; PostgreSQL, Redis and API healthy; /healthz passed; verification containers and network removed"
   },
   "notes": [
     "GitHub repository: https://github.com/QI-code1992/Equipment-repair.",
@@ -69,6 +95,8 @@
     "On 2026-07-15, the project owner corrected the gate sequence: TASK-001 is a Stage 5 task and may start only after the refreshed Stage 4 -> Stage 5 gate is explicitly approved for an exact Commit SHA. DEF-003 and DEF-004 are Stage 5 TASK-001 risks, not pre-gate code-remediation requirements.",
     "On 2026-07-15, the project owner explicitly approved commit 25e15709a3f1d92f661d37acdb8aa3e1e0e41346 as the refreshed Stage 4 baseline and passed Gate-007 into Stage 5. The immutable milestone tag is baseline/stage-04-development-v1.1. DEV-001 may start TASK-001; downstream tasks remain blocked until TASK-001 passes.",
     "On 2026-07-16, DEV-002 requested changes on PR #15 at cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77. The project owner approved the CR-036 remediation scope and DEV-001 entered the TASK-002 repair cycle; the rejected SHA is not an acceptance candidate.",
-    "On 2026-07-16, the project owner approved exact commit cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b as DEVELOPMENT_TASK_BOOK v1.2 and authorized the isolated governance branch push. TASK-002 R6/R7 remain paused until the approved task book and approval ledgers are merged into codex/stage-05-integration; the rejected TASK-002 commit and existing local WIP remain preserved."
+    "On 2026-07-16, the project owner approved exact commit cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b as DEVELOPMENT_TASK_BOOK v1.2 and authorized the isolated governance branch push. TASK-002 R6/R7 remain paused until the approved task book and approval ledgers are merged into codex/stage-05-integration; the rejected TASK-002 commit and existing local WIP remain preserved.",
+    "On 2026-07-16, PR #15 was merged as e328cec64f1aa9c7cdc383579af042692dce5679 while its formal review gate remained Changes requested. CR-038 reverted that invalid integration through PR #17; merge commit d37698c6e51df1701bbdfcf12ec6fa329241e0bd passed post-merge Python, Compose, container-health and /healthz verification.",
+    "CR-037 is now the only governance prerequisite before TASK-002 R6/R7 may resume. TASK-002 remains Changes requested and all dependent database integration remains blocked."
   ]
 }
