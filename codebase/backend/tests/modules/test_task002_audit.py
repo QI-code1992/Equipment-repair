@@ -1,7 +1,14 @@
+import json
+
+import pytest
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from httpx import Response
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
+import app.modules.audit.http as audit_http
 from app.modules.audit.models import AuditEvent
 from app.modules.audit.service import sanitize_audit_metadata
 from app.modules.equipment.organization_router import router as organization_router
@@ -77,6 +84,36 @@ def test_attachment_content_is_redacted_without_removing_metadata() -> None:
     assert value["content_base64"] == "[REDACTED]"
 
 
+def test_attachment_redaction_handles_arrays_and_normalized_keys() -> None:
+    value = sanitize_audit_metadata(
+        {
+            "Files": [
+                {
+                    "filename": "one.txt",
+                    "Content": "first-secret",
+                    "authorization": "Bearer file-token",
+                },
+                {"filename": "two.txt", "base64": "second-secret"},
+            ],
+            "file-content": "direct-secret",
+            "content": "ordinary-content",
+        }
+    )
+
+    assert value == {
+        "Files": [
+            {
+                "filename": "one.txt",
+                "Content": "[REDACTED]",
+                "authorization": "[REDACTED]",
+            },
+            {"filename": "two.txt", "base64": "[REDACTED]"},
+        ],
+        "file-content": "[REDACTED]",
+        "content": "ordinary-content",
+    }
+
+
 def test_validation_failure_returns_one_persisted_audit_id(
     client: TestClient,
 ) -> None:
@@ -93,7 +130,13 @@ def test_validation_failure_returns_one_persisted_audit_id(
             "Authorization": f"Bearer {token}",
             "Idempotency-Key": "invalid-equipment",
         },
-        json={"code": "EQ-X"},
+        json={
+            "code": "EQ-X",
+            "attachment": {"filename": "manual.pdf", "content": "secret-body"},
+            "password": "plain-password",
+            "authorization": "Bearer request-token",
+            "content": "ordinary-business-content",
+        },
     )
 
     assert response.status_code == 422
@@ -104,12 +147,102 @@ def test_validation_failure_returns_one_persisted_audit_id(
     assert event.actor_user_id == user_id
     assert event.action == "equipment.create"
     assert event.result == "failure"
+    assert event.metadata_json["request"] == {
+        "code": "EQ-X",
+        "attachment": {"filename": "manual.pdf", "content": "[REDACTED]"},
+        "password": "[REDACTED]",
+        "authorization": "[REDACTED]",
+        "content": "ordinary-business-content",
+    }
     assert [
         item.id
         for item in failure_events(
             client, actor_user_id=user_id, action="equipment.create"
         )
     ] == [event.id]
+
+
+def test_logout_validation_failure_recovers_actor_from_bearer(
+    client: TestClient,
+) -> None:
+    user_id, token = create_user_token(
+        client,
+        username="logout-validation-user",
+        role_code="LOGOUT_VALIDATION_USER",
+        permission_codes=[],
+    )
+
+    revoked = client.delete(
+        "/api/auth/session",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Idempotency-Key": "revoke-before-validation",
+        },
+    )
+    response = client.delete(
+        "/api/auth/session",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert revoked.status_code == 200
+    assert response.status_code == 422
+    event = event_from_response(client, response)
+    assert event.actor_user_id == user_id
+    assert event.action == "session.logout"
+
+
+def test_invalid_json_body_is_not_stored_in_failure_audit(
+    client: TestClient,
+) -> None:
+    _, token = create_user_token(
+        client,
+        username="invalid-json-writer",
+        role_code="INVALID_JSON_WRITER",
+        permission_codes=["equipment:write"],
+    )
+
+    response = client.post(
+        "/api/equipment",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Idempotency-Key": "invalid-json",
+            "Content-Type": "application/json",
+        },
+        content='{"password":"raw-secret"',
+    )
+
+    assert response.status_code == 422
+    event = event_from_response(client, response)
+    assert "request" not in event.metadata_json
+    assert "raw-secret" not in json.dumps(event.metadata_json)
+
+
+def test_logout_idempotency_failure_recovers_actor_from_bearer(
+    client: TestClient,
+) -> None:
+    user_id, token = create_user_token(
+        client,
+        username="logout-idempotency-user",
+        role_code="LOGOUT_IDEMPOTENCY_USER",
+        permission_codes=["equipment:write"],
+    )
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Idempotency-Key": "cross-route-key",
+    }
+    created = client.post(
+        "/api/equipment",
+        headers=headers,
+        json={"code": "EQ-LOGOUT", "name": "Logout"},
+    )
+
+    response = client.delete("/api/auth/session", headers=headers)
+
+    assert created.status_code == 201
+    assert response.status_code == 409
+    event = event_from_response(client, response)
+    assert event.actor_user_id == user_id
+    assert event.action == "session.logout"
 
 
 def test_http_failure_returns_one_persisted_audit_id(client: TestClient) -> None:
@@ -135,6 +268,11 @@ def test_http_failure_returns_one_persisted_audit_id(client: TestClient) -> None
     assert event.actor_user_id == user_id
     assert event.action == "equipment.update"
     assert event.result == "failure"
+    assert event.metadata_json["request"] == {
+        "name": "Missing",
+        "organization_id": None,
+        "status": "NORMAL",
+    }
     assert [
         item.id
         for item in failure_events(
@@ -215,3 +353,144 @@ def test_permission_denial_reuses_its_existing_audit_event(
             )
         ).all()
     assert [item.id for item in events] == [event.id]
+
+
+@pytest.mark.parametrize("failure_point", ["flush", "commit"])
+def test_audit_persistence_error_rolls_back_and_returns_safe_503(
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+    failure_point: str,
+) -> None:
+    _, token = create_user_token(
+        client,
+        username=f"audit-failure-{failure_point}",
+        role_code=f"AUDIT_FAILURE_{failure_point.upper()}",
+        permission_codes=["equipment:write"],
+    )
+    rollback_calls = 0
+    real_rollback = Session.rollback
+
+    def recording_rollback(session: Session) -> None:
+        nonlocal rollback_calls
+        rollback_calls += 1
+        real_rollback(session)
+
+    def fail_write(*args: object, **kwargs: object) -> None:
+        del args, kwargs
+        raise SQLAlchemyError("SELECT password FROM credentials")
+
+    def fail_commit(session: Session) -> None:
+        del session
+        raise SQLAlchemyError("SELECT password FROM credentials")
+
+    monkeypatch.setattr(Session, "rollback", recording_rollback)
+    if failure_point == "flush":
+        monkeypatch.setattr(audit_http, "write_audit_event", fail_write)
+    else:
+        monkeypatch.setattr(Session, "commit", fail_commit)
+
+    response = client.post(
+        "/api/equipment",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Idempotency-Key": f"audit-failure-{failure_point}",
+        },
+        json={"code": "EQ-AUDIT-FAILURE"},
+    )
+
+    assert response.status_code == 503
+    assert response.json() == {"detail": {"code": "AUDIT_PERSIST_FAILED"}}
+    assert rollback_calls == 1
+    assert caplog.messages == ["Failed to persist audit event"]
+    assert "SELECT" not in caplog.text
+    assert "password" not in caplog.text
+
+
+def test_audit_rollback_error_is_logged_without_sensitive_detail(
+    client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    _, token = create_user_token(
+        client,
+        username="audit-rollback-failure",
+        role_code="AUDIT_ROLLBACK_FAILURE",
+        permission_codes=["equipment:write"],
+    )
+
+    def fail_write(*args: object, **kwargs: object) -> None:
+        del args, kwargs
+        raise SQLAlchemyError("SELECT password FROM credentials")
+
+    def fail_rollback(session: Session) -> None:
+        del session
+        raise SQLAlchemyError("Bearer rollback-secret")
+
+    monkeypatch.setattr(audit_http, "write_audit_event", fail_write)
+    monkeypatch.setattr(Session, "rollback", fail_rollback)
+
+    response = client.post(
+        "/api/equipment",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Idempotency-Key": "audit-rollback-failure",
+        },
+        json={"code": "EQ-AUDIT-ROLLBACK"},
+    )
+
+    assert response.status_code == 503
+    assert caplog.messages == [
+        "Failed to roll back audit transaction",
+        "Failed to persist audit event",
+    ]
+    assert "rollback-secret" not in caplog.text
+
+
+def test_http_detail_uses_safe_recursive_whitelist(client: TestClient) -> None:
+    @client.app.post("/api/test-sensitive-detail", name="test.fail")
+    def fail_with_sensitive_detail() -> None:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "TEST_FAILED",
+                "message": "Safe message",
+                "password": "plain-password",
+                "authorization": "Bearer response-token",
+                "sql": "SELECT password FROM users",
+                "fields": [
+                    {
+                        "field": "password",
+                        "type": "invalid",
+                        "authorization": "Bearer nested-token",
+                    }
+                ],
+            },
+        )
+
+    response = client.post("/api/test-sensitive-detail", json={})
+
+    assert response.status_code == 400
+    detail = response.json()["detail"]
+    assert set(detail) == {"code", "message", "fields", "audit_event_id"}
+    assert detail["fields"] == [{"field": "password", "type": "invalid"}]
+    rendered = json.dumps(detail)
+    assert "plain-password" not in rendered
+    assert "response-token" not in rendered
+    assert "nested-token" not in rendered
+    assert "SELECT password" not in rendered
+
+
+def test_non_dict_http_detail_does_not_expose_exception_text(
+    client: TestClient,
+) -> None:
+    @client.app.post("/api/test-string-detail", name="test.fail")
+    def fail_with_string_detail() -> None:
+        raise HTTPException(status_code=400, detail="SELECT secret-password")
+
+    response = client.post("/api/test-string-detail", json={})
+
+    assert response.status_code == 400
+    assert set(response.json()["detail"]) == {"code", "audit_event_id"}
+    assert response.json()["detail"]["code"] == "REQUEST_FAILED"
+    assert "secret-password" not in response.text

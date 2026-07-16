@@ -1,9 +1,17 @@
+import json
+import logging
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.idempotency import IdempotencyKeyReused
-from app.modules.audit.service import write_audit_event
+from app.modules.audit.service import sanitize_audit_metadata, write_audit_event
+from app.modules.identity.service import login_session_for_token
+
+
+logger = logging.getLogger(__name__)
 
 
 def protected_write(request: Request) -> bool:
@@ -20,12 +28,24 @@ def route_action(request: Request) -> str:
 
 
 def response_detail(detail: object, event_id: str | None) -> dict[str, object]:
-    normalized = (
-        detail
-        if isinstance(detail, dict)
-        else {"code": "REQUEST_FAILED", "message": str(detail)}
-    )
-    result = dict(normalized)
+    result: dict[str, object] = {"code": "REQUEST_FAILED"}
+    if isinstance(detail, dict):
+        sanitized = sanitize_audit_metadata(detail)
+        if isinstance(sanitized, dict):
+            for key in ("code", "message"):
+                if isinstance(sanitized.get(key), str):
+                    result[key] = sanitized[key]
+            fields = sanitized.get("fields")
+            if isinstance(fields, list):
+                result["fields"] = [
+                    {
+                        key: item[key]
+                        for key in ("field", "type")
+                        if key in item and isinstance(item[key], str)
+                    }
+                    for item in fields
+                    if isinstance(item, dict)
+                ]
     if event_id is not None:
         result["audit_event_id"] = event_id
     return result
@@ -42,30 +62,84 @@ def validation_detail(error: RequestValidationError) -> dict[str, object]:
     return {"code": "VALIDATION_ERROR", "fields": fields}
 
 
-def persist_failure(request: Request, detail: object) -> str | None:
+def bearer_token(request: Request) -> str | None:
+    scheme, _, token = request.headers.get("authorization", "").partition(" ")
+    if scheme.lower() != "bearer" or not token:
+        return None
+    return token
+
+
+async def request_summary(request: Request, body: object = None) -> object | None:
+    content_type = request.headers.get("content-type", "").split(";", 1)[0].lower()
+    if content_type != "application/json" and not content_type.endswith("+json"):
+        return None
+    value = body
+    if value is None:
+        raw_body = await request.body()
+        if not raw_body:
+            return None
+        try:
+            value = json.loads(raw_body)
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return None
+    if not isinstance(value, (dict, list)):
+        return None
+    return sanitize_audit_metadata(value)
+
+
+async def persist_failure(
+    request: Request, detail: object, *, body: object = None
+) -> tuple[str | None, bool]:
     event_id = getattr(request.state, "audit_event_id", None)
     if not protected_write(request) or event_id is not None:
-        return event_id
+        return event_id, False
 
     with request.app.state.session_factory() as db:
-        action = route_action(request)
-        event = write_audit_event(
-            db,
-            actor_user_id=getattr(request.state, "current_user_id", None),
-            action=action,
-            resource_type=action.partition(".")[0],
-            resource_id=None,
-            result="failure",
-            metadata={
+        try:
+            actor_user_id = getattr(request.state, "current_user_id", None)
+            if actor_user_id is None:
+                token = bearer_token(request)
+                login_session = (
+                    None if token is None else login_session_for_token(db, token)
+                )
+                if login_session is not None:
+                    actor_user_id = login_session.user_id
+            action = route_action(request)
+            metadata: dict[str, object] = {
                 "method": request.method,
                 "path": request.url.path,
-                "detail": detail,
-            },
-        )
-        db.commit()
-        event_id = event.id
+                "detail": response_detail(detail, None),
+            }
+            summary = await request_summary(request, body)
+            if summary is not None:
+                metadata["request"] = summary
+            event = write_audit_event(
+                db,
+                actor_user_id=actor_user_id,
+                action=action,
+                resource_type=action.partition(".")[0],
+                resource_id=None,
+                result="failure",
+                metadata=metadata,
+            )
+            db.commit()
+            event_id = event.id
+        except SQLAlchemyError:
+            try:
+                db.rollback()
+            except SQLAlchemyError:
+                logger.error("Failed to roll back audit transaction")
+            logger.error("Failed to persist audit event")
+            return None, True
     request.state.audit_event_id = event_id
-    return event_id
+    return event_id, False
+
+
+def audit_persist_failed_response() -> JSONResponse:
+    return JSONResponse(
+        status_code=503,
+        content={"detail": {"code": "AUDIT_PERSIST_FAILED"}},
+    )
 
 
 def register_audit_exception_handlers(app: FastAPI) -> None:
@@ -73,7 +147,9 @@ def register_audit_exception_handlers(app: FastAPI) -> None:
     async def http_exception_handler(
         request: Request, error: HTTPException
     ) -> JSONResponse:
-        event_id = persist_failure(request, error.detail)
+        event_id, persist_failed = await persist_failure(request, error.detail)
+        if persist_failed:
+            return audit_persist_failed_response()
         return JSONResponse(
             status_code=error.status_code,
             content={"detail": response_detail(error.detail, event_id)},
@@ -85,7 +161,11 @@ def register_audit_exception_handlers(app: FastAPI) -> None:
         request: Request, error: RequestValidationError
     ) -> JSONResponse:
         detail = validation_detail(error)
-        event_id = persist_failure(request, detail)
+        event_id, persist_failed = await persist_failure(
+            request, detail, body=error.body
+        )
+        if persist_failed:
+            return audit_persist_failed_response()
         return JSONResponse(
             status_code=422,
             content={"detail": response_detail(detail, event_id)},
@@ -97,7 +177,9 @@ def register_audit_exception_handlers(app: FastAPI) -> None:
     ) -> JSONResponse:
         del error
         detail = {"code": "IDEMPOTENCY_KEY_REUSED"}
-        event_id = persist_failure(request, detail)
+        event_id, persist_failed = await persist_failure(request, detail)
+        if persist_failed:
+            return audit_persist_failed_response()
         return JSONResponse(
             status_code=409,
             content={"detail": response_detail(detail, event_id)},
