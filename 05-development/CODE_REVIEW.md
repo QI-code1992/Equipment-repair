@@ -88,3 +88,13 @@
 - 最终复审：Critical 0、Important 0；Minor 仅提示 `0002` 已接近规模上限，后续数据库变化必须新增 revision，以及 PostgreSQL 测试函数可在未来不损害可读性时继续缩短。
 - 边界：未实现 TASK-003 的活跃故障停用保护，未进入 TASK-004/RAGFlow，未增加兼容层、通用抽象或生产依赖。
 - 结论：DEV-001 内部 Review 门禁通过，可形成书面审核请求；TASK-002 是否接受仍由 DEV-002 决定。
+
+## TASK-002 集成基线同步复审（2026-07-16）
+
+- 自查发现：首轮证据 HEAD `ab67bcdff42d64ba739571515df4e6faed158d32` 与集成分支分叉，merge-base 仍为被拒候选 `cfb8ed9`；模拟合并产生治理台账、`main.py` 和 CR-038 删除文件的冲突，因此原审核请求不可用于创建正式 PR。
+- 修正：将最新集成基线 `ac767c83128cb89ceea8e28c518be0adfbe1984c` 作为第二父提交合入。TASK-002 代码和已同步后追加的任务证据采用任务分支版本；`workflow/STAGE_APPROVALS.md` 采用集成分支版本。
+- 边界检查：CR-037/CR-038 审批和回滚历史保留；`STAGE_APPROVALS.md` 不再出现在任务差异中；依赖继续阻塞。
+- 合并检查：集成分支成为任务分支祖先，ahead/behind 为 `19/0`；`git merge-tree --write-tree` 只返回结果树，无冲突。
+- 差异检查：相对集成分支仅恢复 TASK-002 设计、契约、迁移、后端实现、测试和本任务证据；未引入 TASK-003/TASK-004 业务实现。
+- 复验：完整后端 `125 passed, 5 skipped`；真实 PostgreSQL `5 passed`；迁移、Compose 实际状态、容器健康和 `/healthz` 通过。
+- 结论：分支同步阻断已关闭，可在更新精确证据 HEAD 后重新请求 DEV-002 审核。

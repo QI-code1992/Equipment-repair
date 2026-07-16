@@ -563,3 +563,11 @@
 - Remaining Gate:
   - 正式证据提交和远端精确 HEAD 完成后，由 DEV-001 发送书面审核请求。
   - DEV-002 审核通过后创建后继正式 PR；在正式合入前 TASK-002 不算接受，依赖不解锁。
+
+#### 集成基线同步修正
+
+- Finding: 首轮远端证据 `ab67bcdff42d64ba739571515df4e6faed158d32` 与当前集成分支分叉，不能直接形成无冲突的后继正式 PR。
+- Correction: 通过 Merge Commit `0aac415d18aee256c237adb508d2ab24314a7486` 合入当前集成基线 `ac767c83128cb89ceea8e28c518be0adfbe1984c`。
+- Boundary: TASK-002 代码与证据保留；CR-037、CR-038 和 Stage Approval 采用当前集成历史；不改写或删除既有远端提交。
+- Verification: 集成分支已成为任务分支祖先；模拟合并无冲突；完整后端 `125 passed, 5 skipped`；PostgreSQL `5 passed`；迁移、Compose 实际状态和 `/healthz` 通过。
+- Status: 修正完成，等待生成并推送新的精确审核 HEAD；依赖不解锁。

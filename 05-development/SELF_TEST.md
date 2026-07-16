@@ -90,3 +90,15 @@
 - 静态差异：`git diff --check` 通过。
 - 唯一警告：FastAPI/Starlette TestClient 对 `httpx` 兼容层的第三方弃用提示；未新增生产依赖。
 - 未验证：尚未取得 DEV-002 对新候选的正式批准，尚未创建后继正式 PR，尚未合入 `codex/stage-05-integration`。
+
+## TASK-002 集成基线同步后复验（2026-07-16）
+
+- 同步基线：`origin/codex/stage-05-integration` 精确 SHA `ac767c83128cb89ceea8e28c518be0adfbe1984c`。
+- 同步 Merge Commit：`0aac415d18aee256c237adb508d2ab24314a7486`；当前集成基线是任务分支祖先，`git merge-tree --write-tree` 无冲突。
+- 完整后端：同步解决后和 Merge Commit 后均执行 `python -m pytest tests -q`，结果 `125 passed, 5 skipped, 1 warning`。
+- 编译与静态检查：`python -m compileall -q app alembic`、`git diff --check`、`workflow/state.json` 解析均通过。
+- Compose：`up -d --build` 客户端命令在 180 秒边界返回超时码 124，但输出已完成镜像构建、API 重建和启动；后续独立检查确认 PostgreSQL/Redis healthy、API 正常启动，故不把原超时命令记为直接成功。
+- 健康检查：容器内 Python `3.13.14`；`/healthz` 返回 `{'status': 'ok', 'service': 'equipment-operations-platform'}`。
+- 迁移：真实 PostgreSQL 17 再次完成 `0002 -> 0001 -> 0002`，最终 `0002 (head)`。
+- PostgreSQL 集成：基于同步后 API 镜像重新构建测试镜像，结果 `5 passed, 1 warning`。
+- 未验证：DEV-002 尚未复审同步后的新精确 HEAD；后继正式 PR 尚未创建或集成。

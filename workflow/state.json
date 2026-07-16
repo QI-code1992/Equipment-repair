@@ -1,7 +1,7 @@
 {
   "state": "IN_DEVELOPMENT",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-16T16:53:56+08:00",
+  "updatedAt": "2026-07-16T17:12:55+08:00",
   "productBaseline": {
     "status": "requirements-interaction-and-prototype-approved",
     "canonicalCandidate": [
@@ -22,7 +22,7 @@
   },
   "lastApprovedStage": "Stage 4 — Architecture and Development Plan",
   "pendingStageApproval": null,
-  "currentCommitSha": "11dbb226e9b77ff5185fed5fa1434b0de6749206",
+  "currentCommitSha": "0aac415d18aee256c237adb508d2ab24314a7486",
   "repairCycle": {
     "taskId": "TASK-002",
     "pullRequest": 15,
@@ -36,9 +36,12 @@
     "resumeScope": "Implementation and DEV-001 review complete; only DEV-002 review feedback may reopen development",
     "r6CommitSha": "35119954ba1d9ca475f03d1faa026bf6a474b18f",
     "r7CommitSha": "11dbb226e9b77ff5185fed5fa1434b0de6749206",
-    "verification": "Python 3.13.14: 125 passed, 5 skipped; dedicated PostgreSQL 17: 5 passed; 0002 downgrade/upgrade/current passed; Compose, PostgreSQL/Redis health and /healthz passed; DEV-001 review Critical 0 Important 0",
+    "firstEvidenceCommitSha": "ab67bcdff42d64ba739571515df4e6faed158d32",
+    "integrationBaseSha": "ac767c83128cb89ceea8e28c518be0adfbe1984c",
+    "synchronizationCommitSha": "0aac415d18aee256c237adb508d2ab24314a7486",
+    "verification": "Python 3.13.14: 125 passed, 5 skipped; dedicated PostgreSQL 17: 5 passed; 0002 downgrade/upgrade/current passed; Compose actual state, PostgreSQL/Redis health and /healthz passed; merge simulation has no conflicts; DEV-001 review Critical 0 Important 0",
     "dependencyUnlockAllowed": false,
-    "nextAction": "Push exact task-branch HEAD and request DEV-002 review; DEV-002 creates the successor formal PR only after approval"
+    "nextAction": "Commit and push synchronized evidence HEAD, supersede the ab67bcd review request, and request DEV-002 review; DEV-002 creates the successor formal PR only after approval"
   },
   "governanceCorrection": {
     "changeRequest": "CR-037",
@@ -136,6 +139,7 @@
     "On 2026-07-16, the project owner approved exact commit cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b as DEVELOPMENT_TASK_BOOK v1.2 and authorized the isolated governance branch push. TASK-002 R6/R7 remain paused until the approved task book and approval ledgers are merged into codex/stage-05-integration; the rejected TASK-002 commit and existing local WIP remain preserved.",
     "On 2026-07-16, PR #15 was merged as e328cec64f1aa9c7cdc383579af042692dce5679 while its formal review gate remained Changes requested. CR-038 reverted that invalid integration through PR #17; merge commit d37698c6e51df1701bbdfcf12ec6fa329241e0bd passed post-merge Python, Compose, container-health and /healthz verification.",
     "CR-037 was merged through PR #18 at 18485653a94cd033cfc82e8d6c7e40c35fcfbe33 and passed post-merge verification. DEV-001 may resume TASK-002 CR-036 R6/R7; TASK-002 remains Changes requested and all dependent tasks and database integration remain blocked.",
-    "On 2026-07-16, DEV-001 completed TASK-002 CR-036 R6/R7 at 35119954ba1d9ca475f03d1faa026bf6a474b18f and 11dbb226e9b77ff5185fed5fa1434b0de6749206. Local, PostgreSQL 17, migration, Compose and health verification passed; DEV-001 review has no Critical or Important findings. TASK-002 now awaits DEV-002 re-review and remains unaccepted and unintegrated."
+    "On 2026-07-16, DEV-001 completed TASK-002 CR-036 R6/R7 at 35119954ba1d9ca475f03d1faa026bf6a474b18f and 11dbb226e9b77ff5185fed5fa1434b0de6749206. Local, PostgreSQL 17, migration, Compose and health verification passed; DEV-001 review has no Critical or Important findings. TASK-002 now awaits DEV-002 re-review and remains unaccepted and unintegrated.",
+    "Self-check found the first evidence head ab67bcdff42d64ba739571515df4e6faed158d32 diverged from the current integration branch. Merge commit 0aac415d18aee256c237adb508d2ab24314a7486 synchronized ac767c83128cb89ceea8e28c518be0adfbe1984c, preserved CR-037 and CR-038, and produced a conflict-free successor-PR base. Dependencies remain locked."
   ]
 }
