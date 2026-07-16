@@ -9,6 +9,7 @@ from app.core.database import get_db
 from app.core.idempotency import find_idempotent_response, save_idempotent_response
 from app.modules.audit.service import write_audit_event
 from app.modules.equipment.models import Equipment, EquipmentStatus, Organization
+from app.modules.equipment.organization_service import acquire_organization_tree_lock
 from app.modules.identity.dependencies import require_permission
 from app.modules.identity.models import User
 
@@ -54,6 +55,7 @@ def create_equipment(
     db: Session = Depends(get_db),
     user: User = Depends(require_permission("equipment:write")),
 ) -> dict[str, object] | JSONResponse:
+    acquire_organization_tree_lock(db)
     request_body = payload.model_dump(mode="json")
     replay = find_idempotent_response(
         db,
@@ -126,6 +128,7 @@ def update_equipment(
     db: Session = Depends(get_db),
     user: User = Depends(require_permission("equipment:write")),
 ) -> dict[str, object] | JSONResponse:
+    acquire_organization_tree_lock(db)
     path = f"/api/equipment/{equipment_id}"
     request_body = payload.model_dump(mode="json")
     replay = find_idempotent_response(

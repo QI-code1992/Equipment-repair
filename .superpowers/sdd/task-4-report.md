@@ -77,3 +77,37 @@ D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m compileall -q codebas
 - 抽象层：仅新增简报指定的组织领域 service；路由内两个私有 helper 用于复用既有幂等/审计收尾，没有新增通用层。
 - 无关修改：无。
 - 未验证：未连接实际 PostgreSQL 运行并发写；锁调用 SQL 和固定参数由现有 PostgreSQL recording-session 回归覆盖，SQLite 中按设计为 no-op。
+
+## 审查修复追加记录
+
+### 授权范围
+
+- 按审查意见最小修改现有设备 create/update 控制器：仅在幂等查找和组织读取前获取组织树锁 `824003`，未改变设备字段、schema、响应或其他 Task 5 合同。
+- 未新增通用锁层；设备路由直接复用 `organization_service.acquire_organization_tree_lock()`。
+
+### RED / GREEN
+
+1. 锁顺序：组织 create/update/delete 与设备 create/update 的 3 个序列测试首次 `3 failed`，实际序列缺少前置 tree lock；入口加锁后 `3 passed`，固定为 `tree -> idempotency/business`。
+2. 更新唯一冲突与删除外键竞态：注入实际 SQLAlchemy `IntegrityError`，首次 `4 failed` 且异常穿透；增加 rollback 和约束映射后 `4 passed`。SQLite 唯一消息分别映射 code/name，未知唯一冲突映射 `ORGANIZATION_CONFLICT`；实现同时读取 PostgreSQL `diag.constraint_name`。删除外键冲突映射 `ORGANIZATION_HAS_EQUIPMENT`。所有 API 失败响应均断言含 `audit_event_id`。
+3. 非法环：SQLite 旁路构造自环和三节点环，旧实现两项均在第 7 次后代查询被测试 guard 截断（`2 failed`）；加入 visited 集合后 `2 passed`，稳定返回 `422 ORGANIZATION_TREE_INVALID` 并写失败审计。
+
+### 审查后验证
+
+```powershell
+D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests/modules/test_task002_organizations.py codebase/backend/tests/modules/test_identity_permissions.py codebase/backend/tests/modules/test_task002_audit.py -q
+```
+
+结果：退出码 0，`64 passed, 1 warning in 22.84s`。
+
+```powershell
+D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests -q
+```
+
+结果：退出码 0，`90 passed, 1 warning in 30.67s`。
+
+```powershell
+D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m compileall -q codebase/backend/app codebase/backend/tests
+git diff --check
+```
+
+结果：均退出码 0。组织路由和组织 service 的所有函数均少于 60 行。

@@ -101,6 +101,7 @@ def create_organization(
     db: Session = Depends(get_db),
     actor: User = Depends(require_permission("organization:write")),
 ) -> dict[str, object] | JSONResponse:
+    acquire_organization_tree_lock(db)
     request_body = payload.model_dump(mode="json")
     replay = _replay(db, actor, "POST", "/api/organizations", idempotency_key, request_body)
     if replay is not None:
@@ -121,6 +122,7 @@ def update_organization(
     db: Session = Depends(get_db),
     actor: User = Depends(require_permission("organization:write")),
 ) -> dict[str, object] | JSONResponse:
+    acquire_organization_tree_lock(db)
     path = f"/api/organizations/{organization_id}"
     request_body = payload.model_dump(mode="json")
     replay = _replay(db, actor, "PATCH", path, idempotency_key, request_body)
@@ -139,6 +141,7 @@ def delete_organization(
     db: Session = Depends(get_db),
     actor: User = Depends(require_permission("organization:write")),
 ) -> dict[str, object]:
+    acquire_organization_tree_lock(db)
     deleted = organization_service.delete_organization(db, organization_id)
     return _complete_write(
         db, actor, deleted, action="organization.delete", method="DELETE",
