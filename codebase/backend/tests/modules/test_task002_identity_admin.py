@@ -1,9 +1,12 @@
 from fastapi.testclient import TestClient
+import pytest
 from sqlalchemy import select
 
+from app.modules.identity import admin_service
 from app.modules.audit.models import AuditEvent
 from app.modules.identity.bootstrap import bootstrap_admin
-from app.modules.identity.models import Role, RoleCode
+from app.modules.identity.models import Role, RoleCode, User
+from app.modules.identity.schemas import UserUpdate
 
 
 def seeded_system_admin(client: TestClient) -> tuple[str, str]:
@@ -186,3 +189,87 @@ def test_unknown_write_field_is_audited_once(client: TestClient) -> None:
             )
         ).all()
     assert [event.id for event in events] == [event_id]
+
+
+def test_identity_admin_lock_uses_one_fixed_postgresql_transaction_lock() -> None:
+    executed: list[tuple[object, object]] = []
+
+    class PostgreSQLBind:
+        class dialect:
+            name = "postgresql"
+
+    class RecordingSession:
+        def get_bind(self) -> PostgreSQLBind:
+            return PostgreSQLBind()
+
+        def execute(self, statement: object, parameters: object = None) -> None:
+            executed.append((statement, parameters))
+
+    admin_service.acquire_identity_admin_lock(RecordingSession())
+
+    assert len(executed) == 1
+    assert "pg_advisory_xact_lock" in str(executed[0][0])
+    assert executed[0][1] == {"lock_id": admin_service.IDENTITY_ADMIN_LOCK_ID}
+
+
+def test_identity_admin_lock_is_a_sqlite_noop() -> None:
+    class SQLiteBind:
+        class dialect:
+            name = "sqlite"
+
+    class RejectingSession:
+        def get_bind(self) -> SQLiteBind:
+            return SQLiteBind()
+
+        def execute(self, statement: object, parameters: object = None) -> None:
+            del statement, parameters
+            pytest.fail("SQLite must not execute a PostgreSQL advisory lock")
+
+    admin_service.acquire_identity_admin_lock(RejectingSession())
+
+
+def test_user_update_locks_before_reading_admin_state(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[str] = []
+    system_role = Role(
+        id="system-role", code=RoleCode.SYSTEM_ADMIN.value, name="SYSTEM_ADMIN"
+    )
+    equipment_role = Role(
+        id="equipment-role", code=RoleCode.EQUIPMENT_ADMIN.value, name="EQUIPMENT_ADMIN"
+    )
+    actor = User(id="actor", username="actor", password_hash="hash")
+    target = User(id="target", username="target", password_hash="hash", enabled=True)
+    target.roles = [system_role]
+
+    class RecordingSession:
+        def flush(self) -> None:
+            calls.append("flush")
+
+    monkeypatch.setattr(
+        admin_service, "acquire_identity_admin_lock", lambda db: calls.append("lock")
+    )
+    monkeypatch.setattr(
+        admin_service,
+        "user_detail",
+        lambda db, user_id: calls.append("target") or target,
+    )
+    monkeypatch.setattr(
+        admin_service,
+        "roles_for_ids",
+        lambda db, role_ids: calls.append("roles") or [equipment_role],
+    )
+    monkeypatch.setattr(
+        admin_service,
+        "enabled_system_admin_count",
+        lambda db: calls.append("count") or 2,
+    )
+
+    admin_service.update_user(
+        RecordingSession(),
+        actor,
+        target.id,
+        UserUpdate(enabled=True, role_ids=[equipment_role.id]),
+    )
+
+    assert calls == ["lock", "target", "roles", "count", "flush"]

@@ -42,3 +42,13 @@ The warning is the pre-existing Starlette `TestClient`/httpx deprecation warning
 ## Concerns
 
 - No functional blocker. The existing Starlette/httpx deprecation warning remains outside Task 3 scope.
+
+## Important review fix: system administrator concurrency
+
+- Root cause: `update_user` previously read the target and enabled system administrator count without serializing concurrent transactions. Two administrators could both observe a count of two and each remove the other, leaving zero enabled administrators.
+- Fix: every user update now obtains the fixed PostgreSQL transaction advisory lock `IDENTITY_ADMIN_LOCK_ID` before reading the target, requested roles, or enabled administrator count. SQLite explicitly performs no lock SQL.
+- RED: focused Task 3 tests produced `3 failed, 7 passed`; all three failures showed the missing `acquire_identity_admin_lock` boundary.
+- GREEN: focused Task 3 tests produced `10 passed, 1 warning`.
+- Related identity: `42 passed, 1 warning`.
+- Full backend: `73 passed, 1 warning`.
+- Task 7 remaining verification: run a real PostgreSQL two-transaction concurrency test to prove the advisory lock serializes competing administrator reductions end to end.

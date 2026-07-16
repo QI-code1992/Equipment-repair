@@ -1,11 +1,22 @@
 from fastapi import HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.modules.identity.models import Permission, Role, RoleCode, User, user_roles
 from app.modules.identity.security import hash_password
 from app.modules.identity.schemas import UserCreate, UserUpdate
+
+
+IDENTITY_ADMIN_LOCK_ID = 824004
+
+
+def acquire_identity_admin_lock(db: Session) -> None:
+    if db.get_bind().dialect.name == "postgresql":
+        db.execute(
+            text("SELECT pg_advisory_xact_lock(:lock_id)"),
+            {"lock_id": IDENTITY_ADMIN_LOCK_ID},
+        )
 
 
 def fixed_roles(db: Session) -> list[Role]:
@@ -76,6 +87,7 @@ def enabled_system_admin_count(db: Session) -> int:
 def update_user(
     db: Session, actor: User, user_id: str, payload: UserUpdate
 ) -> User:
+    acquire_identity_admin_lock(db)
     target = user_detail(db, user_id)
     roles = roles_for_ids(db, payload.role_ids)
     keeps_system_admin = any(role.code == RoleCode.SYSTEM_ADMIN.value for role in roles)
