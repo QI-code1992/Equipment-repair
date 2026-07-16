@@ -16,6 +16,7 @@
 - 不新增生产依赖，不建立组织/设备行级授权，不增加通用 CRUD、Repository、Manager、Factory 或兼容层。
 - 设备只保存图片对象引用元数据；密码、Token、Cookie、密钥及敏感附件正文不得进入审计或日志。
 - 所有新增或修复行为必须先有失败测试并观察 RED，再做最小实现转为 GREEN。
+- 所有 TASK-002 请求模型使用 `ConfigDict(extra="forbid")`，未知字段必须产生可审计的 `422 VALIDATION_ERROR`，不得静默忽略附件正文或契约外字段。
 - 普通函数目标不超过 40 行；超过 60 行必须在本任务内按职责拆分；不向现有 600 行测试文件继续增加新业务场景。
 - 每个任务只提交本任务列出的文件；每次提交前运行最小相关测试和 `git diff --check`。
 
@@ -488,6 +489,7 @@ Expected: FAIL because custom role creation still exists and user PATCH is missi
 
 ```python
 class UserCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     username: str = Field(min_length=1, max_length=100)
     password: str = Field(min_length=8, max_length=200)
     role_ids: list[str] = Field(min_length=1)
@@ -586,6 +588,7 @@ Expected: FAIL because type/code/status/delete behavior is absent.
 
 ```python
 class OrganizationWrite(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     type: OrganizationType
     code: str = Field(min_length=1, max_length=100)
     name: str = Field(min_length=1, max_length=200)
@@ -698,11 +701,13 @@ Expected: FAIL because the current request and response only expose code/name/or
 
 ```python
 class ImageRef(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     object_key: str = Field(min_length=1, max_length=500)
     filename: str = Field(min_length=1, max_length=255)
 
 
 class EquipmentWrite(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     code: str = Field(min_length=1, max_length=100)
     name: str = Field(min_length=1, max_length=200)
     model: str = Field(min_length=1, max_length=200)
@@ -721,7 +726,7 @@ class EquipmentWrite(BaseModel):
 
 - [ ] **Step 4: 实现短路由和完整序列化**
 
-Expose list, detail, create and update. Use explicit names `equipment.create` and `equipment.update`; keep code immutable on update unless the SPEC explicitly includes it in the update body. Translate database uniqueness races to `409 EQUIPMENT_CODE_EXISTS`; successful writes include persisted `audit_event_id` and cache the response in the same transaction.
+Expose list, detail, create and update. Use explicit names `equipment.create` and `equipment.update`; update body includes `code` because the approved equipment-edit prototype exposes an editable device-code field, and uniqueness checks apply on code changes. Translate database uniqueness races to `409 EQUIPMENT_CODE_EXISTS`; successful writes include persisted `audit_event_id` and cache the response in the same transaction.
 
 - [ ] **Step 5: 运行 GREEN 和全模块回归**
 
