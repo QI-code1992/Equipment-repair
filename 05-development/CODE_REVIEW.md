@@ -21,3 +21,5 @@
 - 树状态：相对 PR #15 第一父提交 `42098613ffa20faed3bb0dcb842a0121722565bd`，仅保留 CR-038 治理记录。
 - 验证：Python 3.13.14 后端测试 `4 passed, 1 warning`；`compileall`、Compose 配置、`git diff --check` 通过。
 - 结论：回滚候选满足创建补救 PR 的条件；在补救 PR 合入前，TASK-002 仍为 `Changes requested`，所有依赖保持阻塞。
+- 正式治理审查：PR #17 当前头 `3f02ac1021ffb2f189ee53120d4b3523415bff60` 的源/目标分支、36 个文件边界、4 个提交、回滚树一致性和治理证据均通过；GitHub 状态为 `clean`，无评论、无 Review、无 CI checks。
+- 合并决定：项目负责人已于 2026-07-16T15:00:35+08:00 明确批准将 PR #17 转为 Ready 并手动合入。

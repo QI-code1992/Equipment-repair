@@ -452,7 +452,7 @@
 ### CR-038：回滚未经审核门禁批准的 PR #15 集成结果
 
 - Level: L2
-- Status: Ready For Review / Draft PR #17 Open
+- Status: Approved For Merge / PR #17
 - Raised By: 项目负责人
 - Raised At: 2026-07-16T14:48:01+08:00
 - Current Stage: Stage 5 — Development Implementation
@@ -470,10 +470,11 @@
   - Source Branch: `codex/cr-038-revert-pr-15-gate-violation`
   - Target Branch: `codex/stage-05-integration`
   - Pull Request: [#17](https://github.com/QI-code1992/Equipment-repair/pull/17)（Draft）
+  - Merge Approval: 项目负责人于 2026-07-16T15:00:35+08:00 明确批准审查候选 `3f02ac1021ffb2f189ee53120d4b3523415bff60` 转为 Ready 并手动合入；批准后的唯一允许变更是记录本批准的治理文档提交，且必须重新验证无代码或回滚边界变化。
   - Merge Commit To Revert: `e328cec64f1aa9c7cdc383579af042692dce5679`
   - Approval Record Commit: `6650f615e48d88b9a54179c27a7f03d1bf48f391`
   - Revert Commit: `5d91e83679acefa5486a25bf5b921e9c12fd52d6`
 - Verification:
   - Status: Passed for PR creation
   - Evidence: 回滚候选相对第一父提交仅保留 CR-038 治理记录；Python 3.13.14 后端测试 `4 passed, 1 warning`；`compileall`、Compose 配置和 `git diff --check` 通过。
-  - Remaining Gate: PR #17 尚未完成 Review 或合入；TASK-002、CR-037 和依赖任务继续暂停。
+  - Remaining Gate: PR #17 尚未合入；TASK-002、CR-037 和依赖任务继续暂停。

@@ -201,7 +201,8 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Artifacts Reviewed: PR #15 合并提交 `e328cec64f1aa9c7cdc383579af042692dce5679`、审核结论 `Changes requested`、被拒绝候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77`
 - Evidence Reviewed: 远端 `codex/stage-05-integration` 当前头为 `e328cec64f1aa9c7cdc383579af042692dce5679`；该提交直接合并 PR #15，未满足交叉审核和正式集成门禁。
 - Decision: 批准创建 CR-038 隔离补救分支，以非破坏性 revert 撤销 PR #15 在集成分支上的有效内容；保留全部原始提交和历史。
+- Merge Approval: 项目负责人于 2026-07-16T15:00:35+08:00 明确批准 PR #17 审查候选 `3f02ac1021ffb2f189ee53120d4b3523415bff60` 转为 Ready，并由集成负责人手动合入 `codex/stage-05-integration`；批准后的唯一允许变更是记录本批准的治理文档提交，且必须重新验证无代码或回滚边界变化。
 - Conditions: 补救必须通过独立 PR；禁止 `reset`、强制推送或删除本地 TASK-002 工作内容；补救 PR 不得自动合并；回滚后 TASK-002 仍为 `Changes requested`。
-- Next Step: 审查 Draft PR [#17](https://github.com/QI-code1992/Equipment-repair/pull/17)；满足治理门禁后由集成负责人转为 Ready 并手动合入 `codex/stage-05-integration`。
+- Next Step: 推送本批准记录，重新验证 PR 最新头后转为 Ready 并手动合入；合入后执行集成分支回归。
 - Version / Commit SHA: merge `e328cec64f1aa9c7cdc383579af042692dce5679`; first parent `42098613ffa20faed3bb0dcb842a0121722565bd`; verified revert candidate `5d91e83679acefa5486a25bf5b921e9c12fd52d6`
 - Notes: 本批准不代表 TASK-002 完成，不解锁其下游依赖，也不批准进入 Stage 6。

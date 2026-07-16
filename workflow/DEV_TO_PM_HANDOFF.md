@@ -23,6 +23,7 @@
 - 授权记录：`6650f615e48d88b9a54179c27a7f03d1bf48f391`。
 - 回滚候选：`5d91e83679acefa5486a25bf5b921e9c12fd52d6`。
 - 补救 PR：[PR #17](https://github.com/QI-code1992/Equipment-repair/pull/17)，Draft、Open，目标 `codex/stage-05-integration`；创建时 GitHub 显示 `MERGEABLE`，尚无 status checks。
+- 合并批准：项目负责人于 2026-07-16T15:00:35+08:00 明确批准审查候选 `3f02ac1021ffb2f189ee53120d4b3523415bff60` 转为 Ready 并手动合入；批准后的治理文档提交不得修改代码或回滚边界。
 - 验证：Python 3.13.14 `4 passed, 1 warning`；`compileall`、Compose 配置和差异检查通过。
-- 当前边界：PR #17 未完成 Review 或合入；TASK-002 仍为 `Changes requested`；CR-037、TASK-002 R6/R7、TASK-003、TASK-004 和依赖 TASK-002 的数据库集成继续暂停。
+- 当前边界：PR #17 尚未合入；TASK-002 仍为 `Changes requested`；CR-037、TASK-002 R6/R7、TASK-003、TASK-004 和依赖 TASK-002 的数据库集成继续暂停。
 - 下一步：完成 PR #17 治理审查并由集成负责人手动合入；合入后同步 CR-037 治理分支，再恢复 TASK-002 整改与 DEV-002 复审。
