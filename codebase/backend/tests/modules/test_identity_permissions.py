@@ -14,8 +14,13 @@ from app.core.database import Base, create_database_engine, session_factory
 from app.modules.audit.models import AuditEvent
 from app.modules.audit.service import write_audit_event
 from app.modules.equipment.models import Equipment, EquipmentStatus
-from app.modules.identity.models import LoginSession, Permission, Role, User
-from app.modules.identity.bootstrap import BootstrapAlreadyInitialized, bootstrap_admin
+from app.modules.identity.models import LoginSession, Permission, Role, RoleCode, User
+from app.modules.identity.bootstrap import (
+    PERMISSION_CODES,
+    BootstrapAlreadyInitialized,
+    bootstrap_admin,
+    ensure_identity_catalog,
+)
 from app.modules.identity.security import hash_password
 from app.main import create_app
 
@@ -359,24 +364,22 @@ def test_equipment_rejects_unknown_organization(
     assert response.json()["detail"]["code"] == "ORGANIZATION_NOT_FOUND"
 
 
-def test_identity_admin_can_create_role_and_user(client: TestClient) -> None:
+def test_identity_admin_can_create_user_with_fixed_role(client: TestClient) -> None:
     admin_token = create_user_token(
         client,
         ["identity:read", "identity:write", "equipment:read"],
     )
     base_headers = {"Authorization": f"Bearer {admin_token}"}
-    role_response = client.post(
-        "/api/roles",
-        json={"name": "equipment-reader", "permission_codes": ["equipment:read"]},
-        headers={**base_headers, "Idempotency-Key": "create-reader-role"},
-    )
-    assert role_response.status_code == 201
+    with client.app.state.session_factory() as session:
+        fixed_roles = ensure_identity_catalog(session)
+        session.commit()
+        equipment_admin_id = fixed_roles[RoleCode.EQUIPMENT_ADMIN].id
     user_response = client.post(
         "/api/users",
         json={
             "username": "reader",
             "password": "reader-password",
-            "role_ids": [role_response.json()["id"]],
+            "role_ids": [equipment_admin_id],
         },
         headers={**base_headers, "Idempotency-Key": "create-reader-user"},
     )
@@ -431,15 +434,18 @@ def test_bootstrap_rejects_blank_credentials(
 
 def test_identity_reader_can_query_permissions_and_roles(client: TestClient) -> None:
     token = create_user_token(client, ["identity:read"])
+    with client.app.state.session_factory() as session:
+        ensure_identity_catalog(session)
+        session.commit()
     headers = {"Authorization": f"Bearer {token}"}
 
     permissions = client.get("/api/permissions", headers=headers)
     roles = client.get("/api/roles", headers=headers)
 
     assert permissions.status_code == 200
-    assert permissions.json() == [{"code": "identity:read"}]
+    assert {item["code"] for item in permissions.json()} == set(PERMISSION_CODES)
     assert roles.status_code == 200
-    assert roles.json()[0]["permission_codes"] == ["identity:read"]
+    assert {item["code"] for item in roles.json()} == {code.value for code in RoleCode}
 
 
 def test_equipment_and_organization_can_be_updated(client: TestClient) -> None:
@@ -582,44 +588,31 @@ def test_equipment_unique_conflict_is_mapped_to_409(
     assert response.json()["detail"]["code"] == "EQUIPMENT_CODE_EXISTS"
 
 
-@pytest.mark.parametrize("resource", ["role", "user"])
-def test_identity_unique_conflict_is_mapped_to_409(
-    client: TestClient, monkeypatch: pytest.MonkeyPatch, resource: str
+def test_identity_user_unique_conflict_is_mapped_to_409(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     token = create_user_token(client, ["identity:write"])
     with client.app.state.session_factory() as session:
-        role = Role(code="existing-role", name="existing-role", built_in=False)
-        session.add(role)
+        role = ensure_identity_catalog(session)[RoleCode.EQUIPMENT_ADMIN]
         session.commit()
         role_id = role.id
 
     real_flush = Session.flush
-    conflict_type = Role if resource == "role" else User
 
     def conflicting_flush(session: Session, objects: object = None) -> None:
-        if any(isinstance(item, conflict_type) for item in session.new):
+        if any(isinstance(item, User) for item in session.new):
             raise IntegrityError("insert", {}, RuntimeError("unique conflict"))
         real_flush(session, objects)
 
     monkeypatch.setattr(Session, "flush", conflicting_flush)
-    headers = {"Authorization": f"Bearer {token}", "Idempotency-Key": f"conflict-{resource}"}
-    if resource == "role":
-        response = client.post(
-            "/api/roles",
-            json={"name": "new-role", "permission_codes": []},
-            headers=headers,
-        )
-        expected_code = "ROLE_NAME_EXISTS"
-    else:
-        response = client.post(
-            "/api/users",
-            json={"username": "new-user", "password": "password", "role_ids": [role_id]},
-            headers=headers,
-        )
-        expected_code = "USERNAME_EXISTS"
+    response = client.post(
+        "/api/users",
+        json={"username": "new-user", "password": "password", "role_ids": [role_id]},
+        headers={"Authorization": f"Bearer {token}", "Idempotency-Key": "conflict-user"},
+    )
 
     assert response.status_code == 409
-    assert response.json()["detail"]["code"] == expected_code
+    assert response.json()["detail"]["code"] == "USERNAME_EXISTS"
 
 
 def test_timestamp_columns_keep_utc_and_update_semantics() -> None:

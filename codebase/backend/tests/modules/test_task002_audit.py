@@ -55,8 +55,11 @@ def test_protected_write_routes_use_resource_action_names() -> None:
     }
 
     assert route_names[("/api/auth/session", "DELETE")] == "session.logout"
-    assert route_names[("/api/roles", "POST")] == "role.create"
     assert route_names[("/api/users", "POST")] == "user.create"
+    assert route_names[("/api/users/{user_id}", "PATCH")] == "user.update"
+    assert route_names[("/api/roles/{role_id}/permissions", "PATCH")] == (
+        "role.permissions.update"
+    )
     assert route_names[("/api/organizations", "POST")] == "organization.create"
     assert route_names[("/api/organizations/{organization_id}", "PATCH")] == (
         "organization.update"

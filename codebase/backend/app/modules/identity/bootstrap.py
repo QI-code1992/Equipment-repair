@@ -81,6 +81,7 @@ def ensure_identity_catalog(db: Session) -> dict[RoleCode, Role]:
         if role is None:
             role = Role(code=code.value, name=code.value, built_in=True)
             db.add(role)
+        role.built_in = True
         roles[code] = role
     roles[RoleCode.SYSTEM_ADMIN].permissions = list(permissions.values())
     for code, defaults in DEFAULT_ROLE_PERMISSIONS.items():
