@@ -45,6 +45,14 @@
     "integrationTarget": "codex/stage-05-integration",
     "governancePullRequest": null,
     "integrationBase": "d37698c6e51df1701bbdfcf12ec6fa329241e0bd",
+    "historicalWrongTargetPullRequest": {
+      "number": 16,
+      "url": "https://github.com/QI-code1992/Equipment-repair/pull/16",
+      "target": "main",
+      "currentMainCommit": "e0a69bfb3854d9280218d01415d2f5377f1dc181",
+      "currentMainContainsApprovedTaskbook": false,
+      "countsAsIntegration": false
+    },
     "scope": "Stage 5 cross-review, reviewer-created formal PR, integration trigger, automation boundary and stale TASK-002 ledger correction",
     "preserveExistingWork": true,
     "resumeCondition": "The approved v1.2 task book and approval ledgers are merged into codex/stage-05-integration"

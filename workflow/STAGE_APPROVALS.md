@@ -123,6 +123,7 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Version / Commit SHA: `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`，远端分支 `codex/taskbook-v1-2-governance`
 - Decision: 项目负责人明确批准该精确 Commit 作为任务书 v1.2 协作基线，并授权推送隔离治理分支。
 - Conditions / Scope Exceptions: 本修订不改变产品、架构、API、数据模型、开发人数、任务负责人、任务范围或依赖矩阵；现有 TASK-002 代码和未提交契约文件保持原状。PR #15 保留为审核历史，不作为正式集成触发源。
+- PR Target Correction: 历史 PR #16 错误指向 `main`，且当前 `origin/main` 不包含获批 v1.2 任务书 Blob，因此不构成有效集成；CR-037 必须重新通过目标为 `codex/stage-05-integration` 的治理 PR 完成。
 - Notes: 本记录不重写 Gate-007 历史，不批准 TASK-002 完成、PR #15 合并、Stage 5 完成或进入 Stage 6。获批任务书及本审批记录合入 `codex/stage-05-integration` 后，DEV-001 才可恢复 TASK-002 R6/R7。
 
 ## Candidate gate recommendations

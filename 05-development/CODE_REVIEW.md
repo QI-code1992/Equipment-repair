@@ -46,3 +46,9 @@
 - 合并结果：PR #17 已合入 `codex/stage-05-integration`，Merge Commit 为 `d37698c6e51df1701bbdfcf12ec6fa329241e0bd`。
 - 合并后验证：Merge Commit 树与获批 PR 头 `9c1ff88a6842ffa1cb79bd63807b3d41d830d5bd` 一致；Python 3.13.14 `4 passed, 1 warning`；Compose 构建和容器健康通过；`/healthz` 返回正常。
 - 结论：CR-038 技术补救通过；TASK-002 仍为 `Changes requested`，CR-037 合入前不恢复 R6/R7。
+
+## CR-037 PR 目标审查（2026-07-16）
+
+- 历史发现：PR #16 曾以 `main` 为目标并显示合并，不符合任务书规定的 `codex/stage-05-integration` 目标。
+- 当前事实：`origin/main` 为 `e0a69bfb3854d9280218d01415d2f5377f1dc181`；其任务书 Blob 不等于获批 v1.2 Blob，因此错误目标 PR 未形成当前有效基线。
+- 处置：PR #16 仅保留为错误目标历史；CR-037 必须创建新的治理 PR，目标严格为 `codex/stage-05-integration`。
