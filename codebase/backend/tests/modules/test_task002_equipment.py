@@ -446,9 +446,7 @@ def test_equipment_rejects_hours_outside_numeric_12_2_contract(
     )
     assert response.status_code == 422
     assert response.json()["detail"]["code"] == "VALIDATION_ERROR"
-    assert {"field": "operating_hours", "type": error_type} in response.json()[
-        "detail"
-    ]["fields"]
+    assert response.json()["detail"]["fields"]["operating_hours"] == error_type
     assert "audit_event_id" in response.json()["detail"]
 
 

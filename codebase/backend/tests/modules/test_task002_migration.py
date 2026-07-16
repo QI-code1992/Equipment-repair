@@ -42,15 +42,7 @@ def insert_legacy_organization_tree(engine: Engine) -> None:
         )
 
 
-def test_upgrade_and_downgrade_backfill_full_legacy_contract(
-    migration_database: tuple[Config, Engine],
-) -> None:
-    config, engine = migration_database
-    command.upgrade(config, "0001")
-    insert_legacy_organization_tree(engine)
-
-    command.upgrade(config, "0002")
-
+def assert_upgraded_legacy_contract(engine: Engine) -> None:
     with engine.connect() as db:
         fixed_roles = set(db.execute(text("SELECT code FROM roles")).scalars())
         assert fixed_roles == {
@@ -96,8 +88,8 @@ def test_upgrade_and_downgrade_backfill_full_legacy_contract(
         for column_name in ("model", "type", "manufacturer", "organization_id"):
             assert columns[column_name]["nullable"] is False
 
-    command.downgrade(config, "0001")
 
+def assert_downgraded_legacy_contract(engine: Engine) -> None:
     with engine.connect() as db:
         equipment = db.execute(
             text("SELECT enabled, organization_id FROM equipment WHERE id = 'equipment-1'")
@@ -119,6 +111,20 @@ def test_upgrade_and_downgrade_backfill_full_legacy_contract(
         assert {
             "users", "roles", "permissions", "organizations", "equipment"
         } <= set(inspect(engine).get_table_names())
+
+
+def test_upgrade_and_downgrade_backfill_full_legacy_contract(
+    migration_database: tuple[Config, Engine],
+) -> None:
+    config, engine = migration_database
+    command.upgrade(config, "0001")
+    insert_legacy_organization_tree(engine)
+
+    command.upgrade(config, "0002")
+    assert_upgraded_legacy_contract(engine)
+
+    command.downgrade(config, "0001")
+    assert_downgraded_legacy_contract(engine)
 
 
 def test_upgrade_merges_duplicate_system_roles_without_losing_relationships(

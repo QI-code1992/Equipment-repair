@@ -13,6 +13,14 @@ from app.modules.identity.service import login_session_for_token
 
 logger = logging.getLogger(__name__)
 
+STABLE_ERROR_FIELDS = {
+    "IDEMPOTENCY_KEY_REUSED": {"idempotency_key": "conflict"},
+    "USERNAME_EXISTS": {"username": "duplicate"},
+    "ORGANIZATION_CODE_EXISTS": {"code": "duplicate"},
+    "ORGANIZATION_SIBLING_NAME_EXISTS": {"name": "duplicate"},
+    "EQUIPMENT_CODE_EXISTS": {"code": "duplicate"},
+}
+
 
 def protected_write(request: Request) -> bool:
     return (
@@ -28,37 +36,51 @@ def route_action(request: Request) -> str:
 
 
 def response_detail(detail: object, event_id: str | None) -> dict[str, object]:
-    result: dict[str, object] = {"code": "REQUEST_FAILED"}
+    result: dict[str, object] = {
+        "code": "REQUEST_FAILED",
+        "message": "REQUEST_FAILED",
+        "fields": {},
+    }
     if isinstance(detail, dict):
         sanitized = sanitize_audit_metadata(detail)
         if isinstance(sanitized, dict):
-            for key in ("code", "message"):
-                if isinstance(sanitized.get(key), str):
-                    result[key] = sanitized[key]
+            if isinstance(sanitized.get("code"), str):
+                result["code"] = sanitized["code"]
+            result["message"] = (
+                sanitized["message"]
+                if isinstance(sanitized.get("message"), str)
+                else result["code"]
+            )
             fields = sanitized.get("fields")
             if isinstance(fields, list):
-                result["fields"] = [
-                    {
-                        key: item[key]
-                        for key in ("field", "type")
-                        if key in item and isinstance(item[key], str)
-                    }
+                result["fields"] = {
+                    item["field"]: item["type"]
                     for item in fields
                     if isinstance(item, dict)
-                ]
+                    and isinstance(item.get("field"), str)
+                    and isinstance(item.get("type"), str)
+                }
+            elif isinstance(fields, dict):
+                result["fields"] = {
+                    str(field): value
+                    for field, value in fields.items()
+                    if isinstance(value, str)
+                }
+    if not result["fields"]:
+        result["fields"] = STABLE_ERROR_FIELDS.get(str(result["code"]), {})
     if event_id is not None:
         result["audit_event_id"] = event_id
     return result
 
 
 def validation_detail(error: RequestValidationError) -> dict[str, object]:
-    fields: list[dict[str, str]] = []
+    fields: dict[str, str] = {}
     for item in error.errors():
         field = next(
             (member for member in reversed(item["loc"]) if isinstance(member, str)),
             "request",
         )
-        fields.append({"field": field, "type": item["type"]})
+        fields[field] = item["type"]
     return {"code": "VALIDATION_ERROR", "fields": fields}
 
 
@@ -138,7 +160,9 @@ async def persist_failure(
 def audit_persist_failed_response() -> JSONResponse:
     return JSONResponse(
         status_code=503,
-        content={"detail": {"code": "AUDIT_PERSIST_FAILED"}},
+        content={
+            "detail": response_detail({"code": "AUDIT_PERSIST_FAILED"}, None)
+        },
     )
 
 

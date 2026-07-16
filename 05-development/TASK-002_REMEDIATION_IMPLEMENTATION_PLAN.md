@@ -605,7 +605,7 @@ ALLOWED_CHILD = {
 }
 ```
 
-Service operations acquire the existing PostgreSQL advisory transaction lock before reading the tree. Validate fixed ROOT, exact child level, enabled parent, global code and sibling name. Disable descendants iteratively in the same transaction; enabling only updates the selected node. Delete rejects ROOT, children and equipment references.
+Routers acquire the existing PostgreSQL advisory transaction lock before idempotency lookup and before the service reads the tree. Validate fixed ROOT, exact child level, enabled parent, global code and sibling name. Disable descendants iteratively in the same transaction; enabling only updates the selected node. Delete rejects ROOT, children and equipment references.
 
 - [ ] **Step 4: 缩短路由并固定动作名称**
 
@@ -835,6 +835,19 @@ git commit -m "fix(task-002): freeze contract and repair legacy migration"
 ### Task 7: PostgreSQL、Compose、Review 与正式交接
 
 **Files:**
+- Create: `codebase/backend/tests/integration/test_task002_postgres.py`
+- Create: `codebase/backend/tests/modules/test_task002_audit_response.py`
+- Create: `codebase/backend/tests/modules/test_task002_identity_regressions.py`
+- Create: `codebase/backend/tests/modules/test_task002_organization_conflicts.py`
+- Modify: `codebase/backend/app/modules/audit/http.py`
+- Modify: `codebase/backend/app/modules/equipment/organization_service.py`
+- Modify: `codebase/backend/tests/modules/test_task002_audit.py`
+- Modify: `codebase/backend/tests/modules/test_task002_equipment.py`
+- Modify: `codebase/backend/tests/modules/test_identity_permissions.py`
+- Modify: `codebase/backend/tests/modules/test_task002_migration.py`
+- Modify: `codebase/backend/tests/modules/test_task002_organizations.py`
+- Delete after canonical evidence transfer: `.superpowers/sdd/task-3-report.md`
+- Delete after canonical evidence transfer: `.superpowers/sdd/task-4-report.md`
 - Modify: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md`
 - Modify: `05-development/SELF_TEST.md`
 - Modify: `05-development/CODE_REVIEW.md`
@@ -876,6 +889,15 @@ git diff --check
 ```
 
 Expected: Python is `3.13.14`; all tests pass; Compose config exits 0; PostgreSQL and Redis are healthy; API `/healthz` returns `{"status": "ok", "service": "equipment-operations-platform"}`; diff check exits 0.
+
+Run `codebase/backend/tests/integration/test_task002_postgres.py` against an
+isolated PostgreSQL 17 validation database. It must prove failed-write rollback
+plus one failure audit, last-system-admin concurrency serialization, sibling-name
+concurrency serialization, same-key idempotent replay, changed-body idempotency
+rejection, and real equipment API persistence. The suite is destructive and
+remains skipped unless both `TASK002_POSTGRES_DSN` points to a dedicated
+`equipment_task2_validation*` database on the Compose `postgres` host and
+`TASK002_ALLOW_DESTRUCTIVE_TESTS=1` is explicitly set.
 
 - [ ] **Step 3: 独立 Review**
 

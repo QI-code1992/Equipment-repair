@@ -94,7 +94,6 @@ def _flush_write(db: Session) -> None:
 
 
 def create_organization(db: Session, payload: OrganizationCreate) -> Organization:
-    acquire_organization_tree_lock(db)
     parent = db.get(Organization, payload.parent_id)
     if parent is None:
         raise _error(404, "ORGANIZATION_PARENT_NOT_FOUND")
@@ -130,7 +129,6 @@ def _disable_descendants(db: Session, organization_id: str) -> None:
 def update_organization(
     db: Session, organization_id: str, payload: OrganizationUpdate
 ) -> Organization:
-    acquire_organization_tree_lock(db)
     organization = _organization(db, organization_id)
     if organization.type == OrganizationType.ROOT:
         raise _error(409, "ORGANIZATION_ROOT_PROTECTED")
@@ -154,7 +152,6 @@ def update_organization(
 
 
 def delete_organization(db: Session, organization_id: str) -> Organization:
-    acquire_organization_tree_lock(db)
     organization = _organization(db, organization_id)
     if organization.type == OrganizationType.ROOT:
         raise _error(409, "ORGANIZATION_ROOT_PROTECTED")

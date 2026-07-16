@@ -1,7 +1,6 @@
 import json
 
 import pytest
-from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from httpx import Response
 from sqlalchemy.exc import SQLAlchemyError
@@ -147,7 +146,7 @@ def test_validation_failure_returns_one_persisted_audit_id(
 
     assert response.status_code == 422
     fields = response.json()["detail"]["fields"]
-    assert {item["field"] for item in fields} == {
+    assert set(fields) == {
         "name", "model", "type", "manufacturer", "operating_hours", "status",
         "organization_id", "attachment", "password", "authorization", "content",
     }
@@ -405,7 +404,13 @@ def test_audit_persistence_error_rolls_back_and_returns_safe_503(
     )
 
     assert response.status_code == 503
-    assert response.json() == {"detail": {"code": "AUDIT_PERSIST_FAILED"}}
+    assert response.json() == {
+        "detail": {
+            "code": "AUDIT_PERSIST_FAILED",
+            "message": "AUDIT_PERSIST_FAILED",
+            "fields": {},
+        }
+    }
     assert rollback_calls == 1
     assert caplog.messages == ["Failed to persist audit event"]
     assert "SELECT" not in caplog.text
@@ -450,52 +455,3 @@ def test_audit_rollback_error_is_logged_without_sensitive_detail(
         "Failed to persist audit event",
     ]
     assert "rollback-secret" not in caplog.text
-
-
-def test_http_detail_uses_safe_recursive_whitelist(client: TestClient) -> None:
-    @client.app.post("/api/test-sensitive-detail", name="test.fail")
-    def fail_with_sensitive_detail() -> None:
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "code": "TEST_FAILED",
-                "message": "Safe message",
-                "password": "plain-password",
-                "authorization": "Bearer response-token",
-                "sql": "SELECT password FROM users",
-                "fields": [
-                    {
-                        "field": "password",
-                        "type": "invalid",
-                        "authorization": "Bearer nested-token",
-                    }
-                ],
-            },
-        )
-
-    response = client.post("/api/test-sensitive-detail", json={})
-
-    assert response.status_code == 400
-    detail = response.json()["detail"]
-    assert set(detail) == {"code", "message", "fields", "audit_event_id"}
-    assert detail["fields"] == [{"field": "password", "type": "invalid"}]
-    rendered = json.dumps(detail)
-    assert "plain-password" not in rendered
-    assert "response-token" not in rendered
-    assert "nested-token" not in rendered
-    assert "SELECT password" not in rendered
-
-
-def test_non_dict_http_detail_does_not_expose_exception_text(
-    client: TestClient,
-) -> None:
-    @client.app.post("/api/test-string-detail", name="test.fail")
-    def fail_with_string_detail() -> None:
-        raise HTTPException(status_code=400, detail="SELECT secret-password")
-
-    response = client.post("/api/test-string-detail", json={})
-
-    assert response.status_code == 400
-    assert set(response.json()["detail"]) == {"code", "audit_event_id"}
-    assert response.json()["detail"]["code"] == "REQUEST_FAILED"
-    assert "secret-password" not in response.text
