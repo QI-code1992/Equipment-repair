@@ -49,22 +49,38 @@ def db_session(engine: Engine) -> Session:
 
 
 def test_equipment_code_is_unique(db_session: Session) -> None:
+    db_session.add(
+        Organization(
+            id="line-unique",
+            type=OrganizationType.LINE,
+            code="LINE-UNIQUE",
+            name="Unique Test Line",
+            sort_order=0,
+            enabled=True,
+        )
+    )
     db_session.add_all(
         [
             Equipment(
                 code="EQ-001",
                 name="A",
+                model="MODEL-A",
+                type="TYPE-A",
+                manufacturer="MANUFACTURER-A",
                 operating_hours=Decimal("0"),
                 status=EquipmentStatus.NORMAL,
-                organization_id=None,
+                organization_id="line-unique",
                 image_refs=[],
             ),
             Equipment(
                 code="EQ-001",
                 name="B",
+                model="MODEL-B",
+                type="TYPE-B",
+                manufacturer="MANUFACTURER-B",
                 operating_hours=Decimal("0"),
                 status=EquipmentStatus.NORMAL,
-                organization_id=None,
+                organization_id="line-unique",
                 image_refs=[],
             ),
         ]
@@ -396,8 +412,12 @@ def test_equipment_rejects_unknown_organization(
             equipment = Equipment(
                 code="EQ-EXISTING",
                 name="Loader",
+                model="MODEL-EXISTING",
+                type="TYPE-EXISTING",
+                manufacturer="MANUFACTURER-EXISTING",
                 operating_hours=Decimal("0"),
                 status=EquipmentStatus.NORMAL,
+                organization_id=payload["organization_id"],
                 image_refs=[],
             )
             session.add(equipment)

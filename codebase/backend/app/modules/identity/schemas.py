@@ -20,3 +20,29 @@ class RolePermissionsUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     permission_codes: list[str]
+
+
+class PermissionRead(BaseModel):
+    code: str
+
+
+class RoleRead(BaseModel):
+    id: str
+    code: str
+    name: str
+    permission_codes: list[str]
+
+
+class RoleWriteResponse(RoleRead):
+    audit_event_id: str
+
+
+class UserRead(BaseModel):
+    id: str
+    username: str
+    enabled: bool
+    role_ids: list[str]
+
+
+class UserWriteResponse(UserRead):
+    audit_event_id: str

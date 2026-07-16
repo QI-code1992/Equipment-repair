@@ -80,9 +80,9 @@ class Equipment(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     code: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
-    model: Mapped[str | None] = mapped_column(String(200))
-    type: Mapped[str | None] = mapped_column(String(100))
-    manufacturer: Mapped[str | None] = mapped_column(String(200))
+    model: Mapped[str] = mapped_column(String(200), nullable=False)
+    type: Mapped[str] = mapped_column(String(100), nullable=False)
+    manufacturer: Mapped[str] = mapped_column(String(200), nullable=False)
     manufactured_at: Mapped[date | None] = mapped_column(Date)
     commissioned_at: Mapped[date | None] = mapped_column(Date)
     operating_hours: Mapped[Decimal] = mapped_column(
@@ -91,7 +91,9 @@ class Equipment(Base):
     status: Mapped[EquipmentStatus] = mapped_column(
         Enum(EquipmentStatus, native_enum=False), nullable=False, default=EquipmentStatus.NORMAL
     )
-    organization_id: Mapped[str | None] = mapped_column(ForeignKey("organizations.id"))
+    organization_id: Mapped[str] = mapped_column(
+        ForeignKey("organizations.id"), nullable=False
+    )
     owner_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"))
     image_refs: Mapped[list[dict[str, str]]] = mapped_column(
         JSON, nullable=False, default=list

@@ -752,10 +752,29 @@ git commit -m "feat(equipment): complete approved master data contract"
 **Files:**
 - Modify: `04-architecture-plan/API_SPEC.md`
 - Modify: `04-architecture-plan/DATA_MODEL.md`
+- Modify: `05-development/TASK-002_REMEDIATION_IMPLEMENTATION_PLAN.md`
+- Modify: `workflow/CHANGE_REQUESTS.md`
+- Modify: `codebase/backend/app/modules/identity/dependencies.py`
+- Modify: `codebase/backend/app/modules/identity/schemas.py`
+- Modify: `codebase/backend/app/modules/identity/admin_router.py`
+- Modify: `codebase/backend/app/modules/equipment/schemas.py`
+- Modify: `codebase/backend/app/modules/equipment/models.py`
+- Modify: `codebase/backend/app/modules/equipment/organization_router.py`
+- Modify: `codebase/backend/app/modules/equipment/router.py`
+- Modify: `codebase/backend/alembic/versions/0002_task002_contract_completion.py`
+- Modify: `codebase/backend/tests/modules/test_task002_schema.py`
+- Modify: `codebase/backend/tests/modules/test_task002_migration.py`
+- Modify: `codebase/backend/tests/modules/test_identity_permissions.py`
+- Modify: `codebase/backend/tests/modules/test_task002_organizations.py`
 - Create: `codebase/backend/tests/modules/test_task002_api_contract.py`
 
 **Interfaces:**
-- Freezes: TASK-002 endpoints, fields, permissions, error codes, idempotency and audit response semantics.
+- Freezes: TASK-002 endpoints, fields, required/optional/default/nullable constraints,
+  permissions, error codes, idempotency and audit response semantics.
+- Adds documentation-only OpenAPI response models and permission metadata; runtime
+  response serialization and authorization behavior must remain unchanged.
+- Closes the migration consistency gap found during R6 Review: legacy equipment
+  required fields are deterministically backfilled and finalized as non-null.
 
 - [ ] **Step 1: 写 API 文档一致性 RED 测试**
 
@@ -790,7 +809,7 @@ Expected: FAIL because `API_SPEC.md` has no TASK-002 route section.
 
 - [ ] **Step 3: 更新 API_SPEC 和 DATA_MODEL**
 
-Add one canonical TASK-002 section documenting every route from the approved design, request/response fields, permission code, `Idempotency-Key` requirement, error status/code/fields, success audit and failure `audit_event_id`. State that successful responses are replayed, failures are not cached, and Key/body conflicts are audited. Update data model fields, fixed roles, organization hierarchy and explicit TASK-003/TASK-004 deferrals; do not change PRD/SPEC/AC. Record the Stage 3 custom-role controls as stale against FR-010/CR-036 and as a required product-side correction before TASK-010, without modifying prototype source in this backend repair.
+Add one canonical TASK-002 section documenting every route from the approved design, request/response fields, required/optional/default/nullable constraints, permission code, `Idempotency-Key` requirement, error status/code/fields, success audit and failure `audit_event_id`. State that successful responses are replayed, failures are not cached, and Key conflicts are audited. Add documentation-only OpenAPI response schemas and route permission metadata without changing runtime serialization or authorization. Update data model fields, fixed roles and organization hierarchy; map fault, work-order and repair fact deferrals to TASK-003, while TASK-004 remains RAGFlow infrastructure according to the approved task book. Do not change PRD/SPEC/AC. Record the Stage 3 custom-role controls as stale against FR-010/CR-036 and as a required product-side correction before TASK-010, without modifying prototype source in this backend repair.
 
 - [ ] **Step 4: 运行 GREEN 和完整 Python 回归**
 
@@ -807,8 +826,8 @@ Expected: all tests PASS; compileall and diff check exit 0.
 - [ ] **Step 5: 提交契约冻结**
 
 ```powershell
-git add 04-architecture-plan/API_SPEC.md 04-architecture-plan/DATA_MODEL.md codebase/backend/tests/modules/test_task002_api_contract.py
-git commit -m "docs(api): freeze complete task-002 contract"
+git add 04-architecture-plan/API_SPEC.md 04-architecture-plan/DATA_MODEL.md 05-development/TASK-002_REMEDIATION_IMPLEMENTATION_PLAN.md workflow/CHANGE_REQUESTS.md codebase/backend/app/modules/identity/dependencies.py codebase/backend/app/modules/identity/schemas.py codebase/backend/app/modules/identity/admin_router.py codebase/backend/app/modules/equipment/models.py codebase/backend/app/modules/equipment/schemas.py codebase/backend/app/modules/equipment/organization_router.py codebase/backend/app/modules/equipment/router.py codebase/backend/alembic/versions/0002_task002_contract_completion.py codebase/backend/tests/modules/test_task002_schema.py codebase/backend/tests/modules/test_task002_migration.py codebase/backend/tests/modules/test_identity_permissions.py codebase/backend/tests/modules/test_task002_organizations.py codebase/backend/tests/modules/test_task002_api_contract.py
+git commit -m "fix(task-002): freeze contract and repair legacy migration"
 ```
 
 ---

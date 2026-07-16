@@ -26,6 +26,8 @@ def test_task002_models_expose_full_contract() -> None:
     assert set(FIXED_ROLE_CODES) == set(RoleCode)
     assert EquipmentStatus.DISABLED.value == "DISABLED"
     assert OrganizationType.LINE.value == "LINE"
+    for column_name in ("model", "type", "manufacturer", "organization_id"):
+        assert Equipment.__table__.c[column_name].nullable is False
 
 
 def test_equipment_has_no_enabled_compatibility_attribute() -> None:

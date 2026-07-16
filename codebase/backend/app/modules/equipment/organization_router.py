@@ -11,7 +11,12 @@ from app.modules.equipment.organization_service import (
     ORGANIZATION_TREE_LOCK_ID,
     acquire_organization_tree_lock,
 )
-from app.modules.equipment.schemas import OrganizationCreate, OrganizationUpdate
+from app.modules.equipment.schemas import (
+    OrganizationCreate,
+    OrganizationRead,
+    OrganizationUpdate,
+    OrganizationWriteResponse,
+)
 from app.modules.identity.dependencies import require_permission
 from app.modules.identity.models import User
 
@@ -85,7 +90,9 @@ def _complete_write(
     return body
 
 
-@router.get("")
+@router.get(
+    "", response_model=None, responses={200: {"model": list[OrganizationRead]}}
+)
 def list_organizations(
     db: Session = Depends(get_db),
     actor: User = Depends(require_permission("organization:read")),
@@ -94,7 +101,13 @@ def list_organizations(
     return [organization_body(item) for item in organization_service.organizations(db)]
 
 
-@router.post("", status_code=201, response_model=None, name="organization.create")
+@router.post(
+    "",
+    status_code=201,
+    response_model=None,
+    responses={201: {"model": OrganizationWriteResponse}},
+    name="organization.create",
+)
 def create_organization(
     payload: OrganizationCreate,
     idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
@@ -114,7 +127,12 @@ def create_organization(
     )
 
 
-@router.patch("/{organization_id}", response_model=None, name="organization.update")
+@router.patch(
+    "/{organization_id}",
+    response_model=None,
+    responses={200: {"model": OrganizationWriteResponse}},
+    name="organization.update",
+)
 def update_organization(
     organization_id: str,
     payload: OrganizationUpdate,
@@ -135,7 +153,12 @@ def update_organization(
     )
 
 
-@router.delete("/{organization_id}", name="organization.delete")
+@router.delete(
+    "/{organization_id}",
+    response_model=None,
+    responses={200: {"model": OrganizationWriteResponse}},
+    name="organization.delete",
+)
 def delete_organization(
     organization_id: str,
     db: Session = Depends(get_db),

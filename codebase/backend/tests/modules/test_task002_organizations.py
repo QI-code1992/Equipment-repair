@@ -255,7 +255,16 @@ def test_update_rejects_type_and_parent_id(client: TestClient) -> None:
 def test_delete_is_protected_by_children_and_equipment(client: TestClient) -> None:
     factory, workshop, line, headers = organization_tree(client)
     with client.app.state.session_factory() as db:
-        db.add(Equipment(code="EQ-ORG-REF", name="引用设备", organization_id=line["id"]))
+        db.add(
+            Equipment(
+                code="EQ-ORG-REF",
+                name="引用设备",
+                model="MODEL-ORG-REF",
+                type="TYPE-ORG-REF",
+                manufacturer="MANUFACTURER-ORG-REF",
+                organization_id=line["id"],
+            )
+        )
         db.commit()
 
     has_children = client.delete(f"/api/organizations/{factory['id']}", headers=headers)

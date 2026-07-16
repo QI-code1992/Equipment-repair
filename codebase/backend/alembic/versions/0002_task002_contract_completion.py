@@ -26,6 +26,12 @@ ROLE_CODES = ("SYSTEM_ADMIN", "EQUIPMENT_ADMIN", "REPAIR_WORKER", "LINE_OPERATOR
 ORGANIZATION_TYPES = ("ROOT", "FACTORY", "WORKSHOP", "LINE")
 EQUIPMENT_STATUSES = ("NORMAL", "FAULT", "REPAIRING", "DISABLED")
 ROOT_ORGANIZATION_ID = str(uuid5(NAMESPACE_URL, "equipment-task-002-root-organization"))
+LEGACY_EQUIPMENT_FACTORY_ID = str(uuid5(NAMESPACE_URL, "task002-legacy-factory"))
+LEGACY_EQUIPMENT_WORKSHOP_ID = str(uuid5(NAMESPACE_URL, "task002-legacy-workshop"))
+LEGACY_EQUIPMENT_LINE_ID = str(uuid5(NAMESPACE_URL, "task002-legacy-line"))
+LEGACY_EQUIPMENT_ORGANIZATION_IDS = (
+    LEGACY_EQUIPMENT_FACTORY_ID, LEGACY_EQUIPMENT_WORKSHOP_ID, LEGACY_EQUIPMENT_LINE_ID
+)
 
 
 def _fixed_role_id(code: str) -> str:
@@ -276,7 +282,12 @@ def _add_equipment_columns() -> sa.Enum:
 def _equipment_table() -> sa.TableClause:
     return sa.table(
         "equipment",
+        sa.column("id", sa.String(36)),
+        sa.column("code", sa.String(100)),
         sa.column("enabled", sa.Boolean()),
+        sa.column("model", sa.String(200)),
+        sa.column("type", sa.String(100)),
+        sa.column("manufacturer", sa.String(200)),
         sa.column("organization_id", sa.String(36)),
         sa.column("operating_hours", sa.Numeric(12, 2)),
         sa.column("status", sa.String(20)),
@@ -286,8 +297,84 @@ def _equipment_table() -> sa.TableClause:
     )
 
 
+def _insert_legacy_equipment_line(bind: Connection, now: datetime) -> None:
+    organizations = _organization_table()
+    rows = (
+        (
+            LEGACY_EQUIPMENT_FACTORY_ID,
+            "FACTORY",
+            "LEGACY_EQUIPMENT_FACTORY",
+            "Legacy Equipment Factory",
+            ROOT_ORGANIZATION_ID,
+        ),
+        (
+            LEGACY_EQUIPMENT_WORKSHOP_ID,
+            "WORKSHOP",
+            "LEGACY_EQUIPMENT_WORKSHOP",
+            "Legacy Equipment Workshop",
+            LEGACY_EQUIPMENT_FACTORY_ID,
+        ),
+        (
+            LEGACY_EQUIPMENT_LINE_ID,
+            "LINE",
+            "LEGACY_EQUIPMENT_LINE",
+            "Legacy Equipment Line",
+            LEGACY_EQUIPMENT_WORKSHOP_ID,
+        ),
+    )
+    for index, (item_id, item_type, code, name, parent_id) in enumerate(rows):
+        sibling_names = set(bind.execute(
+            sa.select(organizations.c.name).where(organizations.c.parent_id == parent_id)
+        ).scalars())
+        candidate_name = name
+        suffix_index = 1
+        while candidate_name in sibling_names:
+            suffix = f" [{suffix_index}]"
+            candidate_name = f"{name[:200 - len(suffix)]}{suffix}"
+            suffix_index += 1
+        bind.execute(
+            organizations.insert().values(
+                id=item_id,
+                type=item_type,
+                code=code,
+                name=candidate_name,
+                parent_id=parent_id,
+                sort_order=2_000_000 + index,
+                enabled=True,
+                remark="Generated for legacy equipment during TASK-002 migration",
+                created_at=now,
+                updated_at=now,
+            )
+        )
+
+
 def _migrate_equipment(bind: Connection, now: datetime) -> None:
     equipment = _equipment_table()
+    organizations = _organization_table()
+    organization_types = dict(bind.execute(
+        sa.select(organizations.c.id, organizations.c.type)
+    ).all())
+    rows = list(bind.execute(
+        sa.select(equipment.c.id, equipment.c.code, equipment.c.organization_id)
+    ).mappings())
+    invalid_organization_ids = {
+        row["organization_id"]
+        for row in rows
+        if organization_types.get(row["organization_id"]) != "LINE"
+    }
+    if invalid_organization_ids:
+        _insert_legacy_equipment_line(bind, now)
+    for row in rows:
+        values: dict[str, object] = {
+            "model": f"LEGACY-{row['code']}",
+            "type": "LEGACY_UNSPECIFIED",
+            "manufacturer": "LEGACY_UNSPECIFIED",
+        }
+        if row["organization_id"] in invalid_organization_ids:
+            values["organization_id"] = LEGACY_EQUIPMENT_LINE_ID
+        bind.execute(
+            equipment.update().where(equipment.c.id == row["id"]).values(**values)
+        )
     bind.execute(
         equipment.update().values(
             operating_hours=0,
@@ -306,6 +393,14 @@ def _finalize_equipment_schema(equipment_status: sa.Enum) -> None:
         )
         batch_op.alter_column(
             "operating_hours", existing_type=sa.Numeric(12, 2), nullable=False
+        )
+        batch_op.alter_column("model", existing_type=sa.String(200), nullable=False)
+        batch_op.alter_column("type", existing_type=sa.String(100), nullable=False)
+        batch_op.alter_column(
+            "manufacturer", existing_type=sa.String(200), nullable=False
+        )
+        batch_op.alter_column(
+            "organization_id", existing_type=sa.String(36), nullable=False
         )
         batch_op.alter_column("status", existing_type=equipment_status, nullable=False)
         batch_op.alter_column("image_refs", existing_type=sa.JSON(), nullable=False)
@@ -336,9 +431,17 @@ def _downgrade_equipment(bind: Connection) -> None:
         *EQUIPMENT_STATUSES, name="equipment_status", native_enum=False
     )
     equipment = _equipment_table()
+    with op.batch_alter_table("equipment") as batch_op:
+        batch_op.alter_column(
+            "organization_id", existing_type=sa.String(36), nullable=True
+        )
     bind.execute(
         equipment.update()
-        .where(equipment.c.organization_id == ROOT_ORGANIZATION_ID)
+        .where(
+            equipment.c.organization_id.in_(
+                (ROOT_ORGANIZATION_ID, *LEGACY_EQUIPMENT_ORGANIZATION_IDS)
+            )
+        )
         .values(organization_id=None)
     )
     with op.batch_alter_table("equipment") as batch_op:
@@ -365,6 +468,11 @@ def _downgrade_organizations(bind: Connection) -> None:
         organizations.update()
         .where(organizations.c.parent_id == ROOT_ORGANIZATION_ID)
         .values(parent_id=None)
+    )
+    bind.execute(
+        organizations.delete().where(
+            organizations.c.id.in_(LEGACY_EQUIPMENT_ORGANIZATION_IDS)
+        )
     )
     bind.execute(organizations.delete().where(organizations.c.id == ROOT_ORGANIZATION_ID))
     with op.batch_alter_table("organizations") as batch_op:

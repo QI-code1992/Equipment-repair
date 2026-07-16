@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -52,3 +52,40 @@ class OrganizationUpdate(BaseModel):
     sort_order: int = Field(ge=0)
     enabled: bool
     remark: str = Field(default="", max_length=1000)
+
+
+class OrganizationRead(BaseModel):
+    id: str
+    type: OrganizationType
+    code: str
+    name: str
+    parent_id: str | None
+    sort_order: int
+    enabled: bool
+    remark: str
+
+
+class OrganizationWriteResponse(OrganizationRead):
+    audit_event_id: str
+
+
+class EquipmentRead(BaseModel):
+    id: str
+    code: str
+    name: str
+    model: str
+    type: str
+    manufacturer: str
+    manufactured_at: date | None
+    commissioned_at: date | None
+    operating_hours: Decimal
+    status: EquipmentStatus
+    organization_id: str
+    owner_user_id: str | None
+    image_refs: list[ImageRef]
+    created_at: datetime
+    updated_at: datetime
+
+
+class EquipmentWriteResponse(EquipmentRead):
+    audit_event_id: str

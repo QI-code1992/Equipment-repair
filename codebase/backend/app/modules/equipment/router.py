@@ -10,7 +10,7 @@ from app.modules.audit.service import write_audit_event
 from app.modules.equipment import service
 from app.modules.equipment.models import Equipment
 from app.modules.equipment.organization_service import acquire_organization_tree_lock
-from app.modules.equipment.schemas import EquipmentWrite
+from app.modules.equipment.schemas import EquipmentRead, EquipmentWrite, EquipmentWriteResponse
 from app.modules.identity.dependencies import require_permission
 from app.modules.identity.models import User
 
@@ -70,7 +70,9 @@ def _complete_write(
     return body
 
 
-@router.get("")
+@router.get(
+    "", response_model=None, responses={200: {"model": list[EquipmentRead]}}
+)
 def list_equipment(
     db: Session = Depends(get_db),
     actor: User = Depends(require_permission("equipment:read")),
@@ -79,7 +81,9 @@ def list_equipment(
     return [equipment_body(item) for item in service.equipment_items(db)]
 
 
-@router.get("/{equipment_id}")
+@router.get(
+    "/{equipment_id}", response_model=None, responses={200: {"model": EquipmentRead}}
+)
 def get_equipment(
     equipment_id: str,
     db: Session = Depends(get_db),
@@ -89,7 +93,13 @@ def get_equipment(
     return equipment_body(service.equipment_detail(db, equipment_id))
 
 
-@router.post("", status_code=201, response_model=None, name="equipment.create")
+@router.post(
+    "",
+    status_code=201,
+    response_model=None,
+    responses={201: {"model": EquipmentWriteResponse}},
+    name="equipment.create",
+)
 def create_equipment(
     payload: EquipmentWrite,
     idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
@@ -108,7 +118,12 @@ def create_equipment(
     )
 
 
-@router.patch("/{equipment_id}", response_model=None, name="equipment.update")
+@router.patch(
+    "/{equipment_id}",
+    response_model=None,
+    responses={200: {"model": EquipmentWriteResponse}},
+    name="equipment.update",
+)
 def update_equipment(
     equipment_id: str,
     payload: EquipmentWrite,

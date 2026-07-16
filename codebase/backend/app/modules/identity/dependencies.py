@@ -46,4 +46,5 @@ def require_permission(code: str) -> Callable[..., User]:
             raise HTTPException(status_code=403, detail={"code": "PERMISSION_DENIED"})
         return user
 
+    setattr(dependency, "permission_code", code)
     return dependency

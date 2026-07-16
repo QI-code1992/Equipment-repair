@@ -473,6 +473,7 @@
 - Implementation:
   - Commit: 待生成新的修复候选 Commit；不得复用被拒绝的 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77`。
   - Owner: DEV-001
+  - R6 L0 纠偏：静态契约 Review 要求 OpenAPI 精确冻结逐路由权限、请求必填/可选字段、默认值、可空性、关键限制和成功响应字段；实施计划 Task 6 文件清单补入对应 router/schema/dependency、实施计划和变更台账文件。Review 同时发现旧设备迁移未回填正式必填主数据，已补充确定性占位值、合法兜底产线、同级名称避冲突和非空收口。`0002 -> 0001` 的结构降级命令保持可执行，但按迁移设计属于有损降级：原空组织或非 `LINE` 组织映射降级后为 `NULL`，执行前必须备份。上述调整不改变运行时响应序列化、授权规则、产品范围、架构或依赖。
 - Verification:
   - Status: 设计已获确认，待书面设计复核、实施计划、TDD 实现、完整回归和 DEV-002 复审。
   - Evidence: PR #15 的 DEV-002 `Changes requested` 审核；`05-development/TASK-002_REMEDIATION_DESIGN.md`。

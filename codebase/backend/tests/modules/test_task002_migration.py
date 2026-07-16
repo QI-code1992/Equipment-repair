@@ -35,7 +35,9 @@ def insert_legacy_organization_tree(engine: Engine) -> None:
         db.execute(
             text(
                 "INSERT INTO equipment (id, code, name, organization_id, enabled) "
-                "VALUES ('equipment-1', 'EQ-1', 'Legacy', 'org-3', 0)"
+                "VALUES ('equipment-1', 'EQ-1', 'Legacy', 'org-3', 0), "
+                "('equipment-2', 'EQ-2', 'Unassigned', NULL, 1), "
+                "('equipment-3', 'EQ-3', 'Wrong Level', 'org-1', 1)"
             )
         )
 
@@ -65,14 +67,34 @@ def test_upgrade_and_downgrade_backfill_full_legacy_contract(
         assert organizations["org-2"].type == "WORKSHOP"
         assert organizations["org-3"].type == "LINE"
         equipment = db.execute(
-            text("SELECT status, operating_hours, image_refs FROM equipment")
+            text(
+                "SELECT model, type, manufacturer, organization_id, status, "
+                "operating_hours, image_refs FROM equipment WHERE id = 'equipment-1'"
+            )
         ).one()
+        assert equipment.model == "LEGACY-EQ-1"
+        assert equipment.type == "LEGACY_UNSPECIFIED"
+        assert equipment.manufacturer == "LEGACY_UNSPECIFIED"
+        assert equipment.organization_id == "org-3"
         assert equipment.status == "DISABLED"
         assert equipment.operating_hours == 0
         assert equipment.image_refs == "[]"
-        assert "enabled" not in {
-            column["name"] for column in inspect(engine).get_columns("equipment")
+        unassigned = db.execute(
+            text(
+                "SELECT equipment.model, organizations.type AS organization_type "
+                "FROM equipment JOIN organizations "
+                "ON equipment.organization_id = organizations.id "
+                "WHERE equipment.id = 'equipment-2'"
+            )
+        ).one()
+        assert unassigned.model == "LEGACY-EQ-2"
+        assert unassigned.organization_type == "LINE"
+        columns = {
+            column["name"]: column for column in inspect(engine).get_columns("equipment")
         }
+        assert "enabled" not in columns
+        for column_name in ("model", "type", "manufacturer", "organization_id"):
+            assert columns[column_name]["nullable"] is False
 
     command.downgrade(config, "0001")
 
@@ -82,6 +104,18 @@ def test_upgrade_and_downgrade_backfill_full_legacy_contract(
         ).one()
         assert equipment.enabled == 0
         assert equipment.organization_id == "org-3"
+        invalid_legacy_organizations = dict(
+            db.execute(
+                text(
+                    "SELECT id, organization_id FROM equipment "
+                    "WHERE id IN ('equipment-2', 'equipment-3')"
+                )
+            ).all()
+        )
+        assert invalid_legacy_organizations == {
+            "equipment-2": None,
+            "equipment-3": None,
+        }
         assert {
             "users", "roles", "permissions", "organizations", "equipment"
         } <= set(inspect(engine).get_table_names())
@@ -201,3 +235,38 @@ def test_downgrade_detaches_equipment_from_generated_root(
         assert db.execute(
             text("SELECT count(*) FROM organizations WHERE id = :root_id"), {"root_id": root_id}
         ).scalar_one() == 0
+
+
+def test_upgrade_avoids_fallback_name_collision(
+    migration_database: tuple[Config, Engine],
+) -> None:
+    config, engine = migration_database
+    command.upgrade(config, "0001")
+    with engine.begin() as db:
+        db.execute(
+            text(
+                "INSERT INTO organizations (id, name, parent_id) "
+                "VALUES ('legacy-factory', 'Legacy Equipment Factory', NULL)"
+            )
+        )
+        db.execute(
+            text(
+                "INSERT INTO equipment (id, code, name, organization_id, enabled) "
+                "VALUES ('equipment-unassigned', 'EQ-U', 'Unassigned', NULL, 1)"
+            )
+        )
+
+    command.upgrade(config, "0002")
+
+    with engine.connect() as db:
+        root_id = db.execute(
+            text("SELECT id FROM organizations WHERE type = 'ROOT'")
+        ).scalar_one()
+        factory_names = db.execute(
+            text(
+                "SELECT name FROM organizations "
+                "WHERE parent_id = :root_id AND type = 'FACTORY'"
+            ),
+            {"root_id": root_id},
+        ).scalars().all()
+        assert len(factory_names) == len(set(factory_names)) == 2

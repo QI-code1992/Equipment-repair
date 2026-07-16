@@ -9,7 +9,16 @@ from app.modules.audit.service import write_audit_event
 from app.modules.identity import admin_service
 from app.modules.identity.dependencies import require_permission
 from app.modules.identity.models import Permission, Role, User
-from app.modules.identity.schemas import RolePermissionsUpdate, UserCreate, UserUpdate
+from app.modules.identity.schemas import (
+    PermissionRead,
+    RolePermissionsUpdate,
+    RoleRead,
+    RoleWriteResponse,
+    UserCreate,
+    UserRead,
+    UserUpdate,
+    UserWriteResponse,
+)
 
 
 router = APIRouter(prefix="/api", tags=["identity-admin"])
@@ -33,7 +42,11 @@ def user_body(user: User) -> dict[str, object]:
     }
 
 
-@router.get("/permissions")
+@router.get(
+    "/permissions",
+    response_model=None,
+    responses={200: {"model": list[PermissionRead]}},
+)
 def list_permissions(
     db: Session = Depends(get_db),
     actor: User = Depends(require_permission("identity:read")),
@@ -43,7 +56,7 @@ def list_permissions(
     return [{"code": permission.code} for permission in permissions]
 
 
-@router.get("/roles")
+@router.get("/roles", response_model=None, responses={200: {"model": list[RoleRead]}})
 def list_roles(
     db: Session = Depends(get_db),
     actor: User = Depends(require_permission("identity:read")),
@@ -52,7 +65,7 @@ def list_roles(
     return [role_body(role) for role in admin_service.fixed_roles(db)]
 
 
-@router.get("/users")
+@router.get("/users", response_model=None, responses={200: {"model": list[UserRead]}})
 def list_users(
     db: Session = Depends(get_db),
     actor: User = Depends(require_permission("identity:read")),
@@ -61,7 +74,9 @@ def list_users(
     return [user_body(user) for user in admin_service.users(db)]
 
 
-@router.get("/users/{user_id}")
+@router.get(
+    "/users/{user_id}", response_model=None, responses={200: {"model": UserRead}}
+)
 def get_user(
     user_id: str,
     db: Session = Depends(get_db),
@@ -71,7 +86,13 @@ def get_user(
     return user_body(admin_service.user_detail(db, user_id))
 
 
-@router.post("/users", status_code=201, response_model=None, name="user.create")
+@router.post(
+    "/users",
+    status_code=201,
+    response_model=None,
+    responses={201: {"model": UserWriteResponse}},
+    name="user.create",
+)
 def create_user(
     payload: UserCreate,
     idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
@@ -99,7 +120,12 @@ def create_user(
     return body
 
 
-@router.patch("/users/{user_id}", response_model=None, name="user.update")
+@router.patch(
+    "/users/{user_id}",
+    response_model=None,
+    responses={200: {"model": UserWriteResponse}},
+    name="user.update",
+)
 def update_user(
     user_id: str,
     payload: UserUpdate,
@@ -130,7 +156,10 @@ def update_user(
 
 
 @router.patch(
-    "/roles/{role_id}/permissions", response_model=None, name="role.permissions.update"
+    "/roles/{role_id}/permissions",
+    response_model=None,
+    responses={200: {"model": RoleWriteResponse}},
+    name="role.permissions.update",
 )
 def update_role_permissions(
     role_id: str,
