@@ -37,13 +37,19 @@
     "changeRequest": "CR-037",
     "artifact": "04-architecture-plan/DEVELOPMENT_TASK_BOOK.md",
     "candidateVersion": "v1.2",
-    "status": "APPROVED_READY_FOR_PR",
+    "status": "GOVERNANCE_PR_OPEN",
     "approvedCandidateCommit": "cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b",
     "approvedBy": "project owner",
     "approvedAt": "2026-07-16",
     "remoteBranch": "codex/taskbook-v1-2-governance",
     "integrationTarget": "codex/stage-05-integration",
-    "governancePullRequest": null,
+    "governancePullRequest": {
+      "number": 18,
+      "url": "https://github.com/QI-code1992/Equipment-repair/pull/18",
+      "state": "OPEN",
+      "draft": true,
+      "target": "codex/stage-05-integration"
+    },
     "integrationBase": "d37698c6e51df1701bbdfcf12ec6fa329241e0bd",
     "historicalWrongTargetPullRequest": {
       "number": 16,

@@ -51,4 +51,4 @@
 
 - 历史发现：PR #16 曾以 `main` 为目标并显示合并，不符合任务书规定的 `codex/stage-05-integration` 目标。
 - 当前事实：`origin/main` 为 `e0a69bfb3854d9280218d01415d2f5377f1dc181`；其任务书 Blob 不等于获批 v1.2 Blob，因此错误目标 PR 未形成当前有效基线。
-- 处置：PR #16 仅保留为错误目标历史；CR-037 必须创建新的治理 PR，目标严格为 `codex/stage-05-integration`。
+- 处置：PR #16 仅保留为错误目标历史；CR-037 已创建新的 Draft PR [#18](https://github.com/QI-code1992/Equipment-repair/pull/18)，目标严格为 `codex/stage-05-integration`。

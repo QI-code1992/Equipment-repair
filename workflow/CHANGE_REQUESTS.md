@@ -480,7 +480,7 @@
 ### CR-037：补齐 Stage 5 交叉审核与正式 PR 集成控制
 
 - Level: L1
-- Status: Approved / Ready For PR
+- Status: Ready For Review / Draft PR #18 Open
 - Raised By: 工作流一致性审计
 - Raised At: 2026-07-16
 - Current Stage: Stage 5 — 开发实施 / TASK-002 修复暂停点
@@ -503,8 +503,9 @@
   - Remote Branch: `codex/taskbook-v1-2-governance`
   - Integration Base: `d37698c6e51df1701bbdfcf12ec6fa329241e0bd`
   - Historical Wrong-Target PR: [#16](https://github.com/QI-code1992/Equipment-repair/pull/16) 曾以 `main` 为目标并显示合并，但当前远端 `main` 为 `e0a69bfb3854d9280218d01415d2f5377f1dc181`，任务书 Blob `6ba993881159f6faabfba96e45da33aabde51e06` 不等于获批 v1.2 Blob `132aa80e06ffd31154440056ab18618689738761`；PR #16 不构成当前有效基线或 CR-037 完成依据。
+  - Correct Pull Request: [#18](https://github.com/QI-code1992/Equipment-repair/pull/18)（Draft），目标 `codex/stage-05-integration`
 - Verification:
-  - Status: CR-038 已通过 PR #17 完成；治理分支已同步最新集成基线。任务书内容审查与逐任务协作字段检查通过；11 项任务矩阵完整，TASK-002—011 无自我审核或开发者自建正式 PR；任务书 Git Blob 保持与获批候选一致。治理 PR 和合并后验证尚未完成。
+  - Status: CR-038 已通过 PR #17 完成；治理分支已同步最新集成基线。任务书内容审查与逐任务协作字段检查通过；11 项任务矩阵完整，TASK-002—011 无自我审核或开发者自建正式 PR；任务书 Git Blob 保持与获批候选一致。Draft PR #18 已创建，Review、合并和合并后验证尚未完成。
   - Evidence: 当前技能 `references/stage-gate.md`、`references/development-task-book.md`；任务书 v1.1 缺口审计；PR #15 `Changes requested`；PR #16 错误目标审计；CR-036；CR-038 Merge Commit `d37698c6e51df1701bbdfcf12ec6fa329241e0bd`；获批候选 `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`。
 
 ### CR-038：回滚未经审核门禁批准的 PR #15 集成结果

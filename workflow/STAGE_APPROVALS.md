@@ -117,7 +117,7 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Prepared At: 2026-07-16
 - Approved At: 2026-07-16
 - Current Stage: Stage 5 — Development Implementation / TASK-002 repair paused
-- Next Step: 提交并推送本审批记录，通过 `[CR-037]` 治理 PR 将获批任务书与一致性台账合入 `codex/stage-05-integration`；合入前不恢复 TASK-002 R6/R7
+- Next Step: 审查 Draft PR [#18](https://github.com/QI-code1992/Equipment-repair/pull/18)；通过并由项目负责人批准合并后，将获批任务书与一致性台账合入 `codex/stage-05-integration`。合入前不恢复 TASK-002 R6/R7。
 - Artifacts Reviewed: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.2 候选、`workflow/CHANGE_REQUESTS.md` CR-037、PR #15 / CR-036 状态记录
 - Evidence Reviewed: 当前 `formal-software-delivery-workflow` 的交叉审核、reviewer-created PR、正式 PR 集成触发和 checkpoint 约束；任务书 v1.1 缺口审计
 - Version / Commit SHA: `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`，远端分支 `codex/taskbook-v1-2-governance`
