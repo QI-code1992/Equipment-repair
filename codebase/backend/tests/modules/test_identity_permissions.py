@@ -351,7 +351,7 @@ def test_equipment_rejects_unknown_organization(
             equipment_id = equipment.id
         response = client.patch(
             f"/api/equipment/{equipment_id}",
-            json={"name": "Loader", "organization_id": "missing", "enabled": True},
+            json={"name": "Loader", "organization_id": "missing", "status": "NORMAL"},
             headers=headers,
         )
 
@@ -456,6 +456,7 @@ def test_equipment_and_organization_can_be_updated(client: TestClient) -> None:
         json={"code": "EQ-UPDATE", "name": "Old Name", "organization_id": organization["id"]},
         headers=create_equipment_headers,
     ).json()
+    assert equipment["status"] == "NORMAL"
 
     update_org_headers = dict(headers)
     update_org_headers["Idempotency-Key"] = "update-org"
@@ -468,7 +469,7 @@ def test_equipment_and_organization_can_be_updated(client: TestClient) -> None:
     update_equipment_headers["Idempotency-Key"] = "update-equipment"
     updated_equipment = client.patch(
         f"/api/equipment/{equipment['id']}",
-        json={"name": "New Name", "organization_id": organization["id"], "enabled": False},
+        json={"name": "New Name", "organization_id": organization["id"], "status": "REPAIRING"},
         headers=update_equipment_headers,
     )
 
@@ -476,7 +477,7 @@ def test_equipment_and_organization_can_be_updated(client: TestClient) -> None:
     assert updated_organization.json()["name"] == "Updated Plant"
     assert "audit_event_id" in updated_organization.json()
     assert updated_equipment.status_code == 200
-    assert updated_equipment.json()["enabled"] is False
+    assert updated_equipment.json()["status"] == "REPAIRING"
     assert "audit_event_id" in updated_equipment.json()
 
 

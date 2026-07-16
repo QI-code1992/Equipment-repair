@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.idempotency import find_idempotent_response, save_idempotent_response
 from app.modules.audit.service import write_audit_event
-from app.modules.equipment.models import Equipment, Organization
+from app.modules.equipment.models import Equipment, EquipmentStatus, Organization
 from app.modules.identity.dependencies import require_permission
 from app.modules.identity.models import User
 
@@ -25,7 +25,7 @@ class EquipmentCreate(BaseModel):
 class EquipmentUpdate(BaseModel):
     name: str
     organization_id: str | None
-    enabled: bool
+    status: EquipmentStatus
 
 
 @router.get("")
@@ -41,7 +41,7 @@ def list_equipment(
             "code": item.code,
             "name": item.name,
             "organization_id": item.organization_id,
-            "enabled": item.enabled,
+            "status": item.status.value,
         }
         for item in equipment
     ]
@@ -95,7 +95,7 @@ def create_equipment(
         "code": item.code,
         "name": item.name,
         "organization_id": item.organization_id,
-        "enabled": item.enabled,
+        "status": item.status.value,
         "audit_event_id": event.id,
     }
     save_idempotent_response(
@@ -147,7 +147,7 @@ def update_equipment(
 
     item.name = payload.name
     item.organization_id = payload.organization_id
-    item.enabled = payload.enabled
+    item.status = payload.status
     event = write_audit_event(
         db,
         actor_user_id=user.id,
@@ -162,7 +162,7 @@ def update_equipment(
         "code": item.code,
         "name": item.name,
         "organization_id": item.organization_id,
-        "enabled": item.enabled,
+        "status": item.status.value,
         "audit_event_id": event.id,
     }
     save_idempotent_response(

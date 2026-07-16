@@ -56,9 +56,7 @@ class Role(Base):
     __tablename__ = "roles"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
-    code: Mapped[str] = mapped_column(
-        String(100), unique=True, nullable=False, default=lambda: f"CUSTOM_{new_id()}"
-    )
+    code: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     built_in: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     users: Mapped[list[User]] = relationship(secondary=user_roles, back_populates="roles")

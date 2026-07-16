@@ -100,11 +100,3 @@ class Equipment(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now
     )
-
-    @property
-    def enabled(self) -> bool:
-        return self.status != EquipmentStatus.DISABLED
-
-    @enabled.setter
-    def enabled(self, value: bool) -> None:
-        self.status = EquipmentStatus.NORMAL if value else EquipmentStatus.DISABLED

@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from fastapi import APIRouter, Depends, Header, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -81,7 +83,12 @@ def create_role(
     if found_codes != set(payload.permission_codes):
         raise HTTPException(status_code=422, detail={"code": "PERMISSION_NOT_FOUND"})
 
-    role = Role(name=payload.name, permissions=permissions)
+    role = Role(
+        code=f"CUSTOM_{uuid4()}",
+        name=payload.name,
+        built_in=False,
+        permissions=permissions,
+    )
     db.add(role)
     try:
         db.flush()
