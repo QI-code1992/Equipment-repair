@@ -64,3 +64,4 @@
 - 修正提交：`e0f60f84d5ed31b693ad4f617b7b4c02ded0f718`。
 - 修正复审：旧状态措辞已从任务书清除；11 项任务矩阵和 TASK-002—011 交叉审核规则通过；`workflow/state.json` 解析、Python 3.13 健康测试、`compileall`、Compose 配置和 `git diff --check` 通过；相对目标分支仍无 `codebase/` 修改。
 - 复审结论：通过；等待项目负责人批准包含本复审证据的最终精确 HEAD，未获批准前 PR #18 保持 Draft。
+- 合并批准：项目负责人于 2026-07-16T15:25:08+08:00 明确批准精确 HEAD `1d4405e1ff6066df25c896deb57248353d8695b7` 转为 Ready 并手动合入；批准记录提交后必须复核任务书和 `codebase/` 相对获批 HEAD 未变化。

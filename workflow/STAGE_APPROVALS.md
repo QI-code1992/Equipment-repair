@@ -126,6 +126,13 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - PR Target Correction: 历史 PR #16 错误指向 `main`，且当前 `origin/main` 不包含获批 v1.2 任务书 Blob，因此不构成有效集成；CR-037 必须重新通过目标为 `codex/stage-05-integration` 的治理 PR 完成。
 - Notes: 本记录不重写 Gate-007 历史，不批准 TASK-002 完成、PR #15 合并、Stage 5 完成或进入 Stage 6。获批任务书及本审批记录合入 `codex/stage-05-integration` 后，DEV-001 才可恢复 TASK-002 R6/R7。
 - PR #18 Review Correction: 首轮正式审查发现任务书正文仍保留“等待批准”状态，与本审批记录冲突。治理分支仅同步状态字段，不改变已批准协作内容；修正后的新精确 HEAD 必须由项目负责人再次明确批准合并，才可转为 Ready。
+- PR #18 Merge Approval:
+  - Status: Approved
+  - Approver: project owner
+  - Approved At: 2026-07-16T15:25:08+08:00
+  - Approved Head: `1d4405e1ff6066df25c896deb57248353d8695b7`
+  - Decision: 项目负责人明确回复“批准”，授权将 PR #18 当前精确 HEAD 转为 Ready，并由集成负责人手动合入 `codex/stage-05-integration`。
+  - Conditions: 批准后的新增提交只能记录本次批准，不得修改任务书正文、代码、任务范围、人员、依赖或共享契约；推送后必须验证任务书 Blob 和 `codebase/` 相对获批 HEAD 均未变化。
 
 ## Candidate gate recommendations
 
