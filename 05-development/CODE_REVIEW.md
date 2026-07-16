@@ -61,3 +61,6 @@
 - 阻断项：任务书正文仍写“v1.2 候选、等待项目负责人批准、获批前暂停”，但 `workflow/STAGE_APPROVALS.md` 与 CR-037 已记录精确 Commit `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b` 获批，形成当前基线状态矛盾。
 - 首轮结论：Changes Requested；PR #18 不得转 Ready 或合并。
 - 修正边界：只同步任务书和治理台账状态，不修改已批准任务内容、人员、范围、依赖、API、数据或代码；修正后重新检查完整 diff，并由项目负责人批准新的精确 HEAD 后再转 Ready。
+- 修正提交：`e0f60f84d5ed31b693ad4f617b7b4c02ded0f718`。
+- 修正复审：旧状态措辞已从任务书清除；11 项任务矩阵和 TASK-002—011 交叉审核规则通过；`workflow/state.json` 解析、Python 3.13 健康测试、`compileall`、Compose 配置和 `git diff --check` 通过；相对目标分支仍无 `codebase/` 修改。
+- 复审结论：通过；等待项目负责人批准包含本复审证据的最终精确 HEAD，未获批准前 PR #18 保持 Draft。

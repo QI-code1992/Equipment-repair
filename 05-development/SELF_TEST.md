@@ -50,3 +50,14 @@
 - HTTP：API 容器内 `/healthz` 返回 `{"status":"ok","service":"equipment-operations-platform"}`。
 - 清理：验证容器和网络已移除，未执行数据卷删除。
 - 结论：CR-038 技术补救完成；该验证不验收 TASK-002，TASK-002 仍为 `Changes requested`。
+
+## CR-037 PR #18 治理状态修正验证（2026-07-16）
+
+- 修正提交：`e0f60f84d5ed31b693ad4f617b7b4c02ded0f718`。
+- 任务书状态：旧的“v1.2 候选 / 等待批准 / 获批前暂停”当前状态措辞已清除；保留历史变更说明，不改写原审批记录。
+- 任务矩阵：11 个 TASK 存在；TASK-002—011 均具备任务开发者、指定审核者、正式 PR 创建者、开发者不得自建正式 PR 和目标分支字段；开发者与审核者/PR 创建者不同。
+- Python 3.13：`py -3.13 -m pytest codebase/backend/tests/test_health.py -q` 为 `4 passed, 1 warning`。
+- 静态检查：`py -3.13 -m compileall -q codebase/backend/app codebase/backend/tests` 通过。
+- Compose：`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet` 通过。
+- 治理文件：`workflow/state.json` 解析通过；`git diff --check` 通过。
+- 范围：相对 `codex/stage-05-integration` 无 `codebase/` 修改；未运行容器启动和数据库验证，因为本修正仅涉及治理状态文本。
