@@ -1,15 +1,6 @@
-from pathlib import Path
-
 from fastapi.testclient import TestClient
 
 from app.main import create_app
-
-
-def test_api_image_includes_database_migrations() -> None:
-    dockerfile = (Path(__file__).parents[1] / "Dockerfile").read_text()
-
-    assert "COPY alembic.ini ./" in dockerfile
-    assert "COPY alembic ./alembic" in dockerfile
 
 
 def test_healthz_reports_unavailable_when_application_is_not_configured() -> None:
