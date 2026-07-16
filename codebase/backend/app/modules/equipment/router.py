@@ -47,7 +47,7 @@ def list_equipment(
     ]
 
 
-@router.post("", status_code=201, response_model=None)
+@router.post("", status_code=201, response_model=None, name="equipment.create")
 def create_equipment(
     payload: EquipmentCreate,
     idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
@@ -118,7 +118,7 @@ def create_equipment(
     return body
 
 
-@router.patch("/{equipment_id}", response_model=None)
+@router.patch("/{equipment_id}", response_model=None, name="equipment.update")
 def update_equipment(
     equipment_id: str,
     payload: EquipmentUpdate,

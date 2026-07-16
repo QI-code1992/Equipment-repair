@@ -63,7 +63,7 @@ def list_organizations(
     return [{"id": item.id, "name": item.name, "parent_id": item.parent_id} for item in organizations]
 
 
-@router.post("", status_code=201, response_model=None)
+@router.post("", status_code=201, response_model=None, name="organization.create")
 def create_organization(
     payload: OrganizationCreate,
     idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
@@ -117,7 +117,9 @@ def create_organization(
     return body
 
 
-@router.patch("/{organization_id}", response_model=None)
+@router.patch(
+    "/{organization_id}", response_model=None, name="organization.update"
+)
 def update_organization(
     organization_id: str,
     payload: OrganizationUpdate,

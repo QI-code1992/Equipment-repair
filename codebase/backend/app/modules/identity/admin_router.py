@@ -56,7 +56,7 @@ def list_roles(
     ]
 
 
-@router.post("/roles", status_code=201, response_model=None)
+@router.post("/roles", status_code=201, response_model=None, name="role.create")
 def create_role(
     payload: RoleCreate,
     idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
@@ -128,7 +128,7 @@ def create_role(
     return body
 
 
-@router.post("/users", status_code=201, response_model=None)
+@router.post("/users", status_code=201, response_model=None, name="user.create")
 def create_user(
     payload: UserCreate,
     idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),

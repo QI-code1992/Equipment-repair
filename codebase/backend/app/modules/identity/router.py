@@ -39,7 +39,7 @@ def read_current_user(user: User = Depends(get_current_user)) -> dict[str, objec
     return {"id": user.id, "username": user.username, "enabled": user.enabled}
 
 
-@router.delete("/session", response_model=None)
+@router.delete("/session", response_model=None, name="session.logout")
 def logout(
     idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer),

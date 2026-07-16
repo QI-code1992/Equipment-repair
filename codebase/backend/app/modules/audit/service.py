@@ -15,10 +15,30 @@ SENSITIVE_KEYS = {
     "token",
 }
 SENSITIVE_KEY_SUFFIXES = ("_api_key", "_cookie", "_password", "_secret", "_token")
+ATTACHMENT_CONTEXT_KEYS = {
+    "attachment",
+    "attachments",
+    "file",
+    "files",
+    "upload",
+    "document",
+    "image",
+}
+ATTACHMENT_CONTENT_KEYS = {"body", "content", "data", "bytes", "text", "base64"}
+DIRECT_ATTACHMENT_CONTENT_KEYS = {
+    "attachment_content",
+    "file_content",
+    "file_bytes",
+    "content_base64",
+}
+
+
+def normalize_key(key: str) -> str:
+    return re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", key).lower().replace("-", "_")
 
 
 def is_sensitive_key(key: str) -> bool:
-    normalized = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", key).lower().replace("-", "_")
+    normalized = normalize_key(key)
     return (
         normalized in SENSITIVE_KEYS
         or normalized.startswith("authorization_")
@@ -26,16 +46,27 @@ def is_sensitive_key(key: str) -> bool:
     )
 
 
-def sanitize_audit_metadata(value: object) -> object:
+def sanitize_audit_metadata(
+    value: object, *, context: tuple[str, ...] = ()
+) -> object:
     if isinstance(value, dict):
-        return {
-            key: "[REDACTED]"
-            if is_sensitive_key(key)
-            else sanitize_audit_metadata(item)
-            for key, item in value.items()
-        }
+        result: dict[str, object] = {}
+        attachment_context = any(part in ATTACHMENT_CONTEXT_KEYS for part in context)
+        for key, item in value.items():
+            normalized = normalize_key(key)
+            redact = (
+                is_sensitive_key(key)
+                or normalized in DIRECT_ATTACHMENT_CONTENT_KEYS
+                or (attachment_context and normalized in ATTACHMENT_CONTENT_KEYS)
+            )
+            result[key] = (
+                "[REDACTED]"
+                if redact
+                else sanitize_audit_metadata(item, context=(*context, normalized))
+            )
+        return result
     if isinstance(value, list):
-        return [sanitize_audit_metadata(item) for item in value]
+        return [sanitize_audit_metadata(item, context=context) for item in value]
     if isinstance(value, str) and "bearer " in value.lower():
         return "[REDACTED]"
     return value
