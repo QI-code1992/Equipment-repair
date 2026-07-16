@@ -3,6 +3,7 @@ from sqlalchemy import select
 
 from app.core.database import Base
 from app.main import create_app
+from app.modules.equipment.models import Organization, OrganizationType
 from app.modules.identity.models import Permission, Role, User
 from app.modules.identity.security import hash_password
 
@@ -13,6 +14,19 @@ def build_client() -> TestClient:
         redis_url="redis://redis:6379/0",
     )
     Base.metadata.create_all(app.state.engine)
+    with app.state.session_factory() as db:
+        db.add(
+            Organization(
+                type=OrganizationType.ROOT,
+                code="ROOT",
+                name="根节点",
+                parent_id=None,
+                sort_order=0,
+                enabled=True,
+                remark="",
+            )
+        )
+        db.commit()
     return TestClient(app)
 
 

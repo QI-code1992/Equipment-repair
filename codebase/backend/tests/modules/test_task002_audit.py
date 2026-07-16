@@ -64,6 +64,9 @@ def test_protected_write_routes_use_resource_action_names() -> None:
     assert route_names[("/api/organizations/{organization_id}", "PATCH")] == (
         "organization.update"
     )
+    assert route_names[("/api/organizations/{organization_id}", "DELETE")] == (
+        "organization.delete"
+    )
     assert route_names[("/api/equipment", "POST")] == "equipment.create"
     assert route_names[("/api/equipment/{equipment_id}", "PATCH")] == (
         "equipment.update"

@@ -13,7 +13,12 @@ from sqlalchemy.orm import Session
 from app.core.database import Base, create_database_engine, session_factory
 from app.modules.audit.models import AuditEvent
 from app.modules.audit.service import write_audit_event
-from app.modules.equipment.models import Equipment, EquipmentStatus
+from app.modules.equipment.models import (
+    Equipment,
+    EquipmentStatus,
+    Organization,
+    OrganizationType,
+)
 from app.modules.identity.models import LoginSession, Permission, Role, RoleCode, User
 from app.modules.identity.bootstrap import (
     PERMISSION_CODES,
@@ -79,7 +84,41 @@ def client() -> TestClient:
         redis_url="redis://redis:6379/0",
     )
     Base.metadata.create_all(app.state.engine)
+    with app.state.session_factory() as session:
+        session.add(
+            Organization(
+                type=OrganizationType.ROOT,
+                code="ROOT",
+                name="根节点",
+                parent_id=None,
+                sort_order=0,
+                enabled=True,
+                remark="",
+            )
+        )
+        session.commit()
     return TestClient(app)
+
+
+def root_id(client: TestClient) -> str:
+    with client.app.state.session_factory() as session:
+        return session.scalar(
+            select(Organization.id).where(Organization.type == OrganizationType.ROOT)
+        )
+
+
+def organization_payload(
+    organization_type: str, code: str, name: str, parent_id: str
+) -> dict[str, object]:
+    return {
+        "type": organization_type,
+        "code": code,
+        "name": name,
+        "parent_id": parent_id,
+        "sort_order": 0,
+        "enabled": True,
+        "remark": "",
+    }
 
 
 def create_user_token(client: TestClient, permission_codes: list[str]) -> str:
@@ -274,12 +313,16 @@ def test_audit_metadata_excludes_credentials(db_session: Session) -> None:
 
 def test_organization_tree_can_be_created(client: TestClient) -> None:
     headers = writer_headers(client, "root-org")
-    root = client.post("/api/organizations", json={"name": "Plant A", "parent_id": None}, headers=headers)
+    root = client.post(
+        "/api/organizations",
+        json=organization_payload("FACTORY", "FAC-TREE", "Plant A", root_id(client)),
+        headers=headers,
+    )
     child_headers = dict(headers)
     child_headers["Idempotency-Key"] = "child-org"
     child = client.post(
         "/api/organizations",
-        json={"name": "Workshop", "parent_id": root.json()["id"]},
+        json=organization_payload("WORKSHOP", "WS-TREE", "Workshop", root.json()["id"]),
         headers=child_headers,
     )
 
@@ -288,27 +331,29 @@ def test_organization_tree_can_be_created(client: TestClient) -> None:
     assert child.json()["parent_id"] == root.json()["id"]
 
 
-def test_organization_parent_cannot_create_cycle(client: TestClient) -> None:
+def test_organization_parent_cannot_be_changed(client: TestClient) -> None:
     headers = writer_headers(client, "cycle-root")
     root = client.post(
         "/api/organizations",
-        json={"name": "Root", "parent_id": None},
+        json=organization_payload("FACTORY", "FAC-FIXED", "Factory", root_id(client)),
         headers=headers,
-    ).json()
-    child = client.post(
-        "/api/organizations",
-        json={"name": "Child", "parent_id": root["id"]},
-        headers={**headers, "Idempotency-Key": "cycle-child"},
     ).json()
 
     response = client.patch(
         f"/api/organizations/{root['id']}",
-        json={"name": "Root", "parent_id": child["id"]},
+        json={
+            "code": root["code"],
+            "name": root["name"],
+            "sort_order": root["sort_order"],
+            "enabled": root["enabled"],
+            "remark": root["remark"],
+            "parent_id": root_id(client),
+        },
         headers={**headers, "Idempotency-Key": "cycle-update"},
     )
 
     assert response.status_code == 422
-    assert response.json()["detail"]["code"] == "ORGANIZATION_PARENT_INVALID"
+    assert response.json()["detail"]["code"] == "VALIDATION_ERROR"
 
 
 def test_organization_tree_writes_use_one_postgresql_lock() -> None:
@@ -452,7 +497,9 @@ def test_equipment_and_organization_can_be_updated(client: TestClient) -> None:
     headers = writer_headers(client, "create-org-for-update")
     organization = client.post(
         "/api/organizations",
-        json={"name": "Original Plant", "parent_id": None},
+        json=organization_payload(
+            "FACTORY", "FAC-UPDATE", "Original Plant", root_id(client)
+        ),
         headers=headers,
     ).json()
     create_equipment_headers = dict(headers)
@@ -468,7 +515,13 @@ def test_equipment_and_organization_can_be_updated(client: TestClient) -> None:
     update_org_headers["Idempotency-Key"] = "update-org"
     updated_organization = client.patch(
         f"/api/organizations/{organization['id']}",
-        json={"name": "Updated Plant", "parent_id": None},
+        json={
+            "code": organization["code"],
+            "name": "Updated Plant",
+            "sort_order": organization["sort_order"],
+            "enabled": organization["enabled"],
+            "remark": organization["remark"],
+        },
         headers=update_org_headers,
     )
     update_equipment_headers = dict(headers)
@@ -533,7 +586,7 @@ def test_idempotency_key_cannot_be_reused_for_another_target(client: TestClient)
     headers = writer_headers(client, "global-key")
     organization = client.post(
         "/api/organizations",
-        json={"name": "Plant", "parent_id": None},
+        json=organization_payload("FACTORY", "FAC-GLOBAL", "Plant", root_id(client)),
         headers=headers,
     )
 
