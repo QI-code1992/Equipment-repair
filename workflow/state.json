@@ -1,7 +1,7 @@
 {
   "state": "IN_DEVELOPMENT",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-16T15:08:57+08:00",
+  "updatedAt": "2026-07-16T15:30:50+08:00",
   "productBaseline": {
     "status": "requirements-interaction-and-prototype-approved",
     "canonicalCandidate": [
@@ -22,7 +22,7 @@
   },
   "lastApprovedStage": "Stage 4 — Architecture and Development Plan",
   "pendingStageApproval": null,
-  "currentCommitSha": "d37698c6e51df1701bbdfcf12ec6fa329241e0bd",
+  "currentCommitSha": "18485653a94cd033cfc82e8d6c7e40c35fcfbe33",
   "repairCycle": {
     "taskId": "TASK-002",
     "pullRequest": 15,
@@ -31,13 +31,15 @@
     "reviewer": "QI-code1992",
     "owner": "DEV-001",
     "changeRequest": "CR-036",
-    "design": "05-development/TASK-002_REMEDIATION_DESIGN.md"
+    "design": "05-development/TASK-002_REMEDIATION_DESIGN.md",
+    "resumeAllowed": true,
+    "resumeScope": "CR-036 R6/R7 only; TASK-002 remains CHANGES_REQUESTED until DEV-002 re-review passes"
   },
   "governanceCorrection": {
     "changeRequest": "CR-037",
     "artifact": "04-architecture-plan/DEVELOPMENT_TASK_BOOK.md",
     "candidateVersion": "v1.2",
-    "status": "GOVERNANCE_PR_MERGE_APPROVED_PENDING_EXECUTION",
+    "status": "DONE",
     "approvedCandidateCommit": "cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b",
     "approvedBy": "project owner",
     "approvedAt": "2026-07-16",
@@ -46,8 +48,9 @@
     "governancePullRequest": {
       "number": 18,
       "url": "https://github.com/QI-code1992/Equipment-repair/pull/18",
-      "state": "OPEN",
-      "draft": true,
+      "state": "MERGED",
+      "draft": false,
+      "mergeable": true,
       "target": "codex/stage-05-integration",
       "reviewState": "CHANGES_REQUESTED_CORRECTED",
       "reviewedHead": "3231c9e191d33ee7132a5ea9dff13e29cf7af856",
@@ -59,7 +62,11 @@
         "approvedAt": "2026-07-16T15:25:08+08:00",
         "action": "Convert PR #18 to Ready and merge manually into codex/stage-05-integration"
       },
-      "remainingGate": "Push approval record, verify no task-book or codebase change after approved HEAD, then Ready and manual merge"
+      "mergedHead": "e6b571d16192fb4462b7c118ef977df8f6ce186a",
+      "mergeCommit": "18485653a94cd033cfc82e8d6c7e40c35fcfbe33",
+      "mergedAt": "2026-07-16T15:27:01+08:00",
+      "postMergeVerification": "Merge tree matched merged head; Python 3.13.14: 4 passed, 1 warning; compileall, Compose config, JSON and diff checks passed; no codebase change",
+      "remainingGate": null
     },
     "integrationBase": "d37698c6e51df1701bbdfcf12ec6fa329241e0bd",
     "historicalWrongTargetPullRequest": {
@@ -72,7 +79,8 @@
     },
     "scope": "Stage 5 cross-review, reviewer-created formal PR, integration trigger, automation boundary and stale TASK-002 ledger correction",
     "preserveExistingWork": true,
-    "resumeCondition": "The approved v1.2 task book and approval ledgers are merged into codex/stage-05-integration"
+    "resumeCondition": "MET: approved v1.2 task book and approval ledgers merged at 18485653a94cd033cfc82e8d6c7e40c35fcfbe33",
+    "resumeConditionMet": true
   },
   "governanceIncident": {
     "changeRequest": "CR-038",
@@ -122,6 +130,6 @@
     "On 2026-07-16, DEV-002 requested changes on PR #15 at cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77. The project owner approved the CR-036 remediation scope and DEV-001 entered the TASK-002 repair cycle; the rejected SHA is not an acceptance candidate.",
     "On 2026-07-16, the project owner approved exact commit cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b as DEVELOPMENT_TASK_BOOK v1.2 and authorized the isolated governance branch push. TASK-002 R6/R7 remain paused until the approved task book and approval ledgers are merged into codex/stage-05-integration; the rejected TASK-002 commit and existing local WIP remain preserved.",
     "On 2026-07-16, PR #15 was merged as e328cec64f1aa9c7cdc383579af042692dce5679 while its formal review gate remained Changes requested. CR-038 reverted that invalid integration through PR #17; merge commit d37698c6e51df1701bbdfcf12ec6fa329241e0bd passed post-merge Python, Compose, container-health and /healthz verification.",
-    "CR-037 is now the only governance prerequisite before TASK-002 R6/R7 may resume. TASK-002 remains Changes requested and all dependent database integration remains blocked."
+    "CR-037 was merged through PR #18 at 18485653a94cd033cfc82e8d6c7e40c35fcfbe33 and passed post-merge verification. DEV-001 may resume TASK-002 CR-036 R6/R7; TASK-002 remains Changes requested and all dependent tasks and database integration remain blocked."
   ]
 }

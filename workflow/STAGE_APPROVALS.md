@@ -133,6 +133,13 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
   - Approved Head: `1d4405e1ff6066df25c896deb57248353d8695b7`
   - Decision: 项目负责人明确回复“批准”，授权将 PR #18 当前精确 HEAD 转为 Ready，并由集成负责人手动合入 `codex/stage-05-integration`。
   - Conditions: 批准后的新增提交只能记录本次批准，不得修改任务书正文、代码、任务范围、人员、依赖或共享契约；推送后必须验证任务书 Blob 和 `codebase/` 相对获批 HEAD 均未变化。
+- PR #19 Closure Merge Approval:
+  - Status: Approved
+  - Approver: project owner
+  - Approved At: 2026-07-16T15:33:48+08:00
+  - Approved Head: `df53489842e68037d3a2205b18f9e69fef903473`
+  - Decision: 项目负责人明确回复“批准”，授权将 CR-037 合并后治理记录收尾 PR #19 转为 Ready，并由集成负责人手动合入 `codex/stage-05-integration`。
+  - Conditions: 批准后的新增提交只能记录本次批准；不得修改 PR #19 已审核的 6 个收尾文件、任务书正文或 `codebase/`。PR #19 自身 Merge Commit 由 GitHub 历史作为证据，不再递归创建收尾 PR。
 
 ## Candidate gate recommendations
 

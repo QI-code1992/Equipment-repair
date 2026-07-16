@@ -65,3 +65,11 @@
 - 修正复审：旧状态措辞已从任务书清除；11 项任务矩阵和 TASK-002—011 交叉审核规则通过；`workflow/state.json` 解析、Python 3.13 健康测试、`compileall`、Compose 配置和 `git diff --check` 通过；相对目标分支仍无 `codebase/` 修改。
 - 复审结论：通过；等待项目负责人批准包含本复审证据的最终精确 HEAD，未获批准前 PR #18 保持 Draft。
 - 合并批准：项目负责人于 2026-07-16T15:25:08+08:00 明确批准精确 HEAD `1d4405e1ff6066df25c896deb57248353d8695b7` 转为 Ready 并手动合入；批准记录提交后必须复核任务书和 `codebase/` 相对获批 HEAD 未变化。
+
+## CR-037 PR #18 合并后审查（2026-07-16）
+
+- 合并结果：PR #18 已合入 `codex/stage-05-integration`，Merge Commit 为 `18485653a94cd033cfc82e8d6c7e40c35fcfbe33`。
+- 边界复核：批准记录 HEAD `e6b571d16192fb4462b7c118ef977df8f6ce186a` 相对获批 HEAD `1d4405e1ff6066df25c896deb57248353d8695b7` 只修改 4 个批准记录文件；任务书 Blob 与 `codebase/` 均未变化。
+- 合并树：Merge Commit 树与 `e6b571d16192fb4462b7c118ef977df8f6ce186a` 树一致。
+- 验证：Python 3.13.14 `4 passed, 1 warning`；`compileall`、Compose 配置、`workflow/state.json` 解析和 `git diff --check` 通过；相对第一父提交无 `codebase/` 修改。
+- 结论：CR-037 技术与治理集成通过；本结论不代表 TASK-002 完成，也不解锁 TASK-003、TASK-004 或依赖 TASK-002 的数据库集成。

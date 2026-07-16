@@ -28,14 +28,15 @@
 ## TASK-002 交接状态更正（2026-07-16）
 
 - 原因：DEV-002 对 PR #15 候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 提交 `Changes requested`；上节“Ready for review”不再代表当前有效交接状态。
-- 当前状态：TASK-002 / CR-036 `In Development`；本地整改代码和契约草稿保持原状。任务书 v1.2 精确候选 `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b` 已获项目负责人批准并推送治理分支，治理 PR 合入 `codex/stage-05-integration` 前继续暂停后续 R6/R7。
+- 当前状态：TASK-002 / CR-036 `In Development`；本地整改代码和契约草稿保持原状。任务书 v1.2 已通过 PR #18 合入 `codex/stage-05-integration`，CR-037 收尾记录合入后可恢复 R6/R7。
 - 旧证据边界：`0b0d9cf`、`9f162b4` 和 PR #15 历史继续保留，但不得作为 TASK-002 完成、FCP、正式 PR 或集成依据。
 - 协作分工：DEV-001 为任务开发者和集成负责人；DEV-002 为指定审核者及后继正式 PR 创建者。DEV-001 只能推送任务分支并发送书面审核请求。
 - PR #15：保留为被拒绝候选的审核历史和本轮 Review Request 载体；DEV-002 审核新候选通过后创建后继正式 PR。
 - 依赖边界：TASK-003、TASK-004、TASK-005 及 DEV-002 的数据库集成继续按任务书阻塞；TASK-006 仅保留已允许的非数据库范围。
 - 下一次有效交接条件：任务书 v1.2 与本审批记录已通过治理 PR 合入集成分支；CR-036 R6/R7 完成；PostgreSQL/Compose 和完整回归通过；正式证据提交并推送；DEV-002 复审通过。
 - PR #16 更正：历史 PR #16 错误指向 `main`，且当前远端 `main` 不包含获批任务书 v1.2；该 PR 不构成 CR-037 完成或 Stage 5 协作基线。必须重新创建目标为 `codex/stage-05-integration` 的治理 PR。
-- CR-037 正确 PR：[PR #18](https://github.com/QI-code1992/Equipment-repair/pull/18)，Draft、Open，目标 `codex/stage-05-integration`；首轮正式审查发现的任务书正文状态冲突已由 `e0f60f84d5ed31b693ad4f617b7b4c02ded0f718` 修正并复审通过。项目负责人批准包含复审证据的最终精确 HEAD 前，不转 Ready、不合并，也不恢复 TASK-002 R6/R7。
+- CR-037 正确 PR：[PR #18](https://github.com/QI-code1992/Equipment-repair/pull/18)，已合入 `codex/stage-05-integration`；Merged Head 为 `e6b571d16192fb4462b7c118ef977df8f6ce186a`，Merge Commit 为 `18485653a94cd033cfc82e8d6c7e40c35fcfbe33`。合并树、Python 3.13、`compileall`、Compose 配置和治理一致性验证通过。
+- CR-037 收尾边界：本收尾 PR 仅把合并结果写回治理台账；合入后 DEV-001 可恢复 TASK-002 / CR-036 R6/R7。TASK-002 仍未完成，TASK-003、TASK-004、TASK-005 及依赖 TASK-002 的数据库集成继续阻塞。
 
 ## CR-038 治理补救交接（2026-07-16）
 

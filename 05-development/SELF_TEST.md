@@ -61,3 +61,14 @@
 - Compose：`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet` 通过。
 - 治理文件：`workflow/state.json` 解析通过；`git diff --check` 通过。
 - 范围：相对 `codex/stage-05-integration` 无 `codebase/` 修改；未运行容器启动和数据库验证，因为本修正仅涉及治理状态文本。
+
+## CR-037 PR #18 合并后验证（2026-07-16）
+
+- Merge Commit：`18485653a94cd033cfc82e8d6c7e40c35fcfbe33`。
+- 树一致性：Merge Commit 树与 PR 合并前 HEAD `e6b571d16192fb4462b7c118ef977df8f6ce186a` 一致。
+- Python 3.13：`py -3.13 -m pytest codebase/backend/tests/test_health.py -q` 为 `4 passed, 1 warning`。
+- 静态检查：`py -3.13 -m compileall -q codebase/backend/app codebase/backend/tests` 通过。
+- Compose：`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet` 通过。
+- 治理检查：11 个 TASK 存在；`workflow/state.json` 解析通过；`git diff --check` 通过。
+- 范围：相对 Merge Commit 第一父提交无 `codebase/` 修改；未启动容器或数据库，因为 PR #18 仅包含任务书和治理文档。
+- 结论：CR-037 合并后验证通过；TASK-002 仍为 `Changes requested`，仅允许恢复 CR-036 R6/R7，依赖任务继续阻塞。
