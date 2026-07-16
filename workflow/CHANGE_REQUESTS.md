@@ -476,3 +476,30 @@
 - Verification:
   - Status: 设计已获确认，待书面设计复核、实施计划、TDD 实现、完整回归和 DEV-002 复审。
   - Evidence: PR #15 的 DEV-002 `Changes requested` 审核；`05-development/TASK-002_REMEDIATION_DESIGN.md`。
+
+### CR-037：补齐 Stage 5 交叉审核与正式 PR 集成控制
+
+- Level: L1
+- Status: Proposed / Awaiting Approval
+- Raised By: 工作流一致性审计
+- Raised At: 2026-07-16
+- Current Stage: Stage 5 — 开发实施 / TASK-002 修复暂停点
+- Original Request: 项目负责人授权先修正任务书协作基线，保持既有 TASK-002 代码和未提交契约草稿不变，再继续开发与验证。
+- Clarified Requirement: 将 `DEVELOPMENT_TASK_BOOK.md` 修订为 v1.2 候选，为每个正式任务明确任务开发者、指定审核者、正式 PR 创建者、任务分支/目标分支、PR 审核请求与正式 PR 的边界、正式 PR 创建条件、集成触发条件、自动化边界和集成后检查点时机。
+- Reason: 任务书 v1.1 未覆盖当前 `formal-software-delivery-workflow` 的交叉审核和 reviewer-created PR 约束；同时 PR #15、FCP-002、CODE_REVIEW 和交接记录仍含被拒绝前的过期状态，已与 `workflow/state.json`、CR-036 冲突。
+- Impact:
+  - PRD / SPEC / Prototype / Acceptance Criteria: 不修改。
+  - Architecture / API / Data Model: 不修改业务或技术契约；仅修订 Stage 5 协作和集成控制。
+  - Development Task Book: v1.1 -> v1.2 候选；任务范围、负责人和依赖顺序不变。
+  - Stage 5: TASK-002 后续整改暂停到 v1.2 候选获项目负责人针对精确 SHA 批准；现有代码与未提交文件保留。
+  - Effective Boundary: v1.2 从尚未完成的 TASK-002 起生效；不追溯撤销已完成的 TASK-001、FCP-001 或其历史 Review/集成记录。
+  - PR #15: 保留为被拒绝候选的审核历史和 Review Request 载体，不作为 v1.2 下的正式集成触发源。
+  - Checkpoints / Review / Handoff: 旧记录保留并追加 `Changes Requested` / `Superseded` 状态，不删除历史。
+- Decision: 项目负责人已授权制作本修订候选；该授权不等同于批准尚未生成的 v1.2 精确 Commit，也不批准 TASK-002 完成、正式 PR 或集成。
+- Updated Baselines: 待生成 `DEVELOPMENT_TASK_BOOK.md` v1.2 候选 Commit；获批后再记录审批 Commit，并恢复 TASK-002 R6/R7。
+- Implementation:
+  - Owner: DEV-001（工作流协调与集成责任）
+  - Candidate Commit: 待本次候选提交生成
+- Verification:
+  - Status: 待完成任务分配矩阵、PR/集成规则、台账一致性和 `git diff --check` 审查。
+  - Evidence: 当前技能 `references/stage-gate.md`、`references/development-task-book.md`；任务书 v1.1；PR #15 `Changes requested`；CR-036。

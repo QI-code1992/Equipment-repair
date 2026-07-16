@@ -21,3 +21,14 @@
 - 三轮：发现不同键并发组织更新仍可能交叉成环，以及 camelCase 脱敏和 bootstrap actor 语义问题；加入组织树共享 PostgreSQL transaction advisory lock，并完成两项语义修正。
 - 最终独立复审：Critical 0、Important 0、Minor 0，建议提交；独立执行 `python -m pytest codebase/backend/tests -q -p no:cacheprovider` 为 38 passed，`git diff --check` 无内容错误。
 - 范围检查：未实现工厂/设备行级过滤；活跃故障设备停用保护仍按获批边界留给 TASK-003；无额外兼容层、无无关重构。
+
+## TASK-002 正式交叉审核退回（2026-07-16）
+
+- 审核对象：PR #15，精确候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77`。
+- 指定审核者：DEV-002 / GitHub 审核人 `QI-code1992`。
+- 结论：`Changes requested`；该结论取代上节针对更早实现切片的“建议提交”，但不删除旧审查历史。
+- 已通过证据：Python 3.13 后端测试 38 passed；`compileall` 通过；`git diff --check` 通过。
+- Standards 阻断：公开 API 契约未同步；受保护写操作失败审计与失败 `audit_event_id` 不完整。
+- Spec 阻断：设备字段、组织层级、用户/固定角色/菜单操作权限及附件敏感内容脱敏未完整实现。
+- 处置：进入 CR-036 修复周期；被拒绝 SHA 不得复用为完成、正式 PR、FCP 或集成依据。新候选必须完成 PostgreSQL/Compose 真实验证、完整独立 Review 和 DEV-002 复审。
+- PR 边界：按任务书 v1.2 候选，PR #15 保留为被拒绝历史和 Review Request 载体，不作为后继正式集成 PR。

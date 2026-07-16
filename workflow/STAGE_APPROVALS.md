@@ -110,6 +110,20 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Conditions / Scope Exceptions: `DEF-003`、`DEF-004` 尚未修复；当前协调环境缺少 Python 3.13 和 Docker，未验证后端或 Compose。它们必须由 `DEV-001` 在 TASK-001 中提供真实证据，TASK-001 通过前不得启动下游任务。
 - Notes: 本批准只允许进入 Stage 5，不代表 TASK-001 已通过，也不批准 Stage 6、Stage 7 或 Stage 8。
 
+### Review-008: Stage 5 开发任务书 v1.2 协作基线修订
+
+- Status: Pending user approval
+- Approver: none recorded
+- Prepared At: 2026-07-16
+- Current Stage: Stage 5 — Development Implementation / TASK-002 repair paused
+- Next Step: 项目负责人针对候选精确 Commit 审阅并决定是否批准任务书 v1.2；批准前不恢复 TASK-002 R6/R7
+- Artifacts Reviewed: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.2 候选、`workflow/CHANGE_REQUESTS.md` CR-037、PR #15 / CR-036 状态记录
+- Evidence Reviewed: 当前 `formal-software-delivery-workflow` 的交叉审核、reviewer-created PR、正式 PR 集成触发和 checkpoint 约束；任务书 v1.1 缺口审计
+- Version / Commit SHA: 待候选提交生成后填写；不得使用工作区状态或“最新版本”
+- Decision: AI 仅准备候选，不构成批准。
+- Conditions / Scope Exceptions: 本修订不改变产品、架构、API、数据模型、开发人数、任务负责人、任务范围或依赖矩阵；现有 TASK-002 代码和未提交契约文件保持原状。PR #15 保留为审核历史，不作为正式集成触发源。
+- Notes: 若项目负责人批准，另行追加精确批准记录和审批记录 Commit；不重写 Gate-007 历史。
+
 ## Candidate gate recommendations
 
 ### Gate-001: Scoped waiver to enter Stage 3
