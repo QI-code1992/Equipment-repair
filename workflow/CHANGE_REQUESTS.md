@@ -448,3 +448,59 @@
 - 实施提交：`25e15709a3f1d92f661d37acdb8aa3e1e0e41346`。
 - 门禁审批记录提交：`c9eb206c6517b9c3afd7f33a86e3c383d84d12aa`。
 - 验证：检查所有 TASK-001 开始条件均位于门禁之后；Stage 5 准入清单不再要求先修复 TASK-001；JSON 可解析；`git diff --check` 通过。
+
+### CR-036：修复 TASK-002 正式审核阻断项
+
+- Level: L2
+- Status: In Development
+- Raised By: DEV-002 独立审核
+- Raised At: 2026-07-16
+- Current Stage: Stage 5 — 开发实施 / TASK-002 修复周期
+- Original Request: DEV-002 对 PR #15 的精确提交 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 提交 `Changes requested`，指出公开 API 契约未同步、受保护写操作失败审计不完整，以及设备字段、组织层级、用户/固定角色/菜单操作权限和附件敏感内容脱敏未完整实现。
+- Clarified Requirement: 采用“契约完整、定向补齐”方案，在现有 FastAPI、SQLAlchemy、Alembic 架构内完成 TASK-002；不提前实现 TASK-003 的活动故障停用保护，也不提前实现附件存储、扫描和生命周期。
+- Reason: 当前实现缩减了已批准的 FR-001、FR-010、FR-011 和任务书范围，且未满足 `API_SPEC` 对写操作审计与 `audit_event_id` 的统一要求，PR #15 当前不得合并。
+- Impact:
+  - PRD: 不修改，继续作为权威需求基线。
+  - SPEC: 不修改，继续作为字段、角色和组织规则基线。
+  - Prototype: 不修改，继续作为系统管理、工厂建模和设备台账交互基线。
+  - Architecture: 同步 `API_SPEC.md`；必要时同步 `DATA_MODEL.md`，不改变技术栈或部署拓扑。
+  - Implementation Plan: 新增 TASK-002 修复设计与实施计划，保持 TASK-003/TASK-004 依赖边界。
+  - Development Task Book: 修复完成后更新 TASK-002 状态和远端候选 Commit。
+  - Test Cases: 增加设备完整字段、组织层级、用户/角色权限、失败审计、幂等、脱敏和迁移测试。
+  - Acceptance Criteria: 不降低或改写现有 AC；新增评审阻断项的可复现验证证据。
+- Decision: 项目负责人于 2026-07-16 明确确认方案 1、数据模型、API/失败审计、迁移/测试和交付设计，授权 DEV-001 进入修复周期。
+- Updated Baselines: 设计阶段仅新增 `05-development/TASK-002_REMEDIATION_DESIGN.md`；代码和契约基线待实施、Review 和新 Commit 后更新。
+- Implementation:
+  - Commit: 待生成新的修复候选 Commit；不得复用被拒绝的 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77`。
+  - Owner: DEV-001
+- Verification:
+  - Status: 设计已获确认，待书面设计复核、实施计划、TDD 实现、完整回归和 DEV-002 复审。
+  - Evidence: PR #15 的 DEV-002 `Changes requested` 审核；`05-development/TASK-002_REMEDIATION_DESIGN.md`。
+
+### CR-037：补齐 Stage 5 交叉审核与正式 PR 集成控制
+
+- Level: L1
+- Status: Approved / Pending Integration
+- Raised By: 工作流一致性审计
+- Raised At: 2026-07-16
+- Current Stage: Stage 5 — 开发实施 / TASK-002 修复暂停点
+- Original Request: 项目负责人授权先修正任务书协作基线，保持既有 TASK-002 代码和未提交契约草稿不变，再继续开发与验证。
+- Clarified Requirement: 将 `DEVELOPMENT_TASK_BOOK.md` 修订为 v1.2 候选，为每个正式任务明确任务开发者、指定审核者、正式 PR 创建者、任务分支/目标分支、PR 审核请求与正式 PR 的边界、正式 PR 创建条件、集成触发条件、自动化边界和集成后检查点时机。
+- Reason: 任务书 v1.1 未覆盖当前 `formal-software-delivery-workflow` 的交叉审核和 reviewer-created PR 约束；同时 PR #15、FCP-002、CODE_REVIEW 和交接记录仍含被拒绝前的过期状态，已与 `workflow/state.json`、CR-036 冲突。
+- Impact:
+  - PRD / SPEC / Prototype / Acceptance Criteria: 不修改。
+  - Architecture / API / Data Model: 不修改业务或技术契约；仅修订 Stage 5 协作和集成控制。
+  - Development Task Book: v1.1 -> v1.2 候选；任务范围、负责人和依赖顺序不变。
+  - Stage 5: TASK-002 后续整改暂停到 v1.2 候选获项目负责人针对精确 SHA 批准；现有代码与未提交文件保留。
+  - Effective Boundary: v1.2 从尚未完成的 TASK-002 起生效；不追溯撤销已完成的 TASK-001、FCP-001 或其历史 Review/集成记录。
+  - PR #15: 保留为被拒绝候选的审核历史和 Review Request 载体，不作为 v1.2 下的正式集成触发源。
+  - Checkpoints / Review / Handoff: 旧记录保留并追加 `Changes Requested` / `Superseded` 状态，不删除历史。
+- Decision: 项目负责人已针对精确 Commit `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b` 明确批准任务书 v1.2 协作基线并授权推送隔离治理分支。该批准不等同于 TASK-002 完成、正式 PR、集成或 Stage 6 准入；治理记录与任务书合入 `codex/stage-05-integration` 前，TASK-002 R6/R7 继续暂停。
+- Updated Baselines: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.2 获批候选 Commit `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`，远端分支 `codex/taskbook-v1-2-governance`；待治理 PR 合入后成为 Stage 5 当前协作基线。
+- Implementation:
+  - Owner: DEV-001（工作流协调与集成责任）
+  - Candidate Commit: `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`
+  - Remote Branch: `codex/taskbook-v1-2-governance`
+- Verification:
+  - Status: 任务书内容审查与逐任务协作字段检查通过；11 项任务矩阵完整，TASK-002—011 无自我审核或开发者自建正式 PR；任务书 Git Blob 与获批候选一致；隔离治理分支远端 SHA 已核对。治理台账正在本提交中同步，治理 PR 和合并后验证尚未完成。
+  - Evidence: 当前技能 `references/stage-gate.md`、`references/development-task-book.md`；任务书 v1.1 缺口审计；PR #15 `Changes requested`；CR-036；获批候选 `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`。

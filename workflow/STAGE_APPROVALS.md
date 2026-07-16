@@ -110,6 +110,21 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Conditions / Scope Exceptions: `DEF-003`、`DEF-004` 尚未修复；当前协调环境缺少 Python 3.13 和 Docker，未验证后端或 Compose。它们必须由 `DEV-001` 在 TASK-001 中提供真实证据，TASK-001 通过前不得启动下游任务。
 - Notes: 本批准只允许进入 Stage 5，不代表 TASK-001 已通过，也不批准 Stage 6、Stage 7 或 Stage 8。
 
+### Review-008: Stage 5 开发任务书 v1.2 协作基线修订
+
+- Status: Approved
+- Approver: project owner
+- Prepared At: 2026-07-16
+- Approved At: 2026-07-16
+- Current Stage: Stage 5 — Development Implementation / TASK-002 repair paused
+- Next Step: 提交并推送本审批记录，通过 `[CR-037]` 治理 PR 将获批任务书与一致性台账合入 `codex/stage-05-integration`；合入前不恢复 TASK-002 R6/R7
+- Artifacts Reviewed: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.2 候选、`workflow/CHANGE_REQUESTS.md` CR-037、PR #15 / CR-036 状态记录
+- Evidence Reviewed: 当前 `formal-software-delivery-workflow` 的交叉审核、reviewer-created PR、正式 PR 集成触发和 checkpoint 约束；任务书 v1.1 缺口审计
+- Version / Commit SHA: `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`，远端分支 `codex/taskbook-v1-2-governance`
+- Decision: 项目负责人明确批准该精确 Commit 作为任务书 v1.2 协作基线，并授权推送隔离治理分支。
+- Conditions / Scope Exceptions: 本修订不改变产品、架构、API、数据模型、开发人数、任务负责人、任务范围或依赖矩阵；现有 TASK-002 代码和未提交契约文件保持原状。PR #15 保留为审核历史，不作为正式集成触发源。
+- Notes: 本记录不重写 Gate-007 历史，不批准 TASK-002 完成、PR #15 合并、Stage 5 完成或进入 Stage 6。获批任务书及本审批记录合入 `codex/stage-05-integration` 后，DEV-001 才可恢复 TASK-002 R6/R7。
+
 ## Candidate gate recommendations
 
 ### Gate-001: Scoped waiver to enter Stage 3
