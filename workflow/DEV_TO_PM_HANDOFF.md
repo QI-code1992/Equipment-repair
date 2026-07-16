@@ -35,7 +35,7 @@
 - 依赖边界：TASK-003、TASK-004、TASK-005 及 DEV-002 的数据库集成继续按任务书阻塞；TASK-006 仅保留已允许的非数据库范围。
 - 下一次有效交接条件：任务书 v1.2 与本审批记录已通过治理 PR 合入集成分支；CR-036 R6/R7 完成；PostgreSQL/Compose 和完整回归通过；正式证据提交并推送；DEV-002 复审通过。
 - PR #16 更正：历史 PR #16 错误指向 `main`，且当前远端 `main` 不包含获批任务书 v1.2；该 PR 不构成 CR-037 完成或 Stage 5 协作基线。必须重新创建目标为 `codex/stage-05-integration` 的治理 PR。
-- CR-037 正确 PR：[PR #18](https://github.com/QI-code1992/Equipment-repair/pull/18)，Draft、Open，目标 `codex/stage-05-integration`；完成 Review 和项目负责人合并批准前，不恢复 TASK-002 R6/R7。
+- CR-037 正确 PR：[PR #18](https://github.com/QI-code1992/Equipment-repair/pull/18)，Draft、Open，目标 `codex/stage-05-integration`；首轮正式审查发现任务书正文状态与审批台账冲突，已在治理分支执行仅限状态同步的修正。完成新候选复审和项目负责人针对精确 HEAD 的合并批准前，不转 Ready、不合并，也不恢复 TASK-002 R6/R7。
 
 ## CR-038 治理补救交接（2026-07-16）
 

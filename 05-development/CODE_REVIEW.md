@@ -52,3 +52,12 @@
 - 历史发现：PR #16 曾以 `main` 为目标并显示合并，不符合任务书规定的 `codex/stage-05-integration` 目标。
 - 当前事实：`origin/main` 为 `e0a69bfb3854d9280218d01415d2f5377f1dc181`；其任务书 Blob 不等于获批 v1.2 Blob，因此错误目标 PR 未形成当前有效基线。
 - 处置：PR #16 仅保留为错误目标历史；CR-037 已创建新的 Draft PR [#18](https://github.com/QI-code1992/Equipment-repair/pull/18)，目标严格为 `codex/stage-05-integration`。
+
+## CR-037 PR #18 正式审查（2026-07-16）
+
+- 审查对象：PR #18 首轮 HEAD `3231c9e191d33ee7132a5ea9dff13e29cf7af856`，目标 `codex/stage-05-integration`。
+- 范围检查：9 个文件均为任务书或治理台账；相对目标分支无 `codebase/` 修改，无产品、架构、API、数据模型或业务代码变更。
+- 已通过项：目标分支正确；11 个 TASK 协作字段完整；TASK-002—011 均由对方审核并创建正式 PR；依赖矩阵、集成触发、自动化边界和 PR #15 / CR-038 状态基本一致；`workflow/state.json` 可解析；`git diff --check` 通过。
+- 阻断项：任务书正文仍写“v1.2 候选、等待项目负责人批准、获批前暂停”，但 `workflow/STAGE_APPROVALS.md` 与 CR-037 已记录精确 Commit `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b` 获批，形成当前基线状态矛盾。
+- 首轮结论：Changes Requested；PR #18 不得转 Ready 或合并。
+- 修正边界：只同步任务书和治理台账状态，不修改已批准任务内容、人员、范围、依赖、API、数据或代码；修正后重新检查完整 diff，并由项目负责人批准新的精确 HEAD 后再转 Ready。

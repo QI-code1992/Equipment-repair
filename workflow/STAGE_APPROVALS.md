@@ -125,6 +125,7 @@ Do not add an `Approved` record unless the user explicitly approves the transiti
 - Conditions / Scope Exceptions: 本修订不改变产品、架构、API、数据模型、开发人数、任务负责人、任务范围或依赖矩阵；现有 TASK-002 代码和未提交契约文件保持原状。PR #15 保留为审核历史，不作为正式集成触发源。
 - PR Target Correction: 历史 PR #16 错误指向 `main`，且当前 `origin/main` 不包含获批 v1.2 任务书 Blob，因此不构成有效集成；CR-037 必须重新通过目标为 `codex/stage-05-integration` 的治理 PR 完成。
 - Notes: 本记录不重写 Gate-007 历史，不批准 TASK-002 完成、PR #15 合并、Stage 5 完成或进入 Stage 6。获批任务书及本审批记录合入 `codex/stage-05-integration` 后，DEV-001 才可恢复 TASK-002 R6/R7。
+- PR #18 Review Correction: 首轮正式审查发现任务书正文仍保留“等待批准”状态，与本审批记录冲突。治理分支仅同步状态字段，不改变已批准协作内容；修正后的新精确 HEAD 必须由项目负责人再次明确批准合并，才可转为 Ready。
 
 ## Candidate gate recommendations
 
