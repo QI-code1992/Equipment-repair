@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from enum import StrEnum
 from uuid import uuid4
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, String, Table, Column
@@ -44,11 +45,22 @@ class User(Base):
     roles: Mapped[list["Role"]] = relationship(secondary=user_roles, back_populates="users")
 
 
+class RoleCode(StrEnum):
+    SYSTEM_ADMIN = "SYSTEM_ADMIN"
+    EQUIPMENT_ADMIN = "EQUIPMENT_ADMIN"
+    REPAIR_WORKER = "REPAIR_WORKER"
+    LINE_OPERATOR = "LINE_OPERATOR"
+
+
 class Role(Base):
     __tablename__ = "roles"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    code: Mapped[str] = mapped_column(
+        String(100), unique=True, nullable=False, default=lambda: f"CUSTOM_{new_id()}"
+    )
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    built_in: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     users: Mapped[list[User]] = relationship(secondary=user_roles, back_populates="roles")
     permissions: Mapped[list["Permission"]] = relationship(
         secondary=role_permissions, back_populates="roles"

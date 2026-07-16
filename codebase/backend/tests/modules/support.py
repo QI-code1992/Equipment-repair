@@ -1,0 +1,48 @@
+from fastapi.testclient import TestClient
+from sqlalchemy import select
+
+from app.core.database import Base
+from app.main import create_app
+from app.modules.identity.models import Permission, Role, User
+from app.modules.identity.security import hash_password
+
+
+def build_client() -> TestClient:
+    app = create_app(
+        postgres_dsn="sqlite+pysqlite:///:memory:",
+        redis_url="redis://redis:6379/0",
+    )
+    Base.metadata.create_all(app.state.engine)
+    return TestClient(app)
+
+
+def create_user_token(
+    client: TestClient,
+    *,
+    username: str,
+    role_code: str,
+    permission_codes: list[str],
+) -> tuple[str, str]:
+    with client.app.state.session_factory() as db:
+        permissions = []
+        for code in permission_codes:
+            permission = db.scalar(select(Permission).where(Permission.code == code))
+            if permission is None:
+                permission = Permission(code=code)
+                db.add(permission)
+            permissions.append(permission)
+        role = db.scalar(select(Role).where(Role.code == role_code))
+        if role is None:
+            role = Role(code=role_code, name=role_code, built_in=True)
+            db.add(role)
+        role.permissions = permissions
+        user = User(username=username, password_hash=hash_password("correct-password"), roles=[role])
+        db.add(user)
+        db.commit()
+        user_id = user.id
+    response = client.post(
+        "/api/auth/login",
+        json={"username": username, "password": "correct-password"},
+    )
+    assert response.status_code == 200
+    return user_id, response.json()["access_token"]

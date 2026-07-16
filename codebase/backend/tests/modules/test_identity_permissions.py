@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+from decimal import Decimal
 import pytest
 from fastapi.testclient import TestClient
 import json
@@ -12,7 +13,7 @@ from sqlalchemy.orm import Session
 from app.core.database import Base, create_database_engine, session_factory
 from app.modules.audit.models import AuditEvent
 from app.modules.audit.service import write_audit_event
-from app.modules.equipment.models import Equipment
+from app.modules.equipment.models import Equipment, EquipmentStatus
 from app.modules.identity.models import LoginSession, Permission, Role, User
 from app.modules.identity.bootstrap import BootstrapAlreadyInitialized, bootstrap_admin
 from app.modules.identity.security import hash_password
@@ -39,8 +40,22 @@ def db_session(engine: Engine) -> Session:
 def test_equipment_code_is_unique(db_session: Session) -> None:
     db_session.add_all(
         [
-            Equipment(code="EQ-001", name="A", organization_id=None),
-            Equipment(code="EQ-001", name="B", organization_id=None),
+            Equipment(
+                code="EQ-001",
+                name="A",
+                operating_hours=Decimal("0"),
+                status=EquipmentStatus.NORMAL,
+                organization_id=None,
+                image_refs=[],
+            ),
+            Equipment(
+                code="EQ-001",
+                name="B",
+                operating_hours=Decimal("0"),
+                status=EquipmentStatus.NORMAL,
+                organization_id=None,
+                image_refs=[],
+            ),
         ]
     )
 
@@ -64,7 +79,8 @@ def client() -> TestClient:
 
 def create_user_token(client: TestClient, permission_codes: list[str]) -> str:
     with client.app.state.session_factory() as session:
-        role = Role(name=f"role-{len(permission_codes)}-{'-'.join(permission_codes)}")
+        role_name = f"role-{len(permission_codes)}-{'-'.join(permission_codes)}"
+        role = Role(code=role_name, name=role_name, built_in=False)
         role.permissions = [Permission(code=code) for code in permission_codes]
         user = User(username=f"user-{len(permission_codes)}", password_hash=hash_password("correct-password"))
         user.roles = [role]
@@ -323,7 +339,13 @@ def test_equipment_rejects_unknown_organization(
         )
     else:
         with client.app.state.session_factory() as session:
-            equipment = Equipment(code="EQ-EXISTING", name="Loader")
+            equipment = Equipment(
+                code="EQ-EXISTING",
+                name="Loader",
+                operating_hours=Decimal("0"),
+                status=EquipmentStatus.NORMAL,
+                image_refs=[],
+            )
             session.add(equipment)
             session.commit()
             equipment_id = equipment.id
@@ -565,7 +587,7 @@ def test_identity_unique_conflict_is_mapped_to_409(
 ) -> None:
     token = create_user_token(client, ["identity:write"])
     with client.app.state.session_factory() as session:
-        role = Role(name="existing-role")
+        role = Role(code="existing-role", name="existing-role", built_in=False)
         session.add(role)
         session.commit()
         role_id = role.id
