@@ -116,3 +116,13 @@
 - 证据：RED `2 failed`；定向 `23 passed`；Python 3.13 全量 `142 passed, 5 skipped`；失败审计 `AuditEvent.metadata_json` 无测试秘密。PostgreSQL 17 `5 passed, 1 warning`；Compose/`/healthz` HTTP 200。
 - 已知残余风险：任意未知字段默认脱敏不在本 CR，当前结论仅关闭已知敏感语义别名漏洞。
 - 请求动作：推送本台账 HEAD 后，请 DEV-002 对精确远端 HEAD 复审；TASK-002 仍未验收、未集成，依赖不解锁，DEV-002 批准后才可创建后继正式 PR。
+
+## CR-040 协作治理候选交接（2026-07-17）
+
+- 项目负责人决定：采用“任务开发者创建并维护同一 Draft PR、另一名开发者批准、DEV-001 集成检查、项目负责人逐 PR 授权、非任务开发者获批后 Merge”的开发任务流程。
+- 角色：Stage 5 只有 DEV-001、DEV-002 两名开发者。DEV-001 负责 DEV-002 开发任务审核、全部 PR 集成检查、授权请求、合并 DEV-002 的获批 PR 和合并后回归；DEV-002 负责自身开发任务、DEV-001 开发任务审核及合并 DEV-001 的获批 PR。“Agent”是执行方式，不是另设角色。
+- 治理边界：只修改流程、任务书、AGENTS 或工作流台账且不含业务代码、测试代码、数据库、基础设施或部署配置的纯治理文档 PR，不要求两名开发者交叉代码审核；由项目负责人确认治理内容和精确 HEAD，DEV-001 执行集成核查和请求授权，非 PR 作者的开发者获批后合并。
+- Merge 授权请求必须包含：TASK/CR、PR 链接、源/目标分支、精确 HEAD、适用的开发审核或治理确认结论、Critical/Important/Minor 或治理检查结果、测试与 Docker 证据（如适用）、依赖、冲突、共享契约、风险、回滚和合并后验证计划。
+- 安全边界：未获项目负责人明确授权不得 Merge；授权后 HEAD 或条件变化则失效；禁止 auto-merge、merge queue、直接 push 集成分支、普通 Stage 5 PR 指向 `main`。
+- 历史边界：不追溯改写 TASK-001、TASK-002 或 CR-037—CR-039 的已发生 GitHub 操作。生效时仍 Open 的 TASK-006 Draft PR #14 应继续作为同一 PR，不再创建后继 PR。
+- 当前候选分支：`codex/cr-040-agent-merge-approval`；目标：`codex/stage-05-integration`。本治理候选不修改 `codebase/`，不解锁 TASK 依赖，也不批准进入 Stage 6。
