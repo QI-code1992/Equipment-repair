@@ -1,7 +1,7 @@
 {
   "state": "IN_DEVELOPMENT",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-17T15:36:00+08:00",
+  "updatedAt": "2026-07-17T17:27:26+08:00",
   "productBaseline": {
     "status": "requirements-interaction-and-prototype-approved",
     "canonicalCandidate": [
@@ -100,7 +100,7 @@
     },
     "verification": "Post-merge Python 3.13: 142 passed, 5 skipped, 1 warning; compileall and diff check passed. Isolated Docker test target with PostgreSQL 17: 5 passed, 1 warning. Compose rebuild passed; PostgreSQL and Redis healthy; API Up; /healthz returned HTTP 200.",
     "dependencyUnlockAllowed": true,
-    "nextAction": "TASK-003 and TASK-004 may start under their task-book PR gates. TASK-005 remains blocked by TASK-004. TASK-006 may continue non-database work and its migration, database integration and shared data model are no longer blocked by TASK-002; Stage 6 remains prohibited without its separate formal gate."
+    "nextAction": "TASK-003 and TASK-004 may start under their task-book PR gates. TASK-005 remains blocked by TASK-004. TASK-006 may continue its full scope, including migration, database integration and shared data model, which are no longer blocked by TASK-002; Stage 6 remains prohibited without its separate formal gate."
   },
   "governanceCorrection": {
     "changeRequest": "CR-037",
