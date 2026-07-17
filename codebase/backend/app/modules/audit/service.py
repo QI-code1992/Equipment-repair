@@ -32,6 +32,21 @@ DIRECT_ATTACHMENT_CONTENT_KEYS = {
     "file_bytes",
     "content_base64",
 }
+ATTACHMENT_METADATA_KEYS = {
+    "attachment_id",
+    "checksum",
+    "content_type",
+    "extension",
+    "file_id",
+    "file_name",
+    "filename",
+    "length",
+    "mime_type",
+    "name",
+    "sha1",
+    "sha256",
+    "size",
+}
 
 
 def normalize_key(key: str) -> str:
@@ -40,6 +55,7 @@ def normalize_key(key: str) -> str:
 
 def is_sensitive_key(key: str) -> bool:
     normalized = normalize_key(key)
+    segments = normalized.split("_")
     return (
         normalized in SENSITIVE_KEYS
         or normalized == "cookies"
@@ -47,6 +63,7 @@ def is_sensitive_key(key: str) -> bool:
         or normalized.endswith(SENSITIVE_KEY_SUFFIXES)
         or normalized.startswith(("password_", "passwd_", "pwd_", "cookie_", "cookies_"))
         or re.fullmatch(r"(?:password|passwd|pwd)\d+", normalized) is not None
+        or any(segment in {"password", "passwd", "pwd"} for segment in segments)
     )
 
 
@@ -69,6 +86,10 @@ def sanitize_audit_metadata(
                 is_sensitive_key(key)
                 or normalized in DIRECT_ATTACHMENT_CONTENT_KEYS
                 or (attachment_context and normalized in ATTACHMENT_CONTENT_KEYS)
+                or (
+                    attachment_context
+                    and normalized not in ATTACHMENT_METADATA_KEYS
+                )
             )
             result[key] = (
                 "[REDACTED]"

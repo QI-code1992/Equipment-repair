@@ -170,6 +170,54 @@ def test_validation_failure_returns_one_persisted_audit_id(
     ] == [event.id]
 
 
+def test_validation_failure_redacts_password_and_attachment_aliases_in_database(
+    client: TestClient,
+) -> None:
+    _, token = create_user_token(
+        client,
+        username="audit-alias-writer",
+        role_code=RoleCode.EQUIPMENT_ADMIN.value,
+        permission_codes=["equipment:write"],
+    )
+    secrets = [
+        "new-password-secret",
+        "current-password-secret",
+        "attachment-secret",
+        "nested-attachment-secret",
+    ]
+
+    response = client.post(
+        "/api/equipment",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Idempotency-Key": "invalid-equipment-audit-aliases",
+        },
+        json={
+            "code": "EQ-AUDIT-ALIASES",
+            "newPasswordConfirmation": secrets[0],
+            "current_password_confirmation": secrets[1],
+            "attachment_payload": {
+                "filename": "manual.pdf",
+                "raw_content": secrets[2],
+                "nested": [{"binary_payload": secrets[3]}],
+            },
+        },
+    )
+
+    assert response.status_code == 422
+    event = event_from_response(client, response)
+    rendered = json.dumps(event.metadata_json)
+    for secret in secrets:
+        assert secret not in rendered
+    assert event.metadata_json["request"]["newPasswordConfirmation"] == "[REDACTED]"
+    assert event.metadata_json["request"]["current_password_confirmation"] == "[REDACTED]"
+    assert event.metadata_json["request"]["attachment_payload"] == {
+        "filename": "manual.pdf",
+        "raw_content": "[REDACTED]",
+        "nested": "[REDACTED]",
+    }
+
+
 def test_logout_validation_failure_recovers_actor_from_bearer(
     client: TestClient,
 ) -> None:

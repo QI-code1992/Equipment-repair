@@ -36,6 +36,38 @@ def test_sensitive_key_variants_and_attachment_payload_are_redacted() -> None:
     }
 
 
+def test_password_semantic_segments_and_attachment_payload_aliases_are_redacted() -> None:
+    value = sanitize_audit_metadata(
+        {
+            "newPasswordConfirmation": "new-password-secret",
+            "current_password_confirmation": "current-password-secret",
+            "payload": [
+                {
+                    "attachment_payload": {
+                        "filename": "manual.pdf",
+                        "raw_content": "attachment-secret",
+                        "nested": [{"binary_payload": "nested-attachment-secret"}],
+                    }
+                }
+            ],
+        }
+    )
+
+    assert value == {
+        "newPasswordConfirmation": "[REDACTED]",
+        "current_password_confirmation": "[REDACTED]",
+        "payload": [
+            {
+                "attachment_payload": {
+                    "filename": "manual.pdf",
+                    "raw_content": "[REDACTED]",
+                    "nested": "[REDACTED]",
+                }
+            }
+        ],
+    }
+
+
 def failure_events(client: TestClient) -> list[AuditEvent]:
     with client.app.state.session_factory() as db:
         return list(
