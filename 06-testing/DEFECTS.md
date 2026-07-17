@@ -61,3 +61,10 @@
 - DEV-002 补充发现属于既有 CR-036 的同一审计脱敏 Important，不新增重复 DEF：附件上下文标量、标量列表及紧凑密码键会绕过 R9 的字典白名单规则。
 - 根因和修复见 `CODE_REVIEW.md` R10；代码候选 `b4d451009d1deb9dbe3286f5bff4db9414ef4aee`，新增直接脱敏和数据库持久化两层回归。
 - 当前状态：DEV-001 内部复核未见 Critical/Important；真实 PostgreSQL 17、Compose 与 `/healthz` 已复测。外部审核仍未通过，TASK-002 不得视为完成或解除依赖。
+
+## TASK-002 / CR-036 R11 复审发现（2026-07-17）
+
+- DEV-002 的 R10 Important 属于既有 CR-036，不新增重复 DEF：附件/文件语义仅识别键首，Cookie 和紧凑密码规则不完整，导致失败审计可含明文。
+- 根因和修复见 `CODE_REVIEW.md` R11；代码候选 `ea4338bad15f16048226a329801d3144b367909e`，新增直接和落库反例测试。
+- 残余风险：无敏感语义的未知字段默认脱敏未实施，须作为独立安全强化项评估；不得把 R11 结论表述为可识别任意秘密。
+- 当前状态：DEV-001 内部复核未见 Critical/Important；真实 PostgreSQL 17、Compose 与 `/healthz` 已复测。外部审核仍未通过，TASK-002 不得视为完成或解除依赖。

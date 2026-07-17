@@ -128,6 +128,16 @@
 - 唯一警告：既有 FastAPI/Starlette TestClient 对 `httpx` 的第三方弃用提示。
 - 未验证：DEV-002 尚未批准；后继正式 PR 尚未由 DEV-002 创建；TASK-002 尚未合入 `codex/stage-05-integration`，依赖继续锁定。
 
+## TASK-002 / CR-036 R11 语义敏感键脱敏复测（2026-07-17）
+
+- RED：`binaryAttachment`、`uploadedFile`、`sessionCookieValue`、`passwordvalue` 在直接函数和失败审计落库用例中均为 `2 failed`，确认 R10 的前缀/后缀枚举遗漏。
+- GREEN：归一化后仅按完整语义段识别附件（`attachment/file/upload/document/image`）与敏感键；密码、Cookie、Secret、Authorization 使用有限紧凑前后缀，Token 仅按完整段脱敏并保留 `token_count`、`token_usage`。
+- 反例：`code`、`name`、`status`、`profile`、根层普通 `content` 和 Token 统计字段均保持原值；附件上下文内仍仅保留元数据白名单。
+- 回归：定向审计 `23 passed, 1 warning`；Python 3.13 全量 `142 passed, 5 skipped, 1 warning`；compileall 与 diff check 通过；失败请求的 `AuditEvent.metadata_json` 不含七类测试秘密。
+- 运行验证：独立 test 镜像 PostgreSQL 17 集成 `5 passed, 1 warning`；Compose 重建成功，PostgreSQL/Redis healthy、API Up，`/healthz` HTTP 200。
+- 残余风险：本轮关闭已知敏感语义别名漏洞；攻击者将秘密置于无敏感语义的任意未知字段（如 `notes`）尚未默认脱敏，作为后续独立强化项，不在本 CR 实现。
+- 未验证：DEV-002 尚未批准；后继正式 PR 尚未由 DEV-002 创建；TASK-002 尚未合入 `codex/stage-05-integration`，依赖继续锁定。
+
 ## TASK-002 / CR-036 R10 审计标量脱敏复测（2026-07-17）
 
 - 审核复现：DEV-002 给出的 `newpassword`、`attachment_payload` 标量、`attachments` 标量列表和 `uploadData` 在修复前均会原样进入审计；新增 RED 用例为 `2 failed`。

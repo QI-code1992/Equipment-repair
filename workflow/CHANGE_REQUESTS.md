@@ -607,3 +607,13 @@
 - Verification: RED `2 failed`；定向 `21 passed`；Python 3.13 `140 passed, 5 skipped`；compileall、diff check、PostgreSQL 17 `5 passed`、Compose 重建和 `/healthz` HTTP 200 通过；返回摘要与 `AuditEvent.metadata_json` 均无测试秘密原文。
 - Prevention: 附件安全回归固定覆盖标量、标量列表、混合 list/dict 与持久化审计；密码回归同时覆盖下划线、驼峰和紧凑命名。
 - Next Gate: 推送正式台账 HEAD 后由 DEV-001 在 PR #15 请求 DEV-002 复审；只有 DEV-002 审核通过并创建后继正式 PR、合入目标分支后，TASK-002 才可接受和解锁依赖。
+
+### CR-036 R11 已知敏感语义别名脱敏修复（2026-07-17）
+
+- Status: Ready For DEV-002 Re-review / Not Accepted / Not Integrated。
+- Review Input: DEV-002 R10 为 Critical 0、Important 1；`binaryAttachment`、`uploadedFile`、`sessionCookieValue`、`passwordvalue` 可原样写入失败审计。
+- Decision: 在 TASK-002 审计脱敏范围内采用归一化完整分段与有限紧凑前后缀规则；不使用任意子串匹配，不修改需求、API、迁移、Compose 或生产依赖。
+- Code Candidate: `ea4338bad15f16048226a329801d3144b367909e`。
+- Verification: RED `2 failed`；定向 `23 passed`；Python 3.13 `142 passed, 5 skipped`；compileall、diff check、PostgreSQL 17 `5 passed`、Compose 重建和 `/healthz` HTTP 200 通过；返回摘要与 `AuditEvent.metadata_json` 均无测试秘密，`profile`、普通业务字段和 Token 统计字段未误伤。
+- Residual Risk: 未知额外字段默认脱敏不在本 CR；本轮仅关闭已知敏感语义别名漏洞，任意无语义字段承载秘密需后续独立强化。
+- Next Gate: 推送正式台账 HEAD 后由 DEV-001 在 PR #15 请求 DEV-002 复审；只有 DEV-002 审核通过并创建后继正式 PR、合入目标分支后，TASK-002 才可接受和解锁依赖。

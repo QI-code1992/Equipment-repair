@@ -107,3 +107,12 @@
 - 修复：附件 context 的标量和纯标量列表默认脱敏；混合 list/dict 只保留字典元数据白名单；紧凑密码键 `newpassword`、`userpassword` 脱敏。
 - 证据：RED `2 failed`；定向 `21 passed`；Python 3.13 全量 `140 passed, 5 skipped`；失败请求已从 `AuditEvent.metadata_json` 读取验证无明文。独立 PostgreSQL 17 `5 passed, 1 warning`；Compose/健康检查 `/healthz` HTTP 200。
 - 请求动作：推送本台账 HEAD 后，请 DEV-002 对该精确远端 HEAD 复审。TASK-002 仍未验收、未集成，DEV-002 批准后才可创建后继正式 PR；依赖不解锁。
+
+## TASK-002 / CR-036 R11 复审交接（2026-07-17）
+
+- 开发者/审核者：DEV-001 / DEV-002；任务分支 `codex/task-002-identity-equipment`，目标 `codex/stage-05-integration`。
+- 代码候选：`ea4338bad15f16048226a329801d3144b367909e`，修复 R10 的敏感键语义识别 Important。
+- 修复：完整分段识别附件/文件与敏感语义；有限紧凑规则覆盖 `passwordvalue`、`userpassword`；保留 `profile`、`token_count`、`token_usage` 等反例；附件容器继续使用元数据白名单。
+- 证据：RED `2 failed`；定向 `23 passed`；Python 3.13 全量 `142 passed, 5 skipped`；失败审计 `AuditEvent.metadata_json` 无测试秘密。PostgreSQL 17 `5 passed, 1 warning`；Compose/`/healthz` HTTP 200。
+- 已知残余风险：任意未知字段默认脱敏不在本 CR，当前结论仅关闭已知敏感语义别名漏洞。
+- 请求动作：推送本台账 HEAD 后，请 DEV-002 对精确远端 HEAD 复审；TASK-002 仍未验收、未集成，依赖不解锁，DEV-002 批准后才可创建后继正式 PR。

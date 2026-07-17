@@ -136,3 +136,12 @@
 - 防复发：安全复审矩阵固定包含附件标量、标量列表、混合 list/dict、驼峰别名、紧凑密码键以及 SQLite 失败响应和持久化 `AuditEvent.metadata_json` 两层断言；任何新增附件别名必须先以红灯覆盖三种载荷形态。
 - 验证：RED `2 failed`；定向 `21 passed, 1 warning`；Python 3.13 `140 passed, 5 skipped, 1 warning`；compileall、diff check、真实 PostgreSQL 17 `5 passed, 1 warning`、Compose 和 HTTP `/healthz` 均通过。
 - 结论：DEV-001 内部复审 Critical 0、Important 0；仅可请求 DEV-002 复审，未获得批准前不创建正式 PR、不合入、不解锁依赖。
+
+## TASK-002 / CR-036 R11 语义敏感键复审（2026-07-17）
+
+- 审核输入：DEV-002 R10 指出 `binaryAttachment`、`uploadedFile`、`sessionCookieValue`、`passwordvalue` 可原样进入失败审计；Critical 0、Important 1。
+- 根因：`is_attachment_context()` 只接受附件语义处于键首，`is_sensitive_key()` 只覆盖不对称枚举/后缀；归一化后的键虽含独立敏感段，却没有统一分类。
+- 修复：`ea4338bad15f16048226a329801d3144b367909e` 将归一化键拆为完整段，附件段可出现在键首、键中或键尾；敏感段统一处理。紧凑规则限定为已定义敏感前后缀及 `value/hash/confirmation` 复合，不使用任意子串；Token 统计字段显式保留。
+- 复查：直接与持久化两层覆盖键首、键中、键尾、附件标量、列表、混合结构、紧凑密码、Cookie、Token 以及业务反例。`profile` 不会因包含 `file` 字符串而误命中。
+- 边界与风险：未知额外字段默认脱敏未实施；当前结论只覆盖已知敏感语义别名，不声称识别任意秘密载荷。该残余风险已记录，需独立 CR 决定可观测性与安全取舍。
+- 验证：RED `2 failed`；定向 `23 passed, 1 warning`；Python 3.13 `142 passed, 5 skipped, 1 warning`；compileall、diff check、PostgreSQL 17 `5 passed, 1 warning`、Compose 和 `/healthz` HTTP 200 通过。DEV-001 内部复审 Critical 0、Important 0；仍待 DEV-002 复审。
