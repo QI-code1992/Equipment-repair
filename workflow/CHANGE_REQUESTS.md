@@ -617,3 +617,11 @@
 - Verification: RED `2 failed`；定向 `23 passed`；Python 3.13 `142 passed, 5 skipped`；compileall、diff check、PostgreSQL 17 `5 passed`、Compose 重建和 `/healthz` HTTP 200 通过；返回摘要与 `AuditEvent.metadata_json` 均无测试秘密，`profile`、普通业务字段和 Token 统计字段未误伤。
 - Residual Risk: 未知额外字段默认脱敏不在本 CR；本轮仅关闭已知敏感语义别名漏洞，任意无语义字段承载秘密需后续独立强化。
 - Next Gate: 推送正式台账 HEAD 后由 DEV-001 在 PR #15 请求 DEV-002 复审；只有 DEV-002 审核通过并创建后继正式 PR、合入目标分支后，TASK-002 才可接受和解锁依赖。
+
+### CR-036 正式审核与集成结案（2026-07-17）
+
+- Status: Closed / Integrated。
+- Review and PR: DEV-002 审核通过 `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`，并创建正式 PR #20；PR #20 于 2026-07-17 合入 `codex/stage-05-integration`，Merge Commit 为 `904886f48061e27c775f6ee2f8ddae99f5571ead`。
+- Post-merge evidence: Python 3.13 `142 passed, 5 skipped, 1 warning`；PostgreSQL 17 `5 passed, 1 warning`；Compose 重建、容器健康与 `/healthz` HTTP 200 通过。
+- Residual risk: 仅关闭已知敏感语义别名脱敏漏洞；未知字段默认脱敏不在本 CR，后续须独立评估。
+- Dependency effect: TASK-003、TASK-004 的 TASK-002 前置解除；TASK-005 仍等待 TASK-004；未触发 Stage 6。

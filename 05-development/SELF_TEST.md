@@ -146,3 +146,10 @@
 - 回归：定向审计 `21 passed, 1 warning`；Python 3.13 全量 `140 passed, 5 skipped, 1 warning`；`python -m compileall -q app` 和 `git diff --check` 通过。两层测试同时检查 `sanitize_audit_metadata()` 返回值和失败请求的 `AuditEvent.metadata_json`，均无明文。
 - 运行验证：当前代码重新构建独立 `test` 镜像后，内部网络 PostgreSQL 17 集成 `5 passed, 1 warning`；Compose 重建成功，PostgreSQL/Redis healthy、API Up，容器内 `/healthz` 为 HTTP 200、正文 `{"status":"ok","service":"equipment-operations-platform"}`。
 - 未验证：DEV-002 尚未批准；后继正式 PR 尚未由 DEV-002 创建；TASK-002 尚未合入 `codex/stage-05-integration`，依赖继续锁定。
+
+## TASK-002 正式集成后验证（2026-07-17）
+
+- 集成对象：正式 PR #20 的 Merge Commit `904886f48061e27c775f6ee2f8ddae99f5571ead`，目标分支 `codex/stage-05-integration`；受审核任务分支 HEAD 为 `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`。
+- 全量验证：Python 3.13 执行 `python -m pytest tests -q`，结果 `142 passed, 5 skipped, 1 warning`；`python -m compileall -q app alembic`、Compose config 和 `git diff --check` 通过。
+- 真实运行验证：PostgreSQL 17 专用集成 `5 passed, 1 warning`；Compose 重建后 PostgreSQL/Redis healthy、API Up；容器内 `/healthz` 为 HTTP 200，正文为 `{"status":"ok","service":"equipment-operations-platform"}`。
+- 结论：TASK-002 的审核、正式 PR、合入与合并后验证均已完成；不执行 Stage 6 推进。

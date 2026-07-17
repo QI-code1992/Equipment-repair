@@ -1,7 +1,7 @@
 {
   "state": "IN_DEVELOPMENT",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-17T11:37:34+08:00",
+  "updatedAt": "2026-07-17T12:02:13+08:00",
   "productBaseline": {
     "status": "requirements-interaction-and-prototype-approved",
     "canonicalCandidate": [
@@ -22,18 +22,18 @@
   },
   "lastApprovedStage": "Stage 4 — Architecture and Development Plan",
   "pendingStageApproval": null,
-  "currentCommitSha": "ea4338bad15f16048226a329801d3144b367909e",
+  "currentCommitSha": "904886f48061e27c775f6ee2f8ddae99f5571ead",
   "repairCycle": {
     "taskId": "TASK-002",
-    "pullRequest": 15,
-    "reviewState": "READY_FOR_DEV_002_REVIEW",
+    "pullRequest": 20,
+    "reviewState": "APPROVED_AND_INTEGRATED",
     "rejectedCommitSha": "cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77",
     "reviewer": "QI-code1992",
     "owner": "DEV-001",
     "changeRequest": "CR-036",
     "design": "05-development/TASK-002_REMEDIATION_DESIGN.md",
     "resumeAllowed": false,
-    "resumeScope": "Implementation and DEV-001 review complete; only DEV-002 review feedback may reopen development",
+    "resumeScope": "TASK-002 is complete and integrated; only a new defect or approved change request may reopen it",
     "r6CommitSha": "35119954ba1d9ca475f03d1faa026bf6a474b18f",
     "r7CommitSha": "11dbb226e9b77ff5185fed5fa1434b0de6749206",
     "firstEvidenceCommitSha": "ab67bcdff42d64ba739571515df4e6faed158d32",
@@ -45,9 +45,13 @@
     "r9TestImageCommitSha": "41591e759dd53780c9a441b2858536c32d15d287",
     "r10CommitSha": "b4d451009d1deb9dbe3286f5bff4db9414ef4aee",
     "r11CommitSha": "ea4338bad15f16048226a329801d3144b367909e",
-    "verification": "R11 RED: 2 failed; targeted audit regression: 23 passed, 1 warning; Python 3.13: 142 passed, 5 skipped, 1 warning; compileall and diff check passed; failure-audit metadata_json excludes attachment/file semantic aliases, compact password forms and cookie aliases while preserving profile, token_count and token_usage. Isolated Docker test target installs the declared dev group before joining the internal network; dedicated PostgreSQL 17 integration: 5 passed, 1 warning; Compose rebuild passed and /healthz returned HTTP 200.",
-    "dependencyUnlockAllowed": false,
-    "nextAction": "Push R11 evidence ledger and request DEV-002 review of the final task-branch HEAD; DEV-002 creates the successor formal PR only after approval"
+    "reviewedTaskBranchHead": "2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15",
+    "formalPullRequestUrl": "https://github.com/QI-code1992/Equipment-repair/pull/20",
+    "integrationMergeCommitSha": "904886f48061e27c775f6ee2f8ddae99f5571ead",
+    "integratedAt": "2026-07-17T03:56:28Z",
+    "verification": "Post-merge Python 3.13: 142 passed, 5 skipped, 1 warning; compileall and diff check passed. Isolated Docker test target with PostgreSQL 17: 5 passed, 1 warning. Compose rebuild passed; PostgreSQL and Redis healthy; API Up; /healthz returned HTTP 200.",
+    "dependencyUnlockAllowed": true,
+    "nextAction": "TASK-003 and TASK-004 may start under the approved task book; TASK-005 remains blocked by TASK-004; Stage 6 remains blocked pending subsequent task evidence and explicit user approval"
   },
   "governanceCorrection": {
     "changeRequest": "CR-037",
@@ -150,6 +154,7 @@
     "On 2026-07-17, DEV-001 completed CR-036 R8 at 73030f83638b3b063db483029591720bf65aac21 after DEV-002 requested four Important changes. Three review rounds, Python 3.13, dedicated PostgreSQL 17, migration round-trip, fixed-catalog queries, Compose and /healthz passed. Historical merge-type and immutable-0001 Minors were documented without rewriting history. TASK-002 awaits DEV-002 re-review and remains unaccepted and unintegrated.",
     "On 2026-07-17, DEV-002 found one remaining CR-036 audit-redaction Important. DEV-001 reproduced it with two red tests, fixed password semantic-segment recognition and attachment-context metadata allowlisting at ac6947a642f00ba48aebcb80064f87fcc4c01ea8, and verified 138 passed, 5 skipped. PostgreSQL test execution was made reproducible at 41591e759dd53780c9a441b2858536c32d15d287 by installing the declared dev group in a dedicated Docker test target before it joins the internal network; PostgreSQL 17 integration passed 5 tests. TASK-002 remains unaccepted and unintegrated pending DEV-002 re-review.",
     "On 2026-07-17, DEV-002 R9 supplementary review reproduced four additional audit leaks: compact password keys and attachment-context scalar/list aliases. DEV-001 added exact RED unit and persisted AuditEvent regressions, then fixed the missing context consumption at b4d451009d1deb9dbe3286f5bff4db9414ef4aee. Python 3.13 passed 140 tests with 5 explicit PostgreSQL skips; the isolated PostgreSQL 17 test image passed 5 tests; Compose rebuild and /healthz HTTP 200 passed. TASK-002 remains unaccepted and unintegrated pending DEV-002 re-review.",
-    "On 2026-07-17, DEV-002 R10 review found attachment semantics limited to key prefixes and inconsistent compact sensitive-key handling. DEV-001 reproduced it with two RED tests, then implemented normalized segment classification with bounded compact forms at ea4338bad15f16048226a329801d3144b367909e. Direct and persisted audit tests cover attachment/file aliases, password/cookie/token forms and ordinary-field/token-metric counterexamples. Python 3.13 passed 142 tests with 5 explicit PostgreSQL skips; PostgreSQL 17 integration passed 5 tests; Compose and /healthz HTTP 200 passed. The known semantic-alias class is closed, but arbitrary unknown-field secret placement remains a documented residual risk outside this CR. TASK-002 remains unaccepted and unintegrated pending DEV-002 re-review."
+    "On 2026-07-17, DEV-002 R10 review found attachment semantics limited to key prefixes and inconsistent compact sensitive-key handling. DEV-001 reproduced it with two RED tests, then implemented normalized segment classification with bounded compact forms at ea4338bad15f16048226a329801d3144b367909e. Direct and persisted audit tests cover attachment/file aliases, password/cookie/token forms and ordinary-field/token-metric counterexamples. Python 3.13 passed 142 tests with 5 explicit PostgreSQL skips; PostgreSQL 17 integration passed 5 tests; Compose and /healthz HTTP 200 passed. The known semantic-alias class is closed, but arbitrary unknown-field secret placement remains a documented residual risk outside this CR.",
+    "On 2026-07-17, DEV-002 approved task-branch HEAD 2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15 and created formal PR #20. PR #20 was merged into codex/stage-05-integration at 904886f48061e27c775f6ee2f8ddae99f5571ead. DEV-001 completed post-merge verification: Python 3.13 142 passed, 5 skipped, 1 warning; PostgreSQL 17 5 passed, 1 warning; Compose healthy; /healthz HTTP 200. TASK-002 is complete and its dependencies are unlocked only as defined by the task book; Stage 6 is not entered."
   ]
 }

@@ -68,3 +68,9 @@
 - 根因和修复见 `CODE_REVIEW.md` R11；代码候选 `ea4338bad15f16048226a329801d3144b367909e`，新增直接和落库反例测试。
 - 残余风险：无敏感语义的未知字段默认脱敏未实施，须作为独立安全强化项评估；不得把 R11 结论表述为可识别任意秘密。
 - 当前状态：DEV-001 内部复核未见 Critical/Important；真实 PostgreSQL 17、Compose 与 `/healthz` 已复测。外部审核仍未通过，TASK-002 不得视为完成或解除依赖。
+
+## TASK-002 / CR-036 正式审核与集成结案（2026-07-17）
+
+- DEV-002 已正式审核通过 R11 任务分支 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`，并创建正式 PR #20。
+- PR #20 已合入 `codex/stage-05-integration`，Merge Commit `904886f48061e27c775f6ee2f8ddae99f5571ead` 的全量 Python 3.13、PostgreSQL 17、Compose、容器健康和 `/healthz` 验证通过。
+- CR-036 的审核阻断项关闭；不新增 DEF。未知任意字段默认脱敏是独立安全强化风险，未阻断已批准 TASK-002，但后续如立项必须新建 CR/DEF，不得篡改本结案事实。

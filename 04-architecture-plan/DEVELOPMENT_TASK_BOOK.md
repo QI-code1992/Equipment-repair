@@ -156,7 +156,7 @@
 
 ### TASK-002：认证、权限、审计与设备基础
 
-- 状态：CR-036 R11 Review Remediation Complete / Awaiting DEV-002 Re-review；尚未验收、尚未正式集成
+- 状态：Completed / 已由 DEV-002 正式审核通过、正式 PR #20 合入 `codex/stage-05-integration`，并完成合并后验证；不代表进入 Stage 6
 - 优先级：P0
 - 负责人：`DEV-001`
 - 任务开发者：`DEV-001`
@@ -177,13 +177,14 @@
 - PR 审核请求：`DEV-001` 在完成 CR-036 全部实现、PostgreSQL/Compose 真实验证、完整独立 Review 和正式证据更新后，推送任务分支并向 `DEV-002` 发送书面审核请求；请求必须绑定新候选精确 SHA。
 - Review：`DEV-002` 复核 Agent 可使用的认证上下文、任务范围、共享契约和真实验证证据；任何 Critical/Important 均退回 `DEV-001` 修复。
 - 正式 PR：仅在 `DEV-002` 审核通过后，由 `DEV-002` 创建后继正式 PR；PR #15 只保留被拒绝历史和审核请求证据，不触发集成。
+- 正式集成与验证：DEV-002 审核通过的任务分支 HEAD 为 `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`；DEV-002 创建的正式 PR #20 已于 2026-07-17 合入，Merge Commit 为 `904886f48061e27c775f6ee2f8ddae99f5571ead`。合并提交已完成 Python 3.13 全量、真实 PostgreSQL 17、Compose、容器健康和 `/healthz` 验证；详情见 FCP-002-R6。
 - 回滚：回退任务 Commit，并按迁移文档执行对应 downgrade；生产数据存在时不得直接删除表。
-- 交接：旧恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12`、证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 和被拒候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 仅保留历史。R6/R7 与同步候选历史继续保留；R8 的 4 个 Important 关闭后，DEV-002 又发现 1 个审计脱敏绕过。R9/R10 候选保留为历史。R11 代码候选 `ea4338bad15f16048226a329801d3144b367909e` 按归一化完整分段识别附件和敏感键，并以有限紧凑前后缀覆盖 `passwordvalue`、`userpassword`；保留 `profile`、`token_count`、`token_usage` 等非敏感反例。Python 3.13 全套 `142 passed, 5 skipped`；内部网络 PostgreSQL 17 集成 `5 passed`，Compose 重建后的 `/healthz` 为 HTTP 200。本轮仅关闭已知敏感语义别名漏洞；未知字段默认脱敏未纳入范围，残余风险已记录。TASK-002 继续等待 DEV-002 复审。
-- PR：[#15](https://github.com/QI-code1992/Equipment-repair/pull/15) 已违规合并后由 CR-038 回滚，继续保留为被拒绝历史和书面审核请求载体，不得作为正式集成 PR；DEV-002 对新候选审核通过后创建后继正式 PR。
+- 交接：旧恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12`、证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 和被拒候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 仅保留历史。R6/R7 与同步候选历史继续保留；R8—R11 审计脱敏修复候选均保留可追溯。DEV-002 已审核通过最终任务分支 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`；合并后 Python 3.13 `142 passed, 5 skipped, 1 warning`、内部网络 PostgreSQL 17 `5 passed, 1 warning`、Compose 健康及 `/healthz` HTTP 200 均通过。未知字段默认脱敏未纳入范围，残余风险已记录；TASK-002 已完成。
+- PR：[#15](https://github.com/QI-code1992/Equipment-repair/pull/15) 已违规合并后由 CR-038 回滚，继续保留为被拒绝历史和书面审核请求载体，不得作为正式集成 PR；DEV-002 创建的 [#20](https://github.com/QI-code1992/Equipment-repair/pull/20) 已正式合入，Merge Commit 为 `904886f48061e27c775f6ee2f8ddae99f5571ead`。
 
 ### TASK-003：故障、工单、维修与结构化案例闭环
 
-- 状态：Planned / Blocked until TASK-002 is merged into `codex/stage-05-integration`
+- 状态：Ready to Start / TASK-002 已正式合入并完成合并后验证；尚未开始实现
 - 优先级：P0
 - 负责人：`DEV-001`
 - 任务开发者：`DEV-001`
@@ -208,7 +209,7 @@
 
 ### TASK-004：部署独立 RAGFlow 容器环境
 
-- 状态：Planned / Blocked until TASK-002 is merged into `codex/stage-05-integration`
+- 状态：Ready to Start / TASK-002 已正式合入并完成合并后验证；尚未开始实现
 - 优先级：P0
 - 负责人：`DEV-001`
 - 任务开发者：`DEV-001`

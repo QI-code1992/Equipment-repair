@@ -116,3 +116,10 @@
 - 证据：RED `2 failed`；定向 `23 passed`；Python 3.13 全量 `142 passed, 5 skipped`；失败审计 `AuditEvent.metadata_json` 无测试秘密。PostgreSQL 17 `5 passed, 1 warning`；Compose/`/healthz` HTTP 200。
 - 已知残余风险：任意未知字段默认脱敏不在本 CR，当前结论仅关闭已知敏感语义别名漏洞。
 - 请求动作：推送本台账 HEAD 后，请 DEV-002 对精确远端 HEAD 复审；TASK-002 仍未验收、未集成，依赖不解锁，DEV-002 批准后才可创建后继正式 PR。
+
+## TASK-002 正式集成后交接（2026-07-17）
+
+- 已交付：DEV-002 已审核通过任务分支 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`，并创建正式 PR #20；PR #20 已合入 `codex/stage-05-integration`，Merge Commit 为 `904886f48061e27c775f6ee2f8ddae99f5571ead`。
+- 验证证据：Python 3.13 `142 passed, 5 skipped, 1 warning`；真实 PostgreSQL 17 `5 passed, 1 warning`；Compose 运行时 PostgreSQL/Redis healthy、API Up；容器内 `/healthz` HTTP 200。
+- 任务结论：TASK-002 已完成且其依赖已按任务书解除；不代表 Stage 6 已开始或已批准。
+- 后续边界：DEV-001 的下一开发任务为 TASK-003；TASK-004 也已具备 TASK-002 前置，但 TASK-005 仍需等待 TASK-004。未知字段默认脱敏残余风险不在本任务内，必须以独立 CR 决定后续处理。

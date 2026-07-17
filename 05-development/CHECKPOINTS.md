@@ -55,6 +55,17 @@
 - PostgreSQL：测试镜像 `41591e7` 在构建阶段安装 `pyproject.toml` 已声明的 dev 组，再接入 `infra_platform` 内部网络；专用 PostgreSQL 17 集成 `5 passed, 1 warning`。默认生产镜像确认不含 pytest/httpx，重建后 `/healthz` 为 HTTP 200。
 - 门禁：等待 DEV-002 对推送后的最终台账 HEAD 复审；只有 DEV-002 通过并创建后继正式 PR、合入目标分支后才可解锁依赖。
 
+## FCP-002-R6：TASK-002 正式集成后验证
+
+- 状态：Stable / Integrated / TASK-002 完成；不构成 Stage 6 准入或验收批准。
+- 审核与集成：DEV-002 已审核通过任务分支 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`；DEV-002 创建正式 PR #20，已合入 `codex/stage-05-integration`，Merge Commit 为 `904886f48061e27c775f6ee2f8ddae99f5571ead`。
+- 合并后 Python 3.13：`python -m pytest tests -q` 结果为 `142 passed, 5 skipped, 1 warning`；`python -m compileall -q app alembic` 通过；`git diff --check` 通过。既有 TestClient/httpx 弃用警告未在本任务中升级依赖。
+- 真实数据库：隔离 Docker `test` 镜像连接内部网络 PostgreSQL 17，并设置专用 DSN 与 `TASK002_ALLOW_DESTRUCTIVE_TESTS=1`，`tests/integration/test_task002_postgres.py -q` 结果为 `5 passed, 1 warning`。
+- Compose 与健康：`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml up -d --build` 成功；PostgreSQL、Redis 为 healthy，API 为 Up；容器内 `GET /healthz` 返回 HTTP 200 与 `{"status":"ok","service":"equipment-operations-platform"}`。
+- 恢复：若需回退已合并任务，基于集成分支执行 `git revert -m 1 904886f48061e27c775f6ee2f8ddae99f5571ead`，并按迁移文档决定 downgrade 或前向修复；不得在生产环境未经授权删除表。
+- 残余风险：本轮关闭已知敏感语义别名的失败审计泄漏；任意未知字段承载秘密的默认脱敏不属于 CR-036，须作为独立安全强化项评估。
+- 依赖：TASK-003 与 TASK-004 的 TASK-002 前置条件已满足；TASK-005 仍等待 TASK-004；Stage 6 仍需单独的用户批准与后续任务证据。
+
 ## FCP-002-R5：TASK-002 语义敏感键复审候选
 
 - 状态：Review Candidate / Not Accepted / Not Integrated / Does Not Unlock Dependencies。

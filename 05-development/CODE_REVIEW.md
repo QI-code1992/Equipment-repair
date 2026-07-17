@@ -145,3 +145,10 @@
 - 复查：直接与持久化两层覆盖键首、键中、键尾、附件标量、列表、混合结构、紧凑密码、Cookie、Token 以及业务反例。`profile` 不会因包含 `file` 字符串而误命中。
 - 边界与风险：未知额外字段默认脱敏未实施；当前结论只覆盖已知敏感语义别名，不声称识别任意秘密载荷。该残余风险已记录，需独立 CR 决定可观测性与安全取舍。
 - 验证：RED `2 failed`；定向 `23 passed, 1 warning`；Python 3.13 `142 passed, 5 skipped, 1 warning`；compileall、diff check、PostgreSQL 17 `5 passed, 1 warning`、Compose 和 `/healthz` HTTP 200 通过。DEV-001 内部复审 Critical 0、Important 0；仍待 DEV-002 复审。
+
+## TASK-002 正式审核与集成后复核（2026-07-17）
+
+- 正式审核：DEV-002 审核通过任务分支 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`，结论为 Approved（Critical 0、Important 0、Minor 0）。
+- 正式 PR 与集成：DEV-002 创建 PR #20；该 PR 已合入 `codex/stage-05-integration`，Merge Commit 为 `904886f48061e27c775f6ee2f8ddae99f5571ead`。
+- 合并后复核：合并提交的全量 Python 3.13、真实 PostgreSQL 17、Compose、容器健康和 `/healthz` 均按 SELF_TEST/FCP-002-R6 复验通过；未发现新的 Critical 或 Important。
+- 结论：TASK-002 评审门禁与集成门禁已关闭。未知任意字段默认脱敏仍是已记录的独立安全强化风险，不将其误表述为本轮已覆盖能力。
