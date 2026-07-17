@@ -496,7 +496,7 @@
   - PR #15: 保留为被拒绝候选的审核历史和 Review Request 载体，不作为 v1.2 下的正式集成触发源。
   - Checkpoints / Review / Handoff: 旧记录保留并追加 `Changes Requested` / `Superseded` 状态，不删除历史。
 - Decision: 项目负责人已针对精确 Commit `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b` 明确批准任务书 v1.2 协作基线并授权推送隔离治理分支。该批准不等同于 TASK-002 完成、正式 PR、集成或 Stage 6 准入；治理记录与任务书合入 `codex/stage-05-integration` 前，TASK-002 R6/R7 继续暂停。
-- Updated Baselines: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.2 获批候选 Commit `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`，远端分支 `codex/taskbook-v1-2-governance`；待治理 PR 合入后成为 Stage 5 当前协作基线。
+- Updated Baselines: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.2 获批候选 Commit `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`，远端分支 `codex/taskbook-v1-2-governance`；后续已通过 PR #18 合入并成为 Stage 5 当前协作基线。
 - Implementation:
   - Owner: DEV-001（工作流协调与集成责任）
   - Candidate Commit: `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`
@@ -543,3 +543,77 @@
   - Status: Done
   - Evidence: Merge Commit 树与获批 PR 头一致；Python 3.13.14 `4 passed, 1 warning`；`compileall`、Compose 构建、PostgreSQL/Redis/API 健康和容器内 `/healthz` 通过；验证容器与网络已清理。
   - Remaining Gate: CR-037 尚未合入；TASK-002、R6/R7 和依赖任务继续暂停。
+
+### CR-036 R6-R7 实施更新（2026-07-16）
+
+- Status: Ready For Verification / Awaiting DEV-002 Re-review
+- Implementation:
+  - R6 Commit: `35119954ba1d9ca475f03d1faa026bf6a474b18f`
+  - R7 Commit: `11dbb226e9b77ff5185fed5fa1434b0de6749206`
+  - Branch: `codex/task-002-identity-equipment`
+  - Owner: DEV-001
+- Verification:
+  - Python 3.13.14：`125 passed, 5 skipped`；PostgreSQL 专用集成：`5 passed`。
+  - PostgreSQL 17：`0002 -> 0001 -> 0002`，最终 `0002 (head)`。
+  - Compose：配置和构建通过；PostgreSQL/Redis healthy；`/healthz` 正常。
+  - Review：内部独立复审 Critical 0、Important 0；历史 `.superpowers` 证据已迁入正式 `CODE_REVIEW.md` 并删除重复工作文件。
+- Scope Result:
+  - 已关闭 DEV-002 提出的 API 契约、失败审计、设备字段、组织层级、用户/固定角色/权限和附件引用脱敏阻断。
+  - 未进入 TASK-003 活跃故障停用保护、TASK-004 RAGFlow 或后续业务范围。
+- Remaining Gate:
+  - 正式证据提交和远端精确 HEAD 完成后，由 DEV-001 发送书面审核请求。
+  - DEV-002 审核通过后创建后继正式 PR；在正式合入前 TASK-002 不算接受，依赖不解锁。
+
+#### 集成基线同步修正
+
+- Finding: 首轮远端证据 `ab67bcdff42d64ba739571515df4e6faed158d32` 与当前集成分支分叉，不能直接形成无冲突的后继正式 PR。
+- Correction: 通过 Merge Commit `0aac415d18aee256c237adb508d2ab24314a7486` 合入当前集成基线 `ac767c83128cb89ceea8e28c518be0adfbe1984c`。
+- Boundary: TASK-002 代码与证据保留；CR-037、CR-038 和 Stage Approval 采用当前集成历史；不改写或删除既有远端提交。
+- Verification: 集成分支已成为任务分支祖先；模拟合并无冲突；完整后端 `125 passed, 5 skipped`；PostgreSQL `5 passed`；迁移、Compose 实际状态和 `/healthz` 通过。
+- Synchronized Candidate: `4c111d0243d947a32d555bd48b1b72cab552bac4`，已推送并完成第二次自查。
+- Status: 修正与台账证据完成，等待 DEV-002 对最终远端分支 HEAD 正式复审；依赖不解锁。
+
+### CR-036 R8 最终审核阻断修复（2026-07-17）
+
+- Status: Ready For DEV-002 Re-review / Not Accepted / Not Integrated
+- Review Input: DEV-002 对 `60c71dd5ab7588006ee16d794b03bef493fb3c72` 的正式结论为 Changes requested，Critical 0、Important 4、Minor 2。
+- Code Candidate: `73030f83638b3b063db483029591720bf65aac21`。
+- Important Closure:
+  - `0002` 建立精确四角色/33 权限目录、系统管理员全授权并拒绝不可映射旧目录；运行时忽略非固定角色授权。
+  - 用户列表和详情执行 `user_management.view_all`；无权限仅本人。
+  - 脱敏覆盖密码确认/数字后缀、复数 Cookie、附件载荷正文。
+  - 数据库与未知异常回滚主事务，以独立事务写失败审计并返回稳定错误和真实审计 ID。
+- Minor Disposition: 不改写已推送的 `0aac415...` 双父提交或不可变 `0001`；原因、职责和后续提交/revision 规则已写入 `CODE_REVIEW.md`。
+- Verification: Python 3.13 `136 passed, 5 skipped`；专用 PostgreSQL 17 `5 passed`；迁移最终 `0002 (head)`；roles=4、permissions=33、system_admin_grants=33、non_fixed_roles=0；Compose、容器状态和 `/healthz` 通过。
+- Scope Boundary: 无生产依赖、兼容层、通用抽象或 TASK-003/TASK-004 实现。
+
+### CR-036 R9 剩余审计脱敏阻断修复（2026-07-17）
+
+- Status: Ready For DEV-002 Re-review / Not Accepted / Not Integrated。
+- Review Input: DEV-002 对 R8 复审为 Changes requested，Critical 0、Important 1；受保护写失败可把 `newPasswordConfirmation` 和附件 `raw_content` 写入审计库。
+- Decision: 在既有 TASK-002 审计脱敏范围内修复，不修改需求、API 契约、迁移或其他任务。
+- Code Candidate: `ac6947a642f00ba48aebcb80064f87fcc4c01ea8`。
+- Verification: RED `2 failed`；定向 `19 passed`；Python 3.13 `138 passed, 5 skipped`；编译与 diff check 通过；审计表 `metadata_json` 不含四类秘密。`41591e7` 的独立 test 镜像预装 dev 依赖后，PostgreSQL 17 `5 passed`；默认生产镜像不含 pytest/httpx。
+- Prevention: 安全脱敏评审采用语义变体、附件别名、嵌套结构、持久化断言矩阵；内部网络测试不得运行时在线安装依赖。
+- Next Gate: 推送正式台账 HEAD 后由 DEV-001 请求 DEV-002 复审；通过后才由 DEV-002 创建后继正式 PR。
+- Remaining Gate: 正式台账提交推送后由 DEV-001 在 PR #15 发出书面复审请求；只有 DEV-002 审核通过并创建后继正式 PR、合入 `codex/stage-05-integration` 后，TASK-002 才可接受和解锁依赖。
+
+### CR-036 R10 附件标量与紧凑密码脱敏修复（2026-07-17）
+
+- Status: Ready For DEV-002 Re-review / Not Accepted / Not Integrated。
+- Review Input: DEV-002 R9 补充审核为 Critical 0、Important 1；`newpassword`、`attachment_payload` 标量、`attachments` 标量列表和 `uploadData` 可原样写入失败审计。
+- Decision: 仅在 TASK-002 审计脱敏范围内修复，不修改需求、API 契约、迁移、Compose 生产配置或其他任务。
+- Code Candidate: `b4d451009d1deb9dbe3286f5bff4db9414ef4aee`。
+- Verification: RED `2 failed`；定向 `21 passed`；Python 3.13 `140 passed, 5 skipped`；compileall、diff check、PostgreSQL 17 `5 passed`、Compose 重建和 `/healthz` HTTP 200 通过；返回摘要与 `AuditEvent.metadata_json` 均无测试秘密原文。
+- Prevention: 附件安全回归固定覆盖标量、标量列表、混合 list/dict 与持久化审计；密码回归同时覆盖下划线、驼峰和紧凑命名。
+- Next Gate: 推送正式台账 HEAD 后由 DEV-001 在 PR #15 请求 DEV-002 复审；只有 DEV-002 审核通过并创建后继正式 PR、合入目标分支后，TASK-002 才可接受和解锁依赖。
+
+### CR-036 R11 已知敏感语义别名脱敏修复（2026-07-17）
+
+- Status: Ready For DEV-002 Re-review / Not Accepted / Not Integrated。
+- Review Input: DEV-002 R10 为 Critical 0、Important 1；`binaryAttachment`、`uploadedFile`、`sessionCookieValue`、`passwordvalue` 可原样写入失败审计。
+- Decision: 在 TASK-002 审计脱敏范围内采用归一化完整分段与有限紧凑前后缀规则；不使用任意子串匹配，不修改需求、API、迁移、Compose 或生产依赖。
+- Code Candidate: `ea4338bad15f16048226a329801d3144b367909e`。
+- Verification: RED `2 failed`；定向 `23 passed`；Python 3.13 `142 passed, 5 skipped`；compileall、diff check、PostgreSQL 17 `5 passed`、Compose 重建和 `/healthz` HTTP 200 通过；返回摘要与 `AuditEvent.metadata_json` 均无测试秘密，`profile`、普通业务字段和 Token 统计字段未误伤。
+- Residual Risk: 未知额外字段默认脱敏不在本 CR；本轮仅关闭已知敏感语义别名漏洞，任意无语义字段承载秘密需后续独立强化。
+- Next Gate: 推送正式台账 HEAD 后由 DEV-001 在 PR #15 请求 DEV-002 复审；只有 DEV-002 审核通过并创建后继正式 PR、合入目标分支后，TASK-002 才可接受和解锁依赖。

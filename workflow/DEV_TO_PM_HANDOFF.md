@@ -51,3 +51,68 @@
 - 验证：Python 3.13.14 `4 passed, 1 warning`；`compileall`、Compose 构建、PostgreSQL/Redis/API 健康和容器内 `/healthz` 通过。
 - 当前边界：CR-038 已完成；TASK-002 仍为 `Changes requested`；CR-037、TASK-002 R6/R7、TASK-003、TASK-004 和依赖 TASK-002 的数据库集成继续暂停。
 - 下一步：完成 CR-037 治理 PR；合入后恢复 TASK-002 R6/R7 和 DEV-002 复审。
+
+## TASK-002 / CR-036 新候选审核请求（2026-07-16）
+
+- 任务开发者：DEV-001。
+- 指定审核者与正式 PR 创建者：DEV-002。
+- 任务分支：`codex/task-002-identity-equipment`。
+- 目标分支：`codex/stage-05-integration`。
+- 实现提交：R6 `35119954ba1d9ca475f03d1faa026bf6a474b18f`；R7 `11dbb226e9b77ff5185fed5fa1434b0de6749206`。
+- 正式证据：本轮 `docs(task-002): record review remediation handoff` 提交后，以推送后的任务分支精确 HEAD 作为审核对象，并在 GitHub 审核请求中补记。
+- 需求/AC：FR-001、FR-010、FR-011、NFR-001、NFR-009；AC-001—008、AC-038、AC-039；不改写 PRD/SPEC/AC。
+- 修改范围：身份、固定角色和权限目录、失败审计与脱敏、组织层级、完整设备主数据、Alembic `0002`、API/Data Model 契约和相关测试。
+- 验证：Python 3.13.14 全套 `125 passed, 5 skipped`；专用 PostgreSQL 17 集成 `5 passed`；迁移 `0002 -> 0001 -> 0002`；Compose、PostgreSQL/Redis 健康、API `/healthz`、compileall 和 diff check 通过。
+- Review：DEV-001 内部独立复审 Critical 0、Important 0；Minor 为未来迁移 revision/测试函数可读性提醒，不阻塞本候选。
+- 未验证：DEV-002 尚未批准；后继正式 PR 尚未创建；任务尚未正式集成。
+- 依赖：无新增生产依赖；TASK-003/TASK-004 未实施；TASK-003、TASK-004、TASK-005 和依赖 TASK-002 的数据库工作继续阻塞。
+- 兼容与抽象：未新增兼容分支；仅保留任务所需领域 service/schema 与测试职责拆分，无通用框架。
+- 风险：Alembic `0002` downgrade 会丢弃完整合同新增字段，只允许在已备份或专用验证环境执行；PostgreSQL 集成测试有专用库名、主机和显式开关三重保护。
+- 回退：应用与契约按独立任务 Commit 选择性 revert；数据库按已验证 downgrade 或前向修复策略处理，不对生产数据执行未授权删除。
+- 请求动作：请 DEV-002 对推送后的精确 HEAD 复审；若通过，由 DEV-002 创建后继正式 PR。PR #15 仅保留被拒绝和违规合并/回滚历史，不得再次作为正式集成触发源。
+
+### 集成基线同步更正
+
+- 被取代审核 HEAD：`ab67bcdff42d64ba739571515df4e6faed158d32`；原因是该分支相对当前集成分支分叉，模拟正式合并存在冲突。
+- 当前集成基线：`ac767c83128cb89ceea8e28c518be0adfbe1984c`。
+- 同步 Merge Commit：`0aac415d18aee256c237adb508d2ab24314a7486`。
+- 修正结果：当前集成基线已成为任务分支祖先；模拟合并无冲突；CR-037/CR-038 与 `STAGE_APPROVALS.md` 保持集成分支版本。
+- 复验结果：Python 3.13.14 `125 passed, 5 skipped`；PostgreSQL 17 集成 `5 passed`；迁移、Compose 实际状态、容器健康和 `/healthz` 通过。
+- 同步验证候选：`4c111d0243d947a32d555bd48b1b72cab552bac4`，已推送并完成第二次自查。
+- 新请求动作：首轮 PR #15 评论中的 `ab67bcd...` 请求已被取代；本治理记录提交并推送后，以新的远端分支 HEAD 重新请求 DEV-002 审核。该最终 HEAD 包含的新增内容仅为本节台账回填，不改变 `4c111d0...` 的代码、测试或运行证据。
+
+## TASK-002 / CR-036 R8 复审交接（2026-07-17）
+
+- 开发者：DEV-001；指定审核者与后继正式 PR 创建者：DEV-002。
+- 分支/目标：`codex/task-002-identity-equipment` → `codex/stage-05-integration`。
+- 被取代审核 HEAD：`60c71dd5ab7588006ee16d794b03bef493fb3c72`；R8 代码候选：`73030f83638b3b063db483029591720bf65aac21`。
+- 修复：精确固定角色/权限目录和系统管理员全授权；非固定角色不得授权；用户管理执行 `user_management.view_all`；敏感字段变体和附件正文脱敏；数据库/未知异常回滚与独立失败审计。
+- 验证：本机 Python 3.13 `136 passed, 5 skipped`；专用 PostgreSQL 17 `5 passed`；迁移往返和最终目录计数通过；Compose、PostgreSQL/Redis 健康、API Up、`/healthz` HTTP 200。
+- Review：DEV-001 三轮复审 Critical 0、Important 0；两个历史 Minor 已按不可改写历史约束形成书面处置。
+- 交付边界：无生产依赖、兼容层、通用抽象、TASK-003 或 TASK-004 修改；未创建正式 PR。
+- 请求动作：正式台账提交推送后，以远端最终 HEAD 在 PR #15 请求 DEV-002 复审。若审核通过，由 DEV-002 创建后继正式 PR；在合入前 TASK-002、TASK-003、TASK-004、TASK-005 和相关数据库依赖状态不变。
+
+## TASK-002 / CR-036 R9 复审交接（2026-07-17）
+
+- 开发者/审核者：DEV-001 / DEV-002；任务分支仍为 `codex/task-002-identity-equipment`，目标为 `codex/stage-05-integration`。
+- 代码候选：`ac6947a642f00ba48aebcb80064f87fcc4c01ea8`，关闭 R8 复审剩余的审计脱敏 Important。
+- 修复与证据：密码语义段识别；附件上下文元数据白名单；驼峰、下划线、嵌套/list 和真实失败审计表 `metadata_json` 回归。RED `2 failed`，定向 `19 passed`，Python 3.13 全量 `138 passed, 5 skipped`。
+- PostgreSQL 证据：新增 `41591e7` Docker `test` 目标，在构建阶段安装 dev 依赖、运行时接入内部网络；专用 PostgreSQL 17 集成 `5 passed, 1 warning`。默认生产镜像不含 pytest/httpx。
+- 请求动作：推送台账 HEAD 后，请 DEV-002 复审；TASK-002 仍未验收、未集成，依赖不解锁，DEV-002 通过后才创建后继正式 PR。
+
+## TASK-002 / CR-036 R10 复审交接（2026-07-17）
+
+- 开发者/审核者：DEV-001 / DEV-002；任务分支 `codex/task-002-identity-equipment`，目标 `codex/stage-05-integration`。
+- 代码候选：`b4d451009d1deb9dbe3286f5bff4db9414ef4aee`，修复 R9 补充审核的一个 Important。
+- 修复：附件 context 的标量和纯标量列表默认脱敏；混合 list/dict 只保留字典元数据白名单；紧凑密码键 `newpassword`、`userpassword` 脱敏。
+- 证据：RED `2 failed`；定向 `21 passed`；Python 3.13 全量 `140 passed, 5 skipped`；失败请求已从 `AuditEvent.metadata_json` 读取验证无明文。独立 PostgreSQL 17 `5 passed, 1 warning`；Compose/健康检查 `/healthz` HTTP 200。
+- 请求动作：推送本台账 HEAD 后，请 DEV-002 对该精确远端 HEAD 复审。TASK-002 仍未验收、未集成，DEV-002 批准后才可创建后继正式 PR；依赖不解锁。
+
+## TASK-002 / CR-036 R11 复审交接（2026-07-17）
+
+- 开发者/审核者：DEV-001 / DEV-002；任务分支 `codex/task-002-identity-equipment`，目标 `codex/stage-05-integration`。
+- 代码候选：`ea4338bad15f16048226a329801d3144b367909e`，修复 R10 的敏感键语义识别 Important。
+- 修复：完整分段识别附件/文件与敏感语义；有限紧凑规则覆盖 `passwordvalue`、`userpassword`；保留 `profile`、`token_count`、`token_usage` 等反例；附件容器继续使用元数据白名单。
+- 证据：RED `2 failed`；定向 `23 passed`；Python 3.13 全量 `142 passed, 5 skipped`；失败审计 `AuditEvent.metadata_json` 无测试秘密。PostgreSQL 17 `5 passed, 1 warning`；Compose/`/healthz` HTTP 200。
+- 已知残余风险：任意未知字段默认脱敏不在本 CR，当前结论仅关闭已知敏感语义别名漏洞。
+- 请求动作：推送本台账 HEAD 后，请 DEV-002 对精确远端 HEAD 复审；TASK-002 仍未验收、未集成，依赖不解锁，DEV-002 批准后才可创建后继正式 PR。

@@ -51,3 +51,154 @@
 | `MODEL_REASONING_UNSUPPORTED` | 非推理模型开启深度思考 | 拒绝保存并要求改绑模型或关闭开关。 |
 | `RAGFLOW_TIMEOUT`、`LLM_TIMEOUT` | 外部依赖超时 | 不伪造结果；诊断降级为不可用或继续人工。 |
 | `EVIDENCE_INSUFFICIENT` | 证据未满足根因门槛 | 继续追问、上传附件或直接开始维修。 |
+
+## TASK-002 正式契约
+
+本节是 `CR-036` 修复后身份权限、组织和设备主数据 API 的唯一正式契约。所有接口均要求平台 Bearer 会话认证；权限只控制角色、菜单与操作，不增加工厂、组织或设备的行级过滤。动态角色创建接口 `POST /api/roles` 已移除。
+
+### 路由矩阵
+
+| Method | Endpoint | 权限码 | Idempotency-Key | 请求与成功响应 |
+|---|---|---|---|---|
+| GET | `/api/permissions` | `identity:read` | 不使用 | 返回 `[{code}]` 的固定权限目录。 |
+| GET | `/api/roles` | `identity:read` | 不使用 | 返回四个固定角色的 `id,code,name,permission_codes`。 |
+| PATCH | `/api/roles/{role_id}/permissions` | `identity:write` | 必填 | 请求 `permission_codes`；返回角色字段及 `audit_event_id`。 |
+| GET | `/api/users` | `authenticated:self-or-user_management.view_all` | 不使用 | 有 `user_management.view_all` 时返回全量用户，否则仅返回本人 `id,username,enabled,role_ids`。 |
+| GET | `/api/users/{user_id}` | `authenticated:self-or-user_management.view_all` | 不使用 | 返回本人；有 `user_management.view_all` 时可返回其他用户的 `id,username,enabled,role_ids`。 |
+| POST | `/api/users` | `identity:write` | 必填 | 请求 `username,password,role_ids`；201 返回用户字段及 `audit_event_id`，不返回密码。 |
+| PATCH | `/api/users/{user_id}` | `identity:write` | 必填 | 请求完整 `enabled,role_ids`；返回用户字段及 `audit_event_id`。 |
+| GET | `/api/organizations` | `organization:read` | 不使用 | 返回完整组织节点字段列表，调用方按 `parent_id` 构树。 |
+| POST | `/api/organizations` | `organization:write` | 必填 | 请求组织创建字段；201 返回组织字段及 `audit_event_id`。 |
+| PATCH | `/api/organizations/{organization_id}` | `organization:write` | 必填 | 请求完整可变字段；返回组织字段及 `audit_event_id`。 |
+| DELETE | `/api/organizations/{organization_id}` | `organization:write` | 不使用 | 物理删除无引用的非根叶节点；返回被删除组织字段及 `audit_event_id`。 |
+| GET | `/api/equipment` | `equipment:read` | 不使用 | 返回完整设备字段列表。 |
+| GET | `/api/equipment/{equipment_id}` | `equipment:read` | 不使用 | 返回完整设备字段。 |
+| POST | `/api/equipment` | `equipment:write` | 必填 | 请求完整设备写字段；201 返回设备字段及 `audit_event_id`。 |
+| PATCH | `/api/equipment/{equipment_id}` | `equipment:write` | 必填 | 请求完整设备写字段；返回设备字段及 `audit_event_id`。 |
+
+### 写请求字段矩阵
+
+| Method | Endpoint | 必填字段 | 可选字段 |
+|---|---|---|---|
+| POST | `/api/users` | `username`,`password`,`role_ids` | 无 |
+| PATCH | `/api/users/{user_id}` | `enabled`,`role_ids` | 无 |
+| PATCH | `/api/roles/{role_id}/permissions` | `permission_codes` | 无 |
+| POST | `/api/organizations` | `type`,`code`,`name`,`parent_id`,`sort_order` | `enabled`,`remark` |
+| PATCH | `/api/organizations/{organization_id}` | `code`,`name`,`sort_order`,`enabled` | `remark` |
+| POST | `/api/equipment` | `code`,`name`,`model`,`type`,`manufacturer`,`operating_hours`,`status`,`organization_id` | `manufactured_at`,`commissioned_at`,`owner_user_id`,`image_refs` |
+| PATCH | `/api/equipment/{equipment_id}` | `code`,`name`,`model`,`type`,`manufacturer`,`operating_hours`,`status`,`organization_id` | `manufactured_at`,`commissioned_at`,`owner_user_id`,`image_refs` |
+
+### 成功响应字段矩阵
+
+| Method | Endpoint | 字段 |
+|---|---|---|
+| GET | `/api/permissions` | `code` |
+| GET | `/api/roles` | `id`,`code`,`name`,`permission_codes` |
+| PATCH | `/api/roles/{role_id}/permissions` | `id`,`code`,`name`,`permission_codes`,`audit_event_id` |
+| GET | `/api/users` | `id`,`username`,`enabled`,`role_ids` |
+| GET | `/api/users/{user_id}` | `id`,`username`,`enabled`,`role_ids` |
+| POST | `/api/users` | `id`,`username`,`enabled`,`role_ids`,`audit_event_id` |
+| PATCH | `/api/users/{user_id}` | `id`,`username`,`enabled`,`role_ids`,`audit_event_id` |
+| GET | `/api/organizations` | `id`,`type`,`code`,`name`,`parent_id`,`sort_order`,`enabled`,`remark` |
+| POST | `/api/organizations` | `id`,`type`,`code`,`name`,`parent_id`,`sort_order`,`enabled`,`remark`,`audit_event_id` |
+| PATCH | `/api/organizations/{organization_id}` | `id`,`type`,`code`,`name`,`parent_id`,`sort_order`,`enabled`,`remark`,`audit_event_id` |
+| DELETE | `/api/organizations/{organization_id}` | `id`,`type`,`code`,`name`,`parent_id`,`sort_order`,`enabled`,`remark`,`audit_event_id` |
+| GET | `/api/equipment` | `id`,`code`,`name`,`model`,`type`,`manufacturer`,`manufactured_at`,`commissioned_at`,`operating_hours`,`status`,`organization_id`,`owner_user_id`,`image_refs`,`created_at`,`updated_at` |
+| GET | `/api/equipment/{equipment_id}` | `id`,`code`,`name`,`model`,`type`,`manufacturer`,`manufactured_at`,`commissioned_at`,`operating_hours`,`status`,`organization_id`,`owner_user_id`,`image_refs`,`created_at`,`updated_at` |
+| POST | `/api/equipment` | `id`,`code`,`name`,`model`,`type`,`manufacturer`,`manufactured_at`,`commissioned_at`,`operating_hours`,`status`,`organization_id`,`owner_user_id`,`image_refs`,`created_at`,`updated_at`,`audit_event_id` |
+| PATCH | `/api/equipment/{equipment_id}` | `id`,`code`,`name`,`model`,`type`,`manufacturer`,`manufactured_at`,`commissioned_at`,`operating_hours`,`status`,`organization_id`,`owner_user_id`,`image_refs`,`created_at`,`updated_at`,`audit_event_id` |
+
+### 默认值、可空性与约束矩阵
+
+| Model | Field | 可空 | 默认值 | 约束 |
+|---|---|---|---|---|
+| UserCreate | `username` | 否 | 无 | `minLength=1;maxLength=100` |
+| UserCreate | `password` | 否 | 无 | `minLength=8;maxLength=200` |
+| UserCreate | `role_ids` | 否 | 无 | `minItems=1` |
+| OrganizationCreate | `code` | 否 | 无 | `minLength=1;maxLength=100` |
+| OrganizationCreate | `name` | 否 | 无 | `minLength=1;maxLength=200` |
+| OrganizationCreate | `sort_order` | 否 | 无 | `minimum=0` |
+| OrganizationCreate | `enabled` | 否 | `true` | `boolean` |
+| OrganizationCreate | `remark` | 否 | `""` | `maxLength=1000` |
+| OrganizationUpdate | `code` | 否 | 无 | `minLength=1;maxLength=100` |
+| OrganizationUpdate | `name` | 否 | 无 | `minLength=1;maxLength=200` |
+| OrganizationUpdate | `sort_order` | 否 | 无 | `minimum=0` |
+| OrganizationUpdate | `remark` | 否 | `""` | `maxLength=1000` |
+| EquipmentWrite | `code` | 否 | 无 | `minLength=1;maxLength=100` |
+| EquipmentWrite | `name` | 否 | 无 | `minLength=1;maxLength=200` |
+| EquipmentWrite | `model` | 否 | 无 | `minLength=1;maxLength=200` |
+| EquipmentWrite | `type` | 否 | 无 | `minLength=1;maxLength=100` |
+| EquipmentWrite | `manufacturer` | 否 | 无 | `minLength=1;maxLength=200` |
+| EquipmentWrite | `manufactured_at` | 是 | `null` | `format=date` |
+| EquipmentWrite | `commissioned_at` | 是 | `null` | `format=date` |
+| EquipmentWrite | `operating_hours` | 否 | 无 | `minimum=0;maxDigits=12;decimalPlaces=2` |
+| EquipmentWrite | `owner_user_id` | 是 | `null` | `string` |
+| EquipmentWrite | `image_refs` | 否 | `[]` | `items=ImageRef` |
+| ImageRef | `object_key` | 否 | 无 | `minLength=1;maxLength=500` |
+| ImageRef | `filename` | 否 | 无 | `minLength=1;maxLength=255` |
+
+### 请求与响应字段
+
+写请求均拒绝未声明字段。`role_ids` 至少包含一个固定角色 ID；`permission_codes` 只能取固定权限目录。用户创建的 `password` 长度为 8–200，只用于生成密码哈希，不得出现在查询、响应或审计元数据中。用户更新不修改 `username` 或密码，只完整替换 `enabled` 和 `role_ids`。
+
+组织创建请求为 `type,code,name,parent_id,sort_order,enabled,remark`；组织更新请求为 `code,name,sort_order,enabled,remark`，不允许修改 `type` 或 `parent_id`。组织响应为 `id,type,code,name,parent_id,sort_order,enabled,remark`；`type` 只能是 `ROOT,FACTORY,WORKSHOP,LINE`。
+
+设备创建和更新均使用完整写模型：`code,name,model,type,manufacturer,manufactured_at,commissioned_at,operating_hours,status,organization_id,owner_user_id,image_refs`。其中 `model,type,manufacturer` 为非空字符串，两个日期可为 `null`，`operating_hours >= 0`，`status` 只能是 `NORMAL,FAULT,REPAIRING,DISABLED`，`owner_user_id` 可为 `null`。每个 `image_refs` 元素严格为 `object_key,filename`，仅保存对象引用与展示元数据，不接收文件正文。设备响应额外包含 `id,created_at,updated_at`；写成功再包含 `audit_event_id`。
+
+### 固定权限目录
+
+API 权限码固定为 `identity:read,identity:write,equipment:read,equipment:write,organization:read,organization:write`。菜单与操作权限码固定为 `workbench:view,workbench:export,bi:view,bi:export,factory:view,factory:manage,equipment:view,equipment:create,equipment:edit,equipment:delete,fault:view,fault:create,fault:repair,fault:close,maintenance:view,maintenance:detail,maintenance:export,system:role,system:user,user_management.view_all,system:org,system:audit,intelligence:view,intelligence:model,intelligence:agent,intelligence:knowledge,intelligence:audit`。权限实体不提供动态增删 API。
+
+### 错误响应
+
+受保护写操作失败统一返回 `code`、`message`、`fields`、`audit_event_id` 四个 `detail` 字段。`fields` 是字段到稳定原因的对象；没有字段级原因时为空对象。主业务事务先回滚，再由独立事务写一条脱敏失败审计；只有审计提交成功才返回真实 `audit_event_id`。查询失败仍使用相同的 `detail.code,message,fields` 形状，但不承诺失败审计 ID。不得向客户端暴露 SQL、堆栈、密码、令牌、Cookie 或附件正文。
+
+### 错误矩阵
+
+| HTTP | code | 适用场景与 fields |
+|---|---|---|
+| 422 | `VALIDATION_ERROR` | 请求字段缺失、类型、长度、枚举、额外字段或头字段校验失败；`fields` 标识各字段。 |
+| 403 | `PERMISSION_DENIED` | 缺少路由要求的权限码。 |
+| 404 | `RESOURCE_NOT_FOUND` | 查询类通用资源不存在。 |
+| 409 | `IDEMPOTENCY_KEY_REUSED` | 同一用户、方法、路径和 Key 携带不同请求体；`fields.idempotency_key=conflict`。 |
+| 500 | `INTERNAL_SERVER_ERROR` | 未预期的业务或数据库错误；受保护写操作在主事务回滚后以独立事务记录失败审计并返回真实 `audit_event_id`。 |
+| 503 | `AUDIT_PERSIST_FAILED` | 失败审计无法持久化；不伪造 `audit_event_id`。 |
+| 404 | `USER_NOT_FOUND` | 用户不存在。 |
+| 422 | `ROLE_NOT_FOUND` | 用户写请求含未知或非固定角色 ID。 |
+| 409 | `USERNAME_EXISTS` | 用户名重复；`fields.username=duplicate`。 |
+| 409 | `USER_SELF_DISABLE_FORBIDDEN` | 操作者尝试停用自己。 |
+| 409 | `LAST_SYSTEM_ADMIN_REQUIRED` | 停用或移除角色会失去最后一个有效系统管理员。 |
+| 404 | `ROLE_NOT_FOUND` | 目标角色不存在。 |
+| 422 | `PERMISSION_NOT_FOUND` | `permission_codes` 含目录外代码。 |
+| 409 | `SYSTEM_ADMIN_PERMISSIONS_FIXED` | 尝试削弱系统管理员权限。 |
+| 404 | `ORGANIZATION_NOT_FOUND` | 目标组织不存在。 |
+| 404 | `ORGANIZATION_PARENT_NOT_FOUND` | 父组织不存在。 |
+| 422 | `ORGANIZATION_LEVEL_INVALID` | 组织层级不是 `ROOT -> FACTORY -> WORKSHOP -> LINE`。 |
+| 422 | `ORGANIZATION_TREE_INVALID` | 检测到组织环或非法树数据。 |
+| 409 | `ORGANIZATION_CODE_EXISTS` | `code` 全局重复；`fields.code=duplicate`。 |
+| 409 | `ORGANIZATION_SIBLING_NAME_EXISTS` | 同父节点名称重复；`fields.name=duplicate`。 |
+| 409 | `ORGANIZATION_PARENT_DISABLED` | 在停用父节点下创建或重新启用子节点。 |
+| 409 | `ORGANIZATION_ROOT_PROTECTED` | 尝试停用、更新或删除固定根节点。 |
+| 409 | `ORGANIZATION_HAS_CHILDREN` | 删除仍有子节点的组织。 |
+| 409 | `ORGANIZATION_HAS_EQUIPMENT` | 删除仍被设备引用的组织。 |
+| 409 | `ORGANIZATION_CONFLICT` | 数据库约束竞争导致的其他组织写冲突。 |
+| 404 | `EQUIPMENT_NOT_FOUND` | 设备不存在。 |
+| 409 | `EQUIPMENT_CODE_EXISTS` | 设备 `code` 全局重复；`fields.code=duplicate`。 |
+| 404 | `EQUIPMENT_ORGANIZATION_NOT_FOUND` | 所属组织不存在。 |
+| 409 | `EQUIPMENT_ORGANIZATION_NOT_LINE` | 所属组织不是 `LINE`。 |
+| 409 | `EQUIPMENT_ORGANIZATION_DISABLED` | 所属产线已停用。 |
+| 404 | `EQUIPMENT_OWNER_NOT_FOUND` | 负责人用户不存在。 |
+| 409 | `EQUIPMENT_OWNER_DISABLED` | 负责人用户已停用。 |
+| 409 | `EQUIPMENT_CONFLICT` | 数据库约束竞争导致的其他设备写冲突。 |
+
+### 幂等与审计
+
+要求 `Idempotency-Key` 的写接口在同一用户范围内保持 Key 全局唯一。首次成功在同一事务内保存业务变更、成功审计和响应；相同 Key 的 HTTP 方法、实际路径和规范化请求体均一致时，成功响应连同原 `audit_event_id` 原样重放，不产生第二条成功审计。方法、路径或请求体任一不一致均视为 Key 冲突，返回 `409 IDEMPOTENCY_KEY_REUSED` 并写入一条失败审计。失败响应一律不缓存，调用方修正请求后应使用新 Key。组织删除不缓存幂等响应，但仍写成功或失败审计。
+
+成功审计动作固定为 `role.permissions.update,user.create,user.update,organization.create,organization.update,organization.delete,equipment.create,equipment.update`。失败审计记录对应动作、操作者、资源、`failure`、业务错误码和递归脱敏后的请求摘要；权限依赖已经产生拒绝审计时复用其事件，避免重复。
+
+### 延后边界与产品侧修正
+
+TASK-002 不根据尚不存在的业务事实推测状态：由 TASK-003 建立故障、工单和维修事实后，再实现这些事实对设备停用或生命周期操作的保护。TASK-002 不提供设备物理删除接口，也不实现附件上传、对象存储、扫描、下载和生命周期。
+
+Stage 3 原型中的动态自定义角色控件与 FR-010 及 CR-036 的固定四角色规则冲突，必须在 TASK-010 前由产品侧修正。本次后端修复不修改原型、PRD、SPEC 或验收标准。
