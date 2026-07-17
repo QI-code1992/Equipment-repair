@@ -1,14 +1,16 @@
-from fastapi import APIRouter, Depends, Header, HTTPException
+from decimal import Decimal
+
+from fastapi import APIRouter, Depends, Header
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
-from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.idempotency import find_idempotent_response, save_idempotent_response
 from app.modules.audit.service import write_audit_event
-from app.modules.equipment.models import Equipment, Organization
+from app.modules.equipment import service
+from app.modules.equipment.models import Equipment
+from app.modules.equipment.organization_service import acquire_organization_tree_lock
+from app.modules.equipment.schemas import EquipmentRead, EquipmentWrite, EquipmentWriteResponse
 from app.modules.identity.dependencies import require_permission
 from app.modules.identity.models import User
 
@@ -16,164 +18,127 @@ from app.modules.identity.models import User
 router = APIRouter(prefix="/api/equipment", tags=["equipment"])
 
 
-class EquipmentCreate(BaseModel):
-    code: str
-    name: str
-    organization_id: str | None = None
+def _number(value: Decimal) -> int | float:
+    return int(value) if value == value.to_integral() else float(value)
 
 
-class EquipmentUpdate(BaseModel):
-    name: str
-    organization_id: str | None
-    enabled: bool
-
-
-@router.get("")
-def list_equipment(
-    db: Session = Depends(get_db),
-    user: User = Depends(require_permission("equipment:read")),
-) -> list[dict[str, object]]:
-    del user
-    equipment = db.scalars(select(Equipment).order_by(Equipment.code)).all()
-    return [
-        {
-            "id": item.id,
-            "code": item.code,
-            "name": item.name,
-            "organization_id": item.organization_id,
-            "enabled": item.enabled,
-        }
-        for item in equipment
-    ]
-
-
-@router.post("", status_code=201, response_model=None)
-def create_equipment(
-    payload: EquipmentCreate,
-    idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
-    db: Session = Depends(get_db),
-    user: User = Depends(require_permission("equipment:write")),
-) -> dict[str, object] | JSONResponse:
-    request_body = payload.model_dump(mode="json")
-    replay = find_idempotent_response(
-        db,
-        user_id=user.id,
-        method="POST",
-        path="/api/equipment",
-        key=idempotency_key,
-        request_body=request_body,
-    )
-    if replay is not None:
-        status, body = replay
-        return JSONResponse(status_code=status, content=body)
-
-    if db.scalar(select(Equipment).where(Equipment.code == payload.code)) is not None:
-        raise HTTPException(status_code=409, detail={"code": "EQUIPMENT_CODE_EXISTS"})
-    if payload.organization_id is not None and db.get(Organization, payload.organization_id) is None:
-        raise HTTPException(status_code=404, detail={"code": "ORGANIZATION_NOT_FOUND"})
-
-    item = Equipment(**payload.model_dump())
-    db.add(item)
-    try:
-        db.flush()
-    except IntegrityError as error:
-        db.rollback()
-        raise HTTPException(
-            status_code=409, detail={"code": "EQUIPMENT_CODE_EXISTS"}
-        ) from error
-    event = write_audit_event(
-        db,
-        actor_user_id=user.id,
-        action="equipment.create",
-        resource_type="equipment",
-        resource_id=item.id,
-        result="success",
-        metadata=request_body,
-    )
-    body: dict[str, object] = {
+def equipment_body(item: Equipment) -> dict[str, object]:
+    return {
         "id": item.id,
         "code": item.code,
         "name": item.name,
+        "model": item.model,
+        "type": item.type,
+        "manufacturer": item.manufacturer,
+        "manufactured_at": item.manufactured_at.isoformat() if item.manufactured_at else None,
+        "commissioned_at": item.commissioned_at.isoformat() if item.commissioned_at else None,
+        "operating_hours": _number(item.operating_hours),
+        "status": item.status.value,
         "organization_id": item.organization_id,
-        "enabled": item.enabled,
-        "audit_event_id": event.id,
+        "owner_user_id": item.owner_user_id,
+        "image_refs": item.image_refs,
+        "created_at": item.created_at.isoformat(),
+        "updated_at": item.updated_at.isoformat(),
     }
-    save_idempotent_response(
-        db,
-        user_id=user.id,
-        method="POST",
-        path="/api/equipment",
-        key=idempotency_key,
-        request_body=request_body,
-        status=201,
-        body=body,
+
+
+def _replay(
+    db: Session, actor: User, method: str, path: str, key: str, body: object
+) -> JSONResponse | None:
+    result = find_idempotent_response(
+        db, user_id=actor.id, method=method, path=path, key=key, request_body=body
     )
-    try:
-        db.commit()
-    except IntegrityError as error:
-        db.rollback()
-        raise HTTPException(
-            status_code=409, detail={"code": "EQUIPMENT_CODE_EXISTS"}
-        ) from error
-    return body
+    if result is None:
+        return None
+    return JSONResponse(status_code=result[0], content=result[1])
 
 
-@router.patch("/{equipment_id}", response_model=None)
-def update_equipment(
-    equipment_id: str,
-    payload: EquipmentUpdate,
-    idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
-    db: Session = Depends(get_db),
-    user: User = Depends(require_permission("equipment:write")),
-) -> dict[str, object] | JSONResponse:
-    path = f"/api/equipment/{equipment_id}"
-    request_body = payload.model_dump(mode="json")
-    replay = find_idempotent_response(
-        db,
-        user_id=user.id,
-        method="PATCH",
-        path=path,
-        key=idempotency_key,
-        request_body=request_body,
-    )
-    if replay is not None:
-        status, body = replay
-        return JSONResponse(status_code=status, content=body)
-    item = db.get(Equipment, equipment_id)
-    if item is None:
-        raise HTTPException(status_code=404, detail={"code": "EQUIPMENT_NOT_FOUND"})
-    if payload.organization_id is not None and db.get(Organization, payload.organization_id) is None:
-        raise HTTPException(status_code=404, detail={"code": "ORGANIZATION_NOT_FOUND"})
-
-    item.name = payload.name
-    item.organization_id = payload.organization_id
-    item.enabled = payload.enabled
+def _complete_write(
+    db: Session, actor: User, item: Equipment, *, action: str, method: str,
+    path: str, key: str, request_body: object, status: int,
+) -> dict[str, object]:
     event = write_audit_event(
-        db,
-        actor_user_id=user.id,
-        action="equipment.update",
-        resource_type="equipment",
-        resource_id=item.id,
-        result="success",
-        metadata=request_body,
+        db, actor_user_id=actor.id, action=action, resource_type="equipment",
+        resource_id=item.id, result="success", metadata=request_body,
     )
-    body: dict[str, object] = {
-        "id": item.id,
-        "code": item.code,
-        "name": item.name,
-        "organization_id": item.organization_id,
-        "enabled": item.enabled,
-        "audit_event_id": event.id,
-    }
+    body = {**equipment_body(item), "audit_event_id": event.id}
     save_idempotent_response(
-        db,
-        user_id=user.id,
-        method="PATCH",
-        path=path,
-        key=idempotency_key,
-        request_body=request_body,
-        status=200,
-        body=body,
+        db, user_id=actor.id, method=method, path=path, key=key,
+        request_body=request_body, status=status, body=body,
     )
     db.commit()
     return body
+
+
+@router.get(
+    "", response_model=None, responses={200: {"model": list[EquipmentRead]}}
+)
+def list_equipment(
+    db: Session = Depends(get_db),
+    actor: User = Depends(require_permission("equipment:read")),
+) -> list[dict[str, object]]:
+    del actor
+    return [equipment_body(item) for item in service.equipment_items(db)]
+
+
+@router.get(
+    "/{equipment_id}", response_model=None, responses={200: {"model": EquipmentRead}}
+)
+def get_equipment(
+    equipment_id: str,
+    db: Session = Depends(get_db),
+    actor: User = Depends(require_permission("equipment:read")),
+) -> dict[str, object]:
+    del actor
+    return equipment_body(service.equipment_detail(db, equipment_id))
+
+
+@router.post(
+    "",
+    status_code=201,
+    response_model=None,
+    responses={201: {"model": EquipmentWriteResponse}},
+    name="equipment.create",
+)
+def create_equipment(
+    payload: EquipmentWrite,
+    idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
+    db: Session = Depends(get_db),
+    actor: User = Depends(require_permission("equipment:write")),
+) -> dict[str, object] | JSONResponse:
+    acquire_organization_tree_lock(db)
+    request_body = payload.model_dump(mode="json")
+    replay = _replay(db, actor, "POST", "/api/equipment", idempotency_key, request_body)
+    if replay is not None:
+        return replay
+    item = service.create_equipment(db, payload)
+    return _complete_write(
+        db, actor, item, action="equipment.create", method="POST",
+        path="/api/equipment", key=idempotency_key, request_body=request_body, status=201,
+    )
+
+
+@router.patch(
+    "/{equipment_id}",
+    response_model=None,
+    responses={200: {"model": EquipmentWriteResponse}},
+    name="equipment.update",
+)
+def update_equipment(
+    equipment_id: str,
+    payload: EquipmentWrite,
+    idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
+    db: Session = Depends(get_db),
+    actor: User = Depends(require_permission("equipment:write")),
+) -> dict[str, object] | JSONResponse:
+    acquire_organization_tree_lock(db)
+    path = f"/api/equipment/{equipment_id}"
+    request_body = payload.model_dump(mode="json")
+    replay = _replay(db, actor, "PATCH", path, idempotency_key, request_body)
+    if replay is not None:
+        return replay
+    item = service.update_equipment(db, equipment_id, payload)
+    return _complete_write(
+        db, actor, item, action="equipment.update", method="PATCH", path=path,
+        key=idempotency_key, request_body=request_body, status=200,
+    )

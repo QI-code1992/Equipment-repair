@@ -1,11 +1,9 @@
 from fastapi import FastAPI
-from fastapi import Request
 from fastapi import Response
-from fastapi.responses import JSONResponse
 
 from app.core.config import Settings
 from app.core.database import create_database_engine, session_factory
-from app.core.idempotency import IdempotencyKeyReused
+from app.modules.audit.http import register_audit_exception_handlers
 from app.modules.equipment.router import router as equipment_router
 from app.modules.equipment.organization_router import router as organization_router
 from app.modules.identity.router import router as identity_router
@@ -31,16 +29,7 @@ def create_app(
     app.include_router(identity_admin_router)
     app.include_router(equipment_router)
     app.include_router(organization_router)
-
-    @app.exception_handler(IdempotencyKeyReused)
-    def idempotency_key_reused(
-        request: Request, error: IdempotencyKeyReused
-    ) -> JSONResponse:
-        del request, error
-        return JSONResponse(
-            status_code=409,
-            content={"detail": {"code": "IDEMPOTENCY_KEY_REUSED"}},
-        )
+    register_audit_exception_handlers(app)
 
     @app.get("/healthz")
     def healthz(response: Response) -> dict[str, object]:
