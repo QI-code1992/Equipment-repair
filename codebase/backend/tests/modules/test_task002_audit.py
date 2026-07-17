@@ -218,6 +218,64 @@ def test_validation_failure_redacts_password_and_attachment_aliases_in_database(
     }
 
 
+def test_validation_failure_redacts_attachment_scalars_and_compact_passwords_in_database(
+    client: TestClient,
+) -> None:
+    _, token = create_user_token(
+        client,
+        username="audit-scalar-writer",
+        role_code=RoleCode.EQUIPMENT_ADMIN.value,
+        permission_codes=["equipment:write"],
+    )
+    secrets = [
+        "password-secret",
+        "user-password-secret",
+        "scalar-secret",
+        "list-secret",
+        "upload-secret",
+        "nested-secret",
+        "mixed-list-secret",
+    ]
+
+    response = client.post(
+        "/api/equipment",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Idempotency-Key": "invalid-equipment-audit-scalars",
+        },
+        json={
+            "code": "EQ-AUDIT-SCALARS",
+            "newpassword": secrets[0],
+            "userpassword": secrets[1],
+            "attachment_payload": secrets[2],
+            "attachments": [secrets[3]],
+            "uploadData": secrets[4],
+            "attachment_payload_mixed": [
+                {"filename": "manual.pdf", "raw_content": secrets[5]},
+                secrets[6],
+            ],
+        },
+    )
+
+    assert response.status_code == 422
+    event = event_from_response(client, response)
+    rendered = json.dumps(event.metadata_json)
+    for secret in secrets:
+        assert secret not in rendered
+    assert event.metadata_json["request"] == {
+        "code": "EQ-AUDIT-SCALARS",
+        "newpassword": "[REDACTED]",
+        "userpassword": "[REDACTED]",
+        "attachment_payload": "[REDACTED]",
+        "attachments": "[REDACTED]",
+        "uploadData": "[REDACTED]",
+        "attachment_payload_mixed": [
+            {"filename": "manual.pdf", "raw_content": "[REDACTED]"},
+            "[REDACTED]",
+        ],
+    }
+
+
 def test_logout_validation_failure_recovers_actor_from_bearer(
     client: TestClient,
 ) -> None:

@@ -68,6 +68,34 @@ def test_password_semantic_segments_and_attachment_payload_aliases_are_redacted(
     }
 
 
+def test_attachment_scalar_values_and_compact_password_keys_are_redacted() -> None:
+    value = sanitize_audit_metadata(
+        {
+            "newpassword": "password-secret",
+            "userpassword": "user-password-secret",
+            "attachment_payload": "scalar-secret",
+            "attachments": ["list-secret"],
+            "uploadData": "upload-secret",
+            "attachment_payload_mixed": [
+                {"filename": "manual.pdf", "raw_content": "nested-secret"},
+                "mixed-list-secret",
+            ],
+        }
+    )
+
+    assert value == {
+        "newpassword": "[REDACTED]",
+        "userpassword": "[REDACTED]",
+        "attachment_payload": "[REDACTED]",
+        "attachments": "[REDACTED]",
+        "uploadData": "[REDACTED]",
+        "attachment_payload_mixed": [
+            {"filename": "manual.pdf", "raw_content": "[REDACTED]"},
+            "[REDACTED]",
+        ],
+    }
+
+
 def failure_events(client: TestClient) -> list[AuditEvent]:
     with client.app.state.session_factory() as db:
         return list(

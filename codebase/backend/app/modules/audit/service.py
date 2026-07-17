@@ -15,6 +15,7 @@ SENSITIVE_KEYS = {
     "token",
 }
 SENSITIVE_KEY_SUFFIXES = ("_api_key", "_cookie", "_password", "_secret", "_token")
+SENSITIVE_KEY_COMPACT_SUFFIXES = ("password", "passwd", "pwd")
 ATTACHMENT_CONTEXT_KEYS = {
     "attachment",
     "attachments",
@@ -61,6 +62,7 @@ def is_sensitive_key(key: str) -> bool:
         or normalized == "cookies"
         or normalized.startswith("authorization_")
         or normalized.endswith(SENSITIVE_KEY_SUFFIXES)
+        or normalized.endswith(SENSITIVE_KEY_COMPACT_SUFFIXES)
         or normalized.startswith(("password_", "passwd_", "pwd_", "cookie_", "cookies_"))
         or re.fullmatch(r"(?:password|passwd|pwd)\d+", normalized) is not None
         or any(segment in {"password", "passwd", "pwd"} for segment in segments)
@@ -74,12 +76,16 @@ def is_attachment_context(key: str) -> bool:
     )
 
 
+def has_attachment_context(context: tuple[str, ...]) -> bool:
+    return any(is_attachment_context(part) for part in context)
+
+
 def sanitize_audit_metadata(
     value: object, *, context: tuple[str, ...] = ()
 ) -> object:
     if isinstance(value, dict):
         result: dict[str, object] = {}
-        attachment_context = any(is_attachment_context(part) for part in context)
+        attachment_context = has_attachment_context(context)
         for key, item in value.items():
             normalized = normalize_key(key)
             redact = (
@@ -98,7 +104,15 @@ def sanitize_audit_metadata(
             )
         return result
     if isinstance(value, list):
+        if has_attachment_context(context) and all(
+            not isinstance(item, dict) for item in value
+        ):
+            return "[REDACTED]"
         return [sanitize_audit_metadata(item, context=context) for item in value]
+    if has_attachment_context(context) and (
+        not context or context[-1] not in ATTACHMENT_METADATA_KEYS
+    ):
+        return "[REDACTED]"
     if isinstance(value, str) and "bearer " in value.lower():
         return "[REDACTED]"
     return value
