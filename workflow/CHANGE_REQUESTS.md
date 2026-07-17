@@ -633,10 +633,10 @@
   - DEV-001 负责所有 Stage 5 PR 的集成检查；对开发任务 PR 不重复代替另一名开发者做同一代码审核，对纯治理文档 PR 只核查治理边界和一致性。
   - 集成检查通过后，DEV-001 必须逐 PR 向项目负责人报告证据并请求 Merge 授权；未明确批准不得合并。
   - 项目负责人批准后，PR HEAD、目标分支、依赖或检查结论变化会使授权失效。
-  - 获批后仅 DEV-001 可执行 Merge Commit；禁止 GitHub auto-merge、merge queue、直接 push 集成分支和任务开发者自行合并开发任务 PR。
+  - 获批后由非任务开发者/非治理 PR 作者执行 Merge Commit：DEV-002 的开发任务由 DEV-001 合并，DEV-001 的开发任务由 DEV-002 合并，纯治理 PR 由非 PR 作者的开发者合并。禁止 GitHub auto-merge、merge queue、直接 push 集成分支和任何自合并。
 - Impact:
   - PRD / SPEC / Prototype / Architecture / API / Data / Acceptance Criteria: 不变。
-  - Development Task Book / AGENTS: 升级为单 PR 协作、另一名开发者审核开发任务、纯治理文档由项目负责人确认、DEV-001 集成检查、项目负责人逐 PR 授权和获批后合并。
+  - Development Task Book / AGENTS: 升级为单 PR 协作、另一名开发者审核开发任务、纯治理文档由项目负责人确认、DEV-001 集成检查、项目负责人逐 PR 授权和非作者获批后合并。
   - Workflow Ledgers / Automation: 同步角色、授权请求、授权失效、合并后验证和通知处理规则。
   - Historical PRs: TASK-001、TASK-002、CR-037—CR-039 的已发生历史不追溯改写；v1.3 适用于生效时仍 Open 的 Draft PR 与后续任务 PR。
 - Decision: 项目负责人已明确批准该规则与流程，并要求立即更新任务书、AGENTS、工作流台账及自动化指令。
