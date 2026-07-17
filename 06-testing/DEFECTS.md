@@ -55,3 +55,9 @@
 - DEV-002 新发现为 CR-036 的剩余 Important，不另建重复 DEF：密码确认驼峰/中缀变体和附件未知正文别名可绕过失败审计脱敏。
 - 根因和修复见 `CODE_REVIEW.md` R9；代码候选为 `ac6947a642f00ba48aebcb80064f87fcc4c01ea8`，新增数据库持久化断言。
 - 当前状态：独立 `test` 镜像已补齐 pytest/httpx 并完成 PostgreSQL 17 `5 passed`；仍等待 DEV-002 复审，不得据内部证据提前关闭外部审核门禁。
+
+## TASK-002 / CR-036 R10 复审发现（2026-07-17）
+
+- DEV-002 补充发现属于既有 CR-036 的同一审计脱敏 Important，不新增重复 DEF：附件上下文标量、标量列表及紧凑密码键会绕过 R9 的字典白名单规则。
+- 根因和修复见 `CODE_REVIEW.md` R10；代码候选 `b4d451009d1deb9dbe3286f5bff4db9414ef4aee`，新增直接脱敏和数据库持久化两层回归。
+- 当前状态：DEV-001 内部复核未见 Critical/Important；真实 PostgreSQL 17、Compose 与 `/healthz` 已复测。外部审核仍未通过，TASK-002 不得视为完成或解除依赖。

@@ -597,3 +597,13 @@
 - Prevention: 安全脱敏评审采用语义变体、附件别名、嵌套结构、持久化断言矩阵；内部网络测试不得运行时在线安装依赖。
 - Next Gate: 推送正式台账 HEAD 后由 DEV-001 请求 DEV-002 复审；通过后才由 DEV-002 创建后继正式 PR。
 - Remaining Gate: 正式台账提交推送后由 DEV-001 在 PR #15 发出书面复审请求；只有 DEV-002 审核通过并创建后继正式 PR、合入 `codex/stage-05-integration` 后，TASK-002 才可接受和解锁依赖。
+
+### CR-036 R10 附件标量与紧凑密码脱敏修复（2026-07-17）
+
+- Status: Ready For DEV-002 Re-review / Not Accepted / Not Integrated。
+- Review Input: DEV-002 R9 补充审核为 Critical 0、Important 1；`newpassword`、`attachment_payload` 标量、`attachments` 标量列表和 `uploadData` 可原样写入失败审计。
+- Decision: 仅在 TASK-002 审计脱敏范围内修复，不修改需求、API 契约、迁移、Compose 生产配置或其他任务。
+- Code Candidate: `b4d451009d1deb9dbe3286f5bff4db9414ef4aee`。
+- Verification: RED `2 failed`；定向 `21 passed`；Python 3.13 `140 passed, 5 skipped`；compileall、diff check、PostgreSQL 17 `5 passed`、Compose 重建和 `/healthz` HTTP 200 通过；返回摘要与 `AuditEvent.metadata_json` 均无测试秘密原文。
+- Prevention: 附件安全回归固定覆盖标量、标量列表、混合 list/dict 与持久化审计；密码回归同时覆盖下划线、驼峰和紧凑命名。
+- Next Gate: 推送正式台账 HEAD 后由 DEV-001 在 PR #15 请求 DEV-002 复审；只有 DEV-002 审核通过并创建后继正式 PR、合入目标分支后，TASK-002 才可接受和解锁依赖。

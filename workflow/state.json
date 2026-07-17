@@ -1,7 +1,7 @@
 {
   "state": "IN_DEVELOPMENT",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-17T10:50:00+08:00",
+  "updatedAt": "2026-07-17T11:01:29+08:00",
   "productBaseline": {
     "status": "requirements-interaction-and-prototype-approved",
     "canonicalCandidate": [
@@ -22,7 +22,7 @@
   },
   "lastApprovedStage": "Stage 4 — Architecture and Development Plan",
   "pendingStageApproval": null,
-  "currentCommitSha": "ac6947a642f00ba48aebcb80064f87fcc4c01ea8",
+  "currentCommitSha": "b4d451009d1deb9dbe3286f5bff4db9414ef4aee",
   "repairCycle": {
     "taskId": "TASK-002",
     "pullRequest": 15,
@@ -43,9 +43,10 @@
     "r8CommitSha": "73030f83638b3b063db483029591720bf65aac21",
     "r9CommitSha": "ac6947a642f00ba48aebcb80064f87fcc4c01ea8",
     "r9TestImageCommitSha": "41591e759dd53780c9a441b2858536c32d15d287",
-    "verification": "R9 RED: 2 failed; targeted audit regression: 19 passed, 1 warning; Python 3.13: 138 passed, 5 skipped, 1 warning; compileall and diff check passed; failure-audit metadata_json excludes password and attachment aliases. Isolated Docker test target installs the declared dev group before joining the internal network; dedicated PostgreSQL 17 integration: 5 passed, 1 warning; default production image excludes pytest/httpx.",
+    "r10CommitSha": "b4d451009d1deb9dbe3286f5bff4db9414ef4aee",
+    "verification": "R10 RED: 2 failed; targeted audit regression: 21 passed, 1 warning; Python 3.13: 140 passed, 5 skipped, 1 warning; compileall and diff check passed; failure-audit metadata_json excludes attachment scalar, scalar-list, uploadData, newpassword and userpassword plaintext. Isolated Docker test target installs the declared dev group before joining the internal network; dedicated PostgreSQL 17 integration: 5 passed, 1 warning; Compose rebuild passed and /healthz returned HTTP 200.",
     "dependencyUnlockAllowed": false,
-    "nextAction": "Push R9 evidence ledger and request DEV-002 review of the final task-branch HEAD; DEV-002 creates the successor formal PR only after approval"
+    "nextAction": "Push R10 evidence ledger and request DEV-002 review of the final task-branch HEAD; DEV-002 creates the successor formal PR only after approval"
   },
   "governanceCorrection": {
     "changeRequest": "CR-037",
@@ -146,6 +147,7 @@
     "On 2026-07-16, DEV-001 completed TASK-002 CR-036 R6/R7 at 35119954ba1d9ca475f03d1faa026bf6a474b18f and 11dbb226e9b77ff5185fed5fa1434b0de6749206. Local, PostgreSQL 17, migration, Compose and health verification passed; DEV-001 review has no Critical or Important findings. TASK-002 now awaits DEV-002 re-review and remains unaccepted and unintegrated.",
     "Self-check found the first evidence head ab67bcdff42d64ba739571515df4e6faed158d32 diverged from the current integration branch. Merge commit 0aac415d18aee256c237adb508d2ab24314a7486 synchronized ac767c83128cb89ceea8e28c518be0adfbe1984c, preserved CR-037 and CR-038, and produced a conflict-free successor-PR base. Synchronized candidate 4c111d0243d947a32d555bd48b1b72cab552bac4 passed the second self-check. Dependencies remain locked.",
     "On 2026-07-17, DEV-001 completed CR-036 R8 at 73030f83638b3b063db483029591720bf65aac21 after DEV-002 requested four Important changes. Three review rounds, Python 3.13, dedicated PostgreSQL 17, migration round-trip, fixed-catalog queries, Compose and /healthz passed. Historical merge-type and immutable-0001 Minors were documented without rewriting history. TASK-002 awaits DEV-002 re-review and remains unaccepted and unintegrated.",
-    "On 2026-07-17, DEV-002 found one remaining CR-036 audit-redaction Important. DEV-001 reproduced it with two red tests, fixed password semantic-segment recognition and attachment-context metadata allowlisting at ac6947a642f00ba48aebcb80064f87fcc4c01ea8, and verified 138 passed, 5 skipped. PostgreSQL test execution was made reproducible at 41591e759dd53780c9a441b2858536c32d15d287 by installing the declared dev group in a dedicated Docker test target before it joins the internal network; PostgreSQL 17 integration passed 5 tests. TASK-002 remains unaccepted and unintegrated pending DEV-002 re-review."
+    "On 2026-07-17, DEV-002 found one remaining CR-036 audit-redaction Important. DEV-001 reproduced it with two red tests, fixed password semantic-segment recognition and attachment-context metadata allowlisting at ac6947a642f00ba48aebcb80064f87fcc4c01ea8, and verified 138 passed, 5 skipped. PostgreSQL test execution was made reproducible at 41591e759dd53780c9a441b2858536c32d15d287 by installing the declared dev group in a dedicated Docker test target before it joins the internal network; PostgreSQL 17 integration passed 5 tests. TASK-002 remains unaccepted and unintegrated pending DEV-002 re-review.",
+    "On 2026-07-17, DEV-002 R9 supplementary review reproduced four additional audit leaks: compact password keys and attachment-context scalar/list aliases. DEV-001 added exact RED unit and persisted AuditEvent regressions, then fixed the missing context consumption at b4d451009d1deb9dbe3286f5bff4db9414ef4aee. Python 3.13 passed 140 tests with 5 explicit PostgreSQL skips; the isolated PostgreSQL 17 test image passed 5 tests; Compose rebuild and /healthz HTTP 200 passed. TASK-002 remains unaccepted and unintegrated pending DEV-002 re-review."
   ]
 }

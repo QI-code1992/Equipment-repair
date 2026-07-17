@@ -127,3 +127,12 @@
   3. 复查方法错误：三轮复查复用了同一套字段假设，缺少对抗性输入和持久化断言。控制：最终自查必须从攻击者可提交的原始 JSON 出发，并查询 `AuditEvent.metadata_json`，不能仅测 `sanitize_audit_metadata` 返回值。
   4. 环境设计错误：在 `internal: true` 网络内临时在线安装测试依赖。控制：依赖在构建阶段通过 `--group dev` 装入独立 `test` 镜像，运行时只连内部网络；生产目标保持最小化。
 - 结论：DEV-001 内部复核未发现新的 Critical/Important；仍需 DEV-002 复审，TASK-002 未验收、未集成。
+
+## TASK-002 / CR-036 R10 审计标量脱敏复审（2026-07-17）
+
+- 审核输入：DEV-002 的 R9 补充复现指出 `newpassword`、`attachment_payload` 标量、`attachments` 标量列表和 `uploadData` 会泄漏到失败审计；Critical 0、Important 1。
+- 根因：R9 的白名单逻辑只在 `dict` 分支生效；标量/list 分支没有依据继承的附件 context 执行默认脱敏。密码检查只按分隔后语义段判断，遗漏紧凑命名。
+- 修复：`b4d451009d1deb9dbe3286f5bff4db9414ef4aee` 让附件 context 在标量与列表分支生效；纯标量列表整体替换为 `[REDACTED]`，含字典的混合列表逐项处理，且仅明确元数据白名单字段保留标量。紧凑密码后缀覆盖 `newpassword` 与 `userpassword`。
+- 防复发：安全复审矩阵固定包含附件标量、标量列表、混合 list/dict、驼峰别名、紧凑密码键以及 SQLite 失败响应和持久化 `AuditEvent.metadata_json` 两层断言；任何新增附件别名必须先以红灯覆盖三种载荷形态。
+- 验证：RED `2 failed`；定向 `21 passed, 1 warning`；Python 3.13 `140 passed, 5 skipped, 1 warning`；compileall、diff check、真实 PostgreSQL 17 `5 passed, 1 warning`、Compose 和 HTTP `/healthz` 均通过。
+- 结论：DEV-001 内部复审 Critical 0、Important 0；仅可请求 DEV-002 复审，未获得批准前不创建正式 PR、不合入、不解锁依赖。

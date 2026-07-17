@@ -156,7 +156,7 @@
 
 ### TASK-002：认证、权限、审计与设备基础
 
-- 状态：CR-036 R9 Review Remediation Complete / Awaiting DEV-002 Re-review；尚未验收、尚未正式集成
+- 状态：CR-036 R10 Review Remediation Complete / Awaiting DEV-002 Re-review；尚未验收、尚未正式集成
 - 优先级：P0
 - 负责人：`DEV-001`
 - 任务开发者：`DEV-001`
@@ -178,7 +178,7 @@
 - Review：`DEV-002` 复核 Agent 可使用的认证上下文、任务范围、共享契约和真实验证证据；任何 Critical/Important 均退回 `DEV-001` 修复。
 - 正式 PR：仅在 `DEV-002` 审核通过后，由 `DEV-002` 创建后继正式 PR；PR #15 只保留被拒绝历史和审核请求证据，不触发集成。
 - 回滚：回退任务 Commit，并按迁移文档执行对应 downgrade；生产数据存在时不得直接删除表。
-- 交接：旧恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12`、证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 和被拒候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 仅保留历史。R6/R7 与同步候选历史继续保留；R8 的 4 个 Important 关闭后，DEV-002 又发现 1 个审计脱敏绕过。R9 代码候选 `ac6947a642f00ba48aebcb80064f87fcc4c01ea8` 以密码语义段识别和附件上下文元数据白名单关闭该项，并增加请求失败到审计表的回归。Python 3.13 全套 `138 passed, 5 skipped`；测试镜像提交 `41591e759dd53780c9a441b2858536c32d15d287` 预装 dev 依赖后，内部网络 PostgreSQL 17 集成 `5 passed`，默认生产镜像不含 pytest/httpx。TASK-002 继续等待 DEV-002 复审。
+- 交接：旧恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12`、证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 和被拒候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 仅保留历史。R6/R7 与同步候选历史继续保留；R8 的 4 个 Important 关闭后，DEV-002 又发现 1 个审计脱敏绕过。R9 代码候选 `ac6947a642f00ba48aebcb80064f87fcc4c01ea8` 已保留为历史。R10 代码候选 `b4d451009d1deb9dbe3286f5bff4db9414ef4aee` 修复附件上下文标量/标量列表和无分隔密码键（`newpassword`、`userpassword`）的遗漏；纯函数与失败请求持久化审计均断言无明文。Python 3.13 全套 `140 passed, 5 skipped`；测试镜像提交 `41591e759dd53780c9a441b2858536c32d15d287` 预装 dev 依赖后，内部网络 PostgreSQL 17 集成 `5 passed`，Compose 重建后的 `/healthz` 为 HTTP 200。TASK-002 继续等待 DEV-002 复审。
 - PR：[#15](https://github.com/QI-code1992/Equipment-repair/pull/15) 已违规合并后由 CR-038 回滚，继续保留为被拒绝历史和书面审核请求载体，不得作为正式集成 PR；DEV-002 对新候选审核通过后创建后继正式 PR。
 
 ### TASK-003：故障、工单、维修与结构化案例闭环

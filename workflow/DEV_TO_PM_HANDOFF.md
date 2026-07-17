@@ -99,3 +99,11 @@
 - 修复与证据：密码语义段识别；附件上下文元数据白名单；驼峰、下划线、嵌套/list 和真实失败审计表 `metadata_json` 回归。RED `2 failed`，定向 `19 passed`，Python 3.13 全量 `138 passed, 5 skipped`。
 - PostgreSQL 证据：新增 `41591e7` Docker `test` 目标，在构建阶段安装 dev 依赖、运行时接入内部网络；专用 PostgreSQL 17 集成 `5 passed, 1 warning`。默认生产镜像不含 pytest/httpx。
 - 请求动作：推送台账 HEAD 后，请 DEV-002 复审；TASK-002 仍未验收、未集成，依赖不解锁，DEV-002 通过后才创建后继正式 PR。
+
+## TASK-002 / CR-036 R10 复审交接（2026-07-17）
+
+- 开发者/审核者：DEV-001 / DEV-002；任务分支 `codex/task-002-identity-equipment`，目标 `codex/stage-05-integration`。
+- 代码候选：`b4d451009d1deb9dbe3286f5bff4db9414ef4aee`，修复 R9 补充审核的一个 Important。
+- 修复：附件 context 的标量和纯标量列表默认脱敏；混合 list/dict 只保留字典元数据白名单；紧凑密码键 `newpassword`、`userpassword` 脱敏。
+- 证据：RED `2 failed`；定向 `21 passed`；Python 3.13 全量 `140 passed, 5 skipped`；失败请求已从 `AuditEvent.metadata_json` 读取验证无明文。独立 PostgreSQL 17 `5 passed, 1 warning`；Compose/健康检查 `/healthz` HTTP 200。
+- 请求动作：推送本台账 HEAD 后，请 DEV-002 对该精确远端 HEAD 复审。TASK-002 仍未验收、未集成，DEV-002 批准后才可创建后继正式 PR；依赖不解锁。

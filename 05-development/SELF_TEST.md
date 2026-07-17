@@ -127,3 +127,12 @@
 - PostgreSQL：定位到 `internal: true` 网络内在线安装必然不可依赖、生产镜像无 dev 依赖；新增 Docker `test` 目标后，构建阶段安装 `--group dev`，内部网络专用 PostgreSQL 17 集成 `5 passed, 1 warning`。默认生产镜像确认不含 pytest/httpx；Compose PostgreSQL/Redis healthy、API Up，容器内标准库 HTTP 请求 `/healthz` 为 `200`。
 - 唯一警告：既有 FastAPI/Starlette TestClient 对 `httpx` 的第三方弃用提示。
 - 未验证：DEV-002 尚未批准；后继正式 PR 尚未由 DEV-002 创建；TASK-002 尚未合入 `codex/stage-05-integration`，依赖继续锁定。
+
+## TASK-002 / CR-036 R10 审计标量脱敏复测（2026-07-17）
+
+- 审核复现：DEV-002 给出的 `newpassword`、`attachment_payload` 标量、`attachments` 标量列表和 `uploadData` 在修复前均会原样进入审计；新增 RED 用例为 `2 failed`。
+- 根因：附件上下文只在字典分支用于键白名单，标量与列表递归虽传入 context 却未消费；密码规则只识别有分隔符的语义段。
+- GREEN：附件上下文中的非字典标量默认脱敏；纯标量列表整体脱敏，混合列表递归处理；仅字典白名单元数据标量可保留。无分隔的 `newpassword`、`userpassword` 按紧凑敏感后缀脱敏。
+- 回归：定向审计 `21 passed, 1 warning`；Python 3.13 全量 `140 passed, 5 skipped, 1 warning`；`python -m compileall -q app` 和 `git diff --check` 通过。两层测试同时检查 `sanitize_audit_metadata()` 返回值和失败请求的 `AuditEvent.metadata_json`，均无明文。
+- 运行验证：当前代码重新构建独立 `test` 镜像后，内部网络 PostgreSQL 17 集成 `5 passed, 1 warning`；Compose 重建成功，PostgreSQL/Redis healthy、API Up，容器内 `/healthz` 为 HTTP 200、正文 `{"status":"ok","service":"equipment-operations-platform"}`。
+- 未验证：DEV-002 尚未批准；后继正式 PR 尚未由 DEV-002 创建；TASK-002 尚未合入 `codex/stage-05-integration`，依赖继续锁定。
