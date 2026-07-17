@@ -32,12 +32,13 @@
     "integrationTarget": "codex/stage-05-integration",
     "effectiveAfterMerge": true,
     "roles": {
-      "DEV-001": "Agent developer, reviewer for DEV-002 tasks, integration checker, merge-approval requester, authorized merge executor and post-merge verifier",
-      "DEV-002": "Agent developer and reviewer for DEV-001 tasks",
-      "projectOwner": "Per-PR merge approver; does not perform code review"
+      "DEV-001": "Developer, reviewer for DEV-002 development tasks, integration checker, merge-approval requester, authorized merge executor and post-merge verifier",
+      "DEV-002": "Developer and reviewer for DEV-001 development tasks",
+      "projectOwner": "Per-PR merge approver and exact-HEAD confirmer for governance-only documentation PRs; does not replace peer code review for development-task PRs"
     },
     "pullRequestFlow": "Task developer creates and maintains one Draft PR; assigned reviewer approves the exact HEAD on the same PR",
-    "mergeFlow": "DEV-001 Agent checks integration conditions, requests project-owner approval for the exact PR and HEAD, and executes a merge commit only after explicit approval",
+    "governanceOnlyPrFlow": "A PR limited to workflow, task book, AGENTS or workflow ledgers and containing no business code, test code, database, infrastructure or deployment changes does not require DEV-001/DEV-002 peer code review; the project owner confirms governance content and exact HEAD before DEV-001 requests merge authorization",
+    "mergeFlow": "DEV-001 checks integration conditions, requests project-owner approval for the exact PR and HEAD, and executes a merge commit only after explicit approval",
     "approvalInvalidation": "Any change to PR HEAD, base branch, dependency state or integration-check result invalidates prior merge approval",
     "forbidden": [
       "auto-merge",

@@ -119,9 +119,10 @@
 
 ## CR-040 协作治理候选交接（2026-07-17）
 
-- 项目负责人决定：采用“任务开发 Agent 创建并维护同一 Draft PR、指定审核者批准、DEV-001 Agent 集成检查、项目负责人逐 PR 授权、DEV-001 Agent 获批后 Merge”的流程。
-- 角色：DEV-001 Agent 负责集成检查、授权请求、获批后合并和合并后回归；DEV-002 Agent 负责自身任务及 DEV-001 任务审核；不设置人工 DEV-001 同事角色。
-- Merge 授权请求必须包含：TASK、PR 链接、源/目标分支、精确 HEAD、审核者和结论、Critical/Important/Minor、测试与 Docker 证据、依赖、冲突、共享契约、风险、回滚和合并后验证计划。
+- 项目负责人决定：采用“任务开发者创建并维护同一 Draft PR、另一名开发者批准、DEV-001 集成检查、项目负责人逐 PR 授权、DEV-001 获批后 Merge”的开发任务流程。
+- 角色：Stage 5 只有 DEV-001、DEV-002 两名开发者。DEV-001 负责 DEV-002 开发任务审核、集成检查、授权请求、获批后合并和合并后回归；DEV-002 负责自身开发任务及 DEV-001 开发任务审核。“Agent”是执行方式，不是另设角色。
+- 治理边界：只修改流程、任务书、AGENTS 或工作流台账且不含业务代码、测试代码、数据库、基础设施或部署配置的纯治理文档 PR，不要求两名开发者交叉代码审核；由项目负责人确认治理内容和精确 HEAD，DEV-001 执行集成核查、请求授权和获批合并。
+- Merge 授权请求必须包含：TASK/CR、PR 链接、源/目标分支、精确 HEAD、适用的开发审核或治理确认结论、Critical/Important/Minor 或治理检查结果、测试与 Docker 证据（如适用）、依赖、冲突、共享契约、风险、回滚和合并后验证计划。
 - 安全边界：未获项目负责人明确授权不得 Merge；授权后 HEAD 或条件变化则失效；禁止 auto-merge、merge queue、直接 push 集成分支、普通 Stage 5 PR 指向 `main`。
 - 历史边界：不追溯改写 TASK-001、TASK-002 或 CR-037—CR-039 的已发生 GitHub 操作。生效时仍 Open 的 TASK-006 Draft PR #14 应继续作为同一 PR，不再创建后继 PR。
 - 当前候选分支：`codex/cr-040-agent-merge-approval`；目标：`codex/stage-05-integration`。本治理候选不修改 `codebase/`，不解锁 TASK 依赖，也不批准进入 Stage 6。

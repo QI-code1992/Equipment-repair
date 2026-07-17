@@ -24,11 +24,11 @@
 - v1.2 批准时间：2026-07-16
 - v1.2 批准证据：项目负责人明确批准上述精确 Commit 作为任务书 v1.2 协作基线并授权推送隔离治理分支
 - PR #18 修正说明：正式审查曾发现任务书正文保留“等待批准”措辞，与审批台账冲突；修正仅同步治理状态，不改变已批准的任务内容、人员、范围、依赖或契约。项目负责人已批准修正后的精确 HEAD，PR #18 已合入并完成收尾验证。
-- v1.3 修订原因：采用单 PR 协作流；任务开发者创建并维护自己的 Draft PR，指定审核者在同一 PR 上审核并批准精确 HEAD，DEV-001 Agent 完成集成检查后逐个向项目负责人请求 Merge 授权，获明确授权后才执行合并。
+- v1.3 修订原因：采用单 PR 协作流；任务开发者创建并维护自己的 Draft PR，另一名开发者在同一 PR 上审核并批准精确 HEAD，DEV-001 完成集成检查后逐个向项目负责人请求 Merge 授权，获明确授权后才执行合并。
 - v1.3 批准人：项目负责人
 - v1.3 批准时间：2026-07-17
 - v1.3 批准证据：项目负责人明确回复“可以，按照这个规则和流程来”，并要求更新任务书、AGENTS、工作流台账及自动化指令。
-- v1.3 边界：不设置 DEV-001 人工同事角色；DEV-001 是 Agent 角色。禁止 GitHub auto-merge 和 merge queue；允许 DEV-001 Agent 在项目负责人针对 PR 编号和精确 HEAD 明确批准后执行一次 `gh pr merge --merge`。PR HEAD 变化后原批准失效。
+- v1.3 边界：Stage 5 只有 DEV-001、DEV-002 两名开发者，不另设“DEV-001 Agent”或“DEV-002 Agent”角色。禁止 GitHub auto-merge 和 merge queue；允许 DEV-001 在项目负责人针对 PR 编号和精确 HEAD 明确批准后执行一次 `gh pr merge --merge`。PR HEAD 变化后原批准失效。
 - 关联基线：
   - PRD：`01-requirements/PRD.md`，已批准 v1.1
   - SPEC：`01-requirements/SPEC.md`，已批准 v1.1
@@ -42,22 +42,22 @@
 - 编写人：工作流协调者
 - 人员配置确认时间：2026-07-15
 - 已知 Stage 5 首任务风险：`DEF-003`、`DEF-004`；后端测试和 Compose 真实运行验证由 TASK-001 在门禁后关闭
-- 当前首要任务：DEV-001 修正 TASK-002 合并后验证台账的过期状态、依赖重算和集成负责人记录；DEV-002 复审通过后，按 v1.3 单 PR 流程处理该治理 PR。台账正确合入前，TASK-003、TASK-004 和 DEV-002 的数据库集成继续锁定。
+- 当前首要任务：DEV-001 修正 TASK-002 合并后验证台账的过期状态、依赖重算和集成负责人记录；开发任务仍由另一名开发者交叉审核。纯治理文档 PR 由项目负责人确认治理内容和精确 HEAD，不要求开发者交叉代码审核。台账正确合入前，TASK-003、TASK-004 和 DEV-002 的数据库集成继续锁定。
 
 ## 2. 开发人员配置
 
 - Stage 5 参与开发人数：2
 - 人员配置假设是否已由项目负责人确认：是
 - 开发人员角色：
-  - `DEV-001 Agent`：业务平台内核、共享数据库迁移、基础设施、Docker/Compose/RAGFlow 运行环境、指定任务审核、集成检查、Merge 授权请求、获批后的合并与回归负责人。
-  - `DEV-002 Agent`：AI、知识适配、Agent 配置与运行时、正式前端开发，以及 DEV-001 任务的指定审核者。
+  - `DEV-001`：业务平台内核、共享数据库迁移、基础设施、Docker/Compose/RAGFlow 运行环境、DEV-002 开发任务审核、集成检查、Merge 授权请求、获批后的合并与回归负责人。
+  - `DEV-002`：AI、知识适配、Agent 配置与运行时、正式前端开发，以及 DEV-001 开发任务的审核者。
 - 最终集成负责人：`DEV-001`
-- 是否启用交叉审核 PR 机制：是；任务开发者创建自己的 Draft PR，另一 Agent 在同一 PR 上独立审核。
+- 是否启用交叉审核 PR 机制：是；仅适用于开发任务 PR。任务开发者创建自己的 Draft PR，另一名开发者在同一 PR 上独立审核。
 - 默认审核轮转：`DEV-001` 开发的任务由 `DEV-002` 审核；`DEV-002` 开发的任务由 `DEV-001` 审核。
 - 是否允许任务开发者创建自己的 PR：是；只能创建指向 `codex/stage-05-integration` 的 Draft PR，审核通过前不得自行批准或合并。
 - 集成目标分支：`codex/stage-05-integration`
-- 集成触发源：同一任务 Draft PR 转为 Ready、指定审核者批准精确 HEAD、DEV-001 Agent 集成检查通过，并获得项目负责人针对该 PR 和 HEAD 的明确 Merge 授权。
-- 自动化级别：允许 L1 自动检查、L2 PR 规则校验、L3 通知和任务开发 Agent 创建/更新 Draft PR；禁止 GitHub auto-merge、merge queue 和自动进入 Stage 6。DEV-001 Agent 只能在逐 PR 获得项目负责人明确授权后执行手动 Merge 动作。
+- 集成触发源：开发任务 PR 须由另一名开发者批准精确 HEAD；纯治理文档 PR 须由项目负责人确认治理内容和精确 HEAD。两类 PR 均须 DEV-001 集成检查通过，并获得项目负责人针对该 PR 和 HEAD 的明确 Merge 授权。
+- 自动化级别：允许 L1 自动检查、L2 PR 规则校验、L3 通知和任务开发者创建/更新 Draft PR；禁止 GitHub auto-merge、merge queue 和自动进入 Stage 6。DEV-001 只能在逐 PR 获得项目负责人明确授权后执行手动 Merge 动作。
 - Docker 能力：
   - `DEV-001` 具备 Docker 环境，负责所有 Compose、容器健康、RAGFlow、PostgreSQL、Redis、MinIO、Elasticsearch、Nginx 与恢复验证。
   - `DEV-002` 不具备 Docker 环境，不得单独将容器相关任务标记完成；其容器相关变更必须交由 `DEV-001` 执行真实验证。
@@ -82,16 +82,17 @@
 - Draft PR：任务开发者在任务开始或形成可审查切片后创建 Draft PR，并持续向同一任务分支 push；不得为同一 head/base 另建后继 PR 来代替正常复审。
 - Ready 条件：任务范围完成；自测和必要真实环境验证完成；`workflow/DEV_TO_PM_HANDOFF.md` 已记录精确 HEAD、证据、未验证项、风险和请求动作；任务开发者将同一 PR 转为 Ready 并请求指定审核者审核。
 - Review：指定审核者固定 PR HEAD，审查 Standards、Spec、任务边界、依赖和证据。有 Critical/Important 时提交 `Changes requested`；修订产生新 HEAD 后必须重新审核。通过时在同一 PR 上批准精确 HEAD。
-- Merge 前置条件：指定审核者已批准当前 HEAD；Required checks 通过；依赖和目标分支正确；共享契约无未批准漂移；无未解决 Critical/Important 或 review comment；PR 无冲突且 Mergeable。
-- Merge 授权：DEV-001 Agent 完成集成检查后，必须向项目负责人报告 PR、TASK、源/目标分支、精确 HEAD、审核结论、测试、依赖、冲突、风险、回滚和合并后计划，并逐 PR 请求授权。项目负责人未明确批准前不得合并。
+- Merge 前置条件：开发任务 PR 由另一名开发者批准当前 HEAD；纯治理文档 PR 由项目负责人确认治理内容和当前 HEAD。Required checks 通过；依赖和目标分支正确；共享契约无未批准漂移；无未解决阻断项；PR 无冲突且 Mergeable。
+- Merge 授权：DEV-001 完成集成检查后，必须向项目负责人报告 PR、TASK/CR、源/目标分支、精确 HEAD、适用的审核或治理确认结论、检查证据、依赖、冲突、风险、回滚和合并后计划，并逐 PR 请求授权。项目负责人未明确批准前不得合并。
 - 授权失效：项目负责人批准后只要 PR HEAD、目标分支、依赖状态或检查结论发生变化，原批准立即失效，必须重新审核、重新检查并重新询问。
-- Merge 执行：获批后由 DEV-001 Agent 对同一 PR 执行 Merge Commit；禁止任务开发者绕过审核自行合并，禁止 auto-merge 和 merge queue。
+- Merge 执行：获批后由 DEV-001 对同一 PR 执行 Merge Commit；禁止任务开发者绕过审核自行合并开发任务 PR，禁止 auto-merge 和 merge queue。
 - PR #15/#20 历史：PR #15 保留为 TASK-002 被拒绝候选的审核历史；PR #20 由 DEV-002 按 v1.2 创建并由 DEV-001 合入。v1.3 不追溯改写这两项历史。
 - 生效边界：v1.3 适用于治理 PR 合入后仍 Open 的 Draft PR 和所有后续任务 PR，包括现有 TASK-006 Draft PR #14；不追溯改写 TASK-001、TASK-002 及 CR-037—CR-039 的历史角色和操作记录。
 - PR 标题：`[TASK-xxx] <type>: <summary>`
 - Commit：遵循 `04-architecture-plan/AGENTS.md` 的 `type(scope): summary`。
 - 每个 Draft PR 必须包含任务 ID、任务开发者、指定审核者、目标分支、当前 HEAD、需求/AC 映射、修改文件、真实验证结果、未验证项、风险、回退方式、依赖/兼容/抽象层变化和共享契约影响。
 - 每次 Ready 审核请求必须明确请求指定审核者审核同一 PR 的精确 HEAD；每次 Merge 授权请求必须绑定 PR 编号和审核通过的精确 HEAD。
+- 纯治理文档 PR 仅限流程、任务书、AGENTS 和工作流台账，且不得包含 `codebase/`、测试代码、数据库迁移、基础设施或部署配置；该类 PR 不进入 DEV-001/DEV-002 交叉代码审核，改由项目负责人确认治理内容和精确 HEAD。
 - 共享文件发生冲突时暂停合并，由 `DEV-001` 根据已批准 API、数据模型和本任务书决定；不能用后合并覆盖先合并。
 
 ## 5. 共享契约与所有权
@@ -211,7 +212,7 @@
 - 分支：`codex/task-003-maintenance-lifecycle`
 - PR 审核请求：`DEV-001` 完成本任务验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-002` 发送书面审核请求。
 - Review：`DEV-002` 复核诊断上下文、采纳接口、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-001` 修复。
-- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 Agent 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
+- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
 - 回滚：回退应用 Commit；数据库迁移按已验证 downgrade 或前向修复策略处理。
 
 ### TASK-004：部署独立 RAGFlow 容器环境
@@ -236,7 +237,7 @@
 - 分支：`codex/task-004-ragflow-infra`
 - PR 审核请求：`DEV-001` 完成本任务验收、Docker 真实验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-002` 发送书面审核请求。
 - Review：`DEV-002` 复核适配器所需契约、任务范围和验证证据；Docker 通过结论只能由 `DEV-001` 提供；任何 Critical/Important 均退回 `DEV-001` 修复。
-- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 Agent 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
+- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
 - 回滚：停止并移除项目容器；卷删除属于数据删除，必须单独获得授权。
 
 ### TASK-005：知识文档生命周期与 RAGFlow 适配器
@@ -261,7 +262,7 @@
 - 分支：`codex/task-005-knowledge-ragflow`
 - PR 审核请求：`DEV-002` 完成本任务验收、必要真实环境验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
 - Review：`DEV-001` 复核网络、凭据、迁移、任务范围和真实环境证据；任何 Critical/Important 均退回 `DEV-002` 修复。
-- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 Agent 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
+- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
 - 回滚：回退适配器 Commit；外部文档删除必须遵循业务删除和审计规则。
 
 ### TASK-006：四个 Agent 独立配置与模型能力校验
@@ -286,7 +287,7 @@
 - 分支：`codex/task-006-agent-config`
 - PR 审核请求：`DEV-002` 完成本任务全部范围、验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求；仅完成非数据库部分时不得请求完成态审核。
 - Review：`DEV-001` 复核认证、迁移、审计、任务范围和验证证据；数据库部分未合并前不得标记完成；任何 Critical/Important 均退回 `DEV-002` 修复。
-- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 Agent 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
+- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
 - 回滚：回退模块 Commit；配置数据迁移按明确 downgrade 执行。
 
 ### TASK-007：Agent Runtime、LangGraph、SSE 与恢复
@@ -311,7 +312,7 @@
 - 分支：`codex/task-007-agent-runtime`
 - PR 审核请求：`DEV-002` 完成本任务验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
 - Review：`DEV-001` 复核权限、审计、数据库边界、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-002` 修复。
-- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 Agent 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
+- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
 - 回滚：回退 Runtime Commit；保留既有运行审计，不直接删除线程数据。
 
 ### TASK-008：AI 故障上报、智能问数与健康分读取
@@ -336,7 +337,7 @@
 - 分支：`codex/task-008-fault-metric-agents`
 - PR 审核请求：`DEV-002` 完成本任务验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
 - Review：`DEV-001` 复核业务写入、指标服务、权限边界、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-002` 修复。
-- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 Agent 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
+- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
 - 回滚：回退 Agent Commit，不影响业务 API 已有人工流程。
 
 ### TASK-009：操作指引与维修前故障诊断 Agent
@@ -361,7 +362,7 @@
 - 分支：`codex/task-009-guidance-diagnosis`
 - PR 审核请求：`DEV-002` 完成本任务验收、真实 RAGFlow/数据库验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
 - Review：`DEV-001` 复核业务写入、Docker/RAGFlow 证据、安全、降级、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-002` 修复。
-- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 Agent 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
+- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
 - 回滚：回退 Agent Commit，人工开始/结束维修流程必须继续可用。
 
 ### TASK-010：正式前端与批准原型流程集成
@@ -386,7 +387,7 @@
 - 分支：`codex/task-010-frontend-integration`
 - PR 审核请求：`DEV-002` 完成本任务验收、前端验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
 - Review：`DEV-001` 复核 API、权限、端到端可运行性、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-002` 修复。
-- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 Agent 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
+- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
 - 回滚：按页面/功能 Commit 回退，保持其他已集成页面不受影响。
 
 ### TASK-011：平台补齐、端到端、安全与发布准备
@@ -411,12 +412,12 @@
 - 分支：`codex/task-011-e2e-release-readiness`
 - PR 审核请求：`DEV-001` 完成本任务验收、全量验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-002` 发送书面审核请求。
 - Review：`DEV-002` 复核 Agent/前端回归、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-001` 修复。
-- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 Agent 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
+- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
 - 回滚：以最近稳定 FCP 和独立任务 Commit 选择性回退；不得整体回退丢失其他已接受功能。
 
 ## 7. 人员分配与交叉审核矩阵
 
-| 开发 Agent | 分配开发任务 | 默认审核任务 | Draft PR 创建责任 | 主要范围 | Docker 责任 | 集成责任 |
+| 开发者 | 分配开发任务 | 默认审核任务 | Draft PR 创建责任 | 主要范围 | Docker 责任 | 集成责任 |
 |---|---|---|---|---|---|---|
 | DEV-001 | TASK-001、002、003、004、011 | TASK-005、006、007、008、009、010 | 创建并维护自己的任务 Draft PR | 平台事实、权限、维修、基础设施、E2E | 唯一验证人 | 自动执行集成检查、请求项目负责人逐 PR Merge 授权、获批后合并并回归 |
 | DEV-002 | TASK-005、006、007、008、009、010 | TASK-002、003、004、011；TASK-001 仅保留历史独立审查 | 创建并维护自己的任务 Draft PR | 知识适配、Agent、正式前端 | 无本地 Docker；提交给 DEV-001 验证 | 提供模块开发、交叉审核与回归证据 |
@@ -426,30 +427,30 @@
 | 任务 | 开发者 / Draft PR 创建者 | 指定审核者 | Merge 执行者 | 优先级 | 依赖模式 | 可开始条件 |
 |---|---|---|---|---:|---|---|
 | TASK-001 | DEV-001 | 历史独立审查（v1.3 不追溯） | 历史记录不追溯 | P0 | 无 | 已完成并形成远端 FCP-001；保留真实历史记录 |
-| TASK-002 | DEV-001 | DEV-002 | DEV-001 Agent，需项目负责人逐 PR 授权 | P0 | Sequential After TASK-001 | TASK-001 测试、Compose、Review、FCP 均通过 |
-| TASK-003 | DEV-001 | DEV-002 | DEV-001 Agent，需项目负责人逐 PR 授权 | P0 | Sequential After TASK-002 | 身份、审计和迁移基础已审核、正式集成并完成回归 |
-| TASK-004 | DEV-001 | DEV-002 | DEV-001 Agent，需项目负责人逐 PR 授权 | P0 | Sequential After TASK-002 | 业务容器基线与网络契约已审核、正式集成并稳定 |
-| TASK-005 | DEV-002 | DEV-001 | DEV-001 Agent，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-002, TASK-004 | 数据迁移基础和 RAGFlow 环境均已审核、正式集成并可用 |
-| TASK-006 | DEV-002 | DEV-001 | DEV-001 Agent，需项目负责人逐 PR 授权 | P0 | Parallel After TASK-001；DB 集成 Blocked By TASK-002 | 可先做领域测试；迁移合并等待 TASK-002 正式集成 |
-| TASK-007 | DEV-002 | DEV-001 | DEV-001 Agent，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-002, TASK-006 | 认证、迁移和 Agent 配置契约已审核并正式集成 |
-| TASK-008 | DEV-002 | DEV-001 | DEV-001 Agent，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-002, TASK-006, TASK-007 | 业务工具、配置和 Runtime 可用 |
-| TASK-009 | DEV-002 | DEV-001 | DEV-001 Agent，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003, TASK-005, TASK-006, TASK-007 | 维修、案例、知识和 Runtime 全部已审核并正式集成 |
-| TASK-010 | DEV-002 | DEV-001 | DEV-001 Agent，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003, TASK-008, TASK-009 | 所有正式页面所需 API 与 Agent 已审核并正式集成 |
-| TASK-011 | DEV-001 | DEV-002 | DEV-001 Agent，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003—010 | 所有模块 PR 已 Review、合入集成分支并完成回归 |
+| TASK-002 | DEV-001 | DEV-002 | DEV-001，需项目负责人逐 PR 授权 | P0 | Sequential After TASK-001 | TASK-001 测试、Compose、Review、FCP 均通过 |
+| TASK-003 | DEV-001 | DEV-002 | DEV-001，需项目负责人逐 PR 授权 | P0 | Sequential After TASK-002 | 身份、审计和迁移基础已审核、正式集成并完成回归 |
+| TASK-004 | DEV-001 | DEV-002 | DEV-001，需项目负责人逐 PR 授权 | P0 | Sequential After TASK-002 | 业务容器基线与网络契约已审核、正式集成并稳定 |
+| TASK-005 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-002, TASK-004 | 数据迁移基础和 RAGFlow 环境均已审核、正式集成并可用 |
+| TASK-006 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Parallel After TASK-001；DB 集成 Blocked By TASK-002 | 可先做领域测试；迁移合并等待 TASK-002 正式集成 |
+| TASK-007 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-002, TASK-006 | 认证、迁移和 Agent 配置契约已审核并正式集成 |
+| TASK-008 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-002, TASK-006, TASK-007 | 业务工具、配置和 Runtime 可用 |
+| TASK-009 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003, TASK-005, TASK-006, TASK-007 | 维修、案例、知识和 Runtime 全部已审核并正式集成 |
+| TASK-010 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003, TASK-008, TASK-009 | 所有正式页面所需 API 与 Agent 已审核并正式集成 |
+| TASK-011 | DEV-001 | DEV-002 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003—010 | 所有模块 PR 已 Review、合入集成分支并完成回归 |
 
 ## 9. 集成计划
 
 - 集成负责人：`DEV-001`
 - 集成负责人已由项目负责人确认：是。
 - 集成目标分支：`codex/stage-05-integration`
-- 唯一集成触发源：同一任务 PR 已 Ready，指定审核者批准当前精确 HEAD，DEV-001 Agent 集成检查通过，且项目负责人明确批准合并该 PR 和 HEAD。
+- 唯一集成触发源：开发任务 PR 已由另一名开发者批准当前精确 HEAD，或纯治理文档 PR 已由项目负责人确认治理内容和当前精确 HEAD；DEV-001 集成检查通过，且项目负责人明确批准合并该 PR 和 HEAD。
 - 不得作为集成触发源：任务分支 push、Draft PR 创建、单独 CI 通过、过期 approval、未绑定精确 HEAD 的口头批准、PR #15 被拒绝历史或未绑定任务书的自动化事件。
-- 自动化策略：允许 Agent 创建/更新自己的 Draft PR、执行检查、提交 Review、发送通知和准备 Merge 授权请求；禁止 GitHub auto-merge、merge queue 和自动进入 Stage 6。DEV-001 Agent 获项目负责人逐 PR 授权后执行的 Merge Commit 不属于 auto-merge。
+- 自动化策略：允许开发者创建/更新自己的 Draft PR、执行检查、提交 Review、发送通知和准备 Merge 授权请求；禁止 GitHub auto-merge、merge queue 和自动进入 Stage 6。DEV-001 获项目负责人逐 PR 授权后执行的 Merge Commit 不属于 auto-merge。
 - 推荐集成顺序：TASK-001 → TASK-002 → TASK-006 → TASK-007 → TASK-004 → TASK-005 → TASK-003 → TASK-008 → TASK-009 → TASK-010 → TASK-011。
 - 顺序允许在依赖满足后微调，但必须先更新本任务书；不得仅在聊天中改变。
-- 每次集成前检查：任务开发者创建的同一 PR 已 Ready；指定审核者已批准当前精确 HEAD；审核后无新增提交；目标分支正确；required checks 通过；依赖已正式集成；真实命令结果齐全；共享契约未漂移；无禁止范围修改；相关文档已更新；无未解决 review comment；PR 无冲突且 Mergeable。
-- Merge 授权请求：`DEV-001 Agent` 必须向项目负责人报告 TASK、PR、源/目标分支、精确 HEAD、审核者与结论、Critical/Important/Minor、测试与 Docker 证据、依赖、冲突、共享契约、风险、回滚和合并后验证计划，并询问是否批准合并。
-- 集成执行：只有项目负责人明确批准该 PR 和精确 HEAD 后，`DEV-001 Agent` 才可执行 Merge Commit。审批后 HEAD 或条件变化则重新审核、检查和询问；禁止 auto-merge 或 merge queue。合并失败或发现契约冲突时停止，不覆盖既有提交。
+- 每次集成前检查：开发任务 PR 的另一名开发者已批准当前精确 HEAD且审核后无新增提交；纯治理文档 PR 的项目负责人已确认治理内容和当前精确 HEAD。目标分支正确；required checks 通过；依赖已正式集成；真实检查结果齐全；共享契约未漂移；无禁止范围修改；相关文档已更新；无未解决阻断项；PR 无冲突且 Mergeable。
+- Merge 授权请求：`DEV-001` 必须向项目负责人报告 TASK/CR、PR、源/目标分支、精确 HEAD、适用的审核或治理确认结论、Critical/Important/Minor 或治理检查结果、测试与 Docker 证据（如适用）、依赖、冲突、共享契约、风险、回滚和合并后验证计划，并询问是否批准合并。
+- 集成执行：只有项目负责人明确批准该 PR 和精确 HEAD 后，`DEV-001` 才可执行 Merge Commit。审批后 HEAD 或条件变化则重新核查和询问；开发任务 PR 还须重新审核。禁止 auto-merge 或 merge queue。合并失败或发现契约冲突时停止，不覆盖既有提交。
 - 每次集成后执行：记录 Merge Commit SHA；运行最小相关测试、受影响模块回归、`git diff --check`；涉及容器时由 `DEV-001` 执行 Compose/健康检查；记录风险和回滚方式。
 - 功能检查点：每个任务集成并通过回归后，在 `05-development/CHECKPOINTS.md` 新增 FCP，记录远程 Commit SHA、范围、证据和恢复命令。
 - 冲突处理：
@@ -469,7 +470,7 @@
 
 ## 11. 完成与交接
 
-每个任务必须提交：任务 ID、任务开发者、同一 Draft/Ready PR、指定审核者及精确 HEAD 审核结论、DEV-001 Agent 集成检查、项目负责人 Merge 授权、PR/Merge Commit、修改文件、验证命令与真实结果、未验证项、依赖变化、兼容代码、抽象层、共享契约影响、风险和回滚方式。
+每个开发任务必须提交：任务 ID、任务开发者、同一 Draft/Ready PR、另一名开发者及精确 HEAD 审核结论、DEV-001 集成检查、项目负责人 Merge 授权、PR/Merge Commit、修改文件、验证命令与真实结果、未验证项、依赖变化、兼容代码、抽象层、共享契约影响、风险和回滚方式。
 
 所有任务完成后，`DEV-001` 必须输出：
 
