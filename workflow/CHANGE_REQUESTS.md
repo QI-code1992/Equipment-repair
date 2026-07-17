@@ -448,3 +448,17 @@
 - 实施提交：`25e15709a3f1d92f661d37acdb8aa3e1e0e41346`。
 - 门禁审批记录提交：`c9eb206c6517b9c3afd7f33a86e3c383d84d12aa`。
 - 验证：检查所有 TASK-001 开始条件均位于门禁之后；Stage 5 准入清单不再要求先修复 TASK-001；JSON 可解析；`git diff --check` 通过。
+
+### CR-039：回退 PR #21 错误目标分支合并
+
+- 级别：L0 治理纠正
+- 状态：Ready For Review
+- 提出人：项目负责人
+- 提出时间：2026-07-17
+- 当前阶段：Stage 5
+- 原始问题：PR #21 `codex/task-002-post-merge-verification` 错误合入 `main`，而任务书规定 TASK-002 及其治理证据的正式集成目标为 `codex/stage-05-integration`。
+- 影响：PR #21 将 54 个文件、8548 行新增和 744 行删除带入 `main`；其中包含 TASK-002 代码、迁移与台账，超出“仅合并后证据台账”的预期范围。该合并不构成 TASK-002 的有效集成或依赖解锁依据。
+- 决定：不改写历史、不 force-push；在 `main` 当前 HEAD 上以 `git revert -m 1` 反向提交，仅撤销 PR #21 相对第一父提交的变更。
+- 实施：候选分支 `codex/cr-039-revert-pr-21-main-target`；回退提交 `863d88ef0763ee25531dfb09cba2a25ec6cfba3e`；原错误合并为 `8403af9b1286c298d8147de8dee0b9c3b87450fc`，第一父提交为 `488d86b3a0f77189c88843a2a40ce44084b89886`。
+- 验证：回退暂存树与第一父提交树完全一致；`git diff --check` 通过；无冲突。后续正式 PR 必须由治理审核确认并以 `main` 为目标，仅包含本回退及本 CR 记录。
+- 后续：TASK-002 的正确代码与合并后验证仍保留在 `codex/stage-05-integration` 的 `904886f48061e27c775f6ee2f8ddae99f5571ead`；不得由本回退 PR 修改该分支或启动后续任务。
