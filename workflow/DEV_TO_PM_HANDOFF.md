@@ -91,3 +91,11 @@
 - Review：DEV-001 三轮复审 Critical 0、Important 0；两个历史 Minor 已按不可改写历史约束形成书面处置。
 - 交付边界：无生产依赖、兼容层、通用抽象、TASK-003 或 TASK-004 修改；未创建正式 PR。
 - 请求动作：正式台账提交推送后，以远端最终 HEAD 在 PR #15 请求 DEV-002 复审。若审核通过，由 DEV-002 创建后继正式 PR；在合入前 TASK-002、TASK-003、TASK-004、TASK-005 和相关数据库依赖状态不变。
+
+## TASK-002 / CR-036 R9 复审交接（2026-07-17）
+
+- 开发者/审核者：DEV-001 / DEV-002；任务分支仍为 `codex/task-002-identity-equipment`，目标为 `codex/stage-05-integration`。
+- 代码候选：`ac6947a642f00ba48aebcb80064f87fcc4c01ea8`，关闭 R8 复审剩余的审计脱敏 Important。
+- 修复与证据：密码语义段识别；附件上下文元数据白名单；驼峰、下划线、嵌套/list 和真实失败审计表 `metadata_json` 回归。RED `2 failed`，定向 `19 passed`，Python 3.13 全量 `138 passed, 5 skipped`。
+- 已知限制：本轮没有重复 PostgreSQL pytest；临时测试容器无法解析包源且运行镜像无 pytest/httpx。既有 R8 PostgreSQL/迁移/Compose/health 证据保留，不能替代 DEV-002 对 R9 的审核。
+- 请求动作：推送台账 HEAD 后，请 DEV-002 复审；TASK-002 仍未验收、未集成，依赖不解锁，DEV-002 通过后才创建后继正式 PR。

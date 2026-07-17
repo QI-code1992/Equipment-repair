@@ -113,3 +113,12 @@
 - 三轮结论：第一轮修复旧契约和测试夹具不一致；第二轮完整 Python/编译/静态检查通过；第三轮 PostgreSQL、迁移、固定目录、Compose 和 HTTP 通过。最终 Critical 0、Important 0，无新增阻断 Minor。
 - 边界：未新增生产依赖、兼容层、通用框架或 TASK-003/TASK-004 实现；测试夹具改用正式固定角色，保留非固定角色不得授权的负向用例。
 - 结论：DEV-001 内部 Review 门禁通过，可向 DEV-002 提交精确远端 HEAD 复审；DEV-002 批准和后继正式 PR/合入仍是外部门禁。
+
+## TASK-002 / CR-036 R9 脱敏复审（2026-07-17）
+
+- 审核输入：DEV-002 对 R8 代码候选 `73030f83638b3b063db483029591720bf65aac21` 的结论为 Changes requested，Critical 0、Important 1。复现表明 `newPasswordConfirmation` 与附件 `raw_content` 可原样进入失败审计。
+- 根因：R8 使用枚举、前缀和后缀匹配；归一化后的 `new_password_confirmation` 没有由独立密码语义段识别。附件上下文仅枚举 `content/body/base64`，未知正文别名默认保留。
+- 修复：`ac6947a642f00ba48aebcb80064f87fcc4c01ea8` 对归一化键按独立 `password/passwd/pwd` 语义段脱敏；附件上下文改为仅保留明确文件元数据，其余键（含嵌套/list）默认脱敏。
+- 漏检改进：上一轮自查只覆盖已枚举字段，且端到端失败审计未注入驼峰密码别名和附件未知别名。本轮先写 2 个红灯用例，再在审计表 `metadata_json` 断言全部秘密缺失；后续同类审查必须包含规范化变体、未知别名与持久化断言。
+- 验证：RED `2 failed`；定向 `19 passed, 1 warning`；Python 3.13 全量 `138 passed, 5 skipped, 1 warning`；`compileall`、`git diff --check` 通过。Compose 服务健康已检查；本轮 PostgreSQL pytest 因临时容器 DNS/缺少测试依赖未重复执行，未作成功声明。
+- 结论：DEV-001 内部复核未发现新的 Critical/Important；仍需 DEV-002 复审，TASK-002 未验收、未集成。

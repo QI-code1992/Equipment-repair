@@ -586,4 +586,13 @@
 - Minor Disposition: 不改写已推送的 `0aac415...` 双父提交或不可变 `0001`；原因、职责和后续提交/revision 规则已写入 `CODE_REVIEW.md`。
 - Verification: Python 3.13 `136 passed, 5 skipped`；专用 PostgreSQL 17 `5 passed`；迁移最终 `0002 (head)`；roles=4、permissions=33、system_admin_grants=33、non_fixed_roles=0；Compose、容器状态和 `/healthz` 通过。
 - Scope Boundary: 无生产依赖、兼容层、通用抽象或 TASK-003/TASK-004 实现。
+
+### CR-036 R9 剩余审计脱敏阻断修复（2026-07-17）
+
+- Status: Ready For DEV-002 Re-review / Not Accepted / Not Integrated。
+- Review Input: DEV-002 对 R8 复审为 Changes requested，Critical 0、Important 1；受保护写失败可把 `newPasswordConfirmation` 和附件 `raw_content` 写入审计库。
+- Decision: 在既有 TASK-002 审计脱敏范围内修复，不修改需求、API 契约、迁移或其他任务。
+- Code Candidate: `ac6947a642f00ba48aebcb80064f87fcc4c01ea8`。
+- Verification: RED `2 failed`；定向 `19 passed`；Python 3.13 `138 passed, 5 skipped`；编译与 diff check 通过；审计表 `metadata_json` 不含四类秘密。PostgreSQL pytest 本轮未重复执行，临时容器 DNS/测试依赖限制已如实记录。
+- Next Gate: 推送正式台账 HEAD 后由 DEV-001 请求 DEV-002 复审；通过后才由 DEV-002 创建后继正式 PR。
 - Remaining Gate: 正式台账提交推送后由 DEV-001 在 PR #15 发出书面复审请求；只有 DEV-002 审核通过并创建后继正式 PR、合入 `codex/stage-05-integration` 后，TASK-002 才可接受和解锁依赖。

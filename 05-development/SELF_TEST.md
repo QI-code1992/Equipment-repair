@@ -117,5 +117,13 @@
 - 脱敏：`password_confirmation`、`password2`、`cookies` 和 `attachment_payload.content` 均递归脱敏，同时不误伤 `token_count`、`token_usage` 等业务统计字段。
 - Compose/HTTP：配置和 `up -d --build` 通过；PostgreSQL/Redis healthy、API Up；`/healthz` 为 HTTP 200，正文 `{"service":"equipment-operations-platform","status":"ok"}`。
 - 依赖与边界：未新增生产依赖、兼容分支、通用抽象或 TASK-003/TASK-004 代码；临时测试容器安装的 pytest/httpx 未写入生产镜像，执行后已删除。
+
+## TASK-002 / CR-036 R9 审计脱敏复测（2026-07-17）
+
+- RED：新增 `newPasswordConfirmation`、`current_password_confirmation`、`attachment_payload.raw_content` 与嵌套/list 断言，首次为 `2 failed, 17 passed`；失败审计表实际包含秘密，确认问题可复现。
+- GREEN：密码键按归一化独立语义段识别；附件上下文仅保留文件名、类型、尺寸、校验和等白名单元数据，未知正文/二进制键默认脱敏。
+- 回归：`python -m pytest tests/modules/test_task002_audit_safety.py tests/modules/test_task002_audit.py -q` 为 `19 passed, 1 warning`；`python -m pytest tests -q` 为 `138 passed, 5 skipped, 1 warning`；`python -m compileall -q app alembic` 与 `git diff --check` 通过。
+- 持久化断言：受保护写校验失败后读取 `AuditEvent.metadata_json`，四个秘密原文均不存在。
+- Compose：PostgreSQL/Redis healthy、API Up；本轮临时测试容器无法解析 PyPI，且运行镜像不含 pytest/httpx，因此未重复 PostgreSQL pytest，不将该尝试记录为通过。
 - 唯一警告：既有 FastAPI/Starlette TestClient 对 `httpx` 的第三方弃用提示。
 - 未验证：DEV-002 尚未批准；后继正式 PR 尚未由 DEV-002 创建；TASK-002 尚未合入 `codex/stage-05-integration`，依赖继续锁定。
