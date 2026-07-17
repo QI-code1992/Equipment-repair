@@ -8,8 +8,6 @@ from sqlalchemy.orm import Session
 from app.modules.identity.models import (
     LoginSession,
     Permission,
-    Role,
-    RoleCode,
     User,
     role_permissions,
     user_roles,
@@ -98,10 +96,6 @@ def permission_codes_for_user(db: Session, user_id: str) -> set[str]:
         select(Permission.code)
         .join(role_permissions, Permission.id == role_permissions.c.permission_id)
         .join(user_roles, role_permissions.c.role_id == user_roles.c.role_id)
-        .join(Role, Role.id == user_roles.c.role_id)
-        .where(
-            user_roles.c.user_id == user_id,
-            Role.code.in_([code.value for code in RoleCode]),
-        )
+        .where(user_roles.c.user_id == user_id)
     )
     return set(db.scalars(statement))

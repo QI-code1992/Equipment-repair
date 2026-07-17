@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Depends, Header, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -22,8 +22,6 @@ router = APIRouter(prefix="/api/auth", tags=["identity"])
 
 
 class LoginRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
     username: str
     password: str
 
@@ -41,7 +39,7 @@ def read_current_user(user: User = Depends(get_current_user)) -> dict[str, objec
     return {"id": user.id, "username": user.username, "enabled": user.enabled}
 
 
-@router.delete("/session", response_model=None, name="session.logout")
+@router.delete("/session", response_model=None)
 def logout(
     idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
