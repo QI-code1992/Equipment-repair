@@ -4,8 +4,8 @@
 
 - 项目：新能源装载机设备智能运维平台
 - 当前阶段：Stage 5 — TASK-002 代码已通过 PR #20 合入；合并后验证台账仍在修正审核，依赖在台账正确集成前继续锁定
-- 任务书版本：v1.3 候选（CR-040；项目负责人已批准协作规则，等待本治理候选合入 `codex/stage-05-integration`）
-- 状态：v1.2 仍是当前有效 Stage 5 协作基线；v1.3 仅在治理 PR 合入后生效，不追溯改写既有 PR、Review 或 Merge 历史
+- 任务书版本：v1.3（CR-040；PR #23 已合入 `codex/stage-05-integration`）
+- 状态：当前有效 Stage 5 协作基线；PR #23 Merge Commit `d633308de8277c343faf3e266476b64baffcb565`。不追溯改写既有 PR、Review 或 Merge 历史
 - v1.0 候选提交：`8272a8ed161b787098660f61ebb86fa5ccada564`
 - v1.0 审批记录提交：`20261a80f01de8d18e18a2acf9c97e07087e04bc`
 - v1.0 批准人：项目负责人

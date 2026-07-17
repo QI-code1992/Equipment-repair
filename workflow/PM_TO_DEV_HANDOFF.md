@@ -25,4 +25,4 @@
 - 项目负责人对开发任务 PR 负责 Merge 授权而不代替代码审核；对纯治理文档 PR 同时负责治理内容确认。只有明确批准 PR 编号和精确 HEAD 后，非任务开发者/非治理 PR 作者才可执行 Merge Commit。
 - HEAD、目标分支、依赖或检查结论变化后原授权失效；必须重新核查并询问。开发任务 PR 还须重新审核，纯治理文档 PR 还须由项目负责人重新确认治理内容和精确 HEAD。
 - 禁止 auto-merge、merge queue、直接 push `codex/stage-05-integration` 和任何 Stage 5 普通开发 PR 指向 `main`。
-- 本规则在 CR-040 治理 PR 合入 `codex/stage-05-integration` 后生效；不追溯改写既有历史。
+- 本规则已随 CR-040 PR #23 Merge Commit `d633308de8277c343faf3e266476b64baffcb565` 合入 `codex/stage-05-integration` 并生效；不追溯改写既有历史。

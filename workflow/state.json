@@ -1,7 +1,7 @@
 {
   "state": "IN_DEVELOPMENT",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-17T13:30:00+08:00",
+  "updatedAt": "2026-07-17T15:22:52+08:00",
   "productBaseline": {
     "status": "requirements-interaction-and-prototype-approved",
     "canonicalCandidate": [
@@ -25,12 +25,23 @@
   "collaborationGovernance": {
     "changeRequest": "CR-040",
     "candidateVersion": "DEVELOPMENT_TASK_BOOK v1.3",
-    "status": "APPROVED_PENDING_INTEGRATION",
+    "status": "DONE",
     "approvedBy": "project owner",
     "approvedAt": "2026-07-17",
     "sourceBranch": "codex/cr-040-agent-merge-approval",
     "integrationTarget": "codex/stage-05-integration",
-    "effectiveAfterMerge": true,
+    "effectiveAfterMerge": false,
+    "governancePullRequest": {
+      "number": 23,
+      "url": "https://github.com/QI-code1992/Equipment-repair/pull/23",
+      "state": "MERGED",
+      "source": "codex/cr-040-agent-merge-approval",
+      "target": "codex/stage-05-integration",
+      "approvedHead": "8a594cc33434830d2244a404703a7d0d651809d2",
+      "mergeCommit": "d633308de8277c343faf3e266476b64baffcb565",
+      "mergedAt": "2026-07-17T15:22:52+08:00",
+      "mergeExecutor": "DEV-001 (ll979053897-arch, non-author)"
+    },
     "roles": {
       "DEV-001": "Developer, reviewer and merge executor for DEV-002 development tasks, integration checker for all PRs, merge-approval requester and post-merge verifier",
       "DEV-002": "Developer, reviewer and authorized merge executor for DEV-001 development tasks",

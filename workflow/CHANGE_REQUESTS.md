@@ -621,7 +621,7 @@
 ### CR-040：Stage 5 单 PR、DEV-001 集成检查与逐 PR Merge 授权
 
 - Level: L2 协作治理变更。
-- Status: Approved / Implementation Candidate；治理 PR 合入 `codex/stage-05-integration` 后生效。
+- Status: Done；治理规则已随 PR #23 合入 `codex/stage-05-integration` 并生效。
 - Raised By: 项目负责人。
 - Raised At: 2026-07-17。
 - Current Stage: Stage 5 — Development Implementation。
@@ -640,6 +640,10 @@
   - Workflow Ledgers / Automation: 同步角色、授权请求、授权失效、合并后验证和通知处理规则。
   - Historical PRs: TASK-001、TASK-002、CR-037—CR-039 的已发生历史不追溯改写；v1.3 适用于生效时仍 Open 的 Draft PR 与后续任务 PR。
 - Decision: 项目负责人已明确批准该规则与流程，并要求立即更新任务书、AGENTS、工作流台账及自动化指令。
-- Updated Baselines: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.3 候选、`04-architecture-plan/AGENTS.md`、`workflow/PM_TO_DEV_HANDOFF.md`、`workflow/DEV_TO_PM_HANDOFF.md`、`workflow/state.json` 和 Gmail 监控自动化。
-- Verification: 待候选执行 Markdown/JSON 解析、规则扫描、`git diff --check`、任务边界审查和独立复核；本 CR 不修改 `codebase/`，不运行或改变业务代码。
-- Merge Boundary: 本治理 PR 不要求 DEV-001/DEV-002 交叉代码审核；项目负责人须确认治理内容和精确 HEAD，DEV-001 须完成集成检查并再次取得针对 PR 编号和精确 HEAD 的 Merge 授权。批准本 CR 规则不等于提前批准任意后续 HEAD 的 Merge。
+- Updated Baselines: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.3、`04-architecture-plan/AGENTS.md`、`workflow/PM_TO_DEV_HANDOFF.md`、`workflow/DEV_TO_PM_HANDOFF.md`、`workflow/state.json` 和 Gmail 监控自动化。
+- Pull Request: [#23](https://github.com/QI-code1992/Equipment-repair/pull/23)；源 `codex/cr-040-agent-merge-approval`，目标 `codex/stage-05-integration`。
+- Reviewed/Authorized Head: `8a594cc33434830d2244a404703a7d0d651809d2`。
+- Merge Commit: `d633308de8277c343faf3e266476b64baffcb565`；Merged At: 2026-07-17T15:22:52+08:00。
+- Merge Executor: `ll979053897-arch`（DEV-001，非 PR 作者）。
+- Verification: 合并后 `git diff --check`、`workflow/state.json` 解析和治理规则一致性复核通过；仅 6 个治理文件变更，无 `codebase/`、测试代码、数据库、基础设施或部署配置变更。未运行业务测试，因为本 CR 未改变业务代码。
+- Remaining Gate: TASK-002 合并后验证台账仍为 `Changes requested`，依赖继续锁定；本 CR 不解锁 TASK-003、TASK-004、TASK-005 或 TASK-006 的数据库集成，也不进入 Stage 6。
