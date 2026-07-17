@@ -1,12 +1,12 @@
 # 开发到产品交接
 
-## TASK-002 正式集成后的治理收尾候选（2026-07-17）
+## TASK-002 正式集成后的治理收尾（2026-07-17）
 
 - 正式审核与集成：DEV-002 已批准精确 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`；PR #20 由集成负责人 DEV-001（`ll979053897-arch`）手动合入 `codex/stage-05-integration`，Merge Commit 为 `904886f48061e27c775f6ee2f8ddae99f5571ead`。
 - 技术证据：Python 3.13 `142 passed, 5 skipped, 1 warning`；PostgreSQL 17 专项 `5 passed, 1 warning`；Compose 健康与容器内 `/healthz` HTTP 200。
 - 本 PR 的交付修正：关闭 R10 的三个 Important——过期任务摘要、TASK-005/006 错误依赖状态、缺失的 DEV-001 手动合并记录。
-- 当前门禁：这是治理收尾候选，不是 Stage 6 放行。合入前 TASK-003/004/005 保持锁定；TASK-006 可继续非数据库范围，但数据库迁移、数据库集成和共享数据模型保持锁定。合入后 TASK-003/004 方可启动，TASK-005 仍等待 TASK-004，TASK-006 才解除 TASK-002 数据库前置锁定。
-- 需项目负责人/DEV-002 确认：本 PR 的治理内容和精确 HEAD；随后按 CR-040 由 DEV-001 执行集成核查并单独请求逐 PR、精确 HEAD 的 Merge 授权。
+- 治理合并：PR #25 的获批 HEAD `92ec18ec17f08d1d2226b0d98f59eeb2eba78d2f` 已由 DEV-002（`QI-code1992`）手动 Merge Commit 合入，合并提交为 `028da42eb9ab4b55ef981ac462e09993a31e8813`。
+- 当前门禁：TASK-002 治理收尾完成，不是 Stage 6 放行。TASK-003/004 可启动，TASK-005 仍等待 TASK-004，TASK-006 已解除 TASK-002 前置；所有后续任务仍须遵循自身 PR、审核和授权门禁。
 
 ## TASK-001 正式交接（2026-07-15）
 

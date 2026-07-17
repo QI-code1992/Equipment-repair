@@ -10,7 +10,8 @@
 - 正式合并记录：经 DEV-002 批准的任务分支 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15` 已通过 PR #20 合入；集成负责人 DEV-001（`ll979053897-arch`）手动生成 Merge Commit `904886f48061e27c775f6ee2f8ddae99f5571ead`。
 - 已归档验证：Python 3.13 `142 passed, 5 skipped, 1 warning`；真实 PostgreSQL 17 专项 `5 passed, 1 warning`；Compose 容器健康与容器内 `GET /healthz` 返回 HTTP 200。
 - 本次变更仅为治理文档，不改动 `codebase/`，因此不重复运行上述业务测试；提交前仅运行文档范围的 JSON 解析、治理状态断言和 `git diff --check`。
-- 结论：技术验证不等于依赖解锁。本治理 PR 合入前，TASK-003、TASK-004、TASK-005 仍保持锁定；TASK-006 可继续非数据库范围，迁移、数据库集成和共享数据模型保持锁定；合入后再按任务书的条件依赖执行。
+- 治理合并：PR #25 已由 DEV-002（`QI-code1992`）以 Merge Commit `028da42eb9ab4b55ef981ac462e09993a31e8813` 合入。
+- 结论：技术验证与治理收尾已完成。TASK-003、TASK-004 可按任务书启动；TASK-005 仍保持 TASK-004 依赖；TASK-006 已解除 TASK-002 前置，包括迁移、数据库集成和共享数据模型；Stage 6 仍需独立门禁。
 
 ## Task 1（2026-07-15）
 

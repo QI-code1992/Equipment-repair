@@ -92,6 +92,12 @@
     "integrationMergeCommitSha": "904886f48061e27c775f6ee2f8ddae99f5571ead",
     "integratedAt": "2026-07-17T03:56:28Z",
     "integrationExecutor": "ll979053897-arch / DEV-001 / manual Merge Commit",
+    "postMergeGovernance": {
+      "pullRequest": 25,
+      "approvedHead": "92ec18ec17f08d1d2226b0d98f59eeb2eba78d2f",
+      "mergeCommitSha": "028da42eb9ab4b55ef981ac462e09993a31e8813",
+      "mergeExecutor": "QI-code1992 / DEV-002 / manual Merge Commit"
+    },
     "verification": "Post-merge Python 3.13: 142 passed, 5 skipped, 1 warning; compileall and diff check passed. Isolated Docker test target with PostgreSQL 17: 5 passed, 1 warning. Compose rebuild passed; PostgreSQL and Redis healthy; API Up; /healthz returned HTTP 200.",
     "dependencyUnlockAllowed": true,
     "nextAction": "TASK-003 and TASK-004 may start under their task-book PR gates. TASK-005 remains blocked by TASK-004. TASK-006 may continue non-database work and its migration, database integration and shared data model are no longer blocked by TASK-002; Stage 6 remains prohibited without its separate formal gate."
@@ -199,6 +205,7 @@
     "On 2026-07-17, DEV-002 R9 supplementary review reproduced four additional audit leaks: compact password keys and attachment-context scalar/list aliases. DEV-001 added exact RED unit and persisted AuditEvent regressions, then fixed the missing context consumption at b4d451009d1deb9dbe3286f5bff4db9414ef4aee. Python 3.13 passed 140 tests with 5 explicit PostgreSQL skips; the isolated PostgreSQL 17 test image passed 5 tests; Compose rebuild and /healthz HTTP 200 passed. TASK-002 remains unaccepted and unintegrated pending DEV-002 re-review.",
     "On 2026-07-17, DEV-002 R10 review found attachment semantics limited to key prefixes and inconsistent compact sensitive-key handling. DEV-001 reproduced it with two RED tests, then implemented normalized segment classification with bounded compact forms at ea4338bad15f16048226a329801d3144b367909e. Direct and persisted audit tests cover attachment/file aliases, password/cookie/token forms and ordinary-field/token-metric counterexamples. Python 3.13 passed 142 tests with 5 explicit PostgreSQL skips; PostgreSQL 17 integration passed 5 tests; Compose and /healthz HTTP 200 passed. The known semantic-alias class is closed, but arbitrary unknown-field secret placement remains a documented residual risk outside this CR. TASK-002 remains unaccepted and unintegrated pending DEV-002 re-review.",
     "On 2026-07-17, DEV-002 approved TASK-002 exact head 2e89dcd8 and DEV-001 (ll979053897-arch) manually merged PR #20 into codex/stage-05-integration at 904886f48061e27c775f6ee2f8ddae99f5571ead. Code integration and technical verification are complete, but downstream dependencies remain locked until the separate post-merge governance closeout PR is merged.",
-    "CR-040 was merged through PR #23 at d633308de8277c343faf3e266476b64baffcb565 and is effective. The Stage 5 single-PR, exact-HEAD confirmation, DEV-001 integration-check, explicit per-PR authorization, and non-author manual-merge rules apply to this governance closeout PR."
+    "CR-040 was merged through PR #23 at d633308de8277c343faf3e266476b64baffcb565 and is effective. The Stage 5 single-PR, exact-HEAD confirmation, DEV-001 integration-check, explicit per-PR authorization, and non-author manual-merge rules apply to this governance closeout PR.",
+    "On 2026-07-17, TASK-002 post-merge governance closeout PR #25 approved head 92ec18ec17f08d1d2226b0d98f59eeb2eba78d2f was manually merged by DEV-002 / QI-code1992 at 028da42eb9ab4b55ef981ac462e09993a31e8813. TASK-003 and TASK-004 may now start under their task-book gates; TASK-005 remains blocked by TASK-004; TASK-006 is no longer blocked by TASK-002. Stage 6 remains prohibited without a separate formal gate."
   ]
 }

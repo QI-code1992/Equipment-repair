@@ -647,10 +647,11 @@
 ### TASK-002 合并后治理收尾（2026-07-17）
 
 - Level: L2 交付台账修正；纯治理文档，不修改 `codebase/`、测试代码、迁移、Compose 或生产依赖。
-- Status: Draft PR Candidate / Awaiting Project-Owner and DEV-002 Governance Confirmation；未合入前不得解除下游依赖锁定。
+- Status: Integrated / Closed；PR #25 已合入，TASK-002 下游前置已按任务书解除。
 - Baseline: `codex/stage-05-integration` 的 CR-040 Merge Commit `d633308de8277c343faf3e266476b64baffcb565`。
-- Corrected Important 1: 同步任务书、代码评审、自测、检查点和交接摘要，不再把 TASK-002 表述为“等待 DEV-002 审核”或已无条件完成；代码正式集成和技术验证已完成，但治理收尾仍待合入。
-- Corrected Important 2: 在本 PR 合入前，TASK-003、TASK-004、TASK-005 保持锁定；TASK-006 的非数据库范围仍可继续，只有迁移、数据库集成和共享数据模型保持 TASK-002 前置锁定。合入后 TASK-003/004 才可启动，TASK-005 仍等待 TASK-004，TASK-006 才解除该数据库边界。
+- Merge: PR #25 approved HEAD `92ec18ec17f08d1d2226b0d98f59eeb2eba78d2f` was manually merged by DEV-002 / `QI-code1992` at `028da42eb9ab4b55ef981ac462e09993a31e8813` into `codex/stage-05-integration`.
+- Corrected Important 1: 任务书、代码评审、自测、检查点和交接摘要已同步为 TASK-002 正式集成、技术验证和治理收尾完成。
+- Corrected Important 2: TASK-003/004 可启动；TASK-005 仅等待 TASK-004；TASK-006 已解除 TASK-002 数据库边界，但继续遵循其自身任务与 PR 门禁。
 - Corrected Important 3: 记录 DEV-002 批准的完整精确任务 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`、PR #20，以及 DEV-001（`ll979053897-arch`）手动生成的 Merge Commit `904886f48061e27c775f6ee2f8ddae99f5571ead`。
 - Verification Evidence: Python 3.13 `142 passed, 5 skipped, 1 warning`；PostgreSQL 17 专项 `5 passed, 1 warning`；Compose 健康和容器内 `/healthz` HTTP 200。当前 PR 仅做文档范围的 JSON、治理一致性和 diff 检查。
-- Coordination: PR #25 明确取代与其重叠的 CR-040 单独证据 PR #24；PR #24 必须在 PR #25 转 Ready 前关闭，保留历史但不得合并。待项目负责人确认本 PR 的精确 HEAD 后，按 CR-040 另行进行 DEV-001 集成检查和逐 PR Merge 授权。
+- Coordination: PR #24 已关闭、未合并并由 PR #25 取代。PR #25 已完成项目负责人/DEV-002 治理确认、DEV-001 集成核查、逐 PR 授权与非作者合并；Stage 6 不因该纯治理合并而进入。
