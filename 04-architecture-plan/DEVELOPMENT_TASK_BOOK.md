@@ -3,7 +3,7 @@
 ## 1. 基线信息
 
 - 项目：新能源装载机设备智能运维平台
-- 当前阶段：Stage 5 — TASK-002 / CR-036 修复实现与真实环境验证完成，等待 DEV-002 对新候选复审
+- 当前阶段：Stage 5 — TASK-002 / CR-036 R8 最终审核阻断修复与三轮验证完成，等待 DEV-002 对新候选复审
 - 任务书版本：v1.2（已批准并通过 PR #18 合入 `codex/stage-05-integration`）
 - 状态：当前有效 Stage 5 协作基线；PR #18 Merge Commit `18485653a94cd033cfc82e8d6c7e40c35fcfbe33`，CR-037 收尾至 `ac767c83128cb89ceea8e28c518be0adfbe1984c`
 - v1.0 候选提交：`8272a8ed161b787098660f61ebb86fa5ccada564`
@@ -37,7 +37,7 @@
 - 编写人：工作流协调者
 - 人员配置确认时间：2026-07-15
 - 已知 Stage 5 首任务风险：`DEF-003`、`DEF-004`；后端测试和 Compose 真实运行验证由 TASK-001 在门禁后关闭
-- 当前首要任务：DEV-001 推送 TASK-002 新候选并向 DEV-002 发送书面审核请求；DEV-002 审核通过后创建后继正式 PR 至 `codex/stage-05-integration`。TASK-003、TASK-004 和 DEV-002 的数据库集成继续等待 TASK-002 正式 Review 通过并合入。
+- 当前首要任务：DEV-001 推送 TASK-002 R8 代码候选 `73030f83638b3b063db483029591720bf65aac21` 与正式台账 HEAD，并向 DEV-002 发送书面审核请求；DEV-002 审核通过后创建后继正式 PR 至 `codex/stage-05-integration`。TASK-003、TASK-004 和 DEV-002 的数据库集成继续等待 TASK-002 正式 Review 通过并合入。
 
 ## 2. 开发人员配置
 
@@ -156,7 +156,7 @@
 
 ### TASK-002：认证、权限、审计与设备基础
 
-- 状态：CR-036 Implementation Complete / Awaiting DEV-002 Re-review；尚未验收、尚未正式集成
+- 状态：CR-036 R8 Review Remediation Complete / Awaiting DEV-002 Re-review；尚未验收、尚未正式集成
 - 优先级：P0
 - 负责人：`DEV-001`
 - 任务开发者：`DEV-001`
@@ -178,7 +178,7 @@
 - Review：`DEV-002` 复核 Agent 可使用的认证上下文、任务范围、共享契约和真实验证证据；任何 Critical/Important 均退回 `DEV-001` 修复。
 - 正式 PR：仅在 `DEV-002` 审核通过后，由 `DEV-002` 创建后继正式 PR；PR #15 只保留被拒绝历史和审核请求证据，不触发集成。
 - 回滚：回退任务 Commit，并按迁移文档执行对应 downgrade；生产数据存在时不得直接删除表。
-- 交接：旧恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12`、证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 和被拒候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 仅保留历史。CR-036 R6 为 `35119954ba1d9ca475f03d1faa026bf6a474b18f`，R7 为 `11dbb226e9b77ff5185fed5fa1434b0de6749206`，首轮证据提交为 `ab67bcdff42d64ba739571515df4e6faed158d32`。自查发现分支与集成基线分叉后，已通过 Merge Commit `0aac415d18aee256c237adb508d2ab24314a7486` 合入 `ac767c83128cb89ceea8e28c518be0adfbe1984c` 并解决冲突；同步验证候选为 `4c111d0243d947a32d555bd48b1b72cab552bac4`。当前集成分支为任务分支祖先，模拟后继合并无冲突。Python 3.13 全套 125 passed / 5 skipped，真实 PostgreSQL 5 passed，迁移、Compose、容器健康和 `/healthz` 已重新验证。
+- 交接：旧恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12`、证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 和被拒候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 仅保留历史。R6/R7 与同步候选历史继续保留；DEV-002 对分支 HEAD `60c71dd5ab7588006ee16d794b03bef493fb3c72` 提出的 4 个 Important 已由 R8 代码候选 `73030f83638b3b063db483029591720bf65aac21` 修复。Python 3.13 全套 `136 passed, 5 skipped`，跳过的真实 PostgreSQL 项已单独 `5 passed`；迁移 `0002 -> 0001 -> 0002`、4 个固定角色、33 个固定权限、系统管理员 33/33 授权、Compose、容器状态和 `/healthz` 已验证。两个历史 Minor 按不可改写迁移/提交历史原则在 CODE_REVIEW 中形成处置说明。
 - PR：[#15](https://github.com/QI-code1992/Equipment-repair/pull/15) 已违规合并后由 CR-038 回滚，继续保留为被拒绝历史和书面审核请求载体，不得作为正式集成 PR；DEV-002 对新候选审核通过后创建后继正式 PR。
 
 ### TASK-003：故障、工单、维修与结构化案例闭环

@@ -80,3 +80,14 @@
 - 复验结果：Python 3.13.14 `125 passed, 5 skipped`；PostgreSQL 17 集成 `5 passed`；迁移、Compose 实际状态、容器健康和 `/healthz` 通过。
 - 同步验证候选：`4c111d0243d947a32d555bd48b1b72cab552bac4`，已推送并完成第二次自查。
 - 新请求动作：首轮 PR #15 评论中的 `ab67bcd...` 请求已被取代；本治理记录提交并推送后，以新的远端分支 HEAD 重新请求 DEV-002 审核。该最终 HEAD 包含的新增内容仅为本节台账回填，不改变 `4c111d0...` 的代码、测试或运行证据。
+
+## TASK-002 / CR-036 R8 复审交接（2026-07-17）
+
+- 开发者：DEV-001；指定审核者与后继正式 PR 创建者：DEV-002。
+- 分支/目标：`codex/task-002-identity-equipment` → `codex/stage-05-integration`。
+- 被取代审核 HEAD：`60c71dd5ab7588006ee16d794b03bef493fb3c72`；R8 代码候选：`73030f83638b3b063db483029591720bf65aac21`。
+- 修复：精确固定角色/权限目录和系统管理员全授权；非固定角色不得授权；用户管理执行 `user_management.view_all`；敏感字段变体和附件正文脱敏；数据库/未知异常回滚与独立失败审计。
+- 验证：本机 Python 3.13 `136 passed, 5 skipped`；专用 PostgreSQL 17 `5 passed`；迁移往返和最终目录计数通过；Compose、PostgreSQL/Redis 健康、API Up、`/healthz` HTTP 200。
+- Review：DEV-001 三轮复审 Critical 0、Important 0；两个历史 Minor 已按不可改写历史约束形成书面处置。
+- 交付边界：无生产依赖、兼容层、通用抽象、TASK-003 或 TASK-004 修改；未创建正式 PR。
+- 请求动作：正式台账提交推送后，以远端最终 HEAD 在 PR #15 请求 DEV-002 复审。若审核通过，由 DEV-002 创建后继正式 PR；在合入前 TASK-002、TASK-003、TASK-004、TASK-005 和相关数据库依赖状态不变。

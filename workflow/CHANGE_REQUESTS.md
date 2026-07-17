@@ -572,3 +572,18 @@
 - Verification: 集成分支已成为任务分支祖先；模拟合并无冲突；完整后端 `125 passed, 5 skipped`；PostgreSQL `5 passed`；迁移、Compose 实际状态和 `/healthz` 通过。
 - Synchronized Candidate: `4c111d0243d947a32d555bd48b1b72cab552bac4`，已推送并完成第二次自查。
 - Status: 修正与台账证据完成，等待 DEV-002 对最终远端分支 HEAD 正式复审；依赖不解锁。
+
+### CR-036 R8 最终审核阻断修复（2026-07-17）
+
+- Status: Ready For DEV-002 Re-review / Not Accepted / Not Integrated
+- Review Input: DEV-002 对 `60c71dd5ab7588006ee16d794b03bef493fb3c72` 的正式结论为 Changes requested，Critical 0、Important 4、Minor 2。
+- Code Candidate: `73030f83638b3b063db483029591720bf65aac21`。
+- Important Closure:
+  - `0002` 建立精确四角色/33 权限目录、系统管理员全授权并拒绝不可映射旧目录；运行时忽略非固定角色授权。
+  - 用户列表和详情执行 `user_management.view_all`；无权限仅本人。
+  - 脱敏覆盖密码确认/数字后缀、复数 Cookie、附件载荷正文。
+  - 数据库与未知异常回滚主事务，以独立事务写失败审计并返回稳定错误和真实审计 ID。
+- Minor Disposition: 不改写已推送的 `0aac415...` 双父提交或不可变 `0001`；原因、职责和后续提交/revision 规则已写入 `CODE_REVIEW.md`。
+- Verification: Python 3.13 `136 passed, 5 skipped`；专用 PostgreSQL 17 `5 passed`；迁移最终 `0002 (head)`；roles=4、permissions=33、system_admin_grants=33、non_fixed_roles=0；Compose、容器状态和 `/healthz` 通过。
+- Scope Boundary: 无生产依赖、兼容层、通用抽象或 TASK-003/TASK-004 实现。
+- Remaining Gate: 正式台账提交推送后由 DEV-001 在 PR #15 发出书面复审请求；只有 DEV-002 审核通过并创建后继正式 PR、合入 `codex/stage-05-integration` 后，TASK-002 才可接受和解锁依赖。

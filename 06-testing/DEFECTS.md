@@ -40,3 +40,12 @@
 - DEV-001 最终独立复审为 Critical 0、Important 0；未发现需要保持 Open 的新缺陷。
 - 唯一非阻断提醒：Alembic `0002` 接近规模上限，后续数据库变化必须新增 revision；第三方 TestClient/httpx 弃用警告留待依赖维护任务处理。
 - TASK-002 仍待 DEV-002 复审；若正式审核发现新阻断项，应在本台账新增 DEF 或重新打开 CR-036，不得改写本次历史结果。
+
+## TASK-002 / CR-036 R8 缺陷复核（2026-07-17）
+
+- DEV-002 最新 4 个 Important 均属于既有 CR-036 范围，不重复创建 DEF；代码候选为 `73030f83638b3b063db483029591720bf65aac21`。
+- 固定目录、用户范围、脱敏变体和未知异常失败审计已由新增回归测试及真实 PostgreSQL 验证关闭。
+- DEV-001 三轮复核为 Critical 0、Important 0；未发现新的 Open 产品/代码缺陷。
+- 历史 `merge(task-002)` 类型与不可变 `0001` 职责说明为非阻断治理处置，详见 `CODE_REVIEW.md`；不得通过 force-push 或改写已发布 migration 处理。
+- 既有 TestClient/httpx 弃用警告仍为非阻断依赖维护项；本次未升级或新增生产依赖。
+- TASK-002 仍待 DEV-002 正式复审和后继 PR 集成，不得据本内部结论解锁依赖。

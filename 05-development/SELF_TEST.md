@@ -103,3 +103,19 @@
 - 迁移：真实 PostgreSQL 17 再次完成 `0002 -> 0001 -> 0002`，最终 `0002 (head)`。
 - PostgreSQL 集成：基于同步后 API 镜像重新构建测试镜像，结果 `5 passed, 1 warning`。
 - 未验证：DEV-002 尚未复审同步后的新精确 HEAD；后继正式 PR 尚未创建或集成。
+
+## TASK-002 / CR-036 R8 最终审核阻断修复验证（2026-07-17）
+
+- 审核输入：DEV-002 对分支 HEAD `60c71dd5ab7588006ee16d794b03bef493fb3c72` 提交 Changes requested；4 个 Important 为固定目录迁移、`user_management.view_all`、脱敏绕过和未预期异常失败审计，另有 2 个历史 Minor。
+- RED：新增迁移目录、用户范围、脱敏和异常审计测试首次执行为 `9 failed`，确认全部阻断可复现。
+- 第一轮：修复后模块回归发现旧契约/测试夹具与固定角色规则不一致并修正；最终 `131 passed, 1 warning`。
+- 第二轮：完整后端 `python -m pytest tests -q` 为 `136 passed, 5 skipped, 1 warning`；`python -m compileall -q app alembic`、`git diff --check`、`workflow/state.json` 解析通过。
+- 第三轮：专用数据库 `equipment_task2_validation_r8` 且显式 `TASK002_ALLOW_DESTRUCTIVE_TESTS=1`，PostgreSQL 17 集成 `5 passed, 1 warning`；迁移往返最终 `0002 (head)`。
+- 固定目录：真实 PostgreSQL 查询为 roles=4、permissions=33、system_admin_grants=33、non_fixed_roles=0；自定义旧角色/目录外权限迁移均拒绝，非固定角色不参与运行时授权。
+- 用户范围：无 `user_management.view_all` 仅返回本人且不可查看他人；持有该权限可查看全量和他人详情。
+- 审计安全：数据库提交、成功审计和未知运行时异常统一返回稳定错误；主事务回滚后独立失败审计恰好一条并返回真实 `audit_event_id`；独立审计失败才返回无伪造 ID 的 `AUDIT_PERSIST_FAILED`。
+- 脱敏：`password_confirmation`、`password2`、`cookies` 和 `attachment_payload.content` 均递归脱敏，同时不误伤 `token_count`、`token_usage` 等业务统计字段。
+- Compose/HTTP：配置和 `up -d --build` 通过；PostgreSQL/Redis healthy、API Up；`/healthz` 为 HTTP 200，正文 `{"service":"equipment-operations-platform","status":"ok"}`。
+- 依赖与边界：未新增生产依赖、兼容分支、通用抽象或 TASK-003/TASK-004 代码；临时测试容器安装的 pytest/httpx 未写入生产镜像，执行后已删除。
+- 唯一警告：既有 FastAPI/Starlette TestClient 对 `httpx` 的第三方弃用提示。
+- 未验证：DEV-002 尚未批准；后继正式 PR 尚未由 DEV-002 创建；TASK-002 尚未合入 `codex/stage-05-integration`，依赖继续锁定。
