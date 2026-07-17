@@ -178,7 +178,7 @@
 - Review：`DEV-002` 复核 Agent 可使用的认证上下文、任务范围、共享契约和真实验证证据；任何 Critical/Important 均退回 `DEV-001` 修复。
 - 正式 PR：仅在 `DEV-002` 审核通过后，由 `DEV-002` 创建后继正式 PR；PR #15 只保留被拒绝历史和审核请求证据，不触发集成。
 - 回滚：回退任务 Commit，并按迁移文档执行对应 downgrade；生产数据存在时不得直接删除表。
-- 交接：旧恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12`、证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 和被拒候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 仅保留历史。R6/R7 与同步候选历史继续保留；R8 的 4 个 Important 关闭后，DEV-002 又发现 1 个审计脱敏绕过。R9 代码候选 `ac6947a642f00ba48aebcb80064f87fcc4c01ea8` 以密码语义段识别和附件上下文元数据白名单关闭该项，并增加请求失败到审计表的回归。Python 3.13 全套 `138 passed, 5 skipped`；本轮未将 PostgreSQL pytest 伪称为成功（临时容器无法解析包源），既有 R8 PostgreSQL/迁移/Compose/health 证据仍保留。TASK-002 继续等待 DEV-002 复审。
+- 交接：旧恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12`、证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 和被拒候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 仅保留历史。R6/R7 与同步候选历史继续保留；R8 的 4 个 Important 关闭后，DEV-002 又发现 1 个审计脱敏绕过。R9 代码候选 `ac6947a642f00ba48aebcb80064f87fcc4c01ea8` 以密码语义段识别和附件上下文元数据白名单关闭该项，并增加请求失败到审计表的回归。Python 3.13 全套 `138 passed, 5 skipped`；测试镜像提交 `41591e759dd53780c9a441b2858536c32d15d287` 预装 dev 依赖后，内部网络 PostgreSQL 17 集成 `5 passed`，默认生产镜像不含 pytest/httpx。TASK-002 继续等待 DEV-002 复审。
 - PR：[#15](https://github.com/QI-code1992/Equipment-repair/pull/15) 已违规合并后由 CR-038 回滚，继续保留为被拒绝历史和书面审核请求载体，不得作为正式集成 PR；DEV-002 对新候选审核通过后创建后继正式 PR。
 
 ### TASK-003：故障、工单、维修与结构化案例闭环

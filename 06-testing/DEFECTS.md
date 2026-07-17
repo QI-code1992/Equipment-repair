@@ -54,4 +54,4 @@
 
 - DEV-002 新发现为 CR-036 的剩余 Important，不另建重复 DEF：密码确认驼峰/中缀变体和附件未知正文别名可绕过失败审计脱敏。
 - 根因和修复见 `CODE_REVIEW.md` R9；代码候选为 `ac6947a642f00ba48aebcb80064f87fcc4c01ea8`，新增数据库持久化断言。
-- 当前状态：等待 DEV-002 复审；本轮 PostgreSQL pytest 未重复执行并已记录原因，不能据此提前关闭外部审核门禁。
+- 当前状态：独立 `test` 镜像已补齐 pytest/httpx 并完成 PostgreSQL 17 `5 passed`；仍等待 DEV-002 复审，不得据内部证据提前关闭外部审核门禁。

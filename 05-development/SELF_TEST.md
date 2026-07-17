@@ -124,6 +124,6 @@
 - GREEN：密码键按归一化独立语义段识别；附件上下文仅保留文件名、类型、尺寸、校验和等白名单元数据，未知正文/二进制键默认脱敏。
 - 回归：`python -m pytest tests/modules/test_task002_audit_safety.py tests/modules/test_task002_audit.py -q` 为 `19 passed, 1 warning`；`python -m pytest tests -q` 为 `138 passed, 5 skipped, 1 warning`；`python -m compileall -q app alembic` 与 `git diff --check` 通过。
 - 持久化断言：受保护写校验失败后读取 `AuditEvent.metadata_json`，四个秘密原文均不存在。
-- Compose：PostgreSQL/Redis healthy、API Up；本轮临时测试容器无法解析 PyPI，且运行镜像不含 pytest/httpx，因此未重复 PostgreSQL pytest，不将该尝试记录为通过。
+- PostgreSQL：定位到 `internal: true` 网络内在线安装必然不可依赖、生产镜像无 dev 依赖；新增 Docker `test` 目标后，构建阶段安装 `--group dev`，内部网络专用 PostgreSQL 17 集成 `5 passed, 1 warning`。默认生产镜像确认不含 pytest/httpx；Compose PostgreSQL/Redis healthy、API Up，容器内标准库 HTTP 请求 `/healthz` 为 `200`。
 - 唯一警告：既有 FastAPI/Starlette TestClient 对 `httpx` 的第三方弃用提示。
 - 未验证：DEV-002 尚未批准；后继正式 PR 尚未由 DEV-002 创建；TASK-002 尚未合入 `codex/stage-05-integration`，依赖继续锁定。

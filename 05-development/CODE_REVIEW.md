@@ -120,5 +120,10 @@
 - 根因：R8 使用枚举、前缀和后缀匹配；归一化后的 `new_password_confirmation` 没有由独立密码语义段识别。附件上下文仅枚举 `content/body/base64`，未知正文别名默认保留。
 - 修复：`ac6947a642f00ba48aebcb80064f87fcc4c01ea8` 对归一化键按独立 `password/passwd/pwd` 语义段脱敏；附件上下文改为仅保留明确文件元数据，其余键（含嵌套/list）默认脱敏。
 - 漏检改进：上一轮自查只覆盖已枚举字段，且端到端失败审计未注入驼峰密码别名和附件未知别名。本轮先写 2 个红灯用例，再在审计表 `metadata_json` 断言全部秘密缺失；后续同类审查必须包含规范化变体、未知别名与持久化断言。
-- 验证：RED `2 failed`；定向 `19 passed, 1 warning`；Python 3.13 全量 `138 passed, 5 skipped, 1 warning`；`compileall`、`git diff --check` 通过。Compose 服务健康已检查；本轮 PostgreSQL pytest 因临时容器 DNS/缺少测试依赖未重复执行，未作成功声明。
+- 验证：RED `2 failed`；定向 `19 passed, 1 warning`；Python 3.13 全量 `138 passed, 5 skipped, 1 warning`；`compileall`、`git diff --check` 通过。新增 Docker `test` 目标后，专用 PostgreSQL 17 集成 `5 passed, 1 warning`；默认生产镜像不含 pytest/httpx。
+- 深度复盘与防复发：
+  1. 规则设计错误：以枚举/前后缀代替语义模型。控制：密码键必须按归一化后的独立语义段判断，附件上下文采用允许元数据白名单而非正文别名黑名单。
+  2. 测试设计错误：只验证实现者列出的正例。控制：每次安全脱敏变更必须覆盖命名风格、未知别名、嵌套/list 和不应脱敏的业务字段四类矩阵。
+  3. 复查方法错误：三轮复查复用了同一套字段假设，缺少对抗性输入和持久化断言。控制：最终自查必须从攻击者可提交的原始 JSON 出发，并查询 `AuditEvent.metadata_json`，不能仅测 `sanitize_audit_metadata` 返回值。
+  4. 环境设计错误：在 `internal: true` 网络内临时在线安装测试依赖。控制：依赖在构建阶段通过 `--group dev` 装入独立 `test` 镜像，运行时只连内部网络；生产目标保持最小化。
 - 结论：DEV-001 内部复核未发现新的 Critical/Important；仍需 DEV-002 复审，TASK-002 未验收、未集成。

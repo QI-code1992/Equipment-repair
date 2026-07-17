@@ -97,5 +97,5 @@
 - 开发者/审核者：DEV-001 / DEV-002；任务分支仍为 `codex/task-002-identity-equipment`，目标为 `codex/stage-05-integration`。
 - 代码候选：`ac6947a642f00ba48aebcb80064f87fcc4c01ea8`，关闭 R8 复审剩余的审计脱敏 Important。
 - 修复与证据：密码语义段识别；附件上下文元数据白名单；驼峰、下划线、嵌套/list 和真实失败审计表 `metadata_json` 回归。RED `2 failed`，定向 `19 passed`，Python 3.13 全量 `138 passed, 5 skipped`。
-- 已知限制：本轮没有重复 PostgreSQL pytest；临时测试容器无法解析包源且运行镜像无 pytest/httpx。既有 R8 PostgreSQL/迁移/Compose/health 证据保留，不能替代 DEV-002 对 R9 的审核。
+- PostgreSQL 证据：新增 `41591e7` Docker `test` 目标，在构建阶段安装 dev 依赖、运行时接入内部网络；专用 PostgreSQL 17 集成 `5 passed, 1 warning`。默认生产镜像不含 pytest/httpx。
 - 请求动作：推送台账 HEAD 后，请 DEV-002 复审；TASK-002 仍未验收、未集成，依赖不解锁，DEV-002 通过后才创建后继正式 PR。
