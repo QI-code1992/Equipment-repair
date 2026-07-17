@@ -7,7 +7,7 @@ from app.core.database import get_db
 from app.core.idempotency import find_idempotent_response, save_idempotent_response
 from app.modules.audit.service import write_audit_event
 from app.modules.identity import admin_service
-from app.modules.identity.dependencies import require_permission
+from app.modules.identity.dependencies import get_current_user, require_permission
 from app.modules.identity.models import Permission, Role, User
 from app.modules.identity.schemas import (
     PermissionRead,
@@ -68,10 +68,9 @@ def list_roles(
 @router.get("/users", response_model=None, responses={200: {"model": list[UserRead]}})
 def list_users(
     db: Session = Depends(get_db),
-    actor: User = Depends(require_permission("identity:read")),
+    actor: User = Depends(get_current_user),
 ) -> list[dict[str, object]]:
-    del actor
-    return [user_body(user) for user in admin_service.users(db)]
+    return [user_body(user) for user in admin_service.visible_users(db, actor)]
 
 
 @router.get(
@@ -80,10 +79,9 @@ def list_users(
 def get_user(
     user_id: str,
     db: Session = Depends(get_db),
-    actor: User = Depends(require_permission("identity:read")),
+    actor: User = Depends(get_current_user),
 ) -> dict[str, object]:
-    del actor
-    return user_body(admin_service.user_detail(db, user_id))
+    return user_body(admin_service.visible_user_detail(db, actor, user_id))
 
 
 @router.post(

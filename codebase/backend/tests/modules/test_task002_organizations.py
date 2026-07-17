@@ -7,6 +7,7 @@ import app.modules.equipment.organization_router as organization_router
 import app.modules.equipment.router as equipment_router
 from app.modules.audit.models import AuditEvent
 from app.modules.equipment.models import Equipment, Organization, OrganizationType
+from app.modules.identity.models import RoleCode
 from tests.modules.support import create_user_token
 from tests.modules.support import valid_equipment_body
 
@@ -15,7 +16,7 @@ def organization_writer_headers(client: TestClient) -> dict[str, str]:
     _, token = create_user_token(
         client,
         username="organization-writer",
-        role_code="organization-writer",
+        role_code=RoleCode.EQUIPMENT_ADMIN.value,
         permission_codes=["organization:read", "organization:write"],
     )
     return {"Authorization": f"Bearer {token}"}
@@ -25,7 +26,7 @@ def equipment_writer_headers(client: TestClient) -> dict[str, str]:
     _, token = create_user_token(
         client,
         username="equipment-writer",
-        role_code="equipment-writer",
+        role_code=RoleCode.REPAIR_WORKER.value,
         permission_codes=["equipment:write"],
     )
     return {"Authorization": f"Bearer {token}"}

@@ -42,8 +42,18 @@ def is_sensitive_key(key: str) -> bool:
     normalized = normalize_key(key)
     return (
         normalized in SENSITIVE_KEYS
+        or normalized == "cookies"
         or normalized.startswith("authorization_")
         or normalized.endswith(SENSITIVE_KEY_SUFFIXES)
+        or normalized.startswith(("password_", "passwd_", "pwd_", "cookie_", "cookies_"))
+        or re.fullmatch(r"(?:password|passwd|pwd)\d+", normalized) is not None
+    )
+
+
+def is_attachment_context(key: str) -> bool:
+    normalized = normalize_key(key)
+    return normalized in ATTACHMENT_CONTEXT_KEYS or any(
+        normalized.startswith(f"{prefix}_") for prefix in ATTACHMENT_CONTEXT_KEYS
     )
 
 
@@ -52,7 +62,7 @@ def sanitize_audit_metadata(
 ) -> object:
     if isinstance(value, dict):
         result: dict[str, object] = {}
-        attachment_context = any(part in ATTACHMENT_CONTEXT_KEYS for part in context)
+        attachment_context = any(is_attachment_context(part) for part in context)
         for key, item in value.items():
             normalized = normalize_key(key)
             redact = (

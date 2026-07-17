@@ -134,8 +134,8 @@ def organization_payload(
 
 def create_user_token(client: TestClient, permission_codes: list[str]) -> str:
     with client.app.state.session_factory() as session:
-        role_name = f"role-{len(permission_codes)}-{'-'.join(permission_codes)}"
-        role = Role(code=role_name, name=role_name, built_in=False)
+        role_name = RoleCode.EQUIPMENT_ADMIN.value
+        role = Role(code=role_name, name=role_name, built_in=True)
         role.permissions = [Permission(code=code) for code in permission_codes]
         user = User(username=f"user-{len(permission_codes)}", password_hash=hash_password("correct-password"))
         user.roles = [role]

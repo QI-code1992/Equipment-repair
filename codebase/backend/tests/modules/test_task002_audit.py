@@ -13,6 +13,7 @@ from app.modules.audit.service import sanitize_audit_metadata
 from app.modules.equipment.organization_router import router as organization_router
 from app.modules.equipment.router import router as equipment_router
 from app.modules.identity.admin_router import router as identity_admin_router
+from app.modules.identity.models import RoleCode
 from app.modules.identity.router import router as identity_router
 from tests.modules.support import create_user_token, valid_equipment_body
 
@@ -125,7 +126,7 @@ def test_validation_failure_returns_one_persisted_audit_id(
     user_id, token = create_user_token(
         client,
         username="validation-writer",
-        role_code="VALIDATION_WRITER",
+        role_code=RoleCode.EQUIPMENT_ADMIN.value,
         permission_codes=["equipment:write"],
     )
 
@@ -175,7 +176,7 @@ def test_logout_validation_failure_recovers_actor_from_bearer(
     user_id, token = create_user_token(
         client,
         username="logout-validation-user",
-        role_code="LOGOUT_VALIDATION_USER",
+        role_code=RoleCode.EQUIPMENT_ADMIN.value,
         permission_codes=[],
     )
 
@@ -204,7 +205,7 @@ def test_invalid_json_body_is_not_stored_in_failure_audit(
     _, token = create_user_token(
         client,
         username="invalid-json-writer",
-        role_code="INVALID_JSON_WRITER",
+        role_code=RoleCode.EQUIPMENT_ADMIN.value,
         permission_codes=["equipment:write"],
     )
 
@@ -230,7 +231,7 @@ def test_logout_idempotency_failure_recovers_actor_from_bearer(
     user_id, token = create_user_token(
         client,
         username="logout-idempotency-user",
-        role_code="LOGOUT_IDEMPOTENCY_USER",
+        role_code=RoleCode.EQUIPMENT_ADMIN.value,
         permission_codes=["equipment:write"],
     )
     headers = {
@@ -256,7 +257,7 @@ def test_http_failure_returns_one_persisted_audit_id(client: TestClient) -> None
     user_id, token = create_user_token(
         client,
         username="http-writer",
-        role_code="HTTP_WRITER",
+        role_code=RoleCode.EQUIPMENT_ADMIN.value,
         permission_codes=["equipment:write"],
     )
 
@@ -291,7 +292,7 @@ def test_idempotency_failure_returns_one_persisted_audit_id(
     user_id, token = create_user_token(
         client,
         username="idempotency-writer",
-        role_code="IDEMPOTENCY_WRITER",
+        role_code=RoleCode.EQUIPMENT_ADMIN.value,
         permission_codes=["equipment:write"],
     )
     headers = {
@@ -331,7 +332,7 @@ def test_permission_denial_reuses_its_existing_audit_event(
     user_id, token = create_user_token(
         client,
         username="denied-writer",
-        role_code="DENIED_WRITER",
+        role_code=RoleCode.REPAIR_WORKER.value,
         permission_codes=[],
     )
 
@@ -369,7 +370,7 @@ def test_audit_persistence_error_rolls_back_and_returns_safe_503(
     _, token = create_user_token(
         client,
         username=f"audit-failure-{failure_point}",
-        role_code=f"AUDIT_FAILURE_{failure_point.upper()}",
+        role_code=RoleCode.EQUIPMENT_ADMIN.value,
         permission_codes=["equipment:write"],
     )
     rollback_calls = 0
@@ -411,7 +412,7 @@ def test_audit_persistence_error_rolls_back_and_returns_safe_503(
             "fields": {},
         }
     }
-    assert rollback_calls == 1
+    assert rollback_calls == 2
     assert caplog.messages == ["Failed to persist audit event"]
     assert "SELECT" not in caplog.text
     assert "password" not in caplog.text
@@ -425,7 +426,7 @@ def test_audit_rollback_error_is_logged_without_sensitive_detail(
     _, token = create_user_token(
         client,
         username="audit-rollback-failure",
-        role_code="AUDIT_ROLLBACK_FAILURE",
+        role_code=RoleCode.EQUIPMENT_ADMIN.value,
         permission_codes=["equipment:write"],
     )
 
@@ -451,6 +452,7 @@ def test_audit_rollback_error_is_logged_without_sensitive_detail(
 
     assert response.status_code == 503
     assert caplog.messages == [
+        "Unhandled database request failure",
         "Failed to roll back audit transaction",
         "Failed to persist audit event",
     ]

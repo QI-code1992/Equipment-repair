@@ -6,6 +6,8 @@ import pytest
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.engine import Engine
 
+from app.modules.identity.bootstrap import PERMISSION_CODES
+
 
 BACKEND_DIR = Path(__file__).parents[2]
 
@@ -186,7 +188,7 @@ def test_upgrade_merges_duplicate_system_roles_without_losing_relationships(
                 )
             ).scalars()
         )
-        assert permission_codes == {"identity:read", "identity:write"}
+        assert permission_codes == set(PERMISSION_CODES)
 
 
 @pytest.mark.parametrize("invalid_tree", ["depth", "cycle"])

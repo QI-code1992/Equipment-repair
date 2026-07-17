@@ -23,6 +23,32 @@ branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 ROLE_CODES = ("SYSTEM_ADMIN", "EQUIPMENT_ADMIN", "REPAIR_WORKER", "LINE_OPERATOR")
+PERMISSION_CODES = (
+    "identity:read", "identity:write", "equipment:read", "equipment:write",
+    "organization:read", "organization:write", "workbench:view", "workbench:export",
+    "bi:view", "bi:export", "factory:view", "factory:manage", "equipment:view",
+    "equipment:create", "equipment:edit", "equipment:delete", "fault:view",
+    "fault:create", "fault:repair", "fault:close", "maintenance:view",
+    "maintenance:detail", "maintenance:export", "system:role", "system:user",
+    "user_management.view_all", "system:org", "system:audit", "intelligence:view",
+    "intelligence:model", "intelligence:agent", "intelligence:knowledge",
+    "intelligence:audit",
+)
+DEFAULT_ROLE_PERMISSIONS = {
+    "EQUIPMENT_ADMIN": {
+        "identity:read", "equipment:read", "equipment:write", "organization:read",
+        "workbench:view", "bi:view", "factory:view", "equipment:view",
+        "equipment:create", "equipment:edit", "fault:view", "fault:create",
+        "maintenance:view", "maintenance:detail",
+    },
+    "REPAIR_WORKER": {
+        "equipment:read", "workbench:view", "equipment:view", "fault:view",
+        "fault:repair", "fault:close", "maintenance:view", "maintenance:detail",
+    },
+    "LINE_OPERATOR": {
+        "equipment:read", "workbench:view", "equipment:view", "fault:view", "fault:create",
+    },
+}
 ORGANIZATION_TYPES = ("ROOT", "FACTORY", "WORKSHOP", "LINE")
 EQUIPMENT_STATUSES = ("NORMAL", "FAULT", "REPAIRING", "DISABLED")
 ROOT_ORGANIZATION_ID = str(uuid5(NAMESPACE_URL, "equipment-task-002-root-organization"))
@@ -38,8 +64,8 @@ def _fixed_role_id(code: str) -> str:
     return str(uuid5(NAMESPACE_URL, f"equipment-task-002-role:{code}"))
 
 
-def _legacy_role_code(role_id: str) -> str:
-    return f"LEGACY_{role_id.replace('-', '_')}"
+def _fixed_permission_id(code: str) -> str:
+    return str(uuid5(NAMESPACE_URL, f"equipment-task-002-permission:{code}"))
 
 
 def _legacy_organization_code(organization_id: str) -> str:
@@ -121,20 +147,22 @@ def _merge_duplicate_system_roles(bind: Connection, roles: sa.TableClause) -> No
 
 def _migrate_roles(bind: Connection) -> None:
     roles, _, _ = _role_tables()
+    role_names = set(bind.execute(sa.select(roles.c.name)).scalars())
+    allowed_names = {*ROLE_CODES, "system-administrator"}
+    if role_names - allowed_names:
+        raise RuntimeError("custom legacy roles cannot be mapped to the fixed catalog")
     _merge_duplicate_system_roles(bind, roles)
     role_rows = list(bind.execute(sa.select(roles.c.id, roles.c.name)).mappings())
     present_codes: set[str] = set()
     for row in role_rows:
         if row["name"] in ("system-administrator", "SYSTEM_ADMIN"):
             code = "SYSTEM_ADMIN"
-        elif row["name"] in ROLE_CODES:
-            code = row["name"]
         else:
-            code = _legacy_role_code(row["id"])
+            code = row["name"]
         present_codes.add(code)
         bind.execute(
             roles.update().where(roles.c.id == row["id"]).values(
-                code=code, built_in=code in ROLE_CODES
+                code=code, name=code, built_in=True
             )
         )
     for code in ROLE_CODES:
@@ -143,6 +171,62 @@ def _migrate_roles(bind: Connection) -> None:
                 roles.insert().values(
                     id=_fixed_role_id(code), code=code, name=code, built_in=True
                 )
+            )
+
+
+def _permission_tables() -> tuple[sa.TableClause, sa.TableClause]:
+    permissions = sa.table(
+        "permissions",
+        sa.column("id", sa.String(36)),
+        sa.column("code", sa.String(100)),
+    )
+    _, _, role_permissions = _role_tables()
+    return permissions, role_permissions
+
+
+def _grant_permissions(
+    bind: Connection,
+    role_permissions: sa.TableClause,
+    role_id: str,
+    permission_ids: list[str],
+) -> None:
+    bind.execute(role_permissions.delete().where(role_permissions.c.role_id == role_id))
+    bind.execute(
+        role_permissions.insert(),
+        [{"role_id": role_id, "permission_id": item} for item in permission_ids],
+    )
+
+
+def _migrate_permission_catalog(bind: Connection) -> None:
+    permissions, role_permissions = _permission_tables()
+    existing = {
+        row.code: row.id
+        for row in bind.execute(sa.select(permissions.c.code, permissions.c.id))
+    }
+    if set(existing) - set(PERMISSION_CODES):
+        raise RuntimeError("custom legacy permissions are outside the fixed catalog")
+    for code in PERMISSION_CODES:
+        if code not in existing:
+            permission_id = _fixed_permission_id(code)
+            bind.execute(permissions.insert().values(id=permission_id, code=code))
+            existing[code] = permission_id
+    roles, _, _ = _role_tables()
+    role_ids = {
+        row.code: row.id for row in bind.execute(sa.select(roles.c.code, roles.c.id))
+    }
+    _grant_permissions(
+        bind, role_permissions, role_ids["SYSTEM_ADMIN"],
+        [existing[code] for code in PERMISSION_CODES],
+    )
+    for role_code, defaults in DEFAULT_ROLE_PERMISSIONS.items():
+        role_id = role_ids[role_code]
+        has_grants = bind.scalar(
+            sa.select(sa.literal(True)).where(role_permissions.c.role_id == role_id).limit(1)
+        )
+        if not has_grants:
+            _grant_permissions(
+                bind, role_permissions, role_id,
+                [existing[code] for code in sorted(defaults)],
             )
 
 
@@ -419,6 +503,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     now = datetime.now(UTC)
     _migrate_roles(bind)
+    _migrate_permission_catalog(bind)
     _migrate_organizations(bind, now)
     _migrate_equipment(bind, now)
     _finalize_role_schema()

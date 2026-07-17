@@ -97,7 +97,10 @@ async def request_summary(request: Request, body: object = None) -> object | Non
         return None
     value = body
     if value is None:
-        raw_body = await request.body()
+        try:
+            raw_body = await request.body()
+        except RuntimeError:
+            return None
         if not raw_body:
             return None
         try:
@@ -146,10 +149,10 @@ async def persist_failure(
             )
             db.commit()
             event_id = event.id
-        except SQLAlchemyError:
+        except Exception:
             try:
                 db.rollback()
-            except SQLAlchemyError:
+            except Exception:
                 logger.error("Failed to roll back audit transaction")
             logger.error("Failed to persist audit event")
             return None, True
@@ -163,6 +166,17 @@ def audit_persist_failed_response() -> JSONResponse:
         content={
             "detail": response_detail({"code": "AUDIT_PERSIST_FAILED"}, None)
         },
+    )
+
+
+async def internal_error_response(request: Request) -> JSONResponse:
+    detail = {"code": "INTERNAL_SERVER_ERROR"}
+    event_id, persist_failed = await persist_failure(request, detail)
+    if persist_failed:
+        return audit_persist_failed_response()
+    return JSONResponse(
+        status_code=500,
+        content={"detail": response_detail(detail, event_id)},
     )
 
 
@@ -208,3 +222,19 @@ def register_audit_exception_handlers(app: FastAPI) -> None:
             status_code=409,
             content={"detail": response_detail(detail, event_id)},
         )
+
+    @app.exception_handler(SQLAlchemyError)
+    async def sqlalchemy_exception_handler(
+        request: Request, error: SQLAlchemyError
+    ) -> JSONResponse:
+        del error
+        logger.error("Unhandled database request failure")
+        return await internal_error_response(request)
+
+    @app.exception_handler(Exception)
+    async def unexpected_exception_handler(
+        request: Request, error: Exception
+    ) -> JSONResponse:
+        del error
+        logger.error("Unhandled request failure")
+        return await internal_error_response(request)

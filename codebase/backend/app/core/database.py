@@ -31,4 +31,8 @@ def session_factory(engine: Engine) -> sessionmaker[Session]:
 def get_db(request: Request) -> Iterator[Session]:
     factory: sessionmaker[Session] = request.app.state.session_factory
     with factory() as session:
-        yield session
+        try:
+            yield session
+        except Exception:
+            session.rollback()
+            raise

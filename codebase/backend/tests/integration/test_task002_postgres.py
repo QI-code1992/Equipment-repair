@@ -172,7 +172,7 @@ def test_failed_equipment_write_rolls_back_and_commits_one_failure_audit(
         actor_id, token = create_user_token(
             client,
             username=_unique("pg-equipment-writer"),
-            role_code=_unique("PG_EQUIPMENT_WRITER"),
+            role_code=RoleCode.EQUIPMENT_ADMIN.value,
             permission_codes=["equipment:write"],
         )
         code = _unique("PG-EQ")
@@ -226,7 +226,7 @@ def test_concurrent_same_idempotency_key_and_body_replays_one_write(
         actor_id, token = create_user_token(
             client,
             username=_unique("pg-idempotency-replay"),
-            role_code=_unique("PG_IDEMPOTENCY_REPLAY"),
+            role_code=RoleCode.EQUIPMENT_ADMIN.value,
             permission_codes=["equipment:write"],
         )
         payload = valid_equipment_body(client, code=_unique("PG-IDEM-SAME"))
@@ -274,7 +274,7 @@ def test_concurrent_same_idempotency_key_with_changed_body_rejects_reuse(
         actor_id, token = create_user_token(
             client,
             username=_unique("pg-idempotency-conflict"),
-            role_code=_unique("PG_IDEMPOTENCY_CONFLICT"),
+            role_code=RoleCode.EQUIPMENT_ADMIN.value,
             permission_codes=["equipment:write"],
         )
         first_payload = valid_equipment_body(client, code=_unique("PG-IDEM-A"))
@@ -333,7 +333,7 @@ def test_concurrent_system_admin_updates_keep_one_enabled_admin(
         _, actor_token = create_user_token(
             client,
             username=_unique("pg-identity-writer"),
-            role_code=_unique("PG_IDENTITY_WRITER"),
+            role_code=RoleCode.EQUIPMENT_ADMIN.value,
             permission_codes=["identity:write"],
         )
         with app.state.session_factory() as db:
@@ -380,7 +380,7 @@ def test_concurrent_sibling_creation_keeps_one_name(
         _, token = create_user_token(
             client,
             username=_unique("pg-organization-writer"),
-            role_code=_unique("PG_ORGANIZATION_WRITER"),
+            role_code=RoleCode.EQUIPMENT_ADMIN.value,
             permission_codes=["organization:write"],
         )
         with app.state.session_factory() as db:

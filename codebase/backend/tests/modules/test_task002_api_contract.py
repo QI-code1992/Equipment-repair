@@ -35,8 +35,8 @@ TASK002_PERMISSIONS = {
     ("GET", "/api/permissions"): "identity:read",
     ("GET", "/api/roles"): "identity:read",
     ("PATCH", "/api/roles/{role_id}/permissions"): "identity:write",
-    ("GET", "/api/users"): "identity:read",
-    ("GET", "/api/users/{user_id}"): "identity:read",
+    ("GET", "/api/users"): "authenticated:self-or-user_management.view_all",
+    ("GET", "/api/users/{user_id}"): "authenticated:self-or-user_management.view_all",
     ("POST", "/api/users"): "identity:write",
     ("PATCH", "/api/users/{user_id}"): "identity:write",
     ("GET", "/api/organizations"): "organization:read",
@@ -47,6 +47,11 @@ TASK002_PERMISSIONS = {
     ("GET", "/api/equipment/{equipment_id}"): "equipment:read",
     ("POST", "/api/equipment"): "equipment:write",
     ("PATCH", "/api/equipment/{equipment_id}"): "equipment:write",
+}
+TASK002_DEPENDENCY_PERMISSIONS = {
+    **TASK002_PERMISSIONS,
+    ("GET", "/api/users"): None,
+    ("GET", "/api/users/{user_id}"): None,
 }
 
 WRITE_REQUEST_FIELDS = {
@@ -301,7 +306,7 @@ def test_task002_route_permissions_match_the_frozen_contract(client: TestClient)
             key = (method, route.path)
             if key in TASK002_ROUTES:
                 actual[key] = _route_permission(route)
-    assert actual == TASK002_PERMISSIONS
+    assert actual == TASK002_DEPENDENCY_PERMISSIONS
 
 
 def test_task002_openapi_freezes_request_and_response_fields(client: TestClient) -> None:
@@ -407,6 +412,7 @@ def test_api_spec_freezes_error_audit_and_replay_semantics() -> None:
         ("403", "PERMISSION_DENIED"),
         ("404", "RESOURCE_NOT_FOUND"),
         ("409", "IDEMPOTENCY_KEY_REUSED"),
+        ("500", "INTERNAL_SERVER_ERROR"),
         ("503", "AUDIT_PERSIST_FAILED"),
     } <= error_contract
     assert re.search(r"成功响应.*原 `audit_event_id`.*重放", section)

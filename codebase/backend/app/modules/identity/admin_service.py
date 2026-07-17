@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.modules.identity.models import Permission, Role, RoleCode, User, user_roles
 from app.modules.identity.security import hash_password
 from app.modules.identity.schemas import UserCreate, UserUpdate
+from app.modules.identity.service import permission_codes_for_user
 
 
 IDENTITY_ADMIN_LOCK_ID = 824004
@@ -38,6 +39,22 @@ def user_detail(db: Session, user_id: str) -> User:
     if user is None:
         raise HTTPException(status_code=404, detail={"code": "USER_NOT_FOUND"})
     return user
+
+
+def can_view_all_users(db: Session, actor: User) -> bool:
+    return "user_management.view_all" in permission_codes_for_user(db, actor.id)
+
+
+def visible_users(db: Session, actor: User) -> list[User]:
+    if can_view_all_users(db, actor):
+        return users(db)
+    return [actor]
+
+
+def visible_user_detail(db: Session, actor: User, user_id: str) -> User:
+    if actor.id == user_id or can_view_all_users(db, actor):
+        return user_detail(db, user_id)
+    raise HTTPException(status_code=403, detail={"code": "PERMISSION_DENIED"})
 
 
 def roles_for_ids(db: Session, role_ids: list[str]) -> list[Role]:

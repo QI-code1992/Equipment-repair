@@ -1,3 +1,4 @@
+import logging
 from logging.config import fileConfig
 import os
 
@@ -11,8 +12,8 @@ from app.modules.identity import models as identity_models
 
 
 config = context.config
-if config.config_file_name:
-    fileConfig(config.config_file_name)
+if config.config_file_name and not logging.getLogger().handlers:
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 database_url = os.getenv("POSTGRES_DSN")
 if database_url:

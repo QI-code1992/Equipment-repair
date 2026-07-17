@@ -63,8 +63,8 @@
 | GET | `/api/permissions` | `identity:read` | 不使用 | 返回 `[{code}]` 的固定权限目录。 |
 | GET | `/api/roles` | `identity:read` | 不使用 | 返回四个固定角色的 `id,code,name,permission_codes`。 |
 | PATCH | `/api/roles/{role_id}/permissions` | `identity:write` | 必填 | 请求 `permission_codes`；返回角色字段及 `audit_event_id`。 |
-| GET | `/api/users` | `identity:read` | 不使用 | 返回用户 `id,username,enabled,role_ids` 列表。 |
-| GET | `/api/users/{user_id}` | `identity:read` | 不使用 | 返回用户 `id,username,enabled,role_ids`。 |
+| GET | `/api/users` | `authenticated:self-or-user_management.view_all` | 不使用 | 有 `user_management.view_all` 时返回全量用户，否则仅返回本人 `id,username,enabled,role_ids`。 |
+| GET | `/api/users/{user_id}` | `authenticated:self-or-user_management.view_all` | 不使用 | 返回本人；有 `user_management.view_all` 时可返回其他用户的 `id,username,enabled,role_ids`。 |
 | POST | `/api/users` | `identity:write` | 必填 | 请求 `username,password,role_ids`；201 返回用户字段及 `audit_event_id`，不返回密码。 |
 | PATCH | `/api/users/{user_id}` | `identity:write` | 必填 | 请求完整 `enabled,role_ids`；返回用户字段及 `audit_event_id`。 |
 | GET | `/api/organizations` | `organization:read` | 不使用 | 返回完整组织节点字段列表，调用方按 `parent_id` 构树。 |
@@ -161,6 +161,7 @@ API 权限码固定为 `identity:read,identity:write,equipment:read,equipment:wr
 | 403 | `PERMISSION_DENIED` | 缺少路由要求的权限码。 |
 | 404 | `RESOURCE_NOT_FOUND` | 查询类通用资源不存在。 |
 | 409 | `IDEMPOTENCY_KEY_REUSED` | 同一用户、方法、路径和 Key 携带不同请求体；`fields.idempotency_key=conflict`。 |
+| 500 | `INTERNAL_SERVER_ERROR` | 未预期的业务或数据库错误；受保护写操作在主事务回滚后以独立事务记录失败审计并返回真实 `audit_event_id`。 |
 | 503 | `AUDIT_PERSIST_FAILED` | 失败审计无法持久化；不伪造 `audit_event_id`。 |
 | 404 | `USER_NOT_FOUND` | 用户不存在。 |
 | 422 | `ROLE_NOT_FOUND` | 用户写请求含未知或非固定角色 ID。 |
