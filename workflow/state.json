@@ -1,7 +1,7 @@
 {
   "state": "IN_DEVELOPMENT",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-17T11:37:34+08:00",
+  "updatedAt": "2026-07-17T13:30:00+08:00",
   "productBaseline": {
     "status": "requirements-interaction-and-prototype-approved",
     "canonicalCandidate": [
@@ -22,6 +22,33 @@
   },
   "lastApprovedStage": "Stage 4 — Architecture and Development Plan",
   "pendingStageApproval": null,
+  "collaborationGovernance": {
+    "changeRequest": "CR-040",
+    "candidateVersion": "DEVELOPMENT_TASK_BOOK v1.3",
+    "status": "APPROVED_PENDING_INTEGRATION",
+    "approvedBy": "project owner",
+    "approvedAt": "2026-07-17",
+    "sourceBranch": "codex/cr-040-agent-merge-approval",
+    "integrationTarget": "codex/stage-05-integration",
+    "effectiveAfterMerge": true,
+    "roles": {
+      "DEV-001": "Agent developer, reviewer for DEV-002 tasks, integration checker, merge-approval requester, authorized merge executor and post-merge verifier",
+      "DEV-002": "Agent developer and reviewer for DEV-001 tasks",
+      "projectOwner": "Per-PR merge approver; does not perform code review"
+    },
+    "pullRequestFlow": "Task developer creates and maintains one Draft PR; assigned reviewer approves the exact HEAD on the same PR",
+    "mergeFlow": "DEV-001 Agent checks integration conditions, requests project-owner approval for the exact PR and HEAD, and executes a merge commit only after explicit approval",
+    "approvalInvalidation": "Any change to PR HEAD, base branch, dependency state or integration-check result invalidates prior merge approval",
+    "forbidden": [
+      "auto-merge",
+      "merge queue",
+      "direct push to codex/stage-05-integration",
+      "task developer self-approval or self-merge",
+      "ordinary Stage 5 development PRs targeting main",
+      "automatic Stage 6 entry"
+    ],
+    "historicalBoundary": "Does not rewrite completed TASK-001/TASK-002 or CR-037 through CR-039 history; applies to open Draft PRs and subsequent task PRs after integration"
+  },
   "currentCommitSha": "ea4338bad15f16048226a329801d3144b367909e",
   "repairCycle": {
     "taskId": "TASK-002",

@@ -617,3 +617,28 @@
 - Verification: RED `2 failed`；定向 `23 passed`；Python 3.13 `142 passed, 5 skipped`；compileall、diff check、PostgreSQL 17 `5 passed`、Compose 重建和 `/healthz` HTTP 200 通过；返回摘要与 `AuditEvent.metadata_json` 均无测试秘密，`profile`、普通业务字段和 Token 统计字段未误伤。
 - Residual Risk: 未知额外字段默认脱敏不在本 CR；本轮仅关闭已知敏感语义别名漏洞，任意无语义字段承载秘密需后续独立强化。
 - Next Gate: 推送正式台账 HEAD 后由 DEV-001 在 PR #15 请求 DEV-002 复审；只有 DEV-002 审核通过并创建后继正式 PR、合入目标分支后，TASK-002 才可接受和解锁依赖。
+
+### CR-040：Stage 5 单 PR、Agent 集成检查与逐 PR Merge 授权
+
+- Level: L2 协作治理变更。
+- Status: Approved / Implementation Candidate；治理 PR 合入 `codex/stage-05-integration` 后生效。
+- Raised By: 项目负责人。
+- Raised At: 2026-07-17。
+- Current Stage: Stage 5 — Development Implementation。
+- Original Request: 采用常规 GitHub 单 PR 流程；不设置 DEV-001 人工同事角色，由 DEV-001 Agent 自动判断集成条件，并在每次 Merge 前询问项目负责人。
+- Clarified Requirement:
+  - 任务开发 Agent 为自己的任务创建一个 Draft PR，并在同一 PR 上持续提交、转 Ready、接受复审。
+  - 指定审核者在同一 PR 上审核并批准精确 HEAD；Critical/Important 不为零时提交 `Changes requested`。
+  - DEV-001 Agent 负责所有 Stage 5 PR 的集成检查，不重复代替指定审核者做同一代码审核。
+  - 集成检查通过后，DEV-001 Agent 必须逐 PR 向项目负责人报告证据并请求 Merge 授权；未明确批准不得合并。
+  - 项目负责人批准后，PR HEAD、目标分支、依赖或检查结论变化会使授权失效。
+  - 获批后仅 DEV-001 Agent 可执行 Merge Commit；禁止 GitHub auto-merge、merge queue、直接 push 集成分支和任务开发者自行合并。
+- Impact:
+  - PRD / SPEC / Prototype / Architecture / API / Data / Acceptance Criteria: 不变。
+  - Development Task Book / AGENTS: 升级为单 PR 协作、另一 Agent 审核、DEV-001 Agent 集成检查、项目负责人逐 PR 授权和获批后合并。
+  - Workflow Ledgers / Automation: 同步角色、授权请求、授权失效、合并后验证和通知处理规则。
+  - Historical PRs: TASK-001、TASK-002、CR-037—CR-039 的已发生历史不追溯改写；v1.3 适用于生效时仍 Open 的 Draft PR 与后续任务 PR。
+- Decision: 项目负责人已明确批准该规则与流程，并要求立即更新任务书、AGENTS、工作流台账及自动化指令。
+- Updated Baselines: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.3 候选、`04-architecture-plan/AGENTS.md`、`workflow/PM_TO_DEV_HANDOFF.md`、`workflow/DEV_TO_PM_HANDOFF.md`、`workflow/state.json` 和 Gmail 监控自动化。
+- Verification: 待候选执行 Markdown/JSON 解析、规则扫描、`git diff --check`、任务边界审查和独立复核；本 CR 不修改 `codebase/`，不运行或改变业务代码。
+- Merge Boundary: 本治理 PR 本身仍须完成指定审核、DEV-001 Agent 集成检查和项目负责人针对精确 HEAD 的 Merge 授权；批准本 CR 不等于提前批准该 PR Merge。
