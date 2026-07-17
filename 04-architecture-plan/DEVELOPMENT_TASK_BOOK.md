@@ -6,6 +6,12 @@
 - 当前阶段：Stage 5 — TASK-002 / CR-036 R9 审计脱敏复审阻断修复完成，等待 DEV-002 对新候选复审
 - 任务书版本：v1.2（已批准并通过 PR #18 合入 `codex/stage-05-integration`）
 - 状态：当前有效 Stage 5 协作基线；PR #18 Merge Commit `18485653a94cd033cfc82e8d6c7e40c35fcfbe33`，CR-037 收尾至 `ac767c83128cb89ceea8e28c518be0adfbe1984c`
+- 当前阶段：Stage 5 — TASK-002 / CR-036 修复中；生产代码和未提交契约草稿保持原状，等待本任务书 v1.2 协作基线修订获批后继续
+- 任务书版本：v1.2 候选
+- 状态：待项目负责人针对精确候选 Commit 书面批准；获批前暂停 TASK-002 后续开发、正式 PR 创建和集成
+- 当前阶段：Stage 5 — TASK-002 任务分支开发与 Review 已完成，待合入集成分支；DEV-002 可继续 TASK-006 的非数据库部分
+- 任务书版本：v1.1
+- 状态：已批准，作为 Stage 5 任务分配与集成基线
 - v1.0 候选提交：`8272a8ed161b787098660f61ebb86fa5ccada564`
 - v1.0 审批记录提交：`20261a80f01de8d18e18a2acf9c97e07087e04bc`
 - v1.0 批准人：项目负责人
@@ -24,6 +30,7 @@
 - v1.2 批准时间：2026-07-16
 - v1.2 批准证据：项目负责人明确批准上述精确 Commit 作为任务书 v1.2 协作基线并授权推送隔离治理分支
 - PR #18 修正说明：正式审查曾发现任务书正文保留“等待批准”措辞，与审批台账冲突；修正仅同步治理状态，不改变已批准的任务内容、人员、范围、依赖或契约。项目负责人已批准修正后的精确 HEAD，PR #18 已合入并完成收尾验证。
+- v1.2 候选提交：由本次修订提交生成后交项目负责人审批；不得以当前工作区状态或“最新版本”替代精确 SHA。
 - 关联基线：
   - PRD：`01-requirements/PRD.md`，已批准 v1.1
   - SPEC：`01-requirements/SPEC.md`，已批准 v1.1
@@ -38,6 +45,8 @@
 - 人员配置确认时间：2026-07-15
 - 已知 Stage 5 首任务风险：`DEF-003`、`DEF-004`；后端测试和 Compose 真实运行验证由 TASK-001 在门禁后关闭
 - 当前首要任务：DEV-001 推送 TASK-002 R9 代码候选 `ac6947a642f00ba48aebcb80064f87fcc4c01ea8` 与正式台账 HEAD，并向 DEV-002 发送书面审核请求；DEV-002 审核通过后创建后继正式 PR 至 `codex/stage-05-integration`。TASK-003、TASK-004 和 DEV-002 的数据库集成继续等待 TASK-002 正式 Review 通过并合入。
+- 当前首要任务：完成任务书 v1.2 候选、台账一致性检查和项目负责人书面批准；之后 `DEV-001` 才可继续 TASK-002 内部整改工作包 R6/R7。TASK-003、TASK-004 和 DEV-002 的数据库集成继续等待 TASK-002 正式 Review 通过并合入 `codex/stage-05-integration`。
+- 当前首要任务：`DEV-001` 提交 TASK-002 PR 并合入 `codex/stage-05-integration`；`DEV-002` 可继续 TASK-006 的领域测试和非数据库实现，数据库迁移与集成继续等待该合入
 
 ## 2. 开发人员配置
 
@@ -157,6 +166,8 @@
 ### TASK-002：认证、权限、审计与设备基础
 
 - 状态：Completed / 已由 DEV-002 正式审核通过、正式 PR #20 合入 `codex/stage-05-integration`，并完成合并后验证；不代表进入 Stage 6
+- 状态：Changes Requested / CR-036 In Development；任务书 v1.2 获批前暂停后续整改
+- 状态：Review Passed / 任务分支已完成并推送，待 PR 与集成
 - 优先级：P0
 - 负责人：`DEV-001`
 - 任务开发者：`DEV-001`
@@ -181,6 +192,10 @@
 - 回滚：回退任务 Commit，并按迁移文档执行对应 downgrade；生产数据存在时不得直接删除表。
 - 交接：旧恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12`、证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 和被拒候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 仅保留历史。R6/R7 与同步候选历史继续保留；R8—R11 审计脱敏修复候选均保留可追溯。DEV-002 已审核通过最终任务分支 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`；合并后 Python 3.13 `142 passed, 5 skipped, 1 warning`、内部网络 PostgreSQL 17 `5 passed, 1 warning`、Compose 健康及 `/healthz` HTTP 200 均通过。未知字段默认脱敏未纳入范围，残余风险已记录；TASK-002 已完成。
 - PR：[#15](https://github.com/QI-code1992/Equipment-repair/pull/15) 已违规合并后由 CR-038 回滚，继续保留为被拒绝历史和书面审核请求载体，不得作为正式集成 PR；DEV-002 创建的 [#20](https://github.com/QI-code1992/Equipment-repair/pull/20) 已正式合入，Merge Commit 为 `904886f48061e27c775f6ee2f8ddae99f5571ead`。
+- 回滚：回退任务 Commit，并按迁移文档执行对应 downgrade；生产数据存在时不得直接删除表。
+- 交接：旧恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12` 与证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 的历史保留；DEV-002 已对后续候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 请求修改。CR-036 新实现目前仅在本地，真实 PostgreSQL/Compose 汇总验证、正式证据、远端候选和 DEV-002 复审均未完成。
+- PR：[#15](https://github.com/QI-code1992/Equipment-repair/pull/15) 状态为 `Changes requested`，保留但不得作为正式集成 PR；后继正式 PR 编号待 DEV-002 审核通过后生成。
+- 交接：实现恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12` 与证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 已推送；Python 3.13、Compose、容器健康、真实 PostgreSQL 迁移与并发验证通过；最终独立 Review 为 0/0/0。合入集成分支前不解锁 TASK-003 或数据库集成。
 
 ### TASK-003：故障、工单、维修与结构化案例闭环
 
