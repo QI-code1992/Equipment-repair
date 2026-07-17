@@ -96,6 +96,44 @@ def test_attachment_scalar_values_and_compact_password_keys_are_redacted() -> No
     }
 
 
+def test_sensitive_semantic_segments_redact_without_harming_business_fields() -> None:
+    value = sanitize_audit_metadata(
+        {
+            "attachmentPayload": "attachment-secret",
+            "binaryAttachment": "binary-secret",
+            "uploadedFile": "file-secret",
+            "passwordValue": "password-value-secret",
+            "passwordvalue": "compact-password-secret",
+            "sessionCookieValue": "cookie-secret",
+            "apiToken": "token-secret",
+            "code": "EQ-001",
+            "name": "Normal equipment",
+            "status": "active",
+            "profile": "ordinary-profile",
+            "content": "ordinary-business-content",
+            "token_count": 7,
+            "token_usage": 8,
+        }
+    )
+
+    assert value == {
+        "attachmentPayload": "[REDACTED]",
+        "binaryAttachment": "[REDACTED]",
+        "uploadedFile": "[REDACTED]",
+        "passwordValue": "[REDACTED]",
+        "passwordvalue": "[REDACTED]",
+        "sessionCookieValue": "[REDACTED]",
+        "apiToken": "[REDACTED]",
+        "code": "EQ-001",
+        "name": "Normal equipment",
+        "status": "active",
+        "profile": "ordinary-profile",
+        "content": "ordinary-business-content",
+        "token_count": 7,
+        "token_usage": 8,
+    }
+
+
 def failure_events(client: TestClient) -> list[AuditEvent]:
     with client.app.state.session_factory() as db:
         return list(

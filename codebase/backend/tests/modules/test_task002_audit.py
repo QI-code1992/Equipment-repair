@@ -276,6 +276,72 @@ def test_validation_failure_redacts_attachment_scalars_and_compact_passwords_in_
     }
 
 
+def test_validation_failure_redacts_sensitive_segments_without_harming_business_fields(
+    client: TestClient,
+) -> None:
+    _, token = create_user_token(
+        client,
+        username="audit-segment-writer",
+        role_code=RoleCode.EQUIPMENT_ADMIN.value,
+        permission_codes=["equipment:write"],
+    )
+    secrets = [
+        "attachment-secret",
+        "binary-secret",
+        "file-secret",
+        "password-value-secret",
+        "compact-password-secret",
+        "cookie-secret",
+        "token-secret",
+    ]
+
+    response = client.post(
+        "/api/equipment",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Idempotency-Key": "invalid-equipment-audit-segments",
+        },
+        json={
+            "code": "EQ-AUDIT-SEGMENTS",
+            "attachmentPayload": secrets[0],
+            "binaryAttachment": secrets[1],
+            "uploadedFile": secrets[2],
+            "passwordValue": secrets[3],
+            "passwordvalue": secrets[4],
+            "sessionCookieValue": secrets[5],
+            "apiToken": secrets[6],
+            "name": "Normal equipment",
+            "status": "active",
+            "profile": "ordinary-profile",
+            "content": "ordinary-business-content",
+            "token_count": 7,
+            "token_usage": 8,
+        },
+    )
+
+    assert response.status_code == 422
+    event = event_from_response(client, response)
+    rendered = json.dumps(event.metadata_json)
+    for secret in secrets:
+        assert secret not in rendered
+    assert event.metadata_json["request"] == {
+        "code": "EQ-AUDIT-SEGMENTS",
+        "attachmentPayload": "[REDACTED]",
+        "binaryAttachment": "[REDACTED]",
+        "uploadedFile": "[REDACTED]",
+        "passwordValue": "[REDACTED]",
+        "passwordvalue": "[REDACTED]",
+        "sessionCookieValue": "[REDACTED]",
+        "apiToken": "[REDACTED]",
+        "name": "Normal equipment",
+        "status": "active",
+        "profile": "ordinary-profile",
+        "content": "ordinary-business-content",
+        "token_count": 7,
+        "token_usage": 8,
+    }
+
+
 def test_logout_validation_failure_recovers_actor_from_bearer(
     client: TestClient,
 ) -> None:

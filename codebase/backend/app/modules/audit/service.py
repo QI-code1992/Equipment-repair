@@ -15,8 +15,37 @@ SENSITIVE_KEYS = {
     "token",
 }
 SENSITIVE_KEY_SUFFIXES = ("_api_key", "_cookie", "_password", "_secret", "_token")
-SENSITIVE_KEY_COMPACT_SUFFIXES = ("password", "passwd", "pwd")
-ATTACHMENT_CONTEXT_KEYS = {
+SENSITIVE_SEMANTIC_SEGMENTS = {
+    "authorization",
+    "cookie",
+    "cookies",
+    "passwd",
+    "password",
+    "pwd",
+    "secret",
+    "token",
+}
+COMPACT_SENSITIVE_PREFIXES = (
+    "authorization",
+    "cookie",
+    "cookies",
+    "passwd",
+    "password",
+    "pwd",
+    "secret",
+)
+COMPACT_SENSITIVE_PREFIX_SUFFIXES = ("confirmation", "hash", "value")
+COMPACT_SENSITIVE_SUFFIXES = (
+    "authorization",
+    "cookie",
+    "cookies",
+    "passwd",
+    "password",
+    "pwd",
+    "secret",
+)
+TOKEN_METRIC_KEYS = {"token_count", "token_usage"}
+ATTACHMENT_CONTEXT_SEGMENTS = {
     "attachment",
     "attachments",
     "file",
@@ -54,26 +83,36 @@ def normalize_key(key: str) -> str:
     return re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", key).lower().replace("-", "_")
 
 
+def key_segments(key: str) -> tuple[str, ...]:
+    return tuple(segment for segment in normalize_key(key).split("_") if segment)
+
+
+def has_compact_sensitive_form(normalized: str) -> bool:
+    return normalized.endswith(COMPACT_SENSITIVE_SUFFIXES) or any(
+        normalized == f"{prefix}{suffix}"
+        for prefix in COMPACT_SENSITIVE_PREFIXES
+        for suffix in COMPACT_SENSITIVE_PREFIX_SUFFIXES
+    )
+
+
 def is_sensitive_key(key: str) -> bool:
     normalized = normalize_key(key)
-    segments = normalized.split("_")
+    segments = key_segments(key)
     return (
         normalized in SENSITIVE_KEYS
         or normalized == "cookies"
+        or normalized not in TOKEN_METRIC_KEYS
+        and any(segment in SENSITIVE_SEMANTIC_SEGMENTS for segment in segments)
         or normalized.startswith("authorization_")
         or normalized.endswith(SENSITIVE_KEY_SUFFIXES)
-        or normalized.endswith(SENSITIVE_KEY_COMPACT_SUFFIXES)
+        or has_compact_sensitive_form(normalized)
         or normalized.startswith(("password_", "passwd_", "pwd_", "cookie_", "cookies_"))
         or re.fullmatch(r"(?:password|passwd|pwd)\d+", normalized) is not None
-        or any(segment in {"password", "passwd", "pwd"} for segment in segments)
     )
 
 
 def is_attachment_context(key: str) -> bool:
-    normalized = normalize_key(key)
-    return normalized in ATTACHMENT_CONTEXT_KEYS or any(
-        normalized.startswith(f"{prefix}_") for prefix in ATTACHMENT_CONTEXT_KEYS
-    )
+    return any(segment in ATTACHMENT_CONTEXT_SEGMENTS for segment in key_segments(key))
 
 
 def has_attachment_context(context: tuple[str, ...]) -> bool:
