@@ -650,7 +650,7 @@
 - Status: Draft PR Candidate / Awaiting Project-Owner and DEV-002 Governance Confirmation；未合入前不得解除下游依赖锁定。
 - Baseline: `codex/stage-05-integration` 的 CR-040 Merge Commit `d633308de8277c343faf3e266476b64baffcb565`。
 - Corrected Important 1: 同步任务书、代码评审、自测、检查点和交接摘要，不再把 TASK-002 表述为“等待 DEV-002 审核”或已无条件完成；代码正式集成和技术验证已完成，但治理收尾仍待合入。
-- Corrected Important 2: 在本 PR 合入前，TASK-003、TASK-004、TASK-005、TASK-006 保持锁定；合入后 TASK-003/004 才可启动，TASK-005 仍等待 TASK-004，TASK-006 的数据库迁移/集成才解除 TASK-002 前置锁定。
-- Corrected Important 3: 记录 DEV-002 批准的精确任务 HEAD `2e89dcd8...`、PR #20，以及 DEV-001（`ll979053897-arch`）手动生成的 Merge Commit `904886f48061e27c775f6ee2f8ddae99f5571ead`。
+- Corrected Important 2: 在本 PR 合入前，TASK-003、TASK-004、TASK-005 保持锁定；TASK-006 的非数据库范围仍可继续，只有迁移、数据库集成和共享数据模型保持 TASK-002 前置锁定。合入后 TASK-003/004 才可启动，TASK-005 仍等待 TASK-004，TASK-006 才解除该数据库边界。
+- Corrected Important 3: 记录 DEV-002 批准的完整精确任务 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`、PR #20，以及 DEV-001（`ll979053897-arch`）手动生成的 Merge Commit `904886f48061e27c775f6ee2f8ddae99f5571ead`。
 - Verification Evidence: Python 3.13 `142 passed, 5 skipped, 1 warning`；PostgreSQL 17 专项 `5 passed, 1 warning`；Compose 健康和容器内 `/healthz` HTTP 200。当前 PR 仅做文档范围的 JSON、治理一致性和 diff 检查。
-- Coordination: 未合入的 CR-040 单独证据 PR #24 不得与本汇总收尾 PR 并行合入；待项目负责人确认本 PR 的精确 HEAD 后，按 CR-040 另行进行 DEV-001 集成检查和逐 PR Merge 授权。
+- Coordination: PR #25 明确取代与其重叠的 CR-040 单独证据 PR #24；PR #24 必须在 PR #25 转 Ready 前关闭，保留历史但不得合并。待项目负责人确认本 PR 的精确 HEAD 后，按 CR-040 另行进行 DEV-001 集成检查和逐 PR Merge 授权。

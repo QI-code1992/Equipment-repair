@@ -68,14 +68,14 @@
   "repairCycle": {
     "taskId": "TASK-002",
     "pullRequest": 20,
-    "reviewState": "POST_MERGE_GOVERNANCE_CLOSEOUT_PENDING",
+    "reviewState": "POST_MERGE_GOVERNANCE_CLOSEOUT_COMPLETED",
     "rejectedCommitSha": "cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77",
     "reviewer": "QI-code1992",
     "owner": "DEV-001",
     "changeRequest": "CR-036",
     "design": "05-development/TASK-002_REMEDIATION_DESIGN.md",
     "resumeAllowed": false,
-    "resumeScope": "TASK-002 code is integrated and technically verified; this governance closeout PR must merge before dependency status changes. Only a new defect or approved change request may reopen implementation.",
+    "resumeScope": "TASK-002 code, technical verification and post-merge governance closeout are complete. Only a new defect or approved change request may reopen implementation.",
     "r6CommitSha": "35119954ba1d9ca475f03d1faa026bf6a474b18f",
     "r7CommitSha": "11dbb226e9b77ff5185fed5fa1434b0de6749206",
     "firstEvidenceCommitSha": "ab67bcdff42d64ba739571515df4e6faed158d32",
@@ -93,8 +93,8 @@
     "integratedAt": "2026-07-17T03:56:28Z",
     "integrationExecutor": "ll979053897-arch / DEV-001 / manual Merge Commit",
     "verification": "Post-merge Python 3.13: 142 passed, 5 skipped, 1 warning; compileall and diff check passed. Isolated Docker test target with PostgreSQL 17: 5 passed, 1 warning. Compose rebuild passed; PostgreSQL and Redis healthy; API Up; /healthz returned HTTP 200.",
-    "dependencyUnlockAllowed": false,
-    "nextAction": "Obtain project-owner confirmation of this governance-only closeout PR exact HEAD, complete DEV-001 integration check and explicit merge authorization, then have non-author DEV-002 merge it. Until then TASK-003, TASK-004, TASK-005 and TASK-006 database integration remain locked."
+    "dependencyUnlockAllowed": true,
+    "nextAction": "TASK-003 and TASK-004 may start under their task-book PR gates. TASK-005 remains blocked by TASK-004. TASK-006 may continue non-database work and its migration, database integration and shared data model are no longer blocked by TASK-002; Stage 6 remains prohibited without its separate formal gate."
   },
   "governanceCorrection": {
     "changeRequest": "CR-037",
