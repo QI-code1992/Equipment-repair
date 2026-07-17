@@ -2,18 +2,18 @@
 
 ## 状态
 
-更新后的 Stage 4 → Stage 5 门禁 `Gate-007` 已针对精确 Commit `25e15709a3f1d92f661d37acdb8aa3e1e0e41346` 获项目负责人批准。项目状态为 Stage 5 可开始，首个任务为 DEV-001 的 TASK-001。
+更新后的 Stage 4 → Stage 5 门禁 `Gate-007` 已针对精确 Commit `25e15709a3f1d92f661d37acdb8aa3e1e0e41346` 获项目负责人批准。项目当前处于 Stage 5：TASK-002 代码已正式集成，正在完成合并后治理收尾；不进入 Stage 6。
 
 ## 交接材料
 
 - 已批准基线：Stage 1 需求、Stage 2 交互、Stage 3 原型、Stage 4 架构与实施计划。
 - Stage 5 编码约束：[AGENTS.md](../04-architecture-plan/AGENTS.md)。
 - 实施顺序：[IMPLEMENTATION_PLAN.md](../04-architecture-plan/IMPLEMENTATION_PLAN.md)。
-- 已批准开发任务书：[DEVELOPMENT_TASK_BOOK.md](../04-architecture-plan/DEVELOPMENT_TASK_BOOK.md)，v1.1。
+- 已批准开发任务书：[DEVELOPMENT_TASK_BOOK.md](../04-architecture-plan/DEVELOPMENT_TASK_BOOK.md)，v1.3（CR-040 已随 PR #23 Merge Commit `d633308de8277c343faf3e266476b64baffcb565` 生效）。
 - 人员配置：`DEV-001` 负责最终集成和全部 Docker/Compose 验证；`DEV-002` 负责 AI、知识适配和正式前端，不具备 Docker 环境。
-- 当前任务：`DEV-001` 按任务书启动 TASK-001，修复并验证平台运行基线；`DEV-002` 和所有下游任务继续等待 TASK-001 检查点。
+- 当前任务：`DEV-001` 在 Draft PR #25 完成 TASK-002 合并后治理收尾；TASK-003、TASK-004、TASK-005 继续等待该 PR 合入，TASK-006 可继续既已授权的非数据库领域测试和实现，迁移、数据库集成与共享数据模型继续等待该 PR 合入。
 
-`DEV-001` 无需额外任务级授权即可开始 TASK-001。所有开发只允许在新的 `codex/*` 隔离分支和独立工作区执行；不得直接向 `main` 推送，也不得在 TASK-001 通过前启动下游任务。
+TASK-001 已完成并保留其历史交接。所有开发只允许在新的 `codex/*` 隔离分支和独立工作区执行；不得直接向 `main` 推送，也不得绕过当前 TASK-002 治理收尾门禁启动受阻任务。
 
 ## CR-040 Stage 5 协作规则交接（2026-07-17）
 
@@ -25,4 +25,10 @@
 - 项目负责人对开发任务 PR 负责 Merge 授权而不代替代码审核；对纯治理文档 PR 同时负责治理内容确认。只有明确批准 PR 编号和精确 HEAD 后，非任务开发者/非治理 PR 作者才可执行 Merge Commit。
 - HEAD、目标分支、依赖或检查结论变化后原授权失效；必须重新核查并询问。开发任务 PR 还须重新审核，纯治理文档 PR 还须由项目负责人重新确认治理内容和精确 HEAD。
 - 禁止 auto-merge、merge queue、直接 push `codex/stage-05-integration` 和任何 Stage 5 普通开发 PR 指向 `main`。
-- 本规则在 CR-040 治理 PR 合入 `codex/stage-05-integration` 后生效；不追溯改写既有历史。
+- 本规则已随 CR-040 PR #23 Merge Commit `d633308de8277c343faf3e266476b64baffcb565` 合入 `codex/stage-05-integration` 并生效；不追溯改写既有历史。
+
+## TASK-002 合并后治理收尾边界（2026-07-17）
+
+- 代码事实：DEV-002 已批准精确任务 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`；PR #20 已由 DEV-001（`ll979053897-arch`）手动合入，Merge Commit `904886f48061e27c775f6ee2f8ddae99f5571ead`；Python 3.13、PostgreSQL 17、Compose 健康和 `/healthz` 证据均已归档。
+- PR #25 合入前：TASK-003、TASK-004、TASK-005 继续锁定；TASK-006 只允许既已授权的非数据库领域测试和实现，迁移、数据库集成与共享数据模型继续锁定；不进入 Stage 6。
+- PR #25 合入后的有效状态：TASK-002 治理收尾关闭；TASK-003/004 可按任务书启动；TASK-005 仍等待 TASK-004；TASK-006 解除 TASK-002 的数据库前置，但仍按自身任务范围和 PR 门禁执行。

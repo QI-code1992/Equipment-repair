@@ -3,9 +3,9 @@
 ## 1. 基线信息
 
 - 项目：新能源装载机设备智能运维平台
-- 当前阶段：Stage 5 — TASK-002 代码已通过 PR #20 合入；合并后验证台账仍在修正审核，依赖在台账正确集成前继续锁定
-- 任务书版本：v1.3 候选（CR-040；项目负责人已批准协作规则，等待本治理候选合入 `codex/stage-05-integration`）
-- 状态：v1.2 仍是当前有效 Stage 5 协作基线；v1.3 仅在治理 PR 合入后生效，不追溯改写既有 PR、Review 或 Merge 历史
+- 当前阶段：Stage 5 — TASK-002 代码已通过 PR #20 合入；合并后技术验证已完成，本治理收尾 PR 合入前下游依赖继续锁定
+- 任务书版本：v1.3（CR-040；PR #23 已合入 `codex/stage-05-integration`）
+- 状态：当前有效 Stage 5 协作基线；CR-040 的 PR #23 Merge Commit 为 `d633308de8277c343faf3e266476b64baffcb565`。不追溯改写既有 PR、Review 或 Merge 历史
 - v1.0 候选提交：`8272a8ed161b787098660f61ebb86fa5ccada564`
 - v1.0 审批记录提交：`20261a80f01de8d18e18a2acf9c97e07087e04bc`
 - v1.0 批准人：项目负责人
@@ -42,7 +42,7 @@
 - 编写人：工作流协调者
 - 人员配置确认时间：2026-07-15
 - 已知 Stage 5 首任务风险：`DEF-003`、`DEF-004`；后端测试和 Compose 真实运行验证由 TASK-001 在门禁后关闭
-- 当前首要任务：DEV-001 修正 TASK-002 合并后验证台账的过期状态、依赖重算和集成负责人记录；开发任务仍由另一名开发者交叉审核。纯治理文档 PR 由项目负责人确认治理内容和精确 HEAD，不要求开发者交叉代码审核。台账正确合入前，TASK-003、TASK-004 和 DEV-002 的数据库集成继续锁定。
+- 当前首要任务：DEV-001 创建并完成 TASK-002 合并后治理收尾 PR；该 PR 正确合入前，TASK-003、TASK-004、TASK-005、TASK-006 数据库集成及其他下游依赖继续锁定。开发任务仍由另一名开发者交叉审核；纯治理文档 PR 由项目负责人确认治理内容和精确 HEAD，不要求开发者交叉代码审核。
 
 ## 2. 开发人员配置
 
@@ -165,7 +165,7 @@
 
 ### TASK-002：认证、权限、审计与设备基础
 
-- 状态：CR-036 R11 Review Remediation Complete / Awaiting DEV-002 Re-review；尚未验收、尚未正式集成
+- 状态：PR #20 代码已合入且合并后技术验证完成；TASK-002 合并后治理收尾待本 PR 合入，未进入 Stage 6，依赖仍锁定
 - 优先级：P0
 - 负责人：`DEV-001`
 - 任务开发者：`DEV-001`
@@ -185,14 +185,14 @@
 - 分支：`codex/task-002-identity-equipment`
 - PR 审核请求：`DEV-001` 在完成 CR-036 全部实现、PostgreSQL/Compose 真实验证、完整独立 Review 和正式证据更新后，推送任务分支并向 `DEV-002` 发送书面审核请求；请求必须绑定新候选精确 SHA。
 - Review：`DEV-002` 复核 Agent 可使用的认证上下文、任务范围、共享契约和真实验证证据；任何 Critical/Important 均退回 `DEV-001` 修复。
-- 正式 PR 与合并历史：DEV-002 审核通过后创建 PR #20；DEV-001 合入 `codex/stage-05-integration`。该历史不按 v1.3 重写。
+- 正式 PR 与合并历史：DEV-002 审核通过任务分支 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15` 后创建 PR #20；最终集成负责人 DEV-001（`ll979053897-arch`）以手动 Merge Commit 合入 `codex/stage-05-integration`，Merge Commit 为 `904886f48061e27c775f6ee2f8ddae99f5571ead`。该历史不按 v1.3 重写。
 - 回滚：回退任务 Commit，并按迁移文档执行对应 downgrade；生产数据存在时不得直接删除表。
-- 交接：旧恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12`、证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 和被拒候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 仅保留历史。R6/R7 与同步候选历史继续保留；R8 的 4 个 Important 关闭后，DEV-002 又发现 1 个审计脱敏绕过。R9/R10 候选保留为历史。R11 代码候选 `ea4338bad15f16048226a329801d3144b367909e` 按归一化完整分段识别附件和敏感键，并以有限紧凑前后缀覆盖 `passwordvalue`、`userpassword`；保留 `profile`、`token_count`、`token_usage` 等非敏感反例。Python 3.13 全套 `142 passed, 5 skipped`；内部网络 PostgreSQL 17 集成 `5 passed`，Compose 重建后的 `/healthz` 为 HTTP 200。本轮仅关闭已知敏感语义别名漏洞；未知字段默认脱敏未纳入范围，残余风险已记录。TASK-002 继续等待 DEV-002 复审。
-- PR：[#15](https://github.com/QI-code1992/Equipment-repair/pull/15) 已违规合并后由 CR-038 回滚并保留历史；DEV-002 创建的后继正式 PR #20 已合入。合并后验证台账仍须通过正确 PR 集成。
+- 交接：旧恢复点 `0b0d9cf0dc066143c0a57d4683567fadb4714c12`、证据提交 `9f162b421f4fefae4cdd69a001891c7e83d4bc13` 和被拒候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 仅保留历史。R8—R11 审计脱敏修复候选均保留可追溯；Python 3.13 为 `142 passed, 5 skipped, 1 warning`，内部网络 PostgreSQL 17 为 `5 passed, 1 warning`，Compose 容器健康且 `/healthz` 为 HTTP 200。未知字段默认脱敏未纳入范围，残余风险已记录。本治理 PR 合入后才解除 TASK-002 依赖并更新下游起始状态。
+- PR：[#15](https://github.com/QI-code1992/Equipment-repair/pull/15) 已违规合并后由 CR-038 回滚并保留历史；DEV-002 创建的后继正式 PR #20 已合入。本 PR 仅完成合并后治理台账收尾。
 
 ### TASK-003：故障、工单、维修与结构化案例闭环
 
-- 状态：Planned / Blocked until TASK-002 is merged into `codex/stage-05-integration`
+- 状态：Planned / Blocked until TASK-002 post-merge governance closeout is merged into `codex/stage-05-integration`
 - 优先级：P0
 - 负责人：`DEV-001`
 - 任务开发者：`DEV-001`
@@ -217,7 +217,7 @@
 
 ### TASK-004：部署独立 RAGFlow 容器环境
 
-- 状态：Planned / Blocked until TASK-002 is merged into `codex/stage-05-integration`
+- 状态：Planned / Blocked until TASK-002 post-merge governance closeout is merged into `codex/stage-05-integration`
 - 优先级：P0
 - 负责人：`DEV-001`
 - 任务开发者：`DEV-001`
@@ -242,7 +242,7 @@
 
 ### TASK-005：知识文档生命周期与 RAGFlow 适配器
 
-- 状态：Planned / 仍阻塞于 TASK-002、TASK-004
+- 状态：Planned / 当前仍阻塞于 TASK-002 治理收尾、TASK-004；收尾合入后仅继续等待 TASK-004
 - 优先级：P0
 - 负责人：`DEV-002`
 - 任务开发者：`DEV-002`
@@ -250,7 +250,7 @@
 - Draft PR 创建者：任务开发者
 - 开发者是否允许创建 Draft PR：是；审核通过前不得自行批准或合并
 - PR 目标分支：`codex/stage-05-integration`
-- 并行属性：Blocked By TASK-002, TASK-004
+- 并行属性：当前 Blocked By TASK-002 governance closeout, TASK-004；收尾合入后为 Blocked By TASK-004
 - 需求映射：FR-002、FR-007、NFR-002、NFR-007；AC-009、AC-024、AC-025、AC-033、AC-036；实施计划 Task 4 的应用部分
 - 范围：知识文档元数据、对象存储引用、上传/状态/检索/删除适配器、引用映射、Worker 同步和超时降级。
 - 不包含：RAGFlow 容器编排、历史维修案例查询。
@@ -275,7 +275,7 @@
 - Draft PR 创建者：任务开发者
 - 开发者是否允许创建 Draft PR：是；审核通过前不得自行批准或合并
 - PR 目标分支：`codex/stage-05-integration`
-- 并行属性：TASK-001 正式交接后可并行启动领域测试和非数据库实现；数据库集成、迁移和共享数据模型仍 Blocked By TASK-002
+- 并行属性：TASK-001 正式交接后可并行启动领域测试和非数据库实现；数据库集成、迁移和共享数据模型当前仍 Blocked By TASK-002 governance closeout，收尾合入后解除该数据库边界
 - 需求映射：FR-012、NFR-006；AC-032、AC-034；实施计划 Task 5
 - 范围：四个 `agent_id` 独立配置、首次单独初始化、模型能力、深度思考校验和运行配置快照输入。
 - 不包含：Agent 图执行、前端对话和版本/发布/回滚能力。
@@ -428,10 +428,10 @@
 |---|---|---|---|---:|---|---|
 | TASK-001 | DEV-001 | 历史独立审查（v1.3 不追溯） | 历史记录不追溯 | P0 | 无 | 已完成并形成远端 FCP-001；保留真实历史记录 |
 | TASK-002 | DEV-001 | DEV-002 | 历史由 DEV-001 合并（v1.3 不追溯） | P0 | Sequential After TASK-001 | TASK-001 测试、Compose、Review、FCP 均通过 |
-| TASK-003 | DEV-001 | DEV-002 | DEV-002，需项目负责人逐 PR 授权 | P0 | Sequential After TASK-002 | 身份、审计和迁移基础已审核、正式集成并完成回归 |
-| TASK-004 | DEV-001 | DEV-002 | DEV-002，需项目负责人逐 PR 授权 | P0 | Sequential After TASK-002 | 业务容器基线与网络契约已审核、正式集成并稳定 |
-| TASK-005 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-002, TASK-004 | 数据迁移基础和 RAGFlow 环境均已审核、正式集成并可用 |
-| TASK-006 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Parallel After TASK-001；DB 集成 Blocked By TASK-002 | 可先做领域测试；迁移合并等待 TASK-002 正式集成 |
+| TASK-003 | DEV-001 | DEV-002 | DEV-002，需项目负责人逐 PR 授权 | P0 | Sequential After TASK-002 governance closeout | TASK-002 合并后治理台账已正确集成，身份、审计和迁移基础已完成回归 |
+| TASK-004 | DEV-001 | DEV-002 | DEV-002，需项目负责人逐 PR 授权 | P0 | Sequential After TASK-002 governance closeout | TASK-002 合并后治理台账已正确集成，业务容器基线与网络契约可开始实施 |
+| TASK-005 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | 当前 Blocked By TASK-002 governance closeout, TASK-004；随后 Blocked By TASK-004 | 收尾合入后 TASK-002 条件满足；RAGFlow 环境仍须由 TASK-004 审核、正式集成并可用 |
+| TASK-006 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Parallel After TASK-001；DB 集成当前 Blocked By TASK-002 governance closeout | 可继续领域测试和非数据库实现；收尾合入后才可进行迁移、数据库集成和共享数据模型 |
 | TASK-007 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-002, TASK-006 | 认证、迁移和 Agent 配置契约已审核并正式集成 |
 | TASK-008 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-002, TASK-006, TASK-007 | 业务工具、配置和 Runtime 可用 |
 | TASK-009 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003, TASK-005, TASK-006, TASK-007 | 维修、案例、知识和 Runtime 全部已审核并正式集成 |

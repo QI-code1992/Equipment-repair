@@ -5,6 +5,13 @@
 - 必要生产检查：单元、API 契约、权限、健康分、Agent/RAGFlow 集成、安全、性能和端到端测试。
 - 验收候选包必须绑定精确 Commit SHA 和最新结果。
 
+## TASK-002 正式集成后治理收尾（2026-07-17）
+
+- 正式合并记录：经 DEV-002 批准的任务分支 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15` 已通过 PR #20 合入；集成负责人 DEV-001（`ll979053897-arch`）手动生成 Merge Commit `904886f48061e27c775f6ee2f8ddae99f5571ead`。
+- 已归档验证：Python 3.13 `142 passed, 5 skipped, 1 warning`；真实 PostgreSQL 17 专项 `5 passed, 1 warning`；Compose 容器健康与容器内 `GET /healthz` 返回 HTTP 200。
+- 本次变更仅为治理文档，不改动 `codebase/`，因此不重复运行上述业务测试；提交前仅运行文档范围的 JSON 解析、治理状态断言和 `git diff --check`。
+- 结论：技术验证不等于依赖解锁。本治理 PR 合入前，TASK-003、TASK-004、TASK-005 仍保持锁定；TASK-006 可继续非数据库范围，迁移、数据库集成和共享数据模型保持锁定；合入后再按任务书的条件依赖执行。
+
 ## Task 1（2026-07-15）
 
 - RED：在尚未实现 `service_name` 参数时运行健康检查，得到 `TypeError: create_app() got an unexpected keyword argument 'service_name'`；验证应用未配置场景确实尚未实现。

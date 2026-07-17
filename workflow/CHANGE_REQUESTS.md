@@ -621,7 +621,7 @@
 ### CR-040：Stage 5 单 PR、DEV-001 集成检查与逐 PR Merge 授权
 
 - Level: L2 协作治理变更。
-- Status: Approved / Implementation Candidate；治理 PR 合入 `codex/stage-05-integration` 后生效。
+- Status: Effective；PR #23 已合入 `codex/stage-05-integration`，规则已生效。
 - Raised By: 项目负责人。
 - Raised At: 2026-07-17。
 - Current Stage: Stage 5 — Development Implementation。
@@ -640,6 +640,17 @@
   - Workflow Ledgers / Automation: 同步角色、授权请求、授权失效、合并后验证和通知处理规则。
   - Historical PRs: TASK-001、TASK-002、CR-037—CR-039 的已发生历史不追溯改写；v1.3 适用于生效时仍 Open 的 Draft PR 与后续任务 PR。
 - Decision: 项目负责人已明确批准该规则与流程，并要求立即更新任务书、AGENTS、工作流台账及自动化指令。
-- Updated Baselines: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.3 候选、`04-architecture-plan/AGENTS.md`、`workflow/PM_TO_DEV_HANDOFF.md`、`workflow/DEV_TO_PM_HANDOFF.md`、`workflow/state.json` 和 Gmail 监控自动化。
-- Verification: 待候选执行 Markdown/JSON 解析、规则扫描、`git diff --check`、任务边界审查和独立复核；本 CR 不修改 `codebase/`，不运行或改变业务代码。
+- Updated Baselines: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.3、`04-architecture-plan/AGENTS.md`、`workflow/PM_TO_DEV_HANDOFF.md`、`workflow/DEV_TO_PM_HANDOFF.md`、`workflow/state.json` 和 Gmail 监控自动化。PR #23 已以 Merge Commit `d633308de8277c343faf3e266476b64baffcb565` 合入 `codex/stage-05-integration`，规则已生效。
+- Verification: PR #23 合并后已完成 `git diff --check`、治理 JSON 解析和职责矩阵一致性检查；无 `codebase/` 修改。本 CR 的合并记录已纳入本治理收尾 PR，不运行或改变业务代码。
 - Merge Boundary: 本治理 PR 不要求 DEV-001/DEV-002 交叉代码审核；项目负责人须确认治理内容和精确 HEAD，DEV-001 须完成集成检查并再次取得针对 PR 编号和精确 HEAD 的 Merge 授权。批准本 CR 规则不等于提前批准任意后续 HEAD 的 Merge。
+
+### TASK-002 合并后治理收尾（2026-07-17）
+
+- Level: L2 交付台账修正；纯治理文档，不修改 `codebase/`、测试代码、迁移、Compose 或生产依赖。
+- Status: Draft PR Candidate / Awaiting Project-Owner and DEV-002 Governance Confirmation；未合入前不得解除下游依赖锁定。
+- Baseline: `codex/stage-05-integration` 的 CR-040 Merge Commit `d633308de8277c343faf3e266476b64baffcb565`。
+- Corrected Important 1: 同步任务书、代码评审、自测、检查点和交接摘要，不再把 TASK-002 表述为“等待 DEV-002 审核”或已无条件完成；代码正式集成和技术验证已完成，但治理收尾仍待合入。
+- Corrected Important 2: 在本 PR 合入前，TASK-003、TASK-004、TASK-005 保持锁定；TASK-006 的非数据库范围仍可继续，只有迁移、数据库集成和共享数据模型保持 TASK-002 前置锁定。合入后 TASK-003/004 才可启动，TASK-005 仍等待 TASK-004，TASK-006 才解除该数据库边界。
+- Corrected Important 3: 记录 DEV-002 批准的完整精确任务 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`、PR #20，以及 DEV-001（`ll979053897-arch`）手动生成的 Merge Commit `904886f48061e27c775f6ee2f8ddae99f5571ead`。
+- Verification Evidence: Python 3.13 `142 passed, 5 skipped, 1 warning`；PostgreSQL 17 专项 `5 passed, 1 warning`；Compose 健康和容器内 `/healthz` HTTP 200。当前 PR 仅做文档范围的 JSON、治理一致性和 diff 检查。
+- Coordination: PR #25 明确取代与其重叠的 CR-040 单独证据 PR #24；PR #24 必须在 PR #25 转 Ready 前关闭，保留历史但不得合并。待项目负责人确认本 PR 的精确 HEAD 后，按 CR-040 另行进行 DEV-001 集成检查和逐 PR Merge 授权。
