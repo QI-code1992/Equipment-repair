@@ -26,3 +26,4 @@ Production feature commits will be appended with branch, files, verification and
 | 2026-07-15 | `0b0d9cf0dc066143c0a57d4683567fadb4714c12` | TASK-002 review remediation and final implementation | pushed; FCP-002 implementation recovery point |
 | 2026-07-15 | `9f162b421f4fefae4cdd69a001891c7e83d4bc13` | TASK-002 verification, review and handoff evidence | pushed to task branch |
 | 2026-07-17 | `863d88ef0763ee25531dfb09cba2a25ec6cfba3e` | CR-039 revert PR #21 wrong-target merge | non-destructive `-m 1` revert candidate restores `main` to PR #21 first-parent tree; pending governance review |
+| 2026-07-17 | `1e98fc20cd2343ceeb9a02314e8fe583d856da33` | CR-039 PR #22 merge | approved non-destructive correction merged into `main`; post-merge codebase matches `main@488d86b` before PR #21 |

@@ -452,7 +452,7 @@
 ### CR-039：回退 PR #21 错误目标分支合并
 
 - 级别：L0 治理纠正
-- 状态：Ready For Review
+- 状态：Done / Merged
 - 提出人：项目负责人
 - 提出时间：2026-07-17
 - 当前阶段：Stage 5
@@ -463,3 +463,6 @@
 - 验证：回退提交树与第一父提交树完全一致；`git diff --check` 通过；无冲突。后续正式 PR 必须由治理审核确认并以 `main` 为目标，仅包含本回退及本 CR 记录。
 - 提交类型例外：`863d88e` 使用 `revert(governance)`，不在 `AGENTS.md` 的常规提交类型列表内；这是对已合并错误目标 PR 的非破坏性治理回退，按本 CR 记录为例外，不改写既有历史。
 - 后续：TASK-002 的正确代码与正式合并结果保留在 `codex/stage-05-integration` 的 `904886f48061e27c775f6ee2f8ddae99f5571ead`。合并后验证台账候选为 `codex/task-002-post-merge-verification@b7c2a87fae6845c39fd834e1d7ca3be66d9ce668`，仍须由 DEV-002 审核并创建目标为 `codex/stage-05-integration` 的正式 PR；在该台账正确集成前，依赖不得解锁。不得由本回退 PR 修改该分支或启动后续任务。
+- 正式补救 PR：DEV-002 创建 PR #22，目标为 `main`；项目负责人批准后由 DEV-001 手动合入，Merge Commit 为 `1e98fc20cd2343ceeb9a02314e8fe583d856da33`。
+- 合并后验证：`main@1e98fc2` 的 `codebase/` 与错误合并前 `main@488d86b` 无差异；相对该第一父提交仅保留 CR-039 与 Commit Log 两份治理记录；`git diff --check` 与 `workflow/state.json` 解析通过。业务测试未运行，因为代码树精确恢复。
+- 依赖结论：CR-039 仅恢复错误目标分支，不改变 TASK-002 验证台账的未集成状态，不解锁任何后续任务或 Stage 6。
