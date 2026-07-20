@@ -146,6 +146,16 @@
 - 其他：Python 3.13 健康回归 `5 passed, 1 warning`；compileall、平台/RAGFlow Compose config、两个静态契约、网络隔离均通过。运行手册所有命令显式使用忽略的本地 `EnvFile`；本地 `.env.local` 未纳入 Git。
 - 边界：未修改业务 API、数据库迁移、TASK-005、生产依赖、兼容代码或通用抽象层；未执行 TASK-005 文档生命周期或 TASK-011 灾备演练。PR #27 新 HEAD 尚待 DEV-002 精确审核，TASK-005 继续锁定。
 
+## TASK-004 PR #27 R3 审核修正验证（2026-07-20）
+
+- 审核输入：DEV-002 对精确 HEAD `601d54d2427302999c7bc10ac5beec3ac0565501` 给出 `Changes requested`，Critical 0、Important 2、Minor 0。
+- 根因：Runbook 给不消费 Compose 环境的 `verify-isolation.ps1` 传入未声明的 `-EnvFile`，旧静态检查只搜索参数文本而未核对脚本签名；持久化脚本在清理前输出 PASS，且清理命令绕过 `Invoke-Compose` 的退出码门禁。
+- TDD：增强 `verify-review-remediation.ps1` 后先得到 `persistence PASS is emitted before cleanup completes`，修复清理顺序后继续得到 `runbook passes unsupported EnvFile to isolation verifier`，再删除无效参数并转为 `TASK-004 review remediation contract: PASS`。
+- 修正提交：`dc909fff1c8260f2f8a50670192761572cdfb76b`。健康和持久化脚本继续显式使用同一 `.env.local`；隔离脚本只检查已运行容器/网络。MySQL DROP、Redis DEL、MinIO object/bucket 删除、Elasticsearch DELETE 及临时资源清理全部经过退出码检查，所有清理完成后才输出 PASS。
+- 真实验证：Docker Client/Server `29.6.1`、Compose `v5.1.4`；5 容器 healthy；Web/API HTTP 200；RAGFlow `v0.25.6`；Elasticsearch `8.11.3`；依赖错误 0、秘密值命中 0；网络隔离通过；四存储 restart 后探针一致、容器重建数 0、严格清理探针数 4。
+- 静态验证：三个 PowerShell 文件语法解析通过；Compose 契约和审核修正契约均 PASS；RAGFlow Compose `config --quiet`、`git diff --check` 通过。
+- 边界：只修改 TASK-004 运行手册、持久化验证脚本、审核回归与正式证据；未修改业务 API、数据库迁移、TASK-005、生产依赖、兼容代码、通用抽象或无关文件。TASK-005 继续锁定，等待 DEV-002 对新精确 HEAD 复审。
+
 ## TASK-004 独立 RAGFlow 基础设施验证（2026-07-20）
 
 - 分支/基线：`codex/task-004-ragflow-infra`，基于 `origin/codex/stage-05-integration@b29c69d13c3d1c81f01023152eabf0c0f2d02741`；证据提交前功能候选为 `ac8c007730d8e947c5687380e4583e8b23d2cce1`。

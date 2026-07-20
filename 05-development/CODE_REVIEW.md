@@ -179,3 +179,11 @@
 - 第二轮 Spec/失败路径：错误 Compose 镜像覆盖、错误 digest、运行镜像 ID 不一致、Web/API 超时、依赖连接失败、日志秘密命中和持久化不一致均返回非零。注入持久化不一致后四项探针保留；历史日志假阳性通过当前执行窗口约束修复，但窗口内任何匹配仍零容忍。Critical 0、Important 0、Minor 0。
 - 第三轮完整 diff/运行态：Python 3.13 `5 passed, 1 warning`，compileall、两套 Compose config、静态契约、5 容器健康、Web/API 200、网络隔离、四存储 restart、两类镜像负向测试、失败探针保留、日志/秘密扫描和 `git diff --check` 通过。仅 TASK-004 范围，无无关修改。Critical 0、Important 0、Minor 0。
 - 结论：本地三轮复查通过，不等于 DEV-002 正式批准。新精确 HEAD 必须在同一 PR #27 重新审核；复审通过前不请求 Merge 授权、不解锁 TASK-005，Stage 6 仍禁止进入。
+
+### TASK-004 PR #27 R3 Changes requested 与 DEV-001 修正复查
+
+- 外部审核：DEV-002 对精确 HEAD `601d54d2427302999c7bc10ac5beec3ac0565501` 给出 Critical 0、Important 2、Minor 0；阻断为 Runbook 的隔离脚本参数不可执行，以及持久化探针清理失败仍可能输出 PASS。
+- 第一轮 Standards：修正仅涉及 TASK-004 既有 Runbook、验证脚本、回归测试和正式证据；没有新增依赖、兼容层、抽象层、业务代码、迁移或 TASK-005 实现。Critical 0、Important 0、Minor 0。
+- 第二轮 Spec/失败路径：Runbook 命令与隔离脚本 AST 参数签名一致；调用 Compose 的脚本仍绑定本地 EnvFile。持久化验证只有在四类探针及临时资源清理全部返回 0 后才输出 PASS，任一清理失败抛错且不会产生成功结论。Critical 0、Important 0、Minor 0。
+- 第三轮完整 diff/运行态：功能提交 `dc909fff1c8260f2f8a50670192761572cdfb76b`；静态 RED/GREEN、PowerShell 语法、Compose 契约、5 容器健康、Web/API 200、网络隔离、四存储 restart 和严格清理通过；`git diff --check` 通过。Critical 0、Important 0、Minor 0。
+- 结论：本地复查关闭本轮两个 Important，但不等于 DEV-002 正式批准。必须推送同一 PR #27 的新精确 HEAD 并重新审核；此前不请求 Merge 授权、不解锁 TASK-005，Stage 6 仍禁止进入。
