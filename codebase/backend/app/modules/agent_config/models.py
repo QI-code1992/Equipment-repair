@@ -10,6 +10,8 @@ from sqlalchemy import (
     Integer,
     String,
     UniqueConstraint,
+    false,
+    true,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -30,7 +32,9 @@ class ModelProvider(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     secret_ref: Mapped[str] = mapped_column(String(500), nullable=False)
-    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True, server_default=true()
+    )
 
 
 class ModelBinding(Base):
@@ -45,8 +49,12 @@ class ModelBinding(Base):
     )
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     model_name: Mapped[str] = mapped_column(String(200), nullable=False)
-    supports_reasoning: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    supports_reasoning: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
+    enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True, server_default=true()
+    )
 
 
 class AgentConfigModel(Base):

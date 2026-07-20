@@ -1,7 +1,8 @@
 from dataclasses import replace
 
 import pytest
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import UniqueConstraint, event
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.database import Base, create_database_engine, session_factory
@@ -15,6 +16,11 @@ from app.modules.identity.models import User
 @pytest.fixture
 def db_session() -> Session:
     engine = create_database_engine("sqlite+pysqlite:///:memory:")
+    event.listen(
+        engine,
+        "connect",
+        lambda connection, _: connection.execute("PRAGMA foreign_keys=ON"),
+    )
     Base.metadata.create_all(engine)
     factory = session_factory(engine)
     with factory() as session:
@@ -44,7 +50,9 @@ def add_binding(
         supports_reasoning=supports_reasoning,
         enabled=binding_enabled,
     )
-    db_session.add_all((provider, binding))
+    db_session.add(provider)
+    db_session.flush()
+    db_session.add(binding)
     db_session.commit()
     return binding
 
@@ -76,6 +84,39 @@ def test_orm_models_preserve_named_unique_constraints_from_migration() -> None:
 
     assert "uq_model_bindings_provider_name" in binding_constraint_names
     assert "uq_agent_configs_agent_id" in config_constraint_names
+
+
+@pytest.mark.parametrize(
+    ("model", "column_name", "expected_default"),
+    [
+        (ModelProvider, "enabled", "true"),
+        (ModelBinding, "supports_reasoning", "false"),
+        (ModelBinding, "enabled", "true"),
+    ],
+)
+def test_orm_boolean_server_defaults_match_migration(
+    model: type[ModelProvider] | type[ModelBinding],
+    column_name: str,
+    expected_default: str,
+) -> None:
+    column = model.__table__.c[column_name]
+
+    assert column.server_default is not None
+    assert str(column.server_default.arg).lower() == expected_default
+
+
+def test_sqlite_fixture_enforces_agent_config_model_binding_foreign_key(
+    db_session: Session,
+) -> None:
+    repository = SqlAgentConfigRepository(db_session)
+    invalid_config = replace(
+        AgentConfig.default_for(AgentId.METRIC_QUERY),
+        model_binding_id="missing-binding",
+    )
+
+    with pytest.raises(IntegrityError):
+        repository.save(invalid_config)
+    db_session.rollback()
 
 
 @pytest.mark.parametrize("provider_enabled,binding_enabled", [(False, True), (True, False)])
