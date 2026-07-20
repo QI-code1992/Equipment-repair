@@ -38,6 +38,8 @@
 | `codebase/infra/ragflow/scripts/verify.ps1` | 检查五个容器、RAGFlow HTTP 与 Elasticsearch 版本。 |
 | `codebase/infra/ragflow/scripts/verify-isolation.ps1` | 检查实际 Docker 网络成员和宿主机端口。 |
 | `codebase/infra/ragflow/scripts/verify-persistence.ps1` | 写入探针、重启、读取比对并清理探针。 |
+| `codebase/infra/ragflow/scripts/compose-execution.psm1` | 对外部 Compose 命令统一检查退出码，供持久化清理失败路径复用。 |
+| `codebase/infra/ragflow/tests/verify-cleanup-failure.ps1` | 以子进程和固定非零退出码验证四类清理失败均不会输出 PASS。 |
 | `08-release-handoff/RUNBOOK.md` | 启停、验证、排障、恢复候选和 TASK-005 接入说明。 |
 | `05-development/SELF_TEST.md` | TASK-004 真实命令和结果。 |
 | `05-development/CODE_REVIEW.md` | DEV-001 三轮自审及 DEV-002 审核入口。 |
@@ -673,10 +675,12 @@ if (-not (Test-Path -LiteralPath $RagflowEnvFile -PathType Leaf)) { throw "Missi
 powershell -NoProfile -File codebase/infra/ragflow/scripts/verify.ps1 -EnvFile $RagflowEnvFile
 powershell -NoProfile -File codebase/infra/ragflow/scripts/verify-isolation.ps1
 powershell -NoProfile -File codebase/infra/ragflow/scripts/verify-persistence.ps1 -EnvFile $RagflowEnvFile
+powershell -NoProfile -File codebase/infra/ragflow/tests/verify-review-remediation.ps1
+powershell -NoProfile -File codebase/infra/ragflow/tests/verify-cleanup-failure.ps1
 git diff --check
 ```
 
-Expected: Python 健康回归通过；两套 Compose config 通过；TASK-004 三类验证全部 PASS；无 diff whitespace 错误。
+Expected: Python 健康回归通过；两套 Compose config 通过；TASK-004 运行态、审核契约和清理失败行为验证全部 PASS；无 diff whitespace 错误。
 
 - [ ] **Step 2: 第一轮自审 — Standards**
 

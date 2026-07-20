@@ -156,6 +156,17 @@
 - 静态验证：三个 PowerShell 文件语法解析通过；Compose 契约和审核修正契约均 PASS；RAGFlow Compose `config --quiet`、`git diff --check` 通过。
 - 边界：只修改 TASK-004 运行手册、持久化验证脚本、审核回归与正式证据；未修改业务 API、数据库迁移、TASK-005、生产依赖、兼容代码、通用抽象或无关文件。TASK-005 继续锁定，等待 DEV-002 对新精确 HEAD 复审。
 
+## TASK-004 PR #27 R4 审核修正验证（2026-07-20）
+
+- 审核输入：DEV-002 对精确 HEAD `6cd29f158b2c03f61c5b21a7e9bf99d30ec17a34` 给出 `Changes requested`，Critical 0、Important 2、Minor 0。
+- 根因：设计和计划中的真实运行命令未与 Runbook 的 `.env.local` 约束同步；清理门禁只有源码结构检查，没有从外部命令非零退出到脚本非零退出且无 PASS 的可执行证据。
+- RED/GREEN：环境契约增强后先报 `TASK-004_RAGFLOW_INFRA_DESIGN.md does not define the local runtime environment file`；清理行为测试先报 `missing injectable cleanup helper`。修正后两个脚本分别输出 `TASK-004 review remediation contract: PASS` 和 `TASK-004 cleanup failure behavior: PASS; categories=4`。一次临时动态脚本被 AMSI 拦截的环境事件未作为 RED 证据。
+- 修正提交：`29180e285767cbffb9d694cd1834f04514d2cc18`。设计和计划明确真实运行只使用忽略的 `codebase/infra/.env.local` 并显式传 `-EnvFile`，只有不启动容器的静态 `config --quiet` 可使用 `.env.example`。
+- 失败行为：新增最小 Compose 外部副作用边界；测试以静态假命令返回 42，并分别覆盖 MySQL、Redis、MinIO、Elasticsearch 清理参数。四个子进程均为非零且没有 PASS；生产持久化验证仍在全部清理成功后才输出 PASS。
+- 真实验证：Docker Client/Server `29.6.1`、Compose `v5.1.4`；5 容器 healthy；Web/API HTTP 200；RAGFlow `v0.25.6`；Elasticsearch `8.11.3`；依赖错误 0、秘密值命中 0；网络隔离通过；四存储 restart 后探针一致、容器重建数 0、清理探针数 4。
+- 其他验证：Python 3.13 健康回归 `5 passed, 1 warning`；compileall、Compose 契约、RAGFlow Compose config、全部 PowerShell 语法和 `git diff --check` 通过。
+- 边界：未新增生产依赖或兼容代码；新增一个仅用于外部 Compose 退出码检查的最小模块，没有业务 API、迁移、TASK-005 或无关修改。TASK-005 继续锁定，等待 DEV-002 对推送后的新精确 HEAD 复审。
+
 ## TASK-004 独立 RAGFlow 基础设施验证（2026-07-20）
 
 - 分支/基线：`codex/task-004-ragflow-infra`，基于 `origin/codex/stage-05-integration@b29c69d13c3d1c81f01023152eabf0c0f2d02741`；证据提交前功能候选为 `ac8c007730d8e947c5687380e4583e8b23d2cce1`。

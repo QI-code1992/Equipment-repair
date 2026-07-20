@@ -169,3 +169,11 @@
 - 真实验证：5 容器 healthy，Web/API 200，RAGFlow v0.25.6，Elasticsearch 8.11.3；依赖错误/秘密值命中均为 0；网络隔离和四存储 restart 通过，容器未重建，四类探针清理完成；PowerShell 语法、两个静态契约、Compose config 和 diff check 通过。
 - 交付边界：仅 TASK-004 Runbook、验证脚本、回归测试和正式证据；无业务 API、迁移、TASK-005、生产依赖、兼容代码、通用抽象或无关修改。
 - 请求动作：推送正式台账提交后，以 PR #27 新完整 HEAD 重新请求 DEV-002 审核。新审核通过前不得请求 Merge 授权；TASK-005 继续锁定，Stage 6 禁止进入。
+
+## TASK-004 PR #27 R4 审核修正交接（2026-07-20）
+
+- 审核/修正：DEV-002 对 `6cd29f158b2c03f61c5b21a7e9bf99d30ec17a34` 给出 `Changes requested`（Critical 0、Important 2、Minor 0）；DEV-001 在同一分支和 PR #27 内完成最小修正，功能提交 `29180e285767cbffb9d694cd1834f04514d2cc18`。
+- 关闭证据：设计、计划与 Runbook 统一真实运行使用 `.env.local`，静态 Compose config 才允许 `.env.example`；四类清理通过子进程执行固定非零假命令，均返回非零且不输出 PASS，避免只依赖源码正则判断。
+- 真实验证：Python 3.13 `5 passed, 1 warning`；Compose/审核/清理行为契约、PowerShell 语法、5 容器健康、Web/API 200、网络隔离、四存储 restart 和严格清理通过；未输出或提交真实秘密。
+- 交付边界：无业务 API、迁移、TASK-005、生产依赖、兼容代码或无关修改；新增一个仅检查外部 Compose 命令退出码的最小模块。
+- 请求动作：推送本正式台账提交后，以 PR #27 新完整 HEAD 重新请求 DEV-002 审核。新审核通过前不得请求 Merge 授权；TASK-005 继续锁定，Stage 6 禁止进入。

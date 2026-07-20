@@ -187,3 +187,11 @@
 - 第二轮 Spec/失败路径：Runbook 命令与隔离脚本 AST 参数签名一致；调用 Compose 的脚本仍绑定本地 EnvFile。持久化验证只有在四类探针及临时资源清理全部返回 0 后才输出 PASS，任一清理失败抛错且不会产生成功结论。Critical 0、Important 0、Minor 0。
 - 第三轮完整 diff/运行态：功能提交 `dc909fff1c8260f2f8a50670192761572cdfb76b`；静态 RED/GREEN、PowerShell 语法、Compose 契约、5 容器健康、Web/API 200、网络隔离、四存储 restart 和严格清理通过；`git diff --check` 通过。Critical 0、Important 0、Minor 0。
 - 结论：本地复查关闭本轮两个 Important，但不等于 DEV-002 正式批准。必须推送同一 PR #27 的新精确 HEAD 并重新审核；此前不请求 Merge 授权、不解锁 TASK-005，Stage 6 仍禁止进入。
+
+### TASK-004 PR #27 R4 Changes requested 与 DEV-001 修正复查
+
+- 外部审核：DEV-002 对精确 HEAD `6cd29f158b2c03f61c5b21a7e9bf99d30ec17a34` 给出 Critical 0、Important 2、Minor 0；阻断为真实运行环境文件契约在设计/计划中不一致，以及清理失败只做静态检查、未证明非零退出和无 PASS。
+- 第一轮 Standards：设计、计划与 Runbook 统一为真实运行使用忽略的 `.env.local`；调用 Compose 的运行脚本显式传 `-EnvFile`，仅静态 `config --quiet` 使用 `.env.example`。没有生产依赖、兼容代码、业务代码、迁移或 TASK-005 实现。Critical 0、Important 0、Minor 0。
+- 第二轮 Spec/失败路径：功能提交 `29180e285767cbffb9d694cd1834f04514d2cc18` 引入最小外部命令边界；四类代表性清理以子进程调用固定退出码 42 的假 Compose 命令，逐项断言非零退出且输出不含 PASS。真实持久化重启和成功清理继续通过。Critical 0、Important 0、Minor 0。
+- 第三轮完整 diff/运行态：环境与清理行为契约、PowerShell 语法、Python 3.13、compileall、Compose config、5 容器健康、Web/API 200、网络隔离、四存储 restart 和 `git diff --check` 均通过；变更限制在 TASK-004 设计、计划、基础设施验证/测试和正式证据。Critical 0、Important 0、Minor 0。
+- 结论：本地三轮复查关闭两项 Important，但不等于 DEV-002 正式批准。推送后必须按 PR #27 新完整 HEAD 重新审核；此前不请求 Merge 授权、不解锁 TASK-005，Stage 6 仍禁止进入。

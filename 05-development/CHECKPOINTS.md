@@ -90,11 +90,19 @@
 
 ## FCP-004-R4：TASK-004 PR #27 第三轮审核修正候选
 
-- 状态：Review Candidate / Not Accepted / Not Integrated / Does Not Unlock TASK-005。
+- 状态：Superseded / Changes Requested at `6cd29f158b2c03f61c5b21a7e9bf99d30ec17a34` / Not Accepted / Not Integrated / Does Not Unlock TASK-005；后续以 FCP-004-R5 为准。
 - 分支/基线：`codex/task-004-ragflow-infra` / `b29c69d13c3d1c81f01023152eabf0c0f2d02741`；修正功能提交 `dc909fff1c8260f2f8a50670192761572cdfb76b`，精确候选以本证据提交推送后的 PR #27 HEAD 为准。
 - 修正：删除 Runbook 对隔离脚本的无效 `-EnvFile` 参数并通过 AST 核对签名；MySQL、Redis、MinIO、Elasticsearch 和临时资源清理全部使用带退出码检查的 Compose 调用；清理完成后才输出 PASS。
 - 验证：审核修正契约和 Compose 契约 PASS；三个 PowerShell 文件可解析；Docker 5 服务 healthy、Web/API 200、RAGFlow v0.25.6、Elasticsearch 8.11.3、网络隔离通过；四存储 restart 一致且严格清理 4 类探针；`git diff --check` 通过。
 - 恢复/门禁：失败验证路径保留持久化探针，不输出 PASS；成功路径清理失败返回非零。等待 DEV-002 审核新精确 HEAD；获批、逐 PR/HEAD 授权、DEV-002 Merge Commit 和 DEV-001 合并后复验完成前，TASK-005 继续锁定，Stage 6 禁止进入。
+
+## FCP-004-R5：TASK-004 PR #27 第四轮审核修正候选
+
+- 状态：Review Candidate / Not Accepted / Not Integrated / Does Not Unlock TASK-005。
+- 分支/基线：`codex/task-004-ragflow-infra` / `b29c69d13c3d1c81f01023152eabf0c0f2d02741`；修正功能提交 `29180e285767cbffb9d694cd1834f04514d2cc18`，精确候选以本证据提交推送后的 PR #27 HEAD 为准。
+- 修正：设计、计划和 Runbook 统一真实运行 `.env.local` 契约；以最小外部命令边界和四个子进程证明 MySQL、Redis、MinIO、Elasticsearch 清理命令非零时验证整体非零且不输出 PASS。
+- 验证：审核契约、清理失败行为和 Compose 契约 PASS；全部 PowerShell 文件可解析；Python 3.13 `5 passed, 1 warning`；5 服务 healthy、Web/API 200、RAGFlow v0.25.6、Elasticsearch 8.11.3、网络隔离和四存储 restart/清理通过；`git diff --check` 通过。
+- 恢复/门禁：可检出本候选并使用忽略的本地环境文件复现。等待 DEV-002 审核新精确 HEAD；获批、逐 PR/HEAD 授权、DEV-002 Merge Commit 和 DEV-001 合并后复验完成前，TASK-005 继续锁定，Stage 6 禁止进入。
 
 ## FCP-002-R5：TASK-002 语义敏感键复审候选
 
