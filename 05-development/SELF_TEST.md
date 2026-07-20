@@ -136,6 +136,16 @@
 - 唯一警告：既有 FastAPI/Starlette TestClient 对 `httpx` 的第三方弃用提示。
 - 未验证：DEV-002 尚未批准；后继正式 PR 尚未由 DEV-002 创建；TASK-002 尚未合入 `codex/stage-05-integration`，依赖继续锁定。
 
+## TASK-004 PR #27 R2 审核修正验证（2026-07-20）
+
+- 审核输入：DEV-002 对精确 HEAD `6c6fda004f806f8b72eddaad64aac419b78a7a6f` 给出 `Changes requested`，Critical 0、Important 4、Minor 2。
+- TDD：`verify-review-remediation.ps1` 先分别因缺少 Compose/运行镜像绑定、Web 有限超时、当前执行窗口日志扫描、显式 `EnvFile` 和失败探针保留而 RED，再以最小修改转 GREEN。完整矩阵发现历史日志导致 22 次假阳性，新增“日志窗口绑定本次开始时间”RED 后修正并复跑通过。
+- 镜像链：展开 Compose 镜像标签、获批 RepoDigest、本地固定标签镜像 ID 与运行容器不可变镜像 ID 四者绑定；错误 `RAGFLOW_IMAGE` 覆盖和错误摘要均被拒绝，且运行容器 ID/本地标签未被修改。
+- 健康与日志：Web/API 请求均有有限超时；真实结果为 5 服务 healthy、Web/API HTTP 200、RAGFlow v0.25.6、Elasticsearch 8.11.3。完成前最终复测时间 `2026-07-20T05:07:01.3918899Z`—`2026-07-20T05:07:39.5000371Z`；日志 133 行，依赖连接失败 0、秘密值命中 0；Docker info/config/up/ps/logs 退出码均为 0。
+- 持久化：正常 restart 后 MySQL/Redis/MinIO-S3/Elasticsearch 四项探针一致、容器重建数 0；注入 Redis 不一致时脚本按预期失败且四项探针全部保留，测试后仅清理本次 TASK-004 命名空间。
+- 其他：Python 3.13 健康回归 `5 passed, 1 warning`；compileall、平台/RAGFlow Compose config、两个静态契约、网络隔离均通过。运行手册所有命令显式使用忽略的本地 `EnvFile`；本地 `.env.local` 未纳入 Git。
+- 边界：未修改业务 API、数据库迁移、TASK-005、生产依赖、兼容代码或通用抽象层；未执行 TASK-005 文档生命周期或 TASK-011 灾备演练。PR #27 新 HEAD 尚待 DEV-002 精确审核，TASK-005 继续锁定。
+
 ## TASK-004 独立 RAGFlow 基础设施验证（2026-07-20）
 
 - 分支/基线：`codex/task-004-ragflow-infra`，基于 `origin/codex/stage-05-integration@b29c69d13c3d1c81f01023152eabf0c0f2d02741`；证据提交前功能候选为 `ac8c007730d8e947c5687380e4583e8b23d2cce1`。

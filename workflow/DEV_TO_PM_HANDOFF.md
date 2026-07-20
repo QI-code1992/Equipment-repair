@@ -153,3 +153,11 @@
 - 验证：Python 3.13 `5 passed, 1 warning`；平台/RAGFlow Compose config、静态契约、真实健康/API、网络隔离、四存储重启持久化及 `git diff --check` 全部通过。
 - 交付边界：无业务 API、数据库迁移、TASK-005、生产依赖、兼容代码、通用抽象或无关修改；真实文档上传/解析/混合检索/引用仍属于 TASK-005。
 - 请求动作：将本正式台账提交推送到同一 PR #27，以新的完整精确 HEAD 重新请求 DEV-002 审核。旧审核随 HEAD 变化失效；复审通过前不得请求 Merge 授权，TASK-005 继续锁定，Stage 6 禁止进入。
+
+## TASK-004 PR #27 R2 审核修正交接（2026-07-20）
+
+- 审核/修正：DEV-002 对 `6c6fda004f806f8b72eddaad64aac419b78a7a6f` 给出 `Changes requested`（Critical 0、Important 4、Minor 2）；DEV-001 继续在同一分支和 PR #27 内修正。
+- 关闭证据：验证脚本绑定展开 Compose 镜像、获批 digest、固定标签与运行容器镜像 ID；Runbook 显式传入忽略的本地 `EnvFile`；Web/API 均有限超时；当前执行窗口日志依赖错误与秘密值扫描为 0；证据包含时间、命令退出码和脱敏摘要；失败验证保留四类持久化探针；PR 标题按任务书格式修正。
+- 真实验证：Python 3.13 `5 passed, 1 warning`；平台/RAGFlow Compose config、静态契约、5 容器 healthy、Web/API 200、Elasticsearch 8.11.3、网络隔离、四存储 restart、错误镜像/摘要拒绝及失败探针保留全部通过。未输出或提交秘密值。
+- 交付边界：无业务 API、迁移、TASK-005、生产依赖、兼容代码、通用抽象或无关修改；TASK-005 真实文档能力和 TASK-011 灾备仍不属于本轮。
+- 请求动作：推送本轮功能和正式台账提交，确认 PR #27 完整精确 HEAD，并重新请求 DEV-002 审核。复审通过前不得请求 Merge 授权；TASK-005 继续锁定，Stage 6 禁止进入。

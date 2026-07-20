@@ -80,6 +80,14 @@
 - 验证：Python 3.13 `5 passed, 1 warning`；两套 Compose config、两个静态契约、5 容器健康、Web/API 200、网络隔离、S3 持久化和摘要突变负向测试通过；`git diff --check` 通过。
 - 恢复/门禁：可检出本候选复现完整验证；不得替代稳定集成基线。等待 DEV-002 复审 PR #27 新精确 HEAD；获批、逐 PR/HEAD Merge 授权、DEV-002 Merge Commit 和 DEV-001 合并后复验完成前，TASK-005 继续锁定，Stage 6 禁止进入。
 
+## FCP-004-R3：TASK-004 PR #27 第二轮审核修正候选
+
+- 状态：Review Candidate / Not Accepted / Not Integrated / Does Not Unlock TASK-005；`6c6fda004f806f8b72eddaad64aac419b78a7a6f` 已被第二轮 `Changes requested` 取代。
+- 分支/基线：`codex/task-004-ragflow-infra` / `b29c69d13c3d1c81f01023152eabf0c0f2d02741`；精确候选以本轮证据提交推送后的 PR #27 HEAD 为准。
+- 修正：Compose 展开镜像、获批 digest、固定标签 ID 与运行容器 ID 绑定；显式本地 `EnvFile`；Web 有限超时；当前执行窗口依赖错误/秘密扫描；时间、退出码和脱敏日志摘要；失败探针保留；合规 PR 标题。
+- 验证：Python 3.13 `5 passed, 1 warning`；两套 Compose config、两个静态契约、真实健康/API、网络隔离、四存储 restart、错误镜像/摘要、失败探针保留及日志扫描均通过；未记录真实秘密。
+- 恢复/门禁：使用忽略的本地环境文件复现；失败探针不自动清理以保留调查证据，清理由操作者确认后限定 TASK-004 命名空间。等待 DEV-002 审核新精确 HEAD；获批、授权、合并和合并后复验前 TASK-005 继续锁定，Stage 6 禁止进入。
+
 ## FCP-002-R5：TASK-002 语义敏感键复审候选
 
 - 状态：Review Candidate / Not Accepted / Not Integrated / Does Not Unlock Dependencies。

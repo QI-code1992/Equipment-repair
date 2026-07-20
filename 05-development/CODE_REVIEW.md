@@ -171,3 +171,11 @@
 - 第二轮 Spec/失败路径：API 同时断言 target 9380、HTTP 200、业务 code/message 与 v0.25.6；完成前矩阵发现容器 healthy 后 API 仍可能短暂关闭，已在 `ba7e13f2b585f872ca811e98b50c09e25020fba5` 增加 60 秒有限重试并以重启后立即探测复现通过；MinIO 随机 bucket/object 经 S3 写入、重启、回读、清理；摘要缺失、检查失败或不匹配均返回非零，摘要突变测试通过；Critical 0、Important 0、Minor 0。
 - 第三轮完整 diff：相对基线只新增一个 TASK-004 审核回归脚本并原位修改两个验证脚本、实施计划、运行手册和正式台账；没有 TASK-005、后端领域代码、迁移、前端、生产依赖、兼容层或通用抽象；完整矩阵与 `git diff --check` 通过。Critical 0、Important 0、Minor 0。
 - 结论：三项已在本地证据中关闭，但新 HEAD 会使旧审核失效；必须推送同一 PR #27 并由 DEV-002 重新审核精确 HEAD。当前不得请求 Merge 授权，不得解锁 TASK-005，Stage 6 仍禁止进入。
+
+### TASK-004 PR #27 R2 Changes requested 与 DEV-001 修正复查
+
+- 外部审核：DEV-002 对精确 HEAD `6c6fda004f806f8b72eddaad64aac419b78a7a6f` 给出 Critical 0、Important 4、Minor 2；阻断涉及实际 Compose/运行镜像身份未绑定、Runbook 未显式传 `EnvFile`、Web 无有限超时、缺少日志/秘密扫描与结构化执行证据；Minor 为失败探针被清理和 PR 标题不合规。
+- 第一轮 Standards：修改仅位于 TASK-004 既有验证、测试、实施计划和运行手册；未增加依赖、兼容层、抽象层、业务代码或 TASK-005 实现。Runbook 改为唯一显式本地 `EnvFile`，PR 标题规则同步为 `[TASK-004] feat: ...`。Critical 0、Important 0、Minor 0。
+- 第二轮 Spec/失败路径：错误 Compose 镜像覆盖、错误 digest、运行镜像 ID 不一致、Web/API 超时、依赖连接失败、日志秘密命中和持久化不一致均返回非零。注入持久化不一致后四项探针保留；历史日志假阳性通过当前执行窗口约束修复，但窗口内任何匹配仍零容忍。Critical 0、Important 0、Minor 0。
+- 第三轮完整 diff/运行态：Python 3.13 `5 passed, 1 warning`，compileall、两套 Compose config、静态契约、5 容器健康、Web/API 200、网络隔离、四存储 restart、两类镜像负向测试、失败探针保留、日志/秘密扫描和 `git diff --check` 通过。仅 TASK-004 范围，无无关修改。Critical 0、Important 0、Minor 0。
+- 结论：本地三轮复查通过，不等于 DEV-002 正式批准。新精确 HEAD 必须在同一 PR #27 重新审核；复审通过前不请求 Merge 授权、不解锁 TASK-005，Stage 6 仍禁止进入。
