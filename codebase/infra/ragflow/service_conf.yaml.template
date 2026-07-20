@@ -1,0 +1,23 @@
+ragflow:
+  host: 0.0.0.0
+  http_port: 9380
+mysql:
+  name: '${MYSQL_DBNAME}'
+  user: '${MYSQL_USER}'
+  password: '${MYSQL_PASSWORD}'
+  host: 'ragflow-mysql'
+  port: 3306
+  max_connections: 100
+  stale_timeout: 300
+minio:
+  user: '${MINIO_USER}'
+  password: '${MINIO_PASSWORD}'
+  host: 'ragflow-minio:9000'
+es:
+  hosts: 'http://ragflow-elasticsearch:9200'
+  username: 'elastic'
+  password: '${ELASTIC_PASSWORD}'
+redis:
+  db: 1
+  password: '${REDIS_PASSWORD}'
+  host: 'ragflow-redis:6379'
