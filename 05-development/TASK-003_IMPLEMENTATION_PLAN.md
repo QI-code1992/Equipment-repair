@@ -259,15 +259,15 @@ D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backe
 - Modify: `codebase/backend/app/modules/maintenance/schemas.py`
 - Modify: `codebase/backend/app/modules/maintenance/service.py`
 - Modify: `codebase/backend/app/modules/maintenance/router.py`
-- Modify: `codebase/backend/tests/modules/test_maintenance_lifecycle.py`
+- Create: `codebase/backend/tests/modules/test_maintenance_cases.py`
 
 **Interface:** `GET /api/repair-cases/similar`，权限 `maintenance:view`。
 
-- [ ] **Step 1: 写 RED 测试**
+- [x] **Step 1: 写 RED 测试**
 
 覆盖：无查询条件返回 422；`limit` 有边界；设备类型/型号精确匹配优先；症状文本匹配次之；完成时间倒序；空结果返回空列表；未授权返回 403；测试中将任何 RAGFlow/HTTP 客户端调用替换为立即失败，以证明查询只访问数据库。
 
-- [ ] **Step 2: 实现确定性查询**
+- [x] **Step 2: 实现确定性查询**
 
 ```python
 score = case(
@@ -281,12 +281,12 @@ score = case(
 
 症状仅做数据库文本匹配；不得引入向量列、embedding、外部适配器或网络请求。
 
-- [ ] **Step 3: 运行 GREEN**
+- [x] **Step 3: 运行 GREEN**
 
 Run:
 
 ```powershell
-D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests/modules/test_maintenance_lifecycle.py -q -k "similar"
+D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests/modules/test_maintenance_cases.py -q
 ```
 
 ---

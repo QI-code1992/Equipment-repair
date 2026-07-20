@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import and_, case, or_, select
 from sqlalchemy.orm import Session
 
 from app.modules.equipment.models import Equipment, EquipmentStatus, Organization
@@ -20,6 +20,7 @@ from app.modules.maintenance.models import (
 from app.modules.maintenance.schemas import (
     FaultReportCreate,
     RepairResultRequest,
+    SimilarCaseQuery,
     StartRepairRequest,
 )
 
@@ -305,3 +306,44 @@ def complete_repair(
     equipment.status = EquipmentStatus.FAULT if active else EquipmentStatus.NORMAL
     db.flush()
     return order, fault, record, case
+
+
+def find_similar_cases(
+    db: Session, query: SimilarCaseQuery
+) -> list[HistoricalRepairCase]:
+    matches = []
+    priorities = []
+    if query.equipment_type and query.equipment_model:
+        priorities.append(
+            (
+                and_(
+                    HistoricalRepairCase.equipment_type == query.equipment_type,
+                    HistoricalRepairCase.equipment_model == query.equipment_model,
+                ),
+                3,
+            )
+        )
+    if query.equipment_type:
+        condition = HistoricalRepairCase.equipment_type == query.equipment_type
+        matches.append(condition)
+        priorities.append((condition, 2))
+    if query.equipment_model:
+        condition = HistoricalRepairCase.equipment_model == query.equipment_model
+        matches.append(condition)
+        priorities.append((condition, 2))
+    if query.symptom:
+        condition = HistoricalRepairCase.symptom.ilike(f"%{query.symptom}%")
+        matches.append(condition)
+        priorities.append((condition, 1))
+    score = case(*priorities, else_=0)
+    statement = (
+        select(HistoricalRepairCase)
+        .where(or_(*matches))
+        .order_by(
+            score.desc(),
+            HistoricalRepairCase.completed_at.desc(),
+            HistoricalRepairCase.id.asc(),
+        )
+        .limit(query.limit)
+    )
+    return list(db.scalars(statement))

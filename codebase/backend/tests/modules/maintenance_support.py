@@ -17,7 +17,13 @@ def auth_headers(token: str, *, key: str | None = None) -> dict[str, str]:
     return headers
 
 
-def create_equipment(client: TestClient, *, status: str = "NORMAL") -> str:
+def create_equipment(
+    client: TestClient,
+    *,
+    status: str = "NORMAL",
+    equipment_type: str = "LOADER",
+    model: str = "MODEL-1",
+) -> str:
     _, token = create_user_token(
         client,
         username=f"equipment-admin-{uuid4().hex[:8]}",
@@ -26,6 +32,8 @@ def create_equipment(client: TestClient, *, status: str = "NORMAL") -> str:
     )
     body = valid_equipment_body(client, code=f"EQ-{uuid4().hex[:8]}")
     body["status"] = status
+    body["type"] = equipment_type
+    body["model"] = model
     response = client.post(
         "/api/equipment",
         headers=auth_headers(token, key=f"equipment-{uuid4()}"),
@@ -53,11 +61,15 @@ def repairer(client: TestClient) -> tuple[str, str]:
     )
 
 
-def valid_fault_body(equipment_id: str) -> dict[str, object]:
+def valid_fault_body(
+    equipment_id: str,
+    *,
+    symptom: str = "hydraulic pressure loss",
+) -> dict[str, object]:
     return {
         "equipment_id": equipment_id,
         "urgency": "HIGH",
-        "symptom": "hydraulic pressure loss",
+        "symptom": symptom,
         "occurred_at": datetime.now(UTC).isoformat(),
         "possible_location": "main pump",
         "description": "pressure falls under load",
@@ -72,12 +84,17 @@ def valid_fault_body(equipment_id: str) -> dict[str, object]:
     }
 
 
-def create_fault(client: TestClient, equipment_id: str) -> str:
+def create_fault(
+    client: TestClient,
+    equipment_id: str,
+    *,
+    symptom: str = "hydraulic pressure loss",
+) -> str:
     _, token = fault_reporter(client)
     response = client.post(
         "/api/fault-reports",
         headers=auth_headers(token, key=f"fault-{uuid4()}"),
-        json=valid_fault_body(equipment_id),
+        json=valid_fault_body(equipment_id, symptom=symptom),
     )
     assert response.status_code == 201
     return response.json()["id"]

@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, Header
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Header, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
@@ -17,6 +19,7 @@ from app.modules.maintenance.models import (
 from app.modules.maintenance.schemas import (
     FaultReportCreate,
     RepairResultRequest,
+    SimilarCaseQuery,
     StartRepairRequest,
 )
 
@@ -77,6 +80,22 @@ def repair_result_body(
         "actual_solution": record.actual_solution,
         "repair_result": record.repair_result,
         "parts_replacement_notes": record.parts_replacement_notes,
+    }
+
+
+def historical_case_body(item: HistoricalRepairCase) -> dict[str, object]:
+    return {
+        "id": item.id,
+        "source_work_order_id": item.source_work_order_id,
+        "source_fault_report_id": item.source_fault_report_id,
+        "equipment_id": item.equipment_id,
+        "equipment_type": item.equipment_type,
+        "equipment_model": item.equipment_model,
+        "symptom": item.symptom,
+        "actual_cause": item.actual_cause,
+        "actual_solution": item.actual_solution,
+        "repair_result": item.repair_result,
+        "completed_at": item.completed_at.isoformat(),
     }
 
 
@@ -206,3 +225,21 @@ def complete_repair(
     )
     db.commit()
     return body
+
+
+@router.get(
+    "/api/repair-cases/similar",
+    response_model=None,
+    name="repair_case.similar",
+)
+def similar_cases(
+    query: Annotated[SimilarCaseQuery, Query()],
+    db: Session = Depends(get_db),
+    actor: User = Depends(require_permission("maintenance:view")),
+) -> dict[str, object]:
+    del actor
+    items = service.find_similar_cases(db, query)
+    return {
+        "items": [historical_case_body(item) for item in items],
+        "count": len(items),
+    }
