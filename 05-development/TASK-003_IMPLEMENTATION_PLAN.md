@@ -354,7 +354,7 @@ D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m alembic -c codebase/b
 D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m alembic -c codebase/backend/alembic.ini upgrade head
 ```
 
-- [ ] **Step 5: 正式送审前线性化**
+- [x] **Step 5: 正式送审前线性化**
 
 先用 Merge Commit 合并最新 `origin/codex/stage-05-integration`：
 
@@ -381,7 +381,7 @@ D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m alembic -c codebase/b
 
 记录四个端点的权限、请求/响应字段、状态码、稳定错误、幂等和审计；记录五张表、约束、状态机、人工最终字段和 PostgreSQL-only 案例边界。不得改写 PRD、SPEC 或验收标准。
 
-- [ ] **Step 2: Python 3.13 验证**
+- [x] **Step 2: Python 3.13 验证**
 
 ```powershell
 D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests/modules/test_maintenance_lifecycle.py -q
@@ -394,13 +394,15 @@ git diff --check
 
 验证事务回滚、同 Key 并发故障创建、并发开始维修、故障创建与设备停用竞争、迁移空库升级/`0002` 升级/downgrade/再升级和单一 head。记录真实命令、容器/数据库版本、退出码和脱敏结果；不得用 SQLite 替代。
 
-- [ ] **Step 4: 独立三轮自查**
+- [x] **Step 4: 独立三轮自查**
 
 1. Spec：逐条映射 TASK-003 范围、AC 和四个 API。
 2. Standards/Security：权限、幂等、成功/失败审计、脱敏、事务、迁移和秘密边界。
 3. Scope/Diff：确认没有 RAGFlow、Agent、前端、TASK-004/005/006/008、生产依赖、兼容层、多余抽象或无关格式化。
 
 发现 Critical/Important/Minor 均先修复并重新运行相关 RED/GREEN 与回归，不得只记录后送审。
+
+本地验证记录（2026-07-20，未推送、未发起审核）：Python 3.13.14 模块测试 `168 passed`；PostgreSQL 17.10 隔离数据库迁移、事务与并发测试 `4 passed`；`compileall`、`git diff --check` 通过；`alembic heads` 为单一 `0003_task003`。远端集成分支仍为本任务基线 `b29c69d13c3d1c81f01023152eabf0c0f2d02741`，没有新的迁移需要合并，故无需制造空 Merge Commit。三轮自查发现的时区、诊断嵌套值、SQL 通配符、写权限和幂等冲突覆盖缺口均已修复并完成回归。
 
 - [ ] **Step 5: 更新正式交付台账**
 
