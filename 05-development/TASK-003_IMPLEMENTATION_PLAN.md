@@ -223,7 +223,7 @@ D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backe
 
 **Interface:** `POST /api/work-orders/{work_order_id}/repair-result`，权限 `fault:close`，成功返回 200。
 
-- [ ] **Step 1: 写 RED 测试**
+- [x] **Step 1: 写 RED 测试**
 
 覆盖：工单不存在；不是 `IN_REPAIR`；`actual_cause`、`actual_solution`、`repair_result` 任一缺失或空白；人工最终字段覆盖诊断预填；工单依次完成验收边界并最终为 `COMPLETED`；故障为 `PROCESSED`；每个工单只沉淀一条案例；仍有其他活跃故障时设备不得恢复；最后一个活跃故障完成后设备恢复 `NORMAL`；重放不重复案例；中途失败全部业务数据回滚且失败审计可追踪。
 
@@ -235,15 +235,15 @@ assert case.actual_cause == submitted["actual_cause"]
 assert count_rows(client, HistoricalRepairCase) == 1
 ```
 
-- [ ] **Step 2: 运行 RED**
+- [x] **Step 2: 运行 RED**
 
 Expected: 404 because repair-result route does not exist.
 
-- [ ] **Step 3: 实现单事务完成路径**
+- [x] **Step 3: 实现单事务完成路径**
 
 固定顺序：锁工单/故障/设备 → 校验 `IN_REPAIR` → 保存人工最终字段 → `PENDING_INSPECTION` → 生成唯一结构化案例 → `COMPLETED`/`PROCESSED` → 查询设备是否仍有活跃故障并决定 `FAULT` 或 `NORMAL` → 成功审计 → 幂等响应 → 提交。
 
-- [ ] **Step 4: 运行 GREEN 和回滚测试**
+- [x] **Step 4: 运行 GREEN 和回滚测试**
 
 Run:
 

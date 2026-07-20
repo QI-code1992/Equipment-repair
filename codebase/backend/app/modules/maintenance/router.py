@@ -8,8 +8,17 @@ from app.modules.audit.service import write_audit_event
 from app.modules.identity.dependencies import require_permission
 from app.modules.identity.models import User
 from app.modules.maintenance import service
-from app.modules.maintenance.models import FaultReport, MaintenanceRecord, WorkOrder
-from app.modules.maintenance.schemas import FaultReportCreate, StartRepairRequest
+from app.modules.maintenance.models import (
+    FaultReport,
+    HistoricalRepairCase,
+    MaintenanceRecord,
+    WorkOrder,
+)
+from app.modules.maintenance.schemas import (
+    FaultReportCreate,
+    RepairResultRequest,
+    StartRepairRequest,
+)
 
 
 router = APIRouter(tags=["maintenance"])
@@ -48,6 +57,26 @@ def repair_start_body(
         "work_order_status": work_order.status.value,
         "start_mode": record.start_mode.value,
         "diagnosis_draft_id": record.diagnosis_draft_id,
+    }
+
+
+def repair_result_body(
+    order: WorkOrder,
+    fault: FaultReport,
+    record: MaintenanceRecord,
+    case: HistoricalRepairCase,
+) -> dict[str, object]:
+    return {
+        "work_order_id": order.id,
+        "fault_report_id": fault.id,
+        "maintenance_record_id": record.id,
+        "historical_case_id": case.id,
+        "work_order_status": order.status.value,
+        "fault_status": fault.status.value,
+        "actual_cause": record.actual_cause,
+        "actual_solution": record.actual_solution,
+        "repair_result": record.repair_result,
+        "parts_replacement_notes": record.parts_replacement_notes,
     }
 
 
@@ -132,6 +161,45 @@ def start_repair(
         result="success", metadata=request_body,
     )
     body = {**repair_start_body(fault, work_order, record), "audit_event_id": event.id}
+    save_idempotent_response(
+        db, user_id=actor.id, method="POST", path=path,
+        key=idempotency_key, request_body=request_body, status=200, body=body,
+    )
+    db.commit()
+    return body
+
+
+@router.post(
+    "/api/work-orders/{work_order_id}/repair-result",
+    status_code=200,
+    response_model=None,
+    name="repair.complete",
+)
+def complete_repair(
+    work_order_id: str,
+    payload: RepairResultRequest,
+    idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
+    db: Session = Depends(get_db),
+    actor: User = Depends(require_permission("fault:close")),
+) -> dict[str, object] | JSONResponse:
+    path = f"/api/work-orders/{work_order_id}/repair-result"
+    request_body = payload.model_dump(mode="json")
+    replay = find_idempotent_response(
+        db, user_id=actor.id, method="POST", path=path,
+        key=idempotency_key, request_body=request_body,
+    )
+    if replay is not None:
+        return JSONResponse(status_code=replay[0], content=replay[1])
+
+    order, fault, record, case = service.complete_repair(
+        db, work_order_id, payload
+    )
+    event = write_audit_event(
+        db, actor_user_id=actor.id, action="repair.complete",
+        resource_type="work_order", resource_id=order.id,
+        result="success", metadata=request_body,
+    )
+    body = {**repair_result_body(order, fault, record, case), "audit_event_id": event.id}
     save_idempotent_response(
         db, user_id=actor.id, method="POST", path=path,
         key=idempotency_key, request_body=request_body, status=200, body=body,

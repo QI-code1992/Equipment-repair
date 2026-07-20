@@ -11,12 +11,17 @@ from app.modules.maintenance.models import (
     DiagnosisDraftStatus,
     FaultReport,
     FaultStatus,
+    HistoricalRepairCase,
     MaintenanceRecord,
     RepairStartMode,
     WorkOrder,
     WorkOrderStatus,
 )
-from app.modules.maintenance.schemas import FaultReportCreate, StartRepairRequest
+from app.modules.maintenance.schemas import (
+    FaultReportCreate,
+    RepairResultRequest,
+    StartRepairRequest,
+)
 
 
 def _error(
@@ -218,3 +223,85 @@ def start_repair(
     db.add(record)
     db.flush()
     return fault, work_order, record
+
+
+def _locked_work_order(db: Session, work_order_id: str) -> WorkOrder:
+    statement = select(WorkOrder).where(WorkOrder.id == work_order_id)
+    if db.get_bind().dialect.name == "postgresql":
+        statement = statement.with_for_update()
+    order = db.scalar(statement)
+    if order is None:
+        raise _error(404, "WORK_ORDER_NOT_FOUND")
+    return order
+
+
+def _maintenance_record(db: Session, work_order_id: str) -> MaintenanceRecord:
+    statement = select(MaintenanceRecord).where(
+        MaintenanceRecord.work_order_id == work_order_id
+    )
+    if db.get_bind().dialect.name == "postgresql":
+        statement = statement.with_for_update()
+    record = db.scalar(statement)
+    if record is None:
+        raise _error(409, "MAINTENANCE_RECORD_NOT_FOUND")
+    return record
+
+
+def _historical_case(
+    fault: FaultReport,
+    order: WorkOrder,
+    equipment: Equipment,
+    record: MaintenanceRecord,
+    completed_at: datetime,
+) -> HistoricalRepairCase:
+    assert record.actual_cause is not None
+    assert record.actual_solution is not None
+    assert record.repair_result is not None
+    return HistoricalRepairCase(
+        source_work_order_id=order.id,
+        source_fault_report_id=fault.id,
+        equipment_id=equipment.id,
+        equipment_type=equipment.type,
+        equipment_model=equipment.model,
+        symptom=fault.symptom,
+        actual_cause=record.actual_cause,
+        actual_solution=record.actual_solution,
+        repair_result=record.repair_result,
+        completed_at=completed_at,
+    )
+
+
+def complete_repair(
+    db: Session,
+    work_order_id: str,
+    payload: RepairResultRequest,
+) -> tuple[WorkOrder, FaultReport, MaintenanceRecord, HistoricalRepairCase]:
+    order = _locked_work_order(db, work_order_id)
+    if order.status is not WorkOrderStatus.IN_REPAIR:
+        raise _error(
+            409, "WORK_ORDER_STATE_CONFLICT", fields={"status": order.status.value}
+        )
+    fault = _locked_fault_report(db, order.fault_report_id)
+    equipment = _locked_equipment(db, order.equipment_id)
+    record = _maintenance_record(db, order.id)
+    completed_at = datetime.now(UTC)
+    record.actual_cause = payload.actual_cause
+    record.actual_solution = payload.actual_solution
+    record.repair_result = payload.repair_result
+    record.parts_replacement_notes = payload.parts_replacement_notes
+    order.status = WorkOrderStatus.PENDING_INSPECTION
+    order.pending_inspection_at = completed_at
+    case = _historical_case(fault, order, equipment, record, completed_at)
+    db.add(case)
+    order.status = WorkOrderStatus.COMPLETED
+    order.completed_at = completed_at
+    fault.status = FaultStatus.PROCESSED
+    active = db.scalar(
+        select(FaultReport.id).where(
+            FaultReport.equipment_id == equipment.id,
+            FaultReport.status.in_([FaultStatus.PENDING_ACCEPT, FaultStatus.IN_REPAIR]),
+        ).limit(1)
+    )
+    equipment.status = EquipmentStatus.FAULT if active else EquipmentStatus.NORMAL
+    db.flush()
+    return order, fault, record, case

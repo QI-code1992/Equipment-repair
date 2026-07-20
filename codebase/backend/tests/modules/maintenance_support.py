@@ -117,3 +117,25 @@ def create_diagnosis_draft(
         db.add(draft)
         db.commit()
         return draft.id
+
+
+def start_repair(
+    client: TestClient,
+    fault_id: str,
+    *,
+    token: str | None = None,
+    mode: str = "DIRECT",
+    diagnosis_draft_id: str | None = None,
+) -> tuple[str, str]:
+    if token is None:
+        _, token = repairer(client)
+    body: dict[str, object] = {"mode": mode}
+    if diagnosis_draft_id is not None:
+        body["diagnosis_draft_id"] = diagnosis_draft_id
+    response = client.post(
+        f"/api/fault-reports/{fault_id}/start-repair",
+        headers=auth_headers(token, key=f"start-{uuid4()}"),
+        json=body,
+    )
+    assert response.status_code == 200
+    return response.json()["work_order_id"], token
