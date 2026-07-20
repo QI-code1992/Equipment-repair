@@ -170,7 +170,7 @@ D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backe
 
 **Interface:** `POST /api/fault-reports/{fault_id}/start-repair`，权限 `fault:repair`，成功返回 200。
 
-- [ ] **Step 1: 写直接开始 RED 测试**
+- [x] **Step 1: 写直接开始 RED 测试**
 
 覆盖：仅 `PENDING_ACCEPT` 可开始；故障不存在；DIRECT 禁止 `diagnosis_draft_id`；创建唯一工单和唯一维修记录；故障/工单进入 `IN_REPAIR`；设备进入 `REPAIRING`；诊断引用、预填和 AI 摘要均为 `null`；幂等重放无重复副作用；新 Key 重复迁移返回稳定 409。
 
@@ -181,15 +181,15 @@ assert maintenance_record.diagnosis_prefill is None
 assert maintenance_record.ai_summary is None
 ```
 
-- [ ] **Step 2: 运行 RED；实现 DIRECT 最小路径；运行 GREEN**
+- [x] **Step 2: 运行 RED；实现 DIRECT 最小路径；运行 GREEN**
 
 开始事务必须锁定故障和设备。重复或并发请求依靠锁、故障状态和唯一约束共同阻止第二条工单。
 
-- [ ] **Step 3: 写采纳开始 RED 测试**
+- [x] **Step 3: 写采纳开始 RED 测试**
 
 覆盖：ADOPTED 缺少草稿 ID；草稿不存在；属于其他故障；状态不是 `DIAGNOSIS_READY`；已经采纳；成功只复制 `allowed_prefill` 与 `read_only_summary`；不复制未知字段、原始思维链、附件正文或秘密；草稿标记为已采纳且只能采纳一次。
 
-- [ ] **Step 4: 实现 ADOPTED 最小路径并运行 GREEN**
+- [x] **Step 4: 实现 ADOPTED 最小路径并运行 GREEN**
 
 ```python
 if payload.mode is RepairStartMode.DIRECT:

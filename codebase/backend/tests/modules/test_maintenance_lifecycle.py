@@ -9,10 +9,13 @@ from sqlalchemy import func, inspect, select
 from app.modules.audit.models import AuditEvent
 from app.modules.equipment.models import Equipment, EquipmentStatus
 from app.modules.maintenance.models import (
+    DiagnosisDraft,
     DiagnosisDraftStatus,
     FaultReport,
     FaultStatus,
+    MaintenanceRecord,
     RepairStartMode,
+    WorkOrder,
     WorkOrderStatus,
 )
 from app.modules.maintenance.schemas import (
@@ -57,6 +60,62 @@ def fault_reporter(client: TestClient) -> tuple[str, str]:
         role_code="LINE_OPERATOR",
         permission_codes=["fault:create"],
     )
+
+
+def repairer(client: TestClient) -> tuple[str, str]:
+    return create_user_token(
+        client,
+        username=f"repairer-{uuid4().hex[:8]}",
+        role_code="REPAIR_WORKER",
+        permission_codes=["fault:repair"],
+    )
+
+
+def create_fault(client: TestClient, equipment_id: str) -> str:
+    _, token = fault_reporter(client)
+    response = client.post(
+        "/api/fault-reports",
+        headers=auth_headers(token, key=f"fault-{uuid4()}"),
+        json=valid_fault_body(equipment_id),
+    )
+    assert response.status_code == 201
+    return response.json()["id"]
+
+
+def create_diagnosis_draft(
+    client: TestClient,
+    fault_id: str,
+    *,
+    status: DiagnosisDraftStatus = DiagnosisDraftStatus.DIAGNOSIS_READY,
+    adopted: bool = False,
+) -> str:
+    with client.app.state.session_factory() as db:
+        draft = DiagnosisDraft(
+            fault_report_id=fault_id,
+            status=status,
+            allowed_prefill={
+                "fault_type": "hydraulic",
+                "actual_cause": "suspected seal wear",
+                "actual_solution": "inspect and replace seal",
+                "parts_replacement_notes": "prepare seal kit",
+                "unknown_field": "must not copy",
+                "password": "prefill-secret",
+            },
+            read_only_summary={
+                "symptom": "pressure loss",
+                "key_evidence": ["pressure drops under load"],
+                "verification_results": ["leak observed"],
+                "root_cause": "seal wear",
+                "recommendations": ["replace seal", "retest pressure"],
+                "raw_chain_of_thought": "must not copy",
+                "attachment_content": "binary-secret",
+                "token": "summary-secret",
+            },
+            adopted_at=datetime.now(UTC) if adopted else None,
+        )
+        db.add(draft)
+        db.commit()
+        return draft.id
 
 
 def valid_fault_body(equipment_id: str) -> dict[str, object]:
@@ -147,6 +206,11 @@ def test_start_repair_mode_controls_diagnosis_reference() -> None:
             {"mode": "ADOPTED", "diagnosis_draft_id": None}
         )
 
+    with pytest.raises(ValidationError):
+        StartRepairRequest.model_validate(
+            {"mode": "DIRECT", "diagnosis_draft_id": str(uuid4())}
+        )
+
 
 def test_create_fault_is_idempotent_and_sets_equipment_fault(
     client: TestClient,
@@ -218,3 +282,172 @@ def test_create_fault_rejects_disabled_equipment(client: TestClient) -> None:
     assert response.json()["detail"]["code"] == "FAULT_EQUIPMENT_DISABLED"
     with client.app.state.session_factory() as db:
         assert db.scalar(select(func.count()).select_from(FaultReport)) == 0
+
+
+def test_start_repair_direct_is_idempotent_and_creates_one_work_order(
+    client: TestClient,
+) -> None:
+    equipment_id = create_equipment(client)
+    fault_id = create_fault(client, equipment_id)
+    repairer_id, token = repairer(client)
+    path = f"/api/fault-reports/{fault_id}/start-repair"
+    headers = auth_headers(token, key="direct-start-1")
+
+    first = client.post(path, headers=headers, json={"mode": "DIRECT"})
+    replay = client.post(path, headers=headers, json={"mode": "DIRECT"})
+
+    assert first.status_code == 200
+    assert replay.status_code == 200
+    assert replay.json() == first.json()
+    assert first.json()["fault_status"] == "IN_REPAIR"
+    assert first.json()["work_order_status"] == "IN_REPAIR"
+    assert first.json()["start_mode"] == "DIRECT"
+    assert first.json()["audit_event_id"]
+    with client.app.state.session_factory() as db:
+        assert db.scalar(select(func.count()).select_from(WorkOrder)) == 1
+        assert db.scalar(select(func.count()).select_from(MaintenanceRecord)) == 1
+        fault = db.get(FaultReport, fault_id)
+        equipment = db.get(Equipment, equipment_id)
+        work_order = db.scalar(
+            select(WorkOrder).where(WorkOrder.fault_report_id == fault_id)
+        )
+        assert fault is not None and fault.status is FaultStatus.IN_REPAIR
+        assert equipment is not None and equipment.status is EquipmentStatus.REPAIRING
+        assert work_order is not None
+        assert work_order.status is WorkOrderStatus.IN_REPAIR
+        assert work_order.repairer_user_id == repairer_id
+        record = db.scalar(
+            select(MaintenanceRecord).where(
+                MaintenanceRecord.work_order_id == work_order.id
+            )
+        )
+        assert record is not None
+        assert record.start_mode is RepairStartMode.DIRECT
+        assert record.diagnosis_draft_id is None
+        assert record.diagnosis_prefill is None
+        assert record.ai_summary is None
+        assert db.scalar(
+            select(func.count())
+            .select_from(AuditEvent)
+            .where(AuditEvent.action == "repair.start")
+        ) == 1
+
+
+def test_start_repair_direct_rejects_missing_fault_and_repeated_transition(
+    client: TestClient,
+) -> None:
+    equipment_id = create_equipment(client)
+    fault_id = create_fault(client, equipment_id)
+    _, token = repairer(client)
+
+    missing = client.post(
+        f"/api/fault-reports/{uuid4()}/start-repair",
+        headers=auth_headers(token, key="direct-missing-1"),
+        json={"mode": "DIRECT"},
+    )
+    first = client.post(
+        f"/api/fault-reports/{fault_id}/start-repair",
+        headers=auth_headers(token, key="direct-start-2"),
+        json={"mode": "DIRECT"},
+    )
+    repeated = client.post(
+        f"/api/fault-reports/{fault_id}/start-repair",
+        headers=auth_headers(token, key="direct-start-new-key"),
+        json={"mode": "DIRECT"},
+    )
+
+    assert missing.status_code == 404
+    assert missing.json()["detail"]["code"] == "FAULT_REPORT_NOT_FOUND"
+    assert missing.json()["detail"]["audit_event_id"]
+    assert first.status_code == 200
+    assert repeated.status_code == 409
+    assert repeated.json()["detail"]["code"] == "FAULT_STATE_CONFLICT"
+    assert repeated.json()["detail"]["fields"] == {"status": "IN_REPAIR"}
+    assert repeated.json()["detail"]["audit_event_id"]
+    with client.app.state.session_factory() as db:
+        assert db.scalar(select(func.count()).select_from(WorkOrder)) == 1
+        assert db.scalar(select(func.count()).select_from(MaintenanceRecord)) == 1
+
+
+def test_start_repair_adopted_copies_only_approved_fields_once(
+    client: TestClient,
+) -> None:
+    equipment_id = create_equipment(client)
+    fault_id = create_fault(client, equipment_id)
+    draft_id = create_diagnosis_draft(client, fault_id)
+    _, token = repairer(client)
+    path = f"/api/fault-reports/{fault_id}/start-repair"
+    body = {"mode": "ADOPTED", "diagnosis_draft_id": draft_id}
+
+    response = client.post(
+        path,
+        headers=auth_headers(token, key="adopted-start-1"),
+        json=body,
+    )
+    replay = client.post(
+        path,
+        headers=auth_headers(token, key="adopted-start-1"),
+        json=body,
+    )
+
+    assert response.status_code == 200
+    assert replay.json() == response.json()
+    assert response.json()["start_mode"] == "ADOPTED"
+    assert response.json()["diagnosis_draft_id"] == draft_id
+    with client.app.state.session_factory() as db:
+        draft = db.get(DiagnosisDraft, draft_id)
+        record = db.scalar(select(MaintenanceRecord))
+        assert draft is not None and draft.adopted_at is not None
+        assert record is not None
+        assert record.diagnosis_prefill == {
+            "fault_type": "hydraulic",
+            "actual_cause": "suspected seal wear",
+            "actual_solution": "inspect and replace seal",
+            "parts_replacement_notes": "prepare seal kit",
+        }
+        assert record.ai_summary == {
+            "symptom": "pressure loss",
+            "key_evidence": ["pressure drops under load"],
+            "verification_results": ["leak observed"],
+            "root_cause": "seal wear",
+            "recommendations": ["replace seal", "retest pressure"],
+        }
+        serialized = f"{record.diagnosis_prefill!r}{record.ai_summary!r}"
+        assert "secret" not in serialized
+        assert "raw_chain_of_thought" not in serialized
+        assert "attachment_content" not in serialized
+
+
+def test_start_repair_adopted_rejects_invalid_draft_state_and_ownership(
+    client: TestClient,
+) -> None:
+    equipment_id = create_equipment(client)
+    fault_id = create_fault(client, equipment_id)
+    other_fault_id = create_fault(client, equipment_id)
+    draft_not_ready = create_diagnosis_draft(
+        client, fault_id, status=DiagnosisDraftStatus.DRAFT
+    )
+    wrong_fault_draft = create_diagnosis_draft(client, other_fault_id)
+    adopted_draft = create_diagnosis_draft(client, fault_id, adopted=True)
+    _, token = repairer(client)
+    path = f"/api/fault-reports/{fault_id}/start-repair"
+
+    cases = [
+        (str(uuid4()), "DIAGNOSIS_DRAFT_NOT_FOUND"),
+        (wrong_fault_draft, "DIAGNOSIS_DRAFT_FAULT_MISMATCH"),
+        (draft_not_ready, "DIAGNOSIS_DRAFT_NOT_READY"),
+        (adopted_draft, "DIAGNOSIS_DRAFT_ALREADY_ADOPTED"),
+    ]
+    for index, (draft_id, code) in enumerate(cases):
+        response = client.post(
+            path,
+            headers=auth_headers(token, key=f"invalid-adopt-{index}"),
+            json={"mode": "ADOPTED", "diagnosis_draft_id": draft_id},
+        )
+        assert response.status_code in {404, 409}
+        assert response.json()["detail"]["code"] == code
+        assert response.json()["detail"]["audit_event_id"]
+
+    with client.app.state.session_factory() as db:
+        assert db.scalar(select(func.count()).select_from(WorkOrder)) == 0
+        assert db.scalar(select(func.count()).select_from(MaintenanceRecord)) == 0

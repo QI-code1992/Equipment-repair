@@ -8,8 +8,8 @@ from app.modules.audit.service import write_audit_event
 from app.modules.identity.dependencies import require_permission
 from app.modules.identity.models import User
 from app.modules.maintenance import service
-from app.modules.maintenance.models import FaultReport
-from app.modules.maintenance.schemas import FaultReportCreate
+from app.modules.maintenance.models import FaultReport, MaintenanceRecord, WorkOrder
+from app.modules.maintenance.schemas import FaultReportCreate, StartRepairRequest
 
 
 router = APIRouter(tags=["maintenance"])
@@ -31,6 +31,23 @@ def fault_report_body(item: FaultReport) -> dict[str, object]:
         "submitter_id": item.submitter_id,
         "submitted_at": item.submitted_at.isoformat(),
         "updated_at": item.updated_at.isoformat(),
+    }
+
+
+def repair_start_body(
+    fault: FaultReport,
+    work_order: WorkOrder,
+    record: MaintenanceRecord,
+) -> dict[str, object]:
+    return {
+        "fault_report_id": fault.id,
+        "work_order_id": work_order.id,
+        "maintenance_record_id": record.id,
+        "equipment_id": fault.equipment_id,
+        "fault_status": fault.status.value,
+        "work_order_status": work_order.status.value,
+        "start_mode": record.start_mode.value,
+        "diagnosis_draft_id": record.diagnosis_draft_id,
     }
 
 
@@ -79,6 +96,45 @@ def create_fault_report(
         request_body=request_body,
         status=201,
         body=body,
+    )
+    db.commit()
+    return body
+
+
+@router.post(
+    "/api/fault-reports/{fault_id}/start-repair",
+    status_code=200,
+    response_model=None,
+    name="repair.start",
+)
+def start_repair(
+    fault_id: str,
+    payload: StartRepairRequest,
+    idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
+    db: Session = Depends(get_db),
+    actor: User = Depends(require_permission("fault:repair")),
+) -> dict[str, object] | JSONResponse:
+    path = f"/api/fault-reports/{fault_id}/start-repair"
+    request_body = payload.model_dump(mode="json")
+    replay = find_idempotent_response(
+        db, user_id=actor.id, method="POST", path=path,
+        key=idempotency_key, request_body=request_body,
+    )
+    if replay is not None:
+        return JSONResponse(status_code=replay[0], content=replay[1])
+
+    fault, work_order, record = service.start_repair(
+        db, fault_id, payload, repairer_id=actor.id
+    )
+    event = write_audit_event(
+        db, actor_user_id=actor.id, action="repair.start",
+        resource_type="work_order", resource_id=work_order.id,
+        result="success", metadata=request_body,
+    )
+    body = {**repair_start_body(fault, work_order, record), "audit_event_id": event.id}
+    save_idempotent_response(
+        db, user_id=actor.id, method="POST", path=path,
+        key=idempotency_key, request_body=request_body, status=200, body=body,
     )
     db.commit()
     return body
