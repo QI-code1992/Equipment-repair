@@ -2,7 +2,7 @@
 
 ## 状态
 
-更新后的 Stage 4 → Stage 5 门禁 `Gate-007` 已针对精确 Commit `25e15709a3f1d92f661d37acdb8aa3e1e0e41346` 获项目负责人批准。项目当前处于 Stage 5：TASK-002 代码已正式集成，正在完成合并后治理收尾；不进入 Stage 6。
+更新后的 Stage 4 → Stage 5 门禁 `Gate-007` 已针对精确 Commit `25e15709a3f1d92f661d37acdb8aa3e1e0e41346` 获项目负责人批准。项目当前处于 Stage 5：TASK-002 代码、技术验证和合并后治理收尾均已完成；不进入 Stage 6。
 
 ## 交接材料
 
@@ -11,9 +11,9 @@
 - 实施顺序：[IMPLEMENTATION_PLAN.md](../04-architecture-plan/IMPLEMENTATION_PLAN.md)。
 - 已批准开发任务书：[DEVELOPMENT_TASK_BOOK.md](../04-architecture-plan/DEVELOPMENT_TASK_BOOK.md)，v1.3（CR-040 已随 PR #23 Merge Commit `d633308de8277c343faf3e266476b64baffcb565` 生效）。
 - 人员配置：`DEV-001` 负责最终集成和全部 Docker/Compose 验证；`DEV-002` 负责 AI、知识适配和正式前端，不具备 Docker 环境。
-- 当前任务：`DEV-001` 在 Draft PR #25 完成 TASK-002 合并后治理收尾；TASK-003、TASK-004、TASK-005 继续等待该 PR 合入，TASK-006 可继续既已授权的非数据库领域测试和实现，迁移、数据库集成与共享数据模型继续等待该 PR 合入。
+- 当前任务：`DEV-001` 可按任务书启动 TASK-003、TASK-004；`DEV-002` 可继续 TASK-006 全部已定义范围。TASK-005 仍等待 TASK-004 的环境与契约交付。
 
-TASK-001 已完成并保留其历史交接。所有开发只允许在新的 `codex/*` 隔离分支和独立工作区执行；不得直接向 `main` 推送，也不得绕过当前 TASK-002 治理收尾门禁启动受阻任务。
+TASK-001、TASK-002 均已完成并保留历史交接。所有开发只允许在新的 `codex/*` 隔离分支和独立工作区执行；不得直接向 `main` 推送，也不得绕过各任务自身的 PR、审核和授权门禁。
 
 ## CR-040 Stage 5 协作规则交接（2026-07-17）
 
@@ -30,5 +30,5 @@ TASK-001 已完成并保留其历史交接。所有开发只允许在新的 `cod
 ## TASK-002 合并后治理收尾边界（2026-07-17）
 
 - 代码事实：DEV-002 已批准精确任务 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`；PR #20 已由 DEV-001（`ll979053897-arch`）手动合入，Merge Commit `904886f48061e27c775f6ee2f8ddae99f5571ead`；Python 3.13、PostgreSQL 17、Compose 健康和 `/healthz` 证据均已归档。
-- PR #25 合入前：TASK-003、TASK-004、TASK-005 继续锁定；TASK-006 只允许既已授权的非数据库领域测试和实现，迁移、数据库集成与共享数据模型继续锁定；不进入 Stage 6。
-- PR #25 合入后的有效状态：TASK-002 治理收尾关闭；TASK-003/004 可按任务书启动；TASK-005 仍等待 TASK-004；TASK-006 解除 TASK-002 的数据库前置，但仍按自身任务范围和 PR 门禁执行。
+- PR #25 治理合并：获批 HEAD `92ec18ec17f08d1d2226b0d98f59eeb2eba78d2f` 已由 DEV-002（`QI-code1992`）以 Merge Commit `028da42eb9ab4b55ef981ac462e09993a31e8813` 合入。
+- 有效状态：TASK-002 治理收尾关闭；TASK-003/004 可按任务书启动；TASK-005 仍等待 TASK-004；TASK-006 已解除 TASK-002 的数据库前置，但仍按自身任务范围和 PR 门禁执行；不进入 Stage 6。

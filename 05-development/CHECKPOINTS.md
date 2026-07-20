@@ -2,13 +2,13 @@
 
 静态原型检查点记录在 `03-ui-prototype/PROTOTYPE_CHECKPOINTS.md`，不得自动提升为生产检查点。
 
-## FCP-002-R6：TASK-002 正式集成后的治理收尾候选
+## FCP-002-R6：TASK-002 正式集成后的治理收尾
 
-- 状态：代码正式集成与技术验证已完成；本治理 PR 尚未合入，不能解锁任何下游依赖，也不能作为 Stage 6 进入依据。
+- 状态：代码正式集成、技术验证与治理收尾已完成；PR #25 已合入并解除 TASK-002 下游前置，不能作为 Stage 6 进入依据。
 - 正式审核与合并：DEV-002 已批准精确任务分支 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`；PR #20 由集成负责人 DEV-001（`ll979053897-arch`）手动 Merge Commit 合入 `codex/stage-05-integration`，合并提交为 `904886f48061e27c775f6ee2f8ddae99f5571ead`。
 - 已验证证据：Python 3.13 为 `142 passed, 5 skipped, 1 warning`；PostgreSQL 17 真实数据库专项为 `5 passed, 1 warning`；Compose 容器健康和容器内 `GET /healthz` HTTP 200 已保留为正式集成证据。
-- 本 PR 修正：任务书/评审台账不再把 TASK-002 表述为“待 DEV-002 审核”或已无条件解锁；合入前保持 TASK-003、TASK-004、TASK-005 锁定，TASK-006 仅保持数据库迁移、数据库集成和共享数据模型锁定，非数据库范围不受本门禁阻止。
-- 合入后的条件：本治理 PR 合入后，TASK-003 与 TASK-004 才可按任务书启动；TASK-005 届时仍须等待 TASK-004；TASK-006 的数据库迁移/集成和共享数据模型届时解除 TASK-002 前置锁定。
+- 治理合并：PR #25 由 DEV-002（`QI-code1992`）手动 Merge Commit 合入 `codex/stage-05-integration`，Merge Commit 为 `028da42eb9ab4b55ef981ac462e09993a31e8813`。
+- 有效依赖：TASK-003 与 TASK-004 可按任务书启动；TASK-005 仍等待 TASK-004；TASK-006 已解除 TASK-002 前置，包括迁移、数据库集成和共享数据模型，但仍须满足本任务自身 PR 门禁。
 
 ## FCP-001：平台运行环境基线
 
