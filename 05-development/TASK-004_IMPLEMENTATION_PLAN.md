@@ -369,7 +369,7 @@ git commit -m "feat(task-004): add isolated ragflow compose stack"
 **Interfaces:**
 
 - Consumes: Compose 项目 `equipment-ragflow` 和 `.env.example`。
-- Produces: 五服务健康、RAGFlow 本机 HTTP、Elasticsearch `8.11.x` 与镜像 digest 的脱敏证据。
+- Produces: 五服务健康、RAGFlow Web/API 契约、Elasticsearch `8.11.x` 与 5 个获批镜像精确 digest 的脱敏证据。
 
 - [ ] **Step 1: 在 Docker Desktop 未启动状态运行健康脚本路径并确认 RED**
 
@@ -403,14 +403,21 @@ $webPort = @($expanded.services.ragflow.ports | Where-Object { $_.target -eq 80 
 $web = Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:$webPort/"
 if ($web.StatusCode -ne 200) { throw "RAGFlow Web endpoint is unhealthy" }
 
+$apiPort = @($expanded.services.ragflow.ports | Where-Object { $_.target -eq 9380 })[0].published
+$api = Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:$apiPort/api/v1/system/version"
+$apiContract = $api.Content | ConvertFrom-Json
+if ($api.StatusCode -ne 200 -or $apiContract.code -ne 0 -or $apiContract.data -ne "v0.25.6") {
+    throw "RAGFlow API version contract drift"
+}
+
 $versionJson = & docker @compose exec -T ragflow-elasticsearch sh -lc 'curl -fsS -u "elastic:$ELASTIC_PASSWORD" http://localhost:9200/'
 $version = ($versionJson | ConvertFrom-Json).version.number
 if ($version -notlike "8.11.*") { throw "Unexpected Elasticsearch version: $version" }
 
-Write-Output "TASK-004 health: PASS; services=5; elasticsearch=$version"
+Write-Output "TASK-004 health: PASS; services=5; elasticsearch=$version; web_status=200; api_status=200; ragflow=v0.25.6"
 ```
 
-实现时不得把环境变量实际值写到输出；镜像 digest 只输出 `RepoDigests`，不输出 Registry 凭据。
+实现时不得把环境变量实际值写到输出；镜像校验必须把每个固定标签的 `RepoDigests` 与获批的精确 SHA-256 比对，缺失或不一致均返回非零，不输出 Registry 凭据。
 
 - [ ] **Step 3: 启动 Docker Desktop 并运行真实 GREEN**
 
@@ -421,7 +428,7 @@ powershell -NoProfile -File codebase/infra/ragflow/scripts/verify.ps1
 docker compose -p equipment-ragflow --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml ps
 ```
 
-Expected: 五个服务均为 `healthy`；RAGFlow Web 返回 HTTP 200；Elasticsearch 为 `8.11.x`。
+Expected: 五个服务均为 `healthy`；RAGFlow Web 返回 HTTP 200；RAGFlow API 版本契约返回 `v0.25.6`；Elasticsearch 为 `8.11.x`；五个镜像摘要与获批值完全一致。
 
 - [ ] **Step 4: 提交健康验证**
 
@@ -513,7 +520,7 @@ git commit -m "test(task-004): verify ragflow network isolation"
 **Interfaces:**
 
 - Consumes: 健康的 `equipment-ragflow` 栈。
-- Produces: MySQL、Redis、MinIO 数据目录、Elasticsearch 在 `compose restart` 后保持探针一致的证据。
+- Produces: MySQL、Redis、MinIO S3 对象、Elasticsearch 在 `compose restart` 后保持探针一致的证据。
 
 - [ ] **Step 1: 写探针生命周期并确认缺失探针 RED**
 
@@ -524,9 +531,13 @@ git commit -m "test(task-004): verify ragflow network isolation"
 通过容器内部命令写入，不把密码传到宿主机输出：
 
 ```powershell
+$bucket = "task004-$([guid]::NewGuid().ToString('N'))"
 & docker @compose exec -T -e TASK004_PROBE=$probe ragflow-mysql sh -lc 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" -e "CREATE TABLE IF NOT EXISTS task004_probe (id VARCHAR(80) PRIMARY KEY); INSERT IGNORE INTO task004_probe VALUES (\"$TASK004_PROBE\");"'
 & docker @compose exec -T -e TASK004_PROBE=$probe ragflow-redis sh -lc 'redis-cli -a "$REDIS_PASSWORD" SET task004:persistence "$TASK004_PROBE" >/dev/null'
-& docker @compose exec -T -e TASK004_PROBE=$probe ragflow-minio sh -lc 'printf "%s" "$TASK004_PROBE" > /data/.task004-persistence-probe'
+& docker @compose exec -T ragflow-minio sh -lc 'mc alias set task004 http://127.0.0.1:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"'
+& docker @compose exec -T ragflow-minio mc mb "task004/$bucket"
+& docker @compose exec -T -e TASK004_PROBE=$probe ragflow-minio sh -lc 'printf "%s" "$TASK004_PROBE" > /tmp/persistence-probe.txt'
+& docker @compose exec -T ragflow-minio mc cp /tmp/persistence-probe.txt "task004/$bucket/persistence-probe.txt"
 & docker @compose exec -T -e TASK004_PROBE=$probe ragflow-elasticsearch sh -lc 'curl -fsS -u "elastic:$ELASTIC_PASSWORD" -H "Content-Type: application/json" -X PUT http://localhost:9200/task004-persistence/_doc/current -d "{\"value\":\"$TASK004_PROBE\"}" >/dev/null'
 ```
 
@@ -542,7 +553,7 @@ Run inside script:
 
 - [ ] **Step 4: 读取、比对和清理探针**
 
-四项读取结果必须逐字等于 `$probe`。成功后仅删除本轮探针：MySQL 行/探针表、Redis 键、MinIO 探针文件、Elasticsearch 探针索引。任何读取失败时保留卷并返回非零，不执行清卷命令。
+四项读取结果必须逐字等于 `$probe`。MinIO 必须通过 `mc cat`（S3 API）回读，不得直接读取 `/data`。成功后仅删除本轮探针：MySQL 行/探针表、Redis 键、MinIO 临时对象/bucket、Elasticsearch 探针索引。任何读取失败时保留卷并返回非零，不执行清卷命令。
 
 - [ ] **Step 5: 运行真实 GREEN**
 
@@ -550,7 +561,7 @@ Run inside script:
 powershell -NoProfile -File codebase/infra/ragflow/scripts/verify-persistence.ps1
 ```
 
-Expected: 输出 `TASK-004 persistence: PASS`，五个服务在重启后恢复 healthy，四项探针一致并被清理。
+Expected: 输出 `TASK-004 restart persistence: PASS`，五个服务在重启后恢复 healthy，四项探针一致并被清理；MinIO 证据来自 S3 bucket/object 生命周期。
 
 - [ ] **Step 6: 提交持久化验证**
 

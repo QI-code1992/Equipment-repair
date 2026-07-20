@@ -27,7 +27,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/ragflow/scrip
 docker compose -p equipment-ragflow --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml down
 ```
 
-`verify.ps1` 必须确认 5 个容器均为 healthy、Web 返回 HTTP 200、Elasticsearch 为 `8.11.3` 系列，并记录固定镜像的 RepoDigest。`verify-isolation.ps1` 必须确认四个依赖仅位于内部网络且没有宿主端口。`verify-persistence.ps1` 会写入随机探针、重启整栈、核对四类存储后清理探针。
+`verify.ps1` 必须确认 5 个容器均为 healthy、Web 返回 HTTP 200、API `GET /api/v1/system/version` 返回 `code=0` 和 `data=v0.25.6`、Elasticsearch 为 `8.11.3` 系列，并逐一核对 5 个固定镜像的获批 SHA-256；标签对应摘要漂移时必须失败。`verify-isolation.ps1` 必须确认四个依赖仅位于内部网络且没有宿主端口。`verify-persistence.ps1` 会通过各存储的正式接口写入随机探针；其中 MinIO 必须经 S3 API 创建临时 bucket/object，重启整栈后回读比对，再清理对象和 bucket，不得直接读写 `/data` 目录充当对象持久化证据。
 
 常规停止只允许 `down`，禁止使用 `down -v`；后者会删除 TASK-004 命名卷并破坏持久化数据。
 
