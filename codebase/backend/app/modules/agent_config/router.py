@@ -22,7 +22,6 @@ from .schemas import (
     BindingWrite,
     BindingWriteResponse,
     DeleteResponse,
-    ModelCapabilityRead,
     ProviderRead,
     ProviderWrite,
     ProviderWriteResponse,
