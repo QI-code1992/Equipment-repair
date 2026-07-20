@@ -153,3 +153,13 @@
 - 复查：直接与持久化两层覆盖键首、键中、键尾、附件标量、列表、混合结构、紧凑密码、Cookie、Token 以及业务反例。`profile` 不会因包含 `file` 字符串而误命中。
 - 边界与风险：未知额外字段默认脱敏未实施；当前结论只覆盖已知敏感语义别名，不声称识别任意秘密载荷。该残余风险已记录，需独立 CR 决定可观测性与安全取舍。
 - 验证：RED `2 failed`；定向 `23 passed, 1 warning`；Python 3.13 `142 passed, 5 skipped, 1 warning`；compileall、diff check、PostgreSQL 17 `5 passed, 1 warning`、Compose 和 `/healthz` HTTP 200 通过。DEV-001 内部复审 Critical 0、Important 0；仍待 DEV-002 复审。
+
+## TASK-004 DEV-001 三轮独立复审（2026-07-20）
+
+- 审查对象：`codex/task-004-ragflow-infra` 相对 `origin/codex/stage-05-integration@b29c69d13c3d1c81f01023152eabf0c0f2d02741`；证据提交前功能候选 `ac8c007730d8e947c5687380e4583e8b23d2cce1`。
+- 第一轮 Standards：核对 `AGENTS.md`、任务书 v1.3、确认设计和实施计划；镜像固定、回环端口、独立网络/账户/卷、健康检查、秘密样例和任务边界一致。未新增依赖、迁移、业务 API、TASK-005 代码、兼容层或通用抽象；Critical 0、Important 0、Minor 0。
+- 第二轮 Spec/失败路径：逐项核对 FR-002、NFR-003/005/007、AC-009/029/033 与 CR-028；Docker 不可用、健康超时、Elasticsearch 版本错误、缺失 RepoDigest、网络成员/端口泄漏、重启重建和探针丢失均明确失败。修复了验收脚本的摘要数组显示、凭据命令参数警告、多层 SQL/JSON 引号和 PowerShell stderr 误判；完整矩阵复跑通过。Critical 0、Important 0、Minor 0。
+- 第三轮完整 diff：候选只包含 TASK-004 设计/计划、`codebase/infra/ragflow/`、环境样例、运行手册及正式证据；没有后端领域代码、前端、原型、Alembic 或 TASK-005 实现；`git diff --check` 通过。Critical 0、Important 0、Minor 0。
+- 真实证据：Python 3.13 `5 passed, 1 warning`；两套 Compose config 通过；5 容器 healthy；Web 200；Elasticsearch 8.11.3；内部依赖 0 宿主端口；四存储 restart 持久化通过且容器重建数为 0。
+- 风险：首次拉取仍依赖外部镜像源可用性；本地端口可能冲突，须使用环境覆盖；完整灾难恢复演练按任务书延后 TASK-011。日志和证据未记录真实秘密。
+- 当前结论：DEV-001 自审通过，但不等于正式批准。指定审核者 DEV-002 尚未审核 PR #27 的最终精确 HEAD；TASK-005 在 TASK-004 正式集成并完成合并后验证前继续锁定，Stage 6 禁止进入。

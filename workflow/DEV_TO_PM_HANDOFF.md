@@ -134,3 +134,14 @@
 - 安全边界：未获项目负责人明确授权不得 Merge；授权后 HEAD 或条件变化则失效；禁止 auto-merge、merge queue、直接 push 集成分支、普通 Stage 5 PR 指向 `main`。
 - 历史边界：不追溯改写 TASK-001、TASK-002 或 CR-037—CR-039 的已发生 GitHub 操作。生效时仍 Open 的 TASK-006 Draft PR #14 应继续作为同一 PR，不再创建后继 PR。
 - 当前候选分支：`codex/cr-040-agent-merge-approval`；目标：`codex/stage-05-integration`。本治理候选不修改 `codebase/`，不解锁 TASK 依赖，也不批准进入 Stage 6。
+
+## TASK-004 独立 RAGFlow 基础设施审核交接（2026-07-20）
+
+- 开发者/审核者：DEV-001 / DEV-002；同一 Draft PR [#27](https://github.com/QI-code1992/Equipment-repair/pull/27)；分支 `codex/task-004-ragflow-infra` → `codex/stage-05-integration`。
+- 基线/功能候选：`b29c69d13c3d1c81f01023152eabf0c0f2d02741` / `ac8c007730d8e947c5687380e4583e8b23d2cce1`；正式审核对象为本证据提交推送后的 PR #27 完整精确 HEAD。
+- 交付：独立五服务 Compose、固定版本与摘要、内部/访问双网络、仅回环 Web/API、五个命名卷、脱敏环境模板、健康/隔离/重启持久化脚本、唯一运行手册和 TASK-005 API 接入契约。
+- 验证：Python 3.13 `5 passed, 1 warning`；平台/RAGFlow Compose 和静态契约通过；5 容器 healthy、Web HTTP 200、Elasticsearch 8.11.3；依赖无宿主端口；MySQL/Redis/MinIO/Elasticsearch 重启后探针一致且容器未重建。
+- Review：DEV-001 已完成 Standards、Spec/失败路径、完整 diff 三轮复审，Critical 0、Important 0、Minor 0；DEV-002 尚未对最终精确 HEAD 提交正式审核结论。
+- 边界：未修改业务 API、数据库迁移、前端、原型或 TASK-005；未新增生产依赖、兼容代码、通用抽象层或无关修改。真实文档上传/解析/混合检索/引用属于 TASK-005，不在本任务实现。
+- 风险/回退：镜像首次拉取受外部 Registry 可用性影响；本机端口可通过本地环境覆盖；完整备份恢复演练延后 TASK-011。回退只停止/移除项目容器并选择性 revert；删除命名卷必须另行授权。
+- 请求动作：推送证据提交并确认 PR #27 精确 HEAD 后转 Ready，请 DEV-002 审核。TASK-005 在 PR #27 获批、逐 PR Merge 授权、由 DEV-002 合并且 DEV-001 完成合并后复验前继续锁定；Stage 6 禁止进入。

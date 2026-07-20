@@ -136,6 +136,21 @@
 - 唯一警告：既有 FastAPI/Starlette TestClient 对 `httpx` 的第三方弃用提示。
 - 未验证：DEV-002 尚未批准；后继正式 PR 尚未由 DEV-002 创建；TASK-002 尚未合入 `codex/stage-05-integration`，依赖继续锁定。
 
+## TASK-004 独立 RAGFlow 基础设施验证（2026-07-20）
+
+- 分支/基线：`codex/task-004-ragflow-infra`，基于 `origin/codex/stage-05-integration@b29c69d13c3d1c81f01023152eabf0c0f2d02741`；证据提交前功能候选为 `ac8c007730d8e947c5687380e4583e8b23d2cce1`。
+- TDD RED：静态契约首次因缺少 `codebase/infra/ragflow/docker-compose.yml` 失败；健康、隔离和持久化脚本分别先以“not implemented”失败，再实现 GREEN。
+- 环境：Python `3.13.14`；Docker Client/Server `29.6.1`；Docker Compose `v5.1.4`；Docker Desktop Linux 的 `vm.max_map_count=262144`。
+- Python 回归：`py -3.13 -m pytest codebase/backend/tests/test_health.py -q` 为 `5 passed, 1 warning`；警告为既有 Starlette/httpx 弃用提示。
+- Compose：平台 Compose 与 RAGFlow Compose 的 `config --quiet` 均通过；静态契约脚本输出 `TASK-004 compose contract: PASS`。
+- 真实健康：5 个容器全部 healthy；RAGFlow Web 为 HTTP 200；Elasticsearch 为 `8.11.3`；本机已有无关 RAGFlow 占用默认端口，验证仅通过环境覆盖使用 `127.0.0.1:18080/19380`，未停止无关容器。
+- 固定镜像摘要：RAGFlow `sha256:74595f13bb09c51b1c151ce85d9e06e42cf4371b0c8aeaef222e67253d7c7543`；Elasticsearch `sha256:58a3a280935d830215802322e9a0373faaacdfd646477aa7e718939c2f29292a`；MySQL `sha256:ccb8f749bb5e59f9f8f03bf7282c7ef27a93a1814a24f0a8a926fb4e19b7fb97`；MinIO `sha256:a72bf37c235a83a73890d2a46c5b36801fed61c335175e0396070bf84a8bbb98`；Redis `sha256:02419de7eddf55aa5bcf49efb74e88fa8d931b4d77c07eff8a6b2144472b6952`。
+- 网络隔离：内部网络 5 个成员，访问网络仅 RAGFlow；MySQL、Redis、MinIO、Elasticsearch 宿主端口为 0；RAGFlow 两个端口均只绑定 `127.0.0.1`。
+- 重启恢复：MySQL、Redis、MinIO、Elasticsearch 写入同一随机探针，整栈 restart 后均读回；5 个容器 ID 未变化；探针已清理，未删除命名卷。
+- 环境事件：Docker 引擎经内部代理访问 Docker Hub 持续 EOF，宿主机 Registry 探测正常；使用项目既有 DaoCloud 透明镜像拉取同一固定版本并核对 ID/RepoDigest，未修改 Docker Desktop 全局代理或仓库运行镜像身份。
+- 静态与边界：`git diff --check origin/codex/stage-05-integration...HEAD` 通过；没有业务代码、迁移、TASK-005 实现、生产依赖、兼容代码或通用抽象层修改。
+- 未验证：DEV-002 尚未审核当前最终精确 HEAD；PR #27 尚未合入；合并后验证、TASK-005 真实文档上传/解析/检索/引用和 TASK-011 完整备份恢复演练均未执行。
+
 ## TASK-002 / CR-036 R11 语义敏感键脱敏复测（2026-07-17）
 
 - RED：`binaryAttachment`、`uploadedFile`、`sessionCookieValue`、`passwordvalue` 在直接函数和失败审计落库用例中均为 `2 failed`，确认 R10 的前缀/后缀枚举遗漏。
