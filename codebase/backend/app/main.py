@@ -8,6 +8,7 @@ from app.modules.equipment.router import router as equipment_router
 from app.modules.equipment.organization_router import router as organization_router
 from app.modules.identity.router import router as identity_router
 from app.modules.identity.admin_router import router as identity_admin_router
+from app.modules.agent_config.router import router as agent_config_router
 
 
 def create_app(
@@ -27,6 +28,7 @@ def create_app(
         app.state.session_factory = session_factory(app.state.engine)
     app.include_router(identity_router)
     app.include_router(identity_admin_router)
+    app.include_router(agent_config_router)
     app.include_router(equipment_router)
     app.include_router(organization_router)
     register_audit_exception_handlers(app)
