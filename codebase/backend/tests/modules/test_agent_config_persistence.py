@@ -1,7 +1,11 @@
 from dataclasses import replace
+from pathlib import Path
+import subprocess
+import sys
+import textwrap
 
 import pytest
-from sqlalchemy import UniqueConstraint, event
+from sqlalchemy import UniqueConstraint, event, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -16,16 +20,82 @@ from app.modules.identity.models import User
 @pytest.fixture
 def db_session() -> Session:
     engine = create_database_engine("sqlite+pysqlite:///:memory:")
-    event.listen(
-        engine,
-        "connect",
-        lambda connection, _: connection.execute("PRAGMA foreign_keys=ON"),
-    )
     Base.metadata.create_all(engine)
     factory = session_factory(engine)
     with factory() as session:
         yield session
     Base.metadata.drop_all(engine)
+
+
+def test_sqlite_engine_factory_enables_foreign_key_constraints(tmp_path) -> None:
+    engine = create_database_engine(f"sqlite+pysqlite:///{tmp_path / 'foreign-keys.db'}")
+    Base.metadata.create_all(engine)
+    try:
+        with engine.connect() as first_connection, engine.connect() as second_connection:
+            assert first_connection.execute(text("PRAGMA foreign_keys")).scalar_one() == 1
+            assert second_connection.execute(text("PRAGMA foreign_keys")).scalar_one() == 1
+        with engine.begin() as connection:
+            with pytest.raises(IntegrityError):
+                connection.execute(
+                    text(
+                        "INSERT INTO model_bindings "
+                        "(id, provider_id, name, model_name) VALUES "
+                        "('binding-1', 'missing-provider', 'Binding', 'model-v1')"
+                    )
+                )
+    finally:
+        Base.metadata.drop_all(engine)
+        engine.dispose()
+
+
+def test_alembic_env_import_registers_agent_config_tables_in_target_metadata() -> None:
+    env_path = Path(__file__).parents[2] / "alembic" / "env.py"
+    script = textwrap.dedent(
+        f"""
+        import importlib.util
+        import sys
+        from contextlib import nullcontext
+        from types import SimpleNamespace
+
+        import alembic
+
+        class Config:
+            config_file_name = None
+
+            def get_main_option(self, name):
+                return "sqlite+pysqlite:///:memory:"
+
+            def set_main_option(self, name, value):
+                pass
+
+        context = SimpleNamespace(
+            config=Config(),
+            configure=lambda **kwargs: None,
+            begin_transaction=nullcontext,
+            is_offline_mode=lambda: True,
+            run_migrations=lambda: None,
+        )
+        alembic.context = context
+        sys.modules["alembic.context"] = context
+
+        spec = importlib.util.spec_from_file_location("task006_alembic_env", {str(env_path)!r})
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        from app.core.database import Base
+
+        assert {{"model_providers", "model_bindings", "agent_configs"}} <= set(Base.metadata.tables)
+        """
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        cwd=env_path.parents[1],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
 
 
 def add_binding(
@@ -128,61 +198,59 @@ def test_sqlite_fixture_enforces_agent_config_model_binding_foreign_key(
     assert repository.get(AgentId.METRIC_QUERY) == valid_config
 
 
-def test_sql_repository_returns_committed_config_after_actual_unique_race(
-    tmp_path,
-) -> None:
-    engine = create_database_engine(f"sqlite+pysqlite:///{tmp_path / 'agent-config-race.db'}")
-    event.listen(
-        engine,
-        "connect",
-        lambda connection, _: connection.execute("PRAGMA foreign_keys=ON"),
-    )
-    Base.metadata.create_all(engine)
-    factory = session_factory(engine)
-    agent_id = AgentId.FAULT_REPORTING
-    first_result: list[AgentConfig] = []
-    first_initialized = False
-    unique_conflict_seen = False
+def _agent_config_service(session: Session) -> AgentConfigService:
+    return AgentConfigService(SqlAgentConfigRepository(session), SqlModelCatalog(session))
+
+
+def _install_unique_race_listeners(engine, factory, agent_id, first_result):
+    race_state = {"first_initialized": False, "unique_conflict_seen": False}
 
     def initialize_first_session_before_second_insert(
         connection, cursor, statement, parameters, context, executemany
     ) -> None:
-        nonlocal first_initialized
-        if first_initialized or "INSERT INTO agent_configs" not in statement:
+        if race_state["first_initialized"] or "INSERT INTO agent_configs" not in statement:
             return
 
-        first_initialized = True
+        race_state["first_initialized"] = True
         with factory() as first_session:
-            first_service = AgentConfigService(
-                SqlAgentConfigRepository(first_session), SqlModelCatalog(first_session)
-            )
-            first_result.append(first_service.initialize(agent_id))
+            first_result.append(_agent_config_service(first_session).initialize(agent_id))
             first_session.commit()
 
     def record_unique_conflict(exception_context) -> None:
-        nonlocal unique_conflict_seen
         if (
             exception_context.statement
             and "INSERT INTO agent_configs" in exception_context.statement
             and "UNIQUE constraint failed: agent_configs.agent_id"
             in str(exception_context.original_exception)
         ):
-            unique_conflict_seen = True
+            race_state["unique_conflict_seen"] = True
 
     event.listen(engine, "before_cursor_execute", initialize_first_session_before_second_insert)
     event.listen(engine, "handle_error", record_unique_conflict)
+    return race_state, initialize_first_session_before_second_insert, record_unique_conflict
+
+
+def test_sql_repository_returns_committed_config_after_actual_unique_race(
+    tmp_path,
+) -> None:
+    engine = create_database_engine(f"sqlite+pysqlite:///{tmp_path / 'agent-config-race.db'}")
+    Base.metadata.create_all(engine)
+    factory = session_factory(engine)
+    agent_id = AgentId.FAULT_REPORTING
+    first_result: list[AgentConfig] = []
+    race_state, before_insert, record_error = _install_unique_race_listeners(
+        engine, factory, agent_id, first_result
+    )
     try:
         with factory() as second_session:
             second_repository = SqlAgentConfigRepository(second_session)
-            second_service = AgentConfigService(
-                second_repository, SqlModelCatalog(second_session)
-            )
+            second_service = _agent_config_service(second_session)
 
             assert second_repository.get(agent_id) is None
             second_result = second_service.initialize(agent_id)
 
-            assert first_initialized
-            assert unique_conflict_seen
+            assert race_state["first_initialized"]
+            assert race_state["unique_conflict_seen"]
             assert second_result == first_result[0]
             assert second_repository.list_all() == [first_result[0]]
 
@@ -191,8 +259,8 @@ def test_sql_repository_returns_committed_config_after_actual_unique_race(
                 first_result[0]
             ]
     finally:
-        event.remove(engine, "before_cursor_execute", initialize_first_session_before_second_insert)
-        event.remove(engine, "handle_error", record_unique_conflict)
+        event.remove(engine, "before_cursor_execute", before_insert)
+        event.remove(engine, "handle_error", record_error)
         Base.metadata.drop_all(engine)
         engine.dispose()
 

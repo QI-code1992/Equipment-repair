@@ -1,7 +1,7 @@
 from collections.abc import Iterator
 
 from fastapi import Request
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -21,7 +21,14 @@ def create_database_engine(database_url: str) -> Engine:
     options: dict[str, object] = {"pool_pre_ping": True}
     if normalized_url == "sqlite+pysqlite:///:memory:":
         options.update(connect_args={"check_same_thread": False}, poolclass=StaticPool)
-    return create_engine(normalized_url, **options)
+    engine = create_engine(normalized_url, **options)
+    if engine.dialect.name == "sqlite":
+        event.listen(
+            engine,
+            "connect",
+            lambda connection, _: connection.execute("PRAGMA foreign_keys=ON"),
+        )
+    return engine
 
 
 def session_factory(engine: Engine) -> sessionmaker[Session]:

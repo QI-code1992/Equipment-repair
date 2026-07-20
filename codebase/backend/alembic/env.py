@@ -6,6 +6,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from app.core.database import Base, normalize_database_url
+from app.modules.agent_config import models as agent_config_models
 from app.modules.audit import models as audit_models
 from app.modules.equipment import models as equipment_models
 from app.modules.identity import models as identity_models
