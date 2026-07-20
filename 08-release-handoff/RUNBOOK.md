@@ -16,7 +16,7 @@
 
 ## 配置、启动与验证
 
-以下命令显式绑定 Git 忽略的本地环境文件；脚本和 Compose 必须使用同一文件，禁止在真实验证时回退到 `.env.example`。
+以下 Compose 命令以及会调用 Compose 的健康、持久化脚本显式绑定同一个 Git 忽略本地环境文件，禁止在真实验证时回退到 `.env.example`。网络隔离脚本只检查已启动容器和 Docker 网络，不读取 Compose 环境文件。
 
 ```powershell
 $RagflowEnvFile = "codebase/infra/.env.local"
@@ -25,7 +25,7 @@ if (-not (Test-Path -LiteralPath $RagflowEnvFile -PathType Leaf)) { throw "Missi
 docker compose --env-file $RagflowEnvFile -f codebase/infra/ragflow/docker-compose.yml config --quiet
 docker compose -p equipment-ragflow --env-file $RagflowEnvFile -f codebase/infra/ragflow/docker-compose.yml up -d
 powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/ragflow/scripts/verify.ps1 -EnvFile $RagflowEnvFile
-powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/ragflow/scripts/verify-isolation.ps1 -EnvFile $RagflowEnvFile
+powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/ragflow/scripts/verify-isolation.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/ragflow/scripts/verify-persistence.ps1 -EnvFile $RagflowEnvFile
 docker compose -p equipment-ragflow --env-file $RagflowEnvFile -f codebase/infra/ragflow/docker-compose.yml down
 ```

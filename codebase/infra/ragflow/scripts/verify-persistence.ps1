@@ -129,21 +129,19 @@ try {
     }
 
     $verificationSucceeded = $true
-    Write-Output "TASK-004 restart persistence: PASS; stores=mysql,redis,minio-s3,elasticsearch; containers_recreated=0"
 }
 finally {
-    $previousErrorActionPreference = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
     if ($verificationSucceeded) {
         $mysqlCleanup = "DROP TABLE IF EXISTS task004_persistence_probe;"
-        & docker @composeArgs exec -T -e "MYSQL_PWD=$($mysqlEnvironment.MYSQL_PASSWORD)" ragflow-mysql mysql "-u$($mysqlEnvironment.MYSQL_USER)" $mysqlEnvironment.MYSQL_DATABASE -e $mysqlCleanup *> $null
-        & docker @composeArgs exec -T -e "REDISCLI_AUTH=$($redisEnvironment.REDIS_PASSWORD)" ragflow-redis redis-cli DEL task004:persistence *> $null
-        & docker @composeArgs exec -T ragflow-minio mc rm --force "task004/$minioBucket/$minioObject" *> $null
-        & docker @composeArgs exec -T ragflow-minio mc rb --force "task004/$minioBucket" *> $null
-        & docker @composeArgs exec -T ragflow-elasticsearch curl -sS -u "elastic:$($elasticsearchEnvironment.ELASTIC_PASSWORD)" -X DELETE http://localhost:9200/task004-persistence *> $null
+        Invoke-Compose -Arguments @("exec", "-T", "-e", "MYSQL_PWD=$($mysqlEnvironment.MYSQL_PASSWORD)", "ragflow-mysql", "mysql", "-u$($mysqlEnvironment.MYSQL_USER)", $mysqlEnvironment.MYSQL_DATABASE, "-e", $mysqlCleanup) *> $null
+        Invoke-Compose -Arguments @("exec", "-T", "-e", "REDISCLI_AUTH=$($redisEnvironment.REDIS_PASSWORD)", "ragflow-redis", "redis-cli", "DEL", "task004:persistence") *> $null
+        Invoke-Compose -Arguments @("exec", "-T", "ragflow-minio", "mc", "rm", "--force", "task004/$minioBucket/$minioObject") *> $null
+        Invoke-Compose -Arguments @("exec", "-T", "ragflow-minio", "mc", "rb", "--force", "task004/$minioBucket") *> $null
+        Invoke-Compose -Arguments @("exec", "-T", "ragflow-elasticsearch", "curl", "-fsS", "-u", "elastic:$($elasticsearchEnvironment.ELASTIC_PASSWORD)", "-X", "DELETE", "http://localhost:9200/task004-persistence") *> $null
+        Invoke-Compose -Arguments @("exec", "-T", "ragflow-minio", "mc", "alias", "rm", "task004") *> $null
+        Invoke-Compose -Arguments @("exec", "-T", "ragflow-minio", "rm", "-f", $minioTemporaryFile) *> $null
+        Invoke-Compose -Arguments @("exec", "-T", "ragflow-elasticsearch", "rm", "-f", "/tmp/task004-persistence.json") *> $null
     }
-    & docker @composeArgs exec -T ragflow-minio mc alias rm task004 *> $null
-    & docker @composeArgs exec -T ragflow-minio rm -f $minioTemporaryFile *> $null
-    & docker @composeArgs exec -T ragflow-elasticsearch rm -f /tmp/task004-persistence.json *> $null
-    $ErrorActionPreference = $previousErrorActionPreference
 }
+
+Write-Output "TASK-004 restart persistence: PASS; stores=mysql,redis,minio-s3,elasticsearch; containers_recreated=0; probes_cleaned=4"

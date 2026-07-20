@@ -1,5 +1,6 @@
 param(
     [string]$VerifyScript = "codebase/infra/ragflow/scripts/verify.ps1",
+    [string]$IsolationScript = "codebase/infra/ragflow/scripts/verify-isolation.ps1",
     [string]$PersistenceScript = "codebase/infra/ragflow/scripts/verify-persistence.ps1",
     [string]$Runbook = "08-release-handoff/RUNBOOK.md"
 )
@@ -30,10 +31,21 @@ Assert-Contract ($persistenceSource -match 'mc\s+alias\s+set') "MinIO S3 client 
 Assert-Contract ($persistenceSource -match '"mc"\s*,\s*"mb"') "MinIO bucket is not created through the S3 API"
 Assert-Contract ($persistenceSource -match '"mc"\s*,\s*"cp"') "MinIO object is not written through the S3 API"
 Assert-Contract ($persistenceSource -match '"mc"\s*,\s*"cat"') "MinIO object is not read through the S3 API"
-Assert-Contract ($persistenceSource -match 'mc\s+rb') "MinIO probe bucket is not cleaned through the S3 API"
+Assert-Contract ($persistenceSource -match '"mc"\s*,\s*"rb"') "MinIO probe bucket is not cleaned through the S3 API"
 Assert-Contract ($persistenceSource -notmatch '/data/\.task004-persistence-probe') "MinIO persistence still bypasses the S3 API"
 Assert-Contract ($persistenceSource -match '\$verificationSucceeded\s*=\s*\$false') "persistence verification has no failure-preservation state"
 Assert-Contract ($persistenceSource -match 'if\s*\(\$verificationSucceeded\)\s*\{[\s\S]*DROP TABLE') "persistence probes are not conditionally cleaned only after success"
+$finallyIndex = $persistenceSource.IndexOf("finally {")
+$passIndex = $persistenceSource.LastIndexOf('Write-Output "TASK-004 restart persistence: PASS')
+Assert-Contract ($finallyIndex -ge 0) "persistence verifier has no guarded cleanup block"
+Assert-Contract ($passIndex -gt $finallyIndex) "persistence PASS is emitted before cleanup completes"
+$finallySource = $persistenceSource.Substring($finallyIndex)
+Assert-Contract ($finallySource -notmatch '&\s+docker\s+@composeArgs') "persistence cleanup bypasses checked Compose execution"
+Assert-Contract ($finallySource -match '\$mysqlCleanup\s*=\s*"DROP TABLE[\s\S]*Invoke-Compose[\s\S]*\$mysqlCleanup') "MySQL cleanup is not exit-code checked"
+Assert-Contract ($finallySource -match 'Invoke-Compose[\s\S]*redis-cli[\s\S]*DEL') "Redis cleanup is not exit-code checked"
+Assert-Contract ($finallySource -match 'Invoke-Compose[\s\S]*"mc"\s*,\s*"rm"') "MinIO object cleanup is not exit-code checked"
+Assert-Contract ($finallySource -match 'Invoke-Compose[\s\S]*"mc"\s*,\s*"rb"') "MinIO bucket cleanup is not exit-code checked"
+Assert-Contract ($finallySource -match 'Invoke-Compose[\s\S]*curl[\s\S]*-fsS[\s\S]*DELETE') "Elasticsearch cleanup is not fail-fast"
 
 $expectedDigests = @(
     "sha256:74595f13bb09c51b1c151ce85d9e06e42cf4371b0c8aeaef222e67253d7c7543",
@@ -58,13 +70,25 @@ Assert-Contract ($verifySource -match 'log_summary=') "sanitized log summary is 
 Assert-Contract ($verifySource -match 'exit_codes=') "verification command exit codes are not emitted"
 
 Assert-Contract (Test-Path -LiteralPath $Runbook -PathType Leaf) "missing TASK-004 runbook"
+Assert-Contract (Test-Path -LiteralPath $IsolationScript -PathType Leaf) "missing isolation verification script"
 $runbookSource = Get-Content -Raw -LiteralPath $Runbook
 Assert-Contract ($runbookSource -match '\$RagflowEnvFile\s*=') "runbook does not define an explicit local environment file"
 $scriptInvocations = @($runbookSource -split "`n" | Where-Object { $_ -match 'scripts/verify.*\.ps1' })
 Assert-Contract ($scriptInvocations.Count -eq 3) "runbook must contain exactly three TASK-004 verifier commands"
-foreach ($invocation in $scriptInvocations) {
-    Assert-Contract ($invocation -match '-EnvFile\s+\$RagflowEnvFile') "runbook verifier omits the explicit local environment file"
-}
+$runtimeInvocation = @($scriptInvocations | Where-Object { $_ -match 'scripts/verify\.ps1' })
+$isolationInvocation = @($scriptInvocations | Where-Object { $_ -match 'scripts/verify-isolation\.ps1' })
+$persistenceInvocation = @($scriptInvocations | Where-Object { $_ -match 'scripts/verify-persistence\.ps1' })
+Assert-Contract ($runtimeInvocation.Count -eq 1 -and $runtimeInvocation[0] -match '-EnvFile\s+\$RagflowEnvFile') "runtime verifier omits the explicit local environment file"
+Assert-Contract ($persistenceInvocation.Count -eq 1 -and $persistenceInvocation[0] -match '-EnvFile\s+\$RagflowEnvFile') "persistence verifier omits the explicit local environment file"
+Assert-Contract ($isolationInvocation.Count -eq 1 -and $isolationInvocation[0] -notmatch '-EnvFile') "runbook passes unsupported EnvFile to isolation verifier"
+$tokens = $null
+$parseErrors = $null
+$isolationAst = [System.Management.Automation.Language.Parser]::ParseFile(
+    (Resolve-Path -LiteralPath $IsolationScript), [ref]$tokens, [ref]$parseErrors
+)
+Assert-Contract ($parseErrors.Count -eq 0) "isolation verifier cannot be parsed"
+$isolationParameters = @($isolationAst.ParamBlock.Parameters | ForEach-Object { $_.Name.VariablePath.UserPath })
+Assert-Contract ($isolationParameters -notcontains "EnvFile") "isolation verifier exposes an unused EnvFile parameter"
 Assert-Contract ($runbookSource -match '--env-file\s+\$RagflowEnvFile.*\sdown') "runbook down command omits the explicit local environment file"
 
 Write-Output "TASK-004 review remediation contract: PASS"
