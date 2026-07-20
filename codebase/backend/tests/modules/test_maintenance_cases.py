@@ -136,6 +136,28 @@ def test_similar_cases_require_filter_enforce_limit_and_return_empty(
     assert empty.json() == {"items": [], "count": 0}
 
 
+def test_similar_cases_treats_sql_wildcards_as_literal_text(
+    client: TestClient,
+) -> None:
+    create_case(
+        client,
+        equipment_type="LOADER",
+        model="MODEL-1",
+        symptom="hydraulic pressure loss",
+        completed_at=datetime.now(UTC),
+    )
+    _, token = repairer(client)
+
+    response = client.get(
+        "/api/repair-cases/similar",
+        headers=auth_headers(token),
+        params={"symptom": "%_"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"items": [], "count": 0}
+
+
 def test_similar_cases_require_permission_and_do_not_write_success_audit(
     client: TestClient,
 ) -> None:

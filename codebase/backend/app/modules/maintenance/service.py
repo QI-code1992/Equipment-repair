@@ -153,13 +153,22 @@ def _adopted_diagnosis(
     prefill = {
         key: value
         for key, value in (draft.allowed_prefill or {}).items()
-        if key in prefill_fields
+        if key in prefill_fields and isinstance(value, str)
     }
+    scalar_summary_fields = {"symptom", "root_cause"}
+    list_summary_fields = summary_fields - scalar_summary_fields
     summary = {
         key: value
         for key, value in (draft.read_only_summary or {}).items()
-        if key in summary_fields
+        if key in scalar_summary_fields and isinstance(value, str)
     }
+    summary.update(
+        {
+            key: [item for item in value if isinstance(item, str)]
+            for key, value in (draft.read_only_summary or {}).items()
+            if key in list_summary_fields and isinstance(value, list)
+        }
+    )
     return draft, prefill, summary
 
 
@@ -332,7 +341,14 @@ def find_similar_cases(
         matches.append(condition)
         priorities.append((condition, 2))
     if query.symptom:
-        condition = HistoricalRepairCase.symptom.ilike(f"%{query.symptom}%")
+        literal = (
+            query.symptom.replace("\\", "\\\\")
+            .replace("%", "\\%")
+            .replace("_", "\\_")
+        )
+        condition = HistoricalRepairCase.symptom.ilike(
+            f"%{literal}%", escape="\\"
+        )
         matches.append(condition)
         priorities.append((condition, 1))
     score = case(*priorities, else_=0)

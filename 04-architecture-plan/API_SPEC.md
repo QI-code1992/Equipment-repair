@@ -216,7 +216,7 @@ Stage 3 原型中的动态自定义角色控件与 FR-010 及 CR-036 的固定�
 | POST | `/api/work-orders/{work_order_id}/repair-result` | `fault:close` | 必填 | 请求人工最终字段 `actual_cause,actual_solution,repair_result`，可选 `parts_replacement_notes`；200 返回完成状态、结构化案例 ID 及 `audit_event_id`。 |
 | GET | `/api/repair-cases/similar` | `maintenance:view` | 不使用 | 查询至少包含 `equipment_type,equipment_model,symptom` 之一，`limit` 为 1–100、默认 20；200 返回 `items,count`。 |
 
-`attachment_refs` 每项严格包含 `object_key,filename,size_bytes,content_type`，不接受正文、Base64 或任意额外字段。`occurred_at` 不得晚于当前时间。`DIRECT` 禁止携带诊断草稿；`ADOPTED` 必须引用同一故障、状态为 `DIAGNOSIS_READY` 且从未被采纳的草稿。采纳只复制批准的预填字段与只读摘要白名单，直接开始不保存 AI 摘要。维修结束始终以维修人员本次提交的最终字段覆盖草稿预填值。
+`attachment_refs` 每项严格包含 `object_key,filename,size_bytes,content_type`，不接受正文、Base64 或任意额外字段。`occurred_at` 必须携带时区且不得晚于当前时间。`DIRECT` 禁止携带诊断草稿；`ADOPTED` 必须引用同一故障、状态为 `DIAGNOSIS_READY` 且从未被采纳的草稿。采纳只复制批准字段中类型正确的字符串或字符串列表，并丢弃未知字段与非预期嵌套值；直接开始不保存 AI 摘要。维修结束始终以维修人员本次提交的最终字段覆盖草稿预填值。
 
 ### 状态、幂等、审计与并发
 
@@ -235,4 +235,4 @@ Stage 3 原型中的动态自定义角色控件与 FR-010 及 CR-036 的固定�
 | 409 | `DIAGNOSIS_DRAFT_FAULT_MISMATCH`, `DIAGNOSIS_DRAFT_NOT_READY`, `DIAGNOSIS_DRAFT_ALREADY_ADOPTED` | 草稿不属于该故障、未就绪或已采纳。 |
 | 409 | `EQUIPMENT_ACTIVE_FAULT` | 活跃故障存在时禁止停用；`fields.status=active_fault`。 |
 
-相似案例查询只访问 PostgreSQL `historical_repair_cases`：类型与型号精确匹配优先，其次为单字段或症状文本匹配，同优先级按完成时间倒序。空结果返回 `items=[]`；不产生成功审计，不进行网络请求，也不返回知识库引用。
+相似案例查询只访问 PostgreSQL `historical_repair_cases`：类型与型号精确匹配优先，其次为单字段或症状字面文本匹配，同优先级按完成时间倒序；查询中的 `%`、`_` 不具备通配符含义。空结果返回 `items=[]`；不产生成功审计，不进行网络请求，也不返回知识库引用。

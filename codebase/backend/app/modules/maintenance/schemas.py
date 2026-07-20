@@ -1,6 +1,4 @@
-from datetime import datetime
-
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
 from app.modules.maintenance.models import RepairStartMode
 
@@ -20,7 +18,7 @@ class FaultReportCreate(BaseModel):
     equipment_id: str = Field(min_length=1, max_length=36)
     urgency: str = Field(min_length=1, max_length=30)
     symptom: str = Field(min_length=1, max_length=4000)
-    occurred_at: datetime
+    occurred_at: AwareDatetime
     possible_location: str | None = Field(default=None, max_length=300)
     description: str | None = Field(default=None, max_length=10000)
     attachment_refs: list[AttachmentRef] = Field(default_factory=list)

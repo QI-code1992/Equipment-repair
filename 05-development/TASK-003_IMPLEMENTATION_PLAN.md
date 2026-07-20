@@ -296,8 +296,8 @@ D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backe
 **Files:**
 - Modify: `codebase/backend/app/modules/equipment/service.py`
 - Modify: `codebase/backend/app/modules/audit/http.py`
-- Modify: `codebase/backend/tests/modules/test_maintenance_lifecycle.py`
-- Modify: `codebase/backend/tests/modules/test_task002_equipment.py`
+- Create: `codebase/backend/tests/modules/test_maintenance_equipment_protection.py`
+- Regression: `codebase/backend/tests/modules/test_task002_equipment.py`
 
 - [x] **Step 1: 写 RED 测试**
 
