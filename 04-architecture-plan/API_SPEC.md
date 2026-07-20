@@ -199,6 +199,40 @@ API 权限码固定为 `identity:read,identity:write,equipment:read,equipment:wr
 
 ### 延后边界与产品侧修正
 
-TASK-002 不根据尚不存在的业务事实推测状态：由 TASK-003 建立故障、工单和维修事实后，再实现这些事实对设备停用或生命周期操作的保护。TASK-002 不提供设备物理删除接口，也不实现附件上传、对象存储、扫描、下载和生命周期。
+TASK-002 不根据当时尚不存在的业务事实推测状态；TASK-003 负责建立故障、工单和维修事实，并已据此实现活跃故障设备停用保护。TASK-002 不提供设备物理删除接口，也不实现附件上传、对象存储、扫描、下载和生命周期。
 
 Stage 3 原型中的动态自定义角色控件与 FR-010 及 CR-036 的固定四角色规则冲突，必须在 TASK-010 前由产品侧修正。本次后端修复不修改原型、PRD、SPEC 或验收标准。
+
+## TASK-003 正式契约
+
+本节冻结故障上报、开始维修、维修结束和结构化案例查询契约。附件字段只接受对象引用及元数据；TASK-003 不上传、解析或下载文件，不调用 RAGFlow、Agent 或向量服务。
+
+### 路由与权限
+
+| Method | Endpoint | 权限 | Idempotency-Key | 请求与成功响应 |
+|---|---|---|---|---|
+| POST | `/api/fault-reports` | `fault:create` | 必填 | 请求 `equipment_id,urgency,symptom,occurred_at`，可选 `possible_location,description,attachment_refs`；201 返回故障字段及 `audit_event_id`。 |
+| POST | `/api/fault-reports/{fault_id}/start-repair` | `fault:repair` | 必填 | 请求 `mode=DIRECT` 或 `mode=ADOPTED,diagnosis_draft_id`；200 返回故障、工单、维修记录和开始模式字段及 `audit_event_id`。 |
+| POST | `/api/work-orders/{work_order_id}/repair-result` | `fault:close` | 必填 | 请求人工最终字段 `actual_cause,actual_solution,repair_result`，可选 `parts_replacement_notes`；200 返回完成状态、结构化案例 ID 及 `audit_event_id`。 |
+| GET | `/api/repair-cases/similar` | `maintenance:view` | 不使用 | 查询至少包含 `equipment_type,equipment_model,symptom` 之一，`limit` 为 1–100、默认 20；200 返回 `items,count`。 |
+
+`attachment_refs` 每项严格包含 `object_key,filename,size_bytes,content_type`，不接受正文、Base64 或任意额外字段。`occurred_at` 不得晚于当前时间。`DIRECT` 禁止携带诊断草稿；`ADOPTED` 必须引用同一故障、状态为 `DIAGNOSIS_READY` 且从未被采纳的草稿。采纳只复制批准的预填字段与只读摘要白名单，直接开始不保存 AI 摘要。维修结束始终以维修人员本次提交的最终字段覆盖草稿预填值。
+
+### 状态、幂等、审计与并发
+
+故障只允许 `PENDING_ACCEPT -> IN_REPAIR -> PROCESSED`，工单在本契约中由开始维修建立为 `IN_REPAIR`，结束维修经 `PENDING_INSPECTION` 同事务收口为 `COMPLETED`。新 Key 对已迁移状态重复操作返回 409；同一 Key、方法、路径和请求体重放原成功响应，不重复创建故障、工单、维修记录、案例或成功审计。
+
+三个写接口的业务变更、成功审计与幂等记录同事务提交；任一步失败则业务事务回滚，再由独立事务写脱敏失败审计。成功审计动作分别为 `fault_report.create,repair.start,repair.complete`。PostgreSQL 使用设备、故障、工单及诊断草稿行锁协调竞争；设备更新为 `DISABLED` 时也锁定同一设备行。存在 `PENDING_ACCEPT` 或 `IN_REPAIR` 故障时返回 `409 EQUIPMENT_ACTIVE_FAULT` 和 `fields.status=active_fault`，不改变设备。
+
+### 稳定业务错误
+
+| HTTP | code | 场景 |
+|---|---|---|
+| 404 | `FAULT_EQUIPMENT_NOT_FOUND`, `FAULT_REPORT_NOT_FOUND`, `WORK_ORDER_NOT_FOUND`, `DIAGNOSIS_DRAFT_NOT_FOUND` | 对应资源不存在。 |
+| 409 | `FAULT_EQUIPMENT_DISABLED` | 停用设备不可新建故障。 |
+| 422 | `FAULT_OCCURRENCE_IN_FUTURE` | 故障发生时间在未来；`fields.occurred_at=future`。 |
+| 409 | `FAULT_STATE_CONFLICT`, `WORK_ORDER_STATE_CONFLICT` | 当前状态不允许迁移；`fields.status` 返回当前状态。 |
+| 409 | `DIAGNOSIS_DRAFT_FAULT_MISMATCH`, `DIAGNOSIS_DRAFT_NOT_READY`, `DIAGNOSIS_DRAFT_ALREADY_ADOPTED` | 草稿不属于该故障、未就绪或已采纳。 |
+| 409 | `EQUIPMENT_ACTIVE_FAULT` | 活跃故障存在时禁止停用；`fields.status=active_fault`。 |
+
+相似案例查询只访问 PostgreSQL `historical_repair_cases`：类型与型号精确匹配优先，其次为单字段或症状文本匹配，同优先级按完成时间倒序。空结果返回 `items=[]`；不产生成功审计，不进行网络请求，也不返回知识库引用。

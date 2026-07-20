@@ -203,7 +203,7 @@ else:
 
 实现不得生成诊断、调用模型、RAGFlow 或补全客户端未提供的诊断结果。
 
-- [ ] **Step 5: 运行状态、幂等、审计和并发回归**
+- [x] **Step 5: 运行状态、幂等、审计和并发回归**
 
 Run:
 
@@ -299,11 +299,11 @@ D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backe
 - Modify: `codebase/backend/tests/modules/test_maintenance_lifecycle.py`
 - Modify: `codebase/backend/tests/modules/test_task002_equipment.py`
 
-- [ ] **Step 1: 写 RED 测试**
+- [x] **Step 1: 写 RED 测试**
 
 覆盖：`PENDING_ACCEPT` 或 `IN_REPAIR` 故障存在时，PATCH 设备为 `DISABLED` 返回 409 `EQUIPMENT_ACTIVE_FAULT`，`fields.status=active_fault`，设备保持原状态并生成失败审计；全部相关故障为 `PROCESSED` 后允许停用；更新为其他状态不误阻断。
 
-- [ ] **Step 2: 实现最小保护**
+- [x] **Step 2: 实现最小保护**
 
 在 `update_equipment()` 写值之前，仅当目标状态为 `DISABLED` 时查询真实 `FaultReport` 活跃状态。增加稳定字段映射：
 
@@ -313,7 +313,7 @@ D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backe
 
 PostgreSQL 验证使用设备行锁协调故障创建和停用；SQLite 测试只验证业务语义，不声称覆盖竞争条件。
 
-- [ ] **Step 3: 运行 GREEN 和设备全回归**
+- [x] **Step 3: 运行 GREEN 和设备全回归**
 
 Run:
 
@@ -331,19 +331,19 @@ D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backe
 
 **Candidate contract:** 开发期 `revision="0003_task003"`、`down_revision="0002"`。该标识与 TASK-006 的候选 `0003` 明确区分，但不得未经线性化进入集成分支。
 
-- [ ] **Step 1: 写迁移 RED 测试**
+- [x] **Step 1: 写迁移 RED 测试**
 
 覆盖：从空库 upgrade 到 head；从 `0002` upgrade 到 TASK-003 head；五张表、索引、外键、唯一/检查约束存在；downgrade 回 `0002` 后五张表消失且 TASK-002 表保留；再次 upgrade 成功；`alembic heads` 只有一个可解释 head。
 
-- [ ] **Step 2: 运行 RED**
+- [x] **Step 2: 运行 RED**
 
 Expected: revision 不存在或 maintenance 表缺失。
 
-- [ ] **Step 3: 实现 upgrade/downgrade**
+- [x] **Step 3: 实现 upgrade/downgrade**
 
 upgrade 按外键顺序创建：`fault_reports` → `diagnosis_drafts` → `work_orders` → `maintenance_records` → `historical_repair_cases`。downgrade 反序删除。枚举使用非原生约束，避免残留 PostgreSQL enum type。
 
-- [ ] **Step 4: 在隔离 PostgreSQL 17 数据库验证**
+- [x] **Step 4: 在隔离 PostgreSQL 17 数据库验证**
 
 开发数据库必须使用独立数据库名；downgrade 会删除 TASK-003 表，禁止对共享或正式数据执行。
 
@@ -367,8 +367,8 @@ D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m alembic -c codebase/b
 ### Task 8：完成契约文档、全量验证和正式交付证据
 
 **Files:**
-- Modify: `01-requirements/API_SPEC.md`
-- Modify: `01-requirements/DATA_MODEL.md`
+- Modify: `04-architecture-plan/API_SPEC.md`
+- Modify: `04-architecture-plan/DATA_MODEL.md`
 - Modify: `05-development/SELF_TEST.md`
 - Modify: `05-development/CODE_REVIEW.md`
 - Modify: `05-development/COMMIT_LOG.md`
@@ -377,7 +377,7 @@ D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m alembic -c codebase/b
 - Modify: `workflow/DEV_TO_PM_HANDOFF.md`
 - Modify: `workflow/state.json` only for the actual TASK-003 handoff state permitted by the task book
 
-- [ ] **Step 1: 同步 API 和数据模型契约**
+- [x] **Step 1: 同步 API 和数据模型契约**
 
 记录四个端点的权限、请求/响应字段、状态码、稳定错误、幂等和审计；记录五张表、约束、状态机、人工最终字段和 PostgreSQL-only 案例边界。不得改写 PRD、SPEC 或验收标准。
 
@@ -390,7 +390,7 @@ D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m compileall -q codebas
 git diff --check
 ```
 
-- [ ] **Step 3: PostgreSQL 17 真实验证**
+- [x] **Step 3: PostgreSQL 17 真实验证**
 
 验证事务回滚、同 Key 并发故障创建、并发开始维修、故障创建与设备停用竞争、迁移空库升级/`0002` 升级/downgrade/再升级和单一 head。记录真实命令、容器/数据库版本、退出码和脱敏结果；不得用 SQLite 替代。
 
