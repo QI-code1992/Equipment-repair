@@ -18,16 +18,27 @@ Production feature commits will be appended with branch, files, verification and
 | 2026-07-15 | `20fc10f9e0af3e420283814a3eb02ab744aaf869` | CR-032 unified `codebase/` directory migration | directory and prototype regression checks passed; backend blocked by DEF-003; Compose unverified without Docker |
 | 2026-07-15 | `87538b04a168cb3c11c2e65dfb976d3a206d8218` | TASK-001 runtime baseline repair | Python 3.13 test, Compose configuration, container health and `/healthz` verified; FCP-001 |
 | 2026-07-15 | `45725ac083c98ea999492b709e9792082c3db284` | TASK-001 verification evidence | updated FCP, self-test and DEF-003/DEF-004 evidence; pushed to task branch |
-| 2026-07-15 | `33d7712334044437eba0d3fc884859d48a3c71ed` | TASK-006 immutable Agent configuration domain | Task 1 review passed; non-database slice only |
-| 2026-07-15 | `7cbf76bb9ae627e023cbeaa86fd883b18a916373` | TASK-006 independent configuration service and two external ports | Task 2 review passed with four non-blocking Minor test enhancements |
-| 2026-07-15 | `f7da3393f8861e3f7b8a453629fce7079915e58e` | TASK-006 初始 API 实现提交（可注入、正式未挂载） | Task 3 review passed; module 21 passed, backend 25 passed, each with one third-party deprecation warning; FCP-006-NDB candidate |
-| 2026-07-15 | `04e651c1453fbd0551303aff9f4d6236ea2e59d4` | TASK-006 sanitize FastAPI/Pydantic request validation errors | Final-review Important closed; API 7 passed, module 24 passed, backend 28 passed; route remains unmounted |
-| 2026-07-15 | `2a7ca4eeec9857f361039736ec2576658832df52` | TASK-006 final security validation evidence | Current remote evidence and recoverable checkpoint for safety HEAD `04e651c1453fbd0551303aff9f4d6236ea2e59d4`; API 7 passed, module 24 passed, backend 28 passed |
-
-TASK-006 验证环境：Python 3.13.14。已完成领域模型、`AgentConfigRepository` 与 `ModelCatalog` 两个外部端口、独立初始化/读取/保存、模型推理能力校验、不可变配置快照与未挂载 API 契约。
-
-Task 2 独立审查保留四项非阻塞 Minor 测试建议：空仓库 `list_all()`/未初始化读取；路径与请求体身份不匹配时的隔离断言；全部快照字段的 sentinel 完整复制断言；数值范围精确上下边界回归。
-
-TASK-006 状态边界：非数据库切片已验证，但 TASK-006 总任务仍未完成。未完成或未验证：数据库仓储、迁移、事务/并发唯一性、认证/权限/审计接入、正式路由挂载、真实模型测试、前端集成、Docker、Compose、RAGFlow。数据库继续 Blocked By TASK-002，TASK-007 不解锁。未新增生产依赖、兼容代码、范围外抽象或无关修改；DEV-002 未执行或宣称 Docker、Compose、RAGFlow 验证通过。
-
-安全修复补充：三个新增请求校验场景逐项 RED 后 GREEN；响应不再包含 `input`、请求体、原始异常或敏感 sentinel。既有四项 Minor 测试增强与 `_validate` 约 50 行长度关注继续记录为非阻塞，不纳入本次修复。
+| 2026-07-16 | `e328cec64f1aa9c7cdc383579af042692dce5679` | PR #15 TASK-002 merge into `codex/stage-05-integration` | governance-invalid merge; review gate remained `Changes requested`; not a task completion or dependency-unlock commit |
+| 2026-07-16 | `6650f615e48d88b9a54179c27a7f03d1bf48f391` | CR-038 remediation authorization | project-owner approval and rollback constraints recorded |
+| 2026-07-16 | `5d91e83679acefa5486a25bf5b921e9c12fd52d6` | non-destructive revert of PR #15 merge | verified rollback candidate on `codex/cr-038-revert-pr-15-gate-violation`; pending remediation PR |
+| 2026-07-16 | `d37698c6e51df1701bbdfcf12ec6fa329241e0bd` | CR-038 PR #17 merge | invalid PR #15 integration reverted; post-merge Python, Compose, container health and `/healthz` passed |
+| 2026-07-16 | `e0f60f84d5ed31b693ad4f617b7b4c02ded0f718` | CR-037 PR #18 review correction | synchronized task-book approval status with governance ledgers; no codebase change; re-review passed |
+| 2026-07-16 | `e6b571d16192fb4462b7c118ef977df8f6ce186a` | CR-037 PR #18 approved head | approval record only after project-owner approval of `1d4405e`; task-book and codebase unchanged |
+| 2026-07-16 | `18485653a94cd033cfc82e8d6c7e40c35fcfbe33` | CR-037 PR #18 merge | task-book v1.2 and governance ledgers merged into `codex/stage-05-integration`; post-merge governance and minimal runtime verification passed |
+| 2026-07-16 | `35119954ba1d9ca475f03d1faa026bf6a474b18f` | TASK-002 CR-036 R6 contract and migration repair | API/Data Model contract frozen; Alembic legacy repair and local regression passed |
+| 2026-07-16 | `11dbb226e9b77ff5185fed5fa1434b0de6749206` | TASK-002 CR-036 R7 PostgreSQL and review remediation | real PostgreSQL concurrency, stable failure fields, safe destructive-test gate, test responsibility split; internal review blockers closed |
+| 2026-07-16 | `ab67bcdff42d64ba739571515df4e6faed158d32` | TASK-002 first remediation handoff evidence | pushed and used for initial written review request; superseded after self-check found integration-branch divergence |
+| 2026-07-16 | `0aac415d18aee256c237adb508d2ab24314a7486` | TASK-002 integration governance synchronization | merged `ac767c83128cb89ceea8e28c518be0adfbe1984c`, preserved CR-037/CR-038, restored a conflict-free successor-PR base |
+| 2026-07-16 | `4c111d0243d947a32d555bd48b1b72cab552bac4` | TASK-002 synchronized verification evidence | post-sync tests, PostgreSQL, migration, Compose actual state, merge simulation and DEV-001 review recorded; pushed review candidate |
+| 2026-07-17 | `73030f83638b3b063db483029591720bf65aac21` | TASK-002 CR-036 R8 final review-blocker remediation | fixed catalog migration/runtime authorization, user visibility, sanitizer variants, unexpected-error rollback/failure audit and regression tests; three-round verification passed |
+| 2026-07-17 | `ac6947a642f00ba48aebcb80064f87fcc4c01ea8` | TASK-002 CR-036 R9 audit redaction hardening | closes DEV-002's remaining Important: password semantic segments and attachment-context metadata allowlist; adds end-to-end failure-audit database regression |
+| 2026-07-17 | `41591e759dd53780c9a441b2858536c32d15d287` | TASK-002 PostgreSQL test-image repair | adds isolated Docker `test` target that installs the declared dev group before joining the internal network; production target excludes test dependencies |
+| 2026-07-17 | `b4d451009d1deb9dbe3286f5bff4db9414ef4aee` | TASK-002 CR-036 R10 attachment scalar audit redaction | redacts scalar and scalar-list values in attachment context plus compact password keys; adds direct and persisted failure-audit regressions |
+| 2026-07-17 | `ea4338bad15f16048226a329801d3144b367909e` | TASK-002 CR-036 R11 semantic audit-key classification | classifies attachment and sensitive key segments with bounded compact forms; protects token metrics and ordinary-field regressions |
+| 2026-07-17 | `904886f48061e27c775f6ee2f8ddae99f5571ead` | TASK-002 formal PR #20 manual merge | DEV-002-approved task branch was manually merged into `codex/stage-05-integration` by final integration owner DEV-001 / `ll979053897-arch`; technical evidence is complete, governance closeout remains pending |
+| 2026-07-17 | `d633308de8277c343faf3e266476b64baffcb565` | CR-040 PR #23 merge | v1.3 two-developer Draft PR, exact-HEAD confirmation, integration-check and non-author merge rules are effective; TASK-002 dependencies remain locked pending this closeout PR |
+| 2026-07-17 | `028da42eb9ab4b55ef981ac462e09993a31e8813` | TASK-002 PR #25 merge | DEV-002 / `QI-code1992` manually merged the governance closeout; TASK-003/004 may start, TASK-005 remains blocked by TASK-004, TASK-006 is no longer blocked by TASK-002; Stage 6 remains prohibited |
+| 2026-07-15 | `33d7712334044437eba0d3fc884859d48a3c71ed` | TASK-006 immutable Agent configuration domain | non-database slice |
+| 2026-07-15 | `7cbf76bb9ae627e023cbeaa86fd883b18a916373` | TASK-006 independent configuration service | four Agent isolation and external ports |
+| 2026-07-15 | `04e651c1453fbd0551303aff9f4d6236ea2e59d4` | TASK-006 validation error redaction | stable sensitive-input-safe response |
+| 2026-07-15 | `2a7ca4eeec9857f361039736ec2576658832df52` | TASK-006 non-database evidence | recoverable review evidence |

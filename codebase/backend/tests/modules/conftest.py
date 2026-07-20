@@ -1,8 +1,10 @@
 from collections.abc import Iterable
 
 import pytest
+from fastapi.testclient import TestClient
 
 from app.modules.agent_config.domain import AgentConfig, AgentId, ModelCapability
+from tests.modules.support import build_client
 
 
 class FakeAgentConfigRepository:
@@ -43,3 +45,7 @@ def repository() -> FakeAgentConfigRepository:
 @pytest.fixture
 def model_catalog() -> FakeModelCatalog:
     return FakeModelCatalog()
+
+@pytest.fixture
+def client() -> TestClient:
+    return build_client()

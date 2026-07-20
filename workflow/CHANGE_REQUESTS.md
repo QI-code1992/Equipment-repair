@@ -448,3 +448,210 @@
 - 实施提交：`25e15709a3f1d92f661d37acdb8aa3e1e0e41346`。
 - 门禁审批记录提交：`c9eb206c6517b9c3afd7f33a86e3c383d84d12aa`。
 - 验证：检查所有 TASK-001 开始条件均位于门禁之后；Stage 5 准入清单不再要求先修复 TASK-001；JSON 可解析；`git diff --check` 通过。
+
+### CR-036：修复 TASK-002 正式审核阻断项
+
+- Level: L2
+- Status: In Development
+- Raised By: DEV-002 独立审核
+- Raised At: 2026-07-16
+- Current Stage: Stage 5 — 开发实施 / TASK-002 修复周期
+- Original Request: DEV-002 对 PR #15 的精确提交 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 提交 `Changes requested`，指出公开 API 契约未同步、受保护写操作失败审计不完整，以及设备字段、组织层级、用户/固定角色/菜单操作权限和附件敏感内容脱敏未完整实现。
+- Clarified Requirement: 采用“契约完整、定向补齐”方案，在现有 FastAPI、SQLAlchemy、Alembic 架构内完成 TASK-002；不提前实现 TASK-003 的活动故障停用保护，也不提前实现附件存储、扫描和生命周期。
+- Reason: 当前实现缩减了已批准的 FR-001、FR-010、FR-011 和任务书范围，且未满足 `API_SPEC` 对写操作审计与 `audit_event_id` 的统一要求，PR #15 当前不得合并。
+- Impact:
+  - PRD: 不修改，继续作为权威需求基线。
+  - SPEC: 不修改，继续作为字段、角色和组织规则基线。
+  - Prototype: 不修改，继续作为系统管理、工厂建模和设备台账交互基线。
+  - Architecture: 同步 `API_SPEC.md`；必要时同步 `DATA_MODEL.md`，不改变技术栈或部署拓扑。
+  - Implementation Plan: 新增 TASK-002 修复设计与实施计划，保持 TASK-003/TASK-004 依赖边界。
+  - Development Task Book: 修复完成后更新 TASK-002 状态和远端候选 Commit。
+  - Test Cases: 增加设备完整字段、组织层级、用户/角色权限、失败审计、幂等、脱敏和迁移测试。
+  - Acceptance Criteria: 不降低或改写现有 AC；新增评审阻断项的可复现验证证据。
+- Decision: 项目负责人于 2026-07-16 明确确认方案 1、数据模型、API/失败审计、迁移/测试和交付设计，授权 DEV-001 进入修复周期。
+- Updated Baselines: 设计阶段仅新增 `05-development/TASK-002_REMEDIATION_DESIGN.md`；代码和契约基线待实施、Review 和新 Commit 后更新。
+- Implementation:
+  - Commit: 待生成新的修复候选 Commit；不得复用被拒绝的 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77`。
+  - Owner: DEV-001
+- Verification:
+  - Status: 设计已获确认，待书面设计复核、实施计划、TDD 实现、完整回归和 DEV-002 复审。
+  - Evidence: PR #15 的 DEV-002 `Changes requested` 审核；`05-development/TASK-002_REMEDIATION_DESIGN.md`。
+
+### CR-037：补齐 Stage 5 交叉审核与正式 PR 集成控制
+
+- Level: L1
+- Status: Done / PR #18 Merged
+- Raised By: 工作流一致性审计
+- Raised At: 2026-07-16
+- Current Stage: Stage 5 — 开发实施 / TASK-002 修复暂停点
+- Original Request: 项目负责人授权先修正任务书协作基线，保持既有 TASK-002 代码和未提交契约草稿不变，再继续开发与验证。
+- Clarified Requirement: 将 `DEVELOPMENT_TASK_BOOK.md` 修订为 v1.2 候选，为每个正式任务明确任务开发者、指定审核者、正式 PR 创建者、任务分支/目标分支、PR 审核请求与正式 PR 的边界、正式 PR 创建条件、集成触发条件、自动化边界和集成后检查点时机。
+- Reason: 任务书 v1.1 未覆盖当前 `formal-software-delivery-workflow` 的交叉审核和 reviewer-created PR 约束；同时 PR #15、FCP-002、CODE_REVIEW 和交接记录仍含被拒绝前的过期状态，已与 `workflow/state.json`、CR-036 冲突。
+- Impact:
+  - PRD / SPEC / Prototype / Acceptance Criteria: 不修改。
+  - Architecture / API / Data Model: 不修改业务或技术契约；仅修订 Stage 5 协作和集成控制。
+  - Development Task Book: v1.1 -> v1.2 候选；任务范围、负责人和依赖顺序不变。
+  - Stage 5: TASK-002 后续整改暂停到 v1.2 候选获项目负责人针对精确 SHA 批准；现有代码与未提交文件保留。
+  - Effective Boundary: v1.2 从尚未完成的 TASK-002 起生效；不追溯撤销已完成的 TASK-001、FCP-001 或其历史 Review/集成记录。
+  - PR #15: 保留为被拒绝候选的审核历史和 Review Request 载体，不作为 v1.2 下的正式集成触发源。
+  - Checkpoints / Review / Handoff: 旧记录保留并追加 `Changes Requested` / `Superseded` 状态，不删除历史。
+- Decision: 项目负责人已针对精确 Commit `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b` 明确批准任务书 v1.2 协作基线并授权推送隔离治理分支。该批准不等同于 TASK-002 完成、正式 PR、集成或 Stage 6 准入；治理记录与任务书合入 `codex/stage-05-integration` 前，TASK-002 R6/R7 继续暂停。
+- Updated Baselines: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.2 获批候选 Commit `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`，远端分支 `codex/taskbook-v1-2-governance`；后续已通过 PR #18 合入并成为 Stage 5 当前协作基线。
+- Implementation:
+  - Owner: DEV-001（工作流协调与集成责任）
+  - Candidate Commit: `cd9c9b5d9d0f0a695c30881e2594e76a9f36c20b`
+  - Remote Branch: `codex/taskbook-v1-2-governance`
+  - Integration Base: `d37698c6e51df1701bbdfcf12ec6fa329241e0bd`
+  - Historical Wrong-Target PR: [#16](https://github.com/QI-code1992/Equipment-repair/pull/16) 曾以 `main` 为目标并显示合并，但当前远端 `main` 为 `e0a69bfb3854d9280218d01415d2f5377f1dc181`，任务书 Blob `6ba993881159f6faabfba96e45da33aabde51e06` 不等于获批 v1.2 Blob `132aa80e06ffd31154440056ab18618689738761`；PR #16 不构成当前有效基线或 CR-037 完成依据。
+  - Correct Pull Request: [#18](https://github.com/QI-code1992/Equipment-repair/pull/18)（Merged），目标 `codex/stage-05-integration`
+  - Review Correction: 正式审查发现任务书正文仍保留“v1.2 候选 / 等待批准”措辞，与 `STAGE_APPROVALS.md` 已批准状态冲突；已退回治理分支修正。该修正只同步状态，不改变任务内容、人员、范围、依赖或契约。
+  - Merge Approval: 项目负责人于 2026-07-16T15:25:08+08:00 明确批准精确 HEAD `1d4405e1ff6066df25c896deb57248353d8695b7` 转为 Ready 并手动合入；批准后的新增提交仅允许记录该批准。
+  - Merged Head: `e6b571d16192fb4462b7c118ef977df8f6ce186a`
+  - Merge Commit: `18485653a94cd033cfc82e8d6c7e40c35fcfbe33`
+  - Merged At: 2026-07-16T15:27:01+08:00
+- Verification:
+  - Status: Done。PR #18 Merge Commit 树与合并前 HEAD `e6b571d16192fb4462b7c118ef977df8f6ce186a` 一致；Python 3.13.14 为 `4 passed, 1 warning`；`compileall`、Compose 配置、治理 JSON 和 `git diff --check` 通过；相对第一父提交无 `codebase/` 修改。
+  - Evidence: 当前技能 `references/stage-gate.md`、`references/development-task-book.md`；任务书 v1.1 缺口审计；PR #15 `Changes requested`；PR #16 错误目标审计；CR-036；CR-038 Merge Commit `d37698c6e51df1701bbdfcf12ec6fa329241e0bd`；PR #18 Merge Commit `18485653a94cd033cfc82e8d6c7e40c35fcfbe33`。
+
+### CR-038：回滚未经审核门禁批准的 PR #15 集成结果
+
+- Level: L2
+- Status: Done / PR #17 Merged
+- Raised By: 项目负责人
+- Raised At: 2026-07-16T14:48:01+08:00
+- Current Stage: Stage 5 — Development Implementation
+- Original Request: PR #15 未满足指定审核人批准、任务边界验证和正式集成门禁即被合入 `codex/stage-05-integration`，不能仅记录异常，必须恢复合规的集成状态。
+- Clarified Requirement: 保留 TASK-002 开发分支、提交和审计历史；通过独立补救分支对合并提交 `e328cec64f1aa9c7cdc383579af042692dce5679` 执行非破坏性 `git revert -m 1`，经补救 PR 合入后再继续 CR-037 和 TASK-002 整改。
+- Reason: PR #15 的审核结论仍为 `Changes requested`，被拒绝候选 `cfb8ed9b99b5e440b3c0bf4a8652f4f7d233ee77` 不得因误合并而成为 TASK-002 完成、依赖解锁或 Stage 6 准入依据。
+- Impact:
+  - PRD / SPEC / Prototype / Acceptance Criteria: 不变。
+  - Architecture / API / Data Model: 不变；仅撤销未经批准的集成结果。
+  - Development Task Book: TASK-002 继续处于 `Changes requested`；TASK-003、TASK-004 和所有依赖 TASK-002 的数据库集成继续阻塞。
+  - Code: 从集成分支有效树撤销 PR #15 引入内容，但原提交继续由 Git 历史和本地任务工作树保存。
+- Decision: 项目负责人于 2026-07-16 明确批准“保留开发成果、回滚不合规集成、不改写历史”的补救方案。
+- Implementation:
+  - Owner: DEV-001 / Stage 5 integration owner
+  - Source Branch: `codex/cr-038-revert-pr-15-gate-violation`
+  - Target Branch: `codex/stage-05-integration`
+  - Pull Request: [#17](https://github.com/QI-code1992/Equipment-repair/pull/17)（Merged）
+  - Merge Approval: 项目负责人于 2026-07-16T15:00:35+08:00 明确批准审查候选 `3f02ac1021ffb2f189ee53120d4b3523415bff60` 转为 Ready 并手动合入；批准后的唯一允许变更是记录本批准的治理文档提交，且必须重新验证无代码或回滚边界变化。
+  - Merge Commit To Revert: `e328cec64f1aa9c7cdc383579af042692dce5679`
+  - Approval Record Commit: `6650f615e48d88b9a54179c27a7f03d1bf48f391`
+  - Revert Commit: `5d91e83679acefa5486a25bf5b921e9c12fd52d6`
+  - Merge Commit: `d37698c6e51df1701bbdfcf12ec6fa329241e0bd`
+- Verification:
+  - Status: Done
+  - Evidence: Merge Commit 树与获批 PR 头一致；Python 3.13.14 `4 passed, 1 warning`；`compileall`、Compose 构建、PostgreSQL/Redis/API 健康和容器内 `/healthz` 通过；验证容器与网络已清理。
+  - Remaining Gate: CR-037 尚未合入；TASK-002、R6/R7 和依赖任务继续暂停。
+
+### CR-036 R6-R7 实施更新（2026-07-16）
+
+- Status: Ready For Verification / Awaiting DEV-002 Re-review
+- Implementation:
+  - R6 Commit: `35119954ba1d9ca475f03d1faa026bf6a474b18f`
+  - R7 Commit: `11dbb226e9b77ff5185fed5fa1434b0de6749206`
+  - Branch: `codex/task-002-identity-equipment`
+  - Owner: DEV-001
+- Verification:
+  - Python 3.13.14：`125 passed, 5 skipped`；PostgreSQL 专用集成：`5 passed`。
+  - PostgreSQL 17：`0002 -> 0001 -> 0002`，最终 `0002 (head)`。
+  - Compose：配置和构建通过；PostgreSQL/Redis healthy；`/healthz` 正常。
+  - Review：内部独立复审 Critical 0、Important 0；历史 `.superpowers` 证据已迁入正式 `CODE_REVIEW.md` 并删除重复工作文件。
+- Scope Result:
+  - 已关闭 DEV-002 提出的 API 契约、失败审计、设备字段、组织层级、用户/固定角色/权限和附件引用脱敏阻断。
+  - 未进入 TASK-003 活跃故障停用保护、TASK-004 RAGFlow 或后续业务范围。
+- Remaining Gate:
+  - 正式证据提交和远端精确 HEAD 完成后，由 DEV-001 发送书面审核请求。
+  - DEV-002 审核通过后创建后继正式 PR；在正式合入前 TASK-002 不算接受，依赖不解锁。
+
+#### 集成基线同步修正
+
+- Finding: 首轮远端证据 `ab67bcdff42d64ba739571515df4e6faed158d32` 与当前集成分支分叉，不能直接形成无冲突的后继正式 PR。
+- Correction: 通过 Merge Commit `0aac415d18aee256c237adb508d2ab24314a7486` 合入当前集成基线 `ac767c83128cb89ceea8e28c518be0adfbe1984c`。
+- Boundary: TASK-002 代码与证据保留；CR-037、CR-038 和 Stage Approval 采用当前集成历史；不改写或删除既有远端提交。
+- Verification: 集成分支已成为任务分支祖先；模拟合并无冲突；完整后端 `125 passed, 5 skipped`；PostgreSQL `5 passed`；迁移、Compose 实际状态和 `/healthz` 通过。
+- Synchronized Candidate: `4c111d0243d947a32d555bd48b1b72cab552bac4`，已推送并完成第二次自查。
+- Status: 修正与台账证据完成，等待 DEV-002 对最终远端分支 HEAD 正式复审；依赖不解锁。
+
+### CR-036 R8 最终审核阻断修复（2026-07-17）
+
+- Status: Ready For DEV-002 Re-review / Not Accepted / Not Integrated
+- Review Input: DEV-002 对 `60c71dd5ab7588006ee16d794b03bef493fb3c72` 的正式结论为 Changes requested，Critical 0、Important 4、Minor 2。
+- Code Candidate: `73030f83638b3b063db483029591720bf65aac21`。
+- Important Closure:
+  - `0002` 建立精确四角色/33 权限目录、系统管理员全授权并拒绝不可映射旧目录；运行时忽略非固定角色授权。
+  - 用户列表和详情执行 `user_management.view_all`；无权限仅本人。
+  - 脱敏覆盖密码确认/数字后缀、复数 Cookie、附件载荷正文。
+  - 数据库与未知异常回滚主事务，以独立事务写失败审计并返回稳定错误和真实审计 ID。
+- Minor Disposition: 不改写已推送的 `0aac415...` 双父提交或不可变 `0001`；原因、职责和后续提交/revision 规则已写入 `CODE_REVIEW.md`。
+- Verification: Python 3.13 `136 passed, 5 skipped`；专用 PostgreSQL 17 `5 passed`；迁移最终 `0002 (head)`；roles=4、permissions=33、system_admin_grants=33、non_fixed_roles=0；Compose、容器状态和 `/healthz` 通过。
+- Scope Boundary: 无生产依赖、兼容层、通用抽象或 TASK-003/TASK-004 实现。
+
+### CR-036 R9 剩余审计脱敏阻断修复（2026-07-17）
+
+- Status: Ready For DEV-002 Re-review / Not Accepted / Not Integrated。
+- Review Input: DEV-002 对 R8 复审为 Changes requested，Critical 0、Important 1；受保护写失败可把 `newPasswordConfirmation` 和附件 `raw_content` 写入审计库。
+- Decision: 在既有 TASK-002 审计脱敏范围内修复，不修改需求、API 契约、迁移或其他任务。
+- Code Candidate: `ac6947a642f00ba48aebcb80064f87fcc4c01ea8`。
+- Verification: RED `2 failed`；定向 `19 passed`；Python 3.13 `138 passed, 5 skipped`；编译与 diff check 通过；审计表 `metadata_json` 不含四类秘密。`41591e7` 的独立 test 镜像预装 dev 依赖后，PostgreSQL 17 `5 passed`；默认生产镜像不含 pytest/httpx。
+- Prevention: 安全脱敏评审采用语义变体、附件别名、嵌套结构、持久化断言矩阵；内部网络测试不得运行时在线安装依赖。
+- Next Gate: 推送正式台账 HEAD 后由 DEV-001 请求 DEV-002 复审；通过后才由 DEV-002 创建后继正式 PR。
+- Remaining Gate: 正式台账提交推送后由 DEV-001 在 PR #15 发出书面复审请求；只有 DEV-002 审核通过并创建后继正式 PR、合入 `codex/stage-05-integration` 后，TASK-002 才可接受和解锁依赖。
+
+### CR-036 R10 附件标量与紧凑密码脱敏修复（2026-07-17）
+
+- Status: Ready For DEV-002 Re-review / Not Accepted / Not Integrated。
+- Review Input: DEV-002 R9 补充审核为 Critical 0、Important 1；`newpassword`、`attachment_payload` 标量、`attachments` 标量列表和 `uploadData` 可原样写入失败审计。
+- Decision: 仅在 TASK-002 审计脱敏范围内修复，不修改需求、API 契约、迁移、Compose 生产配置或其他任务。
+- Code Candidate: `b4d451009d1deb9dbe3286f5bff4db9414ef4aee`。
+- Verification: RED `2 failed`；定向 `21 passed`；Python 3.13 `140 passed, 5 skipped`；compileall、diff check、PostgreSQL 17 `5 passed`、Compose 重建和 `/healthz` HTTP 200 通过；返回摘要与 `AuditEvent.metadata_json` 均无测试秘密原文。
+- Prevention: 附件安全回归固定覆盖标量、标量列表、混合 list/dict 与持久化审计；密码回归同时覆盖下划线、驼峰和紧凑命名。
+- Next Gate: 推送正式台账 HEAD 后由 DEV-001 在 PR #15 请求 DEV-002 复审；只有 DEV-002 审核通过并创建后继正式 PR、合入目标分支后，TASK-002 才可接受和解锁依赖。
+
+### CR-036 R11 已知敏感语义别名脱敏修复（2026-07-17）
+
+- Status: Ready For DEV-002 Re-review / Not Accepted / Not Integrated。
+- Review Input: DEV-002 R10 为 Critical 0、Important 1；`binaryAttachment`、`uploadedFile`、`sessionCookieValue`、`passwordvalue` 可原样写入失败审计。
+- Decision: 在 TASK-002 审计脱敏范围内采用归一化完整分段与有限紧凑前后缀规则；不使用任意子串匹配，不修改需求、API、迁移、Compose 或生产依赖。
+- Code Candidate: `ea4338bad15f16048226a329801d3144b367909e`。
+- Verification: RED `2 failed`；定向 `23 passed`；Python 3.13 `142 passed, 5 skipped`；compileall、diff check、PostgreSQL 17 `5 passed`、Compose 重建和 `/healthz` HTTP 200 通过；返回摘要与 `AuditEvent.metadata_json` 均无测试秘密，`profile`、普通业务字段和 Token 统计字段未误伤。
+- Residual Risk: 未知额外字段默认脱敏不在本 CR；本轮仅关闭已知敏感语义别名漏洞，任意无语义字段承载秘密需后续独立强化。
+- Next Gate: 推送正式台账 HEAD 后由 DEV-001 在 PR #15 请求 DEV-002 复审；只有 DEV-002 审核通过并创建后继正式 PR、合入目标分支后，TASK-002 才可接受和解锁依赖。
+
+### CR-040：Stage 5 单 PR、DEV-001 集成检查与逐 PR Merge 授权
+
+- Level: L2 协作治理变更。
+- Status: Effective；PR #23 已合入 `codex/stage-05-integration`，规则已生效。
+- Raised By: 项目负责人。
+- Raised At: 2026-07-17。
+- Current Stage: Stage 5 — Development Implementation。
+- Original Request: 采用常规 GitHub 单 PR 流程；Stage 5 只有 DEV-001、DEV-002 两名开发者，由 DEV-001 判断集成条件，并在每次 Merge 前询问项目负责人。
+- Clarified Requirement:
+  - 任务开发者为自己的开发任务创建一个 Draft PR，并在同一 PR 上持续提交、转 Ready、接受复审。
+  - 开发任务 PR 由另一名开发者在同一 PR 上审核并批准精确 HEAD；Critical/Important 不为零时提交 `Changes requested`。
+  - 纯治理文档 PR 只修改流程、任务书、AGENTS 或工作流台账，不含业务代码、测试代码、数据库、基础设施或部署配置；该类 PR 不要求 DEV-001/DEV-002 交叉代码审核，由项目负责人确认治理内容和精确 HEAD。
+  - DEV-001 负责所有 Stage 5 PR 的集成检查；对开发任务 PR 不重复代替另一名开发者做同一代码审核，对纯治理文档 PR 只核查治理边界和一致性。
+  - 集成检查通过后，DEV-001 必须逐 PR 向项目负责人报告证据并请求 Merge 授权；未明确批准不得合并。
+  - 项目负责人批准后，PR HEAD、目标分支、依赖或检查结论变化会使授权失效。
+  - 获批后由非任务开发者/非治理 PR 作者执行 Merge Commit：DEV-002 的开发任务由 DEV-001 合并，DEV-001 的开发任务由 DEV-002 合并，纯治理 PR 由非 PR 作者的开发者合并。禁止 GitHub auto-merge、merge queue、直接 push 集成分支和任何自合并。
+- Impact:
+  - PRD / SPEC / Prototype / Architecture / API / Data / Acceptance Criteria: 不变。
+  - Development Task Book / AGENTS: 升级为单 PR 协作、另一名开发者审核开发任务、纯治理文档由项目负责人确认、DEV-001 集成检查、项目负责人逐 PR 授权和非作者获批后合并。
+  - Workflow Ledgers / Automation: 同步角色、授权请求、授权失效、合并后验证和通知处理规则。
+  - Historical PRs: TASK-001、TASK-002、CR-037—CR-039 的已发生历史不追溯改写；v1.3 适用于生效时仍 Open 的 Draft PR 与后续任务 PR。
+- Decision: 项目负责人已明确批准该规则与流程，并要求立即更新任务书、AGENTS、工作流台账及自动化指令。
+- Updated Baselines: `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.3、`04-architecture-plan/AGENTS.md`、`workflow/PM_TO_DEV_HANDOFF.md`、`workflow/DEV_TO_PM_HANDOFF.md`、`workflow/state.json` 和 Gmail 监控自动化。PR #23 已以 Merge Commit `d633308de8277c343faf3e266476b64baffcb565` 合入 `codex/stage-05-integration`，规则已生效。
+- Verification: PR #23 合并后已完成 `git diff --check`、治理 JSON 解析和职责矩阵一致性检查；无 `codebase/` 修改。本 CR 的合并记录已纳入本治理收尾 PR，不运行或改变业务代码。
+- Merge Boundary: 本治理 PR 不要求 DEV-001/DEV-002 交叉代码审核；项目负责人须确认治理内容和精确 HEAD，DEV-001 须完成集成检查并再次取得针对 PR 编号和精确 HEAD 的 Merge 授权。批准本 CR 规则不等于提前批准任意后续 HEAD 的 Merge。
+
+### TASK-002 合并后治理收尾（2026-07-17）
+
+- Level: L2 交付台账修正；纯治理文档，不修改 `codebase/`、测试代码、迁移、Compose 或生产依赖。
+- Status: Integrated / Closed；PR #25 已合入，TASK-002 下游前置已按任务书解除。
+- Baseline: `codex/stage-05-integration` 的 CR-040 Merge Commit `d633308de8277c343faf3e266476b64baffcb565`。
+- Merge: PR #25 approved HEAD `92ec18ec17f08d1d2226b0d98f59eeb2eba78d2f` was manually merged by DEV-002 / `QI-code1992` at `028da42eb9ab4b55ef981ac462e09993a31e8813` into `codex/stage-05-integration`.
+- Corrected Important 1: 任务书、代码评审、自测、检查点和交接摘要已同步为 TASK-002 正式集成、技术验证和治理收尾完成。
+- Corrected Important 2: TASK-003/004 可启动；TASK-005 仅等待 TASK-004；TASK-006 已解除 TASK-002 数据库边界，但继续遵循其自身任务与 PR 门禁。
+- Corrected Important 3: 记录 DEV-002 批准的完整精确任务 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`、PR #20，以及 DEV-001（`ll979053897-arch`）手动生成的 Merge Commit `904886f48061e27c775f6ee2f8ddae99f5571ead`。
+- Verification Evidence: Python 3.13 `142 passed, 5 skipped, 1 warning`；PostgreSQL 17 专项 `5 passed, 1 warning`；Compose 健康和容器内 `/healthz` HTTP 200。当前 PR 仅做文档范围的 JSON、治理一致性和 diff 检查。
+- Coordination: PR #24 已关闭、未合并并由 PR #25 取代。PR #25 已完成项目负责人/DEV-002 治理确认、DEV-001 集成核查、逐 PR 授权与非作者合并；Stage 6 不因该纯治理合并而进入。

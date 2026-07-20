@@ -46,7 +46,7 @@ Stage 5 新增命令必须同步写入 `codebase/backend/pyproject.toml` 或 `co
 
 允许按已批准实施计划修改：`codebase/backend/`、`codebase/frontend/`、`codebase/infra/`、对应工程测试目录、`05-development/`、`06-testing/`、`08-release-handoff/`。正式代码不得放入 `05-development/`；原型及其专用资源只归档于 `03-ui-prototype/`。
 
-禁止修改：`.env`、密钥、生成目录、`node_modules/`、容器卷数据、已归档证据；不得直接向 `main` 推送。
+禁止修改：`.env`、密钥、生成目录、`node_modules/`、容器卷数据、已归档证据；不得直接向 `main` 或 `codex/stage-05-integration` 推送。
 
 修改以下内容前必须获得项目负责人针对具体范围的确认：生产依赖、数据库迁移、认证/权限、公开 API、部署与 CI/CD 配置、用户可见流程、PRD/SPEC/原型/验收标准。
 
@@ -68,7 +68,19 @@ Stage 5 新增命令必须同步写入 `codebase/backend/pyproject.toml` 或 `co
 - Commit 格式：`type(scope): summary`；允许 `feat`、`fix`、`docs`、`test`、`refactor`、`chore`。
 - PR/交付说明须包含需求或 CR、范围、测试结果、风险与回退方式、依赖/兼容/抽象层变化和无关修改说明。
 
-## 7. 编码前与完成前检查
+## 7. PR、审核与 Merge
+
+- 任务开发者从 `codex/stage-05-integration` 建立任务分支，并为自己的任务创建一个目标为该集成分支的 Draft PR；后续修订继续 push 到同一 PR，不因审核轮次重复创建 PR。
+- 任务开发者不得批准或合并自己的开发任务 PR。完成自测和证据记录后，将同一 PR 转为 Ready，并请求任务书指定的另一名开发者审核精确 HEAD。
+- 指定审核者必须固定 PR HEAD，审查 Standards、Spec、任务边界、依赖和证据。Critical 或 Important 不为零时提交 `Changes requested`；HEAD 变化后旧批准不得继续使用。
+- 开发任务 PR 审核通过后，DEV-001 负责核查目标分支、当前 HEAD、审核结论、required checks、依赖、冲突、共享契约、证据、风险和回滚。
+- 仅修改流程、任务书、AGENTS 或工作流台账且不含业务代码、测试代码、数据库、基础设施或部署配置的纯治理 PR，不要求 DEV-001/DEV-002 交叉代码审核；由项目负责人确认治理内容和精确 HEAD，DEV-001 执行集成核查、Merge 授权请求和合并后治理验证，非 PR 作者的开发者在获批后执行 Merge。
+- DEV-001 集成检查通过后，必须向项目负责人逐 PR 请求 Merge 授权；请求必须绑定 PR 编号与精确 HEAD。未获明确批准不得合并。
+- 项目负责人授权后，若 HEAD、目标分支、依赖或检查结论变化，授权立即失效。DEV-001 必须重新核查并重新询问；开发任务 PR 的 HEAD 变化还必须重新审核。
+- Merge 执行者必须与 PR 的任务开发者或治理 PR 作者不同：DEV-002 开发的任务由 DEV-001 合并，DEV-001 开发的任务由 DEV-002 合并；纯治理 PR 由非 PR 作者的开发者合并。禁止 GitHub auto-merge、merge queue、自合并，以及直接 push 集成分支。
+- 合并到 `codex/stage-05-integration` 不代表 Stage 5 完成或允许进入 Stage 6；合并到 `main` 仍须 Stage 6、Stage 7、Stage 8 和项目负责人发布授权。
+
+## 8. 编码前与完成前检查
 
 编码前确认：任务已获准、最小实现范围明确、相关测试与基线已阅读、无未经批准的新依赖或抽象。
 
