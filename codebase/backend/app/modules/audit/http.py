@@ -19,6 +19,7 @@ STABLE_ERROR_FIELDS = {
     "ORGANIZATION_CODE_EXISTS": {"code": "duplicate"},
     "ORGANIZATION_SIBLING_NAME_EXISTS": {"name": "duplicate"},
     "EQUIPMENT_CODE_EXISTS": {"code": "duplicate"},
+    "EQUIPMENT_ACTIVE_FAULT": {"status": "active_fault"},
 }
 
 
