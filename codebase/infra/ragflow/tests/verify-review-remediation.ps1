@@ -18,6 +18,7 @@ Assert-Contract (Test-Path -LiteralPath $VerifyScript -PathType Leaf) "missing r
 $verifySource = Get-Content -Raw -LiteralPath $VerifyScript
 Assert-Contract ($verifySource -match 'target\s+-eq\s+9380') "RAGFlow API port 9380 is not selected"
 Assert-Contract ($verifySource -match '/api/v1/system/version') "RAGFlow API version endpoint is not probed"
+Assert-Contract ($verifySource -match '\$apiDeadline') "RAGFlow API probe has no bounded startup retry"
 Assert-Contract ($verifySource -match '\.code\s+-ne\s+0') "RAGFlow API response code is not asserted"
 Assert-Contract ($verifySource -match '\.data\s+-ne\s+"v0\.25\.6"') "RAGFlow API version contract is not asserted"
 

@@ -404,7 +404,14 @@ $web = Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:$webPort/"
 if ($web.StatusCode -ne 200) { throw "RAGFlow Web endpoint is unhealthy" }
 
 $apiPort = @($expanded.services.ragflow.ports | Where-Object { $_.target -eq 9380 })[0].published
-$api = Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:$apiPort/api/v1/system/version"
+$apiDeadline = (Get-Date).AddSeconds(60)
+do {
+    try { $api = Invoke-WebRequest -UseBasicParsing -TimeoutSec 10 "http://127.0.0.1:$apiPort/api/v1/system/version" }
+    catch { $api = $null }
+    if ($null -ne $api -and $api.StatusCode -eq 200) { break }
+    Start-Sleep -Seconds 2
+} while ((Get-Date) -lt $apiDeadline)
+if ($null -eq $api) { throw "RAGFlow API endpoint did not become healthy before timeout" }
 $apiContract = $api.Content | ConvertFrom-Json
 if ($api.StatusCode -ne 200 -or $apiContract.code -ne 0 -or $apiContract.data -ne "v0.25.6") {
     throw "RAGFlow API version contract drift"

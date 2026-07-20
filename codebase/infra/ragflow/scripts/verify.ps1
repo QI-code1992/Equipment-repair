@@ -61,9 +61,22 @@ if ($apiPorts.Count -ne 1) {
     throw "RAGFlow API port contract drift: expected one target 9380 mapping"
 }
 $apiPort = $apiPorts[0].published
-$api = Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:$apiPort/api/v1/system/version"
-if ($api.StatusCode -ne 200) {
-    throw "RAGFlow API endpoint is unhealthy: HTTP $($api.StatusCode)"
+$apiDeadline = (Get-Date).AddSeconds(60)
+$api = $null
+do {
+    try {
+        $api = Invoke-WebRequest -UseBasicParsing -TimeoutSec 10 "http://127.0.0.1:$apiPort/api/v1/system/version"
+    }
+    catch {
+        $api = $null
+    }
+    if ($null -ne $api -and $api.StatusCode -eq 200) {
+        break
+    }
+    Start-Sleep -Seconds 2
+} while ((Get-Date) -lt $apiDeadline)
+if ($null -eq $api -or $api.StatusCode -ne 200) {
+    throw "RAGFlow API endpoint did not become healthy before timeout"
 }
 $apiContract = $api.Content | ConvertFrom-Json
 if ($apiContract.code -ne 0 -or $apiContract.data -ne "v0.25.6" -or $apiContract.message -ne "success") {
