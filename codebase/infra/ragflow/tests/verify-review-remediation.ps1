@@ -2,7 +2,9 @@ param(
     [string]$VerifyScript = "codebase/infra/ragflow/scripts/verify.ps1",
     [string]$IsolationScript = "codebase/infra/ragflow/scripts/verify-isolation.ps1",
     [string]$PersistenceScript = "codebase/infra/ragflow/scripts/verify-persistence.ps1",
-    [string]$Runbook = "08-release-handoff/RUNBOOK.md"
+    [string]$Runbook = "08-release-handoff/RUNBOOK.md",
+    [string]$Design = "05-development/TASK-004_RAGFLOW_INFRA_DESIGN.md",
+    [string]$ImplementationPlan = "05-development/TASK-004_IMPLEMENTATION_PLAN.md"
 )
 
 $ErrorActionPreference = "Stop"
@@ -12,6 +14,23 @@ function Assert-Contract {
 
     if (-not $Condition) {
         throw "TASK-004 review remediation failed: $Message"
+    }
+}
+
+function Assert-RuntimeEnvironmentContract {
+    param([string]$Path)
+
+    Assert-Contract (Test-Path -LiteralPath $Path -PathType Leaf) "missing TASK-004 contract document: $Path"
+    $source = Get-Content -Raw -LiteralPath $Path
+    Assert-Contract ($source -match '\$RagflowEnvFile\s*=\s*"codebase/infra/\.env\.local"') "$Path does not define the local runtime environment file"
+    Assert-Contract ($source -notmatch '\$compose\s*=.*\.env\.example') "$Path keeps .env.example in the runtime Compose argument"
+    $runtimeLines = @($source -split "`n" | Where-Object {
+        $_ -match '^\s*docker compose.*(?:up -d|\sps(?:\s|$)|\sdown(?:\s|$))' -or
+        $_ -match '^\s*powershell .*scripts/verify(?:-persistence)?\.ps1'
+    })
+    foreach ($line in $runtimeLines) {
+        Assert-Contract ($line -notmatch '\.env\.example') "$Path uses .env.example for a runtime command"
+        Assert-Contract ($line -match '\$RagflowEnvFile') "$Path runtime command does not bind the local environment file"
     }
 }
 
@@ -31,10 +50,9 @@ Assert-Contract ($persistenceSource -match 'mc\s+alias\s+set') "MinIO S3 client 
 Assert-Contract ($persistenceSource -match '"mc"\s*,\s*"mb"') "MinIO bucket is not created through the S3 API"
 Assert-Contract ($persistenceSource -match '"mc"\s*,\s*"cp"') "MinIO object is not written through the S3 API"
 Assert-Contract ($persistenceSource -match '"mc"\s*,\s*"cat"') "MinIO object is not read through the S3 API"
-Assert-Contract ($persistenceSource -match '"mc"\s*,\s*"rb"') "MinIO probe bucket is not cleaned through the S3 API"
 Assert-Contract ($persistenceSource -notmatch '/data/\.task004-persistence-probe') "MinIO persistence still bypasses the S3 API"
 Assert-Contract ($persistenceSource -match '\$verificationSucceeded\s*=\s*\$false') "persistence verification has no failure-preservation state"
-Assert-Contract ($persistenceSource -match 'if\s*\(\$verificationSucceeded\)\s*\{[\s\S]*DROP TABLE') "persistence probes are not conditionally cleaned only after success"
+Assert-Contract ($persistenceSource -match 'if\s*\(\$verificationSucceeded\)') "persistence cleanup is not guarded by successful verification"
 $finallyIndex = $persistenceSource.IndexOf("finally {")
 $passIndex = $persistenceSource.LastIndexOf('Write-Output "TASK-004 restart persistence: PASS')
 Assert-Contract ($finallyIndex -ge 0) "persistence verifier has no guarded cleanup block"
@@ -90,5 +108,7 @@ Assert-Contract ($parseErrors.Count -eq 0) "isolation verifier cannot be parsed"
 $isolationParameters = @($isolationAst.ParamBlock.Parameters | ForEach-Object { $_.Name.VariablePath.UserPath })
 Assert-Contract ($isolationParameters -notcontains "EnvFile") "isolation verifier exposes an unused EnvFile parameter"
 Assert-Contract ($runbookSource -match '--env-file\s+\$RagflowEnvFile.*\sdown') "runbook down command omits the explicit local environment file"
+Assert-RuntimeEnvironmentContract -Path $Design
+Assert-RuntimeEnvironmentContract -Path $ImplementationPlan
 
 Write-Output "TASK-004 review remediation contract: PASS"

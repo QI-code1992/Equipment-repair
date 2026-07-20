@@ -192,12 +192,15 @@ TASK-005 不直接连接本任务的 MySQL、Redis、MinIO 或 Elasticsearch，�
 真实验证矩阵：
 
 ```powershell
+$RagflowEnvFile = "codebase/infra/.env.local"
+if (-not (Test-Path -LiteralPath $RagflowEnvFile -PathType Leaf)) { throw "Missing local RAGFlow environment file" }
+
 docker compose --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml config --quiet
-docker compose -p equipment-ragflow --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml up -d
-docker compose -p equipment-ragflow --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml ps
-powershell -File codebase/infra/ragflow/scripts/verify.ps1
+docker compose -p equipment-ragflow --env-file $RagflowEnvFile -f codebase/infra/ragflow/docker-compose.yml up -d
+docker compose -p equipment-ragflow --env-file $RagflowEnvFile -f codebase/infra/ragflow/docker-compose.yml ps
+powershell -File codebase/infra/ragflow/scripts/verify.ps1 -EnvFile $RagflowEnvFile
 powershell -File codebase/infra/ragflow/scripts/verify-isolation.ps1
-powershell -File codebase/infra/ragflow/scripts/verify-persistence.ps1
+powershell -File codebase/infra/ragflow/scripts/verify-persistence.ps1 -EnvFile $RagflowEnvFile
 git diff --check
 ```
 

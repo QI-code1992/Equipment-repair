@@ -5,6 +5,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+Import-Module "$PSScriptRoot/compose-execution.psm1" -Force
 $composeArgs = @(
     "compose", "-p", "equipment-ragflow",
     "--env-file", $EnvFile,
@@ -21,15 +22,10 @@ $verificationSucceeded = $false
 function Invoke-Compose {
     param([string[]]$Arguments)
 
-    $previousErrorActionPreference = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
-    $output = & docker @composeArgs @Arguments 2>&1
-    $exitCode = $LASTEXITCODE
-    $ErrorActionPreference = $previousErrorActionPreference
-    if ($exitCode -ne 0) {
-        throw "Docker Compose command failed"
-    }
-    return $output
+    return Invoke-CheckedCompose `
+        -DockerCommand "docker" `
+        -ComposeArguments $composeArgs `
+        -Arguments $Arguments
 }
 
 function Get-ContainerEnvironment {

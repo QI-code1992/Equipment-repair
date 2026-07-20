@@ -380,7 +380,9 @@ git commit -m "feat(task-004): add isolated ragflow compose stack"
 脚本固定执行：
 
 ```powershell
-$compose = @("compose", "-p", "equipment-ragflow", "--env-file", "codebase/infra/.env.example", "-f", "codebase/infra/ragflow/docker-compose.yml")
+$RagflowEnvFile = "codebase/infra/.env.local"
+if (-not (Test-Path -LiteralPath $RagflowEnvFile -PathType Leaf)) { throw "Missing local RAGFlow environment file" }
+$compose = @("compose", "-p", "equipment-ragflow", "--env-file", $RagflowEnvFile, "-f", "codebase/infra/ragflow/docker-compose.yml")
 
 docker info *> $null
 if ($LASTEXITCODE -ne 0) { throw "Docker Desktop Linux engine is unavailable" }
@@ -431,8 +433,8 @@ Write-Output "TASK-004 health: PASS; services=5; elasticsearch=$version; web_sta
 Run:
 
 ```powershell
-powershell -NoProfile -File codebase/infra/ragflow/scripts/verify.ps1
-docker compose -p equipment-ragflow --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml ps
+powershell -NoProfile -File codebase/infra/ragflow/scripts/verify.ps1 -EnvFile $RagflowEnvFile
+docker compose -p equipment-ragflow --env-file $RagflowEnvFile -f codebase/infra/ragflow/docker-compose.yml ps
 ```
 
 Expected: 五个服务均为 `healthy`；RAGFlow Web 返回 HTTP 200；RAGFlow API 版本契约返回 `v0.25.6`；Elasticsearch 为 `8.11.x`；Compose 展开镜像、运行容器镜像 ID 和五个镜像摘要均与获批值完全一致；依赖连接失败和秘密值命中均为 0；证据包含执行时间和各 Docker 命令退出码。
@@ -485,7 +487,7 @@ foreach ($suffix in @("mysql", "redis", "minio", "elasticsearch")) {
 if (-not ($internalNames -match "equipment-ragflow-ragflow-")) { throw "RAGFlow missing internal network" }
 if (-not ($accessNames -match "equipment-ragflow-ragflow-")) { throw "RAGFlow missing access network" }
 
-$published = docker compose -p equipment-ragflow --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml ps --format json | ConvertFrom-Json
+$published = docker compose -p equipment-ragflow --env-file $RagflowEnvFile -f codebase/infra/ragflow/docker-compose.yml ps --format json | ConvertFrom-Json
 foreach ($row in $published) {
     if ($row.Service -ne "ragflow" -and $row.Publishers.Count -gt 0) {
         throw "Internal dependency publishes a host port: $($row.Service)"
@@ -565,7 +567,7 @@ Run inside script:
 - [ ] **Step 5: 运行真实 GREEN**
 
 ```powershell
-powershell -NoProfile -File codebase/infra/ragflow/scripts/verify-persistence.ps1
+powershell -NoProfile -File codebase/infra/ragflow/scripts/verify-persistence.ps1 -EnvFile $RagflowEnvFile
 ```
 
 Expected: 输出 `TASK-004 restart persistence: PASS`，五个服务在重启后恢复 healthy，四项探针一致并被清理；MinIO 证据来自 S3 bucket/object 生命周期。
@@ -600,12 +602,15 @@ git commit -m "test(task-004): verify ragflow restart persistence"
 运行手册必须包含并解释：
 
 ```powershell
+$RagflowEnvFile = "codebase/infra/.env.local"
+if (-not (Test-Path -LiteralPath $RagflowEnvFile -PathType Leaf)) { throw "Missing local RAGFlow environment file" }
+
 docker compose --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml config --quiet
-docker compose -p equipment-ragflow --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml up -d
-powershell -NoProfile -File codebase/infra/ragflow/scripts/verify.ps1
+docker compose -p equipment-ragflow --env-file $RagflowEnvFile -f codebase/infra/ragflow/docker-compose.yml up -d
+powershell -NoProfile -File codebase/infra/ragflow/scripts/verify.ps1 -EnvFile $RagflowEnvFile
 powershell -NoProfile -File codebase/infra/ragflow/scripts/verify-isolation.ps1
-powershell -NoProfile -File codebase/infra/ragflow/scripts/verify-persistence.ps1
-docker compose -p equipment-ragflow --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml down
+powershell -NoProfile -File codebase/infra/ragflow/scripts/verify-persistence.ps1 -EnvFile $RagflowEnvFile
+docker compose -p equipment-ragflow --env-file $RagflowEnvFile -f codebase/infra/ragflow/docker-compose.yml down
 ```
 
 明确禁止在常规操作中使用 `down -v`。
@@ -663,9 +668,11 @@ py -3.13 -m pytest codebase/backend/tests/test_health.py -q
 docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet
 powershell -NoProfile -File codebase/infra/ragflow/tests/verify-compose-contract.ps1
 docker compose --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml config --quiet
-powershell -NoProfile -File codebase/infra/ragflow/scripts/verify.ps1
+$RagflowEnvFile = "codebase/infra/.env.local"
+if (-not (Test-Path -LiteralPath $RagflowEnvFile -PathType Leaf)) { throw "Missing local RAGFlow environment file" }
+powershell -NoProfile -File codebase/infra/ragflow/scripts/verify.ps1 -EnvFile $RagflowEnvFile
 powershell -NoProfile -File codebase/infra/ragflow/scripts/verify-isolation.ps1
-powershell -NoProfile -File codebase/infra/ragflow/scripts/verify-persistence.ps1
+powershell -NoProfile -File codebase/infra/ragflow/scripts/verify-persistence.ps1 -EnvFile $RagflowEnvFile
 git diff --check
 ```
 
