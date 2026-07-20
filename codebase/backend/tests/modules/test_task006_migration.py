@@ -154,6 +154,7 @@ def test_task006_upgrade_creates_agent_config_schema(
         tuple(constraint["column_names"])
         for constraint in inspector.get_unique_constraints("agent_configs")
     } >= {("agent_id",)}
+    assert _column(engine, "agent_configs", "model_binding_id")["nullable"] is True
     assert _column(engine, "agent_configs", "updated_by")["nullable"] is True
     model_binding_foreign_key = _foreign_key(engine, "agent_configs", "model_binding_id")
     assert model_binding_foreign_key["referred_table"] == "model_bindings"
@@ -211,6 +212,19 @@ def test_task006_round_trip_preserves_task002_baseline_data(
                 "VALUES ('user-1', 'baseline-user', 'hash', 1, '2026-01-01', '2026-01-01')"
             )
         )
+        root_organization_id = db.execute(
+            text("SELECT id FROM organizations WHERE type = 'ROOT'")
+        ).scalar_one()
+        db.execute(
+            text(
+                "INSERT INTO organizations "
+                "(id, name, parent_id, type, code, sort_order, enabled, remark, created_at, updated_at) "
+                "VALUES ('organization-1', 'Preserved Factory', :parent_id, 'FACTORY', "
+                "'PRESERVED_FACTORY', 7, 1, 'TASK-002 field preservation', "
+                "'2026-01-01', '2026-01-01')"
+            ),
+            {"parent_id": root_organization_id},
+        )
 
     command.upgrade(config, "0003")
     command.downgrade(config, "0002")
@@ -219,6 +233,19 @@ def test_task006_round_trip_preserves_task002_baseline_data(
         assert db.execute(
             text("SELECT username, password_hash, enabled FROM users WHERE id = 'user-1'")
         ).one() == ("baseline-user", "hash", 1)
+        assert db.execute(
+            text(
+                "SELECT name, type, code, sort_order, enabled, remark "
+                "FROM organizations WHERE id = 'organization-1'"
+            )
+        ).one() == (
+            "Preserved Factory",
+            "FACTORY",
+            "PRESERVED_FACTORY",
+            7,
+            1,
+            "TASK-002 field preservation",
+        )
 
 
 def test_task006_downgrade_removes_only_task006_tables(
