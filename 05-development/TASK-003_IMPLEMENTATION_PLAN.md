@@ -34,7 +34,7 @@
 - Produces: `FaultStatus`、`WorkOrderStatus`、`RepairStartMode`、`DiagnosisDraftStatus`。
 - Produces strict request models: `FaultReportCreate`、`StartRepairRequest`、`RepairResultRequest`、`SimilarCaseQuery`。
 
-- [ ] **Step 1: 写表、枚举、必填字段和额外字段拒绝的失败测试**
+- [x] **Step 1: 写表、枚举、必填字段和额外字段拒绝的失败测试**
 
 ```python
 def test_maintenance_tables_and_constraints_exist(client: TestClient) -> None:
@@ -55,7 +55,7 @@ def test_fault_payload_rejects_extra_fields(client: TestClient, fault_headers: d
     assert response.json()["detail"]["fields"]["binaryAttachment"] == "extra_forbidden"
 ```
 
-- [ ] **Step 2: 运行 RED**
+- [x] **Step 2: 运行 RED**
 
 Run:
 
@@ -65,7 +65,7 @@ D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backe
 
 Expected: collection fails because `app.modules.maintenance` does not exist.
 
-- [ ] **Step 3: 实现最小模型和严格 schema**
+- [x] **Step 3: 实现最小模型和严格 schema**
 
 ```python
 class FaultStatus(StrEnum):
@@ -89,7 +89,7 @@ class RepairStartMode(StrEnum):
 
 模型约束必须包含：编号唯一；工单 `fault_report_id` 唯一；维修记录 `work_order_id` 唯一；案例 `source_work_order_id` 唯一；所有外键明确；枚举使用 `native_enum=False`；JSON 列只保存附件引用、允许预填和只读摘要。
 
-- [ ] **Step 4: 运行 GREEN 并检查 diff**
+- [x] **Step 4: 运行 GREEN 并检查 diff**
 
 Run:
 
@@ -112,7 +112,7 @@ Expected: Task 1 tests pass; no whitespace errors.
 
 **Interface:** `POST /api/fault-reports`，权限 `fault:create`，`Idempotency-Key` 必填，成功返回 201 和真实 `audit_event_id`。
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 覆盖：缺少权限；设备不存在；设备为 `DISABLED`；未来 `occurred_at`；附件引用额外字段；单个 `size_bytes > 100 MiB`；创建成功后故障为 `PENDING_ACCEPT`、设备为 `FAULT`；相同幂等键原样重放且只有一条故障和一条成功审计；相同键不同请求返回 `IDEMPOTENCY_KEY_REUSED`；业务失败回滚并产生一条脱敏失败审计。
 
@@ -129,11 +129,11 @@ def test_create_fault_is_idempotent_and_sets_equipment_fault(
     assert count_rows(client, FaultReport) == 1
 ```
 
-- [ ] **Step 2: 运行 RED**
+- [x] **Step 2: 运行 RED**
 
 Expected: 404 because the route is not registered.
 
-- [ ] **Step 3: 实现最小事务路径**
+- [x] **Step 3: 实现最小事务路径**
 
 路由顺序固定为：取得设备事务锁（PostgreSQL 使用 `SELECT ... FOR UPDATE`）→ 查幂等响应 → 校验请求和设备 → 创建故障并设设备为 `FAULT` → 写成功审计 → 保存幂等响应 → 单次提交。所有业务异常交给现有独立失败审计处理器，服务层不得静默提交或伪造事件 ID。
 
@@ -148,13 +148,13 @@ def create_fault_report(
     ...
 ```
 
-- [ ] **Step 4: 运行 GREEN 和模块回归**
+- [x] **Step 4: 运行 GREEN 和模块回归**
 
 Run:
 
 ```powershell
 D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests/modules/test_maintenance_lifecycle.py -q
-D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests/modules/test_equipment_api.py -q
+D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests/modules/test_task002_equipment.py -q
 ```
 
 ---
@@ -297,7 +297,7 @@ D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backe
 - Modify: `codebase/backend/app/modules/equipment/service.py`
 - Modify: `codebase/backend/app/modules/audit/http.py`
 - Modify: `codebase/backend/tests/modules/test_maintenance_lifecycle.py`
-- Modify: `codebase/backend/tests/modules/test_equipment_api.py`
+- Modify: `codebase/backend/tests/modules/test_task002_equipment.py`
 
 - [ ] **Step 1: 写 RED 测试**
 
@@ -318,7 +318,7 @@ PostgreSQL 验证使用设备行锁协调故障创建和停用；SQLite 测试�
 Run:
 
 ```powershell
-D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests/modules/test_equipment_api.py codebase/backend/tests/modules/test_maintenance_lifecycle.py -q
+D:\codex\tools\equipment-task1-py313\Scripts\python.exe -m pytest codebase/backend/tests/modules/test_task002_equipment.py codebase/backend/tests/modules/test_maintenance_lifecycle.py -q
 ```
 
 ---
