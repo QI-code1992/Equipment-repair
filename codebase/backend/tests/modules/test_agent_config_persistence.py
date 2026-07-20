@@ -118,6 +118,84 @@ def test_sqlite_fixture_enforces_agent_config_model_binding_foreign_key(
         repository.save(invalid_config)
     db_session.rollback()
 
+    assert repository.get(AgentId.METRIC_QUERY) is None
+
+    valid_config = AgentConfig.default_for(AgentId.METRIC_QUERY)
+    assert repository.save(valid_config) == valid_config
+    assert db_session.in_transaction()
+    db_session.commit()
+
+    assert repository.get(AgentId.METRIC_QUERY) == valid_config
+
+
+def test_sql_repository_returns_committed_config_after_actual_unique_race(
+    tmp_path,
+) -> None:
+    engine = create_database_engine(f"sqlite+pysqlite:///{tmp_path / 'agent-config-race.db'}")
+    event.listen(
+        engine,
+        "connect",
+        lambda connection, _: connection.execute("PRAGMA foreign_keys=ON"),
+    )
+    Base.metadata.create_all(engine)
+    factory = session_factory(engine)
+    agent_id = AgentId.FAULT_REPORTING
+    first_result: list[AgentConfig] = []
+    first_initialized = False
+    unique_conflict_seen = False
+
+    def initialize_first_session_before_second_insert(
+        connection, cursor, statement, parameters, context, executemany
+    ) -> None:
+        nonlocal first_initialized
+        if first_initialized or "INSERT INTO agent_configs" not in statement:
+            return
+
+        first_initialized = True
+        with factory() as first_session:
+            first_service = AgentConfigService(
+                SqlAgentConfigRepository(first_session), SqlModelCatalog(first_session)
+            )
+            first_result.append(first_service.initialize(agent_id))
+            first_session.commit()
+
+    def record_unique_conflict(exception_context) -> None:
+        nonlocal unique_conflict_seen
+        if (
+            exception_context.statement
+            and "INSERT INTO agent_configs" in exception_context.statement
+            and "UNIQUE constraint failed: agent_configs.agent_id"
+            in str(exception_context.original_exception)
+        ):
+            unique_conflict_seen = True
+
+    event.listen(engine, "before_cursor_execute", initialize_first_session_before_second_insert)
+    event.listen(engine, "handle_error", record_unique_conflict)
+    try:
+        with factory() as second_session:
+            second_repository = SqlAgentConfigRepository(second_session)
+            second_service = AgentConfigService(
+                second_repository, SqlModelCatalog(second_session)
+            )
+
+            assert second_repository.get(agent_id) is None
+            second_result = second_service.initialize(agent_id)
+
+            assert first_initialized
+            assert unique_conflict_seen
+            assert second_result == first_result[0]
+            assert second_repository.list_all() == [first_result[0]]
+
+        with factory() as verification_session:
+            assert SqlAgentConfigRepository(verification_session).list_all() == [
+                first_result[0]
+            ]
+    finally:
+        event.remove(engine, "before_cursor_execute", initialize_first_session_before_second_insert)
+        event.remove(engine, "handle_error", record_unique_conflict)
+        Base.metadata.drop_all(engine)
+        engine.dispose()
+
 
 @pytest.mark.parametrize("provider_enabled,binding_enabled", [(False, True), (True, False)])
 def test_disabled_provider_or_binding_is_not_returned_or_accepted(
