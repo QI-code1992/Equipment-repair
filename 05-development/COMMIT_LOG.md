@@ -46,3 +46,4 @@ Production feature commits will be appended with branch, files, verification and
 | 2026-07-20 | `05a20e9218567cbf1de8e171424a217847ef8424` | TASK-004 network isolation verifier | exact network membership, zero dependency publishers and two loopback bindings |
 | 2026-07-20 | `0ff29ed5bd6a64ad53dcc9c683f2111f1234da27` | TASK-004 restart persistence verifier | MySQL/Redis/MinIO/Elasticsearch probe, restart recovery and non-destructive cleanup |
 | 2026-07-20 | `ac8c007730d8e947c5687380e4583e8b23d2cce1` | TASK-004 operations contract candidate | run prerequisites, commands, TASK-005 boundary, troubleshooting and recovery limits; pending DEV-002 review |
+| 2026-07-20 | `f87a0c309c322f9accedcaea4a80aed84483b0e7` | TASK-004 PR #27 R1 validation remediation | validates the 9380 API version contract, exercises MinIO persistence through S3, and rejects drift from five approved image digests |

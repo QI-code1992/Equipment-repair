@@ -63,14 +63,22 @@
 - PostgreSQL：测试镜像 `41591e7` 在构建阶段安装 `pyproject.toml` 已声明的 dev 组，再接入 `infra_platform` 内部网络；专用 PostgreSQL 17 集成 `5 passed, 1 warning`。默认生产镜像确认不含 pytest/httpx，重建后 `/healthz` 为 HTTP 200。
 - 门禁：等待 DEV-002 对推送后的最终台账 HEAD 复审；只有 DEV-002 通过并创建后继正式 PR、合入目标分支后才可解锁依赖。
 
-## FCP-004-R1：TASK-004 独立 RAGFlow 基础设施审核候选
+## FCP-004-R1：TASK-004 独立 RAGFlow 基础设施审核候选（已被审核驳回）
 
-- 状态：Review Candidate / Not Accepted / Not Integrated / Does Not Unlock TASK-005。
+- 状态：Superseded / Changes Requested at `8b628fcfbf80fb6490d8d3dd5257feafba9d1595` / Not Accepted / Not Integrated / Does Not Unlock TASK-005。
 - 分支/基线：`codex/task-004-ragflow-infra` / `b29c69d13c3d1c81f01023152eabf0c0f2d02741`；证据提交前功能候选 `ac8c007730d8e947c5687380e4583e8b23d2cce1`。
 - 范围：RAGFlow v0.25.6、MySQL 8.0.39、Redis 7.4.2、MinIO 2026-03-25、Elasticsearch 8.11.3 的独立 Compose、网络、健康、命名卷、脱敏环境模板、验证脚本和运行手册。
 - 验证：Python 3.13 `5 passed`；两套 Compose config 与静态契约通过；5 容器 healthy、Web 200；内部依赖 0 宿主端口；四存储重启读回探针且容器未重建；`git diff --check` 通过。
 - 恢复：从本候选检出并使用本地环境文件启动；常规回退执行 Compose `down` 和选择性 revert，禁止未经授权删除命名卷。
-- 门禁：等待 DEV-002 审核 PR #27 最终精确 HEAD。审核通过、项目负责人绑定 PR/HEAD 授权、DEV-002 Merge Commit 和 DEV-001 合并后复验完成前，TASK-005 继续锁定；Stage 6 禁止进入。
+- 门禁：DEV-002 已发现 3 个 Important，本候选不得恢复为审核对象；后续以 FCP-004-R2 为准。TASK-005 继续锁定；Stage 6 禁止进入。
+
+## FCP-004-R2：TASK-004 PR #27 审核修正候选
+
+- 状态：Review Candidate / Not Accepted / Not Integrated / Does Not Unlock TASK-005。
+- 分支/基线：`codex/task-004-ragflow-infra` / `b29c69d13c3d1c81f01023152eabf0c0f2d02741`；修正功能提交 `f87a0c309c322f9accedcaea4a80aed84483b0e7`。
+- 修正：9380 `/api/v1/system/version` 精确契约；MinIO S3 bucket/object 重启持久化；5 个获批镜像 SHA-256 强制匹配及漂移失败测试。
+- 验证：Python 3.13 `5 passed, 1 warning`；两套 Compose config、两个静态契约、5 容器健康、Web/API 200、网络隔离、S3 持久化和摘要突变负向测试通过；`git diff --check` 通过。
+- 恢复/门禁：可检出本候选复现完整验证；不得替代稳定集成基线。等待 DEV-002 复审 PR #27 新精确 HEAD；获批、逐 PR/HEAD Merge 授权、DEV-002 Merge Commit 和 DEV-001 合并后复验完成前，TASK-005 继续锁定，Stage 6 禁止进入。
 
 ## FCP-002-R5：TASK-002 语义敏感键复审候选
 

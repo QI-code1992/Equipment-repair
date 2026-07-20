@@ -163,3 +163,11 @@
 - 真实证据：Python 3.13 `5 passed, 1 warning`；两套 Compose config 通过；5 容器 healthy；Web 200；Elasticsearch 8.11.3；内部依赖 0 宿主端口；四存储 restart 持久化通过且容器重建数为 0。
 - 风险：首次拉取仍依赖外部镜像源可用性；本地端口可能冲突，须使用环境覆盖；完整灾难恢复演练按任务书延后 TASK-011。日志和证据未记录真实秘密。
 - 当前结论：DEV-001 自审通过，但不等于正式批准。指定审核者 DEV-002 尚未审核 PR #27 的最终精确 HEAD；TASK-005 在 TASK-004 正式集成并完成合并后验证前继续锁定，Stage 6 禁止进入。
+
+### TASK-004 PR #27 R1 Changes requested 与 DEV-001 修正复查
+
+- 外部审核：DEV-002 对精确 HEAD `8b628fcfbf80fb6490d8d3dd5257feafba9d1595` 给出 Critical 0、Important 3、Minor 0；阻断为缺少 9380 API 契约、MinIO 绕过 S3 API 直接读写 `/data`、镜像只检查 RepoDigest 存在而未匹配获批 SHA-256。
+- 第一轮 Standards：修正功能提交 `f87a0c309c322f9accedcaea4a80aed84483b0e7` 仅触及 TASK-004 验证、回归契约、既有计划/手册；API 使用稳定版本端点，MinIO 凭据仅在容器内展开，摘要使用已核验的 5 个精确值；Critical 0、Important 0、Minor 0。
+- 第二轮 Spec/失败路径：API 同时断言 target 9380、HTTP 200、业务 code/message 与 v0.25.6；MinIO 随机 bucket/object 经 S3 写入、重启、回读、清理；摘要缺失、检查失败或不匹配均返回非零，摘要突变测试通过；Critical 0、Important 0、Minor 0。
+- 第三轮完整 diff：相对基线只新增一个 TASK-004 审核回归脚本并原位修改两个验证脚本、实施计划、运行手册和正式台账；没有 TASK-005、后端领域代码、迁移、前端、生产依赖、兼容层或通用抽象；完整矩阵与 `git diff --check` 通过。Critical 0、Important 0、Minor 0。
+- 结论：三项已在本地证据中关闭，但新 HEAD 会使旧审核失效；必须推送同一 PR #27 并由 DEV-002 重新审核精确 HEAD。当前不得请求 Merge 授权，不得解锁 TASK-005，Stage 6 仍禁止进入。
