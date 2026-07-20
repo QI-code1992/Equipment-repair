@@ -11,23 +11,26 @@
 - Docker Desktop 使用 Linux containers；Docker Engine `>=24`，Docker Compose `>=2.26.1`。
 - 主机至少 4 CPU、16 GB RAM、50 GB 可用磁盘；Elasticsearch 默认内存上限为 4 GB。
 - WSL2/Linux 的 `vm.max_map_count` 应不低于 `262144`。使用 `wsl -d docker-desktop sysctl vm.max_map_count` 检查；如不足，由运维人员按环境策略人工设置，仓库脚本不会修改系统全局配置。
-- 运行前复制 `codebase/infra/.env.example` 为 Git 忽略的本地环境文件，并替换所有 `change-me` 值。不得提交、打印或发送真实密码、Token、Cookie 和密钥。
+- 运行前复制 `codebase/infra/.env.example` 为 Git 忽略的 `codebase/infra/.env.local`，并替换所有 `change-me` 值。不得提交、打印或发送真实密码、Token、Cookie 和密钥。
 - 若本机 `8080` 或 `9380` 已占用，在本地环境文件中修改 `RAGFLOW_HTTP_PORT` 或 `RAGFLOW_API_PORT`；依赖容器不得增加宿主机端口映射。
 
 ## 配置、启动与验证
 
-以下命令以安全样例文件展示；真实运行时将 `codebase/infra/.env.example` 替换为本地环境文件路径。
+以下命令显式绑定 Git 忽略的本地环境文件；脚本和 Compose 必须使用同一文件，禁止在真实验证时回退到 `.env.example`。
 
 ```powershell
-docker compose --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml config --quiet
-docker compose -p equipment-ragflow --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml up -d
-powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/ragflow/scripts/verify.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/ragflow/scripts/verify-isolation.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/ragflow/scripts/verify-persistence.ps1
-docker compose -p equipment-ragflow --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml down
+$RagflowEnvFile = "codebase/infra/.env.local"
+if (-not (Test-Path -LiteralPath $RagflowEnvFile -PathType Leaf)) { throw "Missing local RAGFlow environment file" }
+
+docker compose --env-file $RagflowEnvFile -f codebase/infra/ragflow/docker-compose.yml config --quiet
+docker compose -p equipment-ragflow --env-file $RagflowEnvFile -f codebase/infra/ragflow/docker-compose.yml up -d
+powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/ragflow/scripts/verify.ps1 -EnvFile $RagflowEnvFile
+powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/ragflow/scripts/verify-isolation.ps1 -EnvFile $RagflowEnvFile
+powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/ragflow/scripts/verify-persistence.ps1 -EnvFile $RagflowEnvFile
+docker compose -p equipment-ragflow --env-file $RagflowEnvFile -f codebase/infra/ragflow/docker-compose.yml down
 ```
 
-`verify.ps1` 必须确认 5 个容器均为 healthy、Web 返回 HTTP 200、API `GET /api/v1/system/version` 在有限重试窗口内返回 `code=0` 和 `data=v0.25.6`、Elasticsearch 为 `8.11.3` 系列，并逐一核对 5 个固定镜像的获批 SHA-256；标签对应摘要漂移时必须失败。`verify-isolation.ps1` 必须确认四个依赖仅位于内部网络且没有宿主端口。`verify-persistence.ps1` 会通过各存储的正式接口写入随机探针；其中 MinIO 必须经 S3 API 创建临时 bucket/object，重启整栈后回读比对，再清理对象和 bucket，不得直接读写 `/data` 目录充当对象持久化证据。
+`verify.ps1` 必须确认 5 个容器均为 healthy、Web 返回 HTTP 200、API `GET /api/v1/system/version` 在有限重试窗口内返回 `code=0` 和 `data=v0.25.6`、Elasticsearch 为 `8.11.3` 系列，并逐一绑定展开 Compose 镜像、固定标签获批 SHA-256 和运行容器镜像 ID；任一漂移必须失败。本次执行窗口内的 RAGFlow 日志还必须没有依赖连接失败或秘密值命中，输出只保留时间、退出码和计数摘要。`verify-isolation.ps1` 必须确认四个依赖仅位于内部网络且没有宿主端口。`verify-persistence.ps1` 会通过各存储的正式接口写入随机探针；其中 MinIO 必须经 S3 API 创建临时 bucket/object，重启整栈后回读比对。只有所有断言成功后才自动清理探针；失败时保留调查证据，并由操作者确认后仅清理 TASK-004 命名空间。不得直接读写 `/data` 目录充当对象持久化证据。
 
 常规停止只允许 `down`，禁止使用 `down -v`；后者会删除 TASK-004 命名卷并破坏持久化数据。
 

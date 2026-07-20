@@ -16,6 +16,7 @@ $minioBucket = "task004-$([guid]::NewGuid().ToString('N'))"
 $minioObject = "persistence-probe.txt"
 $minioTemporaryFile = "/tmp/$minioObject"
 $minioAliasCommand = 'mc alias set task004 http://127.0.0.1:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"'
+$verificationSucceeded = $false
 
 function Invoke-Compose {
     param([string[]]$Arguments)
@@ -127,19 +128,22 @@ try {
         }
     }
 
+    $verificationSucceeded = $true
     Write-Output "TASK-004 restart persistence: PASS; stores=mysql,redis,minio-s3,elasticsearch; containers_recreated=0"
 }
 finally {
     $previousErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
-    $mysqlCleanup = "DROP TABLE IF EXISTS task004_persistence_probe;"
-    & docker @composeArgs exec -T -e "MYSQL_PWD=$($mysqlEnvironment.MYSQL_PASSWORD)" ragflow-mysql mysql "-u$($mysqlEnvironment.MYSQL_USER)" $mysqlEnvironment.MYSQL_DATABASE -e $mysqlCleanup *> $null
-    & docker @composeArgs exec -T -e "REDISCLI_AUTH=$($redisEnvironment.REDIS_PASSWORD)" ragflow-redis redis-cli DEL task004:persistence *> $null
-    & docker @composeArgs exec -T ragflow-minio mc rm --force "task004/$minioBucket/$minioObject" *> $null
-    & docker @composeArgs exec -T ragflow-minio mc rb --force "task004/$minioBucket" *> $null
+    if ($verificationSucceeded) {
+        $mysqlCleanup = "DROP TABLE IF EXISTS task004_persistence_probe;"
+        & docker @composeArgs exec -T -e "MYSQL_PWD=$($mysqlEnvironment.MYSQL_PASSWORD)" ragflow-mysql mysql "-u$($mysqlEnvironment.MYSQL_USER)" $mysqlEnvironment.MYSQL_DATABASE -e $mysqlCleanup *> $null
+        & docker @composeArgs exec -T -e "REDISCLI_AUTH=$($redisEnvironment.REDIS_PASSWORD)" ragflow-redis redis-cli DEL task004:persistence *> $null
+        & docker @composeArgs exec -T ragflow-minio mc rm --force "task004/$minioBucket/$minioObject" *> $null
+        & docker @composeArgs exec -T ragflow-minio mc rb --force "task004/$minioBucket" *> $null
+        & docker @composeArgs exec -T ragflow-elasticsearch curl -sS -u "elastic:$($elasticsearchEnvironment.ELASTIC_PASSWORD)" -X DELETE http://localhost:9200/task004-persistence *> $null
+    }
     & docker @composeArgs exec -T ragflow-minio mc alias rm task004 *> $null
     & docker @composeArgs exec -T ragflow-minio rm -f $minioTemporaryFile *> $null
-    & docker @composeArgs exec -T ragflow-elasticsearch curl -sS -u "elastic:$($elasticsearchEnvironment.ELASTIC_PASSWORD)" -X DELETE http://localhost:9200/task004-persistence *> $null
     & docker @composeArgs exec -T ragflow-elasticsearch rm -f /tmp/task004-persistence.json *> $null
     $ErrorActionPreference = $previousErrorActionPreference
 }

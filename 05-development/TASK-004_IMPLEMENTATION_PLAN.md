@@ -368,8 +368,8 @@ git commit -m "feat(task-004): add isolated ragflow compose stack"
 
 **Interfaces:**
 
-- Consumes: Compose 项目 `equipment-ragflow` 和 `.env.example`。
-- Produces: 五服务健康、RAGFlow Web/API 契约、Elasticsearch `8.11.x` 与 5 个获批镜像精确 digest 的脱敏证据。
+- Consumes: Compose 项目 `equipment-ragflow` 和显式传入的本地 `EnvFile`；`.env.example` 只作为模板和静态配置输入。
+- Produces: 五服务健康、RAGFlow Web/API 契约、Elasticsearch `8.11.x`、展开 Compose 镜像、实际运行容器镜像 ID 与 5 个获批镜像精确 digest 的脱敏证据，并记录执行时间、命令退出码和脱敏日志摘要。
 
 - [ ] **Step 1: 在 Docker Desktop 未启动状态运行健康脚本路径并确认 RED**
 
@@ -400,7 +400,7 @@ if ($healthy -ne 5) { throw "Not all five TASK-004 services became healthy" }
 
 $expanded = & docker @compose config --format json | ConvertFrom-Json
 $webPort = @($expanded.services.ragflow.ports | Where-Object { $_.target -eq 80 })[0].published
-$web = Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:$webPort/"
+$web = Invoke-WebRequest -UseBasicParsing -TimeoutSec 10 "http://127.0.0.1:$webPort/"
 if ($web.StatusCode -ne 200) { throw "RAGFlow Web endpoint is unhealthy" }
 
 $apiPort = @($expanded.services.ragflow.ports | Where-Object { $_.target -eq 9380 })[0].published
@@ -424,7 +424,7 @@ if ($version -notlike "8.11.*") { throw "Unexpected Elasticsearch version: $vers
 Write-Output "TASK-004 health: PASS; services=5; elasticsearch=$version; web_status=200; api_status=200; ragflow=v0.25.6"
 ```
 
-实现时不得把环境变量实际值写到输出；镜像校验必须把每个固定标签的 `RepoDigests` 与获批的精确 SHA-256 比对，缺失或不一致均返回非零，不输出 Registry 凭据。
+实现时不得把环境变量实际值写到输出；镜像校验必须同时完成三层绑定：展开 Compose 配置中的镜像标签等于获批标签、固定标签的 `RepoDigests` 包含获批 SHA-256、运行容器的镜像 ID 等于获批标签解析出的本地镜像 ID。任一缺失或不一致均返回非零，不输出 Registry 凭据。健康验证还必须扫描 RAGFlow 日志中的依赖连接失败，并以运行时秘密值进行精确泄漏扫描；输出只允许包含开始/结束时间、命令退出码和命中计数等脱敏摘要。
 
 - [ ] **Step 3: 启动 Docker Desktop 并运行真实 GREEN**
 
@@ -435,7 +435,7 @@ powershell -NoProfile -File codebase/infra/ragflow/scripts/verify.ps1
 docker compose -p equipment-ragflow --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml ps
 ```
 
-Expected: 五个服务均为 `healthy`；RAGFlow Web 返回 HTTP 200；RAGFlow API 版本契约返回 `v0.25.6`；Elasticsearch 为 `8.11.x`；五个镜像摘要与获批值完全一致。
+Expected: 五个服务均为 `healthy`；RAGFlow Web 返回 HTTP 200；RAGFlow API 版本契约返回 `v0.25.6`；Elasticsearch 为 `8.11.x`；Compose 展开镜像、运行容器镜像 ID 和五个镜像摘要均与获批值完全一致；依赖连接失败和秘密值命中均为 0；证据包含执行时间和各 Docker 命令退出码。
 
 - [ ] **Step 4: 提交健康验证**
 
@@ -710,7 +710,7 @@ git push -u origin codex/task-004-ragflow-infra
 若 Draft PR 尚不存在，创建一次：
 
 ```text
-Title: TASK-004: deploy isolated RAGFlow infrastructure
+Title: [TASK-004] feat: deploy isolated RAGFlow infrastructure
 Head: codex/task-004-ragflow-infra
 Base: codex/stage-05-integration
 State: Draft

@@ -1,6 +1,7 @@
 param(
     [string]$VerifyScript = "codebase/infra/ragflow/scripts/verify.ps1",
-    [string]$PersistenceScript = "codebase/infra/ragflow/scripts/verify-persistence.ps1"
+    [string]$PersistenceScript = "codebase/infra/ragflow/scripts/verify-persistence.ps1",
+    [string]$Runbook = "08-release-handoff/RUNBOOK.md"
 )
 
 $ErrorActionPreference = "Stop"
@@ -19,6 +20,7 @@ $verifySource = Get-Content -Raw -LiteralPath $VerifyScript
 Assert-Contract ($verifySource -match 'target\s+-eq\s+9380') "RAGFlow API port 9380 is not selected"
 Assert-Contract ($verifySource -match '/api/v1/system/version') "RAGFlow API version endpoint is not probed"
 Assert-Contract ($verifySource -match '\$apiDeadline') "RAGFlow API probe has no bounded startup retry"
+Assert-Contract ($verifySource -match 'Invoke-WebRequest\s+-UseBasicParsing\s+-TimeoutSec\s+\d+\s+"http://127\.0\.0\.1:\$webPort/') "RAGFlow Web probe has no finite request timeout"
 Assert-Contract ($verifySource -match '\.code\s+-ne\s+0') "RAGFlow API response code is not asserted"
 Assert-Contract ($verifySource -match '\.data\s+-ne\s+"v0\.25\.6"') "RAGFlow API version contract is not asserted"
 
@@ -30,6 +32,8 @@ Assert-Contract ($persistenceSource -match '"mc"\s*,\s*"cp"') "MinIO object is n
 Assert-Contract ($persistenceSource -match '"mc"\s*,\s*"cat"') "MinIO object is not read through the S3 API"
 Assert-Contract ($persistenceSource -match 'mc\s+rb') "MinIO probe bucket is not cleaned through the S3 API"
 Assert-Contract ($persistenceSource -notmatch '/data/\.task004-persistence-probe') "MinIO persistence still bypasses the S3 API"
+Assert-Contract ($persistenceSource -match '\$verificationSucceeded\s*=\s*\$false') "persistence verification has no failure-preservation state"
+Assert-Contract ($persistenceSource -match 'if\s*\(\$verificationSucceeded\)\s*\{[\s\S]*DROP TABLE') "persistence probes are not conditionally cleaned only after success"
 
 $expectedDigests = @(
     "sha256:74595f13bb09c51b1c151ce85d9e06e42cf4371b0c8aeaef222e67253d7c7543",
@@ -42,5 +46,25 @@ foreach ($digest in $expectedDigests) {
     Assert-Contract ($verifySource.Contains($digest)) "missing approved image digest $digest"
 }
 Assert-Contract ($verifySource -match 'Image digest mismatch') "image digest drift does not fail verification"
+Assert-Contract ($verifySource -match 'Compose image mismatch') "expanded Compose image is not bound to the approved tag"
+Assert-Contract ($verifySource -match 'Running container image mismatch') "running container image ID is not bound to the approved image"
+Assert-Contract ($verifySource -match "docker inspect.*--format '\{\{\.Image\}\}'") "running container immutable image ID is not inspected"
+Assert-Contract ($verifySource -match '\$verificationStartedAt') "verification execution time is not recorded"
+Assert-Contract ($verifySource -match 'logs.*--no-color.*ragflow') "RAGFlow logs are not inspected"
+Assert-Contract ($verifySource -match 'logs.*--since.*\$verificationStartedAt.*ragflow') "RAGFlow log scan is not bounded to the current verification window"
+Assert-Contract ($verifySource -match '\$dependencyFailurePattern') "dependency connection failures are not scanned"
+Assert-Contract ($verifySource -match '\$secretValues') "runtime secret values are not scanned against logs"
+Assert-Contract ($verifySource -match 'log_summary=') "sanitized log summary is not emitted"
+Assert-Contract ($verifySource -match 'exit_codes=') "verification command exit codes are not emitted"
+
+Assert-Contract (Test-Path -LiteralPath $Runbook -PathType Leaf) "missing TASK-004 runbook"
+$runbookSource = Get-Content -Raw -LiteralPath $Runbook
+Assert-Contract ($runbookSource -match '\$RagflowEnvFile\s*=') "runbook does not define an explicit local environment file"
+$scriptInvocations = @($runbookSource -split "`n" | Where-Object { $_ -match 'scripts/verify.*\.ps1' })
+Assert-Contract ($scriptInvocations.Count -eq 3) "runbook must contain exactly three TASK-004 verifier commands"
+foreach ($invocation in $scriptInvocations) {
+    Assert-Contract ($invocation -match '-EnvFile\s+\$RagflowEnvFile') "runbook verifier omits the explicit local environment file"
+}
+Assert-Contract ($runbookSource -match '--env-file\s+\$RagflowEnvFile.*\sdown') "runbook down command omits the explicit local environment file"
 
 Write-Output "TASK-004 review remediation contract: PASS"
