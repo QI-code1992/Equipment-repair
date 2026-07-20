@@ -76,7 +76,7 @@
 
 - 状态：Review Candidate / Not Accepted / Not Integrated / Does Not Unlock TASK-005。
 - 分支/基线：`codex/task-004-ragflow-infra` / `b29c69d13c3d1c81f01023152eabf0c0f2d02741`；修正功能提交 `f87a0c309c322f9accedcaea4a80aed84483b0e7`。
-- 修正：9380 `/api/v1/system/version` 精确契约；MinIO S3 bucket/object 重启持久化；5 个获批镜像 SHA-256 强制匹配及漂移失败测试。
+- 修正：9380 `/api/v1/system/version` 精确契约及有限启动重试；MinIO S3 bucket/object 重启持久化；5 个获批镜像 SHA-256 强制匹配及漂移失败测试。功能提交为 `f87a0c309c322f9accedcaea4a80aed84483b0e7`、`ba7e13f2b585f872ca811e98b50c09e25020fba5`。
 - 验证：Python 3.13 `5 passed, 1 warning`；两套 Compose config、两个静态契约、5 容器健康、Web/API 200、网络隔离、S3 持久化和摘要突变负向测试通过；`git diff --check` 通过。
 - 恢复/门禁：可检出本候选复现完整验证；不得替代稳定集成基线。等待 DEV-002 复审 PR #27 新精确 HEAD；获批、逐 PR/HEAD Merge 授权、DEV-002 Merge Commit 和 DEV-001 合并后复验完成前，TASK-005 继续锁定，Stage 6 禁止进入。
 

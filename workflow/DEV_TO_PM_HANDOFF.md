@@ -149,7 +149,7 @@
 ## TASK-004 PR #27 R1 审核修正交接（2026-07-20）
 
 - 审核/修正：DEV-002 对 `8b628fcfbf80fb6490d8d3dd5257feafba9d1595` 给出 `Changes requested`（Critical 0、Important 3、Minor 0）；DEV-001 在同一分支和同一 PR 内完成修正，功能提交为 `f87a0c309c322f9accedcaea4a80aed84483b0e7`。
-- 三项关闭证据：9380 稳定版本 API 为 HTTP 200 且返回 v0.25.6 契约；MinIO 经 S3 API 创建随机 bucket/object、整栈重启后回读并清理；5 个固定镜像逐一匹配获批 SHA-256，错误摘要突变测试被拒绝。
+- 三项关闭证据：9380 稳定版本 API 在有限启动重试内为 HTTP 200 且返回 v0.25.6 契约；MinIO 经 S3 API 创建随机 bucket/object、整栈重启后回读并清理；5 个固定镜像逐一匹配获批 SHA-256，错误摘要突变测试被拒绝。完成前矩阵发现并修复了容器 healthy 后 API 短暂未就绪的时序缺陷，追加功能提交为 `ba7e13f2b585f872ca811e98b50c09e25020fba5`。
 - 验证：Python 3.13 `5 passed, 1 warning`；平台/RAGFlow Compose config、静态契约、真实健康/API、网络隔离、四存储重启持久化及 `git diff --check` 全部通过。
 - 交付边界：无业务 API、数据库迁移、TASK-005、生产依赖、兼容代码、通用抽象或无关修改；真实文档上传/解析/混合检索/引用仍属于 TASK-005。
 - 请求动作：将本正式台账提交推送到同一 PR #27，以新的完整精确 HEAD 重新请求 DEV-002 审核。旧审核随 HEAD 变化失效；复审通过前不得请求 Merge 授权，TASK-005 继续锁定，Stage 6 禁止进入。

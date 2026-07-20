@@ -155,10 +155,11 @@
 
 - 审核基线：DEV-002 对 `8b628fcfbf80fb6490d8d3dd5257feafba9d1595` 给出 `Changes requested`，Critical 0、Important 3、Minor 0；修正功能提交为 `f87a0c309c322f9accedcaea4a80aed84483b0e7`。
 - TDD RED/GREEN：新增 `verify-review-remediation.ps1`；依次确认 9380 API 契约缺失、MinIO S3 生命周期缺失、5 个获批摘要缺失时失败，随后逐项实现并转为 `TASK-004 review remediation contract: PASS`。
-- API：从 Compose 展开配置定位 target `9380`，真实请求 `/api/v1/system/version`；结果为 HTTP 200、`code=0`、`data=v0.25.6`、`message=success`，任一契约漂移均失败。
+- API：从 Compose 展开配置定位 target `9380`，以 60 秒有限窗口真实请求 `/api/v1/system/version`；结果为 HTTP 200、`code=0`、`data=v0.25.6`、`message=success`，任一契约漂移或超时均失败。
 - MinIO：创建随机 bucket/object，经 `mc` 使用 S3 API 写入；整栈 restart 后经 S3 API 回读一致，再删除对象、bucket、client alias 和临时文件；输出 `stores=mysql,redis,minio-s3,elasticsearch; containers_recreated=0`。
 - 镜像：`verify.ps1` 对 5 个固定标签逐一匹配获批 SHA-256；内存替换 Redis 期望值为全零摘要的负向测试得到 `Image digest mismatch`，证明漂移会返回非零，未改写本地镜像标签。
 - 完整矩阵：Python 3.13 健康回归 `5 passed, 1 warning`；平台/RAGFlow Compose config、Compose 静态契约、审核修正契约、真实健康/API、网络隔离和重启持久化全部通过；`git diff --check` 通过。
+- 完成前复查：首次在持久化重启后立即执行摘要突变测试时，容器虽 healthy 但 API 连接短暂关闭，暴露一次性 API 请求的时序缺陷；新增 RED 契约后以 `ba7e13f2b585f872ca811e98b50c09e25020fba5` 实现有限重试，再按“持久化重启 → API/摘要负向验证”顺序复现通过。
 - 边界：仅修改 TASK-004 验证脚本、审核回归脚本、既有实施计划/运行手册和正式台账；未修改业务 API、迁移、TASK-005、生产依赖、兼容代码或通用抽象层。PR #27 尚未获 DEV-002 对新精确 HEAD 的批准，TASK-005 继续锁定。
 
 ## TASK-002 / CR-036 R11 语义敏感键脱敏复测（2026-07-17）

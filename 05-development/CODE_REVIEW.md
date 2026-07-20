@@ -168,6 +168,6 @@
 
 - 外部审核：DEV-002 对精确 HEAD `8b628fcfbf80fb6490d8d3dd5257feafba9d1595` 给出 Critical 0、Important 3、Minor 0；阻断为缺少 9380 API 契约、MinIO 绕过 S3 API 直接读写 `/data`、镜像只检查 RepoDigest 存在而未匹配获批 SHA-256。
 - 第一轮 Standards：修正功能提交 `f87a0c309c322f9accedcaea4a80aed84483b0e7` 仅触及 TASK-004 验证、回归契约、既有计划/手册；API 使用稳定版本端点，MinIO 凭据仅在容器内展开，摘要使用已核验的 5 个精确值；Critical 0、Important 0、Minor 0。
-- 第二轮 Spec/失败路径：API 同时断言 target 9380、HTTP 200、业务 code/message 与 v0.25.6；MinIO 随机 bucket/object 经 S3 写入、重启、回读、清理；摘要缺失、检查失败或不匹配均返回非零，摘要突变测试通过；Critical 0、Important 0、Minor 0。
+- 第二轮 Spec/失败路径：API 同时断言 target 9380、HTTP 200、业务 code/message 与 v0.25.6；完成前矩阵发现容器 healthy 后 API 仍可能短暂关闭，已在 `ba7e13f2b585f872ca811e98b50c09e25020fba5` 增加 60 秒有限重试并以重启后立即探测复现通过；MinIO 随机 bucket/object 经 S3 写入、重启、回读、清理；摘要缺失、检查失败或不匹配均返回非零，摘要突变测试通过；Critical 0、Important 0、Minor 0。
 - 第三轮完整 diff：相对基线只新增一个 TASK-004 审核回归脚本并原位修改两个验证脚本、实施计划、运行手册和正式台账；没有 TASK-005、后端领域代码、迁移、前端、生产依赖、兼容层或通用抽象；完整矩阵与 `git diff --check` 通过。Critical 0、Important 0、Minor 0。
 - 结论：三项已在本地证据中关闭，但新 HEAD 会使旧审核失效；必须推送同一 PR #27 并由 DEV-002 重新审核精确 HEAD。当前不得请求 Merge 授权，不得解锁 TASK-005，Stage 6 仍禁止进入。
