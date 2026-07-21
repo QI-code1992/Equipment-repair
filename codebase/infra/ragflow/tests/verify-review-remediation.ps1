@@ -4,7 +4,8 @@ param(
     [string]$PersistenceScript = "codebase/infra/ragflow/scripts/verify-persistence.ps1",
     [string]$Runbook = "08-release-handoff/RUNBOOK.md",
     [string]$Design = "05-development/TASK-004_RAGFLOW_INFRA_DESIGN.md",
-    [string]$ImplementationPlan = "05-development/TASK-004_IMPLEMENTATION_PLAN.md"
+    [string]$ImplementationPlan = "05-development/TASK-004_IMPLEMENTATION_PLAN.md",
+    [string]$TaskBook = "04-architecture-plan/DEVELOPMENT_TASK_BOOK.md"
 )
 
 $ErrorActionPreference = "Stop"
@@ -110,5 +111,6 @@ Assert-Contract ($isolationParameters -notcontains "EnvFile") "isolation verifie
 Assert-Contract ($runbookSource -match '--env-file\s+\$RagflowEnvFile.*\sdown') "runbook down command omits the explicit local environment file"
 Assert-RuntimeEnvironmentContract -Path $Design
 Assert-RuntimeEnvironmentContract -Path $ImplementationPlan
+Assert-RuntimeEnvironmentContract -Path $TaskBook
 
 Write-Output "TASK-004 review remediation contract: PASS"
