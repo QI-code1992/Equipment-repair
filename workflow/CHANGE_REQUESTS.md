@@ -9,7 +9,7 @@
 ### CR-041：前端工程初始化前置与 Agent 前端子范围解锁
 
 - 级别：L2
-- 状态：Changes requested / 台账回填后待重新治理确认与集成检查
+- 状态：Done / PR #28 Merged；合并后治理收尾待本记录 PR 合入
 - 提出人：项目负责人
 - 提出时间：2026-07-22
 - 当前阶段：Stage 5 — 开发实施
@@ -23,16 +23,18 @@
   - Development Task Book：v1.3 -> v1.4 候选；新增 TASK-006-FE，细化 TASK-006/TASK-007 前端子范围依赖，并将 TASK-010 调整为不重复建立工程。
   - Test Cases：新增前端工程构建、测试与原型隔离验证；TASK-006 的智能配置前端测试和 TASK-007 的对话组件测试仍由原任务负责。
   - Schedule / Integration：TASK-006 后端/迁移继续可做；TASK-006-FE 合入后才可完成 TASK-006/007 的前端子范围；TASK-010 仍须等待 TASK-003、TASK-008、TASK-009。
-- 决定：项目负责人于 2026-07-22 明确选择方案 2，并已确认 PR #28 的首个候选 HEAD `ea6c3e4408ab70ba7b9edf739752b36914ee485a` 的治理内容。该确认不等同于 Ready、开发审核批准或 Merge 授权；本次台账回填产生新 HEAD 后，该确认失效，必须重新确认。
-- 更新基线：`04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.4 候选、`04-architecture-plan/IMPLEMENTATION_PLAN.md`、`workflow/PM_TO_DEV_HANDOFF.md`、`workflow/DEV_TO_PM_HANDOFF.md`。
+- 决定：项目负责人于 2026-07-22 明确选择方案 2。首个候选 HEAD `ea6c3e4408ab70ba7b9edf739752b36914ee485a` 的治理确认因台账回填失效；项目负责人随后重新确认最终 HEAD `ee3383bf56aa2eb1b0dc90d1b253fbf9666dbce5`，并按逐 PR 授权流程批准合并。
+- 更新基线：`04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.4、`04-architecture-plan/IMPLEMENTATION_PLAN.md`、`workflow/PM_TO_DEV_HANDOFF.md`、`workflow/DEV_TO_PM_HANDOFF.md`。
 - 实施：
   - 候选分支：`codex/cr-041-frontend-bootstrap`
   - 目标分支：`codex/stage-05-integration`
   - 负责人：DEV-002（治理候选编制）；DEV-001 负责集成检查与 Merge 授权请求；非 PR 作者的开发者在获授权后执行 Merge。
-  - PR：[#28](https://github.com/QI-code1992/Equipment-repair/pull/28)（Draft）；首个候选 HEAD：`ea6c3e4408ab70ba7b9edf739752b36914ee485a`；仅允许治理文档，不修改 `codebase/`、测试、迁移、基础设施或部署配置。
+  - PR：[#28](https://github.com/QI-code1992/Equipment-repair/pull/28)（Merged）；最终授权 HEAD：`ee3383bf56aa2eb1b0dc90d1b253fbf9666dbce5`；Merge Commit：`7a44401bacbdc48d58f697a6b252449ecf44bb29`；合并执行者：DEV-001（`ll979053897-arch`）；源分支保留。PR 仅含治理文档，不修改 `codebase/`、测试、迁移、基础设施或部署配置。
 - 验证：
   - 首个候选 HEAD `ea6c3e4408ab70ba7b9edf739752b36914ee485a`：`git diff --check` 通过；`workflow/state.json` JSON 解析通过；完整 diff 仅含本 CR 列出的 5 个治理文件、无 `codebase/` 修改；目标分支为 `codex/stage-05-integration@b29c69d13c3d1c81f01023152eabf0c0f2d02741`；模拟合并无冲突。
   - 集成检查结论：DEV-001 对首个候选发现 Important 1——本台账原先错误记录“PR：待创建”“状态：待执行”。本次仅回填已发生事实；新 HEAD 必须重新执行治理确认、集成检查和逐 PR Merge 授权请求。
+  - 最终候选 HEAD `ee3383bf56aa2eb1b0dc90d1b253fbf9666dbce5`：项目负责人已重新确认治理内容；DEV-001 已完成集成检查并获逐 PR Merge 授权；目标分支为 `codex/stage-05-integration`；Merge Commit 为 `7a44401bacbdc48d58f697a6b252449ecf44bb29`；授权 HEAD 已成为目标分支祖先，PR 状态为 `MERGED`。
+  - 合并后边界：TASK-006-FE 现可按任务书创建自己的 Draft PR 并启动；不代表 TASK-006-FE 完成、TASK-006 前端子范围完成或 Stage 6 获批。
 
 ### CR-001: Reconcile the canonical requirements baseline
 
