@@ -235,7 +235,7 @@
 - 共享契约：向 TASK-005 交付服务地址、认证引用、健康检查、数据集初始化方式和恢复步骤；不得与业务 PostgreSQL/Redis/MinIO 共用账户。
 - 实施步骤：锁定镜像；编排独立网络与依赖；执行健康、重启、持久化和隔离验证；输出脱敏配置契约。
 - 验收标准：全部容器 healthy；Elasticsearch 版本为 8.11；重启后数据与配置可恢复；无公网暴露的内部依赖。
-- 验证：`docker compose --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml config --quiet`；`docker compose -p equipment-ragflow --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml up -d`；`docker compose -p equipment-ragflow -f codebase/infra/ragflow/docker-compose.yml ps`；执行重启和网络隔离检查并保存真实输出。
+- 验证：静态结构校验可使用 `docker compose --env-file codebase/infra/.env.example -f codebase/infra/ragflow/docker-compose.yml config --quiet`；真实启动、状态、健康、重启、持久化和隔离验证必须先创建 Git 忽略的 `codebase/infra/.env.local`，并使用 `$RagflowEnvFile = "codebase/infra/.env.local"` 显式传入 `docker compose -p equipment-ragflow --env-file $RagflowEnvFile -f codebase/infra/ragflow/docker-compose.yml up -d`、`docker compose -p equipment-ragflow --env-file $RagflowEnvFile -f codebase/infra/ragflow/docker-compose.yml ps` 及对应验证脚本；执行重启和网络隔离检查并保存真实输出。
 - 分支：`codex/task-004-ragflow-infra`
 - PR 审核请求：`DEV-001` 完成本任务验收、Docker 真实验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-002` 发送书面审核请求。
 - Review：`DEV-002` 复核适配器所需契约、任务范围和验证证据；Docker 通过结论只能由 `DEV-001` 提供；任何 Critical/Important 均退回 `DEV-001` 修复。

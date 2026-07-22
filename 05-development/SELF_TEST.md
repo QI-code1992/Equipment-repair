@@ -136,6 +136,63 @@
 - 唯一警告：既有 FastAPI/Starlette TestClient 对 `httpx` 的第三方弃用提示。
 - 未验证：DEV-002 尚未批准；后继正式 PR 尚未由 DEV-002 创建；TASK-002 尚未合入 `codex/stage-05-integration`，依赖继续锁定。
 
+## TASK-004 PR #27 R2 审核修正验证（2026-07-20）
+
+- 审核输入：DEV-002 对精确 HEAD `6c6fda004f806f8b72eddaad64aac419b78a7a6f` 给出 `Changes requested`，Critical 0、Important 4、Minor 2。
+- TDD：`verify-review-remediation.ps1` 先分别因缺少 Compose/运行镜像绑定、Web 有限超时、当前执行窗口日志扫描、显式 `EnvFile` 和失败探针保留而 RED，再以最小修改转 GREEN。完整矩阵发现历史日志导致 22 次假阳性，新增“日志窗口绑定本次开始时间”RED 后修正并复跑通过。
+- 镜像链：展开 Compose 镜像标签、获批 RepoDigest、本地固定标签镜像 ID 与运行容器不可变镜像 ID 四者绑定；错误 `RAGFLOW_IMAGE` 覆盖和错误摘要均被拒绝，且运行容器 ID/本地标签未被修改。
+- 健康与日志：Web/API 请求均有有限超时；真实结果为 5 服务 healthy、Web/API HTTP 200、RAGFlow v0.25.6、Elasticsearch 8.11.3。完成前最终复测时间 `2026-07-20T05:07:01.3918899Z`—`2026-07-20T05:07:39.5000371Z`；日志 133 行，依赖连接失败 0、秘密值命中 0；Docker info/config/up/ps/logs 退出码均为 0。
+- 持久化：正常 restart 后 MySQL/Redis/MinIO-S3/Elasticsearch 四项探针一致、容器重建数 0；注入 Redis 不一致时脚本按预期失败且四项探针全部保留，测试后仅清理本次 TASK-004 命名空间。
+- 其他：Python 3.13 健康回归 `5 passed, 1 warning`；compileall、平台/RAGFlow Compose config、两个静态契约、网络隔离均通过。运行手册所有命令显式使用忽略的本地 `EnvFile`；本地 `.env.local` 未纳入 Git。
+- 边界：未修改业务 API、数据库迁移、TASK-005、生产依赖、兼容代码或通用抽象层；未执行 TASK-005 文档生命周期或 TASK-011 灾备演练。PR #27 新 HEAD 尚待 DEV-002 精确审核，TASK-005 继续锁定。
+
+## TASK-004 PR #27 R3 审核修正验证（2026-07-20）
+
+- 审核输入：DEV-002 对精确 HEAD `601d54d2427302999c7bc10ac5beec3ac0565501` 给出 `Changes requested`，Critical 0、Important 2、Minor 0。
+- 根因：Runbook 给不消费 Compose 环境的 `verify-isolation.ps1` 传入未声明的 `-EnvFile`，旧静态检查只搜索参数文本而未核对脚本签名；持久化脚本在清理前输出 PASS，且清理命令绕过 `Invoke-Compose` 的退出码门禁。
+- TDD：增强 `verify-review-remediation.ps1` 后先得到 `persistence PASS is emitted before cleanup completes`，修复清理顺序后继续得到 `runbook passes unsupported EnvFile to isolation verifier`，再删除无效参数并转为 `TASK-004 review remediation contract: PASS`。
+- 修正提交：`dc909fff1c8260f2f8a50670192761572cdfb76b`。健康和持久化脚本继续显式使用同一 `.env.local`；隔离脚本只检查已运行容器/网络。MySQL DROP、Redis DEL、MinIO object/bucket 删除、Elasticsearch DELETE 及临时资源清理全部经过退出码检查，所有清理完成后才输出 PASS。
+- 真实验证：Docker Client/Server `29.6.1`、Compose `v5.1.4`；5 容器 healthy；Web/API HTTP 200；RAGFlow `v0.25.6`；Elasticsearch `8.11.3`；依赖错误 0、秘密值命中 0；网络隔离通过；四存储 restart 后探针一致、容器重建数 0、严格清理探针数 4。
+- 静态验证：三个 PowerShell 文件语法解析通过；Compose 契约和审核修正契约均 PASS；RAGFlow Compose `config --quiet`、`git diff --check` 通过。
+- 边界：只修改 TASK-004 运行手册、持久化验证脚本、审核回归与正式证据；未修改业务 API、数据库迁移、TASK-005、生产依赖、兼容代码、通用抽象或无关文件。TASK-005 继续锁定，等待 DEV-002 对新精确 HEAD 复审。
+
+## TASK-004 PR #27 R4 审核修正验证（2026-07-20）
+
+- 审核输入：DEV-002 对精确 HEAD `6cd29f158b2c03f61c5b21a7e9bf99d30ec17a34` 给出 `Changes requested`，Critical 0、Important 2、Minor 0。
+- 根因：设计和计划中的真实运行命令未与 Runbook 的 `.env.local` 约束同步；清理门禁只有源码结构检查，没有从外部命令非零退出到脚本非零退出且无 PASS 的可执行证据。
+- RED/GREEN：环境契约增强后先报 `TASK-004_RAGFLOW_INFRA_DESIGN.md does not define the local runtime environment file`；清理行为测试先报 `missing injectable cleanup helper`。修正后两个脚本分别输出 `TASK-004 review remediation contract: PASS` 和 `TASK-004 cleanup failure behavior: PASS; categories=4`。一次临时动态脚本被 AMSI 拦截的环境事件未作为 RED 证据。
+- 修正提交：`29180e285767cbffb9d694cd1834f04514d2cc18`。设计和计划明确真实运行只使用忽略的 `codebase/infra/.env.local` 并显式传 `-EnvFile`，只有不启动容器的静态 `config --quiet` 可使用 `.env.example`。
+- 失败行为：新增最小 Compose 外部副作用边界；测试以静态假命令返回 42，并分别覆盖 MySQL、Redis、MinIO、Elasticsearch 清理参数。四个子进程均为非零且没有 PASS；生产持久化验证仍在全部清理成功后才输出 PASS。
+- 真实验证：Docker Client/Server `29.6.1`、Compose `v5.1.4`；5 容器 healthy；Web/API HTTP 200；RAGFlow `v0.25.6`；Elasticsearch `8.11.3`；依赖错误 0、秘密值命中 0；网络隔离通过；四存储 restart 后探针一致、容器重建数 0、清理探针数 4。
+- 其他验证：Python 3.13 健康回归 `5 passed, 1 warning`；compileall、Compose 契约、RAGFlow Compose config、全部 PowerShell 语法和 `git diff --check` 通过。
+- 边界：未新增生产依赖或兼容代码；新增一个仅用于外部 Compose 退出码检查的最小模块，没有业务 API、迁移、TASK-005 或无关修改。TASK-005 继续锁定，等待 DEV-002 对推送后的新精确 HEAD 复审。
+
+## TASK-004 独立 RAGFlow 基础设施验证（2026-07-20）
+
+- 分支/基线：`codex/task-004-ragflow-infra`，基于 `origin/codex/stage-05-integration@b29c69d13c3d1c81f01023152eabf0c0f2d02741`；证据提交前功能候选为 `ac8c007730d8e947c5687380e4583e8b23d2cce1`。
+- TDD RED：静态契约首次因缺少 `codebase/infra/ragflow/docker-compose.yml` 失败；健康、隔离和持久化脚本分别先以“not implemented”失败，再实现 GREEN。
+- 环境：Python `3.13.14`；Docker Client/Server `29.6.1`；Docker Compose `v5.1.4`；Docker Desktop Linux 的 `vm.max_map_count=262144`。
+- Python 回归：`py -3.13 -m pytest codebase/backend/tests/test_health.py -q` 为 `5 passed, 1 warning`；警告为既有 Starlette/httpx 弃用提示。
+- Compose：平台 Compose 与 RAGFlow Compose 的 `config --quiet` 均通过；静态契约脚本输出 `TASK-004 compose contract: PASS`。
+- 真实健康：5 个容器全部 healthy；RAGFlow Web 为 HTTP 200；Elasticsearch 为 `8.11.3`；本机已有无关 RAGFlow 占用默认端口，验证仅通过环境覆盖使用 `127.0.0.1:18080/19380`，未停止无关容器。
+- 固定镜像摘要：RAGFlow `sha256:74595f13bb09c51b1c151ce85d9e06e42cf4371b0c8aeaef222e67253d7c7543`；Elasticsearch `sha256:58a3a280935d830215802322e9a0373faaacdfd646477aa7e718939c2f29292a`；MySQL `sha256:ccb8f749bb5e59f9f8f03bf7282c7ef27a93a1814a24f0a8a926fb4e19b7fb97`；MinIO `sha256:a72bf37c235a83a73890d2a46c5b36801fed61c335175e0396070bf84a8bbb98`；Redis `sha256:02419de7eddf55aa5bcf49efb74e88fa8d931b4d77c07eff8a6b2144472b6952`。
+- 网络隔离：内部网络 5 个成员，访问网络仅 RAGFlow；MySQL、Redis、MinIO、Elasticsearch 宿主端口为 0；RAGFlow 两个端口均只绑定 `127.0.0.1`。
+- 重启恢复：MySQL、Redis、MinIO、Elasticsearch 写入同一随机探针，整栈 restart 后均读回；5 个容器 ID 未变化；探针已清理，未删除命名卷。
+- 环境事件：Docker 引擎经内部代理访问 Docker Hub 持续 EOF，宿主机 Registry 探测正常；使用项目既有 DaoCloud 透明镜像拉取同一固定版本并核对 ID/RepoDigest，未修改 Docker Desktop 全局代理或仓库运行镜像身份。
+- 静态与边界：`git diff --check origin/codex/stage-05-integration...HEAD` 通过；没有业务代码、迁移、TASK-005 实现、生产依赖、兼容代码或通用抽象层修改。
+- 未验证：DEV-002 尚未审核当前最终精确 HEAD；PR #27 尚未合入；合并后验证、TASK-005 真实文档上传/解析/检索/引用和 TASK-011 完整备份恢复演练均未执行。
+
+### TASK-004 PR #27 R1 审核修正验证
+
+- 审核基线：DEV-002 对 `8b628fcfbf80fb6490d8d3dd5257feafba9d1595` 给出 `Changes requested`，Critical 0、Important 3、Minor 0；修正功能提交为 `f87a0c309c322f9accedcaea4a80aed84483b0e7`。
+- TDD RED/GREEN：新增 `verify-review-remediation.ps1`；依次确认 9380 API 契约缺失、MinIO S3 生命周期缺失、5 个获批摘要缺失时失败，随后逐项实现并转为 `TASK-004 review remediation contract: PASS`。
+- API：从 Compose 展开配置定位 target `9380`，以 60 秒有限窗口真实请求 `/api/v1/system/version`；结果为 HTTP 200、`code=0`、`data=v0.25.6`、`message=success`，任一契约漂移或超时均失败。
+- MinIO：创建随机 bucket/object，经 `mc` 使用 S3 API 写入；整栈 restart 后经 S3 API 回读一致，再删除对象、bucket、client alias 和临时文件；输出 `stores=mysql,redis,minio-s3,elasticsearch; containers_recreated=0`。
+- 镜像：`verify.ps1` 对 5 个固定标签逐一匹配获批 SHA-256；内存替换 Redis 期望值为全零摘要的负向测试得到 `Image digest mismatch`，证明漂移会返回非零，未改写本地镜像标签。
+- 完整矩阵：Python 3.13 健康回归 `5 passed, 1 warning`；平台/RAGFlow Compose config、Compose 静态契约、审核修正契约、真实健康/API、网络隔离和重启持久化全部通过；`git diff --check` 通过。
+- 完成前复查：首次在持久化重启后立即执行摘要突变测试时，容器虽 healthy 但 API 连接短暂关闭，暴露一次性 API 请求的时序缺陷；新增 RED 契约后以 `ba7e13f2b585f872ca811e98b50c09e25020fba5` 实现有限重试，再按“持久化重启 → API/摘要负向验证”顺序复现通过。
+- 边界：仅修改 TASK-004 验证脚本、审核回归脚本、既有实施计划/运行手册和正式台账；未修改业务 API、迁移、TASK-005、生产依赖、兼容代码或通用抽象层。PR #27 尚未获 DEV-002 对新精确 HEAD 的批准，TASK-005 继续锁定。
+
 ## TASK-002 / CR-036 R11 语义敏感键脱敏复测（2026-07-17）
 
 - RED：`binaryAttachment`、`uploadedFile`、`sessionCookieValue`、`passwordvalue` 在直接函数和失败审计落库用例中均为 `2 failed`，确认 R10 的前缀/后缀枚举遗漏。
@@ -154,3 +211,23 @@
 - 回归：定向审计 `21 passed, 1 warning`；Python 3.13 全量 `140 passed, 5 skipped, 1 warning`；`python -m compileall -q app` 和 `git diff --check` 通过。两层测试同时检查 `sanitize_audit_metadata()` 返回值和失败请求的 `AuditEvent.metadata_json`，均无明文。
 - 运行验证：当前代码重新构建独立 `test` 镜像后，内部网络 PostgreSQL 17 集成 `5 passed, 1 warning`；Compose 重建成功，PostgreSQL/Redis healthy、API Up，容器内 `/healthz` 为 HTTP 200、正文 `{"status":"ok","service":"equipment-operations-platform"}`。
 - 未验证：DEV-002 尚未批准；后继正式 PR 尚未由 DEV-002 创建；TASK-002 尚未合入 `codex/stage-05-integration`，依赖继续锁定。
+
+## TASK-004 PR #27 R5 Markdown 运行命令契约修正（2026-07-22）
+
+- 审核输入：DEV-002 对精确 HEAD `a5ac8490bf678ea03efc702052f7f1edecff182b` 给出 `Changes requested`，Critical 0、Important 1、Minor 0；任务书 `- 验证：...` 内的反引号运行命令未进入 `$runtimeLines`，因此静态断言无法防止其回退到 `.env.example`。
+- RED：保留 `.env.local` 定义，仅将临时任务书列表中的 `--env-file $RagflowEnvFile` 变异为 `.env.example`，旧检查器错误输出 PASS。修正后同一变异稳定返回非零并报告运行命令违规。
+- GREEN：功能提交 `314b46d3efdc7af0d13c671fadd41be7bb3900d1` 按 Markdown 代码块和任务书验证列表提取真实命令；静态 `config --quiet` 不进入运行检查。独立复审发现禁用示例误报后，补充 RED 并排除明确标记为禁止、错误、反例或不得执行的代码块。
+- 验证：Windows PowerShell 语法解析通过；`verify-review-remediation.ps1`、`verify-cleanup-failure.ps1`、`verify-compose-contract.ps1` 均 PASS；任务书回退变异非零；禁用错误示例通过；`git diff --check` 通过。独立复审为 Critical 0、Important 0、Minor 0。
+- 未验证：本轮未改 Compose、镜像、运行脚本或业务代码，因此未重新执行 Docker 五服务重启验证；当前环境中的历史 Python 3.13 虚拟环境入口无法创建进程，本轮未生成新的 Python 结果，沿用记录仅作为上一 HEAD 历史证据，不宣称本轮重新通过。
+- 边界：只修改 TASK-004 审核契约测试；无生产依赖、兼容代码、抽象层、业务 API、迁移、TASK-005 或无关修改。DEV-002 批准新精确 HEAD 前 TASK-005 继续锁定。
+## TASK-004 PR #27 R6 运行环境默认值修复验证（2026-07-22）
+
+- 审核输入：DEV-002 对精确 HEAD `80b40182efa49033ee561f34fd6e078b3469a733` 给出 `Changes requested`；Critical 0、Important 1、Minor 0。
+- RED：增强 `verify-review-remediation.ps1` 后，首先稳定失败于 `verify.ps1 does not default EnvFile to codebase/infra/.env.local`。
+- GREEN：`verify.ps1` 与 `verify-persistence.ps1` 默认改为 Git 忽略的 `codebase/infra/.env.local`，并在任何 Docker 调用前检查文件存在；缺失时两个子进程均非零退出并包含 `Missing local RAGFlow environment file`。
+- 功能提交：`78e3132d907870f17980ade7142f7c9a7ae7562e`。
+- 静态与失败行为：审核契约 PASS；四类清理失败行为 PASS；Compose 契约 PASS；RAGFlow Compose `config --quiet` PASS；8 个 PowerShell 文件语法通过。
+- 真实运行：5 个容器 healthy；Web/API HTTP 200；RAGFlow `v0.25.6`；Elasticsearch `8.11.3`；镜像摘要与运行镜像一致；日志依赖失败 0、秘密命中 0；网络隔离 PASS。
+- 持久化：MySQL、Redis、MinIO S3、Elasticsearch 重启后探针一致，容器重建数 0，严格清理探针数 4。
+- 其他：Python 3.13.14 健康回归 `5 passed, 1 warning`；compileall、`git diff --check` 通过。唯一警告为既有 Starlette/httpx 第三方弃用提示。
+- 边界：未增加生产依赖、兼容代码、抽象层、业务 API、迁移、TASK-005 或无关修改；DEV-002 尚未审核新 HEAD，TASK-005 继续锁定。
