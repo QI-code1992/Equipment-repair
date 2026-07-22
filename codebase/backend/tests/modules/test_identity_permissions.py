@@ -392,7 +392,8 @@ def test_equipment_rejects_unknown_organization(
     client: TestClient, method: str
 ) -> None:
     headers = writer_headers(client, f"unknown-org-{method}")
-    payload = valid_equipment_body(client, code="EQ-NO-ORG") | {
+    valid_payload = valid_equipment_body(client, code="EQ-NO-ORG")
+    payload = valid_payload | {
         "organization_id": "missing"
     }
     if method == "post":
@@ -411,7 +412,7 @@ def test_equipment_rejects_unknown_organization(
                 manufacturer="MANUFACTURER-EXISTING",
                 operating_hours=Decimal("0"),
                 status=EquipmentStatus.NORMAL,
-                organization_id=payload["organization_id"],
+                organization_id=valid_payload["organization_id"],
                 image_refs=[],
             )
             session.add(equipment)

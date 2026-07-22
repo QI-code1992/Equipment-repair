@@ -2,6 +2,22 @@
 
 静态原型检查点记录在 `03-ui-prototype/PROTOTYPE_CHECKPOINTS.md`，不得自动提升为生产检查点。
 
+## FCP-006-NDB：TASK-006 Agent 配置非数据库切片
+
+- 状态：已验证的可恢复检查点，不构成 TASK-006 完成、集成或 Stage 6 依据。
+- 范围：四个 Agent 的不可变配置领域模型、独立初始化/读取/保存、模型能力校验、配置快照和未挂载 API 契约。
+- 证据：实现与安全修复提交 `33d7712`、`7cbf76b`、`f7da339`、`04e651c`；远端恢复证据 `2a7ca4e`。
+- 验证：Python 3.13.14 模块/API 回归 `24 passed, 1 warning`；未执行 Docker、Compose、RAGFlow 或数据库验证。
+- 后续：TASK-002 前置已解除；数据库、迁移与正式路由仍须按 TASK-006 自身范围、迁移顺序、DEV-001 审核和 PR 门禁完成。
+
+## FCP-006-DB-R2：TASK-006 持久化事务契约复审候选
+
+- 状态：复审候选 / 未完成 / 未集成；不构成 TASK-006 完成、依赖解锁或 Stage 6 依据。
+- 范围：持久化模式、仓储事务边界、同一 `agent_id` 初始化竞争、迁移元数据注册及数据库引擎工厂契约的复审证据；本轮将工厂和 Alembic 元数据契约集中到专用集成测试，并补充不连接网络的 PostgreSQL factory 回归。
+- 当前任务证据链：`c8918d6f` → `0e34bed` → `483e75a` → `61c1026` → `911a41f` → `170bccf` → `42ef6ef`；本检查点绑定该完整链及其后的复审证据提交。
+- 已验证：Python 3.13.14 下 `codebase/backend/.venv/bin/python -m pytest tests/modules/test_agent_config_persistence.py tests/modules/test_agent_config_persistence_integration.py -q` 为 `13 passed, 1 known warning`；加入领域测试的 `codebase/backend/.venv/bin/python -m pytest tests/modules/test_agent_config.py tests/modules/test_agent_config_persistence.py tests/modules/test_agent_config_persistence_integration.py -q` 为 `30 passed, 1 known warning`；迁移测试 `codebase/backend/.venv/bin/python -m pytest tests/modules/test_task006_migration.py -q` 为 `5 passed, 1 known warning`。三次警告均为 Starlette TestClient 对当前 `httpx` 的弃用提示。`git diff --check` 通过。唯一竞争测试使用两个文件型 SQLite 会话，实际捕获 `agent_configs.agent_id` 唯一约束冲突后读取已提交配置；外键失败后由调用方 `rollback()`，同一会话可查询并提交有效写入。PostgreSQL factory 契约只创建引擎并检查 PostgreSQL dialect、URL 参数、预检池和无 SQLite PRAGMA 监听器，不发起连接。
+- 仍待 DEV-001：PostgreSQL/Compose 真实环境的迁移升降级、并发初始化、外键与正式路由验证均未执行；SQLite 和无连接 factory 证据不得替代这些验证或 PR 门禁。
+
 ## FCP-002-R6：TASK-002 正式集成后的治理收尾
 
 - 状态：代码正式集成、技术验证与治理收尾已完成；PR #25 已合入并解除 TASK-002 下游前置，不能作为 Stage 6 进入依据。
@@ -159,6 +175,13 @@
 - 证据：前端 2 项测试通过、生产构建通过、全部现有原型静态检查通过、`git diff --check` 通过。
 - 合并后证据：前端 2 项测试通过、生产构建通过、14 项原型静态回归通过、`git diff --check` 与合并树检查通过；浏览器人工视觉回归未执行。
 - 恢复/门禁：可选择性回退该任务合并提交；不涉及数据或生产操作。本治理收尾 PR 合入后，TASK-006 智能配置前端子范围与 TASK-007 共享前端对话子范围可按各自任务书、PR、审核和授权门禁继续；TASK-010 仍受 TASK-003、TASK-008、TASK-009 依赖约束，Stage 6 仍未获准。
+
+### FCP-006-R1：TASK-006 全范围审核候选
+
+- 状态：Review Candidate / Not Approved / Not Integrated / Does Not Unlock Dependencies。
+- 分支/PR：`codex/task-006-agent-config` / PR #14；候选包含最新 `codex/stage-05-integration` 同步、四 Agent 智能配置前端与单链 Alembic 修复。
+- 验证：前端 7 项测试及生产构建通过；Python 3.13.14 TASK-003/006 迁移回归 `7 passed, 1 warning`、全量后端 `221 passed, 9 skipped, 1 warning`；`compileall`、单一 Alembic head 与 `git diff --check` 通过。
+- 风险与恢复：该候选未执行 Docker/PostgreSQL 真实环境验证，须由具备环境的 DEV-001 核验；合并前退回该 PR 追加提交即可，不涉及数据删除。新 HEAD 会使旧审核结论失效，必须重审并重新取得逐 PR/HEAD 合并授权。
 
 ## FCP-003-R1：TASK-003 本地开发候选
 
