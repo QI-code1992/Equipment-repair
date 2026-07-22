@@ -57,7 +57,7 @@ def test_task006_upgrade_creates_model_catalog_schema(
 ) -> None:
     config, engine = migration_database
     command.upgrade(config, "0002")
-    command.upgrade(config, "0003")
+    command.upgrade(config, "0004_task006")
 
     inspector = inspect(engine)
     assert {"model_providers", "model_bindings", "agent_configs"} <= set(
@@ -111,7 +111,7 @@ def test_task006_upgrade_creates_agent_config_schema(
     migration_database: tuple[Config, Engine],
 ) -> None:
     config, engine = migration_database
-    command.upgrade(config, "0003")
+    command.upgrade(config, "0004_task006")
 
     inspector = inspect(engine)
     config_columns = _column_names(engine, "agent_configs")
@@ -167,7 +167,7 @@ def test_task006_restricts_deleting_referenced_model_catalog_rows(
     migration_database: tuple[Config, Engine],
 ) -> None:
     config, engine = migration_database
-    command.upgrade(config, "0003")
+    command.upgrade(config, "0004_task006")
     with engine.begin() as db:
         assert db.execute(text("PRAGMA foreign_keys")).scalar_one() == 1
         db.execute(
@@ -226,8 +226,8 @@ def test_task006_round_trip_preserves_task002_baseline_data(
             {"parent_id": root_organization_id},
         )
 
-    command.upgrade(config, "0003")
-    command.downgrade(config, "0002")
+    command.upgrade(config, "0004_task006")
+    command.downgrade(config, "0003_task003")
 
     with engine.connect() as db:
         assert db.execute(
@@ -252,10 +252,10 @@ def test_task006_downgrade_removes_only_task006_tables(
     migration_database: tuple[Config, Engine],
 ) -> None:
     config, engine = migration_database
-    command.upgrade(config, "0003")
+    command.upgrade(config, "0004_task006")
 
-    command.downgrade(config, "0002")
+    command.downgrade(config, "0003_task003")
 
     table_names = set(inspect(engine).get_table_names())
     assert {"model_providers", "model_bindings", "agent_configs"}.isdisjoint(table_names)
-    assert {"users", "roles", "permissions", "organizations", "equipment"} <= table_names
+    assert {"users", "roles", "permissions", "organizations", "equipment", "fault_reports"} <= table_names

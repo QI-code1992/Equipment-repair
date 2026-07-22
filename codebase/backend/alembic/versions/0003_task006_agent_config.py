@@ -1,7 +1,7 @@
 """add agent configuration schema
 
-Revision ID: 0003
-Revises: 0002
+Revision ID: 0004_task006
+Revises: 0003_task003
 """
 
 from collections.abc import Sequence
@@ -10,8 +10,8 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision: str = "0003"
-down_revision: str | None = "0002"
+revision: str = "0004_task006"
+down_revision: str | None = "0003_task003"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

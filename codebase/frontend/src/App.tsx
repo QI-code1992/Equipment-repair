@@ -1,5 +1,7 @@
 import { NavLink, Route, Routes, useLocation } from "react-router-dom";
 
+import { IntelligentConfigPage } from "./IntelligentConfigPage";
+
 type Page = {
   path: string;
   label: string;
@@ -69,7 +71,7 @@ export function App() {
           <div className="topbar__avatar" aria-label="当前用户">管</div>
         </header>
         <Routes>
-          {pages.map((page) => <Route key={page.path} path={page.path} element={<PageShell label={page.label} />} />)}
+          {pages.map((page) => <Route key={page.path} path={page.path} element={page.path === "/intelligent-config" ? <IntelligentConfigPage /> : <PageShell label={page.label} />} />)}
           <Route path="*" element={<PageShell label={activePage.label} />} />
         </Routes>
       </main>

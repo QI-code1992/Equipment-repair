@@ -284,3 +284,12 @@
 - 修正范围：同步 Ready 审核证据、PR 当前完整 HEAD 绑定说明、Node/npm 运行基线和 `npm ci` 验证证据；未修改业务页面、Agent 配置、SSE、维修流程、认证或业务 API。
 - 运行基线：`package.json` 声明 Node `^20.19.0 || >=22.12.0`、npm `>=10.0.0`；本轮验证环境为 Node `v26.5.0`、npm `11.17.0`。
 - 验证计划：重新执行 `npm ci`、前端测试、生产构建、原型静态回归和 `git diff --check`；推送后以新完整 HEAD 重新请求 DEV-001 审核。
+
+## TASK-006 全范围候选自测（2026-07-22）
+
+- 同步：候选先合并 `codex/stage-05-integration@8c0087928f693674f498044b0e2dbbe96196847c`；解决 `app/main.py` 路由注册与连续台账冲突，未修改已集成任务的业务语义。
+- 前端：智能配置页固定展示 AI 故障上报、智能问数、操作指引、故障诊断四个 Agent；只在首次选中某个尚未初始化的 Agent 时调用其单项读取端点，保存仅向当前 `agent_id` 发出 PUT，并携带 `Idempotency-Key`。无模型或不支持推理的模型开启深度思考时给出明确提示且不提交。
+- 迁移：同步后发现旧 TASK-006 `0003` 与已集成 TASK-003 `0003_task003` 形成双头；将 TASK-006 修订为 `0004_task006`，前置 `0003_task003`。专项 RED 显示 `head` 多头导致迁移失败；修正后 `alembic heads` 仅输出 `0004_task006 (head)`，TASK-006 回退至 `0003_task003` 时不删除 TASK-003 表。
+- 验证：Node/npm 锁定依赖安装后，`npm test` 为 `7 passed`，`npm run build` 通过；Python 3.13.14 的 TASK-003/006 迁移回归为 `7 passed, 1 warning`，全量后端为 `221 passed, 9 skipped, 1 warning`，`compileall` 与 `git diff --check` 通过。唯一警告为既有 Starlette/httpx 第三方弃用提示。
+- 边界：未新增生产依赖、兼容层或通用抽象；未实现 Agent Runtime、对话、SSE、引用、版本/发布/回滚或生产操作。临时 Python/Node 验证环境位于 `/private/tmp`，不纳入提交。
+- 门禁：本候选尚未由 DEV-001 针对新精确 HEAD 复审；在审核、集成检查、项目负责人逐 PR/HEAD 授权、DEV-001 Merge Commit 及合并后验证完成前，不解锁 TASK-007/008/009/010，也不进入 Stage 6。

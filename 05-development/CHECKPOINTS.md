@@ -176,6 +176,13 @@
 - 合并后证据：前端 2 项测试通过、生产构建通过、14 项原型静态回归通过、`git diff --check` 与合并树检查通过；浏览器人工视觉回归未执行。
 - 恢复/门禁：可选择性回退该任务合并提交；不涉及数据或生产操作。本治理收尾 PR 合入后，TASK-006 智能配置前端子范围与 TASK-007 共享前端对话子范围可按各自任务书、PR、审核和授权门禁继续；TASK-010 仍受 TASK-003、TASK-008、TASK-009 依赖约束，Stage 6 仍未获准。
 
+### FCP-006-R1：TASK-006 全范围审核候选
+
+- 状态：Review Candidate / Not Approved / Not Integrated / Does Not Unlock Dependencies。
+- 分支/PR：`codex/task-006-agent-config` / PR #14；候选包含最新 `codex/stage-05-integration` 同步、四 Agent 智能配置前端与单链 Alembic 修复。
+- 验证：前端 7 项测试及生产构建通过；Python 3.13.14 TASK-003/006 迁移回归 `7 passed, 1 warning`、全量后端 `221 passed, 9 skipped, 1 warning`；`compileall`、单一 Alembic head 与 `git diff --check` 通过。
+- 风险与恢复：该候选未执行 Docker/PostgreSQL 真实环境验证，须由具备环境的 DEV-001 核验；合并前退回该 PR 追加提交即可，不涉及数据删除。新 HEAD 会使旧审核结论失效，必须重审并重新取得逐 PR/HEAD 合并授权。
+
 ## FCP-003-R1：TASK-003 本地开发候选
 
 - 状态：Development Candidate / Locally Validated / Not Pushed / Not Reviewed / Not Integrated / Does Not Unlock Dependencies。
