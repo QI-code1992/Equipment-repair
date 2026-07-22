@@ -404,7 +404,7 @@ git diff --check
 
 本地验证记录（2026-07-20，未推送、未发起审核）：Python 3.13.14 模块测试 `168 passed`；PostgreSQL 17.10 隔离数据库迁移、事务与并发测试 `4 passed`；`compileall`、`git diff --check` 通过；`alembic heads` 为单一 `0003_task003`。远端集成分支仍为本任务基线 `b29c69d13c3d1c81f01023152eabf0c0f2d02741`，没有新的迁移需要合并，故无需制造空 Merge Commit。三轮自查发现的时区、诊断嵌套值、SQL 通配符、写权限和幂等冲突覆盖缺口均已修复并完成回归。
 
-- [ ] **Step 5: 更新正式交付台账**
+- [x] **Step 5: 更新正式交付台账**
 
 `SELF_TEST`、`CODE_REVIEW`、`COMMIT_LOG`、`CHECKPOINTS`、handoff 和 `state.json` 必须使用同一完整 HEAD、基线、测试结果、迁移 head、未验证项和下一动作。候选未审核前不得把 TASK-003 写成完成或解锁依赖。
 

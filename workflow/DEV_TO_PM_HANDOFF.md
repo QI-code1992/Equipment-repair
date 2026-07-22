@@ -217,3 +217,14 @@
 - 风险/回退：外部镜像 Registry 可用性仍是运行风险；完整备份恢复属于 TASK-011。应用回退可评估 `git revert -m 1 87e8e3c0aab62ee9105bf3807b23fcf44ac15137`；删除命名卷必须另行授权。
 - 依赖：本治理 PR 合并后 TASK-004 正式闭环，TASK-005 的 TASK-004 阻塞解除；Stage 6 仍未获准。
 - 请求动作：项目负责人确认本纯治理 PR 的内容和精确 HEAD；DEV-001 完成集成核查与授权请求后，由非 PR 作者 DEV-002 合并。
+
+## TASK-003 本地开发候选交接（2026-07-22）
+
+- 开发者/审核者：DEV-001 / DEV-002；分支 `codex/task-003-maintenance-lifecycle`，目标 `codex/stage-05-integration`。
+- 候选：本地实现与验证候选 `053e69039e86c12d4ddb96ee768074bf76ee6497`；吸收最新集成基线 `f135997a6ecc009de75735b673499b475615a717` 的同步 Merge Commit 为 `4877dcdc301b97d884a43883a5584fdee1d28c41`。
+- 交付：故障、工单、维修、人工最终字段、结构化案例查询、活跃故障设备停用保护和可逆 Alembic `0003_task003`。
+- 验证：Python 3.13.14 模块 `168 passed, 1 warning`；专用 PostgreSQL 17 `4 passed, 1 warning`；`compileall`、单一迁移 head、平台/RAGFlow Compose 和差异检查通过。
+- 边界：不调用 RAGFlow、Agent 或外部网络；无新增生产依赖、兼容层、通用抽象、前端或其他正式任务实现。
+- 风险/回退：`0003_task003` downgrade 会删除 TASK-003 五表，只允许专用验证库或已备份环境；应用按独立 TASK-003 Commit 选择性 revert，任何生产数据回退另行授权。
+- 当前门禁：候选尚未推送、Draft PR 尚未创建或更新、DEV-002 尚未审核、未申请 Merge 授权、未集成；不解锁 TASK-009/010/011，Stage 6 仍未获准。
+- 下一动作：提交本地正式台账；获得 DEV-001 明确推送指令后推送同一任务分支并创建/更新唯一 Draft PR，绑定完整精确 HEAD 请求 DEV-002 审核。
