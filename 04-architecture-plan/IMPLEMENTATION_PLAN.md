@@ -70,6 +70,17 @@
 - [ ] 模拟 RAGFlow 超时与容器重启，验证业务人工降级、错误审计和恢复后再次检索；将启动、排障和备份步骤写入 `08-release-handoff/RUNBOOK.md`。
 - [ ] 提交：`feat: integrate isolated ragflow knowledge lifecycle`。
 
+### Task 4A：正式前端工程初始化与共享基础
+
+**文件：**
+- Create：`codebase/frontend/package.json`、TypeScript/测试/构建配置、`codebase/frontend/src/` 工程入口与非业务共享基础
+- Test：`codebase/frontend/src/**/*.test.*`
+
+- [ ] 为前端测试、构建和“正式工程不得运行时依赖 `03-ui-prototype/`”写失败测试。
+- [ ] 建立最小 TypeScript 前端工程、可执行 package scripts、应用启动壳、路由/页面壳、样式基础和非业务 API 客户端边界；不实现业务页面、Agent 配置、对话、SSE、引用或采纳流程。
+- [ ] 执行前端测试、构建、原型隔离检查与 `git diff --check`，记录真实结果。
+- [ ] 提交：`feat(frontend): establish application foundation`。
+
 ### Task 5：智能配置控制面与模型能力校验
 
 **文件：**
@@ -79,14 +90,14 @@
 - [ ] 为四个 `agent_id` 独立读取/保存、首次单独初始化、更新一个 Agent 不影响另外三个写失败测试。
 - [ ] 实现 `AgentConfig`、模型能力 `supports_reasoning`、配置 API 与运行配置快照。
 - [ ] 实现深度思考校验：非推理模型开启时 `PUT /api/agent-configs/{agent_id}` 返回 `MODEL_REASONING_UNSUPPORTED`。
-- [ ] 移除原型/前端中页面加载重写统一 `localStorage` 默认配置的逻辑，改为 API 加载该 Agent 的独立配置。
+- [ ] 在 Task 4A 已正式集成的工程中实现智能配置模块；移除原型/前端中页面加载重写统一 `localStorage` 默认配置的逻辑，改为 API 加载该 Agent 的独立配置。
 - [ ] 提交：`feat: add independent agent configuration control plane`。
 
 ### Task 6：Agent Runtime、SSE 与安全过程事件
 
 **文件：**
 - Create：`codebase/backend/app/modules/agent_runtime/`、`codebase/backend/tests/modules/test_agent_runtime.py`
-- Create：`codebase/frontend/src/components/agent/AgentConversation.tsx`
+- Create：`codebase/frontend/src/components/agent/AgentConversation.tsx`（Task 4A 正式集成后）
 
 - [ ] 为线程归属、运行快照、SSE 顺序、恢复、原始思维链不入库不出流写失败测试。
 - [ ] 实现 `AgentThread`、`AgentRun`、`ToolCall`、`AgentConfirmation`、LangGraph checkpoint 和 SSE 事件端点。
@@ -124,7 +135,7 @@
 - Test：`codebase/frontend/src/pages/**/*.test.tsx`
 
 - [ ] 为独立左右滚动、固定底部输入、真实流式展示、引用折叠展开、诊断采纳按钮门槛和摘要位置写失败测试。
-- [ ] 用 API 客户端替换静态原型数据源；保持已批准原型的直接开始、采纳开始与结束维修交互。
+- [ ] 在 Task 4A 的正式工程基础上用 API 客户端替换静态原型数据源；保持已批准原型的直接开始、采纳开始与结束维修交互。
 - [ ] 将只读 AI 诊断对话摘要放到“备件更换说明”之后；无采纳诊断时隐藏该区。
 - [ ] 运行前端单元/交互测试和静态原型回归，记录差异。
 - [ ] 提交：`feat: integrate configured agents into approved flows`。

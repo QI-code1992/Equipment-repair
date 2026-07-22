@@ -9,9 +9,9 @@
 - 已批准基线：Stage 1 需求、Stage 2 交互、Stage 3 原型、Stage 4 架构与实施计划。
 - Stage 5 编码约束：[AGENTS.md](../04-architecture-plan/AGENTS.md)。
 - 实施顺序：[IMPLEMENTATION_PLAN.md](../04-architecture-plan/IMPLEMENTATION_PLAN.md)。
-- 已批准开发任务书：[DEVELOPMENT_TASK_BOOK.md](../04-architecture-plan/DEVELOPMENT_TASK_BOOK.md)，v1.3（CR-040 已随 PR #23 Merge Commit `d633308de8277c343faf3e266476b64baffcb565` 生效）。
+- 已批准开发任务书：[DEVELOPMENT_TASK_BOOK.md](../04-architecture-plan/DEVELOPMENT_TASK_BOOK.md)，v1.3（CR-040 已随 PR #23 Merge Commit `d633308de8277c343faf3e266476b64baffcb565` 生效）；v1.4 候选通过 CR-041 新增正式前端工程初始化前置任务，合入前不改变当前有效门禁。
 - 人员配置：`DEV-001` 负责最终集成和全部 Docker/Compose 验证；`DEV-002` 负责 AI、知识适配和正式前端，不具备 Docker 环境。
-- 当前任务：`DEV-001` 可按任务书启动 TASK-003、TASK-004；`DEV-002` 可继续 TASK-006 全部已定义范围。TASK-005 仍等待 TASK-004 的环境与契约交付。
+- 当前任务：`DEV-001` 可按任务书启动 TASK-003、TASK-004；`DEV-002` 可继续 TASK-006 后端/迁移范围。CR-041 治理候选合入后，DEV-002 可先执行 TASK-006-FE，再完成 TASK-006 的智能配置前端子范围和 TASK-007 的共享前端对话子范围。TASK-005 仍等待 TASK-004 的环境与契约交付。
 
 TASK-001、TASK-002 均已完成并保留历史交接。所有开发只允许在新的 `codex/*` 隔离分支和独立工作区执行；不得直接向 `main` 推送，也不得绕过各任务自身的 PR、审核和授权门禁。
 
