@@ -153,3 +153,68 @@
 - 复查：直接与持久化两层覆盖键首、键中、键尾、附件标量、列表、混合结构、紧凑密码、Cookie、Token 以及业务反例。`profile` 不会因包含 `file` 字符串而误命中。
 - 边界与风险：未知额外字段默认脱敏未实施；当前结论只覆盖已知敏感语义别名，不声称识别任意秘密载荷。该残余风险已记录，需独立 CR 决定可观测性与安全取舍。
 - 验证：RED `2 failed`；定向 `23 passed, 1 warning`；Python 3.13 `142 passed, 5 skipped, 1 warning`；compileall、diff check、PostgreSQL 17 `5 passed, 1 warning`、Compose 和 `/healthz` HTTP 200 通过。DEV-001 内部复审 Critical 0、Important 0；仍待 DEV-002 复审。
+
+## TASK-004 DEV-001 三轮独立复审（2026-07-20）
+
+- 审查对象：`codex/task-004-ragflow-infra` 相对 `origin/codex/stage-05-integration@b29c69d13c3d1c81f01023152eabf0c0f2d02741`；证据提交前功能候选 `ac8c007730d8e947c5687380e4583e8b23d2cce1`。
+- 第一轮 Standards：核对 `AGENTS.md`、任务书 v1.3、确认设计和实施计划；镜像固定、回环端口、独立网络/账户/卷、健康检查、秘密样例和任务边界一致。未新增依赖、迁移、业务 API、TASK-005 代码、兼容层或通用抽象；Critical 0、Important 0、Minor 0。
+- 第二轮 Spec/失败路径：逐项核对 FR-002、NFR-003/005/007、AC-009/029/033 与 CR-028；Docker 不可用、健康超时、Elasticsearch 版本错误、缺失 RepoDigest、网络成员/端口泄漏、重启重建和探针丢失均明确失败。修复了验收脚本的摘要数组显示、凭据命令参数警告、多层 SQL/JSON 引号和 PowerShell stderr 误判；完整矩阵复跑通过。Critical 0、Important 0、Minor 0。
+- 第三轮完整 diff：候选只包含 TASK-004 设计/计划、`codebase/infra/ragflow/`、环境样例、运行手册及正式证据；没有后端领域代码、前端、原型、Alembic 或 TASK-005 实现；`git diff --check` 通过。Critical 0、Important 0、Minor 0。
+- 真实证据：Python 3.13 `5 passed, 1 warning`；两套 Compose config 通过；5 容器 healthy；Web 200；Elasticsearch 8.11.3；内部依赖 0 宿主端口；四存储 restart 持久化通过且容器重建数为 0。
+- 风险：首次拉取仍依赖外部镜像源可用性；本地端口可能冲突，须使用环境覆盖；完整灾难恢复演练按任务书延后 TASK-011。日志和证据未记录真实秘密。
+- 当前结论：DEV-001 自审通过，但不等于正式批准。指定审核者 DEV-002 尚未审核 PR #27 的最终精确 HEAD；TASK-005 在 TASK-004 正式集成并完成合并后验证前继续锁定，Stage 6 禁止进入。
+
+### TASK-004 PR #27 R1 Changes requested 与 DEV-001 修正复查
+
+- 外部审核：DEV-002 对精确 HEAD `8b628fcfbf80fb6490d8d3dd5257feafba9d1595` 给出 Critical 0、Important 3、Minor 0；阻断为缺少 9380 API 契约、MinIO 绕过 S3 API 直接读写 `/data`、镜像只检查 RepoDigest 存在而未匹配获批 SHA-256。
+- 第一轮 Standards：修正功能提交 `f87a0c309c322f9accedcaea4a80aed84483b0e7` 仅触及 TASK-004 验证、回归契约、既有计划/手册；API 使用稳定版本端点，MinIO 凭据仅在容器内展开，摘要使用已核验的 5 个精确值；Critical 0、Important 0、Minor 0。
+- 第二轮 Spec/失败路径：API 同时断言 target 9380、HTTP 200、业务 code/message 与 v0.25.6；完成前矩阵发现容器 healthy 后 API 仍可能短暂关闭，已在 `ba7e13f2b585f872ca811e98b50c09e25020fba5` 增加 60 秒有限重试并以重启后立即探测复现通过；MinIO 随机 bucket/object 经 S3 写入、重启、回读、清理；摘要缺失、检查失败或不匹配均返回非零，摘要突变测试通过；Critical 0、Important 0、Minor 0。
+- 第三轮完整 diff：相对基线只新增一个 TASK-004 审核回归脚本并原位修改两个验证脚本、实施计划、运行手册和正式台账；没有 TASK-005、后端领域代码、迁移、前端、生产依赖、兼容层或通用抽象；完整矩阵与 `git diff --check` 通过。Critical 0、Important 0、Minor 0。
+- 结论：三项已在本地证据中关闭，但新 HEAD 会使旧审核失效；必须推送同一 PR #27 并由 DEV-002 重新审核精确 HEAD。当前不得请求 Merge 授权，不得解锁 TASK-005，Stage 6 仍禁止进入。
+
+### TASK-004 PR #27 R2 Changes requested 与 DEV-001 修正复查
+
+- 外部审核：DEV-002 对精确 HEAD `6c6fda004f806f8b72eddaad64aac419b78a7a6f` 给出 Critical 0、Important 4、Minor 2；阻断涉及实际 Compose/运行镜像身份未绑定、Runbook 未显式传 `EnvFile`、Web 无有限超时、缺少日志/秘密扫描与结构化执行证据；Minor 为失败探针被清理和 PR 标题不合规。
+- 第一轮 Standards：修改仅位于 TASK-004 既有验证、测试、实施计划和运行手册；未增加依赖、兼容层、抽象层、业务代码或 TASK-005 实现。Runbook 改为唯一显式本地 `EnvFile`，PR 标题规则同步为 `[TASK-004] feat: ...`。Critical 0、Important 0、Minor 0。
+- 第二轮 Spec/失败路径：错误 Compose 镜像覆盖、错误 digest、运行镜像 ID 不一致、Web/API 超时、依赖连接失败、日志秘密命中和持久化不一致均返回非零。注入持久化不一致后四项探针保留；历史日志假阳性通过当前执行窗口约束修复，但窗口内任何匹配仍零容忍。Critical 0、Important 0、Minor 0。
+- 第三轮完整 diff/运行态：Python 3.13 `5 passed, 1 warning`，compileall、两套 Compose config、静态契约、5 容器健康、Web/API 200、网络隔离、四存储 restart、两类镜像负向测试、失败探针保留、日志/秘密扫描和 `git diff --check` 通过。仅 TASK-004 范围，无无关修改。Critical 0、Important 0、Minor 0。
+- 结论：本地三轮复查通过，不等于 DEV-002 正式批准。新精确 HEAD 必须在同一 PR #27 重新审核；复审通过前不请求 Merge 授权、不解锁 TASK-005，Stage 6 仍禁止进入。
+
+### TASK-004 PR #27 R3 Changes requested 与 DEV-001 修正复查
+
+- 外部审核：DEV-002 对精确 HEAD `601d54d2427302999c7bc10ac5beec3ac0565501` 给出 Critical 0、Important 2、Minor 0；阻断为 Runbook 的隔离脚本参数不可执行，以及持久化探针清理失败仍可能输出 PASS。
+- 第一轮 Standards：修正仅涉及 TASK-004 既有 Runbook、验证脚本、回归测试和正式证据；没有新增依赖、兼容层、抽象层、业务代码、迁移或 TASK-005 实现。Critical 0、Important 0、Minor 0。
+- 第二轮 Spec/失败路径：Runbook 命令与隔离脚本 AST 参数签名一致；调用 Compose 的脚本仍绑定本地 EnvFile。持久化验证只有在四类探针及临时资源清理全部返回 0 后才输出 PASS，任一清理失败抛错且不会产生成功结论。Critical 0、Important 0、Minor 0。
+- 第三轮完整 diff/运行态：功能提交 `dc909fff1c8260f2f8a50670192761572cdfb76b`；静态 RED/GREEN、PowerShell 语法、Compose 契约、5 容器健康、Web/API 200、网络隔离、四存储 restart 和严格清理通过；`git diff --check` 通过。Critical 0、Important 0、Minor 0。
+- 结论：本地复查关闭本轮两个 Important，但不等于 DEV-002 正式批准。必须推送同一 PR #27 的新精确 HEAD 并重新审核；此前不请求 Merge 授权、不解锁 TASK-005，Stage 6 仍禁止进入。
+
+### TASK-004 PR #27 R4 Changes requested 与 DEV-001 修正复查
+
+- 外部审核：DEV-002 对精确 HEAD `6cd29f158b2c03f61c5b21a7e9bf99d30ec17a34` 给出 Critical 0、Important 2、Minor 0；阻断为真实运行环境文件契约在设计/计划中不一致，以及清理失败只做静态检查、未证明非零退出和无 PASS。
+- 第一轮 Standards：设计、计划与 Runbook 统一为真实运行使用忽略的 `.env.local`；调用 Compose 的运行脚本显式传 `-EnvFile`，仅静态 `config --quiet` 使用 `.env.example`。没有生产依赖、兼容代码、业务代码、迁移或 TASK-005 实现。Critical 0、Important 0、Minor 0。
+- 第二轮 Spec/失败路径：功能提交 `29180e285767cbffb9d694cd1834f04514d2cc18` 引入最小外部命令边界；四类代表性清理以子进程调用固定退出码 42 的假 Compose 命令，逐项断言非零退出且输出不含 PASS。真实持久化重启和成功清理继续通过。Critical 0、Important 0、Minor 0。
+- 第三轮完整 diff/运行态：环境与清理行为契约、PowerShell 语法、Python 3.13、compileall、Compose config、5 容器健康、Web/API 200、网络隔离、四存储 restart 和 `git diff --check` 均通过；变更限制在 TASK-004 设计、计划、基础设施验证/测试和正式证据。Critical 0、Important 0、Minor 0。
+- 结论：本地三轮复查关闭两项 Important，但不等于 DEV-002 正式批准。推送后必须按 PR #27 新完整 HEAD 重新审核；此前不请求 Merge 授权、不解锁 TASK-005，Stage 6 仍禁止进入。
+
+### TASK-004 PR #27 R5 Changes requested 与 DEV-001 修正复查
+
+- 外部审核：DEV-002 对精确 HEAD `a5ac8490bf678ea03efc702052f7f1edecff182b` 给出 Critical 0、Important 1、Minor 0；阻断为任务书 Markdown 列表中的真实运行命令未被环境契约解析。
+- Standards/Spec：功能提交 `314b46d3efdc7af0d13c671fadd41be7bb3900d1` 仅修改现有审核脚本。任务书验证列表中的反引号命令与可执行代码块被检查；静态 config、普通说明及明确禁用/错误示例不误报。Windows PowerShell 5.1 兼容性、函数尺寸和修改范围通过。
+- RED/GREEN：旧检查器对任务书 `.env.example` 运行变异错误 PASS；修正后非零拒绝。独立首审发现禁用示例误报 1 个 Important，补充外部行为 RED 后修复；累计复审 Critical 0、Important 0、Minor 0。
+- 结论：本地复查通过不等于 DEV-002 批准。新 HEAD 推送后必须在同一 PR #27 重新审核；此前不请求 Merge 授权、不解锁 TASK-005，Stage 6 仍禁止进入。
+## TASK-004 PR #27 R6 修复自查（2026-07-22）
+
+- 外部审核：精确 HEAD `80b40182efa49033ee561f34fd6e078b3469a733` 为 Changes requested；唯一 Important 是真实验证脚本仍默认 `.env.example`。
+- Standards：两个运行脚本现在默认 `.env.local`，静态 Compose 检查仍独立使用 `.env.example`；未改变 Compose 服务、镜像、端口、卷或网络。
+- Spec：环境文件缺失检查位于 Docker 调用前；回归通过 AST 验证默认参数，并对子进程执行缺失文件路径，验证非零退出及明确错误。
+- 范围：仅两个 TASK-004 运行脚本及既有审核回归；无依赖、兼容层、抽象层、业务代码、迁移、TASK-005 或无关修改。
+- 本地结论：Critical 0、Important 0、Minor 0；该结论不替代 DEV-002 对新精确 HEAD 的正式审核。
+
+## TASK-004 PR #27 合并后治理核查（2026-07-22）
+
+- 开发审核：DEV-002 对精确 HEAD `76732606412d71239d302e4e9e5a0da6b364fd70` 给出 Approved；无未关闭 Critical/Important。
+- Merge：项目负责人授权同一 PR/HEAD；DEV-002 作为非任务作者执行 Merge Commit `87e8e3c0aab62ee9105bf3807b23fcf44ac15137`。
+- 合并关系：源 HEAD 是 Merge Commit 的第二父提交；最新集成基线仍包含该 Merge Commit。
+- 合并后核查：任务边界、`.env.local` 运行契约、Compose YAML、Python 3.13、PowerShell 契约、真实 Docker 健康/隔离/持久化均通过。
+- 治理 diff：仅任务书、CHECKPOINTS、SELF_TEST、CODE_REVIEW、COMMIT_LOG 与 DEV_TO_PM_HANDOFF；无代码、测试、数据库、基础设施、部署配置或产品基线修改。
+- 结论：治理检查 Critical 0、Important 0、Minor 0；需项目负责人确认本治理 PR 精确 HEAD，随后由非 PR 作者合并。

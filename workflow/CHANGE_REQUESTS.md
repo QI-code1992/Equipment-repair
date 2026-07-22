@@ -6,6 +6,61 @@
 
 ## 进行中
 
+### CR-042：追认 PR #29 的并发目标分支竞态合并
+
+- 级别：L2
+- 状态：Changes requested / 恢复交接历史并回填 PR 元数据后重新确认
+- 提出人：项目负责人
+- 提出时间：2026-07-22
+- 当前阶段：Stage 5 — 开发实施
+- 事件：PR #29 的项目负责人 Merge 授权请求绑定目标分支 `codex/stage-05-integration@7a44401bacbdc48d58f697a6b252449ecf44bb29`。授权后、PR #29 合并前，TASK-004 在 11:06:57 合入目标分支，提交为 `87e8e3c0aab62ee9105bf3807b23fcf44ac15137`；PR #29 于 11:08:03 合并，实际 Merge Commit `960c64ffc64c20edfb5bd73a2721678c9b9972c8` 的第一父提交为 `87e8e3c0aab62ee9105bf3807b23fcf44ac15137`。
+- 规则偏离：任务书规定目标分支变化会使既有 Merge 授权失效。GitHub 在合并前报告 `MERGEABLE/CLEAN` 且无代码冲突，但该状态不替代重新核查和重新授权。
+- 影响：
+  - 产品、架构、API、数据、测试与部署：不修改；PR #29 仅包含治理文档。
+  - Stage 5 协作：PR #29 不能表述为完全合规完成；必须保留本竞态、授权失效和项目负责人处置的可追溯记录。
+  - 任务依赖：CR-041 的任务范围已由 PR #28 生效；本次追认不改变 TASK-006-FE、TASK-006、TASK-007 或 TASK-010 的范围、负责人、审核者或依赖，只确认不对 PR #29 执行回滚。
+- 决定：项目负责人明确选择方案 1，追认 PR #29 在实际目标 `87e8e3c0aab62ee9105bf3807b23fcf44ac15137` 上的合并结果；不执行回滚 `960c64ffc64c20edfb5bd73a2721678c9b9972c8`。
+- 预防：后续每次 DEV-001 集成检查与 Merge 授权之间，若目标分支、HEAD、依赖或 checks 变化，必须停止 Merge、重新核查并取得新的逐 PR 授权；`MERGEABLE/CLEAN` 不构成例外。
+- 更新基线：本台账与 `workflow/DEV_TO_PM_HANDOFF.md`；不修改任务书、产品基线或代码。
+- 实施：
+  - 负责人：DEV-002（治理记录编制）；DEV-001 负责集成检查与 Merge 授权请求；非 PR 作者在获授权后执行 Merge。
+  - PR：[#30](https://github.com/QI-code1992/Equipment-repair/pull/30)（Draft）；首个候选 HEAD：`c6f63875e5639ba1b8d5f3a79ba820906f8e0c6f`；仅允许上述治理记录文件。
+- 验证：
+  - PR #29 授权 HEAD：`1aedc546352121d22cb36206200469551125e1b0`。
+  - PR #29 Merge Commit：`960c64ffc64c20edfb5bd73a2721678c9b9972c8`；授权 HEAD 已成为目标分支祖先；源分支保留。
+  - 本 CR 仅记录事实与项目负责人追认，不自动补发或假定历史 Merge 授权。
+  - 集成检查：DEV-001 对首个候选发现 Important 2——`workflow/DEV_TO_PM_HANDOFF.md` 误删 TASK-004 R1—R6 审核历史，且本项原先遗漏 PR #30 元数据。修复产生新 HEAD 后，项目负责人治理确认与 DEV-001 集成检查均须重新执行。
+
+### CR-041：前端工程初始化前置与 Agent 前端子范围解锁
+
+- 级别：L2
+- 状态：Done / PR #28 Merged；合并后治理收尾待本记录 PR 合入
+- 提出人：项目负责人
+- 提出时间：2026-07-22
+- 当前阶段：Stage 5 — 开发实施
+- 原始请求：项目负责人在“将 TASK-006 前端智能配置模块移入 TASK-010”与“将正式前端工程初始化及共享基础拆为可提前执行的前置子任务”之间选择方案 2。
+- 明确需求：新增 `TASK-006-FE`，由 DEV-002 在同一 Stage 5 PR/审核/授权矩阵下建立唯一的正式 TypeScript 前端工程、构建/测试脚本、应用壳和非业务共享基础；不得提前交付智能配置、对话、SSE、引用、采纳/直接开始或其他业务页面。TASK-006 保留智能配置模块，TASK-007 保留共享前端对话组件，TASK-010 保留完整已批准流程的页面/API 集成。
+- 原因：当前任务书让 TASK-006/TASK-007 消费正式前端能力，而 TASK-010 才建立前端工程；该顺序会阻塞已授权任务的完整验收。
+- 影响：
+  - PRD / SPEC / Prototype / Acceptance Criteria：不修改；Stage 3 原型继续只读且不得复制到 `codebase/frontend/`。
+  - Architecture / API / Data Model：不修改业务或技术契约；新增前端工程基础不得定义或伪造业务 API。
+  - Implementation Plan：新增 Task 4A；Task 5、Task 6 和 Task 9 改为消费已集成的前端工程基础。
+  - Development Task Book：v1.3 -> v1.4 候选；新增 TASK-006-FE，细化 TASK-006/TASK-007 前端子范围依赖，并将 TASK-010 调整为不重复建立工程。
+  - Test Cases：新增前端工程构建、测试与原型隔离验证；TASK-006 的智能配置前端测试和 TASK-007 的对话组件测试仍由原任务负责。
+  - Schedule / Integration：TASK-006 后端/迁移继续可做；TASK-006-FE 合入后才可完成 TASK-006/007 的前端子范围；TASK-010 仍须等待 TASK-003、TASK-008、TASK-009。
+- 决定：项目负责人于 2026-07-22 明确选择方案 2。首个候选 HEAD `ea6c3e4408ab70ba7b9edf739752b36914ee485a` 的治理确认因台账回填失效；项目负责人随后重新确认最终 HEAD `ee3383bf56aa2eb1b0dc90d1b253fbf9666dbce5`，并按逐 PR 授权流程批准合并。
+- 更新基线：`04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.4、`04-architecture-plan/IMPLEMENTATION_PLAN.md`、`workflow/PM_TO_DEV_HANDOFF.md`、`workflow/DEV_TO_PM_HANDOFF.md`。
+- 实施：
+  - 候选分支：`codex/cr-041-frontend-bootstrap`
+  - 目标分支：`codex/stage-05-integration`
+  - 负责人：DEV-002（治理候选编制）；DEV-001 负责集成检查与 Merge 授权请求；非 PR 作者的开发者在获授权后执行 Merge。
+  - PR：[#28](https://github.com/QI-code1992/Equipment-repair/pull/28)（Merged）；最终授权 HEAD：`ee3383bf56aa2eb1b0dc90d1b253fbf9666dbce5`；Merge Commit：`7a44401bacbdc48d58f697a6b252449ecf44bb29`；合并执行者：DEV-001（`ll979053897-arch`）；源分支保留。PR 仅含治理文档，不修改 `codebase/`、测试、迁移、基础设施或部署配置。
+- 验证：
+  - 首个候选 HEAD `ea6c3e4408ab70ba7b9edf739752b36914ee485a`：`git diff --check` 通过；`workflow/state.json` JSON 解析通过；完整 diff 仅含本 CR 列出的 5 个治理文件、无 `codebase/` 修改；目标分支为 `codex/stage-05-integration@b29c69d13c3d1c81f01023152eabf0c0f2d02741`；模拟合并无冲突。
+  - 集成检查结论：DEV-001 对首个候选发现 Important 1——本台账原先错误记录“PR：待创建”“状态：待执行”。本次仅回填已发生事实；新 HEAD 必须重新执行治理确认、集成检查和逐 PR Merge 授权请求。
+  - 最终候选 HEAD `ee3383bf56aa2eb1b0dc90d1b253fbf9666dbce5`：项目负责人已重新确认治理内容；DEV-001 已完成集成检查并获逐 PR Merge 授权；目标分支为 `codex/stage-05-integration`；Merge Commit 为 `7a44401bacbdc48d58f697a6b252449ecf44bb29`；授权 HEAD 已成为目标分支祖先，PR 状态为 `MERGED`。
+  - 合并后边界：TASK-006-FE 现可按任务书创建自己的 Draft PR 并启动；不代表 TASK-006-FE 完成、TASK-006 前端子范围完成或 Stage 6 获批。
+
 ### CR-001: Reconcile the canonical requirements baseline
 
 - Level: L2
