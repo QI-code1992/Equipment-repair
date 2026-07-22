@@ -209,3 +209,12 @@
 - Spec：环境文件缺失检查位于 Docker 调用前；回归通过 AST 验证默认参数，并对子进程执行缺失文件路径，验证非零退出及明确错误。
 - 范围：仅两个 TASK-004 运行脚本及既有审核回归；无依赖、兼容层、抽象层、业务代码、迁移、TASK-005 或无关修改。
 - 本地结论：Critical 0、Important 0、Minor 0；该结论不替代 DEV-002 对新精确 HEAD 的正式审核。
+
+## TASK-004 PR #27 合并后治理核查（2026-07-22）
+
+- 开发审核：DEV-002 对精确 HEAD `76732606412d71239d302e4e9e5a0da6b364fd70` 给出 Approved；无未关闭 Critical/Important。
+- Merge：项目负责人授权同一 PR/HEAD；DEV-002 作为非任务作者执行 Merge Commit `87e8e3c0aab62ee9105bf3807b23fcf44ac15137`。
+- 合并关系：源 HEAD 是 Merge Commit 的第二父提交；最新集成基线仍包含该 Merge Commit。
+- 合并后核查：任务边界、`.env.local` 运行契约、Compose YAML、Python 3.13、PowerShell 契约、真实 Docker 健康/隔离/持久化均通过。
+- 治理 diff：仅任务书、CHECKPOINTS、SELF_TEST、CODE_REVIEW、COMMIT_LOG 与 DEV_TO_PM_HANDOFF；无代码、测试、数据库、基础设施、部署配置或产品基线修改。
+- 结论：治理检查 Critical 0、Important 0、Minor 0；需项目负责人确认本治理 PR 精确 HEAD，随后由非 PR 作者合并。

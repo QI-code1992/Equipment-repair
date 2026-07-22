@@ -220,7 +220,7 @@
 
 ### TASK-004：部署独立 RAGFlow 容器环境
 
-- 状态：Planned / Ready to start under its task-book PR gates
+- 状态：Integrated / PR #27 Merge Commit `87e8e3c0aab62ee9105bf3807b23fcf44ac15137`；合并后治理收尾与复验记录随本治理 PR 生效
 - 优先级：P0
 - 负责人：`DEV-001`
 - 任务开发者：`DEV-001`
@@ -245,7 +245,7 @@
 
 ### TASK-005：知识文档生命周期与 RAGFlow 适配器
 
-- 状态：Planned / Blocked by TASK-004
+- 状态：Ready after TASK-004 post-merge governance closeout；PR #27 已集成并通过合并后复验，本治理 PR 合并后解除 TASK-004 阻塞
 - 优先级：P0
 - 负责人：`DEV-002`
 - 任务开发者：`DEV-002`
@@ -458,7 +458,7 @@
 | TASK-002 | DEV-001 | DEV-002 | 历史由 DEV-001 合并（v1.3 不追溯） | P0 | Sequential After TASK-001 | TASK-001 测试、Compose、Review、FCP 均通过 |
 | TASK-003 | DEV-001 | DEV-002 | DEV-002，需项目负责人逐 PR 授权 | P0 | Sequential After TASK-002 | TASK-002 已通过 PR #25 完成治理收尾，身份、审计和迁移基础已完成回归 |
 | TASK-004 | DEV-001 | DEV-002 | DEV-002，需项目负责人逐 PR 授权 | P0 | Sequential After TASK-002 | TASK-002 已通过 PR #25 完成治理收尾，业务容器基线与网络契约可开始实施 |
-| TASK-005 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-004 | TASK-002 条件已满足；RAGFlow 环境仍须由 TASK-004 审核、正式集成并可用 |
+| TASK-005 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Sequential After TASK-004 | TASK-002 条件已满足；TASK-004 已由 PR #27 正式集成并通过合并后复验，本治理 PR 合并后可启动 |
 | TASK-006-FE | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Parallel After TASK-001 | 本任务书 v1.4 已按治理 PR 合入；TASK-001 工程目录基线已集成；仅创建正式前端工程与共享基础 |
 | TASK-006 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | 后端 Parallel After TASK-001；前端子范围 Sequential After TASK-006-FE | 后端/迁移可继续；智能配置前端模块仅在 TASK-006-FE 正式集成后实施；任务完成仍须覆盖两部分 |
 | TASK-007 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | 后端 Blocked By TASK-002, TASK-006；前端子范围 Sequential After TASK-006-FE | Agent 配置契约须正式集成；共享前端对话组件须等待 TASK-006-FE |

@@ -200,3 +200,14 @@
 - 验证：Python 3.13 `5 passed, 1 warning`；PowerShell/Compose/失败行为契约通过；5 容器 healthy，Web/API 200，网络隔离及四存储重启恢复/清理通过。
 - 边界：无业务 API、迁移、TASK-005、生产依赖、兼容代码、抽象层或无关修改。
 - 请求动作：推送证据提交后，以 PR #27 新完整精确 HEAD 重新请求 DEV-002 审核；批准前不得请求 Merge 授权，TASK-005 继续锁定，Stage 6 禁止进入。
+
+## TASK-004 PR #27 合并后治理收尾（2026-07-22）
+
+- 开发者/审核者/Merge 执行者：DEV-001 / DEV-002 / DEV-002。
+- PR/版本：PR #27；获批源 HEAD `76732606412d71239d302e4e9e5a0da6b364fd70`；Merge Commit `87e8e3c0aab62ee9105bf3807b23fcf44ac15137`。
+- 授权与审核：DEV-002 Approved 同一 HEAD；项目负责人授权同一 PR/HEAD；DEV-002 按职责分离执行 Merge Commit。
+- 合并后验证：Python 3.13 `5 passed, 1 warning`；PowerShell 三类契约和 RAGFlow Compose 通过；5 容器 healthy、Web/API 200、固定镜像/日志扫描、网络隔离、四存储重启恢复及清理通过。
+- 交付边界：独立 RAGFlow 基础设施正式集成；无业务 API、数据库迁移、TASK-005 实现、生产依赖、兼容代码或通用抽象层。
+- 风险/回退：外部镜像 Registry 可用性仍是运行风险；完整备份恢复属于 TASK-011。应用回退可评估 `git revert -m 1 87e8e3c0aab62ee9105bf3807b23fcf44ac15137`；删除命名卷必须另行授权。
+- 依赖：本治理 PR 合并后 TASK-004 正式闭环，TASK-005 的 TASK-004 阻塞解除；Stage 6 仍未获准。
+- 请求动作：项目负责人确认本纯治理 PR 的内容和精确 HEAD；DEV-001 完成集成核查与授权请求后，由非 PR 作者 DEV-002 合并。
