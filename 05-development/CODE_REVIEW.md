@@ -218,3 +218,12 @@
 - 合并后核查：任务边界、`.env.local` 运行契约、Compose YAML、Python 3.13、PowerShell 契约、真实 Docker 健康/隔离/持久化均通过。
 - 治理 diff：仅任务书、CHECKPOINTS、SELF_TEST、CODE_REVIEW、COMMIT_LOG 与 DEV_TO_PM_HANDOFF；无代码、测试、数据库、基础设施、部署配置或产品基线修改。
 - 结论：治理检查 Critical 0、Important 0、Minor 0；需项目负责人确认本治理 PR 精确 HEAD，随后由非 PR 作者合并。
+
+## TASK-003 本地开发候选独立自查（2026-07-22）
+
+- 审查对象：`b29c69d13c3d1c81f01023152eabf0c0f2d02741..4877dcdc301b97d884a43883a5584fdee1d28c41`，其中第二父为已正式集成的治理/基础设施基线，TASK-003 自有差异限定于 maintenance、设备停用保护、`0003_task003`、相关测试、API/Data Model 契约和实施计划。
+- Spec：故障上报、DIRECT/ADOPTED 开始维修、人工最终维修结果、结构化案例查询、活跃故障停用保护均与任务书和冻结 API 契约一致；RAGFlow/Agent 生成逻辑不在范围内。
+- Standards/Security：权限、幂等、成功/失败审计、附件引用边界、诊断草稿字段白名单、时区、SQL 通配符字面匹配、事务行锁和唯一约束均有直接测试。
+- 数据库：单一线性 Alembic head；downgrade 只移除 TASK-003 五表并明确具有破坏性；专用 PostgreSQL 17 测试通过，未接触平台或生产数据。
+- 范围：无新增生产依赖、兼容代码、通用抽象层、前端、RAGFlow 调用、TASK-005/006/008 实现或无关格式化。
+- 本地结论：Critical 0、Important 0、Minor 0。该结论不替代 DEV-002 对推送后完整精确 HEAD 的正式审核。
