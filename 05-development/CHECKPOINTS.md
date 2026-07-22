@@ -183,6 +183,14 @@
 - 验证：前端 7 项测试及生产构建通过；Python 3.13.14 TASK-003/006 迁移回归 `7 passed, 1 warning`、全量后端 `221 passed, 9 skipped, 1 warning`；`compileall`、单一 Alembic head 与 `git diff --check` 通过。
 - 风险与恢复：该候选未执行 Docker/PostgreSQL 真实环境验证，须由具备环境的 DEV-001 核验；合并前退回该 PR 追加提交即可，不涉及数据删除。新 HEAD 会使旧审核结论失效，必须重审并重新取得逐 PR/HEAD 合并授权。
 
+### FCP-006：TASK-006 四 Agent 独立配置集成检查点
+
+- 状态：Stable after post-merge governance closeout。
+- 分支/PR：`codex/task-006-agent-config` / PR #14；获批源 HEAD `e564b15f42492087578d03c3a1f5412c9db35f6b`；DEV-001 手动 Merge Commit `da460c64f48e1b1522979d2e5f381fb797571934`。
+- 合并后验证：DEV-001 集成检查确认目标分支、祖先关系、merge-tree 与授权 HEAD 一致；前端 7 tests/build、后端 `221 passed / 9 skipped / 1 warning`、PostgreSQL 迁移往返通过。
+- 范围/依赖：四 Agent 独立配置、首次单独初始化、模型能力与深度思考校验、正式智能配置前端和 `0004_task006` 单链迁移已集成；TASK-007 可按自身门禁继续，Stage 6 仍未获准。
+- 回滚：应用可评估 `git revert -m 1 da460c64f48e1b1522979d2e5f381fb797571934`；迁移回退按已验证 downgrade 或前向修复策略处理，生产数据回退须另行授权。
+
 ## FCP-003-R1：TASK-003 本地开发候选
 
 - 状态：Development Candidate / Locally Validated / Not Pushed / Not Reviewed / Not Integrated / Does Not Unlock Dependencies。

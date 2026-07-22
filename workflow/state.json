@@ -64,7 +64,7 @@
     ],
     "historicalBoundary": "Does not rewrite completed TASK-001/TASK-002 or CR-037 through CR-039 history; applies to open Draft PRs and subsequent task PRs after integration"
   },
-  "currentCommitSha": "b98fdef1d2e7777a6109a567464c607add11cdbb",
+  "currentCommitSha": "da460c64f48e1b1522979d2e5f381fb797571934",
   "task003Delivery": {
     "taskId": "TASK-003",
     "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",
@@ -84,6 +84,21 @@
     "verification": "Post-merge Python 3.13.14: 173 passed, 9 skipped, 1 warning; dedicated PostgreSQL 17: 4 passed, 1 warning; compileall, single Alembic head, platform/RAGFlow Compose config and merge diff check passed.",
     "dependencyUnlockAllowed": true,
     "nextAction": "TASK-003 is closed. Only downstream dependency edges whose other task-book prerequisites are already satisfied may proceed; TASK-009, TASK-010 and TASK-011 remain subject to their remaining dependencies, and Stage 6 remains prohibited without its separate formal gate."
+  },
+  "task006Delivery": {
+    "taskId": "TASK-006",
+    "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",
+    "owner": "DEV-002",
+    "reviewer": "DEV-001",
+    "branch": "codex/task-006-agent-config",
+    "integrationTarget": "codex/stage-05-integration",
+    "approvedHead": "e564b15f42492087578d03c3a1f5412c9db35f6b",
+    "pullRequest": 14,
+    "mergeCommit": "da460c64f48e1b1522979d2e5f381fb797571934",
+    "mergeExecutor": "ll979053897-arch / DEV-001 / manual Merge Commit",
+    "verification": "Post-merge DEV-001 integration check: frontend 7 tests/build, backend 221 passed / 9 skipped / 1 warning, PostgreSQL migration round-trip, ancestor and merge-tree checks passed.",
+    "dependencyUnlockAllowed": true,
+    "nextAction": "TASK-007 may proceed under its own task-book PR gate; Stage 6 remains prohibited without its separate formal gate."
   },
   "repairCycle": {
     "taskId": "TASK-002",
@@ -226,6 +241,7 @@
     "On 2026-07-17, DEV-002 R10 review found attachment semantics limited to key prefixes and inconsistent compact sensitive-key handling. DEV-001 reproduced it with two RED tests, then implemented normalized segment classification with bounded compact forms at ea4338bad15f16048226a329801d3144b367909e. Direct and persisted audit tests cover attachment/file aliases, password/cookie/token forms and ordinary-field/token-metric counterexamples. Python 3.13 passed 142 tests with 5 explicit PostgreSQL skips; PostgreSQL 17 integration passed 5 tests; Compose and /healthz HTTP 200 passed. The known semantic-alias class is closed, but arbitrary unknown-field secret placement remains a documented residual risk outside this CR. TASK-002 remains unaccepted and unintegrated pending DEV-002 re-review.",
     "On 2026-07-17, DEV-002 approved TASK-002 exact head 2e89dcd8 and DEV-001 (ll979053897-arch) manually merged PR #20 into codex/stage-05-integration at 904886f48061e27c775f6ee2f8ddae99f5571ead. Code integration and technical verification are complete, but downstream dependencies remain locked until the separate post-merge governance closeout PR is merged.",
     "CR-040 was merged through PR #23 at d633308de8277c343faf3e266476b64baffcb565 and is effective. The Stage 5 single-PR, exact-HEAD confirmation, DEV-001 integration-check, explicit per-PR authorization, and non-author manual-merge rules apply to this governance closeout PR.",
-    "On 2026-07-17, TASK-002 post-merge governance closeout PR #25 approved head 92ec18ec17f08d1d2226b0d98f59eeb2eba78d2f was manually merged by DEV-002 / QI-code1992 at 028da42eb9ab4b55ef981ac462e09993a31e8813. TASK-003 and TASK-004 may now start under their task-book gates; TASK-005 remains blocked by TASK-004; TASK-006 is no longer blocked by TASK-002. Stage 6 remains prohibited without a separate formal gate."
+    "On 2026-07-17, TASK-002 post-merge governance closeout PR #25 approved head 92ec18ec17f08d1d2226b0d98f59eeb2eba78d2f was manually merged by DEV-002 / QI-code1992 at 028da42eb9ab4b55ef981ac462e09993a31e8813. TASK-003 and TASK-004 may now start under their task-book gates; TASK-005 remains blocked by TASK-004; TASK-006 is no longer blocked by TASK-002. Stage 6 remains prohibited without a separate formal gate.",
+    "On 2026-07-22, DEV-001 completed TASK-006 PR #14 integration check and manually merged approved HEAD e564b15f42492087578d03c3a1f5412c9db35f6b at da460c64f48e1b1522979d2e5f381fb797571934. Frontend, backend, PostgreSQL migration, ancestor and merge-tree checks passed; TASK-006 post-merge governance closeout is recorded by the follow-up governance PR."
   ]
 }
