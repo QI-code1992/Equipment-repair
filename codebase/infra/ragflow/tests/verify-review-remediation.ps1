@@ -18,6 +18,37 @@ function Assert-Contract {
     }
 }
 
+function Get-RuntimeEnvironmentCommands {
+    param([string]$Source)
+
+    $candidates = @()
+    $inCodeBlock = $false
+    $skipCodeBlock = $false
+    $previousText = ""
+    foreach ($line in ($Source -split "`r?`n")) {
+        if ($line.TrimStart().StartsWith([string]::new([char]96, 3))) {
+            if (-not $inCodeBlock) {
+                $skipCodeBlock = $previousText -match '(?:\u7981\u6b62|\u9519\u8bef|\u53cd\u4f8b|\u4e0d\u5f97\u6267\u884c)'
+            }
+            $inCodeBlock = -not $inCodeBlock
+        } elseif ($inCodeBlock -and -not $skipCodeBlock) {
+            $candidates += $line.Trim()
+        } elseif (-not $inCodeBlock -and $line -match '^\s*-\s*\u9a8c\u8bc1\uff1a') {
+            $parts = $line.Split([char]96)
+            for ($index = 1; $index -lt $parts.Count; $index += 2) {
+                $candidates += $parts[$index]
+            }
+        }
+        if (-not $inCodeBlock -and $line.Trim()) {
+            $previousText = $line.Trim()
+        }
+    }
+    return @($candidates | Where-Object {
+        $_ -match '^docker compose.*(?:up -d|\sps(?:\s|$)|\sdown(?:\s|$))' -or
+        $_ -match '^powershell .*scripts/verify(?:-persistence)?\.ps1'
+    })
+}
+
 function Assert-RuntimeEnvironmentContract {
     param([string]$Path)
 
@@ -25,13 +56,10 @@ function Assert-RuntimeEnvironmentContract {
     $source = Get-Content -Raw -LiteralPath $Path
     Assert-Contract ($source -match '\$RagflowEnvFile\s*=\s*"codebase/infra/\.env\.local"') "$Path does not define the local runtime environment file"
     Assert-Contract ($source -notmatch '\$compose\s*=.*\.env\.example') "$Path keeps .env.example in the runtime Compose argument"
-    $runtimeLines = @($source -split "`n" | Where-Object {
-        $_ -match '^\s*docker compose.*(?:up -d|\sps(?:\s|$)|\sdown(?:\s|$))' -or
-        $_ -match '^\s*powershell .*scripts/verify(?:-persistence)?\.ps1'
-    })
-    foreach ($line in $runtimeLines) {
-        Assert-Contract ($line -notmatch '\.env\.example') "$Path uses .env.example for a runtime command"
-        Assert-Contract ($line -match '\$RagflowEnvFile') "$Path runtime command does not bind the local environment file"
+    $runtimeCommands = Get-RuntimeEnvironmentCommands -Source $source
+    foreach ($command in $runtimeCommands) {
+        Assert-Contract ($command -notmatch '\.env\.example') "$Path uses .env.example for a runtime command"
+        Assert-Contract ($command -match '\$RagflowEnvFile') "$Path runtime command does not bind the local environment file"
     }
 }
 
