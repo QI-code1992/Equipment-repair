@@ -1,14 +1,14 @@
 # 开发到产品交接
 
-## TASK-006-FE Ready 审核候选（2026-07-22）
+## TASK-006-FE 正式集成后的治理收尾候选（2026-07-22）
 
-- PR：[#33](https://github.com/QI-code1992/Equipment-repair/pull/33)，任务开发者 DEV-002，指定审核者 DEV-001，目标分支 `codex/stage-05-integration`；当前为 Ready，已请求 DEV-001 审核，不请求 Merge 授权。
-- 正式审核候选：本交接证据提交会产生新的 PR HEAD，精确值以 GitHub PR 描述的当前 `headRefOid` 为准；其父提交 `ece1ea1bd39b58c5e1ce4370c90220469136f643` 是吸收 `codex/stage-05-integration@51337db767eb94051f78a5c537a3ff48d428a742` 的普通 merge commit，仅解决 `05-development/CHECKPOINTS.md` 的并行追加冲突，未改变 TASK-006-FE 实现或范围。功能提交 `800e7a43fcc6ae98f00e74d738924c236c84b118`，被取代审核 HEAD 为 `59fb79ef2e1cba76705e1269434e18cfec92d595`、`cd15856a580ed579455536f3c044b6be44b2b295`。当前已重新请求 DEV-001 审核；不请求 Merge 授权。HEAD 变化后旧审核结论自动失效。
+- 正式审核与集成：DEV-001 已批准精确 HEAD `a9c4fc0a2f651ed7465d8d2003342cb94d6f1629`；PR [#33](https://github.com/QI-code1992/Equipment-repair/pull/33) 由 DEV-001（`ll979053897-arch`）手动 Merge Commit 合入 `codex/stage-05-integration`，合并提交为 `25737f52a7e113224606cef6dbd3de49dbf7e4f4`。
 - 交付：唯一正式 TypeScript 前端工程，React + Vite + TypeScript，应用壳、非业务路由页面骨架、基础样式、构建/测试脚本与非业务 `fetch` JSON 边界。
 - 运行基线：`package.json` 声明 Node `^20.19.0 || >=22.12.0`、npm `>=10.0.0`；本轮验证使用 Node `v26.5.0`、npm `11.17.0`，并执行 `npm ci`。
-- 验证：`npm ci` 成功且 0 vulnerabilities；前端 2 项测试通过；生产构建通过；原型静态检查全通过；`git diff --check` 通过；无原型运行时引用。
+- 验证：`npm ci` 成功且 0 vulnerabilities；前端 2 项测试通过；生产构建通过；14 项原型静态检查通过；`git diff --check`、合并树检查与原型运行时引用扫描通过。
 - 范围：仅复用原型的共享视觉语言，未复制原型源码，也未实现 Agent 配置、保存、对话、SSE、引用、故障/维修流程、认证或业务 API。
-- 风险/回退：浏览器人工视觉回归尚未执行；可通过回退任务提交恢复，不涉及数据删除、生产操作或兼容层。
+- 当前门禁：本治理收尾候选不是 Stage 6 放行。合入前，TASK-006 智能配置前端子范围和 TASK-007 共享前端对话子范围继续锁定；合入后两者可按各自任务书、PR、审核和授权门禁继续，TASK-010 仍等待 TASK-003、TASK-008、TASK-009。
+- 风险/回退：浏览器人工视觉回归尚未执行；可选择性回退任务合并提交，不涉及数据删除、生产操作或兼容层。
 
 ## TASK-002 正式集成后的治理收尾（2026-07-17）
 

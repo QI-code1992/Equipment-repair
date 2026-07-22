@@ -150,14 +150,15 @@
 - Restore Options: `git revert -m 1 87e8e3c0aab62ee9105bf3807b23fcf44ac15137` 仅作为代码回退候选；命名卷删除属于数据删除，必须另行授权。
 - Notes: 历史 Pending 条目保留用于审计；本治理 PR 合并后由本条作为当前稳定检查点。TASK-005 可据此启动，Stage 6 仍未获准。
 
-### FCP-006-FE-R1：正式前端工程基础候选
+### FCP-006-FE：正式前端工程基础集成检查点
 
-- 状态：Ready Review Candidate / Not Accepted / Not Integrated / Does Not Unlock TASK-006 前端子范围或 TASK-007 前端子范围。
-- 分支/功能提交：`codex/task-006-fe-frontend-foundation` / `800e7a43fcc6ae98f00e74d738924c236c84b118`；基线为 `codex/stage-05-integration@f135997a6ecc009de75735b673499b475615a717`。
+- 状态：PR #33 已正式集成并完成最小技术回归；本治理收尾 PR 合入前，不据此解锁 TASK-006 或 TASK-007 的前端子范围，也不构成 Stage 6 依据。
+- 分支/审核/合并：`codex/task-006-fe-frontend-foundation`；功能提交 `800e7a43fcc6ae98f00e74d738924c236c84b118`，DEV-001 批准的最终 HEAD `a9c4fc0a2f651ed7465d8d2003342cb94d6f1629`，PR #33 由 DEV-001（`ll979053897-arch`）手动 Merge Commit 合入 `codex/stage-05-integration`，合并提交 `25737f52a7e113224606cef6dbd3de49dbf7e4f4`。
 - 范围：React + Vite + TypeScript 前端工程、Vitest 测试基础、共享应用壳和非业务 `fetch` JSON 边界；原型仅作视觉参考，代码没有运行时原型引用。
 - 运行基线：`package.json` 声明 Node `^20.19.0 || >=22.12.0`、npm `>=10.0.0`；本轮使用 Node `v26.5.0`、npm `11.17.0` 并执行 `npm ci`。
 - 证据：前端 2 项测试通过、生产构建通过、全部现有原型静态检查通过、`git diff --check` 通过。
-- 恢复/门禁：可回退该任务提交；不涉及数据或生产操作。仅在 DEV-001 审核当前精确 HEAD、完成集成检查并取得项目负责人逐 PR/HEAD Merge 授权后，才可由 DEV-001 合并；此前不得解锁下游前端范围或 Stage 6。
+- 合并后证据：前端 2 项测试通过、生产构建通过、14 项原型静态回归通过、`git diff --check` 与合并树检查通过；浏览器人工视觉回归未执行。
+- 恢复/门禁：可选择性回退该任务合并提交；不涉及数据或生产操作。本治理收尾 PR 合入后，TASK-006 智能配置前端子范围与 TASK-007 共享前端对话子范围可按各自任务书、PR、审核和授权门禁继续；TASK-010 仍受 TASK-003、TASK-008、TASK-009 依赖约束，Stage 6 仍未获准。
 
 ## FCP-003-R1：TASK-003 本地开发候选
 
