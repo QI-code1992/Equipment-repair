@@ -195,7 +195,7 @@
 
 ### TASK-003：故障、工单、维修与结构化案例闭环
 
-- 状态：Development Candidate / Locally Validated / Not Pushed / Not Reviewed / Not Integrated
+- 状态：Integrated / PR #32 Merge Commit `51337db767eb94051f78a5c537a3ff48d428a742`；合并后技术复验通过，治理收尾随本纯治理 PR 生效
 - 优先级：P0
 - 负责人：`DEV-001`
 - 任务开发者：`DEV-001`
@@ -216,6 +216,7 @@
 - PR 审核请求：`DEV-001` 完成本任务验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-002` 发送书面审核请求。
 - Review：`DEV-002` 复核诊断上下文、采纳接口、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-001` 修复。
 - PR 与合并：DEV-001 创建并维护同一 Draft PR；DEV-002 批准精确 HEAD、DEV-001 完成集成检查并取得项目负责人逐 PR 明确授权后，由 DEV-002 合并至 `codex/stage-05-integration`。
+- 集成记录：DEV-002 批准精确 HEAD `8960b5d8ab1e7073036c6151744233e26c15c9e9`；项目负责人授权同一 PR/HEAD；DEV-002 以 Merge Commit `51337db767eb94051f78a5c537a3ff48d428a742` 合入。合并后 Python 3.13 为 `173 passed, 9 skipped, 1 warning`，专用 PostgreSQL 17 为 `4 passed, 1 warning`，Alembic 单一 `0003_task003 (head)`，平台/RAGFlow Compose、compileall 与差异检查通过。
 - 回滚：回退应用 Commit；数据库迁移按已验证 downgrade 或前向修复策略处理。
 
 ### TASK-004：部署独立 RAGFlow 容器环境

@@ -158,3 +158,15 @@
 - 验证：Python 3.13.14 模块回归 `168 passed, 1 warning`；专用 PostgreSQL 17 迁移、事务、幂等及并发 `4 passed, 1 warning`；`compileall`、单一迁移 head、平台/RAGFlow Compose 配置及 `git diff --check` 通过。
 - 边界：相似案例只查询 PostgreSQL，不调用 RAGFlow、Agent 或外部网络；无新增生产依赖、兼容层、通用抽象、前端、TASK-004/005/006/008 实现或无关修改。
 - 恢复/门禁：本地提交完整且工作树干净；尚未推送同一 Draft PR，DEV-002 尚未审核。不得据此解锁 TASK-009/010/011，不得进入 Stage 6。
+
+## FCP-003：TASK-003 维修闭环集成检查点
+
+- 状态：Stable after this governance closeout is merged。
+- 范围：故障上报、DIRECT/ADOPTED 开始维修、人工维修结果、结构化历史案例与相似案例查询、活跃故障设备停用保护、Alembic `0003_task003`。
+- 分支/PR：`codex/task-003-maintenance-lifecycle` / PR #32。
+- 获批 HEAD：`8960b5d8ab1e7073036c6151744233e26c15c9e9`。
+- Merge Commit：`51337db767eb94051f78a5c537a3ff48d428a742`；第一父为 `f135997a6ecc009de75735b673499b475615a717`，第二父为获批 HEAD。
+- 合并后证据：Python 3.13.14 `173 passed, 9 skipped, 1 warning`；专用 PostgreSQL 17 `4 passed, 1 warning`；Alembic 单一 `0003_task003 (head)`；平台/RAGFlow Compose、compileall、Merge diff check 均通过。
+- 边界：相似案例只访问 PostgreSQL；无 RAGFlow、Agent、向量、正式前端、新生产依赖、兼容层或范围外实现。
+- 恢复：应用回退可评估 `git revert -m 1 51337db767eb94051f78a5c537a3ff48d428a742`；`0003_task003` downgrade 会删除五张 TASK-003 表，生产数据回退须备份并另行授权，优先采用前向修复迁移。
+- 依赖：本治理 PR 合入后，TASK-003 前置正式满足；TASK-009/010/011 仍受各自其余依赖约束，Stage 6 仍未获准。

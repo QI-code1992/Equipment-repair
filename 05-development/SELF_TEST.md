@@ -241,6 +241,15 @@
 - 业务边界：四个 API、状态迁移、人工最终字段、设备停用保护和结构化案例查询已覆盖；查询无外部网络访问，诊断草稿只复制批准且类型正确的字段。
 - 未验证/门禁：尚未推送当前本地候选、尚未创建或更新 Draft PR、DEV-002 尚未审核；TASK-003 未正式集成，不解锁下游任务，不构成 Stage 6 证据。
 
+## TASK-003 PR #32 合并后复验（2026-07-22）
+
+- 集成对象：获批源 HEAD `8960b5d8ab1e7073036c6151744233e26c15c9e9`；Merge Commit `51337db767eb94051f78a5c537a3ff48d428a742`；双亲顺序与任务书要求一致。
+- Python：Python 3.13.14 全量后端 `173 passed, 9 skipped, 1 warning`；唯一警告为既有 Starlette/httpx 第三方弃用提示。
+- PostgreSQL：一次性 PostgreSQL 17 专用库执行 TASK-003 迁移、失败事务、同 Key 幂等与并发场景为 `4 passed, 1 warning`；临时容器及数据已清理。
+- 静态门禁：`compileall`、Alembic 单一 `0003_task003 (head)`、平台 Compose、RAGFlow Compose 和 Merge diff check 通过。
+- 范围检查：无新增生产依赖、兼容代码、通用抽象、前端、RAGFlow/Agent/向量调用或其他任务实现；工作树在治理修改前保持干净。
+- 结论：技术合并后复验通过；本纯治理 PR 合入后 TASK-003 才完成连续台账闭环。Stage 6 不因此自动获准。
+
 ## TASK-004 PR #27 合并后复验（2026-07-22）
 
 - 集成对象：源 HEAD `76732606412d71239d302e4e9e5a0da6b364fd70`；Merge Commit `87e8e3c0aab62ee9105bf3807b23fcf44ac15137`；最新集成基线 `960c64ffc64c20edfb5bd73a2721678c9b9972c8` 包含该 Merge Commit。
