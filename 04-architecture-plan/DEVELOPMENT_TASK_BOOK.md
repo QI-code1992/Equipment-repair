@@ -296,7 +296,7 @@
 
 ### TASK-006：四个 Agent 独立配置与模型能力校验
 
-- 状态：Authorized to start / TASK-002 前置已解除，全部范围仍须满足本任务自身 PR 门禁
+- 状态：Integrated / PR #14 Merge Commit `da460c64f48e1b1522979d2e5f381fb797571934`；合并后技术与治理复核通过
 - 优先级：P0
 - 负责人：`DEV-002`
 - 任务开发者：`DEV-002`
@@ -317,6 +317,7 @@
 - PR 审核请求：`DEV-002` 完成本任务全部范围、验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
 - Review：`DEV-001` 复核认证、迁移、审计、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-002` 修复。
 - PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
+- 集成记录：DEV-001 批准精确 HEAD `e564b15f42492087578d03c3a1f5412c9db35f6b` 并完成集成检查；项目负责人授权同一 PR/HEAD；DEV-001 以 Merge Commit `da460c64f48e1b1522979d2e5f381fb797571934` 合入。合并后前端 7 tests/build、后端 `221 passed / 9 skipped / 1 warning`、PostgreSQL 迁移往返、祖先关系和 merge-tree 均通过。
 - 回滚：回退模块 Commit；配置数据迁移按明确 downgrade 执行。
 
 ### TASK-007：Agent Runtime、LangGraph、SSE 与恢复

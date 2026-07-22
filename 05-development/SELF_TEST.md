@@ -293,3 +293,10 @@
 - 验证：Node/npm 锁定依赖安装后，`npm test` 为 `7 passed`，`npm run build` 通过；Python 3.13.14 的 TASK-003/006 迁移回归为 `7 passed, 1 warning`，全量后端为 `221 passed, 9 skipped, 1 warning`，`compileall` 与 `git diff --check` 通过。唯一警告为既有 Starlette/httpx 第三方弃用提示。
 - 边界：未新增生产依赖、兼容层或通用抽象；未实现 Agent Runtime、对话、SSE、引用、版本/发布/回滚或生产操作。临时 Python/Node 验证环境位于 `/private/tmp`，不纳入提交。
 - 门禁：本候选尚未由 DEV-001 针对新精确 HEAD 复审；在审核、集成检查、项目负责人逐 PR/HEAD 授权、DEV-001 Merge Commit 及合并后验证完成前，不解锁 TASK-007/008/009/010，也不进入 Stage 6。
+
+## TASK-006 PR #14 合并后治理复核（2026-07-22）
+
+- 集成对象：源 HEAD `e564b15f42492087578d03c3a1f5412c9db35f6b`；Merge Commit `da460c64f48e1b1522979d2e5f381fb797571934`，双亲为 `8c0087928f693674f498044b0e2dbbe96196847c` 与源 HEAD。
+- 执行者/授权：PR 作者 DEV-002；DEV-001 `ll979053897-arch` 执行手动 Merge Commit；项目负责人授权绑定 PR #14 与同一精确 HEAD。
+- 合并后验证：前端 7 tests/build、后端 `221 passed / 9 skipped / 1 warning`、PostgreSQL 迁移往返、祖先关系和 merge-tree 通过；无 HEAD、目标分支或批准记录漂移。
+- 结论：TASK-006 正式闭环，TASK-007 仅按自身任务书门禁继续；未批准 Stage 6，也未自动解锁其他非直接依赖任务。
