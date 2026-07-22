@@ -228,6 +228,16 @@
 - 依赖：本治理 PR 合并后 TASK-004 正式闭环，TASK-005 的 TASK-004 阻塞解除；Stage 6 仍未获准。
 - 请求动作：项目负责人确认本纯治理 PR 的内容和精确 HEAD；DEV-001 完成集成核查与授权请求后，由非 PR 作者 DEV-002 合并。
 
+## TASK-007 开发交接（2026-07-22）
+
+- 开发者/指定审核者：DEV-002 / DEV-001；分支 `codex/task-007-agent-runtime`，目标 `codex/stage-05-integration`。
+- 候选功能提交：`7c3cf64fe7537ca8f7e05c66e4d5a71ff3383e61`。
+- 交付范围：Runtime 持久化模型、线程访问隔离、配置快照、checkpoint、SSE 状态事件、恢复接口和推理参数映射；Alembic `0005_task007`。
+- 验证证据：Python 3.13 全量后端 `224 passed, 9 skipped, 1 warning`；TASK-007 `2 passed`；迁移检查、`compileall`、`git diff --check` 通过。
+- 未验证项：当前环境未执行 Docker/PostgreSQL 真实 checkpoint 联调，未连接外部 LLM；需 DEV-001 具备环境后验证。
+- 风险/回退：`0005_task007` downgrade 会删除 Runtime 四表，生产数据回退须另行授权并先备份；应用可回退功能提交。
+- 请求动作：请 DEV-002 在同一任务分支创建/更新 Draft PR，完成 Ready 前自测后请求 DEV-001 审核精确 HEAD；未完成 Review、集成检查和项目负责人逐 PR/HEAD 授权前，不得合并或解锁下游任务。
+
 ## TASK-003 本地开发候选交接（2026-07-22）
 
 - 开发者/审核者：DEV-001 / DEV-002；分支 `codex/task-003-maintenance-lifecycle`，目标 `codex/stage-05-integration`。

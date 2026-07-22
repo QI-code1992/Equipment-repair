@@ -300,3 +300,12 @@
 - 执行者/授权：PR 作者 DEV-002；DEV-001 `ll979053897-arch` 执行手动 Merge Commit；项目负责人授权绑定 PR #14 与同一精确 HEAD。
 - 合并后验证：前端 7 tests/build、后端 `221 passed / 9 skipped / 1 warning`、PostgreSQL 迁移往返、祖先关系和 merge-tree 通过；无 HEAD、目标分支或批准记录漂移。
 - 结论：TASK-006 正式闭环，TASK-007 仅按自身任务书门禁继续；未批准 Stage 6，也未自动解锁其他非直接依赖任务。
+
+## TASK-007 开发候选自测（2026-07-22）
+
+- 候选：`codex/task-007-agent-runtime@7c3cf64fe7537ca8f7e05c66e4d5a71ff3383e61`，目标 `codex/stage-05-integration`。
+- 实现：线程归属与管理员读取、运行配置快照、持久化 checkpoint、SSE 状态事件、恢复确认、敏感文本不回显、provider-neutral 推理参数映射及 `0005_task007` 迁移。
+- 验证：Python 3.13 全量 `224 passed, 9 skipped, 1 warning`；TASK-007 `2 passed`；迁移检查、`compileall`、`git diff --check` 通过。唯一警告为既有 Starlette/httpx 弃用提示。
+- 未验证：未执行 Docker/PostgreSQL 真实 checkpoint 联调，当前环境无 Docker；未连接真实外部 LLM，Runtime 以可审计 provider-neutral gateway 等待模型执行。
+- 兼容/依赖/抽象：未新增生产依赖、兼容层或通用抽象；新增 Runtime 模块仅承载本任务边界；无无关修改。
+- 门禁：尚未创建/更新 Draft PR，未请求 DEV-001 审核，不申请 Merge 授权，不解锁 TASK-008/009/010，不进入 Stage 6。
