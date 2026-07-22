@@ -180,3 +180,11 @@
 - 边界：相似案例只访问 PostgreSQL；无 RAGFlow、Agent、向量、正式前端、新生产依赖、兼容层或范围外实现。
 - 恢复：应用回退可评估 `git revert -m 1 51337db767eb94051f78a5c537a3ff48d428a742`；`0003_task003` downgrade 会删除五张 TASK-003 表，生产数据回退须备份并另行授权，优先采用前向修复迁移。
 - 依赖：本治理 PR 合入后，TASK-003 前置正式满足；TASK-009/010/011 仍受各自其余依赖约束，Stage 6 仍未获准。
+## FCP-005-R1：TASK-005 RAGFlow 适配器契约检查点
+
+- 状态：Development Candidate / Locally Validated / Not Reviewed / Not Integrated。
+- 分支/基线：`codex/task-005-knowledge-ragflow` / `8c0087928f693674f498044b0e2dbbe96196847c`；功能提交 `b6325cdaf5a412a9b074cc215576292a1b6b1afe`。
+- 范围：RAGFlow v0.25.6 文档上传后解析、状态映射、删除、仅 READY 文档检索、业务文档/切片引用映射、空检索与超时降级；不包含业务元数据/API、数据库迁移、真实对象存储或 Worker 调度。
+- 证据：RED 为 `ModuleNotFoundError: app.integrations`；定向测试 `9 passed`；Python 3.13 全量 `182 passed, 9 skipped, 1 warning`；`compileall` 和 `git diff --check` 通过。
+- 边界：使用 Python 标准库 HTTP 客户端，无新增生产依赖、兼容层或范围外修改。真实 RAGFlow 上传/解析/检索与重启验证仍须由具备 Docker 环境的 DEV-001 执行。
+- 恢复/门禁：可回退功能提交。TASK-005 尚未完成；后续功能继续在同一 Draft PR，最终精确 HEAD 经 DEV-001 审核、集成检查和项目负责人授权后，只能由 DEV-001 合并；Stage 6 仍未获准。
