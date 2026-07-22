@@ -9,6 +9,7 @@ from app.modules.equipment.organization_router import router as organization_rou
 from app.modules.identity.router import router as identity_router
 from app.modules.identity.admin_router import router as identity_admin_router
 from app.modules.agent_config.router import router as agent_config_router
+from app.modules.maintenance.router import router as maintenance_router
 
 
 def create_app(
@@ -31,6 +32,7 @@ def create_app(
     app.include_router(agent_config_router)
     app.include_router(equipment_router)
     app.include_router(organization_router)
+    app.include_router(maintenance_router)
     register_audit_exception_handlers(app)
 
     @app.get("/healthz")

@@ -10,6 +10,7 @@ from app.modules.agent_config import models as agent_config_models
 from app.modules.audit import models as audit_models
 from app.modules.equipment import models as equipment_models
 from app.modules.identity import models as identity_models
+from app.modules.maintenance import models as maintenance_models
 
 
 config = context.config

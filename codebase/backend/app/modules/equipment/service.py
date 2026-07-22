@@ -3,9 +3,15 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.modules.equipment.models import Equipment, Organization, OrganizationType
+from app.modules.equipment.models import (
+    Equipment,
+    EquipmentStatus,
+    Organization,
+    OrganizationType,
+)
 from app.modules.equipment.schemas import EquipmentWrite
 from app.modules.identity.models import User
+from app.modules.maintenance.models import FaultReport, FaultStatus
 
 
 def _error(status_code: int, code: str) -> HTTPException:
@@ -21,6 +27,29 @@ def equipment_detail(db: Session, equipment_id: str) -> Equipment:
     if item is None:
         raise _error(404, "EQUIPMENT_NOT_FOUND")
     return item
+
+
+def _locked_equipment(db: Session, equipment_id: str) -> Equipment:
+    statement = select(Equipment).where(Equipment.id == equipment_id)
+    if db.get_bind().dialect.name == "postgresql":
+        statement = statement.with_for_update()
+    item = db.scalar(statement)
+    if item is None:
+        raise _error(404, "EQUIPMENT_NOT_FOUND")
+    return item
+
+
+def _has_active_fault(db: Session, equipment_id: str) -> bool:
+    return db.scalar(
+        select(FaultReport.id)
+        .where(
+            FaultReport.equipment_id == equipment_id,
+            FaultReport.status.in_(
+                [FaultStatus.PENDING_ACCEPT, FaultStatus.IN_REPAIR]
+            ),
+        )
+        .limit(1)
+    ) is not None
 
 
 def equipment_code_exists(
@@ -82,7 +111,12 @@ def create_equipment(db: Session, payload: EquipmentWrite) -> Equipment:
 def update_equipment(
     db: Session, equipment_id: str, payload: EquipmentWrite
 ) -> Equipment:
-    item = equipment_detail(db, equipment_id)
+    item = _locked_equipment(db, equipment_id)
+    if (
+        payload.status is EquipmentStatus.DISABLED
+        and _has_active_fault(db, equipment_id)
+    ):
+        raise _error(409, "EQUIPMENT_ACTIVE_FAULT")
     if equipment_code_exists(db, payload.code, exclude_id=item.id):
         raise _error(409, "EQUIPMENT_CODE_EXISTS")
     _validate_references(db, payload)
