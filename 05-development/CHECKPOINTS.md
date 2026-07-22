@@ -149,3 +149,11 @@
 - Regression Coverage: `.env.local` 默认值与缺失失败、固定镜像摘要、日志秘密扫描、内部依赖零宿主端口、四存储持久化。
 - Restore Options: `git revert -m 1 87e8e3c0aab62ee9105bf3807b23fcf44ac15137` 仅作为代码回退候选；命名卷删除属于数据删除，必须另行授权。
 - Notes: 历史 Pending 条目保留用于审计；本治理 PR 合并后由本条作为当前稳定检查点。TASK-005 可据此启动，Stage 6 仍未获准。
+
+### FCP-006-FE-R1：正式前端工程基础候选
+
+- 状态：Review Candidate / Not Accepted / Not Integrated / Does Not Unlock TASK-006 前端子范围或 TASK-007 前端子范围。
+- 分支/功能提交：`codex/task-006-fe-frontend-foundation` / `800e7a43fcc6ae98f00e74d738924c236c84b118`；基线为 `codex/stage-05-integration@f135997a6ecc009de75735b673499b475615a717`。
+- 范围：React + Vite + TypeScript 前端工程、Vitest 测试基础、共享应用壳和非业务 `fetch` JSON 边界；原型仅作视觉参考，代码没有运行时原型引用。
+- 证据：前端 2 项测试通过、生产构建通过、全部现有原型静态检查通过、`git diff --check` 通过。
+- 恢复/门禁：可回退该任务提交；不涉及数据或生产操作。仅在 DEV-001 审核当前精确 HEAD、完成集成检查并取得项目负责人逐 PR/HEAD Merge 授权后，才可由 DEV-001 合并；此前不得解锁下游前端范围或 Stage 6。

@@ -242,3 +242,14 @@
 - 隔离/持久化：内部网络成员 5、访问网络成员 1、内部依赖宿主端口 0、RAGFlow 回环端口 2；MySQL、Redis、MinIO S3、Elasticsearch 重启后探针一致，容器重建 0，探针清理 4。
 - 边界：治理收尾只更新任务书和连续台账；无 `codebase/`、测试代码、数据库、部署配置、依赖、兼容层、抽象层或无关修改。
 - 结论：本治理 PR 合并后 TASK-004 正式闭环并解除 TASK-005 的 TASK-004 依赖；Stage 6 仍禁止进入。
+
+## TASK-006-FE 正式前端工程基础自测（2026-07-22）
+
+- 功能提交：`800e7a43fcc6ae98f00e74d738924c236c84b118`，基于 `codex/stage-05-integration@f135997a6ecc009de75735b673499b475615a717`。
+- 范围：在唯一的 `codebase/frontend/` 建立 React、Vite 与 TypeScript 工程；提供构建/测试脚本、共享应用壳、非业务路由页面骨架和最小 `fetch` JSON 边界。
+- 已确认依赖：运行时仅 `react`、`react-dom`、`react-router-dom`；开发时仅 TypeScript、Vite、React 插件、Vitest、jsdom 与 React Testing Library。未引入 UI 框架、全局状态、HTTP 客户端或 CSS 框架。
+- TDD：实现前，应用壳和 JSON 边界测试因模块不存在而不能执行；首次依赖安装产生不完整的 `pathe` 包，按干净安装重试后可执行。随后应用壳测试暴露重复页面标题，修正后转绿；构建再发现 Vite 配置未使用 Vitest 类型入口，修正后通过。
+- 验证：`npm --prefix codebase/frontend test` 为 `2 passed`；`npm --prefix codebase/frontend run build` 通过；`06-testing/tests/*.test.js` 全部通过；`git diff --check` 通过；对 `codebase/frontend` 的原型运行时引用扫描无匹配。
+- 边界：未复制、移动或运行时引用 `03-ui-prototype/`；只新写共享视觉语言，不实现智能配置字段/保存、Agent 对话、SSE、引用、故障或维修流程、认证规则或业务 API。
+- 未验证：未执行浏览器人工视觉回归；未执行 Docker/Compose 或后端测试，原因是本任务未修改对应范围且 DEV-002 不具备容器验证职责。
+- 兼容/抽象/无关修改：无兼容代码；仅实现任务书要求的外部副作用边界 `requestJson`；无无关修改。

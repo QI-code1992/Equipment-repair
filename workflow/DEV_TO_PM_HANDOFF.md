@@ -1,5 +1,14 @@
 # 开发到产品交接
 
+## TASK-006-FE Draft PR 首个可审查切片（2026-07-22）
+
+- PR：[#33](https://github.com/QI-code1992/Equipment-repair/pull/33)，任务开发者 DEV-002，指定审核者 DEV-001，目标分支 `codex/stage-05-integration`；当前仍为 Draft，不请求批准或 Merge。
+- 功能候选：`800e7a43fcc6ae98f00e74d738924c236c84b118`，基线 `f135997a6ecc009de75735b673499b475615a717`；后续补充本交接证据会产生新 HEAD，届时必须重新绑定精确 HEAD 后才可进入 Ready 审核。
+- 交付：唯一正式 TypeScript 前端工程，React + Vite + TypeScript，应用壳、非业务路由页面骨架、基础样式、构建/测试脚本与非业务 `fetch` JSON 边界。
+- 验证：前端 2 项测试通过；生产构建通过；原型静态检查全通过；`git diff --check` 通过；无原型运行时引用。
+- 范围：仅复用原型的共享视觉语言，未复制原型源码，也未实现 Agent 配置、保存、对话、SSE、引用、故障/维修流程、认证或业务 API。
+- 风险/回退：浏览器人工视觉回归尚未执行；可通过回退任务提交恢复，不涉及数据删除、生产操作或兼容层。
+
 ## TASK-002 正式集成后的治理收尾（2026-07-17）
 
 - 正式审核与集成：DEV-002 已批准精确 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`；PR #20 由集成负责人 DEV-001（`ll979053897-arch`）手动合入 `codex/stage-05-integration`，Merge Commit 为 `904886f48061e27c775f6ee2f8ddae99f5571ead`。
