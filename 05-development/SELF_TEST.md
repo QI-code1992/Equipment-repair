@@ -220,3 +220,14 @@
 - 验证：Windows PowerShell 语法解析通过；`verify-review-remediation.ps1`、`verify-cleanup-failure.ps1`、`verify-compose-contract.ps1` 均 PASS；任务书回退变异非零；禁用错误示例通过；`git diff --check` 通过。独立复审为 Critical 0、Important 0、Minor 0。
 - 未验证：本轮未改 Compose、镜像、运行脚本或业务代码，因此未重新执行 Docker 五服务重启验证；当前环境中的历史 Python 3.13 虚拟环境入口无法创建进程，本轮未生成新的 Python 结果，沿用记录仅作为上一 HEAD 历史证据，不宣称本轮重新通过。
 - 边界：只修改 TASK-004 审核契约测试；无生产依赖、兼容代码、抽象层、业务 API、迁移、TASK-005 或无关修改。DEV-002 批准新精确 HEAD 前 TASK-005 继续锁定。
+## TASK-004 PR #27 R6 运行环境默认值修复验证（2026-07-22）
+
+- 审核输入：DEV-002 对精确 HEAD `80b40182efa49033ee561f34fd6e078b3469a733` 给出 `Changes requested`；Critical 0、Important 1、Minor 0。
+- RED：增强 `verify-review-remediation.ps1` 后，首先稳定失败于 `verify.ps1 does not default EnvFile to codebase/infra/.env.local`。
+- GREEN：`verify.ps1` 与 `verify-persistence.ps1` 默认改为 Git 忽略的 `codebase/infra/.env.local`，并在任何 Docker 调用前检查文件存在；缺失时两个子进程均非零退出并包含 `Missing local RAGFlow environment file`。
+- 功能提交：`78e3132d907870f17980ade7142f7c9a7ae7562e`。
+- 静态与失败行为：审核契约 PASS；四类清理失败行为 PASS；Compose 契约 PASS；RAGFlow Compose `config --quiet` PASS；8 个 PowerShell 文件语法通过。
+- 真实运行：5 个容器 healthy；Web/API HTTP 200；RAGFlow `v0.25.6`；Elasticsearch `8.11.3`；镜像摘要与运行镜像一致；日志依赖失败 0、秘密命中 0；网络隔离 PASS。
+- 持久化：MySQL、Redis、MinIO S3、Elasticsearch 重启后探针一致，容器重建数 0，严格清理探针数 4。
+- 其他：Python 3.13.14 健康回归 `5 passed, 1 warning`；compileall、`git diff --check` 通过。唯一警告为既有 Starlette/httpx 第三方弃用提示。
+- 边界：未增加生产依赖、兼容代码、抽象层、业务 API、迁移、TASK-005 或无关修改；DEV-002 尚未审核新 HEAD，TASK-005 继续锁定。

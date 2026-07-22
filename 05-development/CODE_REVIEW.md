@@ -202,3 +202,10 @@
 - Standards/Spec：功能提交 `314b46d3efdc7af0d13c671fadd41be7bb3900d1` 仅修改现有审核脚本。任务书验证列表中的反引号命令与可执行代码块被检查；静态 config、普通说明及明确禁用/错误示例不误报。Windows PowerShell 5.1 兼容性、函数尺寸和修改范围通过。
 - RED/GREEN：旧检查器对任务书 `.env.example` 运行变异错误 PASS；修正后非零拒绝。独立首审发现禁用示例误报 1 个 Important，补充外部行为 RED 后修复；累计复审 Critical 0、Important 0、Minor 0。
 - 结论：本地复查通过不等于 DEV-002 批准。新 HEAD 推送后必须在同一 PR #27 重新审核；此前不请求 Merge 授权、不解锁 TASK-005，Stage 6 仍禁止进入。
+## TASK-004 PR #27 R6 修复自查（2026-07-22）
+
+- 外部审核：精确 HEAD `80b40182efa49033ee561f34fd6e078b3469a733` 为 Changes requested；唯一 Important 是真实验证脚本仍默认 `.env.example`。
+- Standards：两个运行脚本现在默认 `.env.local`，静态 Compose 检查仍独立使用 `.env.example`；未改变 Compose 服务、镜像、端口、卷或网络。
+- Spec：环境文件缺失检查位于 Docker 调用前；回归通过 AST 验证默认参数，并对子进程执行缺失文件路径，验证非零退出及明确错误。
+- 范围：仅两个 TASK-004 运行脚本及既有审核回归；无依赖、兼容层、抽象层、业务代码、迁移、TASK-005 或无关修改。
+- 本地结论：Critical 0、Important 0、Minor 0；该结论不替代 DEV-002 对新精确 HEAD 的正式审核。

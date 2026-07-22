@@ -185,3 +185,10 @@
 - 验证：Windows PowerShell 语法、审核契约、四类清理失败行为、Compose 静态契约和 diff check 通过。本轮未改运行配置且未重跑 Docker；Python 3.13 历史虚拟环境入口当前不可创建进程，未虚报新结果。
 - 交付边界：仅 TASK-004 审核测试与正式证据；无业务 API、迁移、TASK-005、生产依赖、兼容代码、抽象层或无关修改。
 - 请求动作：推送本证据提交后，以 PR #27 新完整 HEAD 重新请求 DEV-002 审核。新审核通过前不得请求 Merge 授权；TASK-005 继续锁定，Stage 6 禁止进入。
+## TASK-004 PR #27 R6 复审交接（2026-07-22）
+
+- 审核/修正：DEV-002 对 `80b40182efa49033ee561f34fd6e078b3469a733` 给出 Changes requested（Critical 0、Important 1、Minor 0）；DEV-001 在同一分支和 PR #27 内完成最小修正，功能提交为 `78e3132d907870f17980ade7142f7c9a7ae7562e`。
+- 关闭证据：两个真实验证脚本默认使用 Git 忽略的 `.env.local`；文件缺失时在 Docker 调用前非零退出并给出明确错误；`.env.example` 仅保留给静态 Compose 配置检查。
+- 验证：Python 3.13 `5 passed, 1 warning`；PowerShell/Compose/失败行为契约通过；5 容器 healthy，Web/API 200，网络隔离及四存储重启恢复/清理通过。
+- 边界：无业务 API、迁移、TASK-005、生产依赖、兼容代码、抽象层或无关修改。
+- 请求动作：推送证据提交后，以 PR #27 新完整精确 HEAD 重新请求 DEV-002 审核；批准前不得请求 Merge 授权，TASK-005 继续锁定，Stage 6 禁止进入。

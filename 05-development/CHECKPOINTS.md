@@ -129,3 +129,11 @@
 - 修正：审核契约现在解析任务书 `- 验证：...` 内反引号运行命令，拒绝 `.env.example` 运行回退，同时排除静态 config、说明文字和明确禁用示例。
 - 验证：Windows PowerShell 语法、审核契约、四类清理失败行为、Compose 静态契约和 `git diff --check` 通过；任务书运行回退变异非零；独立复审 Critical 0、Important 0、Minor 0。
 - 恢复/门禁：等待 DEV-002 审核推送后的新精确 HEAD；获批、逐 PR/HEAD 授权、DEV-002 Merge Commit 和 DEV-001 合并后复验完成前，TASK-005 继续锁定，Stage 6 禁止进入。
+### FCP-TASK004-R6：真实运行脚本默认环境文件修复
+
+- Status: Pending DEV-002 Re-review
+- Branch: `codex/task-004-ragflow-infra`
+- Functional Commit: `78e3132d907870f17980ade7142f7c9a7ae7562e`
+- Scope: `verify.ps1`、`verify-persistence.ps1` 默认 `.env.local` 与缺失文件失败契约。
+- Verification: 审核契约、清理失败行为、Compose、PowerShell、Python 3.13、真实健康/隔离/持久化均通过。
+- Boundary: PR #27 新 HEAD 获 DEV-002 批准前不稳定、不解锁 TASK-005。
