@@ -288,3 +288,10 @@
 - 验证：知识/RAGFlow/MinIO/ClamAV 定向 `28 passed, 1 warning`；Python 3.13 全量 `200 passed, 9 skipped, 1 warning`；`compileall`、`git diff --check` 通过。唯一警告是既有 Starlette/httpx 第三方弃用提示。
 - 未验证：无共享 Alembic 迁移；未连接真实平台 MinIO、ClamAV 或 RAGFlow，未执行真实文档扫描、上传、解析、切片、混合检索和重启恢复。这些仍须 DEV-001 在 Docker 环境完成。
 - 兼容/抽象/无关修改：无兼容代码；新增抽象仅限 MinIO、ClamAV 和 RAGFlow 外部副作用边界；无范围外修改。
+## TASK-005 Worker 同步自测（2026-07-22）
+
+- 功能提交：`5e134655bc087f972e84f8f40b31bac284ee6c29`；继续维护 Draft PR #37。
+- TDD RED：Worker 模块不存在导致测试收集失败；实现批量上传/解析、状态刷新和安全失败后转绿。
+- 行为：只处理 `UPLOADING/PARSING`；上传前要求关联文件扫描状态为 `CLEAN`；对象存储错误不泄露原始异常；RAGFlow 失败不产生伪 READY 状态；批量上限为 500。
+- 验证：Worker 定向 `3 passed, 1 warning`；Python 3.13 全量 `204 passed, 9 skipped, 1 warning`；compileall、git diff check 通过。唯一警告为既有 Starlette/httpx 第三方弃用提示。
+- 未验证：未接真实队列调度、MinIO、ClamAV、RAGFlow 或 PostgreSQL 迁移；这些需 DEV-001 真实环境验证和共享迁移集成。

@@ -204,3 +204,11 @@
 - 证据：知识范围定向 `28 passed, 1 warning`；Python 3.13 全量 `200 passed, 9 skipped, 1 warning`；`pip check`、`compileall` 与 `git diff --check` 通过。
 - 边界：未增加 Alembic 迁移或 Docker/部署配置；共享迁移仍由 DEV-001 集成，平台 MinIO 与 ClamAV 真实服务、RAGFlow 真实联调尚待 DEV-001 环境验证。无兼容层或范围外修改。
 - 恢复/门禁：可回退本功能提交。TASK-005 仍处于 Draft 开发；最终精确 HEAD 经 DEV-001 审核、集成检查和项目负责人授权后，只能由 DEV-001 合并；Stage 6 仍未获准。
+## FCP-005-R4：TASK-005 Worker 同步检查点
+
+- 状态：Development Candidate / Locally Validated / Not Reviewed / Not Integrated。
+- 分支/功能提交：`codex/task-005-knowledge-ragflow` / `5e134655bc087f972e84f8f40b31bac284ee6c29`；继续维护 Draft PR #37。
+- 范围：批量扫描 `UPLOADING/PARSING` 文档；从已扫描 MinIO 对象读取并调用 RAGFlow 上传/解析；刷新远端生命周期；对象存储或同步异常写入固定安全失败原因；批量上限 500。
+- 证据：Worker 定向 `3 passed, 1 warning`；Python 3.13 全量 `204 passed, 9 skipped, 1 warning`；`compileall` 与 `git diff --check` 通过。
+- 边界：未新增 Alembic 迁移、Docker/部署配置或队列依赖；共享迁移、真实 Worker 调度、MinIO/RAGFlow/ClamAV 联调仍待 DEV-001 环境验证。
+- 恢复/门禁：可回退本功能提交。TASK-005 仍处于 Draft 开发；最终精确 HEAD 经 DEV-001 审核、集成检查和项目负责人授权后，只能由 DEV-001 合并；Stage 6 仍未获准。
