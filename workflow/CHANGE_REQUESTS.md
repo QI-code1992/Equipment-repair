@@ -9,7 +9,7 @@
 ### CR-042：追认 PR #29 的并发目标分支竞态合并
 
 - 级别：L2
-- 状态：已批准 / 待台账记录合入
+- 状态：Changes requested / 恢复交接历史并回填 PR 元数据后重新确认
 - 提出人：项目负责人
 - 提出时间：2026-07-22
 - 当前阶段：Stage 5 — 开发实施
@@ -24,11 +24,12 @@
 - 更新基线：本台账与 `workflow/DEV_TO_PM_HANDOFF.md`；不修改任务书、产品基线或代码。
 - 实施：
   - 负责人：DEV-002（治理记录编制）；DEV-001 负责集成检查与 Merge 授权请求；非 PR 作者在获授权后执行 Merge。
-  - PR：待创建；仅允许上述治理记录文件。
+  - PR：[#30](https://github.com/QI-code1992/Equipment-repair/pull/30)（Draft）；首个候选 HEAD：`c6f63875e5639ba1b8d5f3a79ba820906f8e0c6f`；仅允许上述治理记录文件。
 - 验证：
   - PR #29 授权 HEAD：`1aedc546352121d22cb36206200469551125e1b0`。
   - PR #29 Merge Commit：`960c64ffc64c20edfb5bd73a2721678c9b9972c8`；授权 HEAD 已成为目标分支祖先；源分支保留。
   - 本 CR 仅记录事实与项目负责人追认，不自动补发或假定历史 Merge 授权。
+  - 集成检查：DEV-001 对首个候选发现 Important 2——`workflow/DEV_TO_PM_HANDOFF.md` 误删 TASK-004 R1—R6 审核历史，且本项原先遗漏 PR #30 元数据。修复产生新 HEAD 后，项目负责人治理确认与 DEV-001 集成检查均须重新执行。
 
 ### CR-041：前端工程初始化前置与 Agent 前端子范围解锁
 
