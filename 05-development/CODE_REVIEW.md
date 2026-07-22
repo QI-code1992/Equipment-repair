@@ -227,3 +227,12 @@
 - 数据库：单一线性 Alembic head；downgrade 只移除 TASK-003 五表并明确具有破坏性；专用 PostgreSQL 17 测试通过，未接触平台或生产数据。
 - 范围：无新增生产依赖、兼容代码、通用抽象层、前端、RAGFlow 调用、TASK-005/006/008 实现或无关格式化。
 - 本地结论：Critical 0、Important 0、Minor 0。该结论不替代 DEV-002 对推送后完整精确 HEAD 的正式审核。
+
+## TASK-003 PR #32 合并后治理核查（2026-07-22）
+
+- DEV-002 Review：对精确 HEAD `8960b5d8ab1e7073036c6151744233e26c15c9e9` 给出 Approved，Critical 0、Important 0、Minor 0；审核后 HEAD 未变化。
+- 授权/Merge：项目负责人授权 PR #32 同一精确 HEAD；DEV-002 作为非任务作者执行 Merge Commit `51337db767eb94051f78a5c537a3ff48d428a742`。
+- 合并关系：Merge Commit 第一父为授权时目标基线 `f135997a6ecc009de75735b673499b475615a717`，第二父为获批源 HEAD，无错误目标或替换提交。
+- 合并后证据：Python 3.13、专用 PostgreSQL 17、迁移单 head、平台/RAGFlow Compose、compileall 与差异检查均通过。
+- 治理边界：本收尾仅更新任务书、FCP、自测、评审、提交日志、交接与状态台账；无 `codebase/`、测试、数据库迁移、基础设施、部署或运行配置修改。
+- 结论：治理核查 Critical 0、Important 0、Minor 0；等待项目负责人确认本纯治理 PR 的精确 HEAD，随后由非 PR 作者合并。

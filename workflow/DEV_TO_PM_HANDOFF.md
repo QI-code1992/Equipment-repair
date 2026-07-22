@@ -228,3 +228,14 @@
 - 风险/回退：`0003_task003` downgrade 会删除 TASK-003 五表，只允许专用验证库或已备份环境；应用按独立 TASK-003 Commit 选择性 revert，任何生产数据回退另行授权。
 - 当前门禁：候选尚未推送、Draft PR 尚未创建或更新、DEV-002 尚未审核、未申请 Merge 授权、未集成；不解锁 TASK-009/010/011，Stage 6 仍未获准。
 - 下一动作：提交本地正式台账；获得 DEV-001 明确推送指令后推送同一任务分支并创建/更新唯一 Draft PR，绑定完整精确 HEAD 请求 DEV-002 审核。
+
+## TASK-003 PR #32 合并后治理收尾（2026-07-22）
+
+- 开发者/审核者/Merge 执行者：DEV-001 / DEV-002 / DEV-002。
+- PR/版本：PR #32；获批源 HEAD `8960b5d8ab1e7073036c6151744233e26c15c9e9`；Merge Commit `51337db767eb94051f78a5c537a3ff48d428a742`。
+- 审核与授权：DEV-002 Approved 同一 HEAD；项目负责人授权同一 PR/HEAD；DEV-002 按职责分离执行 Merge Commit。
+- 合并后验证：Python 3.13.14 `173 passed, 9 skipped, 1 warning`；专用 PostgreSQL 17 `4 passed, 1 warning`；Alembic 单一 head、平台/RAGFlow Compose、compileall 和差异检查通过。
+- 交付边界：TASK-003 后端维修事实闭环正式集成；无 RAGFlow/Agent/向量/正式前端、新生产依赖、兼容代码、通用抽象或范围外修改。
+- 风险/回退：`0003_task003` downgrade 会删除五张业务表；生产回退优先前向修复，数据回退必须备份并另行授权；应用可评估选择性 revert Merge Commit。
+- 依赖：本治理 PR 合入后 TASK-003 正式闭环；TASK-009/010/011 仍等待各自其余依赖，Stage 6 仍未获准。
+- 请求动作：项目负责人确认本纯治理 PR 的内容和精确 HEAD；DEV-001 完成集成核查与授权请求后，由非 PR 作者 DEV-002 合并。
