@@ -6,6 +6,31 @@
 
 ## 进行中
 
+### CR-042：追认 PR #29 的并发目标分支竞态合并
+
+- 级别：L2
+- 状态：Changes requested / 恢复交接历史并回填 PR 元数据后重新确认
+- 提出人：项目负责人
+- 提出时间：2026-07-22
+- 当前阶段：Stage 5 — 开发实施
+- 事件：PR #29 的项目负责人 Merge 授权请求绑定目标分支 `codex/stage-05-integration@7a44401bacbdc48d58f697a6b252449ecf44bb29`。授权后、PR #29 合并前，TASK-004 在 11:06:57 合入目标分支，提交为 `87e8e3c0aab62ee9105bf3807b23fcf44ac15137`；PR #29 于 11:08:03 合并，实际 Merge Commit `960c64ffc64c20edfb5bd73a2721678c9b9972c8` 的第一父提交为 `87e8e3c0aab62ee9105bf3807b23fcf44ac15137`。
+- 规则偏离：任务书规定目标分支变化会使既有 Merge 授权失效。GitHub 在合并前报告 `MERGEABLE/CLEAN` 且无代码冲突，但该状态不替代重新核查和重新授权。
+- 影响：
+  - 产品、架构、API、数据、测试与部署：不修改；PR #29 仅包含治理文档。
+  - Stage 5 协作：PR #29 不能表述为完全合规完成；必须保留本竞态、授权失效和项目负责人处置的可追溯记录。
+  - 任务依赖：CR-041 的任务范围已由 PR #28 生效；本次追认不改变 TASK-006-FE、TASK-006、TASK-007 或 TASK-010 的范围、负责人、审核者或依赖，只确认不对 PR #29 执行回滚。
+- 决定：项目负责人明确选择方案 1，追认 PR #29 在实际目标 `87e8e3c0aab62ee9105bf3807b23fcf44ac15137` 上的合并结果；不执行回滚 `960c64ffc64c20edfb5bd73a2721678c9b9972c8`。
+- 预防：后续每次 DEV-001 集成检查与 Merge 授权之间，若目标分支、HEAD、依赖或 checks 变化，必须停止 Merge、重新核查并取得新的逐 PR 授权；`MERGEABLE/CLEAN` 不构成例外。
+- 更新基线：本台账与 `workflow/DEV_TO_PM_HANDOFF.md`；不修改任务书、产品基线或代码。
+- 实施：
+  - 负责人：DEV-002（治理记录编制）；DEV-001 负责集成检查与 Merge 授权请求；非 PR 作者在获授权后执行 Merge。
+  - PR：[#30](https://github.com/QI-code1992/Equipment-repair/pull/30)（Draft）；首个候选 HEAD：`c6f63875e5639ba1b8d5f3a79ba820906f8e0c6f`；仅允许上述治理记录文件。
+- 验证：
+  - PR #29 授权 HEAD：`1aedc546352121d22cb36206200469551125e1b0`。
+  - PR #29 Merge Commit：`960c64ffc64c20edfb5bd73a2721678c9b9972c8`；授权 HEAD 已成为目标分支祖先；源分支保留。
+  - 本 CR 仅记录事实与项目负责人追认，不自动补发或假定历史 Merge 授权。
+  - 集成检查：DEV-001 对首个候选发现 Important 2——`workflow/DEV_TO_PM_HANDOFF.md` 误删 TASK-004 R1—R6 审核历史，且本项原先遗漏 PR #30 元数据。修复产生新 HEAD 后，项目负责人治理确认与 DEV-001 集成检查均须重新执行。
+
 ### CR-041：前端工程初始化前置与 Agent 前端子范围解锁
 
 - 级别：L2
