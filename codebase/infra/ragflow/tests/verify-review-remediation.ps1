@@ -63,7 +63,41 @@ function Assert-RuntimeEnvironmentContract {
     }
 }
 
+function Assert-RuntimeScriptEnvironmentContract {
+    param([string]$Path)
+
+    $tokens = $null
+    $parseErrors = $null
+    $ast = [System.Management.Automation.Language.Parser]::ParseFile(
+        (Resolve-Path -LiteralPath $Path), [ref]$tokens, [ref]$parseErrors
+    )
+    Assert-Contract ($parseErrors.Count -eq 0) "$Path cannot be parsed"
+    $envParameter = @($ast.ParamBlock.Parameters | Where-Object {
+        $_.Name.VariablePath.UserPath -eq "EnvFile"
+    })
+    Assert-Contract ($envParameter.Count -eq 1) "$Path must declare one EnvFile parameter"
+    Assert-Contract (
+        $envParameter[0].DefaultValue.Value -eq "codebase/infra/.env.local"
+    ) "$Path does not default EnvFile to codebase/infra/.env.local"
+
+    $missingEnvFile = Join-Path ([System.IO.Path]::GetTempPath()) "missing-task004-$([guid]::NewGuid().ToString('N')).env"
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        $output = @(& powershell -NoProfile -ExecutionPolicy Bypass -File $Path -EnvFile $missingEnvFile 2>&1)
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+    Assert-Contract ($exitCode -ne 0) "$Path accepts a missing runtime environment file"
+    Assert-Contract (
+        ($output -join "`n") -match 'Missing local RAGFlow environment file'
+    ) "$Path does not report a missing runtime environment file explicitly"
+}
+
 Assert-Contract (Test-Path -LiteralPath $VerifyScript -PathType Leaf) "missing runtime verification script"
+Assert-RuntimeScriptEnvironmentContract -Path $VerifyScript
 
 $verifySource = Get-Content -Raw -LiteralPath $VerifyScript
 Assert-Contract ($verifySource -match 'target\s+-eq\s+9380') "RAGFlow API port 9380 is not selected"
@@ -74,6 +108,7 @@ Assert-Contract ($verifySource -match '\.code\s+-ne\s+0') "RAGFlow API response 
 Assert-Contract ($verifySource -match '\.data\s+-ne\s+"v0\.25\.6"') "RAGFlow API version contract is not asserted"
 
 Assert-Contract (Test-Path -LiteralPath $PersistenceScript -PathType Leaf) "missing persistence verification script"
+Assert-RuntimeScriptEnvironmentContract -Path $PersistenceScript
 $persistenceSource = Get-Content -Raw -LiteralPath $PersistenceScript
 Assert-Contract ($persistenceSource -match 'mc\s+alias\s+set') "MinIO S3 client endpoint is not configured"
 Assert-Contract ($persistenceSource -match '"mc"\s*,\s*"mb"') "MinIO bucket is not created through the S3 API"

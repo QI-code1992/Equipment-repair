@@ -1,10 +1,13 @@
 param(
     [string]$ComposeFile = "codebase/infra/ragflow/docker-compose.yml",
-    [string]$EnvFile = "codebase/infra/.env.example",
+    [string]$EnvFile = "codebase/infra/.env.local",
     [int]$TimeoutSeconds = 900
 )
 
 $ErrorActionPreference = "Stop"
+if (-not (Test-Path -LiteralPath $EnvFile -PathType Leaf)) {
+    throw "Missing local RAGFlow environment file: $EnvFile"
+}
 $verificationStartedAt = (Get-Date).ToUniversalTime().ToString("o")
 $composeArgs = @(
     "compose", "-p", "equipment-ragflow",
