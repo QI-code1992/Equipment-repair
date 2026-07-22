@@ -253,3 +253,10 @@
 - 边界：未复制、移动或运行时引用 `03-ui-prototype/`；只新写共享视觉语言，不实现智能配置字段/保存、Agent 对话、SSE、引用、故障或维修流程、认证规则或业务 API。
 - 未验证：未执行浏览器人工视觉回归；未执行 Docker/Compose 或后端测试，原因是本任务未修改对应范围且 DEV-002 不具备容器验证职责。
 - 兼容/抽象/无关修改：无兼容代码；仅实现任务书要求的外部副作用边界 `requestJson`；无无关修改。
+
+## TASK-006-FE Ready 审核证据修正（2026-07-22）
+
+- 审核输入：DEV-001 对 PR #33 精确 HEAD `59fb79ef2e1cba76705e1269434e18cfec92d595` 给出 `Changes requested`，Critical 0、Important 2、Minor 0。
+- 修正范围：同步 Ready 审核证据、PR 当前完整 HEAD 绑定说明、Node/npm 运行基线和 `npm ci` 验证证据；未修改业务页面、Agent 配置、SSE、维修流程、认证或业务 API。
+- 运行基线：`package.json` 声明 Node `^20.19.0 || >=22.12.0`、npm `>=10.0.0`；本轮验证环境为 Node `v26.5.0`、npm `11.17.0`。
+- 验证计划：重新执行 `npm ci`、前端测试、生产构建、原型静态回归和 `git diff --check`；推送后以新完整 HEAD 重新请求 DEV-001 审核。

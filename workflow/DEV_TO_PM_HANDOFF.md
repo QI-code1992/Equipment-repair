@@ -1,11 +1,12 @@
 # 开发到产品交接
 
-## TASK-006-FE Draft PR 首个可审查切片（2026-07-22）
+## TASK-006-FE Ready 审核候选（2026-07-22）
 
-- PR：[#33](https://github.com/QI-code1992/Equipment-repair/pull/33)，任务开发者 DEV-002，指定审核者 DEV-001，目标分支 `codex/stage-05-integration`；当前仍为 Draft，不请求批准或 Merge。
-- 功能候选：`800e7a43fcc6ae98f00e74d738924c236c84b118`，基线 `f135997a6ecc009de75735b673499b475615a717`；后续补充本交接证据会产生新 HEAD，届时必须重新绑定精确 HEAD 后才可进入 Ready 审核。
+- PR：[#33](https://github.com/QI-code1992/Equipment-repair/pull/33)，任务开发者 DEV-002，指定审核者 DEV-001，目标分支 `codex/stage-05-integration`；当前为 Ready，已请求 DEV-001 审核，不请求 Merge 授权。
+- 正式审核候选：PR 当前完整 HEAD 以本修复提交推送后的 GitHub `headRefOid` 为准；功能提交 `800e7a43fcc6ae98f00e74d738924c236c84b118`，Ready 前证据提交 `59fb79ef2e1cba76705e1269434e18cfec92d595`，基线 `f135997a6ecc009de75735b673499b475615a717`。HEAD 变化后旧审核结论自动失效。
 - 交付：唯一正式 TypeScript 前端工程，React + Vite + TypeScript，应用壳、非业务路由页面骨架、基础样式、构建/测试脚本与非业务 `fetch` JSON 边界。
-- 验证：前端 2 项测试通过；生产构建通过；原型静态检查全通过；`git diff --check` 通过；无原型运行时引用。
+- 运行基线：`package.json` 声明 Node `^20.19.0 || >=22.12.0`、npm `>=10.0.0`；本轮验证使用 Node `v26.5.0`、npm `11.17.0`，并执行 `npm ci`。
+- 验证：`npm ci` 成功且 0 vulnerabilities；前端 2 项测试通过；生产构建通过；原型静态检查全通过；`git diff --check` 通过；无原型运行时引用。
 - 范围：仅复用原型的共享视觉语言，未复制原型源码，也未实现 Agent 配置、保存、对话、SSE、引用、故障/维修流程、认证或业务 API。
 - 风险/回退：浏览器人工视觉回归尚未执行；可通过回退任务提交恢复，不涉及数据删除、生产操作或兼容层。
 

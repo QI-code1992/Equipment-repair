@@ -152,8 +152,9 @@
 
 ### FCP-006-FE-R1：正式前端工程基础候选
 
-- 状态：Review Candidate / Not Accepted / Not Integrated / Does Not Unlock TASK-006 前端子范围或 TASK-007 前端子范围。
+- 状态：Ready Review Candidate / Not Accepted / Not Integrated / Does Not Unlock TASK-006 前端子范围或 TASK-007 前端子范围。
 - 分支/功能提交：`codex/task-006-fe-frontend-foundation` / `800e7a43fcc6ae98f00e74d738924c236c84b118`；基线为 `codex/stage-05-integration@f135997a6ecc009de75735b673499b475615a717`。
 - 范围：React + Vite + TypeScript 前端工程、Vitest 测试基础、共享应用壳和非业务 `fetch` JSON 边界；原型仅作视觉参考，代码没有运行时原型引用。
+- 运行基线：`package.json` 声明 Node `^20.19.0 || >=22.12.0`、npm `>=10.0.0`；本轮使用 Node `v26.5.0`、npm `11.17.0` 并执行 `npm ci`。
 - 证据：前端 2 项测试通过、生产构建通过、全部现有原型静态检查通过、`git diff --check` 通过。
 - 恢复/门禁：可回退该任务提交；不涉及数据或生产操作。仅在 DEV-001 审核当前精确 HEAD、完成集成检查并取得项目负责人逐 PR/HEAD Merge 授权后，才可由 DEV-001 合并；此前不得解锁下游前端范围或 Stage 6。
