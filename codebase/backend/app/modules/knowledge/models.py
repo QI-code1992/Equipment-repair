@@ -24,6 +24,28 @@ class KnowledgeDocumentStatus(StrEnum):
     FAILED = "FAILED"
 
 
+class FileScanStatus(StrEnum):
+    CLEAN = "CLEAN"
+
+
+class FileObject(Base):
+    __tablename__ = "file_objects"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
+    object_key: Mapped[str] = mapped_column(String(500), nullable=False, unique=True)
+    filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    content_type: Mapped[str] = mapped_column(String(255), nullable=False)
+    size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
+    sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    scan_status: Mapped[FileScanStatus] = mapped_column(
+        Enum(FileScanStatus, native_enum=False), nullable=False
+    )
+    created_by: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utc_now
+    )
+
+
 class KnowledgeDataset(Base):
     __tablename__ = "knowledge_datasets"
 
@@ -48,7 +70,7 @@ class KnowledgeDocument(Base):
         ForeignKey("knowledge_datasets.id"), nullable=False, index=True
     )
     object_storage_file_id: Mapped[str] = mapped_column(
-        String(200), nullable=False, unique=True
+        ForeignKey("file_objects.id"), nullable=False, unique=True
     )
     ragflow_document_id: Mapped[str | None] = mapped_column(
         String(100), unique=True
