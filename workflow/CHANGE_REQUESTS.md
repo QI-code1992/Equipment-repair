@@ -6,6 +6,34 @@
 
 ## 进行中
 
+### CR-041：前端工程初始化前置与 Agent 前端子范围解锁
+
+- 级别：L2
+- 状态：已批准范围 / 待治理候选确认与合入
+- 提出人：项目负责人
+- 提出时间：2026-07-22
+- 当前阶段：Stage 5 — 开发实施
+- 原始请求：项目负责人在“将 TASK-006 前端智能配置模块移入 TASK-010”与“将正式前端工程初始化及共享基础拆为可提前执行的前置子任务”之间选择方案 2。
+- 明确需求：新增 `TASK-006-FE`，由 DEV-002 在同一 Stage 5 PR/审核/授权矩阵下建立唯一的正式 TypeScript 前端工程、构建/测试脚本、应用壳和非业务共享基础；不得提前交付智能配置、对话、SSE、引用、采纳/直接开始或其他业务页面。TASK-006 保留智能配置模块，TASK-007 保留共享前端对话组件，TASK-010 保留完整已批准流程的页面/API 集成。
+- 原因：当前任务书让 TASK-006/TASK-007 消费正式前端能力，而 TASK-010 才建立前端工程；该顺序会阻塞已授权任务的完整验收。
+- 影响：
+  - PRD / SPEC / Prototype / Acceptance Criteria：不修改；Stage 3 原型继续只读且不得复制到 `codebase/frontend/`。
+  - Architecture / API / Data Model：不修改业务或技术契约；新增前端工程基础不得定义或伪造业务 API。
+  - Implementation Plan：新增 Task 4A；Task 5、Task 6 和 Task 9 改为消费已集成的前端工程基础。
+  - Development Task Book：v1.3 -> v1.4 候选；新增 TASK-006-FE，细化 TASK-006/TASK-007 前端子范围依赖，并将 TASK-010 调整为不重复建立工程。
+  - Test Cases：新增前端工程构建、测试与原型隔离验证；TASK-006 的智能配置前端测试和 TASK-007 的对话组件测试仍由原任务负责。
+  - Schedule / Integration：TASK-006 后端/迁移继续可做；TASK-006-FE 合入后才可完成 TASK-006/007 的前端子范围；TASK-010 仍须等待 TASK-003、TASK-008、TASK-009。
+- 决定：项目负责人于 2026-07-22 明确选择方案 2。该范围决定不等同于对任何治理 PR 或开发 PR 的精确 HEAD 确认、审核批准或 Merge 授权。
+- 更新基线：`04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` v1.4 候选、`04-architecture-plan/IMPLEMENTATION_PLAN.md`、`workflow/PM_TO_DEV_HANDOFF.md`、`workflow/DEV_TO_PM_HANDOFF.md`。
+- 实施：
+  - 候选分支：`codex/cr-041-frontend-bootstrap`
+  - 目标分支：`codex/stage-05-integration`
+  - 负责人：DEV-002（治理候选编制）；DEV-001 负责集成检查与 Merge 授权请求；非 PR 作者的开发者在获授权后执行 Merge。
+  - PR：待创建；仅允许治理文档，不修改 `codebase/`、测试、迁移、基础设施或部署配置。
+- 验证：
+  - 状态：待执行
+  - 证据：待完成 Markdown 一致性、JSON、文件边界、diff 检查及项目负责人对精确 HEAD 的治理确认。
+
 ### CR-001: Reconcile the canonical requirements baseline
 
 - Level: L2

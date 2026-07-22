@@ -4,8 +4,8 @@
 
 - 项目：新能源装载机设备智能运维平台
 - 当前阶段：Stage 5 — TASK-002 已通过 PR #20 完成代码集成，并通过 PR #25 完成合并后治理收尾；TASK-003、TASK-004 可按本任务书启动，Stage 6 仍未获批准
-- 任务书版本：v1.3（CR-040；PR #23 已合入 `codex/stage-05-integration`）
-- 状态：当前有效 Stage 5 协作基线；CR-040 的 PR #23 Merge Commit 为 `d633308de8277c343faf3e266476b64baffcb565`。不追溯改写既有 PR、Review 或 Merge 历史
+- 任务书版本：v1.4 候选（CR-041：前端工程初始化前置）；当前生效版本仍为 v1.3，直到本候选按治理 PR 门禁合入 `codex/stage-05-integration`
+- 状态：v1.3 是当前有效 Stage 5 协作基线；CR-040 的 PR #23 Merge Commit 为 `d633308de8277c343faf3e266476b64baffcb565`。v1.4 候选只调整前端工程初始化的任务边界与依赖，不追溯改写既有 PR、Review 或 Merge 历史
 - v1.0 候选提交：`8272a8ed161b787098660f61ebb86fa5ccada564`
 - v1.0 审批记录提交：`20261a80f01de8d18e18a2acf9c97e07087e04bc`
 - v1.0 批准人：项目负责人
@@ -29,6 +29,8 @@
 - v1.3 批准时间：2026-07-17
 - v1.3 批准证据：项目负责人明确回复“可以，按照这个规则和流程来”，并要求更新任务书、AGENTS、工作流台账及自动化指令。
 - v1.3 边界：Stage 5 只有 DEV-001、DEV-002 两名开发者，不另设“DEV-001 Agent”或“DEV-002 Agent”角色。DEV-001 保持最终集成责任，但 Merge 执行者必须与任务开发者或治理 PR 作者不同。禁止 GitHub auto-merge 和 merge queue；项目负责人针对 PR 编号和精确 HEAD 明确批准后，由矩阵指定的另一名开发者执行一次 `gh pr merge --merge`。PR HEAD 变化后原批准失效。
+- v1.4 候选修订原因：TASK-006 与 TASK-007 分别包含正式前端智能配置模块和共享前端对话组件，而 TASK-010 原先才建立正式 TypeScript 前端工程，形成前端工程能力晚于其消费者的依赖矛盾。
+- v1.4 候选边界：新增 `TASK-006-FE` 作为可提前执行的正式前端工程初始化与共享基础任务。它只建立前端工程、构建/测试脚本、应用壳和非业务共享基础；不得实现 Agent 配置页面、Agent 对话、流式事件、引用、采纳/直接开始或任何业务页面。TASK-006 与 TASK-007 保留各自的前端业务范围和验收责任；TASK-010 保留已批准流程的完整页面/API 集成责任，但不再重复建立工程基础。
 - 关联基线：
   - PRD：`01-requirements/PRD.md`，已批准 v1.1
   - SPEC：`01-requirements/SPEC.md`，已批准 v1.1
@@ -265,6 +267,31 @@
 - PR 与合并：DEV-002 创建并维护同一 Draft PR；DEV-001 批准精确 HEAD、完成集成检查并取得项目负责人逐 PR 明确授权后，由 DEV-001 合并至 `codex/stage-05-integration`。
 - 回滚：回退适配器 Commit；外部文档删除必须遵循业务删除和审计规则。
 
+### TASK-006-FE：正式前端工程初始化与共享基础
+
+- 状态：Authorized to start / 本任务书 v1.4 生效后执行
+- 优先级：P0
+- 负责人：`DEV-002`
+- 任务开发者：`DEV-002`
+- 指定审核者：`DEV-001`
+- Draft PR 创建者：任务开发者
+- 开发者是否允许创建 Draft PR：是；审核通过前不得自行批准或合并
+- PR 目标分支：`codex/stage-05-integration`
+- 并行属性：Parallel After TASK-001；仅为 TASK-006、TASK-007 与 TASK-010 的前端子范围提供工程前置，不等待其业务后端完成
+- 需求映射：前端工程承载已批准的 FR-012、FR-005、页面功能矩阵全部 P0 页面；实施计划 Task 4A
+- 范围：建立唯一的 `codebase/frontend/` TypeScript 工程、可执行的构建和测试脚本、应用启动壳、路由/页面壳、样式基础、非业务 API 客户端边界及测试基础设施。
+- 不包含：Agent 智能配置字段或保存流程、Agent 对话/SSE/引用、故障与维修页面业务流程、认证业务规则、把 Stage 3 原型复制到正式工程、修改原型或新增未经批准的产品能力。
+- 预计修改：`codebase/frontend/package.json`、TypeScript/测试/构建配置、`src/` 中的工程入口与非业务共享基础、对应前端基础测试。
+- 共享契约：正式前端事实来源唯一位于 `codebase/frontend/`；共享基础不得以静态原型为运行时依赖，不得伪造后端数据或定义业务 API；后续任务只能在此工程内实现各自已分配的业务页面/组件。
+- 实施步骤：先写构建、测试与原型隔离失败测试；建立最小 TypeScript 工程与脚本；实现无业务数据的应用壳和共享基础；执行构建、测试与原型隔离检查并记录证据。
+- 验收标准：`npm --prefix codebase/frontend test` 与 `npm --prefix codebase/frontend run build` 可执行；工程不读取 `03-ui-prototype/` 作为运行时依赖；无 Agent 配置、对话、流式、引用或业务流程实现。
+- 验证：`npm --prefix codebase/frontend test`；`npm --prefix codebase/frontend run build`；`git diff --check`；文件边界检查确认仅含工程基础。
+- 分支：`codex/task-006-fe-frontend-foundation`
+- PR 审核请求：`DEV-002` 完成本任务验收、前端基础验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
+- Review：`DEV-001` 复核工程可运行性、原型隔离、任务边界、无业务范围越界及验证证据；任何 Critical/Important 均退回 `DEV-002` 修复。
+- PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
+- 回滚：回退独立前端基础 Commit；不得删除或改写 Stage 3 原型。
+
 ### TASK-006：四个 Agent 独立配置与模型能力校验
 
 - 状态：Authorized to start / TASK-002 前置已解除，全部范围仍须满足本任务自身 PR 门禁
@@ -275,15 +302,15 @@
 - Draft PR 创建者：任务开发者
 - 开发者是否允许创建 Draft PR：是；审核通过前不得自行批准或合并
 - PR 目标分支：`codex/stage-05-integration`
-- 并行属性：Parallel After TASK-001；TASK-002 合并后治理收尾已由 PR #25 合入，迁移、数据库集成和共享数据模型不再受 TASK-002 阻断，仍须满足本任务自身 PR 门禁
+- 并行属性：后端范围 Parallel After TASK-001；前端智能配置子范围 Sequential After TASK-006-FE。TASK-002 合并后治理收尾已由 PR #25 合入，迁移、数据库集成和共享数据模型不再受 TASK-002 阻断，仍须满足本任务自身 PR 门禁
 - 需求映射：FR-012、NFR-006；AC-032、AC-034；实施计划 Task 5
 - 范围：四个 `agent_id` 独立配置、首次单独初始化、模型能力、深度思考校验和运行配置快照输入。
 - 不包含：Agent 图执行、前端对话和版本/发布/回滚能力。
 - 预计修改：`codebase/backend/app/modules/agent_config/`、配置测试、正式前端智能配置模块；共享迁移由 `DEV-001` 集成。
 - 共享契约：更新一个 Agent 不影响其他 Agent；不使用共享默认对象批量覆盖；深度思考要求 `supports_reasoning=true`。
-- 实施步骤：写四 Agent 隔离失败测试；实现模型与配置 API；实现推理能力校验；交付 `AgentRun.config_snapshot` 输入契约。
+- 实施步骤：写四 Agent 隔离失败测试；实现模型与配置 API；实现推理能力校验；在 TASK-006-FE 正式集成后实现智能配置模块并交付 `AgentRun.config_snapshot` 输入契约。
 - 验收标准：四个 Agent 可独立读取和保存；错误模型配置被明确拒绝；密钥不返回前端。
-- 验证：`python -m pytest codebase/backend/tests/modules/test_agent_config.py -q`；API 契约测试；智能配置相关前端测试。
+- 验证：`python -m pytest codebase/backend/tests/modules/test_agent_config.py -q`；API 契约测试；TASK-006-FE 集成后执行智能配置相关前端测试。
 - 分支：`codex/task-006-agent-config`
 - PR 审核请求：`DEV-002` 完成本任务全部范围、验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
 - Review：`DEV-001` 复核认证、迁移、审计、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-002` 修复。
@@ -300,13 +327,13 @@
 - Draft PR 创建者：任务开发者
 - 开发者是否允许创建 Draft PR：是；审核通过前不得自行批准或合并
 - PR 目标分支：`codex/stage-05-integration`
-- 并行属性：Blocked By TASK-002, TASK-006
+- 并行属性：后端范围 Blocked By TASK-002, TASK-006；共享前端对话组件 Sequential After TASK-006-FE
 - 需求映射：FR-005、NFR-006、NFR-008、NFR-009；AC-003、AC-029、AC-034—038；实施计划 Task 6
 - 范围：线程归属、运行快照、LangGraph checkpoint、工具审计、人工中断/恢复和安全 SSE 事件。
 - 不包含：四个 Agent 的具体业务图、业务事实写入。
 - 预计修改：`codebase/backend/app/modules/agent_runtime/`、Agent 运行测试、共享前端对话组件。
 - 共享契约：SSE 事件类型遵循系统架构；不输出/保存原始思维链；线程仅创建者或管理员可读。
-- 实施步骤：写线程隔离/SSE/恢复/脱敏失败测试；实现运行模型和 checkpoint；接入配置快照；验证异常与重启恢复。
+- 实施步骤：写线程隔离/SSE/恢复/脱敏失败测试；实现运行模型和 checkpoint；接入配置快照；在 TASK-006-FE 正式集成后实现共享前端对话组件；验证异常与重启恢复。
 - 验收标准：SSE 顺序稳定；刷新或重启可恢复；未授权线程不可读；错误不被吞掉；日志无敏感信息。
 - 验证：`python -m pytest codebase/backend/tests/modules/test_agent_runtime.py -q`；SSE 契约测试；PostgreSQL checkpoint 集成测试由 `DEV-001` 提供环境。
 - 分支：`codex/task-007-agent-runtime`
@@ -377,11 +404,11 @@
 - PR 目标分支：`codex/stage-05-integration`
 - 并行属性：Blocked By TASK-003, TASK-008, TASK-009
 - 需求映射：页面功能矩阵全部 P0 页面；AC-012—015、AC-031、AC-039—044；实施计划 Task 9
-- 范围：建立正式 TypeScript 前端工程；以 API 替代静态数据；接入流式对话、引用、采纳/直接开始、结束维修摘要和权限状态。
+- 范围：在 TASK-006-FE 已集成的正式 TypeScript 前端工程中，以 API 替代静态数据；接入流式对话、引用、采纳/直接开始、结束维修摘要和权限状态。
 - 不包含：把 Stage 3 原型复制到 `codebase/frontend/`、擅自更改原型或业务规则。
-- 预计修改：`codebase/frontend/package.json`、`src/`、前端单元/交互测试；只读参考 `03-ui-prototype/`。
+- 预计修改：`codebase/frontend/src/`、前端单元/交互测试；只读参考 `03-ui-prototype/`，不得重建或改写 TASK-006-FE 的工程基础。
 - 共享契约：只消费已合并 API；正式前端事实来源唯一位于 `codebase/frontend/`。
-- 实施步骤：先定义并记录 package scripts；写交互失败测试；按页面/组件最小迁移批准流程；执行构建、测试和原型差异审查。
+- 实施步骤：复用 TASK-006-FE 已记录的 package scripts；写交互失败测试；按页面/组件最小迁移批准流程；执行构建、测试和原型差异审查。
 - 验收标准：关键加载/空/错/权限状态存在；SSE 与引用真实；摘要显隐符合 AC；正式代码不依赖原型运行目录。
 - 验证：`npm --prefix codebase/frontend test`；`npm --prefix codebase/frontend run build`；全部 `06-testing/tests/*.test.js`；浏览器关键流程检查。
 - 分支：`codex/task-010-frontend-integration`
@@ -420,7 +447,7 @@
 | 开发者 | 分配开发任务 | 默认审核任务 | Draft PR 创建责任 | 主要范围 | Docker 责任 | 集成责任 |
 |---|---|---|---|---|---|---|
 | DEV-001 | TASK-001、002、003、004、011 | TASK-005、006、007、008、009、010 | 创建并维护自己的任务 Draft PR | 平台事实、权限、维修、基础设施、E2E | 唯一验证人 | 对全部 PR 执行集成检查和授权请求；合并 DEV-002 的 PR；负责合并后回归 |
-| DEV-002 | TASK-005、006、007、008、009、010 | TASK-002、003、004、011；TASK-001 仅保留历史独立审查 | 创建并维护自己的任务 Draft PR | 知识适配、Agent、正式前端 | 无本地 Docker；提交给 DEV-001 验证 | 合并 DEV-001 的获批 PR；提供模块开发、交叉审核与回归证据 |
+| DEV-002 | TASK-005、006-FE、006、007、008、009、010 | TASK-002、003、004、011；TASK-001 仅保留历史独立审查 | 创建并维护自己的任务 Draft PR | 知识适配、Agent、正式前端 | 无本地 Docker；提交给 DEV-001 验证 | 合并 DEV-001 的获批 PR；提供模块开发、交叉审核与回归证据 |
 
 ## 8. 依赖、并行与协作矩阵
 
@@ -431,11 +458,12 @@
 | TASK-003 | DEV-001 | DEV-002 | DEV-002，需项目负责人逐 PR 授权 | P0 | Sequential After TASK-002 | TASK-002 已通过 PR #25 完成治理收尾，身份、审计和迁移基础已完成回归 |
 | TASK-004 | DEV-001 | DEV-002 | DEV-002，需项目负责人逐 PR 授权 | P0 | Sequential After TASK-002 | TASK-002 已通过 PR #25 完成治理收尾，业务容器基线与网络契约可开始实施 |
 | TASK-005 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-004 | TASK-002 条件已满足；RAGFlow 环境仍须由 TASK-004 审核、正式集成并可用 |
-| TASK-006 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Parallel After TASK-001 | 可继续领域测试、非数据库实现、迁移、数据库集成和共享数据模型；仍须满足本任务自身 PR 门禁 |
-| TASK-007 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-002, TASK-006 | 认证、迁移和 Agent 配置契约已审核并正式集成 |
+| TASK-006-FE | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Parallel After TASK-001 | 本任务书 v1.4 已按治理 PR 合入；TASK-001 工程目录基线已集成；仅创建正式前端工程与共享基础 |
+| TASK-006 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | 后端 Parallel After TASK-001；前端子范围 Sequential After TASK-006-FE | 后端/迁移可继续；智能配置前端模块仅在 TASK-006-FE 正式集成后实施；任务完成仍须覆盖两部分 |
+| TASK-007 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | 后端 Blocked By TASK-002, TASK-006；前端子范围 Sequential After TASK-006-FE | Agent 配置契约须正式集成；共享前端对话组件须等待 TASK-006-FE |
 | TASK-008 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-002, TASK-006, TASK-007 | 业务工具、配置和 Runtime 可用 |
 | TASK-009 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003, TASK-005, TASK-006, TASK-007 | 维修、案例、知识和 Runtime 全部已审核并正式集成 |
-| TASK-010 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003, TASK-008, TASK-009 | 所有正式页面所需 API 与 Agent 已审核并正式集成 |
+| TASK-010 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003, TASK-008, TASK-009, TASK-006-FE | 所有正式页面所需 API、Agent 和前端工程基础已审核并正式集成 |
 | TASK-011 | DEV-001 | DEV-002 | DEV-002，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003—010 | 所有模块 PR 已 Review、合入集成分支并完成回归 |
 
 ## 9. 集成计划
@@ -446,7 +474,7 @@
 - 唯一集成触发源：开发任务 PR 已由另一名开发者批准当前精确 HEAD，或纯治理文档 PR 已由项目负责人确认治理内容和当前精确 HEAD；DEV-001 集成检查通过，且项目负责人明确批准合并该 PR 和 HEAD。
 - 不得作为集成触发源：任务分支 push、Draft PR 创建、单独 CI 通过、过期 approval、未绑定精确 HEAD 的口头批准、PR #15 被拒绝历史或未绑定任务书的自动化事件。
 - 自动化策略：允许开发者创建/更新自己的 Draft PR、执行检查、提交 Review、发送通知和准备 Merge 授权请求；禁止 GitHub auto-merge、merge queue 和自动进入 Stage 6。矩阵指定的非任务开发者获项目负责人逐 PR 授权后执行的 Merge Commit 不属于 auto-merge。
-- 推荐集成顺序：TASK-001 → TASK-002 → TASK-006 → TASK-007 → TASK-004 → TASK-005 → TASK-003 → TASK-008 → TASK-009 → TASK-010 → TASK-011。
+- 推荐集成顺序：TASK-001 → TASK-002 → TASK-006-FE → TASK-006 → TASK-007 → TASK-004 → TASK-005 → TASK-003 → TASK-008 → TASK-009 → TASK-010 → TASK-011。
 - 顺序允许在依赖满足后微调，但必须先更新本任务书；不得仅在聊天中改变。
 - 每次集成前检查：开发任务 PR 的另一名开发者已批准当前精确 HEAD且审核后无新增提交；纯治理文档 PR 的项目负责人已确认治理内容和当前精确 HEAD。目标分支正确；required checks 通过；依赖已正式集成；真实检查结果齐全；共享契约未漂移；无禁止范围修改；相关文档已更新；无未解决阻断项；PR 无冲突且 Mergeable。
 - Merge 授权请求：`DEV-001` 必须向项目负责人报告 TASK/CR、PR、源/目标分支、精确 HEAD、适用的审核或治理确认结论、Critical/Important/Minor 或治理检查结果、测试与 Docker 证据（如适用）、依赖、冲突、共享契约、风险、回滚和合并后验证计划，并询问是否批准合并。
