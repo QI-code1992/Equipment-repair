@@ -11,7 +11,7 @@
 - 实施顺序：[IMPLEMENTATION_PLAN.md](../04-architecture-plan/IMPLEMENTATION_PLAN.md)。
 - 已批准开发任务书：[DEVELOPMENT_TASK_BOOK.md](../04-architecture-plan/DEVELOPMENT_TASK_BOOK.md)，v1.4（CR-041 已随 PR #28 Merge Commit `7a44401bacbdc48d58f697a6b252449ecf44bb29` 生效）；新增正式前端工程初始化前置任务。
 - 人员配置：`DEV-001` 负责最终集成和全部 Docker/Compose 验证；`DEV-002` 负责 AI、知识适配和正式前端，不具备 Docker 环境。
-- 当前任务：`DEV-001` 可按任务书启动 TASK-003、TASK-004；`DEV-002` 可继续 TASK-006 后端/迁移范围，并可创建 TASK-006-FE 的独立 Draft PR。TASK-006-FE 正式集成后，才能完成 TASK-006 的智能配置前端子范围和 TASK-007 的共享前端对话子范围。TASK-005 仍等待 TASK-004 的环境与契约交付。
+- 当前任务：`DEV-001` 可按任务书启动 TASK-003、TASK-004；`DEV-002` 可继续 TASK-006 后端/迁移范围。PR #33 已集成，但在其治理收尾 PR 合入前，TASK-006 智能配置前端子范围和 TASK-007 共享前端对话子范围继续锁定；收尾合入后可按各自任务书、PR、审核和授权门禁继续。TASK-005 仍等待 TASK-004 的环境与契约交付。
 
 TASK-001、TASK-002 均已完成并保留历史交接。所有开发只允许在新的 `codex/*` 隔离分支和独立工作区执行；不得直接向 `main` 推送，也不得绕过各任务自身的 PR、审核和授权门禁。
 
