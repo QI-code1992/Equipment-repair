@@ -278,3 +278,13 @@
 - 修正范围：同步 Ready 审核证据、PR 当前完整 HEAD 绑定说明、Node/npm 运行基线和 `npm ci` 验证证据；未修改业务页面、Agent 配置、SSE、维修流程、认证或业务 API。
 - 运行基线：`package.json` 声明 Node `^20.19.0 || >=22.12.0`、npm `>=10.0.0`；本轮验证环境为 Node `v26.5.0`、npm `11.17.0`。
 - 验证计划：重新执行 `npm ci`、前端测试、生产构建、原型静态回归和 `git diff --check`；推送后以新完整 HEAD 重新请求 DEV-001 审核。
+## TASK-005 安全知识上传 API 自测（2026-07-22）
+
+- 功能提交：`f9fc4a0ed2a04249640d569de08c41f17aa4b684`；基线为 `codex/stage-05-integration@8c0087928f693674f498044b0e2dbbe96196847c`，同一 Draft PR #37。
+- TDD RED：MinIO 边界因 `app.integrations.object_storage` 不存在而收集失败；知识 API 因 `create_app` 不接受存储/扫描依赖而 4 项失败；ClamAV 边界因模块不存在而收集失败。逐项实现后转绿。
+- 依赖：项目负责人已明确批准 `minio>=7.2.20,<8.0` 与 `python-multipart>=0.0.32,<1.0`；当前 Python 3.13.14 环境安装 `minio 7.2.20`、`python-multipart 0.0.32`，`pip check` 为 `No broken requirements found`。
+- 安全边界：上传最大 100MB且非空；ClamAV 未配置、不可达或响应异常均失败关闭；不安全文件不写 MinIO；对象键随机且限制在 `knowledge/`；审计和响应不含文件正文、Token 或扫描器原始错误。
+- API：`POST /api/knowledge/documents` 使用 `intelligence:knowledge`、`Idempotency-Key`、multipart 和内容 SHA-256 幂等摘要；`GET /api/knowledge/documents/{id}` 向授权操作者返回生命周期及失败原因。
+- 验证：知识/RAGFlow/MinIO/ClamAV 定向 `28 passed, 1 warning`；Python 3.13 全量 `200 passed, 9 skipped, 1 warning`；`compileall`、`git diff --check` 通过。唯一警告是既有 Starlette/httpx 第三方弃用提示。
+- 未验证：无共享 Alembic 迁移；未连接真实平台 MinIO、ClamAV 或 RAGFlow，未执行真实文档扫描、上传、解析、切片、混合检索和重启恢复。这些仍须 DEV-001 在 Docker 环境完成。
+- 兼容/抽象/无关修改：无兼容代码；新增抽象仅限 MinIO、ClamAV 和 RAGFlow 外部副作用边界；无范围外修改。

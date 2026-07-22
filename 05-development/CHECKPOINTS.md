@@ -196,3 +196,11 @@
 - 证据：知识/RAGFlow 定向 `17 passed, 1 warning`；Python 3.13 全量 `190 passed, 9 skipped, 1 warning`；`compileall` 与 `git diff --check` 通过。
 - 边界：未新增生产依赖、公开 API、迁移、对象存储客户端、扫描器、兼容层或范围外修改。真实 MinIO/RAGFlow/Worker 联调仍未执行。
 - 恢复/门禁：可回退本功能提交。TASK-005 仍处于 Draft 开发；最终精确 HEAD 经 DEV-001 审核、集成检查和项目负责人授权后，只能由 DEV-001 合并；Stage 6 仍未获准。
+## FCP-005-R3：TASK-005 安全上传 API 检查点
+
+- 状态：Development Candidate / Locally Validated / Not Reviewed / Not Integrated。
+- 分支/功能提交：`codex/task-005-knowledge-ragflow` / `f9fc4a0ed2a04249640d569de08c41f17aa4b684`；继续维护 Draft PR #37。
+- 范围：经项目负责人批准新增 `minio` 与 `python-multipart`；实现 MinIO 随机对象键和限定 bucket 访问、ClamAV 失败关闭扫描、100MB multipart 上传、`intelligence:knowledge` 权限、幂等、成功/失败审计、文件元数据与文档状态查询 API。
+- 证据：知识范围定向 `28 passed, 1 warning`；Python 3.13 全量 `200 passed, 9 skipped, 1 warning`；`pip check`、`compileall` 与 `git diff --check` 通过。
+- 边界：未增加 Alembic 迁移或 Docker/部署配置；共享迁移仍由 DEV-001 集成，平台 MinIO 与 ClamAV 真实服务、RAGFlow 真实联调尚待 DEV-001 环境验证。无兼容层或范围外修改。
+- 恢复/门禁：可回退本功能提交。TASK-005 仍处于 Draft 开发；最终精确 HEAD 经 DEV-001 审核、集成检查和项目负责人授权后，只能由 DEV-001 合并；Stage 6 仍未获准。
