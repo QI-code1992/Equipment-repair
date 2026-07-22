@@ -137,3 +137,15 @@
 - Scope: `verify.ps1`、`verify-persistence.ps1` 默认 `.env.local` 与缺失文件失败契约。
 - Verification: 审核契约、清理失败行为、Compose、PowerShell、Python 3.13、真实健康/隔离/持久化均通过。
 - Boundary: PR #27 新 HEAD 获 DEV-002 批准前不稳定、不解锁 TASK-005。
+
+### FCP-004：TASK-004 独立 RAGFlow 基础设施集成检查点
+
+- Status: Stable after governance closeout merge
+- Scope: 独立 RAGFlow、MySQL、Redis、MinIO、Elasticsearch 8.11 Compose 环境；健康、隔离、持久化和运行环境契约。
+- Branch / PR: `codex/task-004-ragflow-infra` / PR #27。
+- Approved Head: `76732606412d71239d302e4e9e5a0da6b364fd70`。
+- Merge Commit: `87e8e3c0aab62ee9105bf3807b23fcf44ac15137`。
+- Verification: DEV-002 Approved；合并后 Python 3.13 `5 passed, 1 warning`；PowerShell 审核/清理失败/Compose 契约 PASS；5 容器 healthy；Web/API 200；网络隔离 PASS；四存储重启恢复 PASS，容器重建 0、探针清理 4。
+- Regression Coverage: `.env.local` 默认值与缺失失败、固定镜像摘要、日志秘密扫描、内部依赖零宿主端口、四存储持久化。
+- Restore Options: `git revert -m 1 87e8e3c0aab62ee9105bf3807b23fcf44ac15137` 仅作为代码回退候选；命名卷删除属于数据删除，必须另行授权。
+- Notes: 历史 Pending 条目保留用于审计；本治理 PR 合并后由本条作为当前稳定检查点。TASK-005 可据此启动，Stage 6 仍未获准。

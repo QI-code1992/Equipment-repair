@@ -231,3 +231,14 @@
 - 持久化：MySQL、Redis、MinIO S3、Elasticsearch 重启后探针一致，容器重建数 0，严格清理探针数 4。
 - 其他：Python 3.13.14 健康回归 `5 passed, 1 warning`；compileall、`git diff --check` 通过。唯一警告为既有 Starlette/httpx 第三方弃用提示。
 - 边界：未增加生产依赖、兼容代码、抽象层、业务 API、迁移、TASK-005 或无关修改；DEV-002 尚未审核新 HEAD，TASK-005 继续锁定。
+
+## TASK-004 PR #27 合并后复验（2026-07-22）
+
+- 集成对象：源 HEAD `76732606412d71239d302e4e9e5a0da6b364fd70`；Merge Commit `87e8e3c0aab62ee9105bf3807b23fcf44ac15137`；最新集成基线 `960c64ffc64c20edfb5bd73a2721678c9b9972c8` 包含该 Merge Commit。
+- Review/Merge：DEV-002 Approved 同一源 HEAD，并作为非任务作者使用 Merge Commit 合并；项目负责人授权绑定 PR #27 和同一精确 HEAD。
+- 合并后静态回归：`verify-review-remediation.ps1`、`verify-cleanup-failure.ps1`、`verify-compose-contract.ps1` 均 PASS；RAGFlow Compose `config --quiet` PASS。
+- Python：Python 3.13.14 健康回归 `5 passed, 1 warning`；唯一警告为既有 Starlette/httpx 第三方弃用提示。
+- 真实运行：5 个容器 healthy；Web/API HTTP 200；RAGFlow `v0.25.6`；Elasticsearch `8.11.3`；五个固定镜像摘要与运行镜像一致；日志依赖失败 0、秘密命中 0。
+- 隔离/持久化：内部网络成员 5、访问网络成员 1、内部依赖宿主端口 0、RAGFlow 回环端口 2；MySQL、Redis、MinIO S3、Elasticsearch 重启后探针一致，容器重建 0，探针清理 4。
+- 边界：治理收尾只更新任务书和连续台账；无 `codebase/`、测试代码、数据库、部署配置、依赖、兼容层、抽象层或无关修改。
+- 结论：本治理 PR 合并后 TASK-004 正式闭环并解除 TASK-005 的 TASK-004 依赖；Stage 6 仍禁止进入。
