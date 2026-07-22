@@ -158,3 +158,12 @@
 - 运行基线：`package.json` 声明 Node `^20.19.0 || >=22.12.0`、npm `>=10.0.0`；本轮使用 Node `v26.5.0`、npm `11.17.0` 并执行 `npm ci`。
 - 证据：前端 2 项测试通过、生产构建通过、全部现有原型静态检查通过、`git diff --check` 通过。
 - 恢复/门禁：可回退该任务提交；不涉及数据或生产操作。仅在 DEV-001 审核当前精确 HEAD、完成集成检查并取得项目负责人逐 PR/HEAD Merge 授权后，才可由 DEV-001 合并；此前不得解锁下游前端范围或 Stage 6。
+
+## FCP-003-R1：TASK-003 本地开发候选
+
+- 状态：Development Candidate / Locally Validated / Not Pushed / Not Reviewed / Not Integrated / Does Not Unlock Dependencies。
+- 分支/基线：`codex/task-003-maintenance-lifecycle`；最新集成基线 `f135997a6ecc009de75735b673499b475615a717`；同步 Merge Commit `4877dcdc301b97d884a43883a5584fdee1d28c41`。
+- 范围：故障上报、直接/采纳诊断开始维修、维修完成、人工最终字段、结构化历史案例与相似案例查询、活跃故障设备停用保护、Alembic `0003_task003`。
+- 验证：Python 3.13.14 模块回归 `168 passed, 1 warning`；专用 PostgreSQL 17 迁移、事务、幂等及并发 `4 passed, 1 warning`；`compileall`、单一迁移 head、平台/RAGFlow Compose 配置及 `git diff --check` 通过。
+- 边界：相似案例只查询 PostgreSQL，不调用 RAGFlow、Agent 或外部网络；无新增生产依赖、兼容层、通用抽象、前端、TASK-004/005/006/008 实现或无关修改。
+- 恢复/门禁：本地提交完整且工作树干净；尚未推送同一 Draft PR，DEV-002 尚未审核。不得据此解锁 TASK-009/010/011，不得进入 Stage 6。

@@ -195,7 +195,7 @@
 
 ### TASK-003：故障、工单、维修与结构化案例闭环
 
-- 状态：Planned / Ready to start under its task-book PR gates
+- 状态：Development Candidate / Locally Validated / Not Pushed / Not Reviewed / Not Integrated
 - 优先级：P0
 - 负责人：`DEV-001`
 - 任务开发者：`DEV-001`

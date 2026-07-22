@@ -232,6 +232,15 @@
 - 其他：Python 3.13.14 健康回归 `5 passed, 1 warning`；compileall、`git diff --check` 通过。唯一警告为既有 Starlette/httpx 第三方弃用提示。
 - 边界：未增加生产依赖、兼容代码、抽象层、业务 API、迁移、TASK-005 或无关修改；DEV-002 尚未审核新 HEAD，TASK-005 继续锁定。
 
+## TASK-003 最新集成基线本地复验（2026-07-22）
+
+- 同步：本地候选以 Merge Commit `4877dcdc301b97d884a43883a5584fdee1d28c41` 吸收 `codex/stage-05-integration` 的 `f135997a6ecc009de75735b673499b475615a717`，无文件、迁移、API 或治理冲突。
+- Python：Python 3.13.14 执行 `pytest codebase/backend/tests/modules -q` 为 `168 passed, 1 warning`；唯一警告为既有 Starlette/httpx 第三方弃用提示。
+- PostgreSQL：一次性 PostgreSQL 17 专用空库执行 `test_task003_postgres.py` 为 `4 passed, 1 warning`，覆盖 `0002 -> 0003 -> 0002 -> head`、失败回滚、同 Key 并发重放、并发开始维修、故障创建/设备停用竞争；容器已移除。
+- 静态门禁：`compileall`、Alembic 单一 `0003_task003 (head)`、平台 Compose、RAGFlow Compose 和 `git diff --check` 通过。
+- 业务边界：四个 API、状态迁移、人工最终字段、设备停用保护和结构化案例查询已覆盖；查询无外部网络访问，诊断草稿只复制批准且类型正确的字段。
+- 未验证/门禁：尚未推送当前本地候选、尚未创建或更新 Draft PR、DEV-002 尚未审核；TASK-003 未正式集成，不解锁下游任务，不构成 Stage 6 证据。
+
 ## TASK-004 PR #27 合并后复验（2026-07-22）
 
 - 集成对象：源 HEAD `76732606412d71239d302e4e9e5a0da6b364fd70`；Merge Commit `87e8e3c0aab62ee9105bf3807b23fcf44ac15137`；最新集成基线 `960c64ffc64c20edfb5bd73a2721678c9b9972c8` 包含该 Merge Commit。

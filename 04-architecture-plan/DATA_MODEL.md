@@ -93,6 +93,30 @@ Alembic `0002` 对旧设备执行确定性收口：`model` 回填为 `LEGACY-{co
 
 ### 延后边界与产品侧修正
 
-由 TASK-003 建立故障、工单和维修事实后，再实现这些事实对设备停用或生命周期操作的保护。附件上传、MinIO/S3、扫描、下载和生命周期不属于 TASK-002；当前只保存图片引用元数据。
+TASK-003 负责建立故障、工单和维修事实，并已据此实现活跃故障设备停用保护。附件上传、MinIO/S3、扫描、下载和生命周期不属于 TASK-002；当前只保存图片引用元数据。
 
 Stage 3 原型中的动态自定义角色控件与 FR-010 及 CR-036 的固定四角色模型冲突，必须在 TASK-010 前完成产品侧修正。本次修复不修改原型、PRD、SPEC 或验收标准。
+
+## TASK-003 正式契约
+
+TASK-003 迁移候选为 `0003_task003`，开发基线 `down_revision=0002`。正式送审前必须按最新集成分支线性化；当前候选的 downgrade 会删除以下五张 TASK-003 表，但保留 TASK-002 表。
+
+| Entity | 核心字段 | 唯一、检查与外键约束 |
+|---|---|---|
+| `FaultReport` | `number,equipment_id,organization_snapshot,urgency,symptom,occurred_at,possible_location,description,attachment_refs,status,submitter_id,submitted_at,updated_at` | `number` 唯一；状态仅 `PENDING_ACCEPT,IN_REPAIR,PROCESSED`；引用设备和提交人；按设备与状态索引。 |
+| `DiagnosisDraft` | `fault_report_id,status,allowed_prefill,read_only_summary,adopted_at,created_at,updated_at` | 状态仅 `DRAFT,DIAGNOSIS_READY`；引用故障；一次采纳由事务与行锁保护。 |
+| `WorkOrder` | `number,fault_report_id,equipment_id,status,repairer_user_id,started_at,pending_inspection_at,completed_at,created_at,updated_at` | `number` 和 `fault_report_id` 分别唯一；状态仅 `DRAFT,PENDING_ACCEPT,IN_REPAIR,PENDING_INSPECTION,COMPLETED`；引用故障、设备和维修人。 |
+| `MaintenanceRecord` | `work_order_id,start_mode,diagnosis_draft_id,diagnosis_prefill,ai_summary,actual_cause,actual_solution,repair_result,parts_replacement_notes,created_at,updated_at` | `work_order_id` 唯一；非空 `diagnosis_draft_id` 唯一；开始模式仅 `DIRECT,ADOPTED`；引用工单和诊断草稿。 |
+| `HistoricalRepairCase` | `source_work_order_id,source_fault_report_id,equipment_id,equipment_type,equipment_model,symptom,actual_cause,actual_solution,repair_result,completed_at,created_at` | `source_work_order_id` 唯一；引用工单、故障和设备；按故障与设备索引。 |
+
+### 状态机与业务事实
+
+故障上报以设备行锁读取正式设备：停用设备拒绝上报；正常设备变为 `FAULT`。开始维修锁定故障并只接受 `PENDING_ACCEPT`，创建唯一工单和唯一维修记录，故障变为 `IN_REPAIR`、设备变为 `REPAIRING`。结束维修锁定工单、故障、设备和维修记录，保存人工最终字段，生成唯一结构化案例，将工单收口为 `COMPLETED`、故障收口为 `PROCESSED`；若同设备仍有其他活跃故障则设备为 `FAULT`，否则为 `NORMAL`。
+
+设备停用与故障创建都先锁定同一设备行。目标状态不是 `DISABLED` 时不增加活跃故障限制；目标为 `DISABLED` 时，只要存在 `PENDING_ACCEPT` 或 `IN_REPAIR` 故障就拒绝，从而禁止形成“停用设备仍新增活跃故障”的竞争终态。
+
+### 人工最终字段与诊断边界
+
+`actual_cause,actual_solution,repair_result` 是维修结束必填的人工业务事实，`parts_replacement_notes` 可空。采纳诊断仅允许预填 `fault_type,actual_cause,actual_solution,parts_replacement_notes`，只读摘要仅允许 `symptom,key_evidence,verification_results,root_cause,recommendations`；未知字段、密钥、Token、附件正文和思维链不得进入维修记录。人工结束提交覆盖任何预填值。
+
+`HistoricalRepairCase` 是 PostgreSQL 结构化事实源。相似案例只使用类型、型号、症状和完成时间确定性排序，不写入或调用 RAGFlow，不增加向量、embedding、引用或外部网络依赖。
