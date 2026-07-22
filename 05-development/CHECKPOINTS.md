@@ -188,3 +188,11 @@
 - 证据：RED 为 `ModuleNotFoundError: app.integrations`；定向测试 `9 passed`；Python 3.13 全量 `182 passed, 9 skipped, 1 warning`；`compileall` 和 `git diff --check` 通过。
 - 边界：使用 Python 标准库 HTTP 客户端，无新增生产依赖、兼容层或范围外修改。真实 RAGFlow 上传/解析/检索与重启验证仍须由具备 Docker 环境的 DEV-001 执行。
 - 恢复/门禁：可回退功能提交。TASK-005 尚未完成；后续功能继续在同一 Draft PR，最终精确 HEAD 经 DEV-001 审核、集成检查和项目负责人授权后，只能由 DEV-001 合并；Stage 6 仍未获准。
+## FCP-005-R2：TASK-005 知识文档生命周期检查点
+
+- 状态：Development Candidate / Locally Validated / Not Reviewed / Not Integrated。
+- 分支/功能提交：`codex/task-005-knowledge-ragflow` / `95f5d31aeb7f41864f2c0dfd860cde6cc7ff6dfa`；继续维护 Draft PR #37。
+- 范围：知识数据集、业务文档和引用模型；对象存储引用、100MB 上限、Worker 上传同步、状态刷新、安全失败原因、仅 READY 文档检索以及远端优先删除。共享 Alembic 迁移仍由 DEV-001 集成。
+- 证据：知识/RAGFlow 定向 `17 passed, 1 warning`；Python 3.13 全量 `190 passed, 9 skipped, 1 warning`；`compileall` 与 `git diff --check` 通过。
+- 边界：未新增生产依赖、公开 API、迁移、对象存储客户端、扫描器、兼容层或范围外修改。真实 MinIO/RAGFlow/Worker 联调仍未执行。
+- 恢复/门禁：可回退本功能提交。TASK-005 仍处于 Draft 开发；最终精确 HEAD 经 DEV-001 审核、集成检查和项目负责人授权后，只能由 DEV-001 合并；Stage 6 仍未获准。
