@@ -195,3 +195,10 @@
 - 第二轮 Spec/失败路径：功能提交 `29180e285767cbffb9d694cd1834f04514d2cc18` 引入最小外部命令边界；四类代表性清理以子进程调用固定退出码 42 的假 Compose 命令，逐项断言非零退出且输出不含 PASS。真实持久化重启和成功清理继续通过。Critical 0、Important 0、Minor 0。
 - 第三轮完整 diff/运行态：环境与清理行为契约、PowerShell 语法、Python 3.13、compileall、Compose config、5 容器健康、Web/API 200、网络隔离、四存储 restart 和 `git diff --check` 均通过；变更限制在 TASK-004 设计、计划、基础设施验证/测试和正式证据。Critical 0、Important 0、Minor 0。
 - 结论：本地三轮复查关闭两项 Important，但不等于 DEV-002 正式批准。推送后必须按 PR #27 新完整 HEAD 重新审核；此前不请求 Merge 授权、不解锁 TASK-005，Stage 6 仍禁止进入。
+
+### TASK-004 PR #27 R5 Changes requested 与 DEV-001 修正复查
+
+- 外部审核：DEV-002 对精确 HEAD `a5ac8490bf678ea03efc702052f7f1edecff182b` 给出 Critical 0、Important 1、Minor 0；阻断为任务书 Markdown 列表中的真实运行命令未被环境契约解析。
+- Standards/Spec：功能提交 `314b46d3efdc7af0d13c671fadd41be7bb3900d1` 仅修改现有审核脚本。任务书验证列表中的反引号命令与可执行代码块被检查；静态 config、普通说明及明确禁用/错误示例不误报。Windows PowerShell 5.1 兼容性、函数尺寸和修改范围通过。
+- RED/GREEN：旧检查器对任务书 `.env.example` 运行变异错误 PASS；修正后非零拒绝。独立首审发现禁用示例误报 1 个 Important，补充外部行为 RED 后修复；累计复审 Critical 0、Important 0、Minor 0。
+- 结论：本地复查通过不等于 DEV-002 批准。新 HEAD 推送后必须在同一 PR #27 重新审核；此前不请求 Merge 授权、不解锁 TASK-005，Stage 6 仍禁止进入。

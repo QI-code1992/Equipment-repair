@@ -211,3 +211,12 @@
 - 回归：定向审计 `21 passed, 1 warning`；Python 3.13 全量 `140 passed, 5 skipped, 1 warning`；`python -m compileall -q app` 和 `git diff --check` 通过。两层测试同时检查 `sanitize_audit_metadata()` 返回值和失败请求的 `AuditEvent.metadata_json`，均无明文。
 - 运行验证：当前代码重新构建独立 `test` 镜像后，内部网络 PostgreSQL 17 集成 `5 passed, 1 warning`；Compose 重建成功，PostgreSQL/Redis healthy、API Up，容器内 `/healthz` 为 HTTP 200、正文 `{"status":"ok","service":"equipment-operations-platform"}`。
 - 未验证：DEV-002 尚未批准；后继正式 PR 尚未由 DEV-002 创建；TASK-002 尚未合入 `codex/stage-05-integration`，依赖继续锁定。
+
+## TASK-004 PR #27 R5 Markdown 运行命令契约修正（2026-07-22）
+
+- 审核输入：DEV-002 对精确 HEAD `a5ac8490bf678ea03efc702052f7f1edecff182b` 给出 `Changes requested`，Critical 0、Important 1、Minor 0；任务书 `- 验证：...` 内的反引号运行命令未进入 `$runtimeLines`，因此静态断言无法防止其回退到 `.env.example`。
+- RED：保留 `.env.local` 定义，仅将临时任务书列表中的 `--env-file $RagflowEnvFile` 变异为 `.env.example`，旧检查器错误输出 PASS。修正后同一变异稳定返回非零并报告运行命令违规。
+- GREEN：功能提交 `314b46d3efdc7af0d13c671fadd41be7bb3900d1` 按 Markdown 代码块和任务书验证列表提取真实命令；静态 `config --quiet` 不进入运行检查。独立复审发现禁用示例误报后，补充 RED 并排除明确标记为禁止、错误、反例或不得执行的代码块。
+- 验证：Windows PowerShell 语法解析通过；`verify-review-remediation.ps1`、`verify-cleanup-failure.ps1`、`verify-compose-contract.ps1` 均 PASS；任务书回退变异非零；禁用错误示例通过；`git diff --check` 通过。独立复审为 Critical 0、Important 0、Minor 0。
+- 未验证：本轮未改 Compose、镜像、运行脚本或业务代码，因此未重新执行 Docker 五服务重启验证；当前环境中的历史 Python 3.13 虚拟环境入口无法创建进程，本轮未生成新的 Python 结果，沿用记录仅作为上一 HEAD 历史证据，不宣称本轮重新通过。
+- 边界：只修改 TASK-004 审核契约测试；无生产依赖、兼容代码、抽象层、业务 API、迁移、TASK-005 或无关修改。DEV-002 批准新精确 HEAD 前 TASK-005 继续锁定。

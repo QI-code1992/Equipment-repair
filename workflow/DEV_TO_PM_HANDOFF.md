@@ -177,3 +177,11 @@
 - 真实验证：Python 3.13 `5 passed, 1 warning`；Compose/审核/清理行为契约、PowerShell 语法、5 容器健康、Web/API 200、网络隔离、四存储 restart 和严格清理通过；未输出或提交真实秘密。
 - 交付边界：无业务 API、迁移、TASK-005、生产依赖、兼容代码或无关修改；新增一个仅检查外部 Compose 命令退出码的最小模块。
 - 请求动作：推送本正式台账提交后，以 PR #27 新完整 HEAD 重新请求 DEV-002 审核。新审核通过前不得请求 Merge 授权；TASK-005 继续锁定，Stage 6 禁止进入。
+
+## TASK-004 PR #27 R5 审核修正交接（2026-07-22）
+
+- 审核/修正：DEV-002 对 `a5ac8490bf678ea03efc702052f7f1edecff182b` 给出 `Changes requested`（Critical 0、Important 1、Minor 0）；DEV-001 在同一分支和 PR #27 内完成最小修正，功能提交 `314b46d3efdc7af0d13c671fadd41be7bb3900d1`。
+- 关闭证据：任务书 Markdown 列表中的真实运行命令现在进入环境契约；`.env.example` 运行变异返回非零，静态 config 和明确禁用示例不误报；独立累计复审 Critical 0、Important 0、Minor 0。
+- 验证：Windows PowerShell 语法、审核契约、四类清理失败行为、Compose 静态契约和 diff check 通过。本轮未改运行配置且未重跑 Docker；Python 3.13 历史虚拟环境入口当前不可创建进程，未虚报新结果。
+- 交付边界：仅 TASK-004 审核测试与正式证据；无业务 API、迁移、TASK-005、生产依赖、兼容代码、抽象层或无关修改。
+- 请求动作：推送本证据提交后，以 PR #27 新完整 HEAD 重新请求 DEV-002 审核。新审核通过前不得请求 Merge 授权；TASK-005 继续锁定，Stage 6 禁止进入。

@@ -121,3 +121,11 @@
 - 证据：RED `2 failed`；定向 `21 passed, 1 warning`；Python 3.13 全量 `140 passed, 5 skipped, 1 warning`；compileall、diff check 通过；失败请求的 `AuditEvent.metadata_json` 无 `newpassword`、`userpassword`、附件标量、列表或嵌套混合载荷明文。
 - 运行态：独立 test 镜像 PostgreSQL 17 `5 passed, 1 warning`；Compose 重建成功，PostgreSQL/Redis healthy、API Up，`/healthz` HTTP 200。
 - 门禁：等待 DEV-002 对推送后的最终台账 HEAD 复审；只有 DEV-002 通过并创建后继正式 PR、合入目标分支后才可解锁依赖。
+
+## FCP-004-R6：TASK-004 PR #27 第五轮审核修正候选
+
+- 状态：Review Candidate / Not Accepted / Not Integrated / Does Not Unlock TASK-005。
+- 分支/基线：`codex/task-004-ragflow-infra` / `b29c69d13c3d1c81f01023152eabf0c0f2d02741`；修正功能提交 `314b46d3efdc7af0d13c671fadd41be7bb3900d1`，精确候选以本证据提交推送后的 PR #27 HEAD 为准。
+- 修正：审核契约现在解析任务书 `- 验证：...` 内反引号运行命令，拒绝 `.env.example` 运行回退，同时排除静态 config、说明文字和明确禁用示例。
+- 验证：Windows PowerShell 语法、审核契约、四类清理失败行为、Compose 静态契约和 `git diff --check` 通过；任务书运行回退变异非零；独立复审 Critical 0、Important 0、Minor 0。
+- 恢复/门禁：等待 DEV-002 审核推送后的新精确 HEAD；获批、逐 PR/HEAD 授权、DEV-002 Merge Commit 和 DEV-001 合并后复验完成前，TASK-005 继续锁定，Stage 6 禁止进入。
