@@ -228,6 +228,45 @@
 - 依赖：本治理 PR 合并后 TASK-004 正式闭环，TASK-005 的 TASK-004 阻塞解除；Stage 6 仍未获准。
 - 请求动作：项目负责人确认本纯治理 PR 的内容和精确 HEAD；DEV-001 完成集成核查与授权请求后，由非 PR 作者 DEV-002 合并。
 
+## TASK-007 开发交接（2026-07-22）
+
+- 开发者/指定审核者：DEV-002 / DEV-001；分支 `codex/task-007-agent-runtime`，目标 `codex/stage-05-integration`。
+- 候选功能提交：`7c3cf64fe7537ca8f7e05c66e4d5a71ff3383e61`。
+- 交付范围：Runtime 持久化模型、线程访问隔离、配置快照、checkpoint、SSE 状态事件、恢复接口和推理参数映射；Alembic `0005_task007`。
+- 验证证据：Python 3.13 全量后端 `224 passed, 9 skipped, 1 warning`；TASK-007 `2 passed`；迁移检查、`compileall`、`git diff --check` 通过。
+- 未验证项：当前环境未执行 Docker/PostgreSQL 真实 checkpoint 联调，未连接外部 LLM；需 DEV-001 具备环境后验证。
+- 风险/回退：`0005_task007` downgrade 会删除 Runtime 四表，生产数据回退须另行授权并先备份；应用可回退功能提交。
+- 请求动作：请 DEV-002 在同一任务分支创建/更新 Draft PR，完成 Ready 前自测后请求 DEV-001 审核精确 HEAD；未完成 Review、集成检查和项目负责人逐 PR/HEAD 授权前，不得合并或解锁下游任务。
+
+## TASK-007 Changes requested 修订交接（2026-07-23）
+
+- 原审核 HEAD：`24421bc49d45823fa9e2946124940a26de684545`；DEV-001 对 PR #40 提出 3 项 P1、1 项 P2，旧审核失效。
+- 本轮修订：消息幂等重放/409 冲突、线程/运行/resume 脱敏审计、递归上下文/附件/状态脱敏、allowlist ToolCall 审计、管理员/SSE/checkpoint/嵌套敏感测试和可选 PostgreSQL 集成测试。
+- 验证：Python 3.13 全量 `226 passed, 10 skipped, 1 warning`；Runtime `4 passed`；`compileall` 和 `git diff --check` 通过。
+- 阻断：真实 LangGraph checkpoint 尚未实现；新增 LangGraph 生产依赖需项目负责人先确认，当前不申请 Ready、Merge 或下游解锁。
+
+## TASK-007 LangGraph 依赖授权后修订交接（2026-07-23）
+
+- 授权：项目负责人确认允许新增 LangGraph 生产依赖。
+- 新增：`langgraph>=0.6,<0.7`、`langgraph-checkpoint-postgres>=2.0,<3.0`。
+- 实现：LangGraph `StateGraph`、PostgreSQL `PostgresSaver` checkpoint、同一 `thread_id` resume；SQLite 测试使用内存 saver。
+- 验证：全量后端 `226 passed, 10 skipped, 2 warnings`；Runtime `4 passed`；`compileall` 和 `git diff --check` 通过。
+- 未验证：当前无 Docker/PostgreSQL 专用环境；需 DEV-001 执行真实 PostgreSQL checkpoint 集成测试后再提交 Ready 审核请求。
+
+## TASK-007 第二轮 Changes requested 修订交接（2026-07-23）
+
+- 原审核 HEAD：`71b7d3c1993beb6abd94a22bacd0b9d392347d7d`；阻断为 resume 幂等、PostgresSaver 真实恢复和历史 checkpoint 不得被调用方 state 覆盖。
+- 修订：resume 幂等重放/409 与 confirmation/audit 唯一性测试；`run_checkpoint` 通过同一 `thread_id` 先读取 saver 历史 state，再合并白名单恢复输入；可选专用 PostgreSQL 测试覆盖真实首存/恢复。
+- 验证：全量 `227 passed, 10 skipped, 2 warnings`；Runtime/集成定向 `5 passed, 1 skipped`；compileall/diff-check 通过。
+- 未验证：当前无专用 PostgreSQL DSN，真实 PostgresSaver 集成测试跳过；请 DEV-001 提供环境执行并将结果绑定新精确 HEAD。
+
+## TASK-007 第三轮 DSN 修订交接（2026-07-23）
+
+- 审核对象：HEAD `d315d11c67e3886aad7feae9b0699d12e64b1336`。
+- 修订：专用 PostgreSQL 测试改用项目 `create_database_engine()`（psycopg v3）；LangGraph PostgresSaver 接收前统一转换为 libpq `postgresql://`；新增 URL 转换回归测试。
+- 验证：全量 `228 passed, 10 skipped, 2 warnings`；Runtime/集成定向 `6 passed, 1 skipped`；compileall/diff-check 通过。
+- 未验证/请求：当前无专用 PostgreSQL DSN；请 DEV-001 在 PostgreSQL 17 真实环境运行 `TASK007_POSTGRES_DSN=... TASK007_ALLOW_DESTRUCTIVE_TESTS=1 python -m pytest tests/integration/test_task007_postgres.py -q`，并将结果绑定下一次精确 HEAD 审核。
+
 ## TASK-003 本地开发候选交接（2026-07-22）
 
 - 开发者/审核者：DEV-001 / DEV-002；分支 `codex/task-003-maintenance-lifecycle`，目标 `codex/stage-05-integration`。

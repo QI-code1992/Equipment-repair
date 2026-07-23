@@ -300,3 +300,41 @@
 - 执行者/授权：PR 作者 DEV-002；DEV-001 `ll979053897-arch` 执行手动 Merge Commit；项目负责人授权绑定 PR #14 与同一精确 HEAD。
 - 合并后验证：前端 7 tests/build、后端 `221 passed / 9 skipped / 1 warning`、PostgreSQL 迁移往返、祖先关系和 merge-tree 通过；无 HEAD、目标分支或批准记录漂移。
 - 结论：TASK-006 正式闭环，TASK-007 仅按自身任务书门禁继续；未批准 Stage 6，也未自动解锁其他非直接依赖任务。
+
+## TASK-007 开发候选自测（2026-07-22）
+
+- 候选：`codex/task-007-agent-runtime@7c3cf64fe7537ca8f7e05c66e4d5a71ff3383e61`，目标 `codex/stage-05-integration`。
+- 实现：线程归属与管理员读取、运行配置快照、持久化 checkpoint、SSE 状态事件、恢复确认、敏感文本不回显、provider-neutral 推理参数映射及 `0005_task007` 迁移。
+- 验证：Python 3.13 全量 `224 passed, 9 skipped, 1 warning`；TASK-007 `2 passed`；迁移检查、`compileall`、`git diff --check` 通过。唯一警告为既有 Starlette/httpx 弃用提示。
+- 未验证：未执行 Docker/PostgreSQL 真实 checkpoint 联调，当前环境无 Docker；未连接真实外部 LLM，Runtime 以可审计 provider-neutral gateway 等待模型执行。
+- 兼容/依赖/抽象：未新增生产依赖、兼容层或通用抽象；新增 Runtime 模块仅承载本任务边界；无无关修改。
+- 门禁：尚未创建/更新 Draft PR，未请求 DEV-001 审核，不申请 Merge 授权，不解锁 TASK-008/009/010，不进入 Stage 6。
+
+## TASK-007 DEV-001 Changes requested 修订（2026-07-23）
+
+- 审核对象：PR #40，原精确 HEAD `24421bc49d45823fa9e2946124940a26de684545`；DEV-001 提出 3 项 P1、1 项 P2，旧批准不适用。
+- 已修订：恢复 `Idempotency-Key` 重放/冲突保护；线程/运行成功与 resume 写入脱敏审计；业务上下文、附件引用、运行状态递归脱敏；加入 allowlist ToolCall 审计边界；补充幂等、管理员访问、SSE、checkpoint 状态和嵌套敏感字段测试；增加可选 `TASK007_POSTGRES_DSN` 集成测试。
+- 新验证：Python 3.13 全量 `226 passed, 10 skipped, 1 warning`；定向 Runtime `4 passed`；`compileall`、`git diff --check` 通过。唯一警告为既有 Starlette/httpx 弃用提示。
+- 未解决阻断：TASK-007 批准范围要求真实 LangGraph checkpoint。当前 `pyproject.toml` 未声明 LangGraph，新增生产依赖按项目规则需要项目负责人确认；本轮未静默添加依赖，PR 仍不得 Ready/合并。
+
+## TASK-007 LangGraph 依赖授权后修订（2026-07-23）
+
+- 项目负责人已确认允许 TASK-007 新增 LangGraph 生产依赖。
+- 新增依赖：`langgraph>=0.6,<0.7`、`langgraph-checkpoint-postgres>=2.0,<3.0`。
+- 实现：Runtime 使用 LangGraph `StateGraph`；生产 PostgreSQL 使用 `PostgresSaver` 并初始化 checkpoint 表，本地 SQLite 测试使用内存 saver；运行与 resume 均通过同一 `thread_id` 恢复状态。
+- 验证：Python 3.13 全量 `226 passed, 10 skipped, 2 warnings`；定向 Runtime `4 passed`；`compileall`、`git diff --check` 通过。警告为既有 Starlette/httpx 弃用及 LangChain serializer pending deprecation。
+- 结论：原 LangGraph P1 已修订；真实 PostgreSQL checkpoint 仍需 DEV-001 专用环境执行可选集成测试，完成前不得宣称容器级验证通过。
+
+## TASK-007 DEV-001 第二轮 Changes requested 修订（2026-07-23）
+
+- 审核对象：PR #40，HEAD `71b7d3c1993beb6abd94a22bacd0b9d392347d7d`；DEV-001 提出 resume 幂等、真实 PostgreSQL checkpoint/restart、恢复不得覆盖历史 checkpoint 三项问题。
+- 已修订：resume 接受并校验 `Idempotency-Key`，相同请求重放原响应、冲突返回 409；resume 仅传入允许的 confirmation/resume 输入，LangGraph saver 先读取同一 `thread_id` 的历史 state 再合并；可选 PostgreSQL 集成测试增加真实 `run_checkpoint` 首次保存、同 thread resume 和历史事件保留断言。
+- 验证：Python 3.13 全量 `227 passed, 10 skipped, 2 warnings`；Runtime/集成定向 `5 passed, 1 skipped`；`compileall`、`git diff --check` 通过。专用 PostgreSQL 未配置，真实集成测试本地跳过。
+- 门禁：新 HEAD 尚未由 DEV-001 复审；不得 Ready、请求 Merge 授权、合并或解锁下游。
+
+## TASK-007 DEV-001 第三轮 DSN 修订（2026-07-23）
+
+- 审核对象：PR #40，HEAD `d315d11c67e3886aad7feae9b0699d12e64b1336`；DEV-001 发现测试未走 psycopg v3 构造路径，生产 PostgresSaver 收到错误的 SQLAlchemy 方言 URL。
+- 修订：PostgreSQL 集成测试改用 `create_database_engine()`；LangGraph 边界将 `postgresql+psycopg://`/`postgresql+psycopg2://` 转换为 libpq `postgresql://`；新增 URL 规范化回归测试。
+- 验证：Python 3.13 全量 `228 passed, 10 skipped, 2 warnings`；Runtime/集成定向 `6 passed, 1 skipped`；`compileall`、`git diff --check` 通过。
+- 未验证：当前无专用 PostgreSQL DSN，真实 checkpoint 测试仍跳过；需要 DEV-001 在 PostgreSQL 17 环境执行并记录结果。

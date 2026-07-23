@@ -211,3 +211,34 @@
 - 边界：相似案例只访问 PostgreSQL；无 RAGFlow、Agent、向量、正式前端、新生产依赖、兼容层或范围外实现。
 - 恢复：应用回退可评估 `git revert -m 1 51337db767eb94051f78a5c537a3ff48d428a742`；`0003_task003` downgrade 会删除五张 TASK-003 表，生产数据回退须备份并另行授权，优先采用前向修复迁移。
 - 依赖：本治理 PR 合入后，TASK-003 前置正式满足；TASK-009/010/011 仍受各自其余依赖约束，Stage 6 仍未获准。
+
+## FCP-007：TASK-007 Agent Runtime 开发候选
+
+- 状态：Development Candidate / Ready for review 前；未集成，不解锁下游任务。
+- 分支：`codex/task-007-agent-runtime`；功能提交 `7c3cf64fe7537ca8f7e05c66e4d5a71ff3383e61`；目标 `codex/stage-05-integration`。
+- 范围：AgentThread/AgentRun/ToolCall/AgentConfirmation 持久化模型、线程创建者/管理员访问控制、配置快照、provider-neutral 推理参数映射、持久化 checkpoint、SSE 状态事件与恢复接口；新增 Alembic `0005_task007`。
+- 验证：Python 3.13 全量后端 `224 passed, 9 skipped, 1 warning`；TASK-007 定向测试 `2 passed`；迁移检查、`compileall` 与 `git diff --check` 通过。唯一警告为既有 Starlette/httpx 弃用提示。
+- 边界：未引入 LangGraph 或其他新生产依赖；真实外部模型、容器和 PostgreSQL checkpoint 联调仍待 DEV-001 环境验证；无原始思维链入库或出流。
+- 回滚：应用可选择性回退提交 `7c3cf64fe7537ca8f7e05c66e4d5a71ff3383e61`；`0005_task007` downgrade 会删除四张 Runtime 表，生产数据回退须另行授权并先备份。
+
+## FCP-007-R1：TASK-007 LangGraph 修订候选
+
+- 状态：Development Candidate / 等待 DEV-001 PostgreSQL 专用环境复验；未集成，不解锁下游任务。
+- 依赖授权：项目负责人已授权新增 LangGraph 生产依赖。
+- 新增依赖：`langgraph>=0.6,<0.7`、`langgraph-checkpoint-postgres>=2.0,<3.0`。
+- 实现：真实 StateGraph runtime；生产 PostgreSQL 使用 `PostgresSaver`，同一 `thread_id` 支持 checkpoint resume；本地 SQLite 测试使用内存 saver。
+- 验证：Python 3.13 全量 `226 passed, 10 skipped, 2 warnings`；Runtime `4 passed`；`compileall`、`git diff --check` 通过。未完成 Docker/PostgreSQL 真实环境验证。
+
+## FCP-007-R2：TASK-007 Resume 与持久化恢复修订候选
+
+- 状态：Development Candidate / 等待 DEV-001 PostgreSQL 专用环境复验；未集成，不解锁下游任务。
+- 修订：resume 写入纳入幂等重放/409；LangGraph saver 恢复先读取同一 `thread_id` 历史 checkpoint，再合并 `resume`/`confirmation` 白名单输入；PostgreSQL 集成测试覆盖首存、恢复和历史 state 保留。
+- 验证：Python 3.13 全量 `227 passed, 10 skipped, 2 warnings`；Runtime/集成定向 `5 passed, 1 skipped`；compileall/diff-check 通过。
+- 未验证：当前无专用 PostgreSQL DSN，真实 PostgresSaver 测试跳过；需 DEV-001 执行后才能重新请求 Ready 审核。
+
+## FCP-007-R3：TASK-007 PostgreSQL DSN 修订候选
+
+- 状态：Development Candidate / 等待 DEV-001 PostgreSQL 17 专用环境复验；未集成，不解锁下游任务。
+- 修订：集成测试使用 `create_database_engine()` 的 psycopg v3 路径；LangGraph PostgresSaver 使用 libpq URL 规范化；新增转换回归。
+- 验证：Python 3.13 全量 `228 passed, 10 skipped, 2 warnings`；定向 `6 passed, 1 skipped`；compileall/diff-check 通过。
+- 未验证：本地没有专用 PostgreSQL DSN，真实 checkpoint/restart 仍待 DEV-001 执行。
