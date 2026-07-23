@@ -253,9 +253,9 @@
 
 ## FCP-008-R1：TASK-008 AI 故障上报与指标读取开发候选
 
-- 状态：Development Candidate / 本地自测通过 / 尚未创建 Draft PR / 未审核、未集成，不解锁下游任务。
+- 状态：Development Candidate / PR #43 Ready for review / 未审核、未集成，不解锁下游任务。
 - 分支/基线：`codex/task-008-fault-metric-agents`，基于 `origin/codex/stage-05-integration@78e9dfb`。
 - 范围：受控故障草稿字段采集与人工确认门禁；固定 40 项指标目录、最多五项批量查询、合法维度校验；健康分受控读取失败时返回 `UNAVAILABLE` 且不伪造分值；新增指标只读 API。
 - 验证：Python 3.13.14 专项 `12 passed, 2 warnings`；完整后端 `240 passed, 10 skipped, 2 warnings`；`git diff --check` 通过。警告为既有 Starlette/httpx 与 LangChain serializer 弃用提示。
 - 边界：未新增生产依赖、数据库迁移、兼容层或通用抽象；未实现诊断 Agent、模型计算指标/健康分或修改 TASK-005；健康分公开路由留待既有冻结 API 边界，避免 TASK-002 路由表冲突。
-- 门禁：待 DEV-002 完成自测证据、提交并推送精确候选 SHA、创建同一 Draft PR 后，申请 DEV-001 按精确 HEAD 审核；不得自批、自合并、请求 Merge 授权、解锁 TASK-009/010/011 或进入 Stage 6。
+- 门禁：PR #43 已绑定候选；当前精确 HEAD 变化后旧审核请求立即失效。等待 DEV-001 按新精确 HEAD 审核；不得自批、自合并、请求 Merge 授权、解锁 TASK-009/010/011 或进入 Stage 6。

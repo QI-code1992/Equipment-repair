@@ -256,4 +256,4 @@
 - Standards/Spec：故障草稿只采集字段并经人工确认后调用外部业务写入；指标仅来自固定 40 项目录且最多五项；非法维度和受控服务失败明确拒绝/降级；健康分读取器不计算、不缓存、不伪造分值。
 - 安全/边界：使用现有 `equipment:read` 权限保护目录和查询 API；无直接数据库、SQL、文件系统、模型计算指标、诊断 Agent、TASK-005 或新生产依赖。
 - 验证：专项 `12 passed, 2 warnings`；全量后端 `240 passed, 10 skipped, 2 warnings`；`git diff --check` 通过。Critical 0、Important 0、Minor 0（DEV-001 正式复审尚未开始）。
-- 门禁：尚未创建 Draft PR、尚未 Ready、尚未请求 DEV-001 审核或 Merge 授权；下一步推送精确候选后在同一 PR 请求 DEV-001 复审。
+- 门禁：PR #43 已创建并 Ready；当前精确 HEAD 变化后旧审核请求失效。等待 DEV-001 对新精确 HEAD 复审，未请求 Merge 授权。

@@ -302,7 +302,7 @@
 - 开发者/审核者：DEV-002 / DEV-001；分支 `codex/task-008-fault-metric-agents`，目标 `codex/stage-05-integration`。
 - 基线：`origin/codex/stage-05-integration@78e9dfb`；TASK-002、TASK-006、TASK-007 前置已满足，TASK-005 独立进行不阻塞本任务。
 - 范围：故障草稿字段采集与人工确认、固定 40 项指标目录、最多五项批量查询、非法维度拒绝、受控健康分读取失败降级；不实现诊断 Agent 或模型计算业务数值。
-- 当前候选：隔离 worktree 本地验证通过，尚无正式候选 SHA、Draft PR 或 DEV-001 Review。
+- 当前候选：PR #43 已创建并 Ready，初始候选 HEAD `58a64d9dfbc4672cfd4cdc118127850dd83fed5e`；证据同步提交后需以新完整 HEAD 重新绑定审核。
 - 验证：专项 `12 passed, 2 warnings`；后端全量 `240 passed, 10 skipped, 2 warnings`；`git diff --check` 与 `workflow/state.json` 解析通过。
 - 风险/边界：未执行 Docker/PostgreSQL/RAGFlow 真实联调；无新增生产依赖、迁移、兼容层或通用抽象；健康分公开路由不提前突破 TASK-002 冻结路由表。
-- 下一动作：DEV-002 提交并推送精确候选、创建唯一 Draft PR、请求 DEV-001 审核；审核通过后再走 DEV-001 集成检查、项目负责人逐 PR/HEAD 授权和 DEV-001 合并。当前不请求授权、不解锁下游、不进入 Stage 6。
+- 下一动作：DEV-002 推送证据同步后的新精确 HEAD，并在同一 PR #43 重新请求 DEV-001 审核；审核通过后再走 DEV-001 集成检查、项目负责人逐 PR/HEAD 授权和 DEV-001 合并。当前不请求授权、不解锁下游、不进入 Stage 6。

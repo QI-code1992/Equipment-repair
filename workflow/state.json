@@ -124,13 +124,16 @@
   },
   "task008Delivery": {
     "taskId": "TASK-008",
-    "status": "IN_DEVELOPMENT",
+    "status": "READY_FOR_DEV001_REVIEW",
     "owner": "DEV-002",
     "reviewer": "DEV-001",
     "branch": "codex/task-008-fault-metric-agents",
     "integrationTarget": "codex/stage-05-integration",
     "baseCommit": "78e9dfb",
     "scope": "AI fault draft confirmation gate, fixed metric catalog and batch query boundary, controlled health-score read failure fallback",
+    "pullRequest": 43,
+    "pullRequestState": "OPEN_READY",
+    "candidateHead": "58a64d9dfbc4672cfd4cdc118127850dd83fed5e",
     "verification": "Local Python 3.13.14: 12 TASK-008 tests passed / 2 warnings; full backend 240 passed / 10 skipped / 2 warnings; git diff --check passed.",
     "dependencyUnlockAllowed": false,
     "nextAction": "DEV-002 must commit and push the exact candidate, create the single Draft PR, and request DEV-001 review; no Merge authorization, integration, downstream unlock or Stage 6 entry."
