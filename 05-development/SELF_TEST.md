@@ -344,3 +344,13 @@
 - 集成对象：PR #40，源 HEAD `fcd643ab0b0e33a585e3be6ec0b0036a611059c4`；Merge Commit `bf842626987148575173c6cf3f34970fc496ad7c`；第一父 `fdec916fad943acb8ad62a1cf5bc3ce8f770cc8d`，第二父为源 HEAD。
 - DEV-001 实测：合并结果后端 `228 passed, 10 skipped, 2 warnings`；PostgreSQL 17 真实 `PostgresSaver` checkpoint/restart `1 passed, 1 warning`；`compileall`、合并树 `git diff --check`、Compose 配置、API 生产镜像构建通过；PostgreSQL/Redis healthy，容器内 `/healthz` 返回 HTTP 200。
 - 治理状态：项目负责人已正式追认 PR #40/源 HEAD/合并结果；PR #41 治理收尾 Merge Commit `092eb84821131f6c6faa6b6a1c2acdb4079ecf8f` 已合入。TASK-007 治理闭环完成，可按依赖矩阵解锁下游；Stage 6 仍未批准。
+
+## TASK-008 本地开发候选自测（2026-07-23）
+
+- 分支：`codex/task-008-fault-metric-agents`；基于 `origin/codex/stage-05-integration@78e9dfb`。
+- TDD：先运行缺少 `app.modules.agents` 的测试并确认收集失败，再实现最小故障上报和指标读取边界；专项测试转绿。
+- 验证：`python3.13 -m pytest codebase/backend/tests/agents -q` 加健康分边界为 `12 passed, 2 warnings`；全量 `python3.13 -m pytest codebase/backend/tests -q` 为 `240 passed, 10 skipped, 2 warnings`；`git diff --check` 通过。
+- 证据范围：故障草稿拒绝未来时间/多设备、不完整字段阻止预览、人工确认阻止提交；固定目录 40 项、查询上限五项、非法维度拒绝、服务失败不产生数值；指标目录 API 只读。
+- 未验证：未执行 Docker/PostgreSQL/RAGFlow 真实联调；健康分公开 API 未在本任务提前扩展，受控读取边界已覆盖服务失败降级。
+- 依赖/兼容/抽象：无新增生产依赖、数据库迁移、兼容层、通用抽象或无关修改；未修改 TASK-005。
+- 当前结论：仅为本地开发候选，不代表 DEV-001 审核、集成检查、Merge 授权或任务完成。

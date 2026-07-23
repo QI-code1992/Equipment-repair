@@ -122,6 +122,19 @@
     "dependencyUnlockAllowed": true,
     "nextAction": "TASK-008 and other downstream work may proceed only where all task-book prerequisites are satisfied; Stage 6 remains prohibited without its separate formal gate."
   },
+  "task008Delivery": {
+    "taskId": "TASK-008",
+    "status": "IN_DEVELOPMENT",
+    "owner": "DEV-002",
+    "reviewer": "DEV-001",
+    "branch": "codex/task-008-fault-metric-agents",
+    "integrationTarget": "codex/stage-05-integration",
+    "baseCommit": "78e9dfb",
+    "scope": "AI fault draft confirmation gate, fixed metric catalog and batch query boundary, controlled health-score read failure fallback",
+    "verification": "Local Python 3.13.14: 12 TASK-008 tests passed / 2 warnings; full backend 240 passed / 10 skipped / 2 warnings; git diff --check passed.",
+    "dependencyUnlockAllowed": false,
+    "nextAction": "DEV-002 must commit and push the exact candidate, create the single Draft PR, and request DEV-001 review; no Merge authorization, integration, downstream unlock or Stage 6 entry."
+  },
   "repairCycle": {
     "taskId": "TASK-002",
     "pullRequest": 20,

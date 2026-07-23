@@ -249,3 +249,11 @@
 - 合并：PR #40 已实际合入 `codex/stage-05-integration`，Merge Commit `bf842626987148575173c6cf3f34970fc496ad7c`；第二父为审核源 HEAD，第一父为 `fdec916fad943acb8ad62a1cf5bc3ce8f770cc8d`。
 - 技术核查：后端 `228 passed, 10 skipped, 2 warnings`；PostgreSQL 17 真实 PostgresSaver `1 passed, 1 warning`；compileall、Compose 配置、API 镜像构建、容器健康、`/healthz` HTTP 200、merge-tree 与 diff-check 均通过。
 - 治理结论：项目负责人已正式追认 PR #40、源 HEAD、Merge Commit 及合并结果；PR #41 治理收尾已合入，TASK-007 治理闭环完成并可按依赖矩阵解锁下游；Stage 6 仍未批准。
+
+## TASK-008 DEV-002 开发者自查（2026-07-23）
+
+- 审查对象：`codex/task-008-fault-metric-agents` 相对 `origin/codex/stage-05-integration@78e9dfb` 的完整差异。
+- Standards/Spec：故障草稿只采集字段并经人工确认后调用外部业务写入；指标仅来自固定 40 项目录且最多五项；非法维度和受控服务失败明确拒绝/降级；健康分读取器不计算、不缓存、不伪造分值。
+- 安全/边界：使用现有 `equipment:read` 权限保护目录和查询 API；无直接数据库、SQL、文件系统、模型计算指标、诊断 Agent、TASK-005 或新生产依赖。
+- 验证：专项 `12 passed, 2 warnings`；全量后端 `240 passed, 10 skipped, 2 warnings`；`git diff --check` 通过。Critical 0、Important 0、Minor 0（DEV-001 正式复审尚未开始）。
+- 门禁：尚未创建 Draft PR、尚未 Ready、尚未请求 DEV-001 审核或 Merge 授权；下一步推送精确候选后在同一 PR 请求 DEV-001 复审。

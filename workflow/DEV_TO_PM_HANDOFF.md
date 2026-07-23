@@ -296,3 +296,13 @@
 - 风险/回退：`0003_task003` downgrade 会删除五张业务表；生产回退优先前向修复，数据回退必须备份并另行授权；应用可评估选择性 revert Merge Commit。
 - 依赖：本治理 PR 合入后 TASK-003 正式闭环；TASK-009/010/011 仍等待各自其余依赖，Stage 6 仍未获准。
 - 请求动作：项目负责人确认本纯治理 PR 的内容和精确 HEAD；DEV-001 完成集成核查与授权请求后，由非 PR 作者 DEV-002 合并。
+
+## TASK-008 开发启动交接（2026-07-23）
+
+- 开发者/审核者：DEV-002 / DEV-001；分支 `codex/task-008-fault-metric-agents`，目标 `codex/stage-05-integration`。
+- 基线：`origin/codex/stage-05-integration@78e9dfb`；TASK-002、TASK-006、TASK-007 前置已满足，TASK-005 独立进行不阻塞本任务。
+- 范围：故障草稿字段采集与人工确认、固定 40 项指标目录、最多五项批量查询、非法维度拒绝、受控健康分读取失败降级；不实现诊断 Agent 或模型计算业务数值。
+- 当前候选：隔离 worktree 本地验证通过，尚无正式候选 SHA、Draft PR 或 DEV-001 Review。
+- 验证：专项 `12 passed, 2 warnings`；后端全量 `240 passed, 10 skipped, 2 warnings`；`git diff --check` 与 `workflow/state.json` 解析通过。
+- 风险/边界：未执行 Docker/PostgreSQL/RAGFlow 真实联调；无新增生产依赖、迁移、兼容层或通用抽象；健康分公开路由不提前突破 TASK-002 冻结路由表。
+- 下一动作：DEV-002 提交并推送精确候选、创建唯一 Draft PR、请求 DEV-001 审核；审核通过后再走 DEV-001 集成检查、项目负责人逐 PR/HEAD 授权和 DEV-001 合并。当前不请求授权、不解锁下游、不进入 Stage 6。

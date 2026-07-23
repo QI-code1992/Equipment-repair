@@ -250,3 +250,12 @@
 - 合并关系：第一父 `fdec916fad943acb8ad62a1cf5bc3ce8f770cc8d`，第二父为源 HEAD；源 HEAD 已成为集成分支祖先。
 - 合并后证据：后端 `228 passed, 10 skipped, 2 warnings`；PostgreSQL 17 真实 `PostgresSaver` checkpoint/restart `1 passed, 1 warning`；`compileall`、Compose 配置、API 镜像构建、PostgreSQL/Redis healthy、容器 `/healthz` HTTP 200、merge-tree 与 `git diff --check` 通过。
 - 治理门禁：项目负责人已追认 PR #40、源 HEAD、Merge Commit 及合并结果；PR #41 Merge Commit `092eb84821131f6c6faa6b6a1c2acdb4079ecf8f` 已同步 SELF_TEST、CHECKPOINTS、CODE_REVIEW、COMMIT_LOG、任务书、`workflow/DEV_TO_PM_HANDOFF.md` 与 `workflow/state.json`。TASK-007 治理闭环完成；Stage 6 仍未批准。
+
+## FCP-008-R1：TASK-008 AI 故障上报与指标读取开发候选
+
+- 状态：Development Candidate / 本地自测通过 / 尚未创建 Draft PR / 未审核、未集成，不解锁下游任务。
+- 分支/基线：`codex/task-008-fault-metric-agents`，基于 `origin/codex/stage-05-integration@78e9dfb`。
+- 范围：受控故障草稿字段采集与人工确认门禁；固定 40 项指标目录、最多五项批量查询、合法维度校验；健康分受控读取失败时返回 `UNAVAILABLE` 且不伪造分值；新增指标只读 API。
+- 验证：Python 3.13.14 专项 `12 passed, 2 warnings`；完整后端 `240 passed, 10 skipped, 2 warnings`；`git diff --check` 通过。警告为既有 Starlette/httpx 与 LangChain serializer 弃用提示。
+- 边界：未新增生产依赖、数据库迁移、兼容层或通用抽象；未实现诊断 Agent、模型计算指标/健康分或修改 TASK-005；健康分公开路由留待既有冻结 API 边界，避免 TASK-002 路由表冲突。
+- 门禁：待 DEV-002 完成自测证据、提交并推送精确候选 SHA、创建同一 Draft PR 后，申请 DEV-001 按精确 HEAD 审核；不得自批、自合并、请求 Merge 授权、解锁 TASK-009/010/011 或进入 Stage 6。
