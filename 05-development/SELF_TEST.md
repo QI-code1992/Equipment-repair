@@ -383,3 +383,11 @@
 - 迁移接收：项目负责人批准 `0006_task005` 接续 `0005_task007` 并创建四张表；DEV-001 提交 `2fe848bfb5f7f7849b950cbecfa40644e6782a05` 经三文件边界核验后，由 DEV-002 精确 cherry-pick 为 `78ad1c81f6292c1fc3706b35d9dd495a8244d1b4`。
 - 迁移验证：DEV-001 在 PostgreSQL 17 执行 `0005 -> 0006 -> 0005 -> 0006` 为 `1 passed`；DEV-002 本地定向 `6 passed, 2 skipped`，全量 `262 passed, 12 skipped, 2 warnings`，Alembic 唯一 head 为 `0006_task005`。既有 TASK-003 head 断言按批准链路由 `0005_task007` 最小更新为 `0006_task005`。
 - 剩余验证：含迁移的完整候选仍需 DEV-001 执行真实 RAGFlow/ClamAV 生命周期联调并绑定最终新 HEAD；完成前 PR 保持 Draft。
+
+## TASK-005 DEV-001 隔离真实验证基础设施（2026-07-23）
+
+- 范围：为 PR #37 提供独立 PostgreSQL、Redis、MinIO、ClamAV、Worker、迁移和验证器环境；共享 RAGFlow 仅通过 `host.docker.internal` API 访问，不启动、停止或修改共享服务。
+- TDD：验证基础设施契约先后暴露迁移门禁、宿主 API 地址、测试镜像阶段、专用数据库命名、单次 Worker 初始化竞态和临时凭据清理缺失；新增契约测试后逐项修复。
+- 真实验证：隔离栈迁移至 `0006_task005`；PostgreSQL 执行 `0006 -> 0005_task007 -> 0006`；ClamAV 拒绝 EICAR；安全文档完成上传、RAGFlow 解析、READY、检索和引用回传，验证器 `2 passed`。临时数据集、容器、网络、卷和工作区外临时凭据文件均已清理。
+- 回归：Python 3.13 后端 `264 passed, 12 skipped, 2 warnings`；基础设施契约 `2 passed`；Compose `config --quiet`、PowerShell 语法、`pip check`、`compileall` 与 `git diff --check` 待本独立提交完成前复跑。两项 warning 均为既有第三方弃用提示。
+- 边界：无业务代码、生产依赖、兼容代码或通用抽象层修改；仅新增隔离验证所需 Compose 服务、脚本、环境模板和契约测试。该基础设施提交须由 DEV-002 核验后 cherry-pick 到 PR #37；PR #37 继续 Draft，未申请 Merge 授权、不解锁下游、不进入 Stage 6。
