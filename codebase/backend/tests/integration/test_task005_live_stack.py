@@ -17,7 +17,7 @@ from app.integrations.file_scanning import ClamAvScanner
 from app.integrations.object_storage import build_minio_storage
 from app.integrations.ragflow import RagflowAdapter, UrllibRagflowTransport
 from app.main import create_app
-from app.modules.knowledge import service, worker
+from app.modules.knowledge import service, worker_main
 from app.modules.knowledge.models import FileObject, KnowledgeDataset, KnowledgeDocument
 from tests.modules.support import create_user_token
 
@@ -145,9 +145,8 @@ def test_task005_live_document_lifecycle() -> None:
         deadline = time.monotonic() + float(os.getenv("TASK005_READY_TIMEOUT_SECONDS", "180"))
         status = "UPLOADING"
         while time.monotonic() < deadline and status != "READY":
+            worker_main.main(["--limit", "1"])
             with factory() as db:
-                worker.sync_pending_documents(db, storage, adapter, limit=1)
-                db.commit()
                 document = db.get(KnowledgeDocument, document_id)
                 assert document is not None
                 status = document.status.value

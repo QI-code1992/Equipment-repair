@@ -22,7 +22,7 @@ def test_worker_main_builds_runtime_and_commits(monkeypatch) -> None:
     monkeypatch.setattr(
         worker,
         "sync_pending_documents",
-        lambda db, storage, adapter, limit: calls.append(
+        lambda db, storage, adapter, *, limit: calls.append(
             (db, storage, adapter, limit)
         )
         or worker.WorkerResult(uploaded=1, refreshed=2, failed=0),

@@ -391,3 +391,11 @@
 - 真实验证：隔离栈迁移至 `0006_task005`；PostgreSQL 执行 `0006 -> 0005_task007 -> 0006`；ClamAV 拒绝 EICAR；安全文档完成上传、RAGFlow 解析、READY、检索和引用回传，验证器 `2 passed`。临时数据集、容器、网络、卷和工作区外临时凭据文件均已清理。
 - 回归：Python 3.13 后端 `264 passed, 12 skipped, 2 warnings`；基础设施契约 `2 passed`；Compose `config --quiet`、PowerShell 语法、`pip check`、`compileall` 与 `git diff --check` 待本独立提交完成前复跑。两项 warning 均为既有第三方弃用提示。
 - 边界：无业务代码、生产依赖、兼容代码或通用抽象层修改；仅新增隔离验证所需 Compose 服务、脚本、环境模板和契约测试。该基础设施提交须由 DEV-002 核验后 cherry-pick 到 PR #37；PR #37 继续 Draft，未申请 Merge 授权、不解锁下游、不进入 Stage 6。
+
+## TASK-005 DEV-002 Critical 修正复验（2026-07-23）
+
+- 修正 1：`worker`、`migrate`、`minio`、`clamav` 和 `validator` 全部置于 `validation` profile；普通平台 Compose 仅保留原 API、PostgreSQL、Redis 拓扑，验证脚本显式启用该 profile。
+- 修正 2：临时环境目录必须匹配 `equipment-task005-<GUID>`、文件名必须为 `task005.env`，并且目录内必须存在由创建脚本写入的 `task005-validation-marker`；清理不满足来源校验时拒绝递归删除。
+- 修正 3：真实验证循环改由 `app.modules.knowledge.worker_main.main(--limit 1)` 执行；同时修正 `limit` 关键字调用，避免只由 validator 直接调用底层同步函数。
+- 复验：普通/validation Compose config、PowerShell 语法、契约 `2 passed`、Python 全量 `264 passed, 12 skipped, 2 warnings`；真实 PostgreSQL 往返和 RAGFlow/ClamAV 文档生命周期 `2 passed`。未产生新依赖、兼容层或无关修改。
+- 门禁：修正提交尚未由 DEV-002 重新边界核验和 cherry-pick；PR #37 保持 Draft，不申请 Merge 授权、不解锁下游、不进入 Stage 6。

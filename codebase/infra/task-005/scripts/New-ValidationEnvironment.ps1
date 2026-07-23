@@ -20,6 +20,8 @@ if (!$key -or $key -match '[\r\n]') { throw 'RAGFlow API key file must contain o
 $dir = Join-Path ([IO.Path]::GetTempPath()) ('equipment-task005-' + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $dir | Out-Null
 $envFile = Join-Path $dir 'task005.env'
+$markerFile = Join-Path $dir 'task005-validation-marker'
+[IO.File]::WriteAllText($markerFile, 'TASK005_VALIDATION_ENVIRONMENT')
 $lines = @(
     'POSTGRES_DB=equipment_task5_validation_live',
     ('POSTGRES_USER=task005_' + (New-RandomHex 6)),

@@ -7,23 +7,13 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      minio:
-        condition: service_healthy
-      clamav:
-        condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
     environment:
       POSTGRES_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       REDIS_URL: ${REDIS_URL}
-      MINIO_ENDPOINT: minio:9000
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
-      MINIO_BUCKET: ${MINIO_BUCKET}
-      CLAMAV_HOST: clamav
     networks: [platform]
 
   worker:
+    profiles: [validation]
     build:
       context: ../backend
     command: ["python", "-m", "app.modules.knowledge.worker_main"]
@@ -49,6 +39,7 @@ services:
     networks: [platform, ragflow-egress]
 
   migrate:
+    profiles: [validation]
     build:
       context: ../backend
     command: ["alembic", "upgrade", "head"]
@@ -68,6 +59,13 @@ services:
     environment:
       TASK005_ALLOW_LIVE_TESTS: "1"
       TASK005_ALLOW_DESTRUCTIVE_TESTS: "1"
+      POSTGRES_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      RAGFLOW_BASE_URL: ${RAGFLOW_BASE_URL}
+      RAGFLOW_API_KEY: ${RAGFLOW_API_KEY}
       TASK005_POSTGRES_DSN: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       TASK005_MINIO_ENDPOINT: minio:9000
       TASK005_MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
@@ -112,6 +110,7 @@ services:
     networks: [platform]
 
   minio:
+    profiles: [validation]
     image: ${MINIO_IMAGE:-pgsty/minio:RELEASE.2026-03-25T00-00-00Z}
     command: ["server", "/data"]
     environment:
@@ -125,6 +124,7 @@ services:
     networks: [platform]
 
   clamav:
+    profiles: [validation]
     image: clamav/clamav:1.4.3
     networks: [platform]
 
