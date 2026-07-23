@@ -8,8 +8,14 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.idempotency import (
+    IdempotencyKeyReused,
+    find_idempotent_response,
+    save_idempotent_response,
+)
 from app.modules.agent_config.domain import AgentId
 from app.modules.agent_config.models import AgentConfigModel
+from app.modules.audit.service import write_audit_event, sanitize_audit_metadata
 from app.modules.identity.dependencies import require_permission
 from app.modules.identity.models import User
 
@@ -64,26 +70,54 @@ def _safe_text(text: str) -> str:
     return "[message received]" if text else ""
 
 
+def _response(db: Session, *, user: User, key: str, body: dict[str, object]) -> dict[str, object]:
+    save_idempotent_response(
+        db, user_id=user.id, method="POST", path="/api/agent/threads/{thread_id}/messages",
+        key=key, request_body=body["request"], status=202, body=body["response"],
+    )
+    db.commit()
+    return body["response"]
+
+
 @router.post("/threads", status_code=201)
 def create_thread(
     payload: ThreadCreate,
     db: Session = Depends(get_db),
     user: User = Depends(require_permission("intelligence:agent")),
+    idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
 ) -> dict[str, object]:
     if payload.agent_id not in _PUBLIC_AGENT_IDS:
         raise HTTPException(status_code=422, detail={"code": "AGENT_NOT_AVAILABLE"})
-    if any(key.lower() in {"token", "password", "cookie", "secret", "api_key"} for key in payload.business_context):
-        raise HTTPException(status_code=422, detail={"code": "SENSITIVE_CONTEXT_FORBIDDEN"})
+    request_body = payload.model_dump()
+    try:
+        replay = find_idempotent_response(
+            db, user_id=user.id, method="POST", path="/api/agent/threads",
+            key=idempotency_key, request_body=request_body,
+        )
+    except IdempotencyKeyReused:
+        raise HTTPException(status_code=409, detail={"code": "IDEMPOTENCY_KEY_REUSED"}) from None
+    if replay is not None:
+        return replay[1]
     thread = AgentThread(
         agent_id=payload.agent_id,
         creator_user_id=user.id,
-        business_context_json=payload.business_context,
+        business_context_json=sanitize_audit_metadata(payload.business_context),
         messages_json=[],
         status="OPEN",
     )
     db.add(thread)
+    db.flush()
+    response = {"thread_id": thread.id, "agent_id": thread.agent_id, "status": thread.status}
+    write_audit_event(
+        db, actor_user_id=user.id, action="agent.thread.create", resource_type="agent_thread",
+        resource_id=thread.id, result="success", metadata={"agent_id": thread.agent_id, "business_context": payload.business_context},
+    )
+    save_idempotent_response(
+        db, user_id=user.id, method="POST", path="/api/agent/threads", key=idempotency_key,
+        request_body=request_body, status=201, body=response,
+    )
     db.commit()
-    return {"thread_id": thread.id, "agent_id": thread.agent_id, "status": thread.status}
+    return response
 
 
 @router.post("/threads/{thread_id}/messages", status_code=202)
@@ -94,12 +128,21 @@ def create_run(
     user: User = Depends(require_permission("intelligence:agent")),
     idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
 ) -> dict[str, object]:
-    del idempotency_key  # Runtime writes are currently persisted once per request.
     thread = _thread_or_404(db, thread_id, user)
+    request_body = {"thread_id": thread_id, **payload.model_dump()}
+    try:
+        replay = find_idempotent_response(
+            db, user_id=user.id, method="POST", path="/api/agent/threads/{thread_id}/messages",
+            key=idempotency_key, request_body=request_body,
+        )
+    except IdempotencyKeyReused:
+        raise HTTPException(status_code=409, detail={"code": "IDEMPOTENCY_KEY_REUSED"}) from None
+    if replay is not None:
+        return replay[1]
     config = db.scalar(select(AgentConfigModel).where(AgentConfigModel.agent_id == thread.agent_id))
     if config is None or not config.enabled or config.model_binding_id is None:
         raise HTTPException(status_code=503, detail={"code": "AGENT_CONFIG_INVALID"})
-    message = {"role": "user", "text": _safe_text(payload.text), "attachment_refs": payload.attachment_refs}
+    message = {"role": "user", "text": _safe_text(payload.text), "attachment_refs": sanitize_audit_metadata(payload.attachment_refs)}
     model_request = build_model_request(config)
     thread.messages_json = [*thread.messages_json, message]
     run = AgentRun(
@@ -108,7 +151,7 @@ def create_run(
         model_binding_id=config.model_binding_id,
         status="RUNNING",
         started_at=_now(),
-        state_json={"step": "waiting_for_model", "events": [
+        state_json=sanitize_audit_metadata({"step": "waiting_for_model", "events": [
             _event("run_started", {"run_id": "pending", "status": "RUNNING"}),
             _event("reasoning_status", {"status": "not_exposed", "level": config.deep_thinking_level}),
             _event("model_request", {
@@ -116,7 +159,7 @@ def create_run(
                 "max_tokens": model_request.max_tokens,
                 "reasoning_effort": model_request.reasoning_effort,
             }),
-        ]},
+        ]}),
     )
     db.add(run)
     db.flush()
@@ -126,8 +169,12 @@ def create_run(
     run.state_json = {"step": "waiting_for_model", "events": events}
     thread.checkpoint_ref = run.id
     thread.updated_at = _now()
-    db.commit()
-    return {"run_id": run.id, "thread_id": thread.id, "status": run.status}
+    response = {"run_id": run.id, "thread_id": thread.id, "status": run.status}
+    write_audit_event(
+        db, actor_user_id=user.id, action="agent.run.create", resource_type="agent_run",
+        resource_id=run.id, result="success", metadata={"thread_id": thread.id, "agent_id": thread.agent_id},
+    )
+    return _response(db, user=user, key=idempotency_key, body={"request": request_body, "response": response})
 
 
 @router.get("/runs/{run_id}/events")
@@ -165,7 +212,12 @@ def resume_thread(
     run.status = "RESUMED"
     thread.status = "OPEN"
     thread.updated_at = _now()
-    db.add(AgentConfirmation(run_id=run.id, confirmation_type="resume", status="accepted", payload_json=payload.confirmation))
+    confirmation = sanitize_audit_metadata(payload.confirmation)
+    db.add(AgentConfirmation(run_id=run.id, confirmation_type="resume", status="accepted", payload_json=confirmation))
+    write_audit_event(
+        db, actor_user_id=user.id, action="agent.run.resume", resource_type="agent_run",
+        resource_id=run.id, result="success", metadata={"confirmation": confirmation},
+    )
     db.commit()
     return {"run_id": run.id, "thread_id": thread.id, "status": run.status}
 

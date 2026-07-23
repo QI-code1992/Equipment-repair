@@ -238,6 +238,13 @@
 - 风险/回退：`0005_task007` downgrade 会删除 Runtime 四表，生产数据回退须另行授权并先备份；应用可回退功能提交。
 - 请求动作：请 DEV-002 在同一任务分支创建/更新 Draft PR，完成 Ready 前自测后请求 DEV-001 审核精确 HEAD；未完成 Review、集成检查和项目负责人逐 PR/HEAD 授权前，不得合并或解锁下游任务。
 
+## TASK-007 Changes requested 修订交接（2026-07-23）
+
+- 原审核 HEAD：`24421bc49d45823fa9e2946124940a26de684545`；DEV-001 对 PR #40 提出 3 项 P1、1 项 P2，旧审核失效。
+- 本轮修订：消息幂等重放/409 冲突、线程/运行/resume 脱敏审计、递归上下文/附件/状态脱敏、allowlist ToolCall 审计、管理员/SSE/checkpoint/嵌套敏感测试和可选 PostgreSQL 集成测试。
+- 验证：Python 3.13 全量 `226 passed, 10 skipped, 1 warning`；Runtime `4 passed`；`compileall` 和 `git diff --check` 通过。
+- 阻断：真实 LangGraph checkpoint 尚未实现；新增 LangGraph 生产依赖需项目负责人先确认，当前不申请 Ready、Merge 或下游解锁。
+
 ## TASK-003 本地开发候选交接（2026-07-22）
 
 - 开发者/审核者：DEV-001 / DEV-002；分支 `codex/task-003-maintenance-lifecycle`，目标 `codex/stage-05-integration`。

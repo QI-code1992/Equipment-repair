@@ -309,3 +309,10 @@
 - 未验证：未执行 Docker/PostgreSQL 真实 checkpoint 联调，当前环境无 Docker；未连接真实外部 LLM，Runtime 以可审计 provider-neutral gateway 等待模型执行。
 - 兼容/依赖/抽象：未新增生产依赖、兼容层或通用抽象；新增 Runtime 模块仅承载本任务边界；无无关修改。
 - 门禁：尚未创建/更新 Draft PR，未请求 DEV-001 审核，不申请 Merge 授权，不解锁 TASK-008/009/010，不进入 Stage 6。
+
+## TASK-007 DEV-001 Changes requested 修订（2026-07-23）
+
+- 审核对象：PR #40，原精确 HEAD `24421bc49d45823fa9e2946124940a26de684545`；DEV-001 提出 3 项 P1、1 项 P2，旧批准不适用。
+- 已修订：恢复 `Idempotency-Key` 重放/冲突保护；线程/运行成功与 resume 写入脱敏审计；业务上下文、附件引用、运行状态递归脱敏；加入 allowlist ToolCall 审计边界；补充幂等、管理员访问、SSE、checkpoint 状态和嵌套敏感字段测试；增加可选 `TASK007_POSTGRES_DSN` 集成测试。
+- 新验证：Python 3.13 全量 `226 passed, 10 skipped, 1 warning`；定向 Runtime `4 passed`；`compileall`、`git diff --check` 通过。唯一警告为既有 Starlette/httpx 弃用提示。
+- 未解决阻断：TASK-007 批准范围要求真实 LangGraph checkpoint。当前 `pyproject.toml` 未声明 LangGraph，新增生产依赖按项目规则需要项目负责人确认；本轮未静默添加依赖，PR 仍不得 Ready/合并。
