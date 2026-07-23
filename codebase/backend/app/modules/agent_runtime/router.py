@@ -22,6 +22,7 @@ from app.modules.identity.models import User
 from .models import AgentConfirmation, AgentRun, AgentThread
 from .schemas import MessageCreate, ResumeCreate, ThreadCreate
 from .gateway import build_model_request
+from .langgraph_runtime import run_checkpoint
 
 
 router = APIRouter(prefix="/api/agent", tags=["agent-runtime"])
@@ -68,6 +69,11 @@ def _event(name: str, data: dict[str, object]) -> dict[str, object]:
 def _safe_text(text: str) -> str:
     # Runtime events contain status only; user text is never echoed into an event.
     return "[message received]" if text else ""
+
+
+def _database_url(db: Session) -> str | None:
+    bind = db.get_bind()
+    return bind.url.render_as_string(hide_password=False) if bind is not None else None
 
 
 def _response(db: Session, *, user: User, key: str, body: dict[str, object]) -> dict[str, object]:
@@ -166,7 +172,11 @@ def create_run(
     events = list(run.state_json["events"])
     events[0]["data"]["run_id"] = run.id
     events.append(_event("run_waiting", {"status": "WAITING_FOR_MODEL"}))
-    run.state_json = {"step": "waiting_for_model", "events": events}
+    run.state_json = run_checkpoint(
+        run_id=run.id,
+        initial_state={"step": "waiting_for_model", "status": "RUNNING", "events": events},
+        database_url=_database_url(db),
+    )
     thread.checkpoint_ref = run.id
     thread.updated_at = _now()
     response = {"run_id": run.id, "thread_id": thread.id, "status": run.status}
@@ -208,7 +218,12 @@ def resume_thread(
     run = db.get(AgentRun, thread.checkpoint_ref)
     if run is None:
         raise HTTPException(status_code=409, detail={"code": "CHECKPOINT_NOT_FOUND"})
-    run.state_json = {**run.state_json, "resume": payload.resume, "confirmation": payload.confirmation}
+    run.state_json = run_checkpoint(
+        run_id=run.id,
+        initial_state={**run.state_json, "resume": payload.resume, "confirmation": payload.confirmation},
+        database_url=_database_url(db),
+        resumed=True,
+    )
     run.status = "RESUMED"
     thread.status = "OPEN"
     thread.updated_at = _now()

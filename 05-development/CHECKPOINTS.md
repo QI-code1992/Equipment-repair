@@ -220,3 +220,11 @@
 - 验证：Python 3.13 全量后端 `224 passed, 9 skipped, 1 warning`；TASK-007 定向测试 `2 passed`；迁移检查、`compileall` 与 `git diff --check` 通过。唯一警告为既有 Starlette/httpx 弃用提示。
 - 边界：未引入 LangGraph 或其他新生产依赖；真实外部模型、容器和 PostgreSQL checkpoint 联调仍待 DEV-001 环境验证；无原始思维链入库或出流。
 - 回滚：应用可选择性回退提交 `7c3cf64fe7537ca8f7e05c66e4d5a71ff3383e61`；`0005_task007` downgrade 会删除四张 Runtime 表，生产数据回退须另行授权并先备份。
+
+## FCP-007-R1：TASK-007 LangGraph 修订候选
+
+- 状态：Development Candidate / 等待 DEV-001 PostgreSQL 专用环境复验；未集成，不解锁下游任务。
+- 依赖授权：项目负责人已授权新增 LangGraph 生产依赖。
+- 新增依赖：`langgraph>=0.6,<0.7`、`langgraph-checkpoint-postgres>=2.0,<3.0`。
+- 实现：真实 StateGraph runtime；生产 PostgreSQL 使用 `PostgresSaver`，同一 `thread_id` 支持 checkpoint resume；本地 SQLite 测试使用内存 saver。
+- 验证：Python 3.13 全量 `226 passed, 10 skipped, 2 warnings`；Runtime `4 passed`；`compileall`、`git diff --check` 通过。未完成 Docker/PostgreSQL 真实环境验证。

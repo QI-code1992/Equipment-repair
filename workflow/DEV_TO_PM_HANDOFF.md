@@ -245,6 +245,14 @@
 - 验证：Python 3.13 全量 `226 passed, 10 skipped, 1 warning`；Runtime `4 passed`；`compileall` 和 `git diff --check` 通过。
 - 阻断：真实 LangGraph checkpoint 尚未实现；新增 LangGraph 生产依赖需项目负责人先确认，当前不申请 Ready、Merge 或下游解锁。
 
+## TASK-007 LangGraph 依赖授权后修订交接（2026-07-23）
+
+- 授权：项目负责人确认允许新增 LangGraph 生产依赖。
+- 新增：`langgraph>=0.6,<0.7`、`langgraph-checkpoint-postgres>=2.0,<3.0`。
+- 实现：LangGraph `StateGraph`、PostgreSQL `PostgresSaver` checkpoint、同一 `thread_id` resume；SQLite 测试使用内存 saver。
+- 验证：全量后端 `226 passed, 10 skipped, 2 warnings`；Runtime `4 passed`；`compileall` 和 `git diff --check` 通过。
+- 未验证：当前无 Docker/PostgreSQL 专用环境；需 DEV-001 执行真实 PostgreSQL checkpoint 集成测试后再提交 Ready 审核请求。
+
 ## TASK-003 本地开发候选交接（2026-07-22）
 
 - 开发者/审核者：DEV-001 / DEV-002；分支 `codex/task-003-maintenance-lifecycle`，目标 `codex/stage-05-integration`。

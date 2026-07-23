@@ -316,3 +316,11 @@
 - 已修订：恢复 `Idempotency-Key` 重放/冲突保护；线程/运行成功与 resume 写入脱敏审计；业务上下文、附件引用、运行状态递归脱敏；加入 allowlist ToolCall 审计边界；补充幂等、管理员访问、SSE、checkpoint 状态和嵌套敏感字段测试；增加可选 `TASK007_POSTGRES_DSN` 集成测试。
 - 新验证：Python 3.13 全量 `226 passed, 10 skipped, 1 warning`；定向 Runtime `4 passed`；`compileall`、`git diff --check` 通过。唯一警告为既有 Starlette/httpx 弃用提示。
 - 未解决阻断：TASK-007 批准范围要求真实 LangGraph checkpoint。当前 `pyproject.toml` 未声明 LangGraph，新增生产依赖按项目规则需要项目负责人确认；本轮未静默添加依赖，PR 仍不得 Ready/合并。
+
+## TASK-007 LangGraph 依赖授权后修订（2026-07-23）
+
+- 项目负责人已确认允许 TASK-007 新增 LangGraph 生产依赖。
+- 新增依赖：`langgraph>=0.6,<0.7`、`langgraph-checkpoint-postgres>=2.0,<3.0`。
+- 实现：Runtime 使用 LangGraph `StateGraph`；生产 PostgreSQL 使用 `PostgresSaver` 并初始化 checkpoint 表，本地 SQLite 测试使用内存 saver；运行与 resume 均通过同一 `thread_id` 恢复状态。
+- 验证：Python 3.13 全量 `226 passed, 10 skipped, 2 warnings`；定向 Runtime `4 passed`；`compileall`、`git diff --check` 通过。警告为既有 Starlette/httpx 弃用及 LangChain serializer pending deprecation。
+- 结论：原 LangGraph P1 已修订；真实 PostgreSQL checkpoint 仍需 DEV-001 专用环境执行可选集成测试，完成前不得宣称容器级验证通过。
