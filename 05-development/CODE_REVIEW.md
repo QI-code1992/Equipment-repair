@@ -248,4 +248,4 @@
 - DEV-001 审核：对精确 HEAD `fcd643ab0b0e33a585e3be6ec0b0036a611059c4` Approved；此前 HEAD 的 Changes requested 不适用于当前 HEAD。
 - 合并：PR #40 已实际合入 `codex/stage-05-integration`，Merge Commit `bf842626987148575173c6cf3f34970fc496ad7c`；第二父为审核源 HEAD，第一父为 `fdec916fad943acb8ad62a1cf5bc3ce8f770cc8d`。
 - 技术核查：后端 `228 passed, 10 skipped, 2 warnings`；PostgreSQL 17 真实 PostgresSaver `1 passed, 1 warning`；compileall、Compose 配置、API 镜像构建、容器健康、`/healthz` HTTP 200、merge-tree 与 diff-check 均通过。
-- 治理结论：代码集成事实成立；项目负责人对 PR #40/源 HEAD/合并结果的正式追认仍待记录，不将本条等同于 Merge 授权，不解锁下游，不进入 Stage 6。
+- 治理结论：项目负责人已正式追认 PR #40、源 HEAD、Merge Commit 及合并结果；PR #41 治理收尾已合入，TASK-007 治理闭环完成并可按依赖矩阵解锁下游；Stage 6 仍未批准。

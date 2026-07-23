@@ -102,7 +102,7 @@
   },
   "task007Delivery": {
     "taskId": "TASK-007",
-    "status": "INTEGRATED_GOVERNANCE_CLOSEOUT_PENDING_PROJECT_OWNER_RATIFICATION",
+    "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",
     "owner": "DEV-002",
     "reviewer": "DEV-001",
     "branch": "codex/task-007-agent-runtime",
@@ -116,9 +116,11 @@
     ],
     "mergeExecutor": "ll979053897-arch / DEV-001 / manual Merge Commit",
     "verification": "DEV-001 merged-result evidence: backend 228 passed / 10 skipped / 2 warnings; PostgreSQL 17 PostgresSaver checkpoint/restart 1 passed / 1 warning; compileall, merge-tree diff-check, Compose config and API image build passed; PostgreSQL/Redis healthy and container /healthz HTTP 200.",
-    "governanceCloseoutPullRequest": "pending",
-    "dependencyUnlockAllowed": false,
-    "nextAction": "Create and merge a governance-only closeout PR after project-owner ratification of PR #40, source HEAD and Merge Commit; Stage 6 remains prohibited."
+    "governanceCloseoutPullRequest": 41,
+    "governanceCloseoutMergeCommit": "092eb84821131f6c6faa6b6a1c2acdb4079ecf8f",
+    "projectOwnerRatification": "Project owner formally ratified PR #40, source HEAD fcd643ab0b0e33a585e3be6ec0b0036a611059c4, Merge Commit bf842626987148575173c6cf3f34970fc496ad7c and the merge result.",
+    "dependencyUnlockAllowed": true,
+    "nextAction": "TASK-008 and other downstream work may proceed only where all task-book prerequisites are satisfied; Stage 6 remains prohibited without its separate formal gate."
   },
   "repairCycle": {
     "taskId": "TASK-002",

@@ -322,7 +322,7 @@
 
 ### TASK-007：Agent Runtime、LangGraph、SSE 与恢复
 
-- 状态：Integrated / PR #40 Merge Commit `bf842626987148575173c6cf3f34970fc496ad7c`；治理收尾待项目负责人追认
+- 状态：CLOSED_POST_MERGE_GOVERNANCE_COMPLETED / PR #40 Merge Commit `bf842626987148575173c6cf3f34970fc496ad7c`；PR #41 治理收尾已合入
 - 优先级：P0
 - 负责人：`DEV-002`
 - 任务开发者：`DEV-002`
@@ -343,7 +343,7 @@
 - PR 审核请求：`DEV-002` 完成本任务验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
 - Review：`DEV-001` 复核权限、审计、数据库边界、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-002` 修复。
 - PR 与合并：任务开发者创建并维护同一 Draft PR；指定审核者批准精确 HEAD 后，由 DEV-001 完成集成检查并取得项目负责人逐 PR 明确授权，方可合并至 `codex/stage-05-integration`。
-- 集成记录：PR #40 源 HEAD `fcd643ab0b0e33a585e3be6ec0b0036a611059c4` 已成为 Merge Commit `bf842626987148575173c6cf3f34970fc496ad7c` 的第二父并合入集成分支；DEV-001 的代码审核与最终集成技术检查已记录。治理收尾 PR 待项目负责人追认 PR #40/源 HEAD/合并结果；追认前不宣称 TASK-007 彻底闭环、不解锁下游、不进入 Stage 6。
+- 集成记录：PR #40 源 HEAD `fcd643ab0b0e33a585e3be6ec0b0036a611059c4` 已成为 Merge Commit `bf842626987148575173c6cf3f34970fc496ad7c` 的第二父并合入集成分支；DEV-001 的代码审核与最终集成技术检查已记录。项目负责人已正式追认 PR #40、源 HEAD、Merge Commit 及合并结果；PR #41（Merge Commit `092eb84821131f6c6faa6b6a1c2acdb4079ecf8f`）已完成治理台账收尾。TASK-007 可按依赖矩阵解锁下游；Stage 6 仍须单独批准。
 - 回滚：回退 Runtime Commit；保留既有运行审计，不直接删除线程数据。
 
 ### TASK-008：AI 故障上报、智能问数与健康分读取
