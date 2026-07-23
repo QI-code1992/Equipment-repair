@@ -380,3 +380,6 @@
 - 本地验证：Python 3.13 全量 `261 passed, 11 skipped, 2 warnings`；TASK-005 新增/Worker 定向 `5 passed, 1 skipped, 2 warnings`；`pip check`、`compileall`、`git diff --check` 通过。跳过项是当前无 DEV-001 专用实栈参数；警告均为既有第三方弃用提示。
 - 未解决阻断：当前 Alembic 单链截至 `0005_task007`，知识三表迁移缺失。共享迁移最终决策归 DEV-001，且数据库迁移需项目负责人针对具体范围确认；DEV-002 未擅自新增 revision。完成迁移集成并由 DEV-001 重跑真实联调前，不得 Ready、批准、申请 Merge 授权或解锁下游。
 - 边界：无新增生产依赖、兼容代码、通用抽象或无关修改；真实凭据和运行数据未写入仓库。
+- 迁移接收：项目负责人批准 `0006_task005` 接续 `0005_task007` 并创建四张表；DEV-001 提交 `2fe848bfb5f7f7849b950cbecfa40644e6782a05` 经三文件边界核验后，由 DEV-002 精确 cherry-pick 为 `78ad1c81f6292c1fc3706b35d9dd495a8244d1b4`。
+- 迁移验证：DEV-001 在 PostgreSQL 17 执行 `0005 -> 0006 -> 0005 -> 0006` 为 `1 passed`；DEV-002 本地定向 `6 passed, 2 skipped`，全量 `262 passed, 12 skipped, 2 warnings`，Alembic 唯一 head 为 `0006_task005`。既有 TASK-003 head 断言按批准链路由 `0005_task007` 最小更新为 `0006_task005`。
+- 剩余验证：含迁移的完整候选仍需 DEV-001 执行真实 RAGFlow/ClamAV 生命周期联调并绑定最终新 HEAD；完成前 PR 保持 Draft。

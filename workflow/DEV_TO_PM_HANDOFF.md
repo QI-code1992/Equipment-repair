@@ -314,3 +314,6 @@
 - 验证：Python 3.13 全量 `261 passed, 11 skipped, 2 warnings`；新增/Worker 定向 `5 passed, 1 skipped, 2 warnings`；`pip check`、`compileall`、`git diff --check` 通过。真实联调本轮未运行，须由 DEV-001 在完整候选 HEAD 上执行。
 - 共享迁移阻断：当前 Alembic 单链截至 `0005_task007`，缺少 `knowledge_datasets`、`knowledge_documents`、`knowledge_citations`。任务书规定共享迁移由 DEV-001 最终决策，项目规则要求项目负责人确认具体数据库迁移范围；DEV-002 未创建并行迁移头。
 - 请求动作：请 DEV-001 明确知识三表应接续的 revision/down_revision 与候选集成方式，并由项目负责人确认该具体迁移范围。迁移、真实复验、PR 描述更新和新精确 HEAD 复审全部完成前，PR 保持 Draft，不申请 Merge 授权、不解锁下游、不进入 Stage 6。
+- 迁移决定与接收：项目负责人已批准四表 `0006_task005` / `0005_task007`；DEV-001 的三文件提交 `2fe848bfb5f7f7849b950cbecfa40644e6782a05` 已精确 cherry-pick 到同一 PR 分支，生成提交 `78ad1c81f6292c1fc3706b35d9dd495a8244d1b4`。
+- 验证更新：DEV-001 PostgreSQL 17 升降级往返 `1 passed`；DEV-002 定向 `6 passed, 2 skipped`、全量 `262 passed, 12 skipped, 2 warnings`，`pip check`、`compileall`、唯一 `0006_task005 (head)` 和 diff check 通过。
+- 下一动作：DEV-002 推送含迁移的完整新 HEAD 后，DEV-001 对该 HEAD 执行真实 RAGFlow/ClamAV 联调和复审；完成前仍不转 Ready、不申请 Merge 授权或解锁下游。
