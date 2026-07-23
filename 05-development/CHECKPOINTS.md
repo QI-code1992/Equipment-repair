@@ -2,6 +2,22 @@
 
 静态原型检查点记录在 `03-ui-prototype/PROTOTYPE_CHECKPOINTS.md`，不得自动提升为生产检查点。
 
+## FCP-006-NDB：TASK-006 Agent 配置非数据库切片
+
+- 状态：已验证的可恢复检查点，不构成 TASK-006 完成、集成或 Stage 6 依据。
+- 范围：四个 Agent 的不可变配置领域模型、独立初始化/读取/保存、模型能力校验、配置快照和未挂载 API 契约。
+- 证据：实现与安全修复提交 `33d7712`、`7cbf76b`、`f7da339`、`04e651c`；远端恢复证据 `2a7ca4e`。
+- 验证：Python 3.13.14 模块/API 回归 `24 passed, 1 warning`；未执行 Docker、Compose、RAGFlow 或数据库验证。
+- 后续：TASK-002 前置已解除；数据库、迁移与正式路由仍须按 TASK-006 自身范围、迁移顺序、DEV-001 审核和 PR 门禁完成。
+
+## FCP-006-DB-R2：TASK-006 持久化事务契约复审候选
+
+- 状态：复审候选 / 未完成 / 未集成；不构成 TASK-006 完成、依赖解锁或 Stage 6 依据。
+- 范围：持久化模式、仓储事务边界、同一 `agent_id` 初始化竞争、迁移元数据注册及数据库引擎工厂契约的复审证据；本轮将工厂和 Alembic 元数据契约集中到专用集成测试，并补充不连接网络的 PostgreSQL factory 回归。
+- 当前任务证据链：`c8918d6f` → `0e34bed` → `483e75a` → `61c1026` → `911a41f` → `170bccf` → `42ef6ef`；本检查点绑定该完整链及其后的复审证据提交。
+- 已验证：Python 3.13.14 下 `codebase/backend/.venv/bin/python -m pytest tests/modules/test_agent_config_persistence.py tests/modules/test_agent_config_persistence_integration.py -q` 为 `13 passed, 1 known warning`；加入领域测试的 `codebase/backend/.venv/bin/python -m pytest tests/modules/test_agent_config.py tests/modules/test_agent_config_persistence.py tests/modules/test_agent_config_persistence_integration.py -q` 为 `30 passed, 1 known warning`；迁移测试 `codebase/backend/.venv/bin/python -m pytest tests/modules/test_task006_migration.py -q` 为 `5 passed, 1 known warning`。三次警告均为 Starlette TestClient 对当前 `httpx` 的弃用提示。`git diff --check` 通过。唯一竞争测试使用两个文件型 SQLite 会话，实际捕获 `agent_configs.agent_id` 唯一约束冲突后读取已提交配置；外键失败后由调用方 `rollback()`，同一会话可查询并提交有效写入。PostgreSQL factory 契约只创建引擎并检查 PostgreSQL dialect、URL 参数、预检池和无 SQLite PRAGMA 监听器，不发起连接。
+- 仍待 DEV-001：PostgreSQL/Compose 真实环境的迁移升降级、并发初始化、外键与正式路由验证均未执行；SQLite 和无连接 factory 证据不得替代这些验证或 PR 门禁。
+
 ## FCP-002-R6：TASK-002 正式集成后的治理收尾
 
 - 状态：代码正式集成、技术验证与治理收尾已完成；PR #25 已合入并解除 TASK-002 下游前置，不能作为 Stage 6 进入依据。
@@ -160,6 +176,21 @@
 - 合并后证据：前端 2 项测试通过、生产构建通过、14 项原型静态回归通过、`git diff --check` 与合并树检查通过；浏览器人工视觉回归未执行。
 - 恢复/门禁：可选择性回退该任务合并提交；不涉及数据或生产操作。本治理收尾 PR 合入后，TASK-006 智能配置前端子范围与 TASK-007 共享前端对话子范围可按各自任务书、PR、审核和授权门禁继续；TASK-010 仍受 TASK-003、TASK-008、TASK-009 依赖约束，Stage 6 仍未获准。
 
+### FCP-006-R1：TASK-006 全范围审核候选
+
+- 状态：Review Candidate / Not Approved / Not Integrated / Does Not Unlock Dependencies。
+- 分支/PR：`codex/task-006-agent-config` / PR #14；候选包含最新 `codex/stage-05-integration` 同步、四 Agent 智能配置前端与单链 Alembic 修复。
+- 验证：前端 7 项测试及生产构建通过；Python 3.13.14 TASK-003/006 迁移回归 `7 passed, 1 warning`、全量后端 `221 passed, 9 skipped, 1 warning`；`compileall`、单一 Alembic head 与 `git diff --check` 通过。
+- 风险与恢复：该候选未执行 Docker/PostgreSQL 真实环境验证，须由具备环境的 DEV-001 核验；合并前退回该 PR 追加提交即可，不涉及数据删除。新 HEAD 会使旧审核结论失效，必须重审并重新取得逐 PR/HEAD 合并授权。
+
+### FCP-006：TASK-006 四 Agent 独立配置集成检查点
+
+- 状态：Stable after post-merge governance closeout。
+- 分支/PR：`codex/task-006-agent-config` / PR #14；获批源 HEAD `e564b15f42492087578d03c3a1f5412c9db35f6b`；DEV-001 手动 Merge Commit `da460c64f48e1b1522979d2e5f381fb797571934`。
+- 合并后验证：DEV-001 集成检查确认目标分支、祖先关系、merge-tree 与授权 HEAD 一致；前端 7 tests/build、后端 `221 passed / 9 skipped / 1 warning`、PostgreSQL 迁移往返通过。
+- 范围/依赖：四 Agent 独立配置、首次单独初始化、模型能力与深度思考校验、正式智能配置前端和 `0004_task006` 单链迁移已集成；TASK-007 可按自身门禁继续，Stage 6 仍未获准。
+- 回滚：应用可评估 `git revert -m 1 da460c64f48e1b1522979d2e5f381fb797571934`；迁移回退按已验证 downgrade 或前向修复策略处理，生产数据回退须另行授权。
+
 ## FCP-003-R1：TASK-003 本地开发候选
 
 - 状态：Development Candidate / Locally Validated / Not Pushed / Not Reviewed / Not Integrated / Does Not Unlock Dependencies。
@@ -212,3 +243,43 @@
 - 证据：Worker 定向 `3 passed, 1 warning`；Python 3.13 全量 `204 passed, 9 skipped, 1 warning`；`compileall` 与 `git diff --check` 通过。
 - 边界：未新增 Alembic 迁移、Docker/部署配置或队列依赖；共享迁移、真实 Worker 调度、MinIO/RAGFlow/ClamAV 联调仍待 DEV-001 环境验证。
 - 恢复/门禁：可回退本功能提交。TASK-005 仍处于 Draft 开发；最终精确 HEAD 经 DEV-001 审核、集成检查和项目负责人授权后，只能由 DEV-001 合并；Stage 6 仍未获准。
+
+## FCP-007：TASK-007 Agent Runtime 开发候选
+
+- 状态：Development Candidate / Ready for review 前；未集成，不解锁下游任务。
+- 分支：`codex/task-007-agent-runtime`；功能提交 `7c3cf64fe7537ca8f7e05c66e4d5a71ff3383e61`；目标 `codex/stage-05-integration`。
+- 范围：AgentThread/AgentRun/ToolCall/AgentConfirmation 持久化模型、线程创建者/管理员访问控制、配置快照、provider-neutral 推理参数映射、持久化 checkpoint、SSE 状态事件与恢复接口；新增 Alembic `0005_task007`。
+- 验证：Python 3.13 全量后端 `224 passed, 9 skipped, 1 warning`；TASK-007 定向测试 `2 passed`；迁移检查、`compileall` 与 `git diff --check` 通过。唯一警告为既有 Starlette/httpx 弃用提示。
+- 边界：未引入 LangGraph 或其他新生产依赖；真实外部模型、容器和 PostgreSQL checkpoint 联调仍待 DEV-001 环境验证；无原始思维链入库或出流。
+- 回滚：应用可选择性回退提交 `7c3cf64fe7537ca8f7e05c66e4d5a71ff3383e61`；`0005_task007` downgrade 会删除四张 Runtime 表，生产数据回退须另行授权并先备份。
+
+## FCP-007-R1：TASK-007 LangGraph 修订候选
+
+- 状态：Development Candidate / 等待 DEV-001 PostgreSQL 专用环境复验；未集成，不解锁下游任务。
+- 依赖授权：项目负责人已授权新增 LangGraph 生产依赖。
+- 新增依赖：`langgraph>=0.6,<0.7`、`langgraph-checkpoint-postgres>=2.0,<3.0`。
+- 实现：真实 StateGraph runtime；生产 PostgreSQL 使用 `PostgresSaver`，同一 `thread_id` 支持 checkpoint resume；本地 SQLite 测试使用内存 saver。
+- 验证：Python 3.13 全量 `226 passed, 10 skipped, 2 warnings`；Runtime `4 passed`；`compileall`、`git diff --check` 通过。未完成 Docker/PostgreSQL 真实环境验证。
+
+## FCP-007-R2：TASK-007 Resume 与持久化恢复修订候选
+
+- 状态：Development Candidate / 等待 DEV-001 PostgreSQL 专用环境复验；未集成，不解锁下游任务。
+- 修订：resume 写入纳入幂等重放/409；LangGraph saver 恢复先读取同一 `thread_id` 历史 checkpoint，再合并 `resume`/`confirmation` 白名单输入；PostgreSQL 集成测试覆盖首存、恢复和历史 state 保留。
+- 验证：Python 3.13 全量 `227 passed, 10 skipped, 2 warnings`；Runtime/集成定向 `5 passed, 1 skipped`；compileall/diff-check 通过。
+- 未验证：当前无专用 PostgreSQL DSN，真实 PostgresSaver 测试跳过；需 DEV-001 执行后才能重新请求 Ready 审核。
+
+## FCP-007-R3：TASK-007 PostgreSQL DSN 修订候选
+
+- 状态：Development Candidate / 等待 DEV-001 PostgreSQL 17 专用环境复验；未集成，不解锁下游任务。
+- 修订：集成测试使用 `create_database_engine()` 的 psycopg v3 路径；LangGraph PostgresSaver 使用 libpq URL 规范化；新增转换回归。
+- 验证：Python 3.13 全量 `228 passed, 10 skipped, 2 warnings`；定向 `6 passed, 1 skipped`；compileall/diff-check 通过。
+- 未验证：本地没有专用 PostgreSQL DSN，真实 checkpoint/restart 仍待 DEV-001 执行。
+
+## FCP-005-R5：TASK-005 真实 RAGFlow 联调与集成基线同步候选
+
+- 状态：Review Candidate / 真实环境门禁已满足 / 等待 DEV-001 审核新精确 HEAD / 未集成。
+- 分支/PR：`codex/task-005-knowledge-ragflow` / PR #37；真实联调对象为 `9375d12853248ceb39068f509a8dbd95bf717ce5`，随后同步当前集成基线并保留 TASK-005 与已集成模块的共同路由和生产依赖。
+- 真实证据：上传、ClamAV 恶意附件拒绝、RAGFlow 解析、`READY`、混合检索和引用回传 `1 passed`；临时数据集、容器、网络、卷已清理，共享 RAGFlow 五项服务仍 healthy。
+- 回归证据：Python 3.13 后端 `217 passed, 11 skipped`；`compileall`、验证脚本契约和 `git diff --check` 通过；三轮复核 Critical 0、Important 0、Minor 0。
+- 同步后回归：Python 3.13.14 全量后端 `259 passed, 10 skipped, 2 warnings`；`pip check`、`compileall` 与暂存 diff check 通过。
+- 恢复/门禁：应用可按 TASK-005 功能提交选择性回退；外部文档删除仍受业务删除与审计规则约束。新 HEAD 须由 DEV-001 重新审核并完成集成与授权流程；此前不解锁下游、不进入 Stage 6。

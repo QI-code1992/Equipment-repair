@@ -71,7 +71,7 @@ def test_empty_database_upgrades_to_single_task003_head_and_is_reversible(
 
     script = ScriptDirectory.from_config(config)
     assert [revision.revision for revision in script.get_revisions("heads")] == [
-        "0003_task003"
+        "0005_task007"
     ]
     _assert_task003_schema(engine)
 

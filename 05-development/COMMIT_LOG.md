@@ -38,6 +38,10 @@ Production feature commits will be appended with branch, files, verification and
 | 2026-07-17 | `904886f48061e27c775f6ee2f8ddae99f5571ead` | TASK-002 formal PR #20 manual merge | DEV-002-approved task branch was manually merged into `codex/stage-05-integration` by final integration owner DEV-001 / `ll979053897-arch`; technical evidence is complete, governance closeout remains pending |
 | 2026-07-17 | `d633308de8277c343faf3e266476b64baffcb565` | CR-040 PR #23 merge | v1.3 two-developer Draft PR, exact-HEAD confirmation, integration-check and non-author merge rules are effective; TASK-002 dependencies remain locked pending this closeout PR |
 | 2026-07-17 | `028da42eb9ab4b55ef981ac462e09993a31e8813` | TASK-002 PR #25 merge | DEV-002 / `QI-code1992` manually merged the governance closeout; TASK-003/004 may start, TASK-005 remains blocked by TASK-004, TASK-006 is no longer blocked by TASK-002; Stage 6 remains prohibited |
+| 2026-07-15 | `33d7712334044437eba0d3fc884859d48a3c71ed` | TASK-006 immutable Agent configuration domain | non-database slice |
+| 2026-07-15 | `7cbf76bb9ae627e023cbeaa86fd883b18a916373` | TASK-006 independent configuration service | four Agent isolation and external ports |
+| 2026-07-15 | `04e651c1453fbd0551303aff9f4d6236ea2e59d4` | TASK-006 validation error redaction | stable sensitive-input-safe response |
+| 2026-07-15 | `2a7ca4eeec9857f361039736ec2576658832df52` | TASK-006 non-database evidence | recoverable review evidence |
 | 2026-07-20 | `a4655337b9f30cdab5b2678494fb85243c182f61` | TASK-004 RAGFlow infrastructure design | isolated stack, security boundary, TASK-005 contract and validation design |
 | 2026-07-20 | `80b3110a3841394c649f5d190f6ae2b9def7f1a7` | TASK-004 executable implementation plan | TDD slices, exact files, commands and review gates |
 | 2026-07-20 | `7b71b964a8c09d9f1719289072231aa5d32bf262` | TASK-004 static Compose contract | RED/GREEN verifier for images, health, networks, ports and volumes |
@@ -58,3 +62,5 @@ Production feature commits will be appended with branch, files, verification and
 | 2026-07-22 | `4877dcdc301b97d884a43883a5584fdee1d28c41` | TASK-003 latest-integration synchronization | merges `f135997a6ecc009de75735b673499b475615a717` without conflicts and passes fresh Python/PostgreSQL/Compose/migration regression; still local and unreviewed |
 | 2026-07-22 | `8960b5d8ab1e7073036c6151744233e26c15c9e9` | TASK-003 approved PR head | DEV-002 approved PR #32 exact head; Critical 0, Important 0, Minor 0 |
 | 2026-07-22 | `51337db767eb94051f78a5c537a3ff48d428a742` | TASK-003 PR #32 merge | DEV-002 manually merged the authorized exact head into `codex/stage-05-integration`; fresh Python 3.13, PostgreSQL 17, migration, Compose and diff regression passed |
+| 2026-07-22 | `da460c64f48e1b1522979d2e5f381fb797571934` | TASK-006 PR #14 merge | DEV-001 manually merged approved HEAD `e564b15f42492087578d03c3a1f5412c9db35f6b`; post-merge technical verification passed; governance closeout recorded in follow-up PR |
+| 2026-07-22 | pending commit | TASK-006 full-scope review candidate | syncs the integrated frontend baseline, implements independent Agent configuration UI, and chains Alembic `0004_task006` after TASK-003; pending DEV-001 review |
