@@ -291,3 +291,12 @@
 - 合并关系：第一父 `fdec916fad943acb8ad62a1cf5bc3ce8f770cc8d`，第二父为源 HEAD；源 HEAD 已成为集成分支祖先。
 - 合并后证据：后端 `228 passed, 10 skipped, 2 warnings`；PostgreSQL 17 真实 `PostgresSaver` checkpoint/restart `1 passed, 1 warning`；`compileall`、Compose 配置、API 镜像构建、PostgreSQL/Redis healthy、容器 `/healthz` HTTP 200、merge-tree 与 `git diff --check` 通过。
 - 治理门禁：需纯治理 PR 同步 SELF_TEST、CHECKPOINTS、CODE_REVIEW、COMMIT_LOG、任务书、`workflow/DEV_TO_PM_HANDOFF.md` 与 `workflow/state.json`；追认及治理 PR 合入前 Stage 6 仍未批准。
+
+## FCP-005-R3：TASK-005 审核整改中间检查点
+
+- 状态：Draft / Changes Requested / Partially Remediated / Not Approved / Not Integrated。
+- 分支/PR：`codex/task-005-knowledge-ragflow` / PR #37；审核基准 HEAD `1cee0317ab1eefca2ca4900e2e97804ae1448665`。
+- 已关闭范围：可执行 Worker 模块入口及其 TDD；可选真实 PostgreSQL/MinIO/ClamAV/RAGFlow 生命周期测试；安全校验 PowerShell 调用脚本。
+- 本地证据：全量后端 `261 passed, 11 skipped, 2 warnings`；新增/Worker 定向 `5 passed, 1 skipped, 2 warnings`；`pip check`、`compileall`、`git diff --check` 通过。
+- 未关闭范围：知识三表的共享 Alembic revision 需 DEV-001 决定并取得项目负责人对具体迁移范围的确认；真实联调必须在完整新 HEAD 上由 DEV-001 重跑。
+- 恢复/门禁：本检查点仅为可恢复整改提交，不是 Review Candidate；PR 保持 Draft，不解锁 TASK-009/011，不进入 Stage 6。

@@ -371,3 +371,12 @@
 - 集成对象：PR #40，源 HEAD `fcd643ab0b0e33a585e3be6ec0b0036a611059c4`；Merge Commit `bf842626987148575173c6cf3f34970fc496ad7c`；第一父 `fdec916fad943acb8ad62a1cf5bc3ce8f770cc8d`，第二父为源 HEAD。
 - DEV-001 实测：合并结果后端 `228 passed, 10 skipped, 2 warnings`；PostgreSQL 17 真实 `PostgresSaver` checkpoint/restart `1 passed, 1 warning`；`compileall`、合并树 `git diff --check`、Compose 配置、API 生产镜像构建通过；PostgreSQL/Redis healthy，容器内 `/healthz` 返回 HTTP 200。
 - 治理状态：代码已集成；项目负责人对 PR #40/源 HEAD/合并结果的正式追认及治理收尾 PR 合入前，不宣称 TASK-007 彻底闭环、不解锁下游、不进入 Stage 6。
+
+## TASK-005 PR #37 Changes requested 修订（2026-07-23）
+
+- 审核对象：PR #37 精确 HEAD `1cee0317ab1eefca2ca4900e2e97804ae1448665`；DEV-001 提出 Worker 入口、三张知识表迁移、真实验证资产和过期 PR 描述问题，PR 已恢复 Draft。
+- TDD：新增 Worker 入口测试时因 `app.modules.knowledge.worker_main` 不存在而 `2 failed`；实现运行依赖装配、批量参数、事务提交和安全配置校验后，Worker 定向为 `5 passed, 2 warnings`。
+- 验证资产：新增默认跳过的 `tests/integration/test_task005_live_stack.py`，仅在显式启用和提供专用 PostgreSQL/MinIO/ClamAV/RAGFlow 参数时执行；新增 `codebase/infra/task-005/scripts/Invoke-Validation.ps1`，不保存凭据、不启动或改写共享服务。
+- 本地验证：Python 3.13 全量 `261 passed, 11 skipped, 2 warnings`；TASK-005 新增/Worker 定向 `5 passed, 1 skipped, 2 warnings`；`pip check`、`compileall`、`git diff --check` 通过。跳过项是当前无 DEV-001 专用实栈参数；警告均为既有第三方弃用提示。
+- 未解决阻断：当前 Alembic 单链截至 `0005_task007`，知识三表迁移缺失。共享迁移最终决策归 DEV-001，且数据库迁移需项目负责人针对具体范围确认；DEV-002 未擅自新增 revision。完成迁移集成并由 DEV-001 重跑真实联调前，不得 Ready、批准、申请 Merge 授权或解锁下游。
+- 边界：无新增生产依赖、兼容代码、通用抽象或无关修改；真实凭据和运行数据未写入仓库。

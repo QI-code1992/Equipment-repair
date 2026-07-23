@@ -305,3 +305,12 @@
 - 风险/回退：`0003_task003` downgrade 会删除五张业务表；生产回退优先前向修复，数据回退必须备份并另行授权；应用可评估选择性 revert Merge Commit。
 - 依赖：本治理 PR 合入后 TASK-003 正式闭环；TASK-009/010/011 仍等待各自其余依赖，Stage 6 仍未获准。
 - 请求动作：项目负责人确认本纯治理 PR 的内容和精确 HEAD；DEV-001 完成集成核查与授权请求后，由非 PR 作者 DEV-002 合并。
+
+## TASK-005 PR #37 Changes requested 整改交接（2026-07-23）
+
+- 开发者/审核者/Merge 执行者：DEV-002 / DEV-001 / DEV-001；同一 PR [#37](https://github.com/QI-code1992/Equipment-repair/pull/37) 已恢复 Draft，目标为 `codex/stage-05-integration`。
+- 审核基准：`1cee0317ab1eefca2ca4900e2e97804ae1448665`，结论 Changes requested；旧审核不得用于批准或集成。
+- 已完成整改：实际 Worker 入口 `app.modules.knowledge.worker_main`；默认安全跳过、显式专用环境才运行的真实生命周期测试；不含凭据且不改写共享基础设施的 PowerShell 验证入口。
+- 验证：Python 3.13 全量 `261 passed, 11 skipped, 2 warnings`；新增/Worker 定向 `5 passed, 1 skipped, 2 warnings`；`pip check`、`compileall`、`git diff --check` 通过。真实联调本轮未运行，须由 DEV-001 在完整候选 HEAD 上执行。
+- 共享迁移阻断：当前 Alembic 单链截至 `0005_task007`，缺少 `knowledge_datasets`、`knowledge_documents`、`knowledge_citations`。任务书规定共享迁移由 DEV-001 最终决策，项目规则要求项目负责人确认具体数据库迁移范围；DEV-002 未创建并行迁移头。
+- 请求动作：请 DEV-001 明确知识三表应接续的 revision/down_revision 与候选集成方式，并由项目负责人确认该具体迁移范围。迁移、真实复验、PR 描述更新和新精确 HEAD 复审全部完成前，PR 保持 Draft，不申请 Merge 授权、不解锁下游、不进入 Stage 6。
