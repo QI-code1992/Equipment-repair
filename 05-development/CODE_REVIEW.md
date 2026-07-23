@@ -242,3 +242,10 @@
 - 合并后证据：Python 3.13、专用 PostgreSQL 17、迁移单 head、平台/RAGFlow Compose、compileall 与差异检查均通过。
 - 治理边界：本收尾仅更新任务书、FCP、自测、评审、提交日志、交接与状态台账；无 `codebase/`、测试、数据库迁移、基础设施、部署或运行配置修改。
 - 结论：治理核查 Critical 0、Important 0、Minor 0；等待项目负责人确认本纯治理 PR 的精确 HEAD，随后由非 PR 作者合并。
+
+## TASK-007 PR #40 代码审核与合并后技术核查（2026-07-23）
+
+- DEV-001 审核：对精确 HEAD `fcd643ab0b0e33a585e3be6ec0b0036a611059c4` Approved；此前 HEAD 的 Changes requested 不适用于当前 HEAD。
+- 合并：PR #40 已实际合入 `codex/stage-05-integration`，Merge Commit `bf842626987148575173c6cf3f34970fc496ad7c`；第二父为审核源 HEAD，第一父为 `fdec916fad943acb8ad62a1cf5bc3ce8f770cc8d`。
+- 技术核查：后端 `228 passed, 10 skipped, 2 warnings`；PostgreSQL 17 真实 PostgresSaver `1 passed, 1 warning`；compileall、Compose 配置、API 镜像构建、容器健康、`/healthz` HTTP 200、merge-tree 与 diff-check 均通过。
+- 治理结论：代码集成事实成立；项目负责人对 PR #40/源 HEAD/合并结果的正式追认仍待记录，不将本条等同于 Merge 授权，不解锁下游，不进入 Stage 6。

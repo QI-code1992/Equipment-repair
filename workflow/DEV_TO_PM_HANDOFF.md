@@ -267,6 +267,14 @@
 - 验证：全量 `228 passed, 10 skipped, 2 warnings`；Runtime/集成定向 `6 passed, 1 skipped`；compileall/diff-check 通过。
 - 未验证/请求：当前无专用 PostgreSQL DSN；请 DEV-001 在 PostgreSQL 17 真实环境运行 `TASK007_POSTGRES_DSN=... TASK007_ALLOW_DESTRUCTIVE_TESTS=1 python -m pytest tests/integration/test_task007_postgres.py -q`，并将结果绑定下一次精确 HEAD 审核。
 
+## TASK-007 PR #40 合并后治理收尾候选（2026-07-23）
+
+- 代码集成事实：PR [#40](https://github.com/QI-code1992/Equipment-repair/pull/40) 的源 HEAD `fcd643ab0b0e33a585e3be6ec0b0036a611059c4` 已合入 `codex/stage-05-integration`，Merge Commit `bf842626987148575173c6cf3f34970fc496ad7c`；第一父 `fdec916fad943acb8ad62a1cf5bc3ce8f770cc8d`，第二父为源 HEAD。
+- 审核与集成：DEV-001 已批准该精确 HEAD 并完成最终集成技术检查；这两项是代码审核/集成事实，不等同于项目负责人 Merge 授权。项目负责人对 PR #40、源 HEAD 和 Merge Commit 的正式追认待治理收尾 PR 确认。
+- 合并后证据：后端 `228 passed, 10 skipped, 2 warnings`；PostgreSQL 17 真实 PostgresSaver checkpoint/restart `1 passed, 1 warning`；compileall、Compose 配置、API 生产镜像构建、PostgreSQL/Redis healthy、容器内 `/healthz` HTTP 200、merge-tree 与 `git diff --check` 通过。
+- 治理范围：本收尾候选只更新 `workflow/`、`05-development/`、任务书和本交接台账，不修改 `codebase/`、测试实现、迁移、基础设施、部署或运行配置。
+- 当前门禁：治理收尾 PR 合入且项目负责人追认前，TASK-007 不标记为彻底闭环，不解锁 TASK-008/下游，不进入 Stage 6。
+
 ## TASK-003 本地开发候选交接（2026-07-22）
 
 - 开发者/审核者：DEV-001 / DEV-002；分支 `codex/task-003-maintenance-lifecycle`，目标 `codex/stage-05-integration`。
