@@ -1,9 +1,10 @@
 from sqlalchemy import select
 
 from app.modules.agent_config.models import AgentConfigModel, ModelBinding, ModelProvider
-from app.modules.agent_runtime.models import AgentRun, AgentThread
+from app.modules.agent_runtime.models import AgentConfirmation, AgentRun, AgentThread
 from app.modules.audit.models import AuditEvent, IdempotencyRecord
 from app.modules.agent_runtime.tool_audit import record_tool_call
+from app.modules.agent_runtime.langgraph_runtime import run_checkpoint
 from tests.modules.support import create_user_token
 
 
@@ -107,14 +108,28 @@ def test_thread_isolation_and_checkpoint_resume(client) -> None:
     ).json()
     resumed = client.post(
         f"/api/agent/threads/{thread['thread_id']}/resume",
-        headers=auth(owner_token),
+        headers={**auth(owner_token), "Idempotency-Key": "resume-1"},
         json={"confirmation": {"approved": True}},
     )
     assert resumed.status_code == 202
+    replay = client.post(
+        f"/api/agent/threads/{thread['thread_id']}/resume",
+        headers={**auth(owner_token), "Idempotency-Key": "resume-1"},
+        json={"confirmation": {"approved": True}},
+    )
+    conflict = client.post(
+        f"/api/agent/threads/{thread['thread_id']}/resume",
+        headers={**auth(owner_token), "Idempotency-Key": "resume-1"},
+        json={"confirmation": {"approved": False}},
+    )
+    assert replay.status_code == 202 and replay.json() == resumed.json()
+    assert conflict.status_code == 409
     with client.app.state.session_factory() as db:
         stored = db.get(AgentThread, thread["thread_id"])
         assert stored is not None and stored.checkpoint_ref == run["run_id"]
         assert db.scalar(select(AgentRun).where(AgentRun.id == run["run_id"])).status == "RESUMED"
+        assert len(db.scalars(select(AgentConfirmation).where(AgentConfirmation.run_id == run["run_id"])).all()) == 1
+        assert len(db.scalars(select(AuditEvent).where(AuditEvent.action == "agent.run.resume")).all()) == 1
 
 
 def test_message_idempotency_replays_and_rejects_conflict(client) -> None:
@@ -158,3 +173,21 @@ def test_tool_audit_is_allowlisted_and_redacted(client) -> None:
         )
         db.commit()
         assert call.input_json == {"nested": {"token": "[REDACTED]"}}
+
+
+def test_resume_reads_checkpoint_history_before_merging_input() -> None:
+    initial = run_checkpoint(
+        run_id="checkpoint-history",
+        initial_state={"step": "historical", "events": [{"event": "historical", "data": {"value": 7}}]},
+        database_url="sqlite+pysqlite:///:memory:",
+    )
+    resumed = run_checkpoint(
+        run_id="checkpoint-history",
+        initial_state={"confirmation": {"approved": True}},
+        database_url="sqlite+pysqlite:///:memory:",
+        resumed=True,
+    )
+    assert any(item["event"] == "historical" for item in resumed["events"])
+    assert resumed["confirmation"] == {"approved": True}
+    assert resumed["step"] == "waiting_for_model"
+    assert initial["step"] == "waiting_for_model"

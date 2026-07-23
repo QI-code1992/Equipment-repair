@@ -253,6 +253,13 @@
 - 验证：全量后端 `226 passed, 10 skipped, 2 warnings`；Runtime `4 passed`；`compileall` 和 `git diff --check` 通过。
 - 未验证：当前无 Docker/PostgreSQL 专用环境；需 DEV-001 执行真实 PostgreSQL checkpoint 集成测试后再提交 Ready 审核请求。
 
+## TASK-007 第二轮 Changes requested 修订交接（2026-07-23）
+
+- 原审核 HEAD：`71b7d3c1993beb6abd94a22bacd0b9d392347d7d`；阻断为 resume 幂等、PostgresSaver 真实恢复和历史 checkpoint 不得被调用方 state 覆盖。
+- 修订：resume 幂等重放/409 与 confirmation/audit 唯一性测试；`run_checkpoint` 通过同一 `thread_id` 先读取 saver 历史 state，再合并白名单恢复输入；可选专用 PostgreSQL 测试覆盖真实首存/恢复。
+- 验证：全量 `227 passed, 10 skipped, 2 warnings`；Runtime/集成定向 `5 passed, 1 skipped`；compileall/diff-check 通过。
+- 未验证：当前无专用 PostgreSQL DSN，真实 PostgresSaver 集成测试跳过；请 DEV-001 提供环境执行并将结果绑定新精确 HEAD。
+
 ## TASK-003 本地开发候选交接（2026-07-22）
 
 - 开发者/审核者：DEV-001 / DEV-002；分支 `codex/task-003-maintenance-lifecycle`，目标 `codex/stage-05-integration`。

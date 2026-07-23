@@ -228,3 +228,10 @@
 - 新增依赖：`langgraph>=0.6,<0.7`、`langgraph-checkpoint-postgres>=2.0,<3.0`。
 - 实现：真实 StateGraph runtime；生产 PostgreSQL 使用 `PostgresSaver`，同一 `thread_id` 支持 checkpoint resume；本地 SQLite 测试使用内存 saver。
 - 验证：Python 3.13 全量 `226 passed, 10 skipped, 2 warnings`；Runtime `4 passed`；`compileall`、`git diff --check` 通过。未完成 Docker/PostgreSQL 真实环境验证。
+
+## FCP-007-R2：TASK-007 Resume 与持久化恢复修订候选
+
+- 状态：Development Candidate / 等待 DEV-001 PostgreSQL 专用环境复验；未集成，不解锁下游任务。
+- 修订：resume 写入纳入幂等重放/409；LangGraph saver 恢复先读取同一 `thread_id` 历史 checkpoint，再合并 `resume`/`confirmation` 白名单输入；PostgreSQL 集成测试覆盖首存、恢复和历史 state 保留。
+- 验证：Python 3.13 全量 `227 passed, 10 skipped, 2 warnings`；Runtime/集成定向 `5 passed, 1 skipped`；compileall/diff-check 通过。
+- 未验证：当前无专用 PostgreSQL DSN，真实 PostgresSaver 测试跳过；需 DEV-001 执行后才能重新请求 Ready 审核。

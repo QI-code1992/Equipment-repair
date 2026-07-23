@@ -11,6 +11,8 @@ from alembic.config import Config
 import pytest
 from sqlalchemy import create_engine, inspect
 
+from app.modules.agent_runtime.langgraph_runtime import run_checkpoint
+
 
 POSTGRES_DSN = os.getenv("TASK007_POSTGRES_DSN")
 ALLOW_DESTRUCTIVE = os.getenv("TASK007_ALLOW_DESTRUCTIVE_TESTS") == "1"
@@ -32,6 +34,20 @@ def test_task007_postgres_migration_round_trip() -> None:
         assert {
             "agent_threads", "agent_runs", "agent_tool_calls", "agent_confirmations"
         } <= set(inspect(engine).get_table_names())
+        first = run_checkpoint(
+            run_id="postgres-checkpoint-test",
+            initial_state={"step": "historical", "events": [{"event": "historical", "data": {"value": 7}}]},
+            database_url=POSTGRES_DSN,
+        )
+        resumed = run_checkpoint(
+            run_id="postgres-checkpoint-test",
+            initial_state={"confirmation": {"approved": True}},
+            database_url=POSTGRES_DSN,
+            resumed=True,
+        )
+        assert first["step"] == "waiting_for_model"
+        assert any(item["event"] == "historical" for item in resumed["events"])
+        assert resumed["confirmation"] == {"approved": True}
         command.downgrade(config, "0004_task006")
         assert not ({"agent_threads", "agent_runs", "agent_tool_calls", "agent_confirmations"} & set(inspect(engine).get_table_names()))
     finally:

@@ -13,6 +13,8 @@ class RuntimeState(TypedDict, total=False):
     status: str
     events: list[dict[str, Any]]
     resumed: bool
+    resume: bool
+    confirmation: dict[str, Any]
 
 
 _memory_saver = InMemorySaver()
@@ -55,5 +57,15 @@ def run_checkpoint(
     config = {"configurable": {"thread_id": run_id}}
     with _checkpointer(database_url) as checkpointer:
         graph = _graph(checkpointer)
-        state = {**initial_state, "run_id": run_id, "resumed": resumed}
+        previous = graph.get_state(config)
+        if resumed and previous.values:
+            state = {
+                **previous.values,
+                "resume": initial_state.get("resume", True),
+                "confirmation": initial_state.get("confirmation", {}),
+                "run_id": run_id,
+                "resumed": True,
+            }
+        else:
+            state = {**initial_state, "run_id": run_id, "resumed": resumed}
         return graph.invoke(state, config)

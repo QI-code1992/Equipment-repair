@@ -211,30 +211,46 @@ def resume_thread(
     payload: ResumeCreate,
     db: Session = Depends(get_db),
     user: User = Depends(require_permission("intelligence:agent")),
+    idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
 ) -> dict[str, object]:
     thread = _thread_or_404(db, thread_id, user)
+    request_body = {"thread_id": thread_id, **payload.model_dump()}
+    try:
+        replay = find_idempotent_response(
+            db, user_id=user.id, method="POST", path="/api/agent/threads/{thread_id}/resume",
+            key=idempotency_key, request_body=request_body,
+        )
+    except IdempotencyKeyReused:
+        raise HTTPException(status_code=409, detail={"code": "IDEMPOTENCY_KEY_REUSED"}) from None
+    if replay is not None:
+        return replay[1]
     if thread.checkpoint_ref is None:
         raise HTTPException(status_code=409, detail={"code": "CHECKPOINT_NOT_FOUND"})
     run = db.get(AgentRun, thread.checkpoint_ref)
     if run is None:
         raise HTTPException(status_code=409, detail={"code": "CHECKPOINT_NOT_FOUND"})
+    confirmation = sanitize_audit_metadata(payload.confirmation)
     run.state_json = run_checkpoint(
         run_id=run.id,
-        initial_state={**run.state_json, "resume": payload.resume, "confirmation": payload.confirmation},
+        initial_state={"resume": payload.resume, "confirmation": confirmation},
         database_url=_database_url(db),
         resumed=True,
     )
     run.status = "RESUMED"
     thread.status = "OPEN"
     thread.updated_at = _now()
-    confirmation = sanitize_audit_metadata(payload.confirmation)
     db.add(AgentConfirmation(run_id=run.id, confirmation_type="resume", status="accepted", payload_json=confirmation))
     write_audit_event(
         db, actor_user_id=user.id, action="agent.run.resume", resource_type="agent_run",
         resource_id=run.id, result="success", metadata={"confirmation": confirmation},
     )
+    response = {"run_id": run.id, "thread_id": thread.id, "status": run.status}
+    save_idempotent_response(
+        db, user_id=user.id, method="POST", path="/api/agent/threads/{thread_id}/resume",
+        key=idempotency_key, request_body=request_body, status=202, body=response,
+    )
     db.commit()
-    return {"run_id": run.id, "thread_id": thread.id, "status": run.status}
+    return response
 
 
 @router.get("/threads/{thread_id}")

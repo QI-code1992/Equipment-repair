@@ -324,3 +324,10 @@
 - 实现：Runtime 使用 LangGraph `StateGraph`；生产 PostgreSQL 使用 `PostgresSaver` 并初始化 checkpoint 表，本地 SQLite 测试使用内存 saver；运行与 resume 均通过同一 `thread_id` 恢复状态。
 - 验证：Python 3.13 全量 `226 passed, 10 skipped, 2 warnings`；定向 Runtime `4 passed`；`compileall`、`git diff --check` 通过。警告为既有 Starlette/httpx 弃用及 LangChain serializer pending deprecation。
 - 结论：原 LangGraph P1 已修订；真实 PostgreSQL checkpoint 仍需 DEV-001 专用环境执行可选集成测试，完成前不得宣称容器级验证通过。
+
+## TASK-007 DEV-001 第二轮 Changes requested 修订（2026-07-23）
+
+- 审核对象：PR #40，HEAD `71b7d3c1993beb6abd94a22bacd0b9d392347d7d`；DEV-001 提出 resume 幂等、真实 PostgreSQL checkpoint/restart、恢复不得覆盖历史 checkpoint 三项问题。
+- 已修订：resume 接受并校验 `Idempotency-Key`，相同请求重放原响应、冲突返回 409；resume 仅传入允许的 confirmation/resume 输入，LangGraph saver 先读取同一 `thread_id` 的历史 state 再合并；可选 PostgreSQL 集成测试增加真实 `run_checkpoint` 首次保存、同 thread resume 和历史事件保留断言。
+- 验证：Python 3.13 全量 `227 passed, 10 skipped, 2 warnings`；Runtime/集成定向 `5 passed, 1 skipped`；`compileall`、`git diff --check` 通过。专用 PostgreSQL 未配置，真实集成测试本地跳过。
+- 门禁：新 HEAD 尚未由 DEV-001 复审；不得 Ready、请求 Merge 授权、合并或解锁下游。
