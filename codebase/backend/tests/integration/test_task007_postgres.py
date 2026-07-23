@@ -9,8 +9,9 @@ from pathlib import Path
 from alembic import command
 from alembic.config import Config
 import pytest
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import inspect
 
+from app.core.database import create_database_engine
 from app.modules.agent_runtime.langgraph_runtime import run_checkpoint
 
 
@@ -26,7 +27,7 @@ pytestmark = pytest.mark.skipif(
 def test_task007_postgres_migration_round_trip() -> None:
     config = Config(str(BACKEND_DIR / "alembic.ini"))
     config.set_main_option("path_separator", "os")
-    engine = create_engine(POSTGRES_DSN)
+    engine = create_database_engine(POSTGRES_DSN)
     previous = os.environ.get("POSTGRES_DSN")
     os.environ["POSTGRES_DSN"] = POSTGRES_DSN
     try:

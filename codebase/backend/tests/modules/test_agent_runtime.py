@@ -4,7 +4,7 @@ from app.modules.agent_config.models import AgentConfigModel, ModelBinding, Mode
 from app.modules.agent_runtime.models import AgentConfirmation, AgentRun, AgentThread
 from app.modules.audit.models import AuditEvent, IdempotencyRecord
 from app.modules.agent_runtime.tool_audit import record_tool_call
-from app.modules.agent_runtime.langgraph_runtime import run_checkpoint
+from app.modules.agent_runtime.langgraph_runtime import normalize_checkpoint_url, run_checkpoint
 from tests.modules.support import create_user_token
 
 
@@ -191,3 +191,9 @@ def test_resume_reads_checkpoint_history_before_merging_input() -> None:
     assert resumed["confirmation"] == {"approved": True}
     assert resumed["step"] == "waiting_for_model"
     assert initial["step"] == "waiting_for_model"
+
+
+def test_postgres_checkpoint_url_uses_libpq_format() -> None:
+    assert normalize_checkpoint_url(
+        "postgresql+psycopg://user:pass@postgres:5432/db"
+    ) == "postgresql://user:pass@postgres:5432/db"

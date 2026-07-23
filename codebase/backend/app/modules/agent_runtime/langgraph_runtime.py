@@ -20,6 +20,13 @@ class RuntimeState(TypedDict, total=False):
 _memory_saver = InMemorySaver()
 
 
+def normalize_checkpoint_url(database_url: str) -> str:
+    """Convert SQLAlchemy's psycopg dialect URL to libpq format for LangGraph."""
+    return database_url.replace("postgresql+psycopg://", "postgresql://", 1).replace(
+        "postgresql+psycopg2://", "postgresql://", 1
+    )
+
+
 def _runtime_node(state: RuntimeState) -> RuntimeState:
     events = list(state.get("events", []))
     if state.get("resumed"):
@@ -40,7 +47,7 @@ def _graph(checkpointer: Any):
 @contextmanager
 def _checkpointer(database_url: str | None) -> Iterator[Any]:
     if database_url and database_url.startswith("postgresql"):
-        with PostgresSaver.from_conn_string(database_url) as saver:
+        with PostgresSaver.from_conn_string(normalize_checkpoint_url(database_url)) as saver:
             saver.setup()
             yield saver
         return

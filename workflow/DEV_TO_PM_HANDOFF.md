@@ -260,6 +260,13 @@
 - 验证：全量 `227 passed, 10 skipped, 2 warnings`；Runtime/集成定向 `5 passed, 1 skipped`；compileall/diff-check 通过。
 - 未验证：当前无专用 PostgreSQL DSN，真实 PostgresSaver 集成测试跳过；请 DEV-001 提供环境执行并将结果绑定新精确 HEAD。
 
+## TASK-007 第三轮 DSN 修订交接（2026-07-23）
+
+- 审核对象：HEAD `d315d11c67e3886aad7feae9b0699d12e64b1336`。
+- 修订：专用 PostgreSQL 测试改用项目 `create_database_engine()`（psycopg v3）；LangGraph PostgresSaver 接收前统一转换为 libpq `postgresql://`；新增 URL 转换回归测试。
+- 验证：全量 `228 passed, 10 skipped, 2 warnings`；Runtime/集成定向 `6 passed, 1 skipped`；compileall/diff-check 通过。
+- 未验证/请求：当前无专用 PostgreSQL DSN；请 DEV-001 在 PostgreSQL 17 真实环境运行 `TASK007_POSTGRES_DSN=... TASK007_ALLOW_DESTRUCTIVE_TESTS=1 python -m pytest tests/integration/test_task007_postgres.py -q`，并将结果绑定下一次精确 HEAD 审核。
+
 ## TASK-003 本地开发候选交接（2026-07-22）
 
 - 开发者/审核者：DEV-001 / DEV-002；分支 `codex/task-003-maintenance-lifecycle`，目标 `codex/stage-05-integration`。

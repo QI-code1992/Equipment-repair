@@ -331,3 +331,10 @@
 - 已修订：resume 接受并校验 `Idempotency-Key`，相同请求重放原响应、冲突返回 409；resume 仅传入允许的 confirmation/resume 输入，LangGraph saver 先读取同一 `thread_id` 的历史 state 再合并；可选 PostgreSQL 集成测试增加真实 `run_checkpoint` 首次保存、同 thread resume 和历史事件保留断言。
 - 验证：Python 3.13 全量 `227 passed, 10 skipped, 2 warnings`；Runtime/集成定向 `5 passed, 1 skipped`；`compileall`、`git diff --check` 通过。专用 PostgreSQL 未配置，真实集成测试本地跳过。
 - 门禁：新 HEAD 尚未由 DEV-001 复审；不得 Ready、请求 Merge 授权、合并或解锁下游。
+
+## TASK-007 DEV-001 第三轮 DSN 修订（2026-07-23）
+
+- 审核对象：PR #40，HEAD `d315d11c67e3886aad7feae9b0699d12e64b1336`；DEV-001 发现测试未走 psycopg v3 构造路径，生产 PostgresSaver 收到错误的 SQLAlchemy 方言 URL。
+- 修订：PostgreSQL 集成测试改用 `create_database_engine()`；LangGraph 边界将 `postgresql+psycopg://`/`postgresql+psycopg2://` 转换为 libpq `postgresql://`；新增 URL 规范化回归测试。
+- 验证：Python 3.13 全量 `228 passed, 10 skipped, 2 warnings`；Runtime/集成定向 `6 passed, 1 skipped`；`compileall`、`git diff --check` 通过。
+- 未验证：当前无专用 PostgreSQL DSN，真实 checkpoint 测试仍跳过；需要 DEV-001 在 PostgreSQL 17 环境执行并记录结果。
