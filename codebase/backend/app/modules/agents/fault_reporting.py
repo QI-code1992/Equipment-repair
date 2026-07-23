@@ -4,6 +4,8 @@ from typing import Any
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
+from app.modules.maintenance.schemas import AttachmentRef
+
 
 class FaultDraft(BaseModel):
     """受控的 AI 故障草稿；正式业务写入仍由业务 API 完成。"""
@@ -17,7 +19,7 @@ class FaultDraft(BaseModel):
     duration_minutes: int | None = Field(default=None, ge=0, le=10 * 365 * 24 * 60)
     possible_location: str | None = Field(default=None, max_length=300)
     description: str | None = Field(default=None, max_length=10000)
-    attachment_refs: list[str] = Field(default_factory=list)
+    attachment_refs: list[AttachmentRef] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def reject_multiple_equipment(self) -> "FaultDraft":

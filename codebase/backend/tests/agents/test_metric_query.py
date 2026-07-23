@@ -100,3 +100,52 @@ def test_metric_query_api_returns_unavailable_without_fabricated_value(client) -
     assert response.status_code == 503
     assert response.json()["status"] == "UNAVAILABLE"
     assert response.json()["items"] == []
+
+
+def test_health_score_agent_boundary_returns_controlled_unavailable_status(client) -> None:
+    _, token = create_user_token(
+        client,
+        username="health-reader",
+        role_code="LINE_OPERATOR",
+        permission_codes=["intelligence:agent"],
+    )
+
+    response = client.get(
+        "/api/agent/health-score/equipment-1",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 503
+    assert response.json() == {
+        "status": "UNAVAILABLE",
+        "score": None,
+        "grade": None,
+        "components": [],
+    }
+
+
+def test_health_score_agent_boundary_reads_only_from_injected_service(client) -> None:
+    from app.modules.agents.metric_query import HealthScoreReader
+
+    client.app.state.health_score_reader = HealthScoreReader(
+        lambda equipment_id: {
+            "equipment_id": equipment_id,
+            "score": 91,
+            "grade": "A",
+            "components": [],
+        }
+    )
+    _, token = create_user_token(
+        client,
+        username="health-reader-2",
+        role_code="LINE_OPERATOR",
+        permission_codes=["intelligence:agent"],
+    )
+
+    response = client.get(
+        "/api/agent/health-score/equipment-1",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["score"] == 91

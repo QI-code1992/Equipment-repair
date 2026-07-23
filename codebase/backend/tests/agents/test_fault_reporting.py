@@ -9,6 +9,7 @@ from app.modules.agents.fault_reporting import (
     MissingFaultFieldsError,
     SubmissionNotConfirmedError,
 )
+from tests.modules.maintenance_support import auth_headers, create_equipment, fault_reporter
 
 
 def valid_draft(**overrides: object) -> FaultDraft:
@@ -58,3 +59,36 @@ def test_fault_draft_rejects_multiple_equipment_selection() -> None:
 def test_fault_draft_rejects_future_occurrence_time() -> None:
     with pytest.raises(ValidationError):
         valid_draft(occurred_at=datetime(2099, 1, 1, tzinfo=UTC))
+
+
+def test_confirmed_fault_submission_uses_existing_business_api(client) -> None:
+    equipment_id = create_equipment(client)
+    _, token = fault_reporter(client)
+    response = client.post(
+        "/api/agent/fault-reports/submit",
+        headers=auth_headers(token, key="agent-fault-submit-1"),
+        json={
+            "draft": valid_draft(equipment_id=equipment_id).model_dump(mode="json"),
+            "confirmed": True,
+        },
+    )
+
+    assert response.status_code == 201
+    assert response.json()["status"] == "PENDING_ACCEPT"
+    assert response.json()["audit_event_id"]
+
+
+def test_fault_submission_without_confirmation_does_not_write_business_record(client) -> None:
+    equipment_id = create_equipment(client)
+    _, token = fault_reporter(client)
+    response = client.post(
+        "/api/agent/fault-reports/submit",
+        headers=auth_headers(token, key="agent-fault-submit-2"),
+        json={
+            "draft": valid_draft(equipment_id=equipment_id).model_dump(mode="json"),
+            "confirmed": False,
+        },
+    )
+
+    assert response.status_code == 409
+    assert response.json()["detail"]["code"] == "CONFIRMATION_REQUIRED"
