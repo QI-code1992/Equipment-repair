@@ -71,7 +71,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--limit", type=int, default=50)
     args = parser.parse_args(argv)
     with worker_runtime() as (db, storage, adapter):
-        result = worker.sync_pending_documents(db, storage, adapter, args.limit)
+        result = worker.sync_pending_documents(db, storage, adapter, limit=args.limit)
         db.commit()
     print(json.dumps(result.__dict__, sort_keys=True))
     return 0

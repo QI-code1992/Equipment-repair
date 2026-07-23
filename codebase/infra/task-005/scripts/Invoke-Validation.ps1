@@ -27,7 +27,7 @@ $required = @('POSTGRES_DB', 'POSTGRES_USER', 'POSTGRES_PASSWORD', 'MINIO_ACCESS
 $missing = @($required | Where-Object { -not $settings.ContainsKey($_) -or -not $settings[$_] })
 if ($missing.Count -gt 0) { throw "TASK-005 environment is missing required variables: $($missing -join ', ')" }
 
-$compose = @('compose', '--env-file', $resolvedEnv, '-p', $project, '-f', $composeFile)
+$compose = @('compose', '--profile', 'validation', '--env-file', $resolvedEnv, '-p', $project, '-f', $composeFile)
 $hostRagflowUrl = Convert-ToHostUrl $settings.RAGFLOW_BASE_URL
 $headers = @{ Authorization = "Bearer $($settings.RAGFLOW_API_KEY)" }
 $datasetId = $null

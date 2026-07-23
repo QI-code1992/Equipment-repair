@@ -10,6 +10,8 @@ def test_task005_validation_stack_has_migration_and_isolated_services() -> None:
 
     for service in ("migrate:", "worker:", "minio:", "clamav:", "validator:"):
         assert service in compose
+    assert compose.count("profiles: [validation]") == 5
+    assert "api:\n    build:" in compose
     assert "target: test" in compose
     assert "condition: service_completed_successfully" in compose
     assert "ragflow-egress" in compose
@@ -41,3 +43,6 @@ def test_task005_validation_scripts_use_host_api_url_and_cleanup() -> None:
     assert "POSTGRES_DB=equipment_task5_validation_live" in create_environment
     assert "GetTempPath" in remove_environment
     assert "Remove-Item" in remove_environment
+    assert "task005-validation-marker" in remove_environment
+    assert "equipment-task005-" in remove_environment
+    assert "--profile validation" in remove_environment
