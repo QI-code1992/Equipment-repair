@@ -257,3 +257,10 @@
 - 安全/边界：使用现有 `equipment:read` 权限保护目录和查询 API；无直接数据库、SQL、文件系统、模型计算指标、诊断 Agent、TASK-005 或新生产依赖。
 - 验证：专项 `12 passed, 2 warnings`；全量后端 `240 passed, 10 skipped, 2 warnings`；`git diff --check` 通过。Critical 0、Important 0、Minor 0（DEV-001 正式复审尚未开始）。
 - 门禁：PR #43 已创建并 Ready；当前精确 HEAD 变化后旧审核请求失效。等待 DEV-001 对新精确 HEAD 复审，未请求 Merge 授权。
+
+## TASK-008 DEV-001 P1 修复复查请求（2026-07-23）
+
+- 原审核：PR #43 / HEAD `4e6aec342849f60fdd281c083f3a21147bc7d866`，两项 P1：故障提交未接入业务 API；健康分读取器未接入可执行 API/工具/页面边界。
+- 修复候选：HEAD `24153155da11dac0579466c05c8a04c7371e8904`；同一 PR 新增业务提交 API、受控健康分 API 和 `get_health_score` 工具白名单。
+- 新验证：专项 `14 passed, 2 warnings`；全量 `244 passed, 10 skipped, 2 warnings`；compileall、JSON 解析、diff-check 通过。
+- 当前门禁：请求 DEV-001 绑定新精确 HEAD 复审；未批准、未集成、未申请 Merge 授权。

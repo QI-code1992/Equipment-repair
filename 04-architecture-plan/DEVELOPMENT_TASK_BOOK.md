@@ -348,7 +348,7 @@
 
 ### TASK-008：AI 故障上报、智能问数与健康分读取
 
-- 状态：Ready for DEV-001 Review / PR #43 已创建并转为 Ready；尚未批准、集成或请求 Merge 授权
+- 状态：Ready for DEV-001 Re-review / PR #43 修复 P1 后等待新精确 HEAD 复审；尚未批准、集成或请求 Merge 授权
 - 优先级：P0
 - 负责人：`DEV-002`
 - 任务开发者：`DEV-002`

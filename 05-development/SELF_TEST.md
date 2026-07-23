@@ -354,3 +354,11 @@
 - 未验证：未执行 Docker/PostgreSQL/RAGFlow 真实联调；健康分公开 API 未在本任务提前扩展，受控读取边界已覆盖服务失败降级。
 - 依赖/兼容/抽象：无新增生产依赖、数据库迁移、兼容层、通用抽象或无关修改；未修改 TASK-005。
 - 当前结论：仅为本地开发候选，不代表 DEV-001 审核、集成检查、Merge 授权或任务完成。
+
+## TASK-008 DEV-001 P1 修复自测（2026-07-23）
+
+- 审核反馈：PR #43 精确 HEAD `4e6aec342849f60fdd281c083f3a21147bc7d866` 的两项 P1 为故障提交未接入业务 API、健康分读取器未接入可执行边界。
+- 修复：新增确认提交 API，复用 `maintenance_service.create_fault_report`、既有 `fault:create` 权限、幂等和审计；新增健康分 Agent API 读取边界及失败降级；工具白名单加入 `get_health_score`。
+- 新候选：`24153155da11dac0579466c05c8a04c7371e8904`。
+- 验证：专项 `14 passed, 2 warnings`；全量后端 `244 passed, 10 skipped, 2 warnings`；compileall、JSON 解析、`git diff --check` 通过。
+- 结论：P1 已有可执行回归覆盖；等待 DEV-001 对新精确 HEAD 复审。未请求 Merge 授权，未修改 TASK-005，未解锁下游。

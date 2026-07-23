@@ -306,3 +306,10 @@
 - 验证：专项 `12 passed, 2 warnings`；后端全量 `240 passed, 10 skipped, 2 warnings`；`git diff --check` 与 `workflow/state.json` 解析通过。
 - 风险/边界：未执行 Docker/PostgreSQL/RAGFlow 真实联调；无新增生产依赖、迁移、兼容层或通用抽象；健康分公开路由不提前突破 TASK-002 冻结路由表。
 - 下一动作：DEV-002 推送证据同步后的新精确 HEAD，并在同一 PR #43 重新请求 DEV-001 审核；审核通过后再走 DEV-001 集成检查、项目负责人逐 PR/HEAD 授权和 DEV-001 合并。当前不请求授权、不解锁下游、不进入 Stage 6。
+
+## TASK-008 P1 修复交接（2026-07-23）
+
+- DEV-001 审核：PR #43 / HEAD `4e6aec342849f60fdd281c083f3a21147bc7d866` 为 Changes requested；阻断为故障确认未接入业务 API、健康分读取器未接入可执行边界。
+- 修复候选：同一 PR 新 HEAD `24153155da11dac0579466c05c8a04c7371e8904`；确认提交复用既有维护服务、权限、幂等和审计；健康分 API 通过受控 reader 读取并失败降级；`get_health_score` 已加入白名单。
+- 验证：专项 `14 passed, 2 warnings`；后端全量 `244 passed, 10 skipped, 2 warnings`；compileall、JSON 解析、diff-check 通过。
+- 下一动作：DEV-001 重新绑定新精确 HEAD 审核。当前不请求 Merge 授权、不合并、不解锁 TASK-009/010/011、不进入 Stage 6。

@@ -259,3 +259,11 @@
 - 验证：Python 3.13.14 专项 `12 passed, 2 warnings`；完整后端 `240 passed, 10 skipped, 2 warnings`；`git diff --check` 通过。警告为既有 Starlette/httpx 与 LangChain serializer 弃用提示。
 - 边界：未新增生产依赖、数据库迁移、兼容层或通用抽象；未实现诊断 Agent、模型计算指标/健康分或修改 TASK-005；健康分公开路由留待既有冻结 API 边界，避免 TASK-002 路由表冲突。
 - 门禁：PR #43 已绑定候选；当前精确 HEAD 变化后旧审核请求立即失效。等待 DEV-001 按新精确 HEAD 审核；不得自批、自合并、请求 Merge 授权、解锁 TASK-009/010/011 或进入 Stage 6。
+
+## FCP-008-R2：TASK-008 DEV-001 P1 修复候选
+
+- 状态：Development Candidate / P1 已修复 / PR #43 等待 DEV-001 对新精确 HEAD 复审；未集成、不解锁下游。
+- 修复：确认提交通过既有 `maintenance_service.create_fault_report`、权限、幂等和审计边界写入业务故障；新增 `/api/agent/fault-reports/submit`；健康分读取器接入 `/api/agent/health-score/{equipment_id}`，服务不可用返回 `UNAVAILABLE`；`get_health_score` 纳入工具白名单。
+- 当前 PR HEAD：`24153155da11dac0579466c05c8a04c7371e8904`。
+- 验证：后端全量 `244 passed, 10 skipped, 2 warnings`；专项故障/指标 `14 passed, 2 warnings`；compileall、JSON 解析和 `git diff --check` 通过。
+- 门禁：旧 HEAD `4e6aec342849f60fdd281c083f3a21147bc7d866` 的 Changes requested 已针对同一 PR 修复；等待 DEV-001 绑定新 HEAD 复审，不请求 Merge 授权、不合并、不解锁下游或进入 Stage 6。
