@@ -283,3 +283,11 @@
 - 回归证据：Python 3.13 后端 `217 passed, 11 skipped`；`compileall`、验证脚本契约和 `git diff --check` 通过；三轮复核 Critical 0、Important 0、Minor 0。
 - 同步后回归：Python 3.13.14 全量后端 `259 passed, 10 skipped, 2 warnings`；`pip check`、`compileall` 与暂存 diff check 通过。
 - 恢复/门禁：应用可按 TASK-005 功能提交选择性回退；外部文档删除仍受业务删除与审计规则约束。新 HEAD 须由 DEV-001 重新审核并完成集成与授权流程；此前不解锁下游、不进入 Stage 6。
+
+## FCP-007：TASK-007 Agent Runtime 合并后技术检查点
+
+- 状态：代码已集成；治理收尾待项目负责人追认，不解锁下游任务。
+- 分支/PR：`codex/task-007-agent-runtime` / PR #40；源 HEAD `fcd643ab0b0e33a585e3be6ec0b0036a611059c4`；Merge Commit `bf842626987148575173c6cf3f34970fc496ad7c`。
+- 合并关系：第一父 `fdec916fad943acb8ad62a1cf5bc3ce8f770cc8d`，第二父为源 HEAD；源 HEAD 已成为集成分支祖先。
+- 合并后证据：后端 `228 passed, 10 skipped, 2 warnings`；PostgreSQL 17 真实 `PostgresSaver` checkpoint/restart `1 passed, 1 warning`；`compileall`、Compose 配置、API 镜像构建、PostgreSQL/Redis healthy、容器 `/healthz` HTTP 200、merge-tree 与 `git diff --check` 通过。
+- 治理门禁：需纯治理 PR 同步 SELF_TEST、CHECKPOINTS、CODE_REVIEW、COMMIT_LOG、任务书、`workflow/DEV_TO_PM_HANDOFF.md` 与 `workflow/state.json`；追认及治理 PR 合入前 Stage 6 仍未批准。

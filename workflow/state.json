@@ -64,7 +64,7 @@
     ],
     "historicalBoundary": "Does not rewrite completed TASK-001/TASK-002 or CR-037 through CR-039 history; applies to open Draft PRs and subsequent task PRs after integration"
   },
-  "currentCommitSha": "da460c64f48e1b1522979d2e5f381fb797571934",
+  "currentCommitSha": "bf842626987148575173c6cf3f34970fc496ad7c",
   "task003Delivery": {
     "taskId": "TASK-003",
     "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",
@@ -99,6 +99,26 @@
     "verification": "Post-merge DEV-001 integration check: frontend 7 tests/build, backend 221 passed / 9 skipped / 1 warning, PostgreSQL migration round-trip, ancestor and merge-tree checks passed.",
     "dependencyUnlockAllowed": true,
     "nextAction": "TASK-007 may proceed under its own task-book PR gate; Stage 6 remains prohibited without its separate formal gate."
+  },
+  "task007Delivery": {
+    "taskId": "TASK-007",
+    "status": "INTEGRATED_GOVERNANCE_CLOSEOUT_PENDING_PROJECT_OWNER_RATIFICATION",
+    "owner": "DEV-002",
+    "reviewer": "DEV-001",
+    "branch": "codex/task-007-agent-runtime",
+    "integrationTarget": "codex/stage-05-integration",
+    "approvedHead": "fcd643ab0b0e33a585e3be6ec0b0036a611059c4",
+    "pullRequest": 40,
+    "mergeCommit": "bf842626987148575173c6cf3f34970fc496ad7c",
+    "mergeParents": [
+      "fdec916fad943acb8ad62a1cf5bc3ce8f770cc8d",
+      "fcd643ab0b0e33a585e3be6ec0b0036a611059c4"
+    ],
+    "mergeExecutor": "ll979053897-arch / DEV-001 / manual Merge Commit",
+    "verification": "DEV-001 merged-result evidence: backend 228 passed / 10 skipped / 2 warnings; PostgreSQL 17 PostgresSaver checkpoint/restart 1 passed / 1 warning; compileall, merge-tree diff-check, Compose config and API image build passed; PostgreSQL/Redis healthy and container /healthz HTTP 200.",
+    "governanceCloseoutPullRequest": "pending",
+    "dependencyUnlockAllowed": false,
+    "nextAction": "Create and merge a governance-only closeout PR after project-owner ratification of PR #40, source HEAD and Merge Commit; Stage 6 remains prohibited."
   },
   "repairCycle": {
     "taskId": "TASK-002",

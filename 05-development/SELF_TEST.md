@@ -365,3 +365,9 @@
 - 当前处理：任务分支已同步当前 `codex/stage-05-integration` 并解决 TASK-005 与已集成模块的路由、依赖和连续台账冲突；同步后的新精确 HEAD 必须重新绑定 DEV-001 审核，不能沿用旧 HEAD 结论。
 - 同步后回归：Python 3.13.14 全量后端 `259 passed, 10 skipped, 2 warnings`；`pip check`、`compileall` 与暂存 diff check 通过。警告为既有 Starlette/httpx 弃用及 LangChain serializer pending deprecation。
 - 门禁：证据提交并推送后，PR #37 才可请求 DEV-001 审核；未批准、未完成集成检查和逐 PR Merge 授权，不解锁 TASK-009/011，不进入 Stage 6。
+
+## TASK-007 合并后技术验证（2026-07-23）
+
+- 集成对象：PR #40，源 HEAD `fcd643ab0b0e33a585e3be6ec0b0036a611059c4`；Merge Commit `bf842626987148575173c6cf3f34970fc496ad7c`；第一父 `fdec916fad943acb8ad62a1cf5bc3ce8f770cc8d`，第二父为源 HEAD。
+- DEV-001 实测：合并结果后端 `228 passed, 10 skipped, 2 warnings`；PostgreSQL 17 真实 `PostgresSaver` checkpoint/restart `1 passed, 1 warning`；`compileall`、合并树 `git diff --check`、Compose 配置、API 生产镜像构建通过；PostgreSQL/Redis healthy，容器内 `/healthz` 返回 HTTP 200。
+- 治理状态：代码已集成；项目负责人对 PR #40/源 HEAD/合并结果的正式追认及治理收尾 PR 合入前，不宣称 TASK-007 彻底闭环、不解锁下游、不进入 Stage 6。
