@@ -16,7 +16,7 @@ services:
     profiles: [validation]
     build:
       context: ../backend
-    command: ["python", "-m", "app.modules.knowledge.worker_main"]
+    command: ["python", "-m", "app.modules.knowledge.worker_main", "--poll-seconds", "1"]
     depends_on:
       postgres:
         condition: service_healthy

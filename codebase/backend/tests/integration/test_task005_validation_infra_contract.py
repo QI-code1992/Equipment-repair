@@ -18,6 +18,7 @@ def test_task005_validation_stack_has_migration_and_isolated_services() -> None:
     assert "internal: true" in compose
     assert "test_task005_postgres.py" in compose
     assert "TASK005_ALLOW_DESTRUCTIVE_TESTS: \"1\"" in compose
+    assert '["python", "-m", "app.modules.knowledge.worker_main", "--poll-seconds", "1"]' in compose
 
 
 def test_task005_validation_scripts_use_host_api_url_and_cleanup() -> None:
@@ -46,3 +47,9 @@ def test_task005_validation_scripts_use_host_api_url_and_cleanup() -> None:
     assert "task005-validation-marker" in remove_environment
     assert "equipment-task005-" in remove_environment
     assert "--profile validation" in remove_environment
+    live_test = (REPOSITORY_ROOT / "codebase" / "backend" / "tests" / "integration" / "test_task005_live_stack.py").read_text(encoding="utf-8")
+    assert "worker_main.main" not in live_test
+    assert "TASK005_VALIDATION_ENVIRONMENT" in create_environment
+    assert "catch" in create_environment
+    assert "$cleanupFailure" in remove_environment
+    assert "if ($cleanupFailure)" in remove_environment

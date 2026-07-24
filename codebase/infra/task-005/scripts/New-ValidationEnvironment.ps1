@@ -19,22 +19,28 @@ if (!$key -or $key -match '[\r\n]') { throw 'RAGFlow API key file must contain o
 
 $dir = Join-Path ([IO.Path]::GetTempPath()) ('equipment-task005-' + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $dir | Out-Null
-$envFile = Join-Path $dir 'task005.env'
-$markerFile = Join-Path $dir 'task005-validation-marker'
-[IO.File]::WriteAllText($markerFile, 'TASK005_VALIDATION_ENVIRONMENT')
-$lines = @(
-    'POSTGRES_DB=equipment_task5_validation_live',
-    ('POSTGRES_USER=task005_' + (New-RandomHex 6)),
-    ('POSTGRES_PASSWORD=' + (New-RandomHex 24)),
-    'REDIS_URL=redis://redis:6379/0',
-    ('MINIO_ACCESS_KEY=task005' + (New-RandomHex 6)),
-    ('MINIO_SECRET_KEY=' + (New-RandomHex 24)),
-    ('MINIO_BUCKET=task005-' + (New-RandomHex 6)),
-    'RAGFLOW_BASE_URL=http://host.docker.internal:19380',
-    "RAGFLOW_API_KEY=$key"
-)
-[IO.File]::WriteAllLines($envFile, $lines, [Text.UTF8Encoding]::new($false))
-$identity = [Security.Principal.WindowsIdentity]::GetCurrent().Name
-icacls $envFile /inheritance:r /grant:r "${identity}:(R,W)" *> $null
-if ($LASTEXITCODE -ne 0) { throw 'TASK-005 environment file permissions could not be restricted' }
-Write-Output ([IO.Path]::GetFullPath($envFile))
+try {
+    $envFile = Join-Path $dir 'task005.env'
+    $markerFile = Join-Path $dir 'task005-validation-marker'
+    [IO.File]::WriteAllText($markerFile, 'TASK005_VALIDATION_ENVIRONMENT')
+    $lines = @(
+        'POSTGRES_DB=equipment_task5_validation_live',
+        ('POSTGRES_USER=task005_' + (New-RandomHex 6)),
+        ('POSTGRES_PASSWORD=' + (New-RandomHex 24)),
+        'REDIS_URL=redis://redis:6379/0',
+        ('MINIO_ACCESS_KEY=task005' + (New-RandomHex 6)),
+        ('MINIO_SECRET_KEY=' + (New-RandomHex 24)),
+        ('MINIO_BUCKET=task005-' + (New-RandomHex 6)),
+        'RAGFLOW_BASE_URL=http://host.docker.internal:19380',
+        "RAGFLOW_API_KEY=$key"
+    )
+    [IO.File]::WriteAllLines($envFile, $lines, [Text.UTF8Encoding]::new($false))
+    $identity = [Security.Principal.WindowsIdentity]::GetCurrent().Name
+    icacls $envFile /inheritance:r /grant:r "${identity}:(R,W)" *> $null
+    if ($LASTEXITCODE -ne 0) { throw 'TASK-005 environment file permissions could not be restricted' }
+    Write-Output ([IO.Path]::GetFullPath($envFile))
+}
+catch {
+    Remove-Item -LiteralPath $dir -Recurse -Force -ErrorAction SilentlyContinue
+    throw
+}
