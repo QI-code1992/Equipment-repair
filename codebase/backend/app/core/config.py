@@ -15,6 +15,9 @@ class Settings:
     clamav_host: str | None = None
     clamav_port: int = 3310
     file_scan_timeout_seconds: float = 10.0
+    ragflow_base_url: str | None = None
+    ragflow_api_key: str | None = None
+    ragflow_timeout_seconds: float = 30.0
 
     @classmethod
     def from_environment(cls) -> "Settings":
@@ -31,4 +34,7 @@ class Settings:
             file_scan_timeout_seconds=float(
                 os.getenv("FILE_SCAN_TIMEOUT_SECONDS", "10")
             ),
+            ragflow_base_url=os.getenv("RAGFLOW_BASE_URL"),
+            ragflow_api_key=os.getenv("RAGFLOW_API_KEY"),
+            ragflow_timeout_seconds=float(os.getenv("RAGFLOW_TIMEOUT_SECONDS", "30")),
         )

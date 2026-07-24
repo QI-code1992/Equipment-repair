@@ -6,10 +6,18 @@ from app.modules.agents.fault_diagnosis import (
 from app.integrations.ragflow.adapter import RetrievalResult
 from tests.modules.maintenance_support import auth_headers, create_equipment, create_fault, repairer
 from tests.modules.support import create_user_token
+from app.core.database import Base
 from app.modules.agent_config.models import AgentConfigModel
 from app.modules.audit.models import AuditEvent, IdempotencyRecord
+from app.modules.equipment.models import Organization, OrganizationType
+from app.modules.knowledge.models import FileObject, FileScanStatus, KnowledgeDataset, KnowledgeDocument, KnowledgeDocumentStatus
 from app.modules.maintenance.models import DiagnosisDraft
+from app.main import create_app
+from fastapi.testclient import TestClient
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from sqlalchemy import func, select
+import json
+import threading
 
 
 def test_diagnosis_requires_concrete_alarm_code_or_negative_evidence():
@@ -102,6 +110,131 @@ def configure_fault_diagnosis_dataset(client, dataset_id: str = "server-dataset"
             )
         )
         db.commit()
+
+
+def test_fault_diagnosis_api_uses_app_factory_ragflow_adapter(monkeypatch):
+    requests: list[dict[str, object]] = []
+
+    class RagflowHandler(BaseHTTPRequestHandler):
+        def do_POST(self) -> None:
+            body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+            requests.append({"path": self.path, "body": body})
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(
+                json.dumps(
+                    {
+                        "code": 0,
+                        "data": {
+                            "chunks": [
+                                {
+                                    "id": "chunk-1",
+                                    "document_id": "remote-ready",
+                                    "content": "inspect the relief valve",
+                                    "similarity": 0.91,
+                                }
+                            ]
+                        },
+                    }
+                ).encode()
+            )
+
+        def log_message(self, *args: object) -> None:
+            return None
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), RagflowHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    monkeypatch.setenv("RAGFLOW_BASE_URL", f"http://127.0.0.1:{server.server_port}")
+    monkeypatch.setenv("RAGFLOW_API_KEY", "test-key")
+    try:
+        app = create_app(
+            postgres_dsn="sqlite+pysqlite:///:memory:",
+            redis_url="redis://redis:6379/0",
+        )
+        Base.metadata.create_all(app.state.engine)
+        with app.state.session_factory() as db:
+            db.add(
+                Organization(
+                    type=OrganizationType.ROOT,
+                    code="ROOT",
+                    name="根节点",
+                    parent_id=None,
+                    sort_order=0,
+                    enabled=True,
+                    remark="",
+                )
+            )
+            db.commit()
+        client = TestClient(app)
+        user_id, token = create_user_token(
+            client,
+            username="diagnosis-factory-user",
+            role_code="REPAIR_WORKER",
+            permission_codes=["intelligence:agent", "fault:repair"],
+        )
+        equipment_id = create_equipment(client, model="SERVER-MODEL")
+        fault_id = create_fault(client, equipment_id, symptom="server pressure loss")
+        with app.state.session_factory() as db:
+            dataset = KnowledgeDataset(name="diagnosis manuals", ragflow_dataset_id="remote-dataset")
+            db.add(dataset)
+            db.flush()
+            db.add(
+                AgentConfigModel(
+                    agent_id="fault_diagnosis",
+                    enabled=True,
+                    knowledge_dataset_ids=[dataset.id],
+                    streaming_enabled=True,
+                    suggestions_enabled=True,
+                    sources_enabled=True,
+                    context_turns=3,
+                    retrieval_limit=6,
+                    similarity_threshold=0.62,
+                    deep_thinking_enabled=False,
+                    deep_thinking_level="medium",
+                    max_reply_tokens=4096,
+                )
+            )
+            file_object = FileObject(
+                object_key="knowledge/diagnosis.txt",
+                filename="diagnosis.txt",
+                content_type="text/plain",
+                size_bytes=12,
+                sha256="0" * 64,
+                scan_status=FileScanStatus.CLEAN,
+                created_by=user_id,
+            )
+            db.add(file_object)
+            db.flush()
+            db.add(
+                KnowledgeDocument(
+                    dataset_id=dataset.id,
+                    object_storage_file_id=file_object.id,
+                    ragflow_document_id="remote-ready",
+                    filename="diagnosis.txt",
+                    content_type="text/plain",
+                    size_bytes=12,
+                    status=KnowledgeDocumentStatus.READY,
+                    created_by=user_id,
+                )
+            )
+            db.commit()
+
+        response = client.post(
+            "/api/agent/fault-diagnosis",
+            headers=auth_headers(token, key="diagnosis-factory-start"),
+            json={"action": "start", "fault_report_id": fault_id},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["state"] == "QUESTIONING"
+        assert response.json()["diagnosis_draft_id"]
+        assert requests[0]["path"] == "/api/v1/retrieval"
+        assert requests[0]["body"]["dataset_ids"] == ["remote-dataset"]
+        assert requests[0]["body"]["document_ids"] == ["remote-ready"]
+    finally:
+        server.shutdown()
 
 
 def test_fault_diagnosis_api_creates_existing_business_diagnosis_draft(client, monkeypatch):
