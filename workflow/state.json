@@ -124,7 +124,7 @@
   },
   "task008Delivery": {
     "taskId": "TASK-008",
-    "status": "READY_FOR_DEV001_REREVIEW_INCOMPLETE_DRAFT_FIX",
+    "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",
     "owner": "DEV-002",
     "reviewer": "DEV-001",
     "branch": "codex/task-008-fault-metric-agents",
@@ -132,13 +132,22 @@
     "baseCommit": "78e9dfb",
     "scope": "AI fault draft confirmation gate, fixed metric catalog and batch query boundary, controlled health-score read failure fallback",
     "pullRequest": 43,
-    "pullRequestState": "OPEN_READY",
-    "candidateHead": "ad50034ccb18422ac9a9c88325b9f0c4e9cb22dc",
-    "currentPullRequestHead": "ad50034ccb18422ac9a9c88325b9f0c4e9cb22dc",
-    "reviewStatus": "CHANGES_REQUESTED_GOVERNANCE_EVIDENCE_PENDING_REVIEW",
-    "verification": "Local Python 3.13.14: TASK-008专项 18 passed / 2 warnings; full backend 246 passed / 10 skipped / 2 warnings; compileall and git diff --check passed.",
-    "dependencyUnlockAllowed": false,
-    "nextAction": "DEV-002 must push the governance-evidence synchronization on PR #43 and request DEV-001 review of the resulting exact HEAD; no Merge authorization, integration, downstream unlock or Stage 6 entry."
+    "pullRequestState": "MERGED",
+    "approvedHead": "19eaf1f213c50471f93b4e09e17df57bbeb1987b",
+    "mergeCommit": "84ac8815cab403cb71a86230b4f705944bb5f6d2",
+    "governanceCloseoutPullRequest": 45,
+    "governanceCloseoutHead": "883053f59890272ef1dbb311b8d47bce8aace45c",
+    "governanceCloseoutMergeCommit": "997e50e10a7964b60fc8d9b4357c6274df8f0e97",
+    "mergeParents": [
+      "78e9dfbb8bbda61255360d16889a2ed312828b59",
+      "19eaf1f213c50471f93b4e09e17df57bbeb1987b"
+    ],
+    "mergeExecutor": "ll979053897-arch / DEV-001 / manual Merge Commit",
+    "reviewStatus": "APPROVED_AND_MERGED_POST_MERGE_GOVERNANCE_COMPLETED",
+    "verification": "Post-merge DEV-001 Python 3.13.14: backend 246 passed / 10 skipped / 2 warnings; all 14 prototype static checks passed; compileall, workflow/state.json JSON parsing and merge diff check passed.",
+    "projectOwnerConfirmation": "Project owner confirmed PR #45 and exact HEAD 883053f59890272ef1dbb311b8d47bce8aace45c before manual Merge Commit.",
+    "dependencyUnlockAllowed": true,
+    "nextAction": "TASK-008 governance closeout is complete; downstream work may proceed only where all task-book prerequisites are satisfied. Stage 6 remains prohibited without its separate formal gate."
   },
   "repairCycle": {
     "taskId": "TASK-002",
