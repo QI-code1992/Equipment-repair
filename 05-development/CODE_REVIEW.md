@@ -298,7 +298,7 @@
 
 ## TASK-009 DEV-002 开发者自查与 DEV-001 复审请求（2026-07-24）
 
-- 候选：`f78deace39fde732bcea7ec36f9a3f5eea79dfc1`，分支 `codex/task-009-guidance-diagnosis`，目标 `codex/stage-05-integration`。
+- 候选：PR #49，完整 HEAD `e2c11598bcda652b07c3bf94861ab54cda9aa96b`；代码提交 `f78deace39fde732bcea7ec36f9a3f5eea79dfc1`，分支 `codex/task-009-guidance-diagnosis`，目标 `codex/stage-05-integration`。
 - 任务边界：操作指引两次定向检索/人工降级；维修前诊断报警码、证据门槛、采纳/直接开始及 8/24/4 上限；通过外部回调区分 PostgreSQL 历史案例和 RAGFlow 知识引用。
 - 自查证据：定向与 Runtime `13 passed, 2 warnings`；完整后端 `291 passed, 12 skipped, 2 warnings`；静态 Agent 检查、compileall、`git diff --check` 通过。
 - 代码审查重点：请 DEV-001 绑定该精确 HEAD 检查生产执行边界、任务范围、权限/安全、失败降级、外部检索边界和测试证据。当前未请求 Merge 授权；任何 Critical/Important 在同一 Draft PR 修复后重新审核。

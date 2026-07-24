@@ -361,4 +361,4 @@
 - 变更边界：新增两个 Agent 模块、对应测试和 Runtime 工具白名单；未新增生产依赖、数据库迁移、兼容层或通用抽象，未修改 TASK-005。
 - 验证：Python 3.13 专项与 Runtime `13 passed, 2 warnings`；完整后端 `291 passed, 12 skipped, 2 warnings`；`node 06-testing/tests/fault-report-repair-agent.test.js` 通过；`compileall`、`git diff --check` 通过。警告为既有第三方弃用提示。
 - 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；真实 RAGFlow 引用与运行态降级由 DEV-001 在复审/集成阶段核验。
-- 门禁：任务开发者将在同一 Draft PR 中维护该候选；不得自批、自合并、申请 Merge 授权、解锁 TASK-010/011 或进入 Stage 6。
+- 门禁：同一 Draft PR #49 当前完整 HEAD 为 `e2c11598bcda652b07c3bf94861ab54cda9aa96b`；任务开发者将在该 PR 中维护候选，不得自批、自合并、申请 Merge 授权、解锁 TASK-010/011 或进入 Stage 6。

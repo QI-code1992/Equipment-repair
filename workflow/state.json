@@ -158,6 +158,8 @@
     "integrationTarget": "codex/stage-05-integration",
     "baseCommit": "e0333e2196fc1db9dba0056021625972576215e2",
     "candidateCommit": "f78deace39fde732bcea7ec36f9a3f5eea79dfc1",
+    "pullRequest": 49,
+    "candidateHead": "e2c11598bcda652b07c3bf94861ab54cda9aa96b",
     "scope": "operation guidance and pre-repair fault diagnosis Agent boundaries, evidence gates, bounded retrieval, adoption/direct-start and manual fallback",
     "verification": "Python 3.13 Agent/Runtime 13 passed / 2 warnings; full backend 291 passed / 12 skipped / 2 warnings; static Agent checks, compileall and git diff --check passed.",
     "unverified": "DEV-002 has no Docker environment; real PostgreSQL/RAGFlow/LLM integration remains for DEV-001 review and integration validation.",
