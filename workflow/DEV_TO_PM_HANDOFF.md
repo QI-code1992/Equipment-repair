@@ -364,4 +364,4 @@
 
 - 集成：PR #37 获批 HEAD `cac10a06d2ef48914c14fb7ad955cedb36878acd` 已由 DEV-001 在项目负责人授权后手动 Merge Commit `58fc0b12db1298333eef52c8720ec7d3d5e4846c` 合入 `codex/stage-05-integration`；第一父为 `ca2a07f5f9f19620568cc75f74c97a2d10ed98d3`，第二父为获批 HEAD。
 - 验证：结果树与候选一致；双亲、祖先关系、JSON 和差异检查通过。后端 `284 passed, 12 skipped, 2 warnings`，`pip check`、`compileall`、普通与 validation Compose 配置通过；真实 PostgreSQL 17、MinIO、ClamAV、RAGFlow 和 Compose Worker 验证已完成。
-- 当前门禁：代码集成事实成立，但本治理候选确认并合入前不宣称 TASK-005 完整闭环，不解锁 TASK-009 或其他下游，不进入 Stage 6。
+- 结果：项目负责人已确认 PR #47 精确 HEAD `09f9701ee2ed97358b37cfd60ae79f12358acdcb`；非作者 DEV-002 已执行 Merge Commit `6763f1e7199765c08303aa567c3aed40210f7cf7`。TASK-005 治理闭环完成，可按依赖矩阵解锁 TASK-009；Stage 6 仍须独立批准。

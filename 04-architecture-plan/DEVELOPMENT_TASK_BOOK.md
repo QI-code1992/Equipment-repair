@@ -246,7 +246,7 @@
 
 ### TASK-005：知识文档生命周期与 RAGFlow 适配器
 
-- 状态：INTEGRATED_POST_MERGE_GOVERNANCE_PENDING / PR #37 已合入 `codex/stage-05-integration`；治理收尾确认前不解锁下游，Stage 6 仍禁止
+- 状态：CLOSED_POST_MERGE_GOVERNANCE_COMPLETED / PR #37 代码已集成，PR #47 治理收尾已确认并合入；TASK-009 可按依赖矩阵继续，Stage 6 仍须单独批准
 - 优先级：P0
 - 负责人：`DEV-002`
 - 任务开发者：`DEV-002`
