@@ -296,3 +296,37 @@
 - 风险/回退：`0003_task003` downgrade 会删除五张业务表；生产回退优先前向修复，数据回退必须备份并另行授权；应用可评估选择性 revert Merge Commit。
 - 依赖：本治理 PR 合入后 TASK-003 正式闭环；TASK-009/010/011 仍等待各自其余依赖，Stage 6 仍未获准。
 - 请求动作：项目负责人确认本纯治理 PR 的内容和精确 HEAD；DEV-001 完成集成核查与授权请求后，由非 PR 作者 DEV-002 合并。
+
+## TASK-008 开发启动交接（2026-07-23）
+
+- 开发者/审核者：DEV-002 / DEV-001；分支 `codex/task-008-fault-metric-agents`，目标 `codex/stage-05-integration`。
+- 基线：`origin/codex/stage-05-integration@78e9dfb`；TASK-002、TASK-006、TASK-007 前置已满足，TASK-005 独立进行不阻塞本任务。
+- 范围：故障草稿字段采集与人工确认、固定 40 项指标目录、最多五项批量查询、非法维度拒绝、受控健康分读取失败降级；不实现诊断 Agent 或模型计算业务数值。
+- 当前候选：PR #43 已创建并 Ready，初始候选 HEAD `58a64d9dfbc4672cfd4cdc118127850dd83fed5e`；证据同步提交后需以新完整 HEAD 重新绑定审核。
+- 验证：专项 `12 passed, 2 warnings`；后端全量 `240 passed, 10 skipped, 2 warnings`；`git diff --check` 与 `workflow/state.json` 解析通过。
+- 风险/边界：未执行 Docker/PostgreSQL/RAGFlow 真实联调；无新增生产依赖、迁移、兼容层或通用抽象；健康分公开路由不提前突破 TASK-002 冻结路由表。
+- 下一动作：DEV-002 推送证据同步后的新精确 HEAD，并在同一 PR #43 重新请求 DEV-001 审核；审核通过后再走 DEV-001 集成检查、项目负责人逐 PR/HEAD 授权和 DEV-001 合并。当前不请求授权、不解锁下游、不进入 Stage 6。
+
+## TASK-008 P1 修复交接（2026-07-23）
+
+- DEV-001 审核：PR #43 / HEAD `4e6aec342849f60fdd281c083f3a21147bc7d866` 为 Changes requested；阻断为故障确认未接入业务 API、健康分读取器未接入可执行边界。
+- 修复候选：同一 PR 新 HEAD `24153155da11dac0579466c05c8a04c7371e8904`；确认提交复用既有维护服务、权限、幂等和审计；健康分 API 通过受控 reader 读取并失败降级；`get_health_score` 已加入白名单。
+- 验证：专项 `14 passed, 2 warnings`；后端全量 `244 passed, 10 skipped, 2 warnings`；compileall、JSON 解析、diff-check 通过。
+- 下一动作：DEV-001 重新绑定新精确 HEAD 审核。当前不请求 Merge 授权、不合并、不解锁 TASK-009/010/011、不进入 Stage 6。
+
+## TASK-008 幂等冲突 P1 修复交接（2026-07-24）
+
+- DEV-001 新反馈：PR #43 HEAD `aabfba77b0c2db924f11b67344922986c4888738` 的 `IdempotencyKeyReused` 未映射为 409。
+- 修复：提交端点捕获冲突异常；同 Key 同体重放原响应，同 Key 不同体返回 `409 IDEMPOTENCY_KEY_REUSED`，故障记录和成功审计无重复。
+- 验证：Agent 专项 `15 passed, 2 warnings`；后端全量 `245 passed, 10 skipped, 2 warnings`；compileall、diff-check 通过。
+- 下一动作：推送本次修复后的新精确 HEAD，并在同一 PR #43 请求 DEV-001 复审；仍不申请 Merge 授权、不合并、不解锁下游、不进入 Stage 6。
+
+## TASK-008 不完整草稿 P1 修复交接（2026-07-24）
+
+- DEV-001 新反馈：PR #43 HEAD `4d84ec75b57e603b9a8bfc0542ef3d1e5074f0b2` 的不完整已确认草稿返回未处理异常。
+- 修复：缺失 `occurred_at`/`duration_minutes` 时返回 `422 FAULT_DRAFT_INCOMPLETE` 和字段映射；失败不写业务故障、成功审计或成功幂等响应。
+- 验证：专项 `18 passed, 2 warnings`；全量后端 `246 passed, 10 skipped, 2 warnings`；compileall、diff-check 通过。
+- 下一动作：推送新精确 HEAD 并请求 DEV-001 复审；继续禁止 Merge 授权、合并、下游解锁和 Stage 6。
+- 当前候选：PR #43，HEAD `ad50034ccb18422ac9a9c88325b9f0c4e9cb22dc`；目标 `codex/stage-05-integration`；状态 Open/Ready for review。
+- 治理校准：正式台账、FCP、SELF_TEST、CODE_REVIEW、COMMIT_LOG 与本交接统一绑定当前候选；专项真实结果 `18 passed, 2 warnings`，全量后端 `246 passed, 10 skipped, 2 warnings`，compileall 与 diff-check 通过。
+- 门禁：代码 P1 已关闭但尚待 DEV-001 对新精确 HEAD 复审；未申请 Merge 授权、未合并、未解锁下游、Stage 6 禁止。

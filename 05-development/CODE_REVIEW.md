@@ -249,3 +249,37 @@
 - 合并：PR #40 已实际合入 `codex/stage-05-integration`，Merge Commit `bf842626987148575173c6cf3f34970fc496ad7c`；第二父为审核源 HEAD，第一父为 `fdec916fad943acb8ad62a1cf5bc3ce8f770cc8d`。
 - 技术核查：后端 `228 passed, 10 skipped, 2 warnings`；PostgreSQL 17 真实 PostgresSaver `1 passed, 1 warning`；compileall、Compose 配置、API 镜像构建、容器健康、`/healthz` HTTP 200、merge-tree 与 diff-check 均通过。
 - 治理结论：项目负责人已正式追认 PR #40、源 HEAD、Merge Commit 及合并结果；PR #41 治理收尾已合入，TASK-007 治理闭环完成并可按依赖矩阵解锁下游；Stage 6 仍未批准。
+
+## TASK-008 DEV-002 开发者自查（2026-07-23）
+
+- 审查对象：`codex/task-008-fault-metric-agents` 相对 `origin/codex/stage-05-integration@78e9dfb` 的完整差异。
+- Standards/Spec：故障草稿只采集字段并经人工确认后调用外部业务写入；指标仅来自固定 40 项目录且最多五项；非法维度和受控服务失败明确拒绝/降级；健康分读取器不计算、不缓存、不伪造分值。
+- 安全/边界：使用现有 `equipment:read` 权限保护目录和查询 API；无直接数据库、SQL、文件系统、模型计算指标、诊断 Agent、TASK-005 或新生产依赖。
+- 验证：专项 `12 passed, 2 warnings`；全量后端 `240 passed, 10 skipped, 2 warnings`；`git diff --check` 通过。Critical 0、Important 0、Minor 0（DEV-001 正式复审尚未开始）。
+- 门禁：PR #43 已创建并 Ready；当前精确 HEAD 变化后旧审核请求失效。等待 DEV-001 对新精确 HEAD 复审，未请求 Merge 授权。
+
+## TASK-008 DEV-001 P1 修复复查请求（2026-07-23）
+
+- 原审核：PR #43 / HEAD `4e6aec342849f60fdd281c083f3a21147bc7d866`，两项 P1：故障提交未接入业务 API；健康分读取器未接入可执行 API/工具/页面边界。
+- 修复候选：HEAD `24153155da11dac0579466c05c8a04c7371e8904`；同一 PR 新增业务提交 API、受控健康分 API 和 `get_health_score` 工具白名单。
+- 新验证：专项 `14 passed, 2 warnings`；全量 `244 passed, 10 skipped, 2 warnings`；compileall、JSON 解析、diff-check 通过。
+- 当前门禁：请求 DEV-001 绑定新精确 HEAD 复审；未批准、未集成、未申请 Merge 授权。
+
+## TASK-008 幂等冲突 P1 修复复查请求（2026-07-24）
+
+- 阻断修复：`POST /api/agent/fault-reports/submit` 现在映射 `IdempotencyKeyReused` 为 `409 IDEMPOTENCY_KEY_REUSED`。
+- 证据：同请求重放、冲突请求、无重复故障记录和无重复成功审计回归均通过；Agent 专项 `15 passed, 2 warnings`，全量 `245 passed, 10 skipped, 2 warnings`。
+- 当前门禁：同一 PR 等待 DEV-001 对本次新精确 HEAD 复审，未请求 Merge 授权。
+
+## TASK-008 不完整草稿 P1 修复复查请求（2026-07-24）
+
+- 阻断修复：确认提交捕获 `MissingFaultFieldsError`，稳定返回 `422 FAULT_DRAFT_INCOMPLETE` 与字段映射。
+- 证据：不完整请求不产生故障记录、成功审计或成功幂等响应；补齐同 Key 请求可成功；专项 `18 passed, 2 warnings`，全量 `246 passed, 10 skipped, 2 warnings`。
+- 当前门禁：等待 DEV-001 绑定新完整 HEAD 复审，未请求 Merge 授权。
+- 当前门禁：等待 DEV-001 绑定新完整 HEAD 复审，未申请 Merge 授权。
+
+## TASK-008 治理证据校准复查请求（2026-07-24）
+
+- 复查对象：PR #43，代码与证据候选 HEAD `ad50034ccb18422ac9a9c88325b9f0c4e9cb22dc`。
+- 校准内容：`workflow/state.json`、FCP、SELF_TEST、CODE_REVIEW、COMMIT_LOG、任务书约束与 `workflow/DEV_TO_PM_HANDOFF.md` 统一记录该 HEAD；专项结果统一为 `18 passed, 2 warnings`，全量后端为 `246 passed, 10 skipped, 2 warnings`，不再保留本轮 `pending commit`。
+- 门禁：请求 DEV-001 在同一 PR 对最新远端精确 HEAD 重新审核；当前不得请求 Merge 授权、合并、解锁下游或进入 Stage 6。

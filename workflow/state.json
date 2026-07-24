@@ -122,6 +122,24 @@
     "dependencyUnlockAllowed": true,
     "nextAction": "TASK-008 and other downstream work may proceed only where all task-book prerequisites are satisfied; Stage 6 remains prohibited without its separate formal gate."
   },
+  "task008Delivery": {
+    "taskId": "TASK-008",
+    "status": "READY_FOR_DEV001_REREVIEW_INCOMPLETE_DRAFT_FIX",
+    "owner": "DEV-002",
+    "reviewer": "DEV-001",
+    "branch": "codex/task-008-fault-metric-agents",
+    "integrationTarget": "codex/stage-05-integration",
+    "baseCommit": "78e9dfb",
+    "scope": "AI fault draft confirmation gate, fixed metric catalog and batch query boundary, controlled health-score read failure fallback",
+    "pullRequest": 43,
+    "pullRequestState": "OPEN_READY",
+    "candidateHead": "ad50034ccb18422ac9a9c88325b9f0c4e9cb22dc",
+    "currentPullRequestHead": "ad50034ccb18422ac9a9c88325b9f0c4e9cb22dc",
+    "reviewStatus": "CHANGES_REQUESTED_GOVERNANCE_EVIDENCE_PENDING_REVIEW",
+    "verification": "Local Python 3.13.14: TASK-008专项 18 passed / 2 warnings; full backend 246 passed / 10 skipped / 2 warnings; compileall and git diff --check passed.",
+    "dependencyUnlockAllowed": false,
+    "nextAction": "DEV-002 must push the governance-evidence synchronization on PR #43 and request DEV-001 review of the resulting exact HEAD; no Merge authorization, integration, downstream unlock or Stage 6 entry."
+  },
   "repairCycle": {
     "taskId": "TASK-002",
     "pullRequest": 20,
