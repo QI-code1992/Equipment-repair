@@ -6,6 +6,7 @@ from app.modules.agents.fault_diagnosis import (
 from app.integrations.ragflow.adapter import RetrievalResult
 from tests.modules.maintenance_support import auth_headers, create_equipment, create_fault, repairer
 from tests.modules.support import create_user_token
+from app.modules.agent_config.models import AgentConfigModel
 from app.modules.audit.models import AuditEvent, IdempotencyRecord
 from app.modules.maintenance.models import DiagnosisDraft
 from sqlalchemy import func, select
@@ -81,19 +82,83 @@ def test_diagnosis_caps_evidence_at_four_items_and_steps_at_eight():
     assert session.steps <= 8
 
 
+def configure_fault_diagnosis_dataset(client, dataset_id: str = "server-dataset") -> None:
+    with client.app.state.session_factory() as db:
+        db.add(
+            AgentConfigModel(
+                agent_id="fault_diagnosis",
+                enabled=True,
+                model_binding_id=None,
+                knowledge_dataset_ids=[dataset_id],
+                streaming_enabled=True,
+                suggestions_enabled=True,
+                sources_enabled=True,
+                context_turns=3,
+                retrieval_limit=6,
+                similarity_threshold=0.62,
+                deep_thinking_enabled=False,
+                deep_thinking_level="medium",
+                max_reply_tokens=4096,
+            )
+        )
+        db.commit()
+
+
 def test_fault_diagnosis_api_creates_existing_business_diagnosis_draft(client, monkeypatch):
     client.app.state.knowledge_adapter = object()
-    equipment_id = create_equipment(client)
-    fault_id = create_fault(client, equipment_id)
+    configure_fault_diagnosis_dataset(client)
+    equipment_id = create_equipment(client, model="SERVER-MODEL")
+    fault_id = create_fault(client, equipment_id, symptom="server pressure loss")
+    _, agent_only_token = create_user_token(
+        client,
+        username="diagnosis-agent-only",
+        role_code="LINE_OPERATOR",
+        permission_codes=["intelligence:agent"],
+    )
     _, token = create_user_token(
         client,
         username="diagnosis-api-user",
         role_code="REPAIR_WORKER",
-        permission_codes=["intelligence:agent"],
+        permission_codes=["intelligence:agent", "fault:repair"],
     )
+    retrieval_calls = []
+
+    denied = client.post(
+        "/api/agent/fault-diagnosis",
+        headers={"Authorization": f"Bearer {agent_only_token}", "Idempotency-Key": "diagnosis-agent-only"},
+        json={
+            "action": "start",
+            "fault_report_id": fault_id,
+            "equipment_model": "SERVER-MODEL",
+            "symptom": "server pressure loss",
+            "description": "pressure falls under load",
+        },
+    )
+    assert denied.status_code == 403
+    with client.app.state.session_factory() as db:
+        assert db.scalar(select(func.count()).select_from(DiagnosisDraft)) == 0
+
+    forged_context = client.post(
+        "/api/agent/fault-diagnosis",
+        headers={"Authorization": f"Bearer {token}", "Idempotency-Key": "diagnosis-forged-context"},
+        json={
+            "action": "start",
+            "fault_report_id": fault_id,
+            "equipment_model": "CLIENT-MODEL",
+            "symptom": "client symptom",
+            "description": "client description",
+            "dataset_ids": ["client-dataset"],
+        },
+    )
+    assert forged_context.status_code == 422
+
+    def retrieve(db, question, dataset_ids, adapter):
+        retrieval_calls.append({"question": question, "dataset_ids": dataset_ids})
+        return RetrievalResult()
+
     monkeypatch.setattr(
         "app.modules.agents.router.knowledge_service.retrieve_knowledge",
-        lambda *args, **kwargs: RetrievalResult(),
+        retrieve,
     )
     headers = {"Authorization": f"Bearer {token}", "Idempotency-Key": "diagnosis-start"}
     start = client.post(
@@ -102,13 +167,13 @@ def test_fault_diagnosis_api_creates_existing_business_diagnosis_draft(client, m
         json={
             "action": "start",
             "fault_report_id": fault_id,
-            "equipment_model": "MODEL-1",
-            "symptom": "pressure loss",
-            "description": "drops under load",
-            "dataset_ids": ["dataset-1"],
         },
     )
     assert start.status_code == 200
+    assert retrieval_calls[0] == {
+        "question": "SERVER-MODEL server pressure loss pressure falls under load",
+        "dataset_ids": ["server-dataset"],
+    }
     draft_id = start.json()["diagnosis_draft_id"]
     first = client.post(
         "/api/agent/fault-diagnosis",

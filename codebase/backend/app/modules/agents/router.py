@@ -17,6 +17,8 @@ from app.core.idempotency import (
     save_idempotent_response,
 )
 from app.core.database import get_db
+from app.modules.agent_config.domain import AgentId
+from app.modules.agent_config.models import AgentConfigModel
 from app.modules.audit.service import write_audit_event
 from app.modules.identity.dependencies import require_permission
 from app.modules.identity.models import User
@@ -28,6 +30,7 @@ from app.modules.knowledge import service as knowledge_service
 from app.modules.maintenance.router import fault_report_body
 from app.modules.maintenance.schemas import FaultReportCreate
 from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.modules.agents.fault_reporting import (
     FaultDraft,
@@ -88,11 +91,7 @@ class DiagnosisRequest(BaseModel):
 
     action: Literal["start", "answer", "evidence"] = "start"
     fault_report_id: str | None = None
-    equipment_model: str | None = None
-    symptom: str | None = None
-    description: str | None = None
     alarm_code_present: bool = False
-    dataset_ids: list[str] = Field(default_factory=list)
     diagnosis_draft_id: str | None = None
     answer: str | None = None
     category: str | None = None
@@ -176,6 +175,27 @@ def _restore_diagnosis_session(raw: dict[str, Any]) -> DiagnosisSession:
     )
 
 
+def _fault_diagnosis_dataset_ids(db: Session) -> list[str]:
+    config = db.scalar(
+        select(AgentConfigModel).where(
+            AgentConfigModel.agent_id == AgentId.FAULT_DIAGNOSIS.value
+        )
+    )
+    return [] if config is None else list(config.knowledge_dataset_ids)
+
+
+def _server_diagnosis_context(
+    fault: FaultReport, equipment: Equipment, *, alarm_code_present: bool
+) -> DiagnosisContext:
+    return DiagnosisContext(
+        fault_report_id=fault.id,
+        equipment_model=equipment.model,
+        symptom=fault.symptom,
+        description=fault.description or "",
+        alarm_code_present=alarm_code_present,
+    )
+
+
 @router.post("/api/agent/operation-guidance", response_model=None)
 def operation_guidance(
     payload: OperationGuidanceRequest,
@@ -211,6 +231,7 @@ def fault_diagnosis(
     request: Request,
     db: Session = Depends(get_db),
     actor: User = Depends(require_permission("intelligence:agent")),
+    _: User = Depends(require_permission("fault:repair")),
     idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
 ) -> dict[str, Any]:
     path = "/api/agent/fault-diagnosis"
@@ -226,16 +247,18 @@ def fault_diagnosis(
         return replay[1]
 
     if payload.action == "start":
-        if not all((payload.fault_report_id, payload.equipment_model, payload.symptom, payload.description)):
+        if not payload.fault_report_id:
             raise HTTPException(status_code=422, detail={"code": "DIAGNOSIS_CONTEXT_REQUIRED"})
-        context = DiagnosisContext(
-            fault_report_id=payload.fault_report_id,
-            equipment_model=payload.equipment_model,
-            symptom=payload.symptom,
-            description=payload.description,
-            alarm_code_present=payload.alarm_code_present,
+        fault = db.get(FaultReport, payload.fault_report_id)
+        if fault is None:
+            raise HTTPException(status_code=404, detail={"code": "FAULT_REPORT_NOT_FOUND"})
+        equipment = db.get(Equipment, fault.equipment_id)
+        if equipment is None:
+            raise HTTPException(status_code=404, detail={"code": "EQUIPMENT_NOT_FOUND"})
+        context = _server_diagnosis_context(
+            fault, equipment, alarm_code_present=payload.alarm_code_present
         )
-        request_dataset_ids = payload.dataset_ids
+        request_dataset_ids = _fault_diagnosis_dataset_ids(db)
     else:
         if not payload.diagnosis_draft_id:
             raise HTTPException(status_code=422, detail={"code": "DIAGNOSIS_DRAFT_REQUIRED"})
@@ -256,13 +279,12 @@ def fault_diagnosis(
             return response
         context = _restore_diagnosis_session(raw).context
         request_dataset_ids = list(raw.get("dataset_ids", []))
-
-    fault = db.get(FaultReport, context.fault_report_id)
-    if fault is None:
-        raise HTTPException(status_code=404, detail={"code": "FAULT_REPORT_NOT_FOUND"})
-    equipment = db.get(Equipment, fault.equipment_id)
-    if equipment is None:
-        raise HTTPException(status_code=404, detail={"code": "EQUIPMENT_NOT_FOUND"})
+        fault = db.get(FaultReport, context.fault_report_id)
+        if fault is None:
+            raise HTTPException(status_code=404, detail={"code": "FAULT_REPORT_NOT_FOUND"})
+        equipment = db.get(Equipment, fault.equipment_id)
+        if equipment is None:
+            raise HTTPException(status_code=404, detail={"code": "EQUIPMENT_NOT_FOUND"})
 
     case_items: list[dict[str, Any]] = []
     knowledge_items: list[dict[str, Any]] = []
