@@ -17,6 +17,8 @@ def test_task005_validation_stack_has_migration_and_isolated_services() -> None:
     assert "RAGFLOW_BASE_URL: ${RAGFLOW_BASE_URL}" in api_service
     assert "RAGFLOW_API_KEY: ${RAGFLOW_API_KEY}" in api_service
     assert "RAGFLOW_TIMEOUT_SECONDS: ${RAGFLOW_TIMEOUT_SECONDS}" in api_service
+    assert 'extra_hosts:\n      - "host.docker.internal:host-gateway"' in api_service
+    assert "networks: [platform, ragflow-egress]" in api_service
     assert "RAGFLOW_TIMEOUT_SECONDS=30" in env_example
     assert "target: test" in compose
     assert "condition: service_completed_successfully" in compose
@@ -41,6 +43,11 @@ def test_task005_validation_scripts_use_host_api_url_and_cleanup() -> None:
     assert "Convert-ToHostUrl" in invoke
     assert "TASK005_RAGFLOW_DATASET_ID" in invoke
     assert '-e "TASK005_RAGFLOW_DATASET_ID=$datasetId"' in invoke
+    assert "RAGFLOW_TIMEOUT_SECONDS" in invoke
+    assert "$apiRagflowProbe" in invoke
+    assert "docker @compose exec -T api python -c $apiRagflowProbe" in invoke
+    assert "socket.getaddrinfo" in invoke
+    assert "/api/v1/datasets" in invoke
     assert "run --rm --no-deps --build" in invoke
     assert "down --volumes --remove-orphans" in invoke
     assert "run --rm --no-deps worker python -c" in invoke
@@ -48,6 +55,7 @@ def test_task005_validation_scripts_use_host_api_url_and_cleanup() -> None:
     assert "New-RandomHex" in create_environment
     assert "icacls" in create_environment
     assert "POSTGRES_DB=equipment_task5_validation_live" in create_environment
+    assert "RAGFLOW_TIMEOUT_SECONDS=30" in create_environment
     assert "GetTempPath" in remove_environment
     assert "Remove-Item" in remove_environment
     assert "task005-validation-marker" in remove_environment

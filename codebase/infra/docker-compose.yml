@@ -13,7 +13,9 @@ services:
       RAGFLOW_BASE_URL: ${RAGFLOW_BASE_URL}
       RAGFLOW_API_KEY: ${RAGFLOW_API_KEY}
       RAGFLOW_TIMEOUT_SECONDS: ${RAGFLOW_TIMEOUT_SECONDS}
-    networks: [platform]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks: [platform, ragflow-egress]
 
   worker:
     profiles: [validation]
