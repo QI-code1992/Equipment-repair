@@ -7,11 +7,17 @@ INFRA_ROOT = REPOSITORY_ROOT / "codebase" / "infra"
 
 def test_task005_validation_stack_has_migration_and_isolated_services() -> None:
     compose = (INFRA_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
+    env_example = (INFRA_ROOT / ".env.example").read_text(encoding="utf-8")
+    api_service = compose.split("  worker:", maxsplit=1)[0]
 
     for service in ("migrate:", "worker:", "minio:", "clamav:", "validator:"):
         assert service in compose
     assert compose.count("profiles: [validation]") == 5
     assert "api:\n    build:" in compose
+    assert "RAGFLOW_BASE_URL: ${RAGFLOW_BASE_URL}" in api_service
+    assert "RAGFLOW_API_KEY: ${RAGFLOW_API_KEY}" in api_service
+    assert "RAGFLOW_TIMEOUT_SECONDS: ${RAGFLOW_TIMEOUT_SECONDS}" in api_service
+    assert "RAGFLOW_TIMEOUT_SECONDS=30" in env_example
     assert "target: test" in compose
     assert "condition: service_completed_successfully" in compose
     assert "ragflow-egress" in compose
