@@ -149,6 +149,25 @@
     "dependencyUnlockAllowed": true,
     "nextAction": "TASK-008 governance closeout is complete; downstream work may proceed only where all task-book prerequisites are satisfied. Stage 6 remains prohibited without its separate formal gate."
   },
+  "task005Delivery": {
+    "taskId": "TASK-005",
+    "status": "INTEGRATED_POST_MERGE_GOVERNANCE_PENDING",
+    "owner": "DEV-002",
+    "reviewer": "DEV-001",
+    "branch": "codex/task-005-knowledge-ragflow",
+    "integrationTarget": "codex/stage-05-integration",
+    "pullRequest": 37,
+    "approvedHead": "cac10a06d2ef48914c14fb7ad955cedb36878acd",
+    "mergeCommit": "58fc0b12db1298333eef52c8720ec7d3d5e4846c",
+    "mergeParents": [
+      "ca2a07f5f9f19620568cc75f74c97a2d10ed98d3",
+      "cac10a06d2ef48914c14fb7ad955cedb36878acd"
+    ],
+    "mergeExecutor": "ll979053897-arch / DEV-001 / manual Merge Commit",
+    "verification": "DEV-001 verified the merge parents, ancestor relationships, result-tree equivalence, workflow JSON and diff checks. Candidate evidence: backend 284 passed / 12 skipped / 2 warnings; pip check, compileall and both Compose configs passed. PostgreSQL 17, MinIO, ClamAV, RAGFlow and Compose Worker live validation passed before integration.",
+    "dependencyUnlockAllowed": false,
+    "nextAction": "Create and merge a governance-only closeout PR that records the PR #37 merge and confirms TASK-005 dependency status. Stage 6 remains prohibited without its separate formal gate."
+  },
   "repairCycle": {
     "taskId": "TASK-002",
     "pullRequest": 20,

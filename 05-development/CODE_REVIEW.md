@@ -289,3 +289,9 @@
 - 审核与授权：DEV-001 已批准 PR #43 精确 HEAD `19eaf1f213c50471f93b4e09e17df57bbeb1987b`；项目负责人授权手动 Merge Commit；DEV-001 作为非任务开发者执行合并。
 - 结果：Merge Commit `84ac8815cab403cb71a86230b4f705944bb5f6d2` 双亲、祖先关系和 merge diff check 正确；合并后后端 `246 passed, 10 skipped, 2 warnings`，14 项原型静态回归、compileall 和 JSON 解析通过。
 - 当前结论：项目负责人已确认 PR #45 精确 HEAD `883053f59890272ef1dbb311b8d47bce8aace45c`；DEV-002 已以 Merge Commit `997e50e10a7964b60fc8d9b4357c6274df8f0e97` 合入，治理闭环完成。TASK-008 可按依赖矩阵解锁下游，Stage 6 仍禁止。
+
+## TASK-005 PR #37 合并后 DEV-001 集成验证（2026-07-24）
+
+- 审核与授权：DEV-001 已对获批 HEAD `cac10a06d2ef48914c14fb7ad955cedb36878acd` 重新 Approved；项目负责人针对 PR #37、该 HEAD 和目标基线 `ca2a07f5f9f19620568cc75f74c97a2d10ed98d3` 授权手动 Merge Commit。
+- 结果：DEV-001 以 Merge Commit `58fc0b12db1298333eef52c8720ec7d3d5e4846c` 合入；双亲、祖先关系、结果树、JSON 和差异检查通过。
+- 当前结论：代码已集成但治理收尾待确认；本纯治理 PR 合入前不解锁 TASK-009 或其他下游，Stage 6 仍禁止。

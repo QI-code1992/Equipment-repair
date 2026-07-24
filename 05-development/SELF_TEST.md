@@ -461,3 +461,9 @@
 - 验证：Python 3.13 后端 `246 passed, 10 skipped, 2 warnings`；14 项原型静态回归通过；compileall、JSON 解析和 merge diff check 通过。
 - 未验证：本任务未修改容器、PostgreSQL schema、RAGFlow 或外部 LLM，故未重跑 Docker/RAGFlow 联调；该类验证仍由对应任务和 TASK-011 覆盖。
 - 当前门禁：本治理 PR 未合并前不解锁下游、不进入 Stage 6。
+
+## TASK-005 PR #37 合并后治理收尾候选（2026-07-24）
+
+- 集成事实：获批 HEAD `cac10a06d2ef48914c14fb7ad955cedb36878acd` 已由 DEV-001 手动 Merge Commit `58fc0b12db1298333eef52c8720ec7d3d5e4846c` 合入 `codex/stage-05-integration`；第一父为 `ca2a07f5f9f19620568cc75f74c97a2d10ed98d3`，第二父为获批 HEAD，结果树一致。
+- 合并后核验：双亲、祖先关系、目标分支、JSON 解析和两侧 `git diff --check` 通过；候选树与合并结果相同，因此获批候选的后端 `284 passed, 12 skipped, 2 warnings`、`pip check`、`compileall`、Compose 及真实 PostgreSQL 17/MinIO/ClamAV/RAGFlow/Worker 证据继续适用。
+- 门禁：本候选仅同步治理事实；未修改 `codebase/`、测试、迁移、依赖、基础设施或部署。项目负责人确认本纯治理 PR 内容与精确 HEAD、完成集成授权并合入前，不解锁下游，不进入 Stage 6。
