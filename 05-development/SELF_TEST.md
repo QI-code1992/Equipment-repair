@@ -530,3 +530,14 @@
 - 完整后端：在 `codebase/backend` 下执行 `/private/tmp/equipment-task006-python/bin/python -m pytest -q` 为 `296 passed, 12 skipped, 2 warnings`。
 - 静态/编译：14 项 `06-testing/tests/*.test.js` 全部通过；`python3.13 -m compileall -q codebase/backend/app` 与 `git diff --check` 通过。
 - 未验证：DEV-002 当前环境无 Docker 命令，未运行 `docker compose config`、容器内 adapter 断言、`/healthz` 或真实 RAGFlow 检索；`test_task005_live_stack.py` 仍因无专用环境为 `1 skipped, 2 warnings`。这些是 DEV-001 复审/集成门禁，不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第七轮 P1 API 容器连通性修复自测（2026-07-24）
+
+- 审核输入：DEV-001 对 PR #49 精确 HEAD `f920af89f7fbaefbb1f5547582ed4d44b44005ef` 提交 `Changes requested`；API 容器无法解析 `host.docker.internal`，即使应用工厂已装配 adapter 也无法连接宿主机 RAGFlow。
+- 红灯验证：新增 API host 映射、RAGFlow egress 网络、验证环境超时和 API 容器探针断言后，修复前 Compose/脚本契约为 `2 failed`。
+- 修复提交：`a25f32f90ddf812c7cc75c1a940d09d5077a2eb5`。
+- 修复结果：API 复用 `host.docker.internal:host-gateway` 与 `ragflow-egress`；`Invoke-Validation.ps1` 在 API 容器中通过 `socket.getaddrinfo` 解析配置地址，并请求带 Bearer 凭据的 `/api/v1/datasets`，30 次重试后仍失败即中断验证。
+- 定向验证：`/private/tmp/equipment-task006-python/bin/python -m pytest codebase/backend/tests/integration/test_task005_validation_infra_contract.py codebase/backend/tests/test_health.py codebase/backend/tests/agents/test_operation_guidance.py codebase/backend/tests/agents/test_fault_diagnosis.py -q` 为 `18 passed, 2 warnings`。
+- 完整后端：在 `codebase/backend` 下执行 `/private/tmp/equipment-task006-python/bin/python -m pytest -q` 为 `296 passed, 12 skipped, 2 warnings`。
+- 静态/编译：14 项 `06-testing/tests/*.test.js` 全部通过；`python3.13 -m compileall -q codebase/backend/app` 与 `git diff --check` 通过。
+- 未验证：DEV-002 当前无 Docker 或 PowerShell，未执行脚本的真实 Linux Docker 容器探针、Compose 重建、容器内 `/healthz`、adapter 断言或 RAGFlow 检索；必须由 DEV-001 对新 HEAD 运行。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。

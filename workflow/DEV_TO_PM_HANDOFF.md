@@ -418,3 +418,12 @@
 - 回归证据：新增 API 服务块/模板超时契约，修复前分别观察到缺失变量和缺失模板值的红灯；修复后相关 `18 passed, 2 warnings`，完整后端 `296 passed, 12 skipped, 2 warnings`，14 项原型静态检查、编译和差异检查通过。
 - 未验证：DEV-002 无 Docker 命令与专用 live-stack 配置，未执行 Compose 容器内 `RagflowAdapter` 断言、`/healthz` 或真实 TASK-009 RAGFlow 检索。请 DEV-001 对推送后的精确 HEAD 运行这些复验；`test_task005_live_stack.py` 在此环境为 `1 skipped, 2 warnings`。
 - 门禁：当前不得申请 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
+
+## TASK-009 第七轮 P1 API 容器连通性修复交接（2026-07-24）
+
+- 审核基准：PR #49 / HEAD `f920af89f7fbaefbb1f5547582ed4d44b44005ef`，结论 `Changes requested`；API 容器缺少 `host.docker.internal` 的 Linux host-gateway 映射，不能解析宿主机 RAGFlow。
+- 修复提交：`a25f32f90ddf812c7cc75c1a940d09d5077a2eb5`。
+- 修复内容：API 现在配置 `host.docker.internal:host-gateway`，并加入已有的 `ragflow-egress`；安全验证环境提供超时变量。live-stack 脚本从 API 容器读取生产 RAGFlow 配置，执行 DNS 解析及 Bearer 认证的 `/api/v1/datasets` 请求，失败会阻断验证。
+- 回归证据：新增静态 Compose/脚本契约先失败后转绿；相关 `18 passed, 2 warnings`，完整后端 `296 passed, 12 skipped, 2 warnings`，14 项原型静态检查、编译和差异检查通过。
+- 未验证：DEV-002 环境没有 Docker 或 PowerShell，尚未执行真实 Compose 重建、API 容器 `/healthz`、adapter 断言和 RAGFlow 实际检索。请 DEV-001 对推送后的精确 HEAD 执行这些复验，再决定是否可重新批准。
+- 门禁：当前不得申请 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。

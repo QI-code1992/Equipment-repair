@@ -393,6 +393,16 @@
 - 未验证：DEV-002 环境无 Docker 命令且无专用 live-stack 变量，未执行 Compose 容器内 adapter 断言、`/healthz` 或真实 RAGFlow 检索；这些由 DEV-001 复审/集成环境执行。
 - 门禁：旧 `a173233d39d752fe5f025d1423d2038c54b685ba` 的审核结论已失效；不得申请 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
 
+## FCP-009-R7：TASK-009 API 容器 RAGFlow 连通性修复候选
+
+- 状态：Development Candidate / 第七轮 P1 修复 / PR #49 等待 DEV-001 对推送后的精确 HEAD 复审；未集成、不解锁下游，Stage 6 仍禁止。
+- 修复提交：`a25f32f90ddf812c7cc75c1a940d09d5077a2eb5`。
+- 修复范围：`api` 服务复用既有 `host.docker.internal:host-gateway` 映射及受限 `ragflow-egress` 网络；TASK-005 验证环境补齐超时变量，验证脚本在 API 容器内解析配置 host，并以 Bearer 凭据请求 RAGFlow `/api/v1/datasets`。
+- 回归覆盖：Compose 契约限定检查 API 的 host 映射、RAGFlow egress 网络、超时模板及容器探针命令；运行脚本以 30 次重试将 DNS 或连接失败作为验证失败。
+- 验证：先观察 API 映射与验证脚本断言失败，再转绿；相关 `18 passed, 2 warnings`，完整后端 `296 passed, 12 skipped, 2 warnings`，14 项原型静态检查、`compileall` 和 `git diff --check` 通过。
+- 未验证：DEV-002 环境无 Docker 与 PowerShell，未运行实际 Compose 配置、容器内探针、`/healthz` 或真实 TASK-009 RAGFlow 检索；这些由 DEV-001 复审/集成环境执行。
+- 门禁：旧 `f920af89f7fbaefbb1f5547582ed4d44b44005ef` 的审核结论已失效；不得申请 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
+
 ## FCP-009-R4：TASK-009 CR-043 正式基线收敛候选
 
 - 状态：Development Candidate / 第四轮基线冲突修复 / 等待 DEV-001 绑定新精确 HEAD 复审；未集成，不解锁下游任务，Stage 6 仍禁止。
