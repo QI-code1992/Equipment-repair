@@ -392,3 +392,11 @@
 - 回归证据：仅有 `intelligence:agent` 的用户返回 403 且不创建草稿；伪造客户端上下文/数据集返回 422；成功路径检索问题与数据集绑定服务端事实和配置；既有草稿越权、重放、READY 幂等和 `ADOPTED` 采纳路径继续通过。
 - 验证：故障诊断定向 `5 passed, 2 warnings`；聚焦 `49 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；14 项原型静态回归、compileall、JSON 解析和 `git diff --check` 通过。
 - 请求动作：推送本证据提交后，以 PR #49 新完整精确 HEAD 请求 DEV-001 复审。当前不申请 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第四轮 CR-043 基线收敛交接（2026-07-24）
+
+- 审核基准：PR #49 / HEAD `3b8adf2f37e2490c7ec5695bd2e789dd9813fae8`，结论 `Changes requested`；阻断为正式基线尚未同步 CR-043。
+- 修复内容：同步 PRD、SPEC、AC-037、需求追踪矩阵、API 契约、CR 台账和 `workflow/state.json`，明确当前设计不实现 `EquipmentGrant` 或设备/工厂行级授权隔离；AC-037 收敛为认证、路由权限、线程/草稿创建者隔离、服务端事实绑定、非法对象不泄露详情和审计。
+- 变更边界：未修改 `codebase/`、测试、数据库迁移、依赖、部署或运行时配置；不新增兼容层或通用抽象。
+- 验证：`workflow/state.json` JSON 解析、`git diff --check` 和授权冲突词扫描通过；因本次仅治理/基线文档变更，未重跑后端测试。
+- 请求动作：推送本证据提交后，以 PR #49 新完整精确 HEAD 请求 DEV-001 复审。当前不申请 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。

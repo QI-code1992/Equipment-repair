@@ -499,3 +499,11 @@
 - 完整后端：`/private/tmp/equipment-task006-python/bin/python -m pytest -q` 为 `293 passed, 12 skipped, 2 warnings`。
 - 静态/编译：14 项 `06-testing/tests/*.test.js` 全部通过；`/private/tmp/equipment-task006-python/bin/python -m compileall -q codebase/backend/app`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
 - 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；需 DEV-001 在复审/集成阶段核验。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第四轮 CR-043 基线收敛自测（2026-07-24）
+
+- 审核输入：DEV-001 对 PR #49 精确 HEAD `3b8adf2f37e2490c7ec5695bd2e789dd9813fae8` 提交 `Changes requested`；阻断为 AC-037、SPEC/API 契约和需求追踪矩阵仍未同步 CR-043，正式基线冲突未关闭。
+- 修复结果：PRD、SPEC、AC-037、需求追踪矩阵、API 契约、CR 台账和 `workflow/state.json` 已统一确认本期不实现 `EquipmentGrant` 或设备/工厂行级授权隔离；验收口径改为认证、角色/菜单/操作权限、线程/草稿隔离、服务端事实绑定、非法对象详情保护和审计。
+- 治理验证：`/private/tmp/equipment-task006-python/bin/python -m json.tool workflow/state.json` 通过；`git diff --check` 通过；授权冲突词扫描无剩余的设备授予/授权设备作为当前生效边界表述。
+- 代码验证：本次未修改 `codebase/`，未重跑后端测试；上一代码 HEAD 的 DEV-001 独立验证为后端全量 `293 passed, 12 skipped, 2 warnings`，Compose 配置解析、Python 3.13 编译和 14 项静态检查通过。
+- 未验证：DEV-002 当前无 Docker 环境，真实 Docker/PostgreSQL/RAGFlow/LLM 联调仍由 DEV-001 在复审/集成阶段核验。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。

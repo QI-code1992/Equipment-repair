@@ -17,15 +17,15 @@
 - 澄清需求：项目负责人确认当前最新设计不实现 `EquipmentGrant`，也不实现设备/工厂行级授权隔离。TASK-009 不得临时新增对象级授权模型；诊断与操作指引继续按现有角色/菜单/操作权限、服务端故障/设备事实绑定、线程隔离、审计和非法对象不泄露详情来实现。
 - 原因：第四轮正式审核指出当前实现仍缺少设备对象级授权判断，无法满足 AC-037。现有批准基线又明确不启用 `EquipmentGrant` / 设备行级隔离，因此必须先通过变更控制确认契约，再继续实现。
 - 影响：
-  - PRD：可能需要补充设备对象级授权的业务边界说明
-  - SPEC：可能需要补充诊断/操作指引的授权前置条件
-  - Acceptance Criteria：AC-037 的实现口径需要与批准契约保持一致
-  - Architecture：可能需要明确设备授权来源、查询边界与拒绝语义
-  - API / Data / Implementation Plan / Task Book / Tests：会根据最终契约同步更新
+  - PRD：同步删除设备授予作为授权边界的旧表述，保留菜单/操作权限、线程隔离、审计和非法对象详情保护
+  - SPEC：同步诊断/操作指引的授权前置条件，移除 `get_granted_equipment` 契约
+  - Acceptance Criteria：AC-037 改为授权详情保护，不再要求设备/工厂行级授权
+  - Architecture：沿用 CR-026、Stage 4 架构、数据模型和实施计划中的“不实现 EquipmentGrant / 行级隔离”决定
+  - API / Traceability / Tests：API 契约与需求追踪矩阵同步；当前实现和既有回归不新增设备行级过滤断言
 - 决定：项目负责人于 2026-07-24 明确确认“按照最新设计，目前不实现 EquipmentGrant / 设备行级授权隔离”。因此 DEV-001 第四轮审核中的对象级设备授权要求不作为 TASK-009 当前实现门槛；如未来需要设备对象授权，必须另起 L3 变更并同步 PRD/SPEC/AC/架构/API/数据模型/测试。
-- 更新基线：保持现有 Stage 4 架构、实施计划、ADR 和 CR-026 的“不实现 EquipmentGrant / 行级隔离”决定；本记录澄清 TASK-009 复审口径。
-- 实施：不修改 `codebase/`；仅记录治理澄清，并请求 DEV-001 基于该口径复审 PR #49 当前实现。
-- 验证：适用治理检查为 `workflow/state.json` JSON 解析与 `git diff --check`；不运行后端测试。
+- 更新基线：`01-requirements/PRD.md`、`01-requirements/SPEC.md`、`01-requirements/ACCEPTANCE_CRITERIA.md`、`01-requirements/REQUIREMENTS_TRACEABILITY_MATRIX.md`、`04-architecture-plan/API_SPEC.md`、`workflow/state.json`；保持现有 Stage 4 架构、实施计划、ADR 和 CR-026 的“不实现 EquipmentGrant / 行级隔离”决定。
+- 实施：不修改 `codebase/`；在 PR #49 同一任务分支同步正式基线文档，并请求 DEV-001 基于该口径复审当前实现。
+- 验证：适用治理检查为相关 Markdown 冲突词扫描、`workflow/state.json` JSON 解析与 `git diff --check`；不运行后端测试。
 
 ### CR-042：追认 PR #29 的并发目标分支竞态合并
 

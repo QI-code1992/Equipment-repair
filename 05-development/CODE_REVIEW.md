@@ -322,3 +322,11 @@
 - 回归证据：仅有 `intelligence:agent` 的用户返回 403 且不创建草稿；伪造客户端上下文/数据集返回 422；成功路径检索问题与数据集绑定服务端事实和配置；READY 幂等、草稿越权、重放和最终 `ADOPTED` 采纳路径继续通过。
 - 验证：故障诊断定向 `5 passed, 2 warnings`；Agent/Runtime/Maintenance 聚焦回归 `49 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；14 项原型静态回归、compileall、JSON 解析和 `git diff --check` 通过。
 - 当前结论：本地自查 Critical 0、Important 0；等待 DEV-001 对推送后的新完整 HEAD 复审。未请求 Merge 授权、未合并、未解锁 TASK-010/011，Stage 6 仍禁止。
+
+## TASK-009 DEV-001 第四轮基线冲突修复复查请求（2026-07-24）
+
+- 原审核：PR #49 / HEAD `3b8adf2f37e2490c7ec5695bd2e789dd9813fae8`，P1 为 CR-043 仅更新变更台账和 `workflow/state.json`，但 AC-037、SPEC/API 契约和需求追踪矩阵仍保留旧授权口径。
+- 修复范围：同步 `01-requirements/PRD.md`、`SPEC.md`、`ACCEPTANCE_CRITERIA.md`、`REQUIREMENTS_TRACEABILITY_MATRIX.md` 与 `04-architecture-plan/API_SPEC.md`，明确当前设计不实现 `EquipmentGrant` 或设备/工厂行级授权隔离。
+- Standards/Spec 自查：AC-037 现在验证授权详情保护，而不是设备对象级授权；API 契约要求故障诊断按服务端故障单、设备事实、Agent 配置和诊断草稿创建者隔离执行，且不把客户端上下文当作诊断事实源。
+- 验证：`workflow/state.json` JSON 解析、`git diff --check` 与授权冲突词扫描通过；本次未修改 `codebase/`，未重跑后端测试。
+- 当前结论：本地自查 Critical 0、Important 0；等待 DEV-001 对推送后的新完整 HEAD 复审。未请求 Merge 授权、未合并、未解锁 TASK-010/011，Stage 6 仍禁止。

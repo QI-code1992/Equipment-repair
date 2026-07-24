@@ -382,3 +382,12 @@
 - 验证：Python 3.13 故障诊断定向 `5 passed, 2 warnings`；Agent/Runtime/Maintenance 聚焦回归 `49 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；14 项原型静态回归通过；`compileall`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。警告为既有第三方弃用提示。
 - 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；真实 RAGFlow 引用与运行态降级由 DEV-001 在复审/集成阶段核验。
 - 门禁：PR #49 新 HEAD 会使旧审核结论失效；等待 DEV-001 重新审核，不得请求 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
+
+## FCP-009-R4：TASK-009 CR-043 正式基线收敛候选
+
+- 状态：Development Candidate / 第四轮基线冲突修复 / 等待 DEV-001 绑定新精确 HEAD 复审；未集成，不解锁下游任务，Stage 6 仍禁止。
+- 分支/PR：`codex/task-009-guidance-diagnosis` / PR #49；本次仅同步正式基线文档和治理台账，最终候选 HEAD 以本证据提交推送后的 PR #49 完整 HEAD 为准。
+- 修复范围：按项目负责人已批准的 CR-043，将 PRD、SPEC、AC-037、需求追踪矩阵和 API 契约统一为“本期不实现 `EquipmentGrant` 或设备/工厂行级授权隔离”；AC-037 收敛为认证、路由权限、线程/草稿创建者隔离、服务端事实绑定、非法对象不泄露详情和审计。
+- 变更边界：未修改 `codebase/`、测试、数据库迁移、生产依赖、部署或运行时配置；不新增兼容层或抽象层。
+- 验证：`workflow/state.json` JSON 解析、`git diff --check` 和授权冲突词扫描通过；因无代码变更，未重跑后端测试，沿用上一代码 HEAD 的 DEV-001 独立验证证据。
+- 门禁：PR #49 新 HEAD 会使旧审核结论失效；等待 DEV-001 重新审核，不得请求 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。

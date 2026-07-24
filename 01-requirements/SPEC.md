@@ -19,19 +19,19 @@
 |---|---:|---:|---:|---:|
 | User/role/menu/operation management | Manage | View | None | None |
 | User management scope (`user_management.view_all`) | All users | Granted scope | Self only | Self only |
-| Equipment list/detail | Manage | Manage | View | View assigned context |
+| Equipment list/detail | Manage | Manage | View | View related business context |
 | Equipment knowledge | Manage | Manage | View | None |
 | Manual fault report | Create/view | Create/view | Create/view | Create/view |
 | AI floating Agent | Use/manage | Use | Use | Use |
 | AI fault-report creation | Create | Create | Create | Create |
-| AI diagnosis review | View | Review/confirm | View | View related |
+| AI diagnosis review | View | Review/confirm | View | View related business context |
 | Draft work order | Manage | Confirm/dispatch | View | View related |
 | Repair execution | View | View/accept | Execute/submit | View progress |
-| Health score/BI | View | View | View | View related |
+| Health score/BI | View | View | View | View related business context |
 
-必须执行服务端授权。设备授予仅约束 Agent 的设备查询和上报，不扩展为通用数据过滤。
+必须执行服务端账号认证、角色、菜单/操作权限、Agent 线程创建者隔离、诊断草稿创建者隔离和审计。根据 CR-026 与 CR-043，本期不实现 `EquipmentGrant`、设备/工厂行级授权隔离或通用数据权限过滤；设备负责人字段不作为授权来源。
 
-`user_management.view_all` controls user-management visibility; it does not expand Agent device grants or create general data permissions.
+`user_management.view_all` controls user-management visibility; it does not create equipment row-level filtering, factory row-level filtering or general data permissions.
 
 ## 3. 页面与路由契约
 
@@ -85,7 +85,7 @@
 
 ## 7. Agent 工具白名单
 
-`get_metric`, `get_health_score`, `get_granted_equipment`, `retrieve_knowledge`, `create_fault_draft`, `submit_fault_report`, `get_fault_progress`. Every write tool requires a permission check and, where specified, human confirmation. RAG citations must include document and chunk identifiers.
+`get_metric`, `get_health_score`, `retrieve_knowledge`, `get_operation_guidance`, `run_fault_diagnosis`, `create_fault_draft`, `submit_fault_report`, `get_fault_progress`. Every write tool requires a permission check and, where specified, human confirmation. RAG citations must include document and chunk identifiers.
 
 The allowlist is closed: no direct database, arbitrary SQL, health-score write, maintenance-record write, permission/user mutation or filesystem-execution tool may be registered.
 

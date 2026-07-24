@@ -3,7 +3,7 @@
 - 基线：已批准 v2.1
 - 状态：Stage 4 已批准；见 `workflow/STAGE_APPROVALS.md` 的 Gate-005 与 Gate-006
 
-所有写请求要求平台账号认证；可重复写请求需携带 `Idempotency-Key`；响应包含字段级校验错误和 `audit_event_id`。权限仅校验角色、菜单和操作权限，不按工厂或设备进行数据行过滤。
+所有写请求要求平台账号认证；可重复写请求需携带 `Idempotency-Key`；响应包含字段级校验错误和 `audit_event_id`。权限仅校验角色、菜单和操作权限，不按工厂或设备进行数据行过滤。根据 CR-043，Agent 的授权详情保护不引入 `EquipmentGrant`；其边界为认证、路由权限、线程/诊断草稿创建者隔离、服务端业务事实绑定、非法对象不泄露详情和审计。
 
 ## 智能配置
 
@@ -33,16 +33,20 @@
 | POST | `/api/fault-reports/{id}/start-repair` | 直接开始或采纳已确认诊断后开始维修。 |
 | POST | `/api/work-orders/{id}/repair-result` | 提交维修人员最终处理结果。 |
 | GET | `/api/repair-cases/similar` | 结构化同类设备相似案例查询。 |
+| POST | `/api/agent/operation-guidance` | 操作指引，使用页面传入的设备/故障上下文进行受控知识检索；要求 `intelligence:agent`，不读取或判断设备行级授权。 |
+| POST | `/api/agent/fault-diagnosis` | 维修前故障诊断；要求 `intelligence:agent` 与 `fault:repair`，`start` 只接受 `fault_report_id` 与报警码状态，诊断上下文由服务端 `FaultReport`、`Equipment` 和 `fault_diagnosis` Agent 配置生成。 |
 | GET | `/api/metrics/catalog` | 固定指标目录。 |
 | POST | `/api/metrics/query-batch` | 一次正式查询最多五个已校验指标。 |
 | POST | `/api/knowledge/documents` | 上传并创建知识文档元数据。 |
 | GET | `/api/knowledge/documents/{id}` | 查询 RAGFlow 生命周期状态。 |
 
-内部工具不直接暴露给浏览器：`retrieve_knowledge`、`get_similar_repair_cases`、`query_metric_batch`、`get_page_capability`、`create_fault_draft`、`submit_confirmed_business_action` 均经服务端参数模型、权限校验、超时和审计封装。禁止 Agent 生成 SQL 或任意文件系统命令。
+内部工具不直接暴露给浏览器：`retrieve_knowledge`、`get_similar_repair_cases`、`query_metric_batch`、`get_page_capability`、`get_operation_guidance`、`run_fault_diagnosis`、`create_fault_draft`、`submit_confirmed_business_action` 均经服务端参数模型、权限校验、超时和审计封装。禁止 Agent 生成 SQL 或任意文件系统命令。
 
 ## 诊断状态与错误契约
 
 诊断运行状态：`QUEUED`、`OPEN_LOADING`、`QUESTIONING`、`EVIDENCE_PENDING`、`DIAGNOSIS_READY`、`ADOPTED`、`DIRECT_START`、`UNAVAILABLE`。仅 `DIAGNOSIS_READY` 可以返回“采纳 AI 建议并开始维修”。
+
+`POST /api/agent/fault-diagnosis` 的客户端状态不是事实源。服务端以 `DiagnosisDraft` 保存诊断会话、创建者、故障绑定、知识数据集和证据进度；客户端后续步骤只提交 `diagnosis_draft_id`、回答或证据字段。READY 后重复提交必须幂等返回既有结果，不重复创建草稿或成功审计。缺少 `fault:repair`、草稿不存在、草稿不属于当前用户、故障/设备不存在或客户端提交服务端拥有的诊断上下文字段时，接口必须拒绝且不返回受保护业务详情。
 
 | 错误码 | 场景 | 前台行为 |
 |---|---|---|
