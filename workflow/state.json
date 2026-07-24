@@ -159,7 +159,7 @@
     "baseCommit": "e0333e2196fc1db9dba0056021625972576215e2",
     "candidateCommit": "e0c058e182d7c29881c3de75403b2ef0eb648de7",
     "pullRequest": 49,
-    "candidateHead": "PENDING_TASK009_R3_EVIDENCE_COMMIT",
+    "candidateHead": "1380541d599e30f032acf2a5af0c4dfbbb5edbad",
     "scope": "operation guidance and pre-repair fault diagnosis Agent boundaries, evidence gates, bounded retrieval, adoption/direct-start and manual fallback",
     "verification": "Python 3.13 fault diagnosis focused 5 passed / 2 warnings; Agent/Runtime/Maintenance focused regression 49 passed / 2 warnings; full backend 293 passed / 12 skipped / 2 warnings; all 14 prototype static checks passed; compileall, workflow JSON parsing and git diff --check passed.",
     "unverified": "DEV-002 has no Docker environment; real PostgreSQL/RAGFlow/LLM integration remains for DEV-001 review and integration validation.",
