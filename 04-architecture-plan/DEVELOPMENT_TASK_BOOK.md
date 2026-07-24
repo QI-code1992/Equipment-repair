@@ -246,7 +246,7 @@
 
 ### TASK-005：知识文档生命周期与 RAGFlow 适配器
 
-- 状态：Ready after TASK-004 post-merge governance closeout；PR #27 已集成并通过合并后复验，本治理 PR 合并后解除 TASK-004 阻塞
+- 状态：INTEGRATED_POST_MERGE_GOVERNANCE_PENDING / PR #37 已合入 `codex/stage-05-integration`；治理收尾确认前不解锁下游，Stage 6 仍禁止
 - 优先级：P0
 - 负责人：`DEV-002`
 - 任务开发者：`DEV-002`
@@ -254,7 +254,7 @@
 - Draft PR 创建者：任务开发者
 - 开发者是否允许创建 Draft PR：是；审核通过前不得自行批准或合并
 - PR 目标分支：`codex/stage-05-integration`
-- 并行属性：Blocked By TASK-004
+- 并行属性：TASK-004 前置已满足；下游依赖仍待本治理收尾完成后按矩阵逐项判断
 - 需求映射：FR-002、FR-007、NFR-002、NFR-007；AC-009、AC-024、AC-025、AC-033、AC-036；实施计划 Task 4 的应用部分
 - 范围：知识文档元数据、对象存储引用、上传/状态/检索/删除适配器、引用映射、Worker 同步和超时降级。
 - 不包含：RAGFlow 容器编排、历史维修案例查询。
@@ -267,6 +267,7 @@
 - PR 审核请求：`DEV-002` 完成本任务验收、必要真实环境验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
 - Review：`DEV-001` 复核网络、凭据、迁移、任务范围和真实环境证据；任何 Critical/Important 均退回 `DEV-002` 修复。
 - PR 与合并：DEV-002 创建并维护同一 Draft PR；DEV-001 批准精确 HEAD、完成集成检查并取得项目负责人逐 PR 明确授权后，由 DEV-001 合并至 `codex/stage-05-integration`。
+- 集成记录：PR #37 获批 HEAD `cac10a06d2ef48914c14fb7ad955cedb36878acd` 已由 DEV-001 以 Merge Commit `58fc0b12db1298333eef52c8720ec7d3d5e4846c` 合入；第一父为 `ca2a07f5f9f19620568cc75f74c97a2d10ed98d3`，第二父为获批 HEAD。真实 PostgreSQL 17、MinIO、ClamAV、RAGFlow 和 Compose Worker 联调已通过；治理台账收尾确认前不宣称 TASK-005 完整闭环、不解锁下游、不进入 Stage 6。
 - 回滚：回退适配器 Commit；外部文档删除必须遵循业务删除和审计规则。
 
 ### TASK-006-FE：正式前端工程初始化与共享基础

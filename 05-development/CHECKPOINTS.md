@@ -344,3 +344,11 @@
 - 集成：PR #43 获批 HEAD `19eaf1f213c50471f93b4e09e17df57bbeb1987b` 经项目负责人授权后，由 DEV-001 手动 Merge Commit `84ac8815cab403cb71a86230b4f705944bb5f6d2` 合入 `codex/stage-05-integration`；双亲为 `78e9dfb...` 与获批 HEAD。
 - 合并后验证：Python 3.13 后端 `246 passed, 10 skipped, 2 warnings`；14 项 `06-testing/tests/*.test.js` 静态回归通过；compileall、`workflow/state.json` JSON 解析和 merge diff check 通过。
 - 状态：PR #45 已获项目负责人确认并由 DEV-002 以 Merge Commit `997e50e10a7964b60fc8d9b4357c6274df8f0e97` 合入；治理闭环完成，TASK-008 可按依赖矩阵解锁下游，Stage 6 仍禁止。
+
+## FCP-005-R6：TASK-005 PR #37 合并后治理收尾候选
+
+- 状态：Integrated / governance closeout pending / does not unlock downstream.
+- PR/版本：PR #37；获批 HEAD `cac10a06d2ef48914c14fb7ad955cedb36878acd`；Merge Commit `58fc0b12db1298333eef52c8720ec7d3d5e4846c`。
+- 合并关系：第一父 `ca2a07f5f9f19620568cc75f74c97a2d10ed98d3`，第二父为获批 HEAD；结果树与获批候选一致。
+- 证据：后端 `284 passed, 12 skipped, 2 warnings`；`pip check`、`compileall`、普通与 `validation` Compose 配置、JSON、merge-tree 与 `git diff --check` 通过；真实 PostgreSQL 17、MinIO、ClamAV、RAGFlow 和 Compose Worker 文档生命周期联调通过。
+- 门禁：本纯治理 PR 合入并确认前，TASK-005 不标记为治理闭环，不解锁 TASK-009 或其他下游，不进入 Stage 6。

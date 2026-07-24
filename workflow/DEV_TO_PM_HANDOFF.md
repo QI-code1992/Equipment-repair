@@ -359,3 +359,9 @@
 - 集成：PR #43 获批 HEAD `19eaf1f213c50471f93b4e09e17df57bbeb1987b` 已在项目负责人授权后由 DEV-001 手动合入 `codex/stage-05-integration`，Merge Commit `84ac8815cab403cb71a86230b4f705944bb5f6d2`。
 - 验证：双亲与祖先关系正确；Python 3.13 后端 `246 passed, 10 skipped, 2 warnings`；14 项原型静态回归、compileall、JSON 解析和 merge diff check 通过。
 - 结果：项目负责人已确认 PR #45 精确 HEAD `883053f59890272ef1dbb311b8d47bce8aace45c`；非作者 DEV-002 已执行 Merge Commit `997e50e10a7964b60fc8d9b4357c6274df8f0e97`。TASK-008 治理闭环完成，可按依赖矩阵解锁下游；Stage 6 仍须独立批准。
+
+## TASK-005 PR #37 合并后治理收尾候选（2026-07-24）
+
+- 集成：PR #37 获批 HEAD `cac10a06d2ef48914c14fb7ad955cedb36878acd` 已由 DEV-001 在项目负责人授权后手动 Merge Commit `58fc0b12db1298333eef52c8720ec7d3d5e4846c` 合入 `codex/stage-05-integration`；第一父为 `ca2a07f5f9f19620568cc75f74c97a2d10ed98d3`，第二父为获批 HEAD。
+- 验证：结果树与候选一致；双亲、祖先关系、JSON 和差异检查通过。后端 `284 passed, 12 skipped, 2 warnings`，`pip check`、`compileall`、普通与 validation Compose 配置通过；真实 PostgreSQL 17、MinIO、ClamAV、RAGFlow 和 Compose Worker 验证已完成。
+- 当前门禁：代码集成事实成立，但本治理候选确认并合入前不宣称 TASK-005 完整闭环，不解锁 TASK-009 或其他下游，不进入 Stage 6。
