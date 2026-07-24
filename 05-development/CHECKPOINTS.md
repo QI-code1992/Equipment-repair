@@ -280,5 +280,7 @@
 
 - 状态：Development Candidate / P1 修复完成 / PR #43 等待 DEV-001 对新精确 HEAD 复审；未集成、不解锁下游。
 - 修复：确认提交捕获 `MissingFaultFieldsError`，返回 `422 FAULT_DRAFT_INCOMPLETE` 和缺失字段；失败不写故障记录、不写成功审计、不保存成功幂等响应。
-- 验证：专项 Agent 测试 `16 passed, 2 warnings`；完整后端 `246 passed, 10 skipped, 2 warnings`；compileall、`git diff --check` 通过。
+- 验证：专项 Agent 测试 `18 passed, 2 warnings`；完整后端 `246 passed, 10 skipped, 2 warnings`；compileall、`git diff --check` 通过。
 - 门禁：当前仍不得请求 Merge 授权、合并、解锁下游或进入 Stage 6。
+- 证据校准：PR #43 当前待审 HEAD `ad50034ccb18422ac9a9c88325b9f0c4e9cb22dc`；专项 Agent 测试真实结果为 `18 passed, 2 warnings`，全量后端为 `246 passed, 10 skipped, 2 warnings`；`compileall`、JSON 解析和 `git diff --check` 通过。
+- 当前门禁：PR #43 仍 Open/Ready for review，等待 DEV-001 对最新精确 HEAD 复审；未集成、未请求 Merge 授权、未解锁下游、Stage 6 禁止。

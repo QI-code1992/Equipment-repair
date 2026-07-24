@@ -348,7 +348,7 @@
 
 ### TASK-008：AI 故障上报、智能问数与健康分读取
 
-- 状态：Ready for DEV-001 Re-review / PR #43 修复 P1 后等待新精确 HEAD 复审；尚未批准、集成或请求 Merge 授权
+- 状态：Ready for DEV-001 Re-review / PR #43 当前精确 HEAD `ad50034ccb18422ac9a9c88325b9f0c4e9cb22dc`；治理证据已校准，尚未批准、集成或请求 Merge 授权
 - 优先级：P0
 - 负责人：`DEV-002`
 - 任务开发者：`DEV-002`
@@ -364,6 +364,7 @@
 - 共享契约：正式写入经 TASK-002/003 的业务 API；指标和健康分只来自受控服务，不由模型生成。
 - 实施步骤：写缺失字段/指标限制/服务失败测试；实现两个状态机；接入批量指标和健康分读取；验证人工确认门禁。
 - 验收标准：不完整草稿不能提交；一次查询最多五项；非法指标/维度被拒；服务失败不生成数值。
+- 当前验证证据：Agent 专项 `18 passed, 2 warnings`；后端全量 `246 passed, 10 skipped, 2 warnings`；`compileall` 与 `git diff --check` 通过。代码 P1 已修复，等待 DEV-001 对最新精确 HEAD 复审。
 - 验证：`python -m pytest codebase/backend/tests/agents/test_fault_reporting.py codebase/backend/tests/agents/test_metric_query.py codebase/backend/tests/modules/test_health_score.py -q`；指标 API 契约测试；全部 `06-testing/tests/*.test.js`。
 - 分支：`codex/task-008-fault-metric-agents`
 - PR 审核请求：`DEV-002` 完成本任务验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。

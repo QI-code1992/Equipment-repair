@@ -274,5 +274,12 @@
 ## TASK-008 不完整草稿 P1 修复复查请求（2026-07-24）
 
 - 阻断修复：确认提交捕获 `MissingFaultFieldsError`，稳定返回 `422 FAULT_DRAFT_INCOMPLETE` 与字段映射。
-- 证据：不完整请求不产生故障记录、成功审计或成功幂等响应；补齐同 Key 请求可成功；专项 `16 passed, 2 warnings`，全量 `246 passed, 10 skipped, 2 warnings`。
+- 证据：不完整请求不产生故障记录、成功审计或成功幂等响应；补齐同 Key 请求可成功；专项 `18 passed, 2 warnings`，全量 `246 passed, 10 skipped, 2 warnings`。
 - 当前门禁：等待 DEV-001 绑定新完整 HEAD 复审，未请求 Merge 授权。
+- 当前门禁：等待 DEV-001 绑定新完整 HEAD 复审，未申请 Merge 授权。
+
+## TASK-008 治理证据校准复查请求（2026-07-24）
+
+- 复查对象：PR #43，代码与证据候选 HEAD `ad50034ccb18422ac9a9c88325b9f0c4e9cb22dc`。
+- 校准内容：`workflow/state.json`、FCP、SELF_TEST、CODE_REVIEW、COMMIT_LOG、任务书约束与 `workflow/DEV_TO_PM_HANDOFF.md` 统一记录该 HEAD；专项结果统一为 `18 passed, 2 warnings`，全量后端为 `246 passed, 10 skipped, 2 warnings`，不再保留本轮 `pending commit`。
+- 门禁：请求 DEV-001 在同一 PR 对最新远端精确 HEAD 重新审核；当前不得请求 Merge 授权、合并、解锁下游或进入 Stage 6。

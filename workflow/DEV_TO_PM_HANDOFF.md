@@ -325,5 +325,8 @@
 
 - DEV-001 新反馈：PR #43 HEAD `4d84ec75b57e603b9a8bfc0542ef3d1e5074f0b2` 的不完整已确认草稿返回未处理异常。
 - 修复：缺失 `occurred_at`/`duration_minutes` 时返回 `422 FAULT_DRAFT_INCOMPLETE` 和字段映射；失败不写业务故障、成功审计或成功幂等响应。
-- 验证：专项 `16 passed, 2 warnings`；全量后端 `246 passed, 10 skipped, 2 warnings`；compileall、diff-check 通过。
+- 验证：专项 `18 passed, 2 warnings`；全量后端 `246 passed, 10 skipped, 2 warnings`；compileall、diff-check 通过。
 - 下一动作：推送新精确 HEAD 并请求 DEV-001 复审；继续禁止 Merge 授权、合并、下游解锁和 Stage 6。
+- 当前候选：PR #43，HEAD `ad50034ccb18422ac9a9c88325b9f0c4e9cb22dc`；目标 `codex/stage-05-integration`；状态 Open/Ready for review。
+- 治理校准：正式台账、FCP、SELF_TEST、CODE_REVIEW、COMMIT_LOG 与本交接统一绑定当前候选；专项真实结果 `18 passed, 2 warnings`，全量后端 `246 passed, 10 skipped, 2 warnings`，compileall 与 diff-check 通过。
+- 门禁：代码 P1 已关闭但尚待 DEV-001 对新精确 HEAD 复审；未申请 Merge 授权、未合并、未解锁下游、Stage 6 禁止。

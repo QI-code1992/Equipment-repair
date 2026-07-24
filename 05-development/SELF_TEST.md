@@ -374,5 +374,11 @@
 
 - 修复：`MissingFaultFieldsError` 映射为 `422 FAULT_DRAFT_INCOMPLETE`，返回 `occurred_at`、`duration_minutes` 等缺失字段。
 - 回归：不完整确认草稿不创建故障、不创建成功审计、不保存成功幂等响应；同 Key 补齐字段后可正常创建。
-- 验证：专项 `16 passed, 2 warnings`；全量后端 `246 passed, 10 skipped, 2 warnings`；compileall、`git diff --check` 通过。
+- 验证：专项 `18 passed, 2 warnings`；全量后端 `246 passed, 10 skipped, 2 warnings`；compileall、`git diff --check` 通过。
 - 当前结论：等待 DEV-001 对新精确 HEAD 复审，未申请 Merge 授权。
+
+## TASK-008 治理证据校准自测（2026-07-24）
+
+- 绑定代码候选：PR #43，HEAD `ad50034ccb18422ac9a9c88325b9f0c4e9cb22dc`。
+- 真实验证：Agent 专项 `18 passed, 2 warnings`；全量后端 `246 passed, 10 skipped, 2 warnings`；`python3.13 -m compileall -q codebase/backend/app` 和 `git diff --check` 通过。
+- 治理校准：`state.json`、FCP、CODE_REVIEW、COMMIT_LOG 与交接记录统一绑定该候选及真实结果；PR #43 仍未集成、未申请 Merge 授权、未解锁下游、Stage 6 禁止。
