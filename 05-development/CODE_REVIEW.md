@@ -298,7 +298,7 @@
 
 ## TASK-009 DEV-002 开发者自查与 DEV-001 复审请求（2026-07-24）
 
-- 候选：PR #49，完整 HEAD `b7c6f55c3bc9858f842c8d9041a0d477f516c042`；代码提交 `f78deace39fde732bcea7ec36f9a3f5eea79dfc1`，生产接入提交 `ab54e7663d0ae65205236463bcd92b3a868eec24`，分支 `codex/task-009-guidance-diagnosis`，目标 `codex/stage-05-integration`。
+- 候选：PR #49，完整 HEAD `a5c5d20ef1936f7690e9fb32d332195561257609`；代码提交 `f78deace39fde732bcea7ec36f9a3f5eea79dfc1`，生产接入提交 `ab54e7663d0ae65205236463bcd92b3a868eec24`，分支 `codex/task-009-guidance-diagnosis`，目标 `codex/stage-05-integration`。
 - 任务边界：操作指引两次定向检索/人工降级；维修前诊断报警码、证据门槛、采纳/直接开始及 8/24/4 上限；通过外部回调区分 PostgreSQL 历史案例和 RAGFlow 知识引用。
 - 自查证据：Agent API 与 Runtime `8 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；静态 Agent 检查、compileall、`git diff --check` 通过。
 - P1 修复：新增 `/api/agent/operation-guidance` 和 `/api/agent/fault-diagnosis`；历史案例通过 TASK-003 查询，知识引用通过 TASK-005 adapter，诊断达标创建既有 `DiagnosisDraft`，后续由 `/start-repair` 采纳。

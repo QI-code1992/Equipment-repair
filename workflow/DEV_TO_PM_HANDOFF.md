@@ -369,7 +369,7 @@
 ## TASK-009 开发启动与复审交接（2026-07-24）
 
 - 开发者/审核者：DEV-002 / DEV-001；分支 `codex/task-009-guidance-diagnosis`，目标 `codex/stage-05-integration`。
-- 基线与候选：基于 `e0333e2196fc1db9dba0056021625972576215e2`，PR #49 当前完整 HEAD `b7c6f55c3bc9858f842c8d9041a0d477f516c042`，代码提交 `f78deace39fde732bcea7ec36f9a3f5eea79dfc1`。
+- 基线与候选：基于 `e0333e2196fc1db9dba0056021625972576215e2`，PR #49 当前完整 HEAD `a5c5d20ef1936f7690e9fb32d332195561257609`，代码提交 `f78deace39fde732bcea7ec36f9a3f5eea79dfc1`。
 - 范围：操作指引两次定向检索/人工降级；报警码具体追问和否定证据；维修前诊断证据门槛；采纳/直接开始；8/24/4 上限；历史案例和知识引用通过受控外部边界。
 - 证据：Agent API 与 Runtime `8 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；静态 Agent 检查、compileall、`git diff --check` 通过。
 - 未验证：DEV-002 无 Docker 环境，真实 PostgreSQL/RAGFlow/LLM 联调待 DEV-001 执行；未新增生产依赖、迁移、兼容层或通用抽象。
