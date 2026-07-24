@@ -415,3 +415,4 @@
 - 本地验证：TASK-005/Worker/迁移/基础设施契约定向 `10 passed, 2 skipped, 2 warnings`；Python 3.13 全量 `266 passed, 12 skipped, 2 warnings`；`pip check`、`compileall`、Alembic 唯一 `0006_task005 (head)`、`git diff --check` 通过。
 - 未验证：当前 DEV-002 Mac 环境无 `docker` 和 `pwsh`，未本机复跑两套 Compose config 或 PowerShell 语法；这些结果引用 DEV-001 已提供的真实验证，仍需 DEV-001 对 PR #37 新 HEAD 复审绑定。
 - 门禁：PR #37 保持 Draft；未请求 Merge 授权、不解锁 TASK-009/011、不进入 Stage 6。
+- 治理状态：项目负责人已正式追认 PR #40/源 HEAD/合并结果；PR #41 治理收尾 Merge Commit `092eb84821131f6c6faa6b6a1c2acdb4079ecf8f` 已合入。TASK-007 治理闭环完成，可按依赖矩阵解锁下游；Stage 6 仍未批准。

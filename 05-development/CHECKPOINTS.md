@@ -286,7 +286,7 @@
 
 ## FCP-007：TASK-007 Agent Runtime 合并后技术检查点
 
-- 状态：代码已集成；治理收尾待项目负责人追认，不解锁下游任务。
+- 状态：Stable after post-merge governance closeout；依赖矩阵允许的下游可继续，Stage 6 仍未获准。
 - 分支/PR：`codex/task-007-agent-runtime` / PR #40；源 HEAD `fcd643ab0b0e33a585e3be6ec0b0036a611059c4`；Merge Commit `bf842626987148575173c6cf3f34970fc496ad7c`。
 - 合并关系：第一父 `fdec916fad943acb8ad62a1cf5bc3ce8f770cc8d`，第二父为源 HEAD；源 HEAD 已成为集成分支祖先。
 - 合并后证据：后端 `228 passed, 10 skipped, 2 warnings`；PostgreSQL 17 真实 `PostgresSaver` checkpoint/restart `1 passed, 1 warning`；`compileall`、Compose 配置、API 镜像构建、PostgreSQL/Redis healthy、容器 `/healthz` HTTP 200、merge-tree 与 `git diff --check` 通过。
@@ -303,3 +303,4 @@
 - 迁移增量：DEV-001 原提交 `2fe848bfb5f7f7849b950cbecfa40644e6782a05` 已由 DEV-002 cherry-pick 为 `78ad1c81f6292c1fc3706b35d9dd495a8244d1b4`；四表迁移链为 `0005_task007 -> 0006_task005`，PostgreSQL 17 往返 `1 passed`。
 - 合入分支后回归：全量 `262 passed, 12 skipped, 2 warnings`；`pip check`、`compileall`、单一 head 和 diff check 通过。真实 RAGFlow/ClamAV 复验仍待 DEV-001，因此状态继续为 Draft / Not Approved。
 - 验证基础设施增量：DEV-001 分支 `codex/task-005-validation-infra` 的三提交已由 DEV-002 连续 cherry-pick 至 PR #37；验证专用 Compose 服务限制在 `validation` profile，临时凭据和清理入口具备 marker/GUID/固定文件名约束，Worker 以独立 Compose 进程轮询推进 `READY`。DEV-002 本地回归 `266 passed, 12 skipped, 2 warnings`，定向 `10 passed, 2 skipped, 2 warnings`；Docker/PowerShell 本机不可用，真实联调和脚本语法结果仍待 DEV-001 对新 HEAD 绑定复审。
+- 治理门禁：项目负责人已追认 PR #40、源 HEAD、Merge Commit 及合并结果；PR #41 Merge Commit `092eb84821131f6c6faa6b6a1c2acdb4079ecf8f` 已同步 SELF_TEST、CHECKPOINTS、CODE_REVIEW、COMMIT_LOG、任务书、`workflow/DEV_TO_PM_HANDOFF.md` 与 `workflow/state.json`。TASK-007 治理闭环完成；Stage 6 仍未批准。
