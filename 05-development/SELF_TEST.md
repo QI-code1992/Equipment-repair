@@ -407,3 +407,11 @@
 - 安全与失败传播：临时凭据环境创建将写入与 `icacls` 放入 `try/catch`，权限设置失败时删除专用目录；清理脚本即使 Compose 清理失败也先删除经过 marker/GUID/固定文件名校验的凭据目录，再传播清理失败。
 - 真实验证：独立 PostgreSQL 17、MinIO、ClamAV、Compose Worker 和本机 RAGFlow 环境中，验证器上传安全文档后由 Compose Worker 推进为 `READY`，RAGFlow 检索与引用回传通过，EICAR 被 ClamAV 拒绝；专用 RAGFlow dataset、容器、网络、卷及工作区外临时凭据目录均已清理。
 - 门禁：此基础设施分支仍待 DEV-002 边界核验后 cherry-pick 至 PR #37；PR #37 继续保持 Draft，不申请 Merge 授权、不解锁下游、不进入 Stage 6。
+
+## TASK-005 DEV-002 接收基础设施增量（2026-07-24）
+
+- 接收范围：DEV-001 基础设施分支 `codex/task-005-validation-infra` 的连续提交 `dbf4d68b074838bfdaf629b2b6897c6ec5d79843`、`579a98ea048430a4b79684b6191ec1a3d71cd574`、`6c2df422f36e84f9660cb16d3c7c925d9d9a6f7a` 已精确 cherry-pick 至 PR #37，生成本分支提交 `339956d`、`b8b840c`、`7daab78`。
+- 边界核验：验证专用 `worker/migrate/validator/minio/clamav` 均位于 `validation` profile；清理脚本绑定系统临时目录、`equipment-task005-<GUID>`、`task005.env` 和 marker；真实测试不再直接调用底层同步函数，改由 Compose Worker 常驻轮询入口推进文档状态。
+- 本地验证：TASK-005/Worker/迁移/基础设施契约定向 `10 passed, 2 skipped, 2 warnings`；Python 3.13 全量 `266 passed, 12 skipped, 2 warnings`；`pip check`、`compileall`、Alembic 唯一 `0006_task005 (head)`、`git diff --check` 通过。
+- 未验证：当前 DEV-002 Mac 环境无 `docker` 和 `pwsh`，未本机复跑两套 Compose config 或 PowerShell 语法；这些结果引用 DEV-001 已提供的真实验证，仍需 DEV-001 对 PR #37 新 HEAD 复审绑定。
+- 门禁：PR #37 保持 Draft；未请求 Merge 授权、不解锁 TASK-009/011、不进入 Stage 6。

@@ -302,3 +302,4 @@
 - 恢复/门禁：本检查点仅为可恢复整改提交，不是 Review Candidate；PR 保持 Draft，不解锁 TASK-009/011，不进入 Stage 6。
 - 迁移增量：DEV-001 原提交 `2fe848bfb5f7f7849b950cbecfa40644e6782a05` 已由 DEV-002 cherry-pick 为 `78ad1c81f6292c1fc3706b35d9dd495a8244d1b4`；四表迁移链为 `0005_task007 -> 0006_task005`，PostgreSQL 17 往返 `1 passed`。
 - 合入分支后回归：全量 `262 passed, 12 skipped, 2 warnings`；`pip check`、`compileall`、单一 head 和 diff check 通过。真实 RAGFlow/ClamAV 复验仍待 DEV-001，因此状态继续为 Draft / Not Approved。
+- 验证基础设施增量：DEV-001 分支 `codex/task-005-validation-infra` 的三提交已由 DEV-002 连续 cherry-pick 至 PR #37；验证专用 Compose 服务限制在 `validation` profile，临时凭据和清理入口具备 marker/GUID/固定文件名约束，Worker 以独立 Compose 进程轮询推进 `READY`。DEV-002 本地回归 `266 passed, 12 skipped, 2 warnings`，定向 `10 passed, 2 skipped, 2 warnings`；Docker/PowerShell 本机不可用，真实联调和脚本语法结果仍待 DEV-001 对新 HEAD 绑定复审。
