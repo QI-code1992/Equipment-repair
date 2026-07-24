@@ -399,3 +399,11 @@
 - 修正 3：真实验证循环改由 `app.modules.knowledge.worker_main.main(--limit 1)` 执行；同时修正 `limit` 关键字调用，避免只由 validator 直接调用底层同步函数。
 - 复验：普通/validation Compose config、PowerShell 语法、契约 `2 passed`、Python 全量 `264 passed, 12 skipped, 2 warnings`；真实 PostgreSQL 往返和 RAGFlow/ClamAV 文档生命周期 `2 passed`。未产生新依赖、兼容层或无关修改。
 - 门禁：修正提交尚未由 DEV-002 重新边界核验和 cherry-pick；PR #37 保持 Draft，不申请 Merge 授权、不解锁下游、不进入 Stage 6。
+
+## TASK-005 DEV-001 基础设施复验 R2（2026-07-24）
+
+- 根因：Compose Worker 作为独立进程仅加载知识模型，`knowledge_documents.created_by` 对 `users.id` 的外键目标未注册；首个上传文档触发 SQLAlchemy `NoReferencedTableError` 后 Worker 退出，文档停留在 `UPLOADING`。
+- TDD：新增独立 Python 进程回归测试，初始因 `Base.metadata` 缺少 `users` 表失败；Worker 入口显式注册共享 identity 模型后通过。Worker 以 `--poll-seconds 1` 常驻轮询，真实联调测试不再在 validator 进程直接调用 Worker。
+- 安全与失败传播：临时凭据环境创建将写入与 `icacls` 放入 `try/catch`，权限设置失败时删除专用目录；清理脚本即使 Compose 清理失败也先删除经过 marker/GUID/固定文件名校验的凭据目录，再传播清理失败。
+- 真实验证：独立 PostgreSQL 17、MinIO、ClamAV、Compose Worker 和本机 RAGFlow 环境中，验证器上传安全文档后由 Compose Worker 推进为 `READY`，RAGFlow 检索与引用回传通过，EICAR 被 ClamAV 拒绝；专用 RAGFlow dataset、容器、网络、卷及工作区外临时凭据目录均已清理。
+- 门禁：此基础设施分支仍待 DEV-002 边界核验后 cherry-pick 至 PR #37；PR #37 继续保持 Draft，不申请 Merge 授权、不解锁下游、不进入 Stage 6。

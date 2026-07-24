@@ -3,6 +3,7 @@ from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 import json
 import os
+import time
 
 from sqlalchemy.orm import Session
 
@@ -10,6 +11,8 @@ from app.core.database import create_database_engine, session_factory
 from app.integrations.object_storage import MinioObjectStorage, build_minio_storage
 from app.integrations.ragflow import RagflowAdapter, UrllibRagflowTransport
 from app.modules.knowledge import worker
+# The worker runs outside the API process, so register the shared FK target.
+from app.modules.identity import models as identity_models  # noqa: F401
 
 
 _REQUIRED_SETTINGS = (
@@ -69,11 +72,18 @@ def worker_runtime() -> Iterator[tuple[Session, MinioObjectStorage, RagflowAdapt
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Synchronize pending knowledge documents")
     parser.add_argument("--limit", type=int, default=50)
+    parser.add_argument("--poll-seconds", type=float, default=0)
     args = parser.parse_args(argv)
-    with worker_runtime() as (db, storage, adapter):
-        result = worker.sync_pending_documents(db, storage, adapter, limit=args.limit)
-        db.commit()
-    print(json.dumps(result.__dict__, sort_keys=True))
+    if args.poll_seconds < 0:
+        parser.error("--poll-seconds must be zero or positive")
+    while True:
+        with worker_runtime() as (db, storage, adapter):
+            result = worker.sync_pending_documents(db, storage, adapter, limit=args.limit)
+            db.commit()
+        print(json.dumps(result.__dict__, sort_keys=True))
+        if args.poll_seconds == 0:
+            break
+        time.sleep(args.poll_seconds)
     return 0
 
 

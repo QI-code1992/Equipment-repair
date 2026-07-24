@@ -15,6 +15,8 @@ if (!(Test-Path -LiteralPath $markerFile) -or (Get-Content -Raw -LiteralPath $ma
     throw 'TASK-005 temporary environment marker is invalid'
 }
 
+$cleanupFailure = $null
 docker compose --profile validation --env-file $resolvedEnv -p equipment-task-005-validation -f codebase/infra/docker-compose.yml down --volumes --remove-orphans
-if ($LASTEXITCODE) { throw 'TASK-005 cleanup failed' }
+if ($LASTEXITCODE) { $cleanupFailure = 'TASK-005 cleanup failed' }
 Remove-Item -LiteralPath $temporaryDirectory -Recurse -Force
+if ($cleanupFailure) { throw $cleanupFailure }
