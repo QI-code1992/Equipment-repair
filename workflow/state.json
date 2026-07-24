@@ -166,7 +166,7 @@
     "productionDependencyChange": false,
     "databaseMigrationChange": false,
     "dependencyUnlockAllowed": false,
-    "nextAction": "Push the same PR #49 task branch and request DEV-001 review bound to the exact post-evidence candidate HEAD. Do not request merge authorization, merge, unlock downstream tasks or enter Stage 6 before review and integration gates."
+    "nextAction": "CR-043 confirms TASK-009 does not implement EquipmentGrant or equipment row-level authorization. Push the governance clarification and request DEV-001 re-review of PR #49 under the current approved authorization baseline. Do not request merge authorization, merge, unlock downstream tasks or enter Stage 6 before review and integration gates."
   },
   "task005Delivery": {
     "taskId": "TASK-005",
