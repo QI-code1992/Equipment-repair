@@ -347,8 +347,8 @@
 
 ## FCP-005-R6：TASK-005 PR #37 合并后治理收尾候选
 
-- 状态：Integrated / governance closeout pending / does not unlock downstream.
+- 状态：Closed post-merge governance completed / dependency unlock allowed.
 - PR/版本：PR #37；获批 HEAD `cac10a06d2ef48914c14fb7ad955cedb36878acd`；Merge Commit `58fc0b12db1298333eef52c8720ec7d3d5e4846c`。
 - 合并关系：第一父 `ca2a07f5f9f19620568cc75f74c97a2d10ed98d3`，第二父为获批 HEAD；结果树与获批候选一致。
 - 证据：后端 `284 passed, 12 skipped, 2 warnings`；`pip check`、`compileall`、普通与 `validation` Compose 配置、JSON、merge-tree 与 `git diff --check` 通过；真实 PostgreSQL 17、MinIO、ClamAV、RAGFlow 和 Compose Worker 文档生命周期联调通过。
-- 门禁：本纯治理 PR 合入并确认前，TASK-005 不标记为治理闭环，不解锁 TASK-009 或其他下游，不进入 Stage 6。
+- 结果：PR #47 已获项目负责人确认并由 DEV-002 以 Merge Commit `6763f1e7199765c08303aa567c3aed40210f7cf7` 合入；TASK-005 治理闭环完成，可按依赖矩阵解锁 TASK-009，Stage 6 仍禁止。
