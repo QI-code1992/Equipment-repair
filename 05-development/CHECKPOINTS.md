@@ -358,7 +358,7 @@
 - 状态：Development Candidate / 等待 DEV-001 复审；未集成，不解锁下游任务，Stage 6 仍禁止。
 - 分支/基线：`codex/task-009-guidance-diagnosis`，基于 `origin/codex/stage-05-integration@e0333e2196fc1db9dba0056021625972576215e2`；代码提交 `f78deace39fde732bcea7ec36f9a3f5eea79dfc1`。
 - 范围：操作指引最多两次定向检索与人工降级；报警码具体数字/否定证据；维修前诊断的复现工况加第二类技术证据门槛；8 步、24 问、4 项证据上限；采纳预填摘要与直接开始清除临时摘要；历史案例与知识引用均通过外部受控回调边界提供。
-- 变更边界：新增两个 Agent 模块、对应测试和 Runtime 工具白名单；未新增生产依赖、数据库迁移、兼容层或通用抽象，未修改 TASK-005。
-- 验证：Python 3.13 专项与 Runtime `13 passed, 2 warnings`；完整后端 `291 passed, 12 skipped, 2 warnings`；`node 06-testing/tests/fault-report-repair-agent.test.js` 通过；`compileall`、`git diff --check` 通过。警告为既有第三方弃用提示。
+- 变更边界：新增两个 Agent 模块、生产受控 API、TASK-003 历史案例和 TASK-005 知识引用回调、既有 DiagnosisDraft 写入，以及对应测试和 Runtime 工具白名单；未新增生产依赖、数据库迁移、兼容层或通用抽象，未修改 TASK-005。
+- 验证：Python 3.13 Agent API/Runtime `8 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；`node 06-testing/tests/fault-report-repair-agent.test.js` 通过；`compileall`、`git diff --check` 通过。警告为既有第三方弃用提示。
 - 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；真实 RAGFlow 引用与运行态降级由 DEV-001 在复审/集成阶段核验。
-- 门禁：同一 Draft PR #49 当前完整 HEAD 为 `a671728a71d6330d60c8a39a6623c55c794a8bf3`；任务开发者将在该 PR 中维护候选，不得自批、自合并、申请 Merge 授权、解锁 TASK-010/011 或进入 Stage 6。
+- 门禁：同一 Draft PR #49 当前完整 HEAD 为 `ab54e7663d0ae65205236463bcd92b3a868eec24`；任务开发者将在该 PR 中维护候选，不得自批、自合并、申请 Merge 授权、解锁 TASK-010/011 或进入 Stage 6。

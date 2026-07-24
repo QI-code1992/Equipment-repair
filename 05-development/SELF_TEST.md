@@ -471,8 +471,8 @@
 ## TASK-009 开发候选自测（2026-07-24）
 
 - 代码提交：`f78deace39fde732bcea7ec36f9a3f5eea79dfc1`，分支 `codex/task-009-guidance-diagnosis`。
-- 定向验证：Agent 与 Runtime 测试 `13 passed, 2 warnings`；完整后端 `291 passed, 12 skipped, 2 warnings`。
+- 定向验证：Agent API 与 Runtime 测试 `8 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`。
 - 其他验证：`node 06-testing/tests/fault-report-repair-agent.test.js` 通过；Python `compileall` 与 `git diff --check` 通过。
-- 覆盖：两次定向检索、人工降级、报警码否定证据、复现工况加第二类证据、8/24/4 上限、采纳/直接开始边界及工具白名单。
+- 覆盖：两次定向检索、人工降级、生产 API、TASK-003 历史案例、TASK-005 知识引用、DiagnosisDraft 写入、报警码否定证据、复现工况加第二类证据、8/24/4 上限、采纳/直接开始边界及工具白名单。
 - 未验证：当前环境无 Docker，未执行真实 PostgreSQL/RAGFlow/LLM 联调；由 DEV-001 在复审/集成阶段核验。未新增生产依赖、迁移、兼容层或通用抽象。
 - 门禁：候选未获 DEV-001 审核，不请求 Merge 授权、不合并、不解锁下游、不进入 Stage 6。

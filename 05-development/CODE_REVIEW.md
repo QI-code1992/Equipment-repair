@@ -298,8 +298,9 @@
 
 ## TASK-009 DEV-002 开发者自查与 DEV-001 复审请求（2026-07-24）
 
-- 候选：PR #49，完整 HEAD `a671728a71d6330d60c8a39a6623c55c794a8bf3`；代码提交 `f78deace39fde732bcea7ec36f9a3f5eea79dfc1`，分支 `codex/task-009-guidance-diagnosis`，目标 `codex/stage-05-integration`。
+- 候选：PR #49，完整 HEAD `ab54e7663d0ae65205236463bcd92b3a868eec24`；代码提交 `f78deace39fde732bcea7ec36f9a3f5eea79dfc1`，生产接入提交 `ab54e7663d0ae65205236463bcd92b3a868eec24`，分支 `codex/task-009-guidance-diagnosis`，目标 `codex/stage-05-integration`。
 - 任务边界：操作指引两次定向检索/人工降级；维修前诊断报警码、证据门槛、采纳/直接开始及 8/24/4 上限；通过外部回调区分 PostgreSQL 历史案例和 RAGFlow 知识引用。
-- 自查证据：定向与 Runtime `13 passed, 2 warnings`；完整后端 `291 passed, 12 skipped, 2 warnings`；静态 Agent 检查、compileall、`git diff --check` 通过。
+- 自查证据：Agent API 与 Runtime `8 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；静态 Agent 检查、compileall、`git diff --check` 通过。
+- P1 修复：新增 `/api/agent/operation-guidance` 和 `/api/agent/fault-diagnosis`；历史案例通过 TASK-003 查询，知识引用通过 TASK-005 adapter，诊断达标创建既有 `DiagnosisDraft`，后续由 `/start-repair` 采纳。
 - 代码审查重点：请 DEV-001 绑定该精确 HEAD 检查生产执行边界、任务范围、权限/安全、失败降级、外部检索边界和测试证据。当前未请求 Merge 授权；任何 Critical/Important 在同一 Draft PR 修复后重新审核。
 - 未验证：Docker/PostgreSQL/RAGFlow/LLM 真实联调待 DEV-001 专用环境核验；在此之前不得批准、集成、解锁下游或进入 Stage 6。
