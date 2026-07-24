@@ -284,3 +284,9 @@
 - 门禁：当前仍不得请求 Merge 授权、合并、解锁下游或进入 Stage 6。
 - 证据校准：PR #43 当前待审 HEAD `ad50034ccb18422ac9a9c88325b9f0c4e9cb22dc`；专项 Agent 测试真实结果为 `18 passed, 2 warnings`，全量后端为 `246 passed, 10 skipped, 2 warnings`；`compileall`、JSON 解析和 `git diff --check` 通过。
 - 当前门禁：PR #43 仍 Open/Ready for review，等待 DEV-001 对最新精确 HEAD 复审；未集成、未请求 Merge 授权、未解锁下游、Stage 6 禁止。
+
+## FCP-008：TASK-008 合并后验证与治理收尾候选
+
+- 集成：PR #43 获批 HEAD `19eaf1f213c50471f93b4e09e17df57bbeb1987b` 经项目负责人授权后，由 DEV-001 手动 Merge Commit `84ac8815cab403cb71a86230b4f705944bb5f6d2` 合入 `codex/stage-05-integration`；双亲为 `78e9dfb...` 与获批 HEAD。
+- 合并后验证：Python 3.13 后端 `246 passed, 10 skipped, 2 warnings`；14 项 `06-testing/tests/*.test.js` 静态回归通过；compileall、`workflow/state.json` JSON 解析和 merge diff check 通过。
+- 状态：本治理 PR 待项目负责人确认当前精确 HEAD 后合并；在此之前 TASK-008 不解锁下游，Stage 6 禁止。

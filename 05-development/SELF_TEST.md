@@ -382,3 +382,10 @@
 - 绑定代码候选：PR #43，HEAD `ad50034ccb18422ac9a9c88325b9f0c4e9cb22dc`。
 - 真实验证：Agent 专项 `18 passed, 2 warnings`；全量后端 `246 passed, 10 skipped, 2 warnings`；`python3.13 -m compileall -q codebase/backend/app` 和 `git diff --check` 通过。
 - 治理校准：`state.json`、FCP、CODE_REVIEW、COMMIT_LOG 与交接记录统一绑定该候选及真实结果；PR #43 仍未集成、未申请 Merge 授权、未解锁下游、Stage 6 禁止。
+
+## TASK-008 合并后 DEV-001 集成验证（2026-07-24）
+
+- 合并：PR #43 获批 HEAD `19eaf1f213c50471f93b4e09e17df57bbeb1987b` 已由 DEV-001 合入，Merge Commit 为 `84ac8815cab403cb71a86230b4f705944bb5f6d2`。
+- 验证：Python 3.13 后端 `246 passed, 10 skipped, 2 warnings`；14 项原型静态回归通过；compileall、JSON 解析和 merge diff check 通过。
+- 未验证：本任务未修改容器、PostgreSQL schema、RAGFlow 或外部 LLM，故未重跑 Docker/RAGFlow 联调；该类验证仍由对应任务和 TASK-011 覆盖。
+- 当前门禁：本治理 PR 未合并前不解锁下游、不进入 Stage 6。
