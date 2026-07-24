@@ -3,7 +3,7 @@ from sqlalchemy import select
 from app.modules.agent_config.models import AgentConfigModel, ModelBinding, ModelProvider
 from app.modules.agent_runtime.models import AgentConfirmation, AgentRun, AgentThread
 from app.modules.audit.models import AuditEvent, IdempotencyRecord
-from app.modules.agent_runtime.tool_audit import record_tool_call
+from app.modules.agent_runtime.tool_audit import ALLOWED_TOOLS, record_tool_call
 from app.modules.agent_runtime.langgraph_runtime import normalize_checkpoint_url, run_checkpoint
 from tests.modules.support import create_user_token
 
@@ -173,6 +173,10 @@ def test_tool_audit_is_allowlisted_and_redacted(client) -> None:
         )
         db.commit()
         assert call.input_json == {"nested": {"token": "[REDACTED]"}}
+
+
+def test_guidance_and_diagnosis_tools_are_allowlisted() -> None:
+    assert {"get_operation_guidance", "run_fault_diagnosis"} <= ALLOWED_TOOLS
 
 
 def test_resume_reads_checkpoint_history_before_merging_input() -> None:
