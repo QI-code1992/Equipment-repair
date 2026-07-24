@@ -352,3 +352,13 @@
 - 合并关系：第一父 `ca2a07f5f9f19620568cc75f74c97a2d10ed98d3`，第二父为获批 HEAD；结果树与获批候选一致。
 - 证据：后端 `284 passed, 12 skipped, 2 warnings`；`pip check`、`compileall`、普通与 `validation` Compose 配置、JSON、merge-tree 与 `git diff --check` 通过；真实 PostgreSQL 17、MinIO、ClamAV、RAGFlow 和 Compose Worker 文档生命周期联调通过。
 - 结果：PR #47 已获项目负责人确认并由 DEV-002 以 Merge Commit `6763f1e7199765c08303aa567c3aed40210f7cf7` 合入；TASK-005 治理闭环完成，可按依赖矩阵解锁 TASK-009，Stage 6 仍禁止。
+
+## FCP-009-R1：TASK-009 操作指引与维修前诊断开发候选
+
+- 状态：Development Candidate / 等待 DEV-001 复审；未集成，不解锁下游任务，Stage 6 仍禁止。
+- 分支/基线：`codex/task-009-guidance-diagnosis`，基于 `origin/codex/stage-05-integration@e0333e2196fc1db9dba0056021625972576215e2`；代码提交 `f78deace39fde732bcea7ec36f9a3f5eea79dfc1`。
+- 范围：操作指引最多两次定向检索与人工降级；报警码具体数字/否定证据；维修前诊断的复现工况加第二类技术证据门槛；8 步、24 问、4 项证据上限；采纳预填摘要与直接开始清除临时摘要；历史案例与知识引用均通过外部受控回调边界提供。
+- 变更边界：新增两个 Agent 模块、对应测试和 Runtime 工具白名单；未新增生产依赖、数据库迁移、兼容层或通用抽象，未修改 TASK-005。
+- 验证：Python 3.13 专项与 Runtime `13 passed, 2 warnings`；完整后端 `291 passed, 12 skipped, 2 warnings`；`node 06-testing/tests/fault-report-repair-agent.test.js` 通过；`compileall`、`git diff --check` 通过。警告为既有第三方弃用提示。
+- 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；真实 RAGFlow 引用与运行态降级由 DEV-001 在复审/集成阶段核验。
+- 门禁：任务开发者将在同一 Draft PR 中维护该候选；不得自批、自合并、申请 Merge 授权、解锁 TASK-010/011 或进入 Stage 6。

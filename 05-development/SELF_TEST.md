@@ -467,3 +467,12 @@
 - 集成事实：获批 HEAD `cac10a06d2ef48914c14fb7ad955cedb36878acd` 已由 DEV-001 手动 Merge Commit `58fc0b12db1298333eef52c8720ec7d3d5e4846c` 合入 `codex/stage-05-integration`；第一父为 `ca2a07f5f9f19620568cc75f74c97a2d10ed98d3`，第二父为获批 HEAD，结果树一致。
 - 合并后核验：双亲、祖先关系、目标分支、JSON 解析和两侧 `git diff --check` 通过；候选树与合并结果相同，因此获批候选的后端 `284 passed, 12 skipped, 2 warnings`、`pip check`、`compileall`、Compose 及真实 PostgreSQL 17/MinIO/ClamAV/RAGFlow/Worker 证据继续适用。
 - 门禁：本候选仅同步治理事实；未修改 `codebase/`、测试、迁移、依赖、基础设施或部署。项目负责人确认本纯治理 PR 内容与精确 HEAD、完成集成授权并合入前，不解锁下游，不进入 Stage 6。
+
+## TASK-009 开发候选自测（2026-07-24）
+
+- 代码提交：`f78deace39fde732bcea7ec36f9a3f5eea79dfc1`，分支 `codex/task-009-guidance-diagnosis`。
+- 定向验证：Agent 与 Runtime 测试 `13 passed, 2 warnings`；完整后端 `291 passed, 12 skipped, 2 warnings`。
+- 其他验证：`node 06-testing/tests/fault-report-repair-agent.test.js` 通过；Python `compileall` 与 `git diff --check` 通过。
+- 覆盖：两次定向检索、人工降级、报警码否定证据、复现工况加第二类证据、8/24/4 上限、采纳/直接开始边界及工具白名单。
+- 未验证：当前环境无 Docker，未执行真实 PostgreSQL/RAGFlow/LLM 联调；由 DEV-001 在复审/集成阶段核验。未新增生产依赖、迁移、兼容层或通用抽象。
+- 门禁：候选未获 DEV-001 审核，不请求 Merge 授权、不合并、不解锁下游、不进入 Stage 6。

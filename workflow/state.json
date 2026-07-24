@@ -149,6 +149,23 @@
     "dependencyUnlockAllowed": true,
     "nextAction": "TASK-008 governance closeout is complete; downstream work may proceed only where all task-book prerequisites are satisfied. Stage 6 remains prohibited without its separate formal gate."
   },
+  "task009Delivery": {
+    "taskId": "TASK-009",
+    "status": "DEVELOPMENT_CANDIDATE_AWAITING_DEV001_REVIEW",
+    "owner": "DEV-002",
+    "reviewer": "DEV-001",
+    "branch": "codex/task-009-guidance-diagnosis",
+    "integrationTarget": "codex/stage-05-integration",
+    "baseCommit": "e0333e2196fc1db9dba0056021625972576215e2",
+    "candidateCommit": "f78deace39fde732bcea7ec36f9a3f5eea79dfc1",
+    "scope": "operation guidance and pre-repair fault diagnosis Agent boundaries, evidence gates, bounded retrieval, adoption/direct-start and manual fallback",
+    "verification": "Python 3.13 Agent/Runtime 13 passed / 2 warnings; full backend 291 passed / 12 skipped / 2 warnings; static Agent checks, compileall and git diff --check passed.",
+    "unverified": "DEV-002 has no Docker environment; real PostgreSQL/RAGFlow/LLM integration remains for DEV-001 review and integration validation.",
+    "productionDependencyChange": false,
+    "databaseMigrationChange": false,
+    "dependencyUnlockAllowed": false,
+    "nextAction": "Push the same task branch, create or update one Draft PR, and request DEV-001 review bound to the exact candidate commit. Do not request merge authorization, merge, unlock downstream tasks or enter Stage 6 before review and integration gates."
+  },
   "task005Delivery": {
     "taskId": "TASK-005",
     "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",

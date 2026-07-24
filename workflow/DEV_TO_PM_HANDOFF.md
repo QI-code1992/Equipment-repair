@@ -365,3 +365,12 @@
 - 集成：PR #37 获批 HEAD `cac10a06d2ef48914c14fb7ad955cedb36878acd` 已由 DEV-001 在项目负责人授权后手动 Merge Commit `58fc0b12db1298333eef52c8720ec7d3d5e4846c` 合入 `codex/stage-05-integration`；第一父为 `ca2a07f5f9f19620568cc75f74c97a2d10ed98d3`，第二父为获批 HEAD。
 - 验证：结果树与候选一致；双亲、祖先关系、JSON 和差异检查通过。后端 `284 passed, 12 skipped, 2 warnings`，`pip check`、`compileall`、普通与 validation Compose 配置通过；真实 PostgreSQL 17、MinIO、ClamAV、RAGFlow 和 Compose Worker 验证已完成。
 - 结果：项目负责人已确认 PR #47 精确 HEAD `09f9701ee2ed97358b37cfd60ae79f12358acdcb`；非作者 DEV-002 已执行 Merge Commit `6763f1e7199765c08303aa567c3aed40210f7cf7`。TASK-005 治理闭环完成，可按依赖矩阵解锁 TASK-009；Stage 6 仍须独立批准。
+
+## TASK-009 开发启动与复审交接（2026-07-24）
+
+- 开发者/审核者：DEV-002 / DEV-001；分支 `codex/task-009-guidance-diagnosis`，目标 `codex/stage-05-integration`。
+- 基线与候选：基于 `e0333e2196fc1db9dba0056021625972576215e2`，代码提交 `f78deace39fde732bcea7ec36f9a3f5eea79dfc1`；同一 Draft PR 待推送后核对编号。
+- 范围：操作指引两次定向检索/人工降级；报警码具体追问和否定证据；维修前诊断证据门槛；采纳/直接开始；8/24/4 上限；历史案例和知识引用通过受控外部边界。
+- 证据：专项与 Runtime `13 passed, 2 warnings`；完整后端 `291 passed, 12 skipped, 2 warnings`；静态 Agent 检查、compileall、`git diff --check` 通过。
+- 未验证：DEV-002 无 Docker 环境，真实 PostgreSQL/RAGFlow/LLM 联调待 DEV-001 执行；未新增生产依赖、迁移、兼容层或通用抽象。
+- 下一动作：推送同一任务分支并创建唯一 Draft PR，向 DEV-001 请求绑定完整精确 HEAD 的正式复审。复审前不得请求 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
