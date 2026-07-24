@@ -320,3 +320,10 @@
 - 修复：提交端点捕获冲突异常；同 Key 同体重放原响应，同 Key 不同体返回 `409 IDEMPOTENCY_KEY_REUSED`，故障记录和成功审计无重复。
 - 验证：Agent 专项 `15 passed, 2 warnings`；后端全量 `245 passed, 10 skipped, 2 warnings`；compileall、diff-check 通过。
 - 下一动作：推送本次修复后的新精确 HEAD，并在同一 PR #43 请求 DEV-001 复审；仍不申请 Merge 授权、不合并、不解锁下游、不进入 Stage 6。
+
+## TASK-008 不完整草稿 P1 修复交接（2026-07-24）
+
+- DEV-001 新反馈：PR #43 HEAD `4d84ec75b57e603b9a8bfc0542ef3d1e5074f0b2` 的不完整已确认草稿返回未处理异常。
+- 修复：缺失 `occurred_at`/`duration_minutes` 时返回 `422 FAULT_DRAFT_INCOMPLETE` 和字段映射；失败不写业务故障、成功审计或成功幂等响应。
+- 验证：专项 `16 passed, 2 warnings`；全量后端 `246 passed, 10 skipped, 2 warnings`；compileall、diff-check 通过。
+- 下一动作：推送新精确 HEAD 并请求 DEV-001 复审；继续禁止 Merge 授权、合并、下游解锁和 Stage 6。

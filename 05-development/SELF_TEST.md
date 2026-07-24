@@ -369,3 +369,10 @@
 - 回归：同请求重放返回相同响应；故障记录数与 `agent.fault_report.submit` 成功审计数均不重复增加。
 - 验证：Agent 专项 `15 passed, 2 warnings`；全量后端 `245 passed, 10 skipped, 2 warnings`；compileall、`git diff --check` 通过。
 - 当前结论：P1 修复候选待 DEV-001 绑定新精确 HEAD 复审，未申请 Merge 授权。
+
+## TASK-008 不完整草稿 P1 修复自测（2026-07-24）
+
+- 修复：`MissingFaultFieldsError` 映射为 `422 FAULT_DRAFT_INCOMPLETE`，返回 `occurred_at`、`duration_minutes` 等缺失字段。
+- 回归：不完整确认草稿不创建故障、不创建成功审计、不保存成功幂等响应；同 Key 补齐字段后可正常创建。
+- 验证：专项 `16 passed, 2 warnings`；全量后端 `246 passed, 10 skipped, 2 warnings`；compileall、`git diff --check` 通过。
+- 当前结论：等待 DEV-001 对新精确 HEAD 复审，未申请 Merge 授权。

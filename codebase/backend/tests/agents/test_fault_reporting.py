@@ -134,3 +134,38 @@ def test_fault_submission_replays_and_rejects_idempotency_conflict_without_dupli
                 AuditEvent.action == "agent.fault_report.submit"
             )
         ) == audits_before
+
+
+def test_incomplete_confirmed_draft_returns_422_without_writes_or_success_idempotency(client) -> None:
+    equipment_id = create_equipment(client)
+    _, token = fault_reporter(client)
+    headers = auth_headers(token, key="agent-fault-incomplete")
+    incomplete = {
+        "draft": valid_draft(
+            equipment_id=equipment_id,
+            occurred_at=None,
+            duration_minutes=None,
+        ).model_dump(mode="json"),
+        "confirmed": True,
+    }
+    failed = client.post("/api/agent/fault-reports/submit", headers=headers, json=incomplete)
+
+    assert failed.status_code == 422
+    detail = failed.json()["detail"]
+    assert detail["code"] == "FAULT_DRAFT_INCOMPLETE"
+    assert detail["fields"] == {"occurred_at": "required", "duration_minutes": "required"}
+    assert detail["audit_event_id"]
+    with client.app.state.session_factory() as db:
+        assert db.scalar(select(func.count()).select_from(FaultReport)) == 0
+        assert db.scalar(
+            select(func.count()).select_from(AuditEvent).where(
+                AuditEvent.action == "agent.fault_report.submit"
+            )
+        ) == 0
+
+    corrected = {
+        "draft": valid_draft(equipment_id=equipment_id).model_dump(mode="json"),
+        "confirmed": True,
+    }
+    succeeded = client.post("/api/agent/fault-reports/submit", headers=headers, json=corrected)
+    assert succeeded.status_code == 201

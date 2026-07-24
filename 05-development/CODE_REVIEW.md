@@ -270,3 +270,9 @@
 - 阻断修复：`POST /api/agent/fault-reports/submit` 现在映射 `IdempotencyKeyReused` 为 `409 IDEMPOTENCY_KEY_REUSED`。
 - 证据：同请求重放、冲突请求、无重复故障记录和无重复成功审计回归均通过；Agent 专项 `15 passed, 2 warnings`，全量 `245 passed, 10 skipped, 2 warnings`。
 - 当前门禁：同一 PR 等待 DEV-001 对本次新精确 HEAD 复审，未请求 Merge 授权。
+
+## TASK-008 不完整草稿 P1 修复复查请求（2026-07-24）
+
+- 阻断修复：确认提交捕获 `MissingFaultFieldsError`，稳定返回 `422 FAULT_DRAFT_INCOMPLETE` 与字段映射。
+- 证据：不完整请求不产生故障记录、成功审计或成功幂等响应；补齐同 Key 请求可成功；专项 `16 passed, 2 warnings`，全量 `246 passed, 10 skipped, 2 warnings`。
+- 当前门禁：等待 DEV-001 绑定新完整 HEAD 复审，未请求 Merge 授权。

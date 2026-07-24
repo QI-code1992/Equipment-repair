@@ -25,7 +25,12 @@ from app.modules.maintenance.router import fault_report_body
 from app.modules.maintenance.schemas import FaultReportCreate
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
-from app.modules.agents.fault_reporting import FaultDraft, FaultReportingAgent, SubmissionNotConfirmedError
+from app.modules.agents.fault_reporting import (
+    FaultDraft,
+    FaultReportingAgent,
+    MissingFaultFieldsError,
+    SubmissionNotConfirmedError,
+)
 
 
 router = APIRouter(tags=["agents"])
@@ -115,7 +120,16 @@ def submit_fault_report(
 
     agent = FaultReportingAgent(submitter)
     try:
-        result = agent.submit(agent.preview(payload.draft), confirmed=payload.confirmed)
+        preview = agent.preview(payload.draft)
+        result = agent.submit(preview, confirmed=payload.confirmed)
+    except MissingFaultFieldsError as error:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code": "FAULT_DRAFT_INCOMPLETE",
+                "fields": {field: "required" for field in error.fields},
+            },
+        ) from None
     except SubmissionNotConfirmedError as error:
         raise HTTPException(status_code=409, detail={"code": "CONFIRMATION_REQUIRED"}) from error
     item = created[0]
