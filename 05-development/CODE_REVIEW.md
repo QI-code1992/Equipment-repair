@@ -339,3 +339,10 @@
 - 回归证据：应用工厂回归证明 adapter 自动装配；操作指引与故障诊断 API 回归使用真实应用工厂、真实 transport 和本地 HTTP RAGFlow stub，证明不依赖 `app.state` 手动注入或知识服务 monkeypatch。
 - 验证：相关 `16 passed, 2 warnings`；Agent/Runtime/Maintenance 聚焦 `51 passed, 2 warnings`；完整后端 `296 passed, 12 skipped, 2 warnings`；14 项原型静态回归、compileall、JSON 解析和 `git diff --check` 通过。live-stack RAGFlow 用例因缺少专用环境为 `1 skipped`。
 - 当前结论：本地自查 Critical 0、Important 0；等待 DEV-001 对推送后的新完整 HEAD 复审和真实 RAGFlow 联调。未请求 Merge 授权、未合并、未解锁 TASK-010/011，Stage 6 仍禁止。
+
+## TASK-009 第六轮 P1 Compose 配置修复自查（2026-07-24）
+
+- 审核反馈映射：PR #49 的 `a173233d39d752fe5f025d1423d2038c54b685ba` 在 Compose 环境下未将 RAGFlow 配置传入 `api`，使应用工厂 adapter 装配分支不可达。
+- 修复边界：仅修改 API Compose 环境传递、安全环境模板和既有 Compose 契约测试；未改业务 API、数据库迁移、生产依赖、认证授权或 RAGFlow 服务部署。
+- 回归：测试先在缺失 `api` 变量和缺失模板超时时失败；修复后相关 `18 passed, 2 warnings`、完整后端 `296 passed, 12 skipped, 2 warnings`、14 项原型静态检查、编译和差异检查通过。
+- 残余风险：本机无 Docker，不能证明运行容器中的 `app.state.knowledge_adapter`、`/healthz` 或对真实 RAGFlow 的检索；DEV-001 必须在具备环境时独立验证。当前仍为 `Changes requested` 后的开发候选，未申请 Merge 授权。

@@ -519,3 +519,14 @@
 - 完整后端：在 `codebase/backend` 下执行 `/private/tmp/equipment-task006-python/bin/python -m pytest -q` 为 `296 passed, 12 skipped, 2 warnings`。
 - 静态/编译：14 项 `06-testing/tests/*.test.js` 全部通过；`/private/tmp/equipment-task006-python/bin/python -m compileall -q codebase/backend/app`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
 - 未验证：`/private/tmp/equipment-task006-python/bin/python -m pytest codebase/backend/tests/integration/test_task005_live_stack.py -q` 因缺少专用 live-stack 环境为 `1 skipped, 2 warnings`；DEV-002 当前仍无稳定真实 RAGFlow 联调环境。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第六轮 P1 Compose 配置修复自测（2026-07-24）
+
+- 审核输入：DEV-001 对 PR #49 精确 HEAD `a173233d39d752fe5f025d1423d2038c54b685ba` 提交 `Changes requested`；`api` 服务遗漏三项 RAGFlow 环境变量，实际 Compose 容器无法装配 `RagflowAdapter`。
+- 红灯验证：将三项断言限定在 Compose `api` 服务块后，修复前 `RAGFLOW_BASE_URL` 断言失败；移除 `.env.example` 的超时值后，模板值断言也按预期失败。
+- 修复提交：`0599bb6de23ddab736b6d2f44a795c8303bee655`。
+- 修复结果：`api` 传递 `RAGFLOW_BASE_URL`、`RAGFLOW_API_KEY`、`RAGFLOW_TIMEOUT_SECONDS`；`.env.example` 提供 `RAGFLOW_TIMEOUT_SECONDS=30`，与 `Settings` 和 `create_app()` 的现有生产装配契约一致。
+- 定向验证：`/private/tmp/equipment-task006-python/bin/python -m pytest codebase/backend/tests/integration/test_task005_validation_infra_contract.py codebase/backend/tests/test_health.py codebase/backend/tests/agents/test_operation_guidance.py codebase/backend/tests/agents/test_fault_diagnosis.py -q` 为 `18 passed, 2 warnings`。
+- 完整后端：在 `codebase/backend` 下执行 `/private/tmp/equipment-task006-python/bin/python -m pytest -q` 为 `296 passed, 12 skipped, 2 warnings`。
+- 静态/编译：14 项 `06-testing/tests/*.test.js` 全部通过；`python3.13 -m compileall -q codebase/backend/app` 与 `git diff --check` 通过。
+- 未验证：DEV-002 当前环境无 Docker 命令，未运行 `docker compose config`、容器内 adapter 断言、`/healthz` 或真实 RAGFlow 检索；`test_task005_live_stack.py` 仍因无专用环境为 `1 skipped, 2 warnings`。这些是 DEV-001 复审/集成门禁，不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。

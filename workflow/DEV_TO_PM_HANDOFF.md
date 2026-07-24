@@ -409,3 +409,12 @@
 - 回归证据：新增应用工厂 adapter 装配测试；新增操作指引和故障诊断 API 回归，均使用真实应用工厂、真实 `UrllibRagflowTransport` 和本地 HTTP RAGFlow stub，不再手动写入 `app.state.knowledge_adapter` 或 monkeypatch 知识服务。
 - 验证：相关 `16 passed, 2 warnings`；聚焦 `51 passed, 2 warnings`；完整后端 `296 passed, 12 skipped, 2 warnings`；14 项原型静态回归、compileall、JSON 解析和 `git diff --check` 通过。真实 live-stack RAGFlow 用例因缺少专用环境为 `1 skipped`。
 - 请求动作：推送本证据提交后，以 PR #49 新完整精确 HEAD 请求 DEV-001 复审；真实 RAGFlow 联调仍需 DEV-001 在具备环境时执行。当前不申请 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第六轮 P1 Compose 配置修复交接（2026-07-24）
+
+- 审核基准：PR #49 / HEAD `a173233d39d752fe5f025d1423d2038c54b685ba`，结论 `Changes requested`；阻断为 Compose `api` 服务未传入 RAGFlow 配置，容器内 `app.state.knowledge_adapter` 为 `None`。
+- 修复提交：`0599bb6de23ddab736b6d2f44a795c8303bee655`。
+- 修复内容：`api` 环境现在传递 `RAGFLOW_BASE_URL`、`RAGFLOW_API_KEY` 与 `RAGFLOW_TIMEOUT_SECONDS`；安全模板显式设置超时 `30`。该配置与已合入本 PR 的 `create_app()` adapter 装配逻辑配对，不改变 RAGFlow 服务、业务 API 或权限契约。
+- 回归证据：新增 API 服务块/模板超时契约，修复前分别观察到缺失变量和缺失模板值的红灯；修复后相关 `18 passed, 2 warnings`，完整后端 `296 passed, 12 skipped, 2 warnings`，14 项原型静态检查、编译和差异检查通过。
+- 未验证：DEV-002 无 Docker 命令与专用 live-stack 配置，未执行 Compose 容器内 `RagflowAdapter` 断言、`/healthz` 或真实 TASK-009 RAGFlow 检索。请 DEV-001 对推送后的精确 HEAD 运行这些复验；`test_task005_live_stack.py` 在此环境为 `1 skipped, 2 warnings`。
+- 门禁：当前不得申请 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。

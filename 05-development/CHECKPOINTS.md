@@ -383,6 +383,16 @@
 - 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；真实 RAGFlow 引用与运行态降级由 DEV-001 在复审/集成阶段核验。
 - 门禁：PR #49 新 HEAD 会使旧审核结论失效；等待 DEV-001 重新审核，不得请求 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
 
+## FCP-009-R6：TASK-009 Compose RAGFlow 配置传递修复候选
+
+- 状态：Development Candidate / 第六轮 P1 修复 / PR #49 等待 DEV-001 对推送后的精确 HEAD 复审；未集成、不解锁下游，Stage 6 仍禁止。
+- 修复提交：`0599bb6de23ddab736b6d2f44a795c8303bee655`。
+- 修复范围：`api` Compose 服务显式传递 `RAGFLOW_BASE_URL`、`RAGFLOW_API_KEY`、`RAGFLOW_TIMEOUT_SECONDS`；安全 `.env.example` 为超时提供 `30`。这使已存在的应用工厂装配逻辑可在 Compose 容器内创建 `RagflowAdapter`。
+- 回归覆盖：Compose 静态契约将三个变量限定断言在 `api` 服务块，并验证模板超时值；避免仅 `worker`/`validator` 配置变量而 API 长期降级。
+- 验证：先观察新增契约断言在修复前失败，再转绿；相关 `18 passed, 2 warnings`，完整后端 `296 passed, 12 skipped, 2 warnings`，14 项原型静态检查、`compileall` 和 `git diff --check` 通过。
+- 未验证：DEV-002 环境无 Docker 命令且无专用 live-stack 变量，未执行 Compose 容器内 adapter 断言、`/healthz` 或真实 RAGFlow 检索；这些由 DEV-001 复审/集成环境执行。
+- 门禁：旧 `a173233d39d752fe5f025d1423d2038c54b685ba` 的审核结论已失效；不得申请 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
+
 ## FCP-009-R4：TASK-009 CR-043 正式基线收敛候选
 
 - 状态：Development Candidate / 第四轮基线冲突修复 / 等待 DEV-001 绑定新精确 HEAD 复审；未集成，不解锁下游任务，Stage 6 仍禁止。
