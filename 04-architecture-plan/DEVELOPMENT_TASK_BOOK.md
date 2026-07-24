@@ -348,7 +348,7 @@
 
 ### TASK-008：AI 故障上报、智能问数与健康分读取
 
-- 状态：Post-merge governance closeout pending / PR #43 已按授权合入，等待本治理 PR 获项目负责人确认；在闭环前不解锁下游
+- 状态：CLOSED_POST_MERGE_GOVERNANCE_COMPLETED / PR #43 代码已集成，PR #44 治理收尾已确认并合入；下游可按依赖矩阵继续，Stage 6 仍须单独批准
 - 优先级：P0
 - 负责人：`DEV-002`
 - 任务开发者：`DEV-002`
@@ -364,8 +364,8 @@
 - 共享契约：正式写入经 TASK-002/003 的业务 API；指标和健康分只来自受控服务，不由模型生成。
 - 实施步骤：写缺失字段/指标限制/服务失败测试；实现两个状态机；接入批量指标和健康分读取；验证人工确认门禁。
 - 验收标准：不完整草稿不能提交；一次查询最多五项；非法指标/维度被拒；服务失败不生成数值。
-- 集成记录：PR #43 获批 HEAD `19eaf1f213c50471f93b4e09e17df57bbeb1987b` 已由 DEV-001 手动 Merge Commit `84ac8815cab403cb71a86230b4f705944bb5f6d2` 合入 `codex/stage-05-integration`；合并后 Python 3.13 后端 `246 passed, 10 skipped, 2 warnings`、14 项原型静态回归、compileall、JSON 解析和 merge diff check 通过。待本治理 PR 合并后方可按依赖矩阵解锁下游；Stage 6 仍须单独批准。
-- 当前验证证据：Agent 专项 `18 passed, 2 warnings`；后端全量 `246 passed, 10 skipped, 2 warnings`；`compileall` 与 `git diff --check` 通过。代码 P1 已修复，等待 DEV-001 对最新精确 HEAD 复审。
+- 集成记录：PR #43 获批 HEAD `19eaf1f213c50471f93b4e09e17df57bbeb1987b` 已由 DEV-001 手动 Merge Commit `84ac8815cab403cb71a86230b4f705944bb5f6d2` 合入 `codex/stage-05-integration`；合并后 Python 3.13 后端 `246 passed, 10 skipped, 2 warnings`、14 项原型静态回归、compileall、JSON 解析和 merge diff check 通过。PR #44 精确 HEAD `1f1ab4202a3cfac66ec94f37d797180ed848b8ed` 经项目负责人确认后由 DEV-002 以 Merge Commit `9bbeab88c02c5cb1e831057fe0e14ca2b3c6f683` 合入；治理闭环完成，下游可按依赖矩阵继续，Stage 6 仍须单独批准。
+- 当前验证证据：Agent 专项 `18 passed, 2 warnings`；后端全量 `246 passed, 10 skipped, 2 warnings`；`compileall` 与 `git diff --check` 通过。代码与治理收尾均已完成。
 - 验证：`python -m pytest codebase/backend/tests/agents/test_fault_reporting.py codebase/backend/tests/agents/test_metric_query.py codebase/backend/tests/modules/test_health_score.py -q`；指标 API 契约测试；全部 `06-testing/tests/*.test.js`。
 - 分支：`codex/task-008-fault-metric-agents`
 - PR 审核请求：`DEV-002` 完成本任务验收、验证和证据更新后，推送精确候选 SHA，并按第 4 节要求向 `DEV-001` 发送书面审核请求。
