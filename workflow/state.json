@@ -157,16 +157,16 @@
     "branch": "codex/task-009-guidance-diagnosis",
     "integrationTarget": "codex/stage-05-integration",
     "baseCommit": "e0333e2196fc1db9dba0056021625972576215e2",
-    "candidateCommit": "e0c058e182d7c29881c3de75403b2ef0eb648de7",
+    "candidateCommit": "655d4a2309251fd0bd0ae874787e63b73f35effd",
     "pullRequest": 49,
     "candidateHead": "1380541d599e30f032acf2a5af0c4dfbbb5edbad",
     "scope": "operation guidance and pre-repair fault diagnosis Agent boundaries, evidence gates, bounded retrieval, adoption/direct-start and manual fallback",
-    "verification": "Python 3.13 fault diagnosis focused 5 passed / 2 warnings; Agent/Runtime/Maintenance focused regression 49 passed / 2 warnings; full backend 293 passed / 12 skipped / 2 warnings; all 14 prototype static checks passed; compileall, workflow JSON parsing and git diff --check passed.",
-    "unverified": "DEV-002 has no Docker environment; real PostgreSQL/RAGFlow/LLM integration remains for DEV-001 review and integration validation.",
+    "verification": "Python 3.13 app factory / operation guidance / fault diagnosis focused 16 passed / 2 warnings; Agent/Runtime/Maintenance focused regression 51 passed / 2 warnings; full backend 296 passed / 12 skipped / 2 warnings; all 14 prototype static checks passed; compileall, workflow JSON parsing and git diff --check passed.",
+    "unverified": "DEV-002 has no dedicated live-stack RAGFlow/PostgreSQL/MinIO/ClamAV environment; test_task005_live_stack.py skipped because TASK005_ALLOW_LIVE_TESTS and dedicated settings are absent. Real TASK-009 operation guidance / fault diagnosis RAGFlow retrieval remains for DEV-001 review and integration validation.",
     "productionDependencyChange": false,
     "databaseMigrationChange": false,
     "dependencyUnlockAllowed": false,
-    "nextAction": "CR-043 baseline convergence updates PRD, SPEC, AC-037, API contract, traceability matrix and workflow ledgers to confirm TASK-009 does not implement EquipmentGrant or equipment row-level authorization. Push the same PR #49 branch and request DEV-001 re-review under the current approved authorization baseline. Do not request merge authorization, merge, unlock downstream tasks or enter Stage 6 before review and integration gates."
+    "nextAction": "TASK-009 P1 production RagflowAdapter wiring is fixed in the same PR #49 branch. Push the evidence head and request DEV-001 re-review, including real RAGFlow retrieval validation in an environment with RAGFLOW_BASE_URL/RAGFLOW_API_KEY. Do not request merge authorization, merge, unlock downstream tasks or enter Stage 6 before review and integration gates."
   },
   "task005Delivery": {
     "taskId": "TASK-005",

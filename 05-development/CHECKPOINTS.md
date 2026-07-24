@@ -391,3 +391,13 @@
 - 变更边界：未修改 `codebase/`、测试、数据库迁移、生产依赖、部署或运行时配置；不新增兼容层或抽象层。
 - 验证：`workflow/state.json` JSON 解析、`git diff --check` 和授权冲突词扫描通过；因无代码变更，未重跑后端测试，沿用上一代码 HEAD 的 DEV-001 独立验证证据。
 - 门禁：PR #49 新 HEAD 会使旧审核结论失效；等待 DEV-001 重新审核，不得请求 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
+
+## FCP-009-R5：TASK-009 生产 RAGFlow Adapter 装配修复候选
+
+- 状态：Development Candidate / 第五轮 P1 已修复 / 等待 DEV-001 绑定新精确 HEAD 复审；未集成，不解锁下游任务，Stage 6 仍禁止。
+- 分支/PR：`codex/task-009-guidance-diagnosis` / PR #49；代码修复提交 `655d4a2309251fd0bd0ae874787e63b73f35effd`，最终候选 HEAD 以本证据提交推送后的 PR #49 完整 HEAD 为准。
+- 修复范围：`create_app()` 根据生产环境 `RAGFLOW_BASE_URL`、`RAGFLOW_API_KEY` 和 `RAGFLOW_TIMEOUT_SECONDS` 自动装配 `RagflowAdapter + UrllibRagflowTransport` 到 `app.state.knowledge_adapter`；显式传入 `knowledge_adapter` 的测试/集成路径仍可覆盖。
+- 回归覆盖：新增应用工厂回归验证 adapter 来自环境；新增操作指引与故障诊断 API 回归，使用真实应用工厂、真实 `UrllibRagflowTransport` 和本地 HTTP RAGFlow stub，不再手动注入 `app.state.knowledge_adapter` 或 monkeypatch 知识服务。
+- 验证：新增相关文件 `16 passed, 2 warnings`；Agent/Runtime/Maintenance 聚焦回归 `51 passed, 2 warnings`；完整后端 `296 passed, 12 skipped, 2 warnings`；14 项原型静态回归、`compileall`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
+- 未验证：当前 DEV-002 环境缺少 `TASK005_ALLOW_LIVE_TESTS=1` 和专用 RAGFlow/PostgreSQL/MinIO/ClamAV 环境变量，真实 RAGFlow 联调用例 `test_task005_live_stack.py` 为 `1 skipped`；需 DEV-001 在具备环境时执行 TASK-009 操作指引/故障诊断真实 RAGFlow 检索联调。
+- 门禁：PR #49 新 HEAD 会使旧审核结论失效；等待 DEV-001 重新审核，不得请求 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。

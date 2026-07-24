@@ -330,3 +330,12 @@
 - Standards/Spec 自查：AC-037 现在验证授权详情保护，而不是设备对象级授权；API 契约要求故障诊断按服务端故障单、设备事实、Agent 配置和诊断草稿创建者隔离执行，且不把客户端上下文当作诊断事实源。
 - 验证：`workflow/state.json` JSON 解析、`git diff --check` 与授权冲突词扫描通过；本次未修改 `codebase/`，未重跑后端测试。
 - 当前结论：本地自查 Critical 0、Important 0；等待 DEV-001 对推送后的新完整 HEAD 复审。未请求 Merge 授权、未合并、未解锁 TASK-010/011，Stage 6 仍禁止。
+
+## TASK-009 DEV-001 第五轮 P1 修复复查请求（2026-07-24）
+
+- 原审核：PR #49 / HEAD `ef6bda4ff28147280868b4088ede72e39bebedb3`，P1 为生产应用工厂未装配 RAGFlow adapter，导致 TASK-009 API 真实部署中始终降级为知识服务不可用。
+- 修复提交：`655d4a2309251fd0bd0ae874787e63b73f35effd`。
+- Standards/Spec 自查：生产 `create_app()` 现在从 `RAGFLOW_BASE_URL`、`RAGFLOW_API_KEY` 和 `RAGFLOW_TIMEOUT_SECONDS` 构建 `RagflowAdapter + UrllibRagflowTransport`；操作指引与故障诊断共用 `app.state.knowledge_adapter`，继续保持 TASK-005 知识检索边界、TASK-003 历史案例边界和既有手动降级语义。
+- 回归证据：应用工厂回归证明 adapter 自动装配；操作指引与故障诊断 API 回归使用真实应用工厂、真实 transport 和本地 HTTP RAGFlow stub，证明不依赖 `app.state` 手动注入或知识服务 monkeypatch。
+- 验证：相关 `16 passed, 2 warnings`；Agent/Runtime/Maintenance 聚焦 `51 passed, 2 warnings`；完整后端 `296 passed, 12 skipped, 2 warnings`；14 项原型静态回归、compileall、JSON 解析和 `git diff --check` 通过。live-stack RAGFlow 用例因缺少专用环境为 `1 skipped`。
+- 当前结论：本地自查 Critical 0、Important 0；等待 DEV-001 对推送后的新完整 HEAD 复审和真实 RAGFlow 联调。未请求 Merge 授权、未合并、未解锁 TASK-010/011，Stage 6 仍禁止。

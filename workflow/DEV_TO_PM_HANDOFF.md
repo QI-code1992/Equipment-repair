@@ -400,3 +400,12 @@
 - 变更边界：未修改 `codebase/`、测试、数据库迁移、依赖、部署或运行时配置；不新增兼容层或通用抽象。
 - 验证：`workflow/state.json` JSON 解析、`git diff --check` 和授权冲突词扫描通过；因本次仅治理/基线文档变更，未重跑后端测试。
 - 请求动作：推送本证据提交后，以 PR #49 新完整精确 HEAD 请求 DEV-001 复审。当前不申请 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第五轮 P1 修复交接（2026-07-24）
+
+- 审核基准：PR #49 / HEAD `ef6bda4ff28147280868b4088ede72e39bebedb3`，结论 `Changes requested`；阻断为生产应用工厂未装配 `RagflowAdapter`，导致真实部署中的操作指引/故障诊断知识检索始终不可用。
+- 修复提交：`655d4a2309251fd0bd0ae874787e63b73f35effd`。
+- 修复内容：`Settings` 增加 RAGFlow 连接配置；`create_app()` 根据 `RAGFLOW_BASE_URL`、`RAGFLOW_API_KEY` 和 `RAGFLOW_TIMEOUT_SECONDS` 自动创建 `RagflowAdapter + UrllibRagflowTransport` 并写入 `app.state.knowledge_adapter`。显式传入 adapter 的测试/集成路径保持可用。
+- 回归证据：新增应用工厂 adapter 装配测试；新增操作指引和故障诊断 API 回归，均使用真实应用工厂、真实 `UrllibRagflowTransport` 和本地 HTTP RAGFlow stub，不再手动写入 `app.state.knowledge_adapter` 或 monkeypatch 知识服务。
+- 验证：相关 `16 passed, 2 warnings`；聚焦 `51 passed, 2 warnings`；完整后端 `296 passed, 12 skipped, 2 warnings`；14 项原型静态回归、compileall、JSON 解析和 `git diff --check` 通过。真实 live-stack RAGFlow 用例因缺少专用环境为 `1 skipped`。
+- 请求动作：推送本证据提交后，以 PR #49 新完整精确 HEAD 请求 DEV-001 复审；真实 RAGFlow 联调仍需 DEV-001 在具备环境时执行。当前不申请 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。

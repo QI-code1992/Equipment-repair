@@ -507,3 +507,15 @@
 - 治理验证：`/private/tmp/equipment-task006-python/bin/python -m json.tool workflow/state.json` 通过；`git diff --check` 通过；授权冲突词扫描无剩余的设备授予/授权设备作为当前生效边界表述。
 - 代码验证：本次未修改 `codebase/`，未重跑后端测试；上一代码 HEAD 的 DEV-001 独立验证为后端全量 `293 passed, 12 skipped, 2 warnings`，Compose 配置解析、Python 3.13 编译和 14 项静态检查通过。
 - 未验证：DEV-002 当前无 Docker 环境，真实 Docker/PostgreSQL/RAGFlow/LLM 联调仍由 DEV-001 在复审/集成阶段核验。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第五轮 P1 修复自测（2026-07-24）
+
+- 审核输入：DEV-001 对 PR #49 精确 HEAD `ef6bda4ff28147280868b4088ede72e39bebedb3` 提交 `Changes requested`；P1 为生产应用工厂未根据 `RAGFLOW_BASE_URL` / `RAGFLOW_API_KEY` 装配 `RagflowAdapter` 到 `app.state.knowledge_adapter`，导致操作指引和故障诊断在真实部署中始终降级。
+- 红灯验证：新增应用工厂和操作指引 API 回归后，修复前 `test_app_factory_builds_ragflow_adapter_from_environment` 断言 adapter 为 `None` 失败，`test_operation_guidance_api_uses_app_factory_ragflow_adapter` 返回 `UNAVAILABLE` 失败。
+- 修复提交：`655d4a2309251fd0bd0ae874787e63b73f35effd`。
+- 修复结果：`Settings` 读取 `RAGFLOW_BASE_URL`、`RAGFLOW_API_KEY`、`RAGFLOW_TIMEOUT_SECONDS`；`create_app()` 在未显式注入 adapter 且配置齐全时创建 `RagflowAdapter + UrllibRagflowTransport`。新增操作指引和故障诊断 API 回归均通过真实应用工厂与本地 HTTP RAGFlow stub 检索链路。
+- 定向验证：`/private/tmp/equipment-task006-python/bin/python -m pytest codebase/backend/tests/test_health.py codebase/backend/tests/agents/test_operation_guidance.py codebase/backend/tests/agents/test_fault_diagnosis.py -q` 为 `16 passed, 2 warnings`。
+- 相关回归：`/private/tmp/equipment-task006-python/bin/python -m pytest codebase/backend/tests/agents codebase/backend/tests/modules/test_agent_runtime.py codebase/backend/tests/modules/test_maintenance_lifecycle.py -q` 为 `51 passed, 2 warnings`。
+- 完整后端：在 `codebase/backend` 下执行 `/private/tmp/equipment-task006-python/bin/python -m pytest -q` 为 `296 passed, 12 skipped, 2 warnings`。
+- 静态/编译：14 项 `06-testing/tests/*.test.js` 全部通过；`/private/tmp/equipment-task006-python/bin/python -m compileall -q codebase/backend/app`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
+- 未验证：`/private/tmp/equipment-task006-python/bin/python -m pytest codebase/backend/tests/integration/test_task005_live_stack.py -q` 因缺少专用 live-stack 环境为 `1 skipped, 2 warnings`；DEV-002 当前仍无稳定真实 RAGFlow 联调环境。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
