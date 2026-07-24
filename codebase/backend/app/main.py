@@ -23,6 +23,7 @@ def create_app(
     service_name: str | None = "equipment-operations-platform",
     knowledge_storage: object | None = None,
     knowledge_scanner: object | None = None,
+    knowledge_adapter: object | None = None,
 ) -> FastAPI:
     environment = Settings.from_environment()
     settings = Settings(
@@ -62,6 +63,7 @@ def create_app(
         )
     app.state.knowledge_storage = knowledge_storage
     app.state.knowledge_scanner = knowledge_scanner
+    app.state.knowledge_adapter = knowledge_adapter
     if settings.postgres_dsn:
         app.state.engine = create_database_engine(settings.postgres_dsn)
         app.state.session_factory = session_factory(app.state.engine)

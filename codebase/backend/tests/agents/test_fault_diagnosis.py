@@ -3,6 +3,9 @@ from app.modules.agents.fault_diagnosis import (
     DiagnosisState,
     FaultDiagnosisAgent,
 )
+from app.integrations.ragflow.adapter import RetrievalResult
+from tests.modules.maintenance_support import auth_headers, create_equipment, create_fault
+from tests.modules.support import create_user_token
 
 
 def test_diagnosis_requires_concrete_alarm_code_or_negative_evidence():
@@ -73,3 +76,49 @@ def test_diagnosis_caps_evidence_at_four_items_and_steps_at_eight():
         session = agent.add_evidence(session, "reproduction", f"detail-{index}")
     assert len(session.evidence) == 4
     assert session.steps <= 8
+
+
+def test_fault_diagnosis_api_creates_existing_business_diagnosis_draft(client, monkeypatch):
+    client.app.state.knowledge_adapter = object()
+    equipment_id = create_equipment(client)
+    fault_id = create_fault(client, equipment_id)
+    _, token = create_user_token(
+        client,
+        username="diagnosis-api-user",
+        role_code="REPAIR_WORKER",
+        permission_codes=["intelligence:agent"],
+    )
+    monkeypatch.setattr(
+        "app.modules.agents.router.knowledge_service.retrieve_knowledge",
+        lambda *args, **kwargs: RetrievalResult(),
+    )
+    headers = {"Authorization": f"Bearer {token}"}
+    start = client.post(
+        "/api/agent/fault-diagnosis",
+        headers=headers,
+        json={
+            "action": "start",
+            "fault_report_id": fault_id,
+            "equipment_model": "MODEL-1",
+            "symptom": "pressure loss",
+            "description": "drops under load",
+            "dataset_ids": ["dataset-1"],
+        },
+    )
+    assert start.status_code == 200
+    session = start.json()["session"]
+    first = client.post(
+        "/api/agent/fault-diagnosis",
+        headers=headers,
+        json={"action": "evidence", "session": session, "category": "reproduction", "detail": "drops under load"},
+    )
+    second = client.post(
+        "/api/agent/fault-diagnosis",
+        headers=headers,
+        json={"action": "evidence", "session": first.json()["session"], "category": "measurement", "detail": "pressure 12 bar"},
+    )
+
+    assert second.status_code == 200
+    body = second.json()
+    assert body["state"] == "DIAGNOSIS_READY"
+    assert body["diagnosis_draft_id"]

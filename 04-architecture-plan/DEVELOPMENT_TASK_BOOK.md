@@ -388,9 +388,9 @@
 - 需求映射：FR-007、FR-RA-001—004、NFR-002、NFR-003；AC-024、AC-025、AC-040—044；实施计划 Task 8
 - 范围：操作指引最多两次定向检索；维修前诊断的预诊断、动态追问、报警码、证据门槛、采纳/直接开始、降级与摘要。
 - 不包含：直接写维修事实、修改已批准原型。
-- 预计修改：`codebase/backend/app/modules/agents/operation_guidance.py`、`fault_diagnosis.py`、相关测试。
+- 预计修改：`codebase/backend/app/modules/agents/operation_guidance.py`、`fault_diagnosis.py`、`codebase/backend/app/modules/agents/router.py`、`app/main.py` 及相关测试。
 - 共享契约：历史案例来自 TASK-003；文档引用来自 TASK-005；采纳写入调用 TASK-003；直接开始清除临时诊断。
-- 实施步骤：写 8/24/4 上限、报警码、否定证据、证据不足和采纳门禁测试；实现两类图；接入预诊断和受控工具；执行真实 RAGFlow/LLM 降级验证。
+- 实施步骤：写 8/24/4 上限、报警码、否定证据、证据不足和采纳门禁测试；实现两类图；接入生产受控 API、TASK-003 历史案例、TASK-005 知识引用和既有诊断草稿/维修启动路径；执行真实 RAGFlow/LLM 降级验证。
 - 验收标准：证据不足不能产生可采纳根因；报警码问题不可跳过；直接开始不保留 AI 摘要；失败保留人工流程。
 - 验证：`python -m pytest codebase/backend/tests/agents/test_operation_guidance.py codebase/backend/tests/agents/test_fault_diagnosis.py -q`；真实 RAGFlow 引用测试由 `DEV-001` 提供 Docker 环境；`node 06-testing/tests/fault-report-repair-agent.test.js`。
 - 分支：`codex/task-009-guidance-diagnosis`
