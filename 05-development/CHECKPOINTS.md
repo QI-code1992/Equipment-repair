@@ -211,6 +211,38 @@
 - 边界：相似案例只访问 PostgreSQL；无 RAGFlow、Agent、向量、正式前端、新生产依赖、兼容层或范围外实现。
 - 恢复：应用回退可评估 `git revert -m 1 51337db767eb94051f78a5c537a3ff48d428a742`；`0003_task003` downgrade 会删除五张 TASK-003 表，生产数据回退须备份并另行授权，优先采用前向修复迁移。
 - 依赖：本治理 PR 合入后，TASK-003 前置正式满足；TASK-009/010/011 仍受各自其余依赖约束，Stage 6 仍未获准。
+## FCP-005-R1：TASK-005 RAGFlow 适配器契约检查点
+
+- 状态：Development Candidate / Locally Validated / Not Reviewed / Not Integrated。
+- 分支/基线：`codex/task-005-knowledge-ragflow` / `8c0087928f693674f498044b0e2dbbe96196847c`；功能提交 `b6325cdaf5a412a9b074cc215576292a1b6b1afe`。
+- 范围：RAGFlow v0.25.6 文档上传后解析、状态映射、删除、仅 READY 文档检索、业务文档/切片引用映射、空检索与超时降级；不包含业务元数据/API、数据库迁移、真实对象存储或 Worker 调度。
+- 证据：RED 为 `ModuleNotFoundError: app.integrations`；定向测试 `9 passed`；Python 3.13 全量 `182 passed, 9 skipped, 1 warning`；`compileall` 和 `git diff --check` 通过。
+- 边界：使用 Python 标准库 HTTP 客户端，无新增生产依赖、兼容层或范围外修改。真实 RAGFlow 上传/解析/检索与重启验证仍须由具备 Docker 环境的 DEV-001 执行。
+- 恢复/门禁：可回退功能提交。TASK-005 尚未完成；后续功能继续在同一 Draft PR，最终精确 HEAD 经 DEV-001 审核、集成检查和项目负责人授权后，只能由 DEV-001 合并；Stage 6 仍未获准。
+## FCP-005-R2：TASK-005 知识文档生命周期检查点
+
+- 状态：Development Candidate / Locally Validated / Not Reviewed / Not Integrated。
+- 分支/功能提交：`codex/task-005-knowledge-ragflow` / `95f5d31aeb7f41864f2c0dfd860cde6cc7ff6dfa`；继续维护 Draft PR #37。
+- 范围：知识数据集、业务文档和引用模型；对象存储引用、100MB 上限、Worker 上传同步、状态刷新、安全失败原因、仅 READY 文档检索以及远端优先删除。共享 Alembic 迁移仍由 DEV-001 集成。
+- 证据：知识/RAGFlow 定向 `17 passed, 1 warning`；Python 3.13 全量 `190 passed, 9 skipped, 1 warning`；`compileall` 与 `git diff --check` 通过。
+- 边界：未新增生产依赖、公开 API、迁移、对象存储客户端、扫描器、兼容层或范围外修改。真实 MinIO/RAGFlow/Worker 联调仍未执行。
+- 恢复/门禁：可回退本功能提交。TASK-005 仍处于 Draft 开发；最终精确 HEAD 经 DEV-001 审核、集成检查和项目负责人授权后，只能由 DEV-001 合并；Stage 6 仍未获准。
+## FCP-005-R3：TASK-005 安全上传 API 检查点
+
+- 状态：Development Candidate / Locally Validated / Not Reviewed / Not Integrated。
+- 分支/功能提交：`codex/task-005-knowledge-ragflow` / `f9fc4a0ed2a04249640d569de08c41f17aa4b684`；继续维护 Draft PR #37。
+- 范围：经项目负责人批准新增 `minio` 与 `python-multipart`；实现 MinIO 随机对象键和限定 bucket 访问、ClamAV 失败关闭扫描、100MB multipart 上传、`intelligence:knowledge` 权限、幂等、成功/失败审计、文件元数据与文档状态查询 API。
+- 证据：知识范围定向 `28 passed, 1 warning`；Python 3.13 全量 `200 passed, 9 skipped, 1 warning`；`pip check`、`compileall` 与 `git diff --check` 通过。
+- 边界：未增加 Alembic 迁移或 Docker/部署配置；共享迁移仍由 DEV-001 集成，平台 MinIO 与 ClamAV 真实服务、RAGFlow 真实联调尚待 DEV-001 环境验证。无兼容层或范围外修改。
+- 恢复/门禁：可回退本功能提交。TASK-005 仍处于 Draft 开发；最终精确 HEAD 经 DEV-001 审核、集成检查和项目负责人授权后，只能由 DEV-001 合并；Stage 6 仍未获准。
+## FCP-005-R4：TASK-005 Worker 同步检查点
+
+- 状态：Development Candidate / Locally Validated / Not Reviewed / Not Integrated。
+- 分支/功能提交：`codex/task-005-knowledge-ragflow` / `5e134655bc087f972e84f8f40b31bac284ee6c29`；继续维护 Draft PR #37。
+- 范围：批量扫描 `UPLOADING/PARSING` 文档；从已扫描 MinIO 对象读取并调用 RAGFlow 上传/解析；刷新远端生命周期；对象存储或同步异常写入固定安全失败原因；批量上限 500。
+- 证据：Worker 定向 `3 passed, 1 warning`；Python 3.13 全量 `204 passed, 9 skipped, 1 warning`；`compileall` 与 `git diff --check` 通过。
+- 边界：未新增 Alembic 迁移、Docker/部署配置或队列依赖；共享迁移、真实 Worker 调度、MinIO/RAGFlow/ClamAV 联调仍待 DEV-001 环境验证。
+- 恢复/门禁：可回退本功能提交。TASK-005 仍处于 Draft 开发；最终精确 HEAD 经 DEV-001 审核、集成检查和项目负责人授权后，只能由 DEV-001 合并；Stage 6 仍未获准。
 
 ## FCP-007：TASK-007 Agent Runtime 开发候选
 
@@ -243,12 +275,34 @@
 - 验证：Python 3.13 全量 `228 passed, 10 skipped, 2 warnings`；定向 `6 passed, 1 skipped`；compileall/diff-check 通过。
 - 未验证：本地没有专用 PostgreSQL DSN，真实 checkpoint/restart 仍待 DEV-001 执行。
 
+## FCP-005-R5：TASK-005 真实 RAGFlow 联调与集成基线同步候选
+
+- 状态：Review Candidate / 真实环境门禁已满足 / 等待 DEV-001 审核新精确 HEAD / 未集成。
+- 分支/PR：`codex/task-005-knowledge-ragflow` / PR #37；真实联调对象为 `9375d12853248ceb39068f509a8dbd95bf717ce5`，随后同步当前集成基线并保留 TASK-005 与已集成模块的共同路由和生产依赖。
+- 真实证据：上传、ClamAV 恶意附件拒绝、RAGFlow 解析、`READY`、混合检索和引用回传 `1 passed`；临时数据集、容器、网络、卷已清理，共享 RAGFlow 五项服务仍 healthy。
+- 回归证据：Python 3.13 后端 `217 passed, 11 skipped`；`compileall`、验证脚本契约和 `git diff --check` 通过；三轮复核 Critical 0、Important 0、Minor 0。
+- 同步后回归：Python 3.13.14 全量后端 `259 passed, 10 skipped, 2 warnings`；`pip check`、`compileall` 与暂存 diff check 通过。
+- 恢复/门禁：应用可按 TASK-005 功能提交选择性回退；外部文档删除仍受业务删除与审计规则约束。新 HEAD 须由 DEV-001 重新审核并完成集成与授权流程；此前不解锁下游、不进入 Stage 6。
+
 ## FCP-007：TASK-007 Agent Runtime 合并后技术检查点
 
 - 状态：Stable after post-merge governance closeout；依赖矩阵允许的下游可继续，Stage 6 仍未获准。
 - 分支/PR：`codex/task-007-agent-runtime` / PR #40；源 HEAD `fcd643ab0b0e33a585e3be6ec0b0036a611059c4`；Merge Commit `bf842626987148575173c6cf3f34970fc496ad7c`。
 - 合并关系：第一父 `fdec916fad943acb8ad62a1cf5bc3ce8f770cc8d`，第二父为源 HEAD；源 HEAD 已成为集成分支祖先。
 - 合并后证据：后端 `228 passed, 10 skipped, 2 warnings`；PostgreSQL 17 真实 `PostgresSaver` checkpoint/restart `1 passed, 1 warning`；`compileall`、Compose 配置、API 镜像构建、PostgreSQL/Redis healthy、容器 `/healthz` HTTP 200、merge-tree 与 `git diff --check` 通过。
+- 治理门禁：需纯治理 PR 同步 SELF_TEST、CHECKPOINTS、CODE_REVIEW、COMMIT_LOG、任务书、`workflow/DEV_TO_PM_HANDOFF.md` 与 `workflow/state.json`；追认及治理 PR 合入前 Stage 6 仍未批准。
+
+## FCP-005-R3：TASK-005 审核整改中间检查点
+
+- 状态：Draft / Changes Requested / Partially Remediated / Not Approved / Not Integrated。
+- 分支/PR：`codex/task-005-knowledge-ragflow` / PR #37；审核基准 HEAD `1cee0317ab1eefca2ca4900e2e97804ae1448665`。
+- 已关闭范围：可执行 Worker 模块入口及其 TDD；可选真实 PostgreSQL/MinIO/ClamAV/RAGFlow 生命周期测试；安全校验 PowerShell 调用脚本。
+- 本地证据：全量后端 `261 passed, 11 skipped, 2 warnings`；新增/Worker 定向 `5 passed, 1 skipped, 2 warnings`；`pip check`、`compileall`、`git diff --check` 通过。
+- 未关闭范围：知识三表的共享 Alembic revision 需 DEV-001 决定并取得项目负责人对具体迁移范围的确认；真实联调必须在完整新 HEAD 上由 DEV-001 重跑。
+- 恢复/门禁：本检查点仅为可恢复整改提交，不是 Review Candidate；PR 保持 Draft，不解锁 TASK-009/011，不进入 Stage 6。
+- 迁移增量：DEV-001 原提交 `2fe848bfb5f7f7849b950cbecfa40644e6782a05` 已由 DEV-002 cherry-pick 为 `78ad1c81f6292c1fc3706b35d9dd495a8244d1b4`；四表迁移链为 `0005_task007 -> 0006_task005`，PostgreSQL 17 往返 `1 passed`。
+- 合入分支后回归：全量 `262 passed, 12 skipped, 2 warnings`；`pip check`、`compileall`、单一 head 和 diff check 通过。真实 RAGFlow/ClamAV 复验仍待 DEV-001，因此状态继续为 Draft / Not Approved。
+- 验证基础设施增量：DEV-001 分支 `codex/task-005-validation-infra` 的三提交已由 DEV-002 连续 cherry-pick 至 PR #37；验证专用 Compose 服务限制在 `validation` profile，临时凭据和清理入口具备 marker/GUID/固定文件名约束，Worker 以独立 Compose 进程轮询推进 `READY`。DEV-002 本地回归 `266 passed, 12 skipped, 2 warnings`，定向 `10 passed, 2 skipped, 2 warnings`；Docker/PowerShell 本机不可用，真实联调和脚本语法结果仍待 DEV-001 对新 HEAD 绑定复审。
 - 治理门禁：项目负责人已追认 PR #40、源 HEAD、Merge Commit 及合并结果；PR #41 Merge Commit `092eb84821131f6c6faa6b6a1c2acdb4079ecf8f` 已同步 SELF_TEST、CHECKPOINTS、CODE_REVIEW、COMMIT_LOG、任务书、`workflow/DEV_TO_PM_HANDOFF.md` 与 `workflow/state.json`。TASK-007 治理闭环完成；Stage 6 仍未批准。
 
 ## FCP-008-R1：TASK-008 AI 故障上报与指标读取开发候选

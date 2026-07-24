@@ -228,6 +228,15 @@
 - 依赖：本治理 PR 合并后 TASK-004 正式闭环，TASK-005 的 TASK-004 阻塞解除；Stage 6 仍未获准。
 - 请求动作：项目负责人确认本纯治理 PR 的内容和精确 HEAD；DEV-001 完成集成核查与授权请求后，由非 PR 作者 DEV-002 合并。
 
+## TASK-005 PR #37 真实联调与重新审核交接（2026-07-23）
+
+- 开发者/审核者/Merge 执行者：DEV-002 / DEV-001 / DEV-001；同一 Draft PR [#37](https://github.com/QI-code1992/Equipment-repair/pull/37)，目标 `codex/stage-05-integration`。
+- DEV-001 实测对象：`9375d12853248ceb39068f509a8dbd95bf717ce5`。上传、ClamAV 恶意附件拒绝、RAGFlow 解析、`READY`、混合检索与引用回传通过，`1 passed`；临时数据集、容器、网络和卷已清理，共享 RAGFlow 五服务仍 healthy。
+- 回归证据：Python 3.13 后端 `217 passed, 11 skipped`；`compileall`、验证脚本契约和 `git diff --check` 通过；三轮复核 Critical 0、Important 0、Minor 0。
+- 集成同步：PR 分支已吸收当前 `codex/stage-05-integration`，解决 `app/main.py`、`pyproject.toml`、SELF_TEST 与 CHECKPOINTS 冲突；同时保留 TASK-005 路由/MinIO 依赖与已集成 Agent Runtime/LangGraph 内容。
+- 同步后回归：Python 3.13.14 全量后端 `259 passed, 10 skipped, 2 warnings`；`pip check`、`compileall` 与暂存 diff check 通过。
+- 请求动作：推送证据与同步提交后，以 PR #37 新完整精确 HEAD 请求 DEV-001 正式审核。新 HEAD 使旧审核失效；审核前不得申请 Merge 授权、合并、解锁 TASK-009/011 或进入 Stage 6。
+
 ## TASK-007 开发交接（2026-07-22）
 
 - 开发者/指定审核者：DEV-002 / DEV-001；分支 `codex/task-007-agent-runtime`，目标 `codex/stage-05-integration`。
@@ -297,6 +306,20 @@
 - 依赖：本治理 PR 合入后 TASK-003 正式闭环；TASK-009/010/011 仍等待各自其余依赖，Stage 6 仍未获准。
 - 请求动作：项目负责人确认本纯治理 PR 的内容和精确 HEAD；DEV-001 完成集成核查与授权请求后，由非 PR 作者 DEV-002 合并。
 
+## TASK-005 PR #37 Changes requested 整改交接（2026-07-23）
+
+- 开发者/审核者/Merge 执行者：DEV-002 / DEV-001 / DEV-001；同一 PR [#37](https://github.com/QI-code1992/Equipment-repair/pull/37) 已恢复 Draft，目标为 `codex/stage-05-integration`。
+- 审核基准：`1cee0317ab1eefca2ca4900e2e97804ae1448665`，结论 Changes requested；旧审核不得用于批准或集成。
+- 已完成整改：实际 Worker 入口 `app.modules.knowledge.worker_main`；默认安全跳过、显式专用环境才运行的真实生命周期测试；不含凭据且不改写共享基础设施的 PowerShell 验证入口。
+- 验证：Python 3.13 全量 `261 passed, 11 skipped, 2 warnings`；新增/Worker 定向 `5 passed, 1 skipped, 2 warnings`；`pip check`、`compileall`、`git diff --check` 通过。真实联调本轮未运行，须由 DEV-001 在完整候选 HEAD 上执行。
+- 共享迁移阻断：当前 Alembic 单链截至 `0005_task007`，缺少 `knowledge_datasets`、`knowledge_documents`、`knowledge_citations`。任务书规定共享迁移由 DEV-001 最终决策，项目规则要求项目负责人确认具体数据库迁移范围；DEV-002 未创建并行迁移头。
+- 请求动作：请 DEV-001 明确知识三表应接续的 revision/down_revision 与候选集成方式，并由项目负责人确认该具体迁移范围。迁移、真实复验、PR 描述更新和新精确 HEAD 复审全部完成前，PR 保持 Draft，不申请 Merge 授权、不解锁下游、不进入 Stage 6。
+- 迁移决定与接收：项目负责人已批准四表 `0006_task005` / `0005_task007`；DEV-001 的三文件提交 `2fe848bfb5f7f7849b950cbecfa40644e6782a05` 已精确 cherry-pick 到同一 PR 分支，生成提交 `78ad1c81f6292c1fc3706b35d9dd495a8244d1b4`。
+- 验证更新：DEV-001 PostgreSQL 17 升降级往返 `1 passed`；DEV-002 定向 `6 passed, 2 skipped`、全量 `262 passed, 12 skipped, 2 warnings`，`pip check`、`compileall`、唯一 `0006_task005 (head)` 和 diff check 通过。
+- 下一动作：DEV-002 推送含迁移的完整新 HEAD 后，DEV-001 对该 HEAD 执行真实 RAGFlow/ClamAV 联调和复审；完成前仍不转 Ready、不申请 Merge 授权或解锁下游。
+- 基础设施增量接收：项目负责人批准的 TASK-005 隔离验证基础设施由 DEV-001 在 `codex/task-005-validation-infra` 实现，DEV-002 已连续 cherry-pick `dbf4d68b`、`579a98e`、`6c2df42` 到同一 PR #37 分支。DEV-002 核验普通 Compose 拓扑不包含验证服务、清理目标受 marker/GUID/固定文件名约束、验证测试不直接调用底层同步函数且依赖 Compose Worker 常驻入口。
+- DEV-002 回归：定向 `10 passed, 2 skipped, 2 warnings`；全量后端 `266 passed, 12 skipped, 2 warnings`；`pip check`、`compileall`、Alembic 唯一 `0006_task005 (head)`、`git diff --check` 通过。当前环境无 `docker`/`pwsh`，Compose 和 PowerShell 语法仅引用 DEV-001 实测，需 DEV-001 对新 HEAD 重新绑定复审。
+- 下一动作：推送证据提交后，请 DEV-001 针对 PR #37 新精确 HEAD 执行/确认真实 PostgreSQL、RAGFlow、ClamAV、Compose Worker 联调与正式复审；复审前仍保持 Draft，不申请 Merge 授权。
 ## TASK-008 开发启动交接（2026-07-23）
 
 - 开发者/审核者：DEV-002 / DEV-001；分支 `codex/task-008-fault-metric-agents`，目标 `codex/stage-05-integration`。

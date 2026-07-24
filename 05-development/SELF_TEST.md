@@ -284,6 +284,23 @@
 - 修正范围：同步 Ready 审核证据、PR 当前完整 HEAD 绑定说明、Node/npm 运行基线和 `npm ci` 验证证据；未修改业务页面、Agent 配置、SSE、维修流程、认证或业务 API。
 - 运行基线：`package.json` 声明 Node `^20.19.0 || >=22.12.0`、npm `>=10.0.0`；本轮验证环境为 Node `v26.5.0`、npm `11.17.0`。
 - 验证计划：重新执行 `npm ci`、前端测试、生产构建、原型静态回归和 `git diff --check`；推送后以新完整 HEAD 重新请求 DEV-001 审核。
+## TASK-005 安全知识上传 API 自测（2026-07-22）
+
+- 功能提交：`f9fc4a0ed2a04249640d569de08c41f17aa4b684`；基线为 `codex/stage-05-integration@8c0087928f693674f498044b0e2dbbe96196847c`，同一 Draft PR #37。
+- TDD RED：MinIO 边界因 `app.integrations.object_storage` 不存在而收集失败；知识 API 因 `create_app` 不接受存储/扫描依赖而 4 项失败；ClamAV 边界因模块不存在而收集失败。逐项实现后转绿。
+- 依赖：项目负责人已明确批准 `minio>=7.2.20,<8.0` 与 `python-multipart>=0.0.32,<1.0`；当前 Python 3.13.14 环境安装 `minio 7.2.20`、`python-multipart 0.0.32`，`pip check` 为 `No broken requirements found`。
+- 安全边界：上传最大 100MB且非空；ClamAV 未配置、不可达或响应异常均失败关闭；不安全文件不写 MinIO；对象键随机且限制在 `knowledge/`；审计和响应不含文件正文、Token 或扫描器原始错误。
+- API：`POST /api/knowledge/documents` 使用 `intelligence:knowledge`、`Idempotency-Key`、multipart 和内容 SHA-256 幂等摘要；`GET /api/knowledge/documents/{id}` 向授权操作者返回生命周期及失败原因。
+- 验证：知识/RAGFlow/MinIO/ClamAV 定向 `28 passed, 1 warning`；Python 3.13 全量 `200 passed, 9 skipped, 1 warning`；`compileall`、`git diff --check` 通过。唯一警告是既有 Starlette/httpx 第三方弃用提示。
+- 未验证：无共享 Alembic 迁移；未连接真实平台 MinIO、ClamAV 或 RAGFlow，未执行真实文档扫描、上传、解析、切片、混合检索和重启恢复。这些仍须 DEV-001 在 Docker 环境完成。
+- 兼容/抽象/无关修改：无兼容代码；新增抽象仅限 MinIO、ClamAV 和 RAGFlow 外部副作用边界；无范围外修改。
+## TASK-005 Worker 同步自测（2026-07-22）
+
+- 功能提交：`5e134655bc087f972e84f8f40b31bac284ee6c29`；继续维护 Draft PR #37。
+- TDD RED：Worker 模块不存在导致测试收集失败；实现批量上传/解析、状态刷新和安全失败后转绿。
+- 行为：只处理 `UPLOADING/PARSING`；上传前要求关联文件扫描状态为 `CLEAN`；对象存储错误不泄露原始异常；RAGFlow 失败不产生伪 READY 状态；批量上限为 500。
+- 验证：Worker 定向 `3 passed, 1 warning`；Python 3.13 全量 `204 passed, 9 skipped, 1 warning`；compileall、git diff check 通过。唯一警告为既有 Starlette/httpx 第三方弃用提示。
+- 未验证：未接真实队列调度、MinIO、ClamAV、RAGFlow 或 PostgreSQL 迁移；这些需 DEV-001 真实环境验证和共享迁移集成。
 
 ## TASK-006 全范围候选自测（2026-07-22）
 
@@ -339,10 +356,65 @@
 - 验证：Python 3.13 全量 `228 passed, 10 skipped, 2 warnings`；Runtime/集成定向 `6 passed, 1 skipped`；`compileall`、`git diff --check` 通过。
 - 未验证：当前无专用 PostgreSQL DSN，真实 checkpoint 测试仍跳过；需要 DEV-001 在 PostgreSQL 17 环境执行并记录结果。
 
+## TASK-005 DEV-001 真实 RAGFlow 联调证据（2026-07-23）
+
+- 验证对象：PR #37 原精确 HEAD `9375d12853248ceb39068f509a8dbd95bf717ce5`；由具备 Docker/RAGFlow 环境的 DEV-001 执行。
+- 真实生命周期：上传、ClamAV 恶意附件拒绝、RAGFlow 解析、状态进入 `READY`、混合检索和引用回传全部通过，结果 `1 passed`。
+- 清理复核：临时数据集、容器、网络和卷均已清理；共享 RAGFlow 五项服务保持 healthy。
+- 回归复核：Python 3.13 后端 `217 passed, 11 skipped`；`compileall`、验证脚本契约和 `git diff --check` 通过；三轮复核 Critical 0、Important 0、Minor 0。
+- 当前处理：任务分支已同步当前 `codex/stage-05-integration` 并解决 TASK-005 与已集成模块的路由、依赖和连续台账冲突；同步后的新精确 HEAD 必须重新绑定 DEV-001 审核，不能沿用旧 HEAD 结论。
+- 同步后回归：Python 3.13.14 全量后端 `259 passed, 10 skipped, 2 warnings`；`pip check`、`compileall` 与暂存 diff check 通过。警告为既有 Starlette/httpx 弃用及 LangChain serializer pending deprecation。
+- 门禁：证据提交并推送后，PR #37 才可请求 DEV-001 审核；未批准、未完成集成检查和逐 PR Merge 授权，不解锁 TASK-009/011，不进入 Stage 6。
+
 ## TASK-007 合并后技术验证（2026-07-23）
 
 - 集成对象：PR #40，源 HEAD `fcd643ab0b0e33a585e3be6ec0b0036a611059c4`；Merge Commit `bf842626987148575173c6cf3f34970fc496ad7c`；第一父 `fdec916fad943acb8ad62a1cf5bc3ce8f770cc8d`，第二父为源 HEAD。
 - DEV-001 实测：合并结果后端 `228 passed, 10 skipped, 2 warnings`；PostgreSQL 17 真实 `PostgresSaver` checkpoint/restart `1 passed, 1 warning`；`compileall`、合并树 `git diff --check`、Compose 配置、API 生产镜像构建通过；PostgreSQL/Redis healthy，容器内 `/healthz` 返回 HTTP 200。
+- 治理状态：代码已集成；项目负责人对 PR #40/源 HEAD/合并结果的正式追认及治理收尾 PR 合入前，不宣称 TASK-007 彻底闭环、不解锁下游、不进入 Stage 6。
+
+## TASK-005 PR #37 Changes requested 修订（2026-07-23）
+
+- 审核对象：PR #37 精确 HEAD `1cee0317ab1eefca2ca4900e2e97804ae1448665`；DEV-001 提出 Worker 入口、三张知识表迁移、真实验证资产和过期 PR 描述问题，PR 已恢复 Draft。
+- TDD：新增 Worker 入口测试时因 `app.modules.knowledge.worker_main` 不存在而 `2 failed`；实现运行依赖装配、批量参数、事务提交和安全配置校验后，Worker 定向为 `5 passed, 2 warnings`。
+- 验证资产：新增默认跳过的 `tests/integration/test_task005_live_stack.py`，仅在显式启用和提供专用 PostgreSQL/MinIO/ClamAV/RAGFlow 参数时执行；新增 `codebase/infra/task-005/scripts/Invoke-Validation.ps1`，不保存凭据、不启动或改写共享服务。
+- 本地验证：Python 3.13 全量 `261 passed, 11 skipped, 2 warnings`；TASK-005 新增/Worker 定向 `5 passed, 1 skipped, 2 warnings`；`pip check`、`compileall`、`git diff --check` 通过。跳过项是当前无 DEV-001 专用实栈参数；警告均为既有第三方弃用提示。
+- 未解决阻断：当前 Alembic 单链截至 `0005_task007`，知识三表迁移缺失。共享迁移最终决策归 DEV-001，且数据库迁移需项目负责人针对具体范围确认；DEV-002 未擅自新增 revision。完成迁移集成并由 DEV-001 重跑真实联调前，不得 Ready、批准、申请 Merge 授权或解锁下游。
+- 边界：无新增生产依赖、兼容代码、通用抽象或无关修改；真实凭据和运行数据未写入仓库。
+- 迁移接收：项目负责人批准 `0006_task005` 接续 `0005_task007` 并创建四张表；DEV-001 提交 `2fe848bfb5f7f7849b950cbecfa40644e6782a05` 经三文件边界核验后，由 DEV-002 精确 cherry-pick 为 `78ad1c81f6292c1fc3706b35d9dd495a8244d1b4`。
+- 迁移验证：DEV-001 在 PostgreSQL 17 执行 `0005 -> 0006 -> 0005 -> 0006` 为 `1 passed`；DEV-002 本地定向 `6 passed, 2 skipped`，全量 `262 passed, 12 skipped, 2 warnings`，Alembic 唯一 head 为 `0006_task005`。既有 TASK-003 head 断言按批准链路由 `0005_task007` 最小更新为 `0006_task005`。
+- 剩余验证：含迁移的完整候选仍需 DEV-001 执行真实 RAGFlow/ClamAV 生命周期联调并绑定最终新 HEAD；完成前 PR 保持 Draft。
+
+## TASK-005 DEV-001 隔离真实验证基础设施（2026-07-23）
+
+- 范围：为 PR #37 提供独立 PostgreSQL、Redis、MinIO、ClamAV、Worker、迁移和验证器环境；共享 RAGFlow 仅通过 `host.docker.internal` API 访问，不启动、停止或修改共享服务。
+- TDD：验证基础设施契约先后暴露迁移门禁、宿主 API 地址、测试镜像阶段、专用数据库命名、单次 Worker 初始化竞态和临时凭据清理缺失；新增契约测试后逐项修复。
+- 真实验证：隔离栈迁移至 `0006_task005`；PostgreSQL 执行 `0006 -> 0005_task007 -> 0006`；ClamAV 拒绝 EICAR；安全文档完成上传、RAGFlow 解析、READY、检索和引用回传，验证器 `2 passed`。临时数据集、容器、网络、卷和工作区外临时凭据文件均已清理。
+- 回归：Python 3.13 后端 `264 passed, 12 skipped, 2 warnings`；基础设施契约 `2 passed`；Compose `config --quiet`、PowerShell 语法、`pip check`、`compileall` 与 `git diff --check` 待本独立提交完成前复跑。两项 warning 均为既有第三方弃用提示。
+- 边界：无业务代码、生产依赖、兼容代码或通用抽象层修改；仅新增隔离验证所需 Compose 服务、脚本、环境模板和契约测试。该基础设施提交须由 DEV-002 核验后 cherry-pick 到 PR #37；PR #37 继续 Draft，未申请 Merge 授权、不解锁下游、不进入 Stage 6。
+
+## TASK-005 DEV-002 Critical 修正复验（2026-07-23）
+
+- 修正 1：`worker`、`migrate`、`minio`、`clamav` 和 `validator` 全部置于 `validation` profile；普通平台 Compose 仅保留原 API、PostgreSQL、Redis 拓扑，验证脚本显式启用该 profile。
+- 修正 2：临时环境目录必须匹配 `equipment-task005-<GUID>`、文件名必须为 `task005.env`，并且目录内必须存在由创建脚本写入的 `task005-validation-marker`；清理不满足来源校验时拒绝递归删除。
+- 修正 3：真实验证循环改由 `app.modules.knowledge.worker_main.main(--limit 1)` 执行；同时修正 `limit` 关键字调用，避免只由 validator 直接调用底层同步函数。
+- 复验：普通/validation Compose config、PowerShell 语法、契约 `2 passed`、Python 全量 `264 passed, 12 skipped, 2 warnings`；真实 PostgreSQL 往返和 RAGFlow/ClamAV 文档生命周期 `2 passed`。未产生新依赖、兼容层或无关修改。
+- 门禁：修正提交尚未由 DEV-002 重新边界核验和 cherry-pick；PR #37 保持 Draft，不申请 Merge 授权、不解锁下游、不进入 Stage 6。
+
+## TASK-005 DEV-001 基础设施复验 R2（2026-07-24）
+
+- 根因：Compose Worker 作为独立进程仅加载知识模型，`knowledge_documents.created_by` 对 `users.id` 的外键目标未注册；首个上传文档触发 SQLAlchemy `NoReferencedTableError` 后 Worker 退出，文档停留在 `UPLOADING`。
+- TDD：新增独立 Python 进程回归测试，初始因 `Base.metadata` 缺少 `users` 表失败；Worker 入口显式注册共享 identity 模型后通过。Worker 以 `--poll-seconds 1` 常驻轮询，真实联调测试不再在 validator 进程直接调用 Worker。
+- 安全与失败传播：临时凭据环境创建将写入与 `icacls` 放入 `try/catch`，权限设置失败时删除专用目录；清理脚本即使 Compose 清理失败也先删除经过 marker/GUID/固定文件名校验的凭据目录，再传播清理失败。
+- 真实验证：独立 PostgreSQL 17、MinIO、ClamAV、Compose Worker 和本机 RAGFlow 环境中，验证器上传安全文档后由 Compose Worker 推进为 `READY`，RAGFlow 检索与引用回传通过，EICAR 被 ClamAV 拒绝；专用 RAGFlow dataset、容器、网络、卷及工作区外临时凭据目录均已清理。
+- 门禁：此基础设施分支仍待 DEV-002 边界核验后 cherry-pick 至 PR #37；PR #37 继续保持 Draft，不申请 Merge 授权、不解锁下游、不进入 Stage 6。
+
+## TASK-005 DEV-002 接收基础设施增量（2026-07-24）
+
+- 接收范围：DEV-001 基础设施分支 `codex/task-005-validation-infra` 的连续提交 `dbf4d68b074838bfdaf629b2b6897c6ec5d79843`、`579a98ea048430a4b79684b6191ec1a3d71cd574`、`6c2df422f36e84f9660cb16d3c7c925d9d9a6f7a` 已精确 cherry-pick 至 PR #37，生成本分支提交 `339956d`、`b8b840c`、`7daab78`。
+- 边界核验：验证专用 `worker/migrate/validator/minio/clamav` 均位于 `validation` profile；清理脚本绑定系统临时目录、`equipment-task005-<GUID>`、`task005.env` 和 marker；真实测试不再直接调用底层同步函数，改由 Compose Worker 常驻轮询入口推进文档状态。
+- 本地验证：TASK-005/Worker/迁移/基础设施契约定向 `10 passed, 2 skipped, 2 warnings`；Python 3.13 全量 `266 passed, 12 skipped, 2 warnings`；`pip check`、`compileall`、Alembic 唯一 `0006_task005 (head)`、`git diff --check` 通过。
+- 未验证：当前 DEV-002 Mac 环境无 `docker` 和 `pwsh`，未本机复跑两套 Compose config 或 PowerShell 语法；这些结果引用 DEV-001 已提供的真实验证，仍需 DEV-001 对 PR #37 新 HEAD 复审绑定。
+- 门禁：PR #37 保持 Draft；未请求 Merge 授权、不解锁 TASK-009/011、不进入 Stage 6。
 - 治理状态：项目负责人已正式追认 PR #40/源 HEAD/合并结果；PR #41 治理收尾 Merge Commit `092eb84821131f6c6faa6b6a1c2acdb4079ecf8f` 已合入。TASK-007 治理闭环完成，可按依赖矩阵解锁下游；Stage 6 仍未批准。
 
 ## TASK-008 本地开发候选自测（2026-07-23）
