@@ -93,7 +93,7 @@ class DiagnosisRequest(BaseModel):
     description: str | None = None
     alarm_code_present: bool = False
     dataset_ids: list[str] = Field(default_factory=list)
-    session: dict[str, Any] | None = None
+    diagnosis_draft_id: str | None = None
     answer: str | None = None
     category: str | None = None
     detail: str | None = None
@@ -125,11 +125,7 @@ def _guidance_body(session: GuidanceSession) -> dict[str, Any]:
     }
 
 
-def _diagnosis_body(
-    session: DiagnosisSession,
-    draft_id: str | None = None,
-    dataset_ids: list[str] | None = None,
-) -> dict[str, Any]:
+def _diagnosis_body(session: DiagnosisSession, draft_id: str | None = None) -> dict[str, Any]:
     return {
         "state": session.state.value,
         "question": session.question,
@@ -139,26 +135,28 @@ def _diagnosis_body(
         "steps": session.steps,
         "questions": session.questions,
         "diagnosis_draft_id": draft_id,
-        "session": {
-            "fault_report_id": session.context.fault_report_id,
-            "equipment_model": session.context.equipment_model,
-            "symptom": session.context.symptom,
-            "description": session.context.description,
-            "alarm_code_present": session.context.alarm_code_present,
-            "state": session.state.value,
-            "question": session.question,
-            "evidence": [{"category": item.category, "detail": item.detail} for item in session.evidence],
-            "prefill": session.prefill,
-            "summary": session.summary,
-            "steps": session.steps,
-            "questions": session.questions,
-            "dataset_ids": dataset_ids or [],
-        },
     }
 
 
-def _restore_diagnosis_session(payload: DiagnosisRequest) -> DiagnosisSession:
-    raw = payload.session or {}
+def _session_state(session: DiagnosisSession, dataset_ids: list[str]) -> dict[str, Any]:
+    return {
+        "fault_report_id": session.context.fault_report_id,
+        "equipment_model": session.context.equipment_model,
+        "symptom": session.context.symptom,
+        "description": session.context.description,
+        "alarm_code_present": session.context.alarm_code_present,
+        "state": session.state.value,
+        "question": session.question,
+        "evidence": [{"category": item.category, "detail": item.detail} for item in session.evidence],
+        "prefill": session.prefill,
+        "summary": session.summary,
+        "steps": session.steps,
+        "questions": session.questions,
+        "dataset_ids": dataset_ids,
+    }
+
+
+def _restore_diagnosis_session(raw: dict[str, Any]) -> DiagnosisSession:
     context = DiagnosisContext(
         fault_report_id=str(raw["fault_report_id"]),
         equipment_model=str(raw["equipment_model"]),
@@ -213,7 +211,20 @@ def fault_diagnosis(
     request: Request,
     db: Session = Depends(get_db),
     actor: User = Depends(require_permission("intelligence:agent")),
+    idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
 ) -> dict[str, Any]:
+    path = "/api/agent/fault-diagnosis"
+    request_body = payload.model_dump(mode="json")
+    try:
+        replay = find_idempotent_response(
+            db, user_id=actor.id, method="POST", path=path,
+            key=idempotency_key, request_body=request_body,
+        )
+    except IdempotencyKeyReused:
+        raise HTTPException(status_code=409, detail={"code": "IDEMPOTENCY_KEY_REUSED"}) from None
+    if replay is not None:
+        return replay[1]
+
     if payload.action == "start":
         if not all((payload.fault_report_id, payload.equipment_model, payload.symptom, payload.description)):
             raise HTTPException(status_code=422, detail={"code": "DIAGNOSIS_CONTEXT_REQUIRED"})
@@ -224,11 +235,27 @@ def fault_diagnosis(
             description=payload.description,
             alarm_code_present=payload.alarm_code_present,
         )
+        request_dataset_ids = payload.dataset_ids
     else:
-        if payload.session is None:
-            raise HTTPException(status_code=422, detail={"code": "DIAGNOSIS_SESSION_REQUIRED"})
-        context = _restore_diagnosis_session(payload).context
-    request_dataset_ids = payload.dataset_ids or list((payload.session or {}).get("dataset_ids", []))
+        if not payload.diagnosis_draft_id:
+            raise HTTPException(status_code=422, detail={"code": "DIAGNOSIS_DRAFT_REQUIRED"})
+        draft = db.get(DiagnosisDraft, payload.diagnosis_draft_id)
+        raw = None if draft is None else (draft.read_only_summary or {}).get("_session")
+        owner = None if draft is None else (draft.read_only_summary or {}).get("_owner_user_id")
+        if draft is None or not isinstance(raw, dict):
+            raise HTTPException(status_code=404, detail={"code": "DIAGNOSIS_DRAFT_NOT_FOUND"})
+        if owner != actor.id:
+            raise HTTPException(status_code=403, detail={"code": "DIAGNOSIS_DRAFT_ACCESS_DENIED"})
+        if draft.status == DiagnosisDraftStatus.DIAGNOSIS_READY:
+            response = _diagnosis_body(_restore_diagnosis_session(raw), draft.id)
+            save_idempotent_response(
+                db, user_id=actor.id, method="POST", path=path,
+                key=idempotency_key, request_body=request_body, status=200, body=response,
+            )
+            db.commit()
+            return response
+        context = _restore_diagnosis_session(raw).context
+        request_dataset_ids = list(raw.get("dataset_ids", []))
 
     fault = db.get(FaultReport, context.fault_report_id)
     if fault is None:
@@ -278,8 +305,18 @@ def fault_diagnosis(
     agent = FaultDiagnosisAgent(case_retrieve, knowledge_retrieve, analyze=analyze)
     if payload.action == "start":
         session = agent.start(context)
+        draft = DiagnosisDraft(
+            fault_report_id=fault.id,
+            status=DiagnosisDraftStatus.DRAFT,
+            read_only_summary={
+                "_owner_user_id": actor.id,
+                "_session": _session_state(session, request_dataset_ids),
+            },
+        )
+        db.add(draft)
+        db.flush()
     else:
-        session = _restore_diagnosis_session(payload)
+        session = _restore_diagnosis_session(raw)
         case_retrieve(context)
         knowledge_retrieve(context)
         if payload.action == "answer":
@@ -287,32 +324,38 @@ def fault_diagnosis(
         else:
             session = agent.add_evidence(session, payload.category or "", payload.detail or "")
 
-    draft_id = None
-    if session.state is DiagnosisState.DIAGNOSIS_READY and session.prefill and session.summary:
-        draft = DiagnosisDraft(
-            fault_report_id=fault.id,
-            status=DiagnosisDraftStatus.DIAGNOSIS_READY,
-            allowed_prefill=session.prefill,
-            read_only_summary=session.summary,
-        )
-        db.add(draft)
-        db.flush()
+    draft_id = draft.id
+    if session.state == DiagnosisState.DIAGNOSIS_READY and session.prefill and session.summary:
+        draft.status = DiagnosisDraftStatus.DIAGNOSIS_READY
+        draft.allowed_prefill = session.prefill
+        draft.read_only_summary = {
+            "_owner_user_id": actor.id,
+            "_session": _session_state(session, request_dataset_ids),
+            **session.summary,
+        }
         write_audit_event(
             db, actor_user_id=actor.id, action="agent.fault_diagnosis.ready",
             resource_type="diagnosis_draft", resource_id=draft.id,
             result="success", metadata={"fault_report_id": fault.id},
         )
-        db.commit()
-        draft_id = draft.id
     else:
+        draft.read_only_summary = {
+            "_owner_user_id": actor.id,
+            "_session": _session_state(session, request_dataset_ids),
+        }
         write_audit_event(
             db, actor_user_id=actor.id, action="agent.fault_diagnosis.step",
             resource_type="fault_report", resource_id=fault.id,
-            result="success" if session.state is not DiagnosisState.UNAVAILABLE else "unavailable",
+            result="success" if session.state != DiagnosisState.UNAVAILABLE else "unavailable",
             metadata={"action": payload.action, "state": session.state.value},
         )
-        db.commit()
-    return _diagnosis_body(session, draft_id, request_dataset_ids)
+    response = _diagnosis_body(session, draft_id)
+    save_idempotent_response(
+        db, user_id=actor.id, method="POST", path=path,
+        key=idempotency_key, request_body=request_body, status=200, body=response,
+    )
+    db.commit()
+    return response
 
 
 @router.get("/api/metrics/catalog")

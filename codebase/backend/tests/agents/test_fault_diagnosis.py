@@ -4,8 +4,11 @@ from app.modules.agents.fault_diagnosis import (
     FaultDiagnosisAgent,
 )
 from app.integrations.ragflow.adapter import RetrievalResult
-from tests.modules.maintenance_support import auth_headers, create_equipment, create_fault
+from tests.modules.maintenance_support import auth_headers, create_equipment, create_fault, repairer
 from tests.modules.support import create_user_token
+from app.modules.audit.models import AuditEvent, IdempotencyRecord
+from app.modules.maintenance.models import DiagnosisDraft
+from sqlalchemy import func, select
 
 
 def test_diagnosis_requires_concrete_alarm_code_or_negative_evidence():
@@ -92,7 +95,7 @@ def test_fault_diagnosis_api_creates_existing_business_diagnosis_draft(client, m
         "app.modules.agents.router.knowledge_service.retrieve_knowledge",
         lambda *args, **kwargs: RetrievalResult(),
     )
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {"Authorization": f"Bearer {token}", "Idempotency-Key": "diagnosis-start"}
     start = client.post(
         "/api/agent/fault-diagnosis",
         headers=headers,
@@ -106,19 +109,100 @@ def test_fault_diagnosis_api_creates_existing_business_diagnosis_draft(client, m
         },
     )
     assert start.status_code == 200
-    session = start.json()["session"]
+    draft_id = start.json()["diagnosis_draft_id"]
     first = client.post(
         "/api/agent/fault-diagnosis",
-        headers=headers,
-        json={"action": "evidence", "session": session, "category": "reproduction", "detail": "drops under load"},
+        headers={**headers, "Idempotency-Key": "diagnosis-evidence-1"},
+        json={"action": "evidence", "diagnosis_draft_id": draft_id, "category": "reproduction", "detail": "drops under load"},
     )
     second = client.post(
         "/api/agent/fault-diagnosis",
-        headers=headers,
-        json={"action": "evidence", "session": first.json()["session"], "category": "measurement", "detail": "pressure 12 bar"},
+        headers={**headers, "Idempotency-Key": "diagnosis-evidence-2"},
+        json={"action": "evidence", "diagnosis_draft_id": draft_id, "category": "measurement", "detail": "pressure 12 bar"},
     )
 
     assert second.status_code == 200
     body = second.json()
     assert body["state"] == "DIAGNOSIS_READY"
     assert body["diagnosis_draft_id"]
+    with client.app.state.session_factory() as db:
+        ready_audits = db.scalar(
+            select(func.count()).select_from(AuditEvent).where(
+                AuditEvent.action == "agent.fault_diagnosis.ready"
+            )
+        )
+        draft_count = db.scalar(select(func.count()).select_from(DiagnosisDraft))
+        idempotency_count = db.scalar(
+            select(func.count()).select_from(IdempotencyRecord).where(
+                IdempotencyRecord.path == "/api/agent/fault-diagnosis"
+            )
+        )
+
+    replay = client.post(
+        "/api/agent/fault-diagnosis",
+        headers={**headers, "Idempotency-Key": "diagnosis-evidence-2"},
+        json={"action": "evidence", "diagnosis_draft_id": draft_id, "category": "measurement", "detail": "pressure 12 bar"},
+    )
+    assert replay.status_code == 200
+    assert replay.json() == body
+    conflict = client.post(
+        "/api/agent/fault-diagnosis",
+        headers={**headers, "Idempotency-Key": "diagnosis-evidence-2"},
+        json={"action": "evidence", "diagnosis_draft_id": draft_id, "category": "measurement", "detail": "pressure 13 bar"},
+    )
+    assert conflict.status_code == 409
+    assert conflict.json()["detail"]["code"] == "IDEMPOTENCY_KEY_REUSED"
+    completed_again = client.post(
+        "/api/agent/fault-diagnosis",
+        headers={**headers, "Idempotency-Key": "diagnosis-after-ready"},
+        json={"action": "evidence", "diagnosis_draft_id": draft_id, "category": "measurement", "detail": "late replay"},
+    )
+    assert completed_again.status_code == 200
+    assert completed_again.json() == body
+
+    forged = client.post(
+        "/api/agent/fault-diagnosis",
+        headers={**headers, "Idempotency-Key": "diagnosis-forged"},
+        json={
+            "action": "evidence",
+            "diagnosis_draft_id": draft_id,
+            "session": {"state": "DIAGNOSIS_READY", "prefill": {"actual_cause": "forged"}},
+            "category": "measurement",
+            "detail": "forged",
+        },
+    )
+    assert forged.status_code == 422
+
+    _, other_token = create_user_token(
+        client,
+        username="diagnosis-api-other-user",
+        role_code="REPAIR_WORKER",
+        permission_codes=["intelligence:agent"],
+    )
+    denied = client.post(
+        "/api/agent/fault-diagnosis",
+        headers={"Authorization": f"Bearer {other_token}", "Idempotency-Key": "diagnosis-other"},
+        json={"action": "evidence", "diagnosis_draft_id": draft_id, "category": "measurement", "detail": "other"},
+    )
+    assert denied.status_code == 403
+
+    _, repair_token = repairer(client)
+    adopted = client.post(
+        f"/api/fault-reports/{fault_id}/start-repair",
+        headers=auth_headers(repair_token, key="diagnosis-adopt"),
+        json={"mode": "ADOPTED", "diagnosis_draft_id": draft_id},
+    )
+    assert adopted.status_code == 200
+    assert adopted.json()["start_mode"] == "ADOPTED"
+    with client.app.state.session_factory() as db:
+        assert db.scalar(select(func.count()).select_from(DiagnosisDraft)) == 1
+        assert db.scalar(
+            select(func.count()).select_from(AuditEvent).where(
+                AuditEvent.action == "agent.fault_diagnosis.ready"
+            )
+        ) == ready_audits
+        assert db.scalar(
+            select(func.count()).select_from(IdempotencyRecord).where(
+                IdempotencyRecord.path == "/api/agent/fault-diagnosis"
+            )
+        ) == idempotency_count + 1
