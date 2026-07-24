@@ -416,3 +416,41 @@
 - 未验证：当前 DEV-002 Mac 环境无 `docker` 和 `pwsh`，未本机复跑两套 Compose config 或 PowerShell 语法；这些结果引用 DEV-001 已提供的真实验证，仍需 DEV-001 对 PR #37 新 HEAD 复审绑定。
 - 门禁：PR #37 保持 Draft；未请求 Merge 授权、不解锁 TASK-009/011、不进入 Stage 6。
 - 治理状态：项目负责人已正式追认 PR #40/源 HEAD/合并结果；PR #41 治理收尾 Merge Commit `092eb84821131f6c6faa6b6a1c2acdb4079ecf8f` 已合入。TASK-007 治理闭环完成，可按依赖矩阵解锁下游；Stage 6 仍未批准。
+
+## TASK-008 本地开发候选自测（2026-07-23）
+
+- 分支：`codex/task-008-fault-metric-agents`；基于 `origin/codex/stage-05-integration@78e9dfb`。
+- TDD：先运行缺少 `app.modules.agents` 的测试并确认收集失败，再实现最小故障上报和指标读取边界；专项测试转绿。
+- 验证：`python3.13 -m pytest codebase/backend/tests/agents -q` 加健康分边界为 `12 passed, 2 warnings`；全量 `python3.13 -m pytest codebase/backend/tests -q` 为 `240 passed, 10 skipped, 2 warnings`；`git diff --check` 通过。
+- 证据范围：故障草稿拒绝未来时间/多设备、不完整字段阻止预览、人工确认阻止提交；固定目录 40 项、查询上限五项、非法维度拒绝、服务失败不产生数值；指标目录 API 只读。
+- 未验证：未执行 Docker/PostgreSQL/RAGFlow 真实联调；健康分公开 API 未在本任务提前扩展，受控读取边界已覆盖服务失败降级。
+- 依赖/兼容/抽象：无新增生产依赖、数据库迁移、兼容层、通用抽象或无关修改；未修改 TASK-005。
+- 当前结论：仅为本地开发候选，不代表 DEV-001 审核、集成检查、Merge 授权或任务完成。
+
+## TASK-008 DEV-001 P1 修复自测（2026-07-23）
+
+- 审核反馈：PR #43 精确 HEAD `4e6aec342849f60fdd281c083f3a21147bc7d866` 的两项 P1 为故障提交未接入业务 API、健康分读取器未接入可执行边界。
+- 修复：新增确认提交 API，复用 `maintenance_service.create_fault_report`、既有 `fault:create` 权限、幂等和审计；新增健康分 Agent API 读取边界及失败降级；工具白名单加入 `get_health_score`。
+- 新候选：`24153155da11dac0579466c05c8a04c7371e8904`。
+- 验证：专项 `14 passed, 2 warnings`；全量后端 `244 passed, 10 skipped, 2 warnings`；compileall、JSON 解析、`git diff --check` 通过。
+- 结论：P1 已有可执行回归覆盖；等待 DEV-001 对新精确 HEAD 复审。未请求 Merge 授权，未修改 TASK-005，未解锁下游。
+
+## TASK-008 幂等冲突 P1 修复自测（2026-07-24）
+
+- 修复：捕获 `IdempotencyKeyReused`，同 Key 不同请求体稳定返回 `409 IDEMPOTENCY_KEY_REUSED`。
+- 回归：同请求重放返回相同响应；故障记录数与 `agent.fault_report.submit` 成功审计数均不重复增加。
+- 验证：Agent 专项 `15 passed, 2 warnings`；全量后端 `245 passed, 10 skipped, 2 warnings`；compileall、`git diff --check` 通过。
+- 当前结论：P1 修复候选待 DEV-001 绑定新精确 HEAD 复审，未申请 Merge 授权。
+
+## TASK-008 不完整草稿 P1 修复自测（2026-07-24）
+
+- 修复：`MissingFaultFieldsError` 映射为 `422 FAULT_DRAFT_INCOMPLETE`，返回 `occurred_at`、`duration_minutes` 等缺失字段。
+- 回归：不完整确认草稿不创建故障、不创建成功审计、不保存成功幂等响应；同 Key 补齐字段后可正常创建。
+- 验证：专项 `18 passed, 2 warnings`；全量后端 `246 passed, 10 skipped, 2 warnings`；compileall、`git diff --check` 通过。
+- 当前结论：等待 DEV-001 对新精确 HEAD 复审，未申请 Merge 授权。
+
+## TASK-008 治理证据校准自测（2026-07-24）
+
+- 绑定代码候选：PR #43，HEAD `ad50034ccb18422ac9a9c88325b9f0c4e9cb22dc`。
+- 真实验证：Agent 专项 `18 passed, 2 warnings`；全量后端 `246 passed, 10 skipped, 2 warnings`；`python3.13 -m compileall -q codebase/backend/app` 和 `git diff --check` 通过。
+- 治理校准：`state.json`、FCP、CODE_REVIEW、COMMIT_LOG 与交接记录统一绑定该候选及真实结果；PR #43 仍未集成、未申请 Merge 授权、未解锁下游、Stage 6 禁止。

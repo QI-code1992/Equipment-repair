@@ -11,6 +11,7 @@ ALLOWED_TOOLS = frozenset({
     "retrieve_knowledge",
     "get_similar_repair_cases",
     "query_metric_batch",
+    "get_health_score",
     "get_page_capability",
     "create_fault_draft",
     "submit_confirmed_business_action",

@@ -304,3 +304,37 @@
 - 合入分支后回归：全量 `262 passed, 12 skipped, 2 warnings`；`pip check`、`compileall`、单一 head 和 diff check 通过。真实 RAGFlow/ClamAV 复验仍待 DEV-001，因此状态继续为 Draft / Not Approved。
 - 验证基础设施增量：DEV-001 分支 `codex/task-005-validation-infra` 的三提交已由 DEV-002 连续 cherry-pick 至 PR #37；验证专用 Compose 服务限制在 `validation` profile，临时凭据和清理入口具备 marker/GUID/固定文件名约束，Worker 以独立 Compose 进程轮询推进 `READY`。DEV-002 本地回归 `266 passed, 12 skipped, 2 warnings`，定向 `10 passed, 2 skipped, 2 warnings`；Docker/PowerShell 本机不可用，真实联调和脚本语法结果仍待 DEV-001 对新 HEAD 绑定复审。
 - 治理门禁：项目负责人已追认 PR #40、源 HEAD、Merge Commit 及合并结果；PR #41 Merge Commit `092eb84821131f6c6faa6b6a1c2acdb4079ecf8f` 已同步 SELF_TEST、CHECKPOINTS、CODE_REVIEW、COMMIT_LOG、任务书、`workflow/DEV_TO_PM_HANDOFF.md` 与 `workflow/state.json`。TASK-007 治理闭环完成；Stage 6 仍未批准。
+
+## FCP-008-R1：TASK-008 AI 故障上报与指标读取开发候选
+
+- 状态：Development Candidate / PR #43 Ready for review / 未审核、未集成，不解锁下游任务。
+- 分支/基线：`codex/task-008-fault-metric-agents`，基于 `origin/codex/stage-05-integration@78e9dfb`。
+- 范围：受控故障草稿字段采集与人工确认门禁；固定 40 项指标目录、最多五项批量查询、合法维度校验；健康分受控读取失败时返回 `UNAVAILABLE` 且不伪造分值；新增指标只读 API。
+- 验证：Python 3.13.14 专项 `12 passed, 2 warnings`；完整后端 `240 passed, 10 skipped, 2 warnings`；`git diff --check` 通过。警告为既有 Starlette/httpx 与 LangChain serializer 弃用提示。
+- 边界：未新增生产依赖、数据库迁移、兼容层或通用抽象；未实现诊断 Agent、模型计算指标/健康分或修改 TASK-005；健康分公开路由留待既有冻结 API 边界，避免 TASK-002 路由表冲突。
+- 门禁：PR #43 已绑定候选；当前精确 HEAD 变化后旧审核请求立即失效。等待 DEV-001 按新精确 HEAD 审核；不得自批、自合并、请求 Merge 授权、解锁 TASK-009/010/011 或进入 Stage 6。
+
+## FCP-008-R2：TASK-008 DEV-001 P1 修复候选
+
+- 状态：Development Candidate / P1 已修复 / PR #43 等待 DEV-001 对新精确 HEAD 复审；未集成、不解锁下游。
+- 修复：确认提交通过既有 `maintenance_service.create_fault_report`、权限、幂等和审计边界写入业务故障；新增 `/api/agent/fault-reports/submit`；健康分读取器接入 `/api/agent/health-score/{equipment_id}`，服务不可用返回 `UNAVAILABLE`；`get_health_score` 纳入工具白名单。
+- 当前 PR HEAD：`24153155da11dac0579466c05c8a04c7371e8904`。
+- 验证：后端全量 `244 passed, 10 skipped, 2 warnings`；专项故障/指标 `14 passed, 2 warnings`；compileall、JSON 解析和 `git diff --check` 通过。
+- 门禁：旧 HEAD `4e6aec342849f60fdd281c083f3a21147bc7d866` 的 Changes requested 已针对同一 PR 修复；等待 DEV-001 绑定新 HEAD 复审，不请求 Merge 授权、不合并、不解锁下游或进入 Stage 6。
+
+## FCP-008-R3：TASK-008 幂等冲突修复候选
+
+- 状态：Development Candidate / P1 修复完成 / PR #43 等待 DEV-001 对新精确 HEAD 复审；未集成、不解锁下游。
+- 修复：`/api/agent/fault-reports/submit` 捕获 `IdempotencyKeyReused` 并返回 `409 IDEMPOTENCY_KEY_REUSED`；新增同请求重放、不同请求体冲突、故障记录和成功审计无重复回归测试。
+- 当前 PR HEAD：待本次证据提交后以 GitHub PR 当前完整 HEAD 绑定。
+- 验证：专项 Agent 测试 `15 passed, 2 warnings`；完整后端 `245 passed, 10 skipped, 2 warnings`；compileall、`git diff --check` 通过。
+- 门禁：仍不得请求 Merge 授权、合并、解锁下游或进入 Stage 6；等待 DEV-001 重新审核。
+
+## FCP-008-R4：TASK-008 不完整草稿错误契约修复候选
+
+- 状态：Development Candidate / P1 修复完成 / PR #43 等待 DEV-001 对新精确 HEAD 复审；未集成、不解锁下游。
+- 修复：确认提交捕获 `MissingFaultFieldsError`，返回 `422 FAULT_DRAFT_INCOMPLETE` 和缺失字段；失败不写故障记录、不写成功审计、不保存成功幂等响应。
+- 验证：专项 Agent 测试 `18 passed, 2 warnings`；完整后端 `246 passed, 10 skipped, 2 warnings`；compileall、`git diff --check` 通过。
+- 门禁：当前仍不得请求 Merge 授权、合并、解锁下游或进入 Stage 6。
+- 证据校准：PR #43 当前待审 HEAD `ad50034ccb18422ac9a9c88325b9f0c4e9cb22dc`；专项 Agent 测试真实结果为 `18 passed, 2 warnings`，全量后端为 `246 passed, 10 skipped, 2 warnings`；`compileall`、JSON 解析和 `git diff --check` 通过。
+- 当前门禁：PR #43 仍 Open/Ready for review，等待 DEV-001 对最新精确 HEAD 复审；未集成、未请求 Merge 授权、未解锁下游、Stage 6 禁止。
