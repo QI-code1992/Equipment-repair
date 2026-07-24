@@ -362,3 +362,10 @@
 - 新候选：`24153155da11dac0579466c05c8a04c7371e8904`。
 - 验证：专项 `14 passed, 2 warnings`；全量后端 `244 passed, 10 skipped, 2 warnings`；compileall、JSON 解析、`git diff --check` 通过。
 - 结论：P1 已有可执行回归覆盖；等待 DEV-001 对新精确 HEAD 复审。未请求 Merge 授权，未修改 TASK-005，未解锁下游。
+
+## TASK-008 幂等冲突 P1 修复自测（2026-07-24）
+
+- 修复：捕获 `IdempotencyKeyReused`，同 Key 不同请求体稳定返回 `409 IDEMPOTENCY_KEY_REUSED`。
+- 回归：同请求重放返回相同响应；故障记录数与 `agent.fault_report.submit` 成功审计数均不重复增加。
+- 验证：Agent 专项 `15 passed, 2 warnings`；全量后端 `245 passed, 10 skipped, 2 warnings`；compileall、`git diff --check` 通过。
+- 当前结论：P1 修复候选待 DEV-001 绑定新精确 HEAD 复审，未申请 Merge 授权。

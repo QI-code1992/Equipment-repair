@@ -11,7 +11,11 @@ from app.modules.agents.metric_query import (
     MetricQueryService,
     ServiceUnavailableError,
 )
-from app.core.idempotency import find_idempotent_response, save_idempotent_response
+from app.core.idempotency import (
+    IdempotencyKeyReused,
+    find_idempotent_response,
+    save_idempotent_response,
+)
 from app.core.database import get_db
 from app.modules.audit.service import write_audit_event
 from app.modules.identity.dependencies import require_permission
@@ -78,10 +82,15 @@ def submit_fault_report(
 ) -> dict[str, Any] | JSONResponse:
     path = "/api/agent/fault-reports/submit"
     request_body = payload.model_dump(mode="json")
-    replay = find_idempotent_response(
-        db, user_id=actor.id, method="POST", path=path,
-        key=idempotency_key, request_body=request_body,
-    )
+    try:
+        replay = find_idempotent_response(
+            db, user_id=actor.id, method="POST", path=path,
+            key=idempotency_key, request_body=request_body,
+        )
+    except IdempotencyKeyReused:
+        raise HTTPException(
+            status_code=409, detail={"code": "IDEMPOTENCY_KEY_REUSED"}
+        ) from None
     if replay is not None:
         return JSONResponse(status_code=replay[0], content=replay[1])
 

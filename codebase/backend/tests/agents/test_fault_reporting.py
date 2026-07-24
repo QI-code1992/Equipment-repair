@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 
 import pytest
 from pydantic import ValidationError
+from sqlalchemy import func, select
 
 from app.modules.agents.fault_reporting import (
     FaultDraft,
@@ -10,6 +11,8 @@ from app.modules.agents.fault_reporting import (
     SubmissionNotConfirmedError,
 )
 from tests.modules.maintenance_support import auth_headers, create_equipment, fault_reporter
+from app.modules.audit.models import AuditEvent
+from app.modules.maintenance.models import FaultReport
 
 
 def valid_draft(**overrides: object) -> FaultDraft:
@@ -92,3 +95,42 @@ def test_fault_submission_without_confirmation_does_not_write_business_record(cl
 
     assert response.status_code == 409
     assert response.json()["detail"]["code"] == "CONFIRMATION_REQUIRED"
+
+
+def test_fault_submission_replays_and_rejects_idempotency_conflict_without_duplicates(client) -> None:
+    equipment_id = create_equipment(client)
+    _, token = fault_reporter(client)
+    headers = auth_headers(token, key="agent-fault-submit-replay")
+    body = {
+        "draft": valid_draft(equipment_id=equipment_id).model_dump(mode="json"),
+        "confirmed": True,
+    }
+    first = client.post("/api/agent/fault-reports/submit", headers=headers, json=body)
+    assert first.status_code == 201
+    with client.app.state.session_factory() as db:
+        faults_before = db.scalar(select(func.count()).select_from(FaultReport))
+        audits_before = db.scalar(
+            select(func.count()).select_from(AuditEvent).where(
+                AuditEvent.action == "agent.fault_report.submit"
+            )
+        )
+
+    replay = client.post("/api/agent/fault-reports/submit", headers=headers, json=body)
+    assert replay.status_code == 201
+    assert replay.json() == first.json()
+    conflict_body = {
+        **body,
+        "draft": valid_draft(equipment_id=equipment_id, symptom="不同故障").model_dump(mode="json"),
+    }
+    conflict = client.post(
+        "/api/agent/fault-reports/submit", headers=headers, json=conflict_body
+    )
+    assert conflict.status_code == 409
+    assert conflict.json()["detail"]["code"] == "IDEMPOTENCY_KEY_REUSED"
+    with client.app.state.session_factory() as db:
+        assert db.scalar(select(func.count()).select_from(FaultReport)) == faults_before
+        assert db.scalar(
+            select(func.count()).select_from(AuditEvent).where(
+                AuditEvent.action == "agent.fault_report.submit"
+            )
+        ) == audits_before

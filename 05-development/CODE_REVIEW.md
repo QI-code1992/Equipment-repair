@@ -264,3 +264,9 @@
 - 修复候选：HEAD `24153155da11dac0579466c05c8a04c7371e8904`；同一 PR 新增业务提交 API、受控健康分 API 和 `get_health_score` 工具白名单。
 - 新验证：专项 `14 passed, 2 warnings`；全量 `244 passed, 10 skipped, 2 warnings`；compileall、JSON 解析、diff-check 通过。
 - 当前门禁：请求 DEV-001 绑定新精确 HEAD 复审；未批准、未集成、未申请 Merge 授权。
+
+## TASK-008 幂等冲突 P1 修复复查请求（2026-07-24）
+
+- 阻断修复：`POST /api/agent/fault-reports/submit` 现在映射 `IdempotencyKeyReused` 为 `409 IDEMPOTENCY_KEY_REUSED`。
+- 证据：同请求重放、冲突请求、无重复故障记录和无重复成功审计回归均通过；Agent 专项 `15 passed, 2 warnings`，全量 `245 passed, 10 skipped, 2 warnings`。
+- 当前门禁：同一 PR 等待 DEV-001 对本次新精确 HEAD 复审，未请求 Merge 授权。

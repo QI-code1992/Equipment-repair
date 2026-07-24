@@ -267,3 +267,11 @@
 - 当前 PR HEAD：`24153155da11dac0579466c05c8a04c7371e8904`。
 - 验证：后端全量 `244 passed, 10 skipped, 2 warnings`；专项故障/指标 `14 passed, 2 warnings`；compileall、JSON 解析和 `git diff --check` 通过。
 - 门禁：旧 HEAD `4e6aec342849f60fdd281c083f3a21147bc7d866` 的 Changes requested 已针对同一 PR 修复；等待 DEV-001 绑定新 HEAD 复审，不请求 Merge 授权、不合并、不解锁下游或进入 Stage 6。
+
+## FCP-008-R3：TASK-008 幂等冲突修复候选
+
+- 状态：Development Candidate / P1 修复完成 / PR #43 等待 DEV-001 对新精确 HEAD 复审；未集成、不解锁下游。
+- 修复：`/api/agent/fault-reports/submit` 捕获 `IdempotencyKeyReused` 并返回 `409 IDEMPOTENCY_KEY_REUSED`；新增同请求重放、不同请求体冲突、故障记录和成功审计无重复回归测试。
+- 当前 PR HEAD：待本次证据提交后以 GitHub PR 当前完整 HEAD 绑定。
+- 验证：专项 Agent 测试 `15 passed, 2 warnings`；完整后端 `245 passed, 10 skipped, 2 warnings`；compileall、`git diff --check` 通过。
+- 门禁：仍不得请求 Merge 授权、合并、解锁下游或进入 Stage 6；等待 DEV-001 重新审核。

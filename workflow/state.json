@@ -124,7 +124,7 @@
   },
   "task008Delivery": {
     "taskId": "TASK-008",
-    "status": "READY_FOR_DEV001_REREVIEW",
+    "status": "READY_FOR_DEV001_REREVIEW_IDEMPOTENCY_FIX",
     "owner": "DEV-002",
     "reviewer": "DEV-001",
     "branch": "codex/task-008-fault-metric-agents",
@@ -136,7 +136,7 @@
     "candidateHead": "58a64d9dfbc4672cfd4cdc118127850dd83fed5e",
     "currentPullRequestHead": "24153155da11dac0579466c05c8a04c7371e8904",
     "reviewStatus": "CHANGES_REQUESTED_P1_REMEDIATED_PENDING_REVIEW",
-    "verification": "Local Python 3.13.14: 14 TASK-008 tests passed / 2 warnings; full backend 244 passed / 10 skipped / 2 warnings; git diff --check passed.",
+    "verification": "Local Python 3.13.14: 15 TASK-008 agent tests passed / 2 warnings; full backend 245 passed / 10 skipped / 2 warnings; git diff --check passed.",
     "dependencyUnlockAllowed": false,
     "nextAction": "DEV-002 must commit and push the exact candidate, create the single Draft PR, and request DEV-001 review; no Merge authorization, integration, downstream unlock or Stage 6 entry."
   },

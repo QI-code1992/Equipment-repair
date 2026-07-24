@@ -313,3 +313,10 @@
 - 修复候选：同一 PR 新 HEAD `24153155da11dac0579466c05c8a04c7371e8904`；确认提交复用既有维护服务、权限、幂等和审计；健康分 API 通过受控 reader 读取并失败降级；`get_health_score` 已加入白名单。
 - 验证：专项 `14 passed, 2 warnings`；后端全量 `244 passed, 10 skipped, 2 warnings`；compileall、JSON 解析、diff-check 通过。
 - 下一动作：DEV-001 重新绑定新精确 HEAD 审核。当前不请求 Merge 授权、不合并、不解锁 TASK-009/010/011、不进入 Stage 6。
+
+## TASK-008 幂等冲突 P1 修复交接（2026-07-24）
+
+- DEV-001 新反馈：PR #43 HEAD `aabfba77b0c2db924f11b67344922986c4888738` 的 `IdempotencyKeyReused` 未映射为 409。
+- 修复：提交端点捕获冲突异常；同 Key 同体重放原响应，同 Key 不同体返回 `409 IDEMPOTENCY_KEY_REUSED`，故障记录和成功审计无重复。
+- 验证：Agent 专项 `15 passed, 2 warnings`；后端全量 `245 passed, 10 skipped, 2 warnings`；compileall、diff-check 通过。
+- 下一动作：推送本次修复后的新精确 HEAD，并在同一 PR #43 请求 DEV-001 复审；仍不申请 Merge 授权、不合并、不解锁下游、不进入 Stage 6。
