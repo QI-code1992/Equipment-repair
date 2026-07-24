@@ -374,3 +374,12 @@
 - 证据：Agent API 与 Runtime `8 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；静态 Agent 检查、compileall、`git diff --check` 通过。
 - 未验证：DEV-002 无 Docker 环境，真实 PostgreSQL/RAGFlow/LLM 联调待 DEV-001 执行；未新增生产依赖、迁移、兼容层或通用抽象。
 - 下一动作：推送同一任务分支并创建唯一 Draft PR，向 DEV-001 请求绑定完整精确 HEAD 的正式复审。复审前不得请求 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
+
+## TASK-009 第二轮 P1 修复交接（2026-07-24）
+
+- 审核基准：PR #49 / HEAD `15a5947f95d52a0044d4ee2978da09cc2509e41e`，结论 `Changes requested`；旧审核不得用于批准或集成。
+- 修复提交：`8d4d4c48aaa4ee39d01be4cbb5cb18de374a784c`。
+- 修复内容：故障诊断 API 不再信任客户端回传 `session`；服务端以 `DiagnosisDraft` 保存和恢复诊断状态，绑定 `_owner_user_id` 与故障；READY 写入幂等，重复提交返回既有结果，不重复写草稿或成功审计。
+- 回归证据：伪造 READY/root cause 的客户端 `session` 请求 422；其他用户访问草稿 403；同 Key 重放/409 冲突覆盖；READY 后不同 Key 重放不新增草稿或 `agent.fault_diagnosis.ready` 审计；既有 `ADOPTED` 开始维修路径通过。
+- 验证：聚焦 `49 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；14 项原型静态回归、compileall、JSON 解析和 `git diff --check` 通过。
+- 请求动作：推送本证据提交后，以 PR #49 新完整精确 HEAD 请求 DEV-001 复审。当前不申请 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。

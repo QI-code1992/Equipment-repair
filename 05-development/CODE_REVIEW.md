@@ -304,3 +304,12 @@
 - P1 修复：新增 `/api/agent/operation-guidance` 和 `/api/agent/fault-diagnosis`；历史案例通过 TASK-003 查询，知识引用通过 TASK-005 adapter，诊断达标创建既有 `DiagnosisDraft`，后续由 `/start-repair` 采纳。
 - 代码审查重点：请 DEV-001 绑定该精确 HEAD 检查生产执行边界、任务范围、权限/安全、失败降级、外部检索边界和测试证据。当前未请求 Merge 授权；任何 Critical/Important 在同一 Draft PR 修复后重新审核。
 - 未验证：Docker/PostgreSQL/RAGFlow/LLM 真实联调待 DEV-001 专用环境核验；在此之前不得批准、集成、解锁下游或进入 Stage 6。
+
+## TASK-009 DEV-001 第二轮 P1 修复复查请求（2026-07-24）
+
+- 原审核：PR #49 / HEAD `15a5947f95d52a0044d4ee2978da09cc2509e41e`，P1 为故障诊断 API 信任客户端回传 `session`，可伪造 READY 状态、根因和方案，并在完成会话重放时重复创建草稿和成功审计。
+- 修复提交：`8d4d4c48aaa4ee39d01be4cbb5cb18de374a784c`。
+- Standards/Spec 自查：客户端不再提交完整诊断状态；服务端 `DiagnosisDraft` 保存受控 `_session` 和 `_owner_user_id`，后续步骤以 `diagnosis_draft_id` 读取并校验归属、故障和状态。诊断达标后仍使用既有 `DiagnosisDraft` 与 `/start-repair` 的 `ADOPTED` 路径，未新增迁移、生产依赖、兼容层或通用抽象。
+- 回归证据：伪造 `session` 请求 422；越权草稿请求 403；幂等重放返回原响应、同 Key 不同体返回 409；READY 后重复请求不新增 `DiagnosisDraft` 或 `agent.fault_diagnosis.ready` 审计；最终维修采纳路径通过。
+- 验证：Agent/Runtime/Maintenance 聚焦回归 `49 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；14 项原型静态回归、compileall、JSON 解析和 `git diff --check` 通过。
+- 当前结论：本地自查 Critical 0、Important 0；等待 DEV-001 对推送后的新完整 HEAD 复审。未请求 Merge 授权、未合并、未解锁 TASK-010/011，Stage 6 仍禁止。

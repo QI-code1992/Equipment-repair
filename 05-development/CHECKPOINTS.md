@@ -355,10 +355,20 @@
 
 ## FCP-009-R1：TASK-009 操作指引与维修前诊断开发候选
 
-- 状态：Development Candidate / 等待 DEV-001 复审；未集成，不解锁下游任务，Stage 6 仍禁止。
+- 状态：Development Candidate / Superseded by FCP-009-R2；未集成，不解锁下游任务，Stage 6 仍禁止。
 - 分支/基线：`codex/task-009-guidance-diagnosis`，基于 `origin/codex/stage-05-integration@e0333e2196fc1db9dba0056021625972576215e2`；代码提交 `f78deace39fde732bcea7ec36f9a3f5eea79dfc1`。
 - 范围：操作指引最多两次定向检索与人工降级；报警码具体数字/否定证据；维修前诊断的复现工况加第二类技术证据门槛；8 步、24 问、4 项证据上限；采纳预填摘要与直接开始清除临时摘要；历史案例与知识引用均通过外部受控回调边界提供。
 - 变更边界：新增两个 Agent 模块、生产受控 API、TASK-003 历史案例和 TASK-005 知识引用回调、既有 DiagnosisDraft 写入，以及对应测试和 Runtime 工具白名单；未新增生产依赖、数据库迁移、兼容层或通用抽象，未修改 TASK-005。
 - 验证：Python 3.13 Agent API/Runtime `8 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；`node 06-testing/tests/fault-report-repair-agent.test.js` 通过；`compileall`、`git diff --check` 通过。警告为既有第三方弃用提示。
 - 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；真实 RAGFlow 引用与运行态降级由 DEV-001 在复审/集成阶段核验。
-- 门禁：同一 Draft PR #49 当前完整 HEAD 为 `a5c5d20ef1936f7690e9fb32d332195561257609`；任务开发者将在该 PR 中维护候选，不得自批、自合并、申请 Merge 授权、解锁 TASK-010/011 或进入 Stage 6。
+- 门禁：该候选已被 DEV-001 第二轮 `Changes requested` 取代；同一 Draft PR #49 继续维护，不得自批、自合并、申请 Merge 授权、解锁 TASK-010/011 或进入 Stage 6。
+
+## FCP-009-R2：TASK-009 服务端受控诊断会话修复候选
+
+- 状态：Development Candidate / 第二轮 P1 已修复 / 等待 DEV-001 绑定新精确 HEAD 复审；未集成，不解锁下游任务，Stage 6 仍禁止。
+- 分支/PR：`codex/task-009-guidance-diagnosis` / PR #49；代码修复提交 `8d4d4c48aaa4ee39d01be4cbb5cb18de374a784c`，最终候选 HEAD 以本证据提交推送后的 PR #49 完整 HEAD 为准。
+- 修复范围：`POST /api/agent/fault-diagnosis` 不再接受客户端回传的完整 `session` 作为事实源；诊断状态保存在服务端 `DiagnosisDraft.read_only_summary._session`，客户端后续步骤只提交 `diagnosis_draft_id`。服务端校验草稿存在、归属用户、故障绑定和状态，READY 后重复提交只返回既有服务端结果，不重复创建草稿或成功审计。
+- 回归覆盖：伪造 `DIAGNOSIS_READY`/根因的客户端 `session` 请求稳定 422；其他用户访问草稿返回 403；同一幂等 Key 重放返回原响应、不同请求体返回 `409 IDEMPOTENCY_KEY_REUSED`；READY 后不同 Key 重放不新增 `DiagnosisDraft` 或 `agent.fault_diagnosis.ready` 审计；既有 `/api/fault-reports/{fault_id}/start-repair` 的 `ADOPTED` 采纳路径仍通过。
+- 验证：Python 3.13 Agent/Runtime/Maintenance 聚焦回归 `49 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；14 项原型静态回归通过；`compileall`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。警告为既有第三方弃用提示。
+- 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；真实 RAGFlow 引用与运行态降级由 DEV-001 在复审/集成阶段核验。
+- 门禁：PR #49 新 HEAD 会使旧审核结论失效；等待 DEV-001 重新审核，不得请求 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。

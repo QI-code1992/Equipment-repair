@@ -157,16 +157,16 @@
     "branch": "codex/task-009-guidance-diagnosis",
     "integrationTarget": "codex/stage-05-integration",
     "baseCommit": "e0333e2196fc1db9dba0056021625972576215e2",
-    "candidateCommit": "f78deace39fde732bcea7ec36f9a3f5eea79dfc1",
+    "candidateCommit": "8d4d4c48aaa4ee39d01be4cbb5cb18de374a784c",
     "pullRequest": 49,
-    "candidateHead": "a5c5d20ef1936f7690e9fb32d332195561257609",
+    "candidateHead": "PENDING_TASK009_EVIDENCE_COMMIT",
     "scope": "operation guidance and pre-repair fault diagnosis Agent boundaries, evidence gates, bounded retrieval, adoption/direct-start and manual fallback",
-    "verification": "Python 3.13 Agent API/Runtime 8 passed / 2 warnings; full backend 293 passed / 12 skipped / 2 warnings; static Agent checks, compileall and git diff --check passed.",
+    "verification": "Python 3.13 Agent/Runtime/Maintenance focused regression 49 passed / 2 warnings; full backend 293 passed / 12 skipped / 2 warnings; all 14 prototype static checks passed; compileall, workflow JSON parsing and git diff --check passed.",
     "unverified": "DEV-002 has no Docker environment; real PostgreSQL/RAGFlow/LLM integration remains for DEV-001 review and integration validation.",
     "productionDependencyChange": false,
     "databaseMigrationChange": false,
     "dependencyUnlockAllowed": false,
-    "nextAction": "Push the same task branch, create or update one Draft PR, and request DEV-001 review bound to the exact candidate commit. Do not request merge authorization, merge, unlock downstream tasks or enter Stage 6 before review and integration gates."
+    "nextAction": "Push the same PR #49 task branch and request DEV-001 review bound to the exact post-evidence candidate HEAD. Do not request merge authorization, merge, unlock downstream tasks or enter Stage 6 before review and integration gates."
   },
   "task005Delivery": {
     "taskId": "TASK-005",

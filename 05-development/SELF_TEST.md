@@ -476,3 +476,15 @@
 - 覆盖：两次定向检索、人工降级、生产 API、TASK-003 历史案例、TASK-005 知识引用、DiagnosisDraft 写入、报警码否定证据、复现工况加第二类证据、8/24/4 上限、采纳/直接开始边界及工具白名单。
 - 未验证：当前环境无 Docker，未执行真实 PostgreSQL/RAGFlow/LLM 联调；由 DEV-001 在复审/集成阶段核验。未新增生产依赖、迁移、兼容层或通用抽象。
 - 门禁：候选未获 DEV-001 审核，不请求 Merge 授权、不合并、不解锁下游、不进入 Stage 6。
+
+## TASK-009 第二轮 P1 修复自测（2026-07-24）
+
+- 审核输入：DEV-001 对 PR #49 精确 HEAD `15a5947f95d52a0044d4ee2978da09cc2509e41e` 提交 `Changes requested`；P1 为故障诊断 API 信任客户端 `session`，可伪造 `DIAGNOSIS_READY`、根因和方案并重复创建草稿/成功审计。
+- 修复提交：`8d4d4c48aaa4ee39d01be4cbb5cb18de374a784c`。
+- 修复结果：诊断状态改为服务端受控 `DiagnosisDraft` 会话；后续请求只接受 `diagnosis_draft_id`；服务端校验草稿存在、归属用户、故障绑定和状态；READY 写入和 READY 后重放均不重复创建草稿或成功审计。
+- 定向验证：`/private/tmp/equipment-task006-python/bin/python -m pytest tests/agents/test_fault_diagnosis.py -q` 为 `5 passed, 2 warnings`。
+- 相关回归：`/private/tmp/equipment-task006-python/bin/python -m pytest tests/agents tests/modules/test_agent_runtime.py tests/modules/test_maintenance_lifecycle.py -q` 为 `49 passed, 2 warnings`。
+- 完整后端：`/private/tmp/equipment-task006-python/bin/python -m pytest -q` 为 `293 passed, 12 skipped, 2 warnings`。
+- 静态/编译：14 项 `06-testing/tests/*.test.js` 全部通过；`/private/tmp/equipment-task006-python/bin/python -m compileall -q codebase/backend/app`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
+- 环境说明：系统 `python3.13` 当前缺少 `pytest`，本轮使用隔离 Python 3.13.14 环境 `/private/tmp/equipment-task006-python` 并重新 editable 安装当前后端；安装生成的本地 `egg-info` 已清理，未修改生产依赖声明。
+- 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；需 DEV-001 在复审/集成阶段核验。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。

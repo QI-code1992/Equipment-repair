@@ -376,7 +376,7 @@
 
 ### TASK-009：操作指引与维修前故障诊断 Agent
 
-- 状态：Development Candidate / 等待 DEV-001 复审；未集成，不解锁下游任务
+- 状态：Development Candidate / 第二轮 P1 已修复，等待 DEV-001 复审；未集成，不解锁下游任务
 - 优先级：P0
 - 负责人：`DEV-002`
 - 任务开发者：`DEV-002`
