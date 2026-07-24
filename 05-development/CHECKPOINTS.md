@@ -289,4 +289,4 @@
 
 - 集成：PR #43 获批 HEAD `19eaf1f213c50471f93b4e09e17df57bbeb1987b` 经项目负责人授权后，由 DEV-001 手动 Merge Commit `84ac8815cab403cb71a86230b4f705944bb5f6d2` 合入 `codex/stage-05-integration`；双亲为 `78e9dfb...` 与获批 HEAD。
 - 合并后验证：Python 3.13 后端 `246 passed, 10 skipped, 2 warnings`；14 项 `06-testing/tests/*.test.js` 静态回归通过；compileall、`workflow/state.json` JSON 解析和 merge diff check 通过。
-- 状态：PR #44 已获项目负责人确认并由 DEV-002 以 Merge Commit `9bbeab88c02c5cb1e831057fe0e14ca2b3c6f683` 合入；治理闭环完成，TASK-008 可按依赖矩阵解锁下游，Stage 6 仍禁止。
+- 状态：PR #45 已获项目负责人确认并由 DEV-002 以 Merge Commit `997e50e10a7964b60fc8d9b4357c6274df8f0e97` 合入；治理闭环完成，TASK-008 可按依赖矩阵解锁下游，Stage 6 仍禁止。
