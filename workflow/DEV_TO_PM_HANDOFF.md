@@ -383,3 +383,12 @@
 - 回归证据：伪造 READY/root cause 的客户端 `session` 请求 422；其他用户访问草稿 403；同 Key 重放/409 冲突覆盖；READY 后不同 Key 重放不新增草稿或 `agent.fault_diagnosis.ready` 审计；既有 `ADOPTED` 开始维修路径通过。
 - 验证：聚焦 `49 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；14 项原型静态回归、compileall、JSON 解析和 `git diff --check` 通过。
 - 请求动作：推送本证据提交后，以 PR #49 新完整精确 HEAD 请求 DEV-001 复审。当前不申请 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第三轮 P1 修复交接（2026-07-24）
+
+- 审核基准：PR #49 / HEAD `4b965715fe6fb6869c14da6b23f6b26479243595`，结论 `Changes requested`；旧审核不得用于批准或集成。
+- 修复提交：`e0c058e182d7c29881c3de75403b2ef0eb648de7`。
+- 修复内容：故障诊断草稿创建除 `intelligence:agent` 外必须具备 `fault:repair`；`start` 请求不再接受客户端设备型号、症状、描述或数据集；诊断上下文和知识检索范围由服务端故障单、设备事实和 `fault_diagnosis` Agent 配置绑定。
+- 回归证据：仅有 `intelligence:agent` 的用户返回 403 且不创建草稿；伪造客户端上下文/数据集返回 422；成功路径检索问题与数据集绑定服务端事实和配置；既有草稿越权、重放、READY 幂等和 `ADOPTED` 采纳路径继续通过。
+- 验证：故障诊断定向 `5 passed, 2 warnings`；聚焦 `49 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；14 项原型静态回归、compileall、JSON 解析和 `git diff --check` 通过。
+- 请求动作：推送本证据提交后，以 PR #49 新完整精确 HEAD 请求 DEV-001 复审。当前不申请 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。

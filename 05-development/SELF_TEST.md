@@ -488,3 +488,14 @@
 - 静态/编译：14 项 `06-testing/tests/*.test.js` 全部通过；`/private/tmp/equipment-task006-python/bin/python -m compileall -q codebase/backend/app`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
 - 环境说明：系统 `python3.13` 当前缺少 `pytest`，本轮使用隔离 Python 3.13.14 环境 `/private/tmp/equipment-task006-python` 并重新 editable 安装当前后端；安装生成的本地 `egg-info` 已清理，未修改生产依赖声明。
 - 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；需 DEV-001 在复审/集成阶段核验。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第三轮 P1 修复自测（2026-07-24）
+
+- 审核输入：DEV-001 对 PR #49 精确 HEAD `4b965715fe6fb6869c14da6b23f6b26479243595` 提交 `Changes requested`；P1 为仅有 `intelligence:agent` 可创建诊断草稿，且诊断上下文/知识数据集信任客户端字段，违反 AC-004/AC-037。
+- 修复提交：`e0c058e182d7c29881c3de75403b2ef0eb648de7`。
+- 修复结果：故障诊断 `start` 路径增加 `fault:repair` 门禁；客户端不再能提交设备型号、症状、描述或数据集；服务端从 `FaultReport`、`Equipment` 和 `fault_diagnosis` Agent 配置构造诊断上下文和知识检索范围。
+- 定向验证：`/private/tmp/equipment-task006-python/bin/python -m pytest tests/agents/test_fault_diagnosis.py -q` 为 `5 passed, 2 warnings`。
+- 相关回归：`/private/tmp/equipment-task006-python/bin/python -m pytest tests/agents tests/modules/test_agent_runtime.py tests/modules/test_maintenance_lifecycle.py -q` 为 `49 passed, 2 warnings`。
+- 完整后端：`/private/tmp/equipment-task006-python/bin/python -m pytest -q` 为 `293 passed, 12 skipped, 2 warnings`。
+- 静态/编译：14 项 `06-testing/tests/*.test.js` 全部通过；`/private/tmp/equipment-task006-python/bin/python -m compileall -q codebase/backend/app`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
+- 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；需 DEV-001 在复审/集成阶段核验。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。

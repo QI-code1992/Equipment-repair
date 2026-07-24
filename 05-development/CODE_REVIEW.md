@@ -313,3 +313,12 @@
 - 回归证据：伪造 `session` 请求 422；越权草稿请求 403；幂等重放返回原响应、同 Key 不同体返回 409；READY 后重复请求不新增 `DiagnosisDraft` 或 `agent.fault_diagnosis.ready` 审计；最终维修采纳路径通过。
 - 验证：Agent/Runtime/Maintenance 聚焦回归 `49 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；14 项原型静态回归、compileall、JSON 解析和 `git diff --check` 通过。
 - 当前结论：本地自查 Critical 0、Important 0；等待 DEV-001 对推送后的新完整 HEAD 复审。未请求 Merge 授权、未合并、未解锁 TASK-010/011，Stage 6 仍禁止。
+
+## TASK-009 DEV-001 第三轮 P1 修复复查请求（2026-07-24）
+
+- 原审核：PR #49 / HEAD `4b965715fe6fb6869c14da6b23f6b26479243595`，P1 为仅有 `intelligence:agent` 权限的用户仍可创建诊断草稿，且诊断上下文与知识数据集仍信任客户端字段，违反 AC-004/AC-037。
+- 修复提交：`e0c058e182d7c29881c3de75403b2ef0eb648de7`。
+- Standards/Spec 自查：故障诊断创建可采纳草稿需同时满足 `intelligence:agent` 与 `fault:repair`；`start` 请求只接受 `fault_report_id` 与报警码状态，设备型号、故障症状、描述均由服务端故障单和设备记录生成，知识数据集由 `fault_diagnosis` Agent 配置读取。未新增迁移、生产依赖、兼容层或通用抽象。
+- 回归证据：仅有 `intelligence:agent` 的用户返回 403 且不创建草稿；伪造客户端上下文/数据集返回 422；成功路径检索问题与数据集绑定服务端事实和配置；READY 幂等、草稿越权、重放和最终 `ADOPTED` 采纳路径继续通过。
+- 验证：故障诊断定向 `5 passed, 2 warnings`；Agent/Runtime/Maintenance 聚焦回归 `49 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；14 项原型静态回归、compileall、JSON 解析和 `git diff --check` 通过。
+- 当前结论：本地自查 Critical 0、Important 0；等待 DEV-001 对推送后的新完整 HEAD 复审。未请求 Merge 授权、未合并、未解锁 TASK-010/011，Stage 6 仍禁止。
