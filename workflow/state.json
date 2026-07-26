@@ -157,16 +157,16 @@
     "branch": "codex/task-009-guidance-diagnosis",
     "integrationTarget": "codex/stage-05-integration",
     "baseCommit": "e0333e2196fc1db9dba0056021625972576215e2",
-    "candidateCommit": "a25f32f90ddf812c7cc75c1a940d09d5077a2eb5",
+    "candidateCommit": "913cb44b262e34e7d49e25162a1fb5bf3bfe113f",
     "pullRequest": 49,
-    "candidateHead": "a25f32f90ddf812c7cc75c1a940d09d5077a2eb5",
+    "candidateHead": "PR #49 headRefOid after governance evidence push; must be bound in the re-review request",
     "scope": "operation guidance and pre-repair fault diagnosis Agent boundaries, evidence gates, bounded retrieval, adoption/direct-start and manual fallback",
-    "verification": "Python 3.13 Compose-contract/app-factory/operation-guidance/fault-diagnosis focused regression 18 passed / 2 warnings; full backend 296 passed / 12 skipped / 2 warnings; all 14 prototype static checks passed; compileall and git diff --check passed. The Compose contract binds the API RAGFlow variables, Linux host-gateway mapping, scoped egress network and live API-container DNS/authenticated-connectivity probe.",
-    "unverified": "DEV-002 has no Docker or PowerShell and no dedicated live-stack RAGFlow/PostgreSQL/MinIO/ClamAV environment; Compose rebuild/config, API-container DNS/connectivity probe, adapter assertion, /healthz and real TASK-009 retrieval require DEV-001 review/integration validation.",
+    "verification": "Python 3.13 executable-probe/Compose-contract/operation-guidance/fault-diagnosis/runtime focused regression 20 passed / 2 warnings; full backend 297 passed / 12 skipped / 2 warnings; all 14 prototype static checks passed; compileall, workflow JSON and git diff --check passed. The API-container probe now runs a module entry point without passing Python source through PowerShell native arguments, and an actual subprocess regression verifies the authenticated HTTP request.",
+    "unverified": "DEV-002 has no Windows PowerShell/Docker dedicated live-stack environment; DEV-001 must rerun the complete script with the dedicated RAGFlow key on the final exact HEAD, including Compose rebuild/config, API-container probe, adapter assertion, /healthz and real TASK-009 retrieval.",
     "productionDependencyChange": false,
     "databaseMigrationChange": false,
     "dependencyUnlockAllowed": false,
-    "nextAction": "TASK-009 P1 API-container RAGFlow connectivity is fixed in the same PR #49 branch. Push the evidence head and request DEV-001 re-review, including Compose rebuild/config, API-container DNS/connectivity probe, adapter assertion, /healthz and real RAGFlow retrieval validation in an environment with RAGFLOW_BASE_URL/RAGFLOW_API_KEY. Do not request merge authorization, merge, unlock downstream tasks or enter Stage 6 before review and integration gates."
+    "nextAction": "Push the TASK-009 executable-probe remediation and governance evidence to the same PR #49, bind the final exact HEAD, and request DEV-001 re-review plus Windows Docker live-stack validation with the dedicated RAGFlow key. Do not request merge authorization, merge, unlock downstream tasks or enter Stage 6 before review and integration gates."
   },
   "task005Delivery": {
     "taskId": "TASK-005",

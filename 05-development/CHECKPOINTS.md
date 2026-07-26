@@ -383,6 +383,16 @@
 - 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；真实 RAGFlow 引用与运行态降级由 DEV-001 在复审/集成阶段核验。
 - 门禁：PR #49 新 HEAD 会使旧审核结论失效；等待 DEV-001 重新审核，不得请求 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
 
+## FCP-009-R8：TASK-009 可执行 RAGFlow 探针修复候选
+
+- 状态：Development Candidate / PowerShell 原生参数传递 P1 已修复 / 等待 DEV-001 对最终 PR #49 精确 HEAD 复审与 live-stack 复验；未集成、不解锁下游，Stage 6 仍禁止。
+- 修复提交：`913cb44b262e34e7d49e25162a1fb5bf3bfe113f`。
+- 修复范围：删除 `Invoke-Validation.ps1` 通过 `python -c` 传递多行 here-string 的路径；新增可由 API 镜像直接运行的 `app.modules.knowledge.ragflow_probe`，脚本改用无源码参数的 `python -m` 执行。
+- 回归覆盖：实际 Python 子进程启动探针模块，访问本地 HTTP RAGFlow stub 的 `/api/v1/datasets` 并验证 Bearer 认证；静态契约同时禁止旧 `$apiRagflowProbe` 并固定模块入口。
+- 验证：相关 `20 passed, 2 warnings`；完整后端 `297 passed, 12 skipped, 2 warnings`；14 项原型静态回归、`compileall`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
+- 未验证：DEV-002 当前 Mac 环境无 PowerShell/Docker 专用 live-stack，未用真实专用 RAGFlow Key 重跑 Windows Docker 脚本；需 DEV-001 在新精确 HEAD 上复验 Compose、容器探针、adapter、`/healthz` 和真实检索。
+- 门禁：不得申请 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
+
 ## FCP-009-R6：TASK-009 Compose RAGFlow 配置传递修复候选
 
 - 状态：Development Candidate / 第六轮 P1 修复 / PR #49 等待 DEV-001 对推送后的精确 HEAD 复审；未集成、不解锁下游，Stage 6 仍禁止。

@@ -353,3 +353,11 @@
 - 修复边界：仅为 API 复用已有 host 映射和 RAGFlow egress 网络，并扩展现有 TASK-005 live-stack 验证入口；未新增生产依赖、业务 API、数据迁移、权限规则或 RAGFlow 服务配置。
 - 回归：静态契约覆盖 API 的 host 映射、egress 网络和容器探针；探针运行时执行 DNS 解析与有凭据的 HTTP 请求。相关 `18 passed, 2 warnings`、完整后端 `296 passed, 12 skipped, 2 warnings`、14 项原型静态检查、编译和差异检查通过。
 - 残余风险：本机缺少 Docker/PowerShell，未实际运行 Linux 容器探针；DEV-001 必须重建 Compose 并验证 API 容器 `/healthz`、adapter 与真实检索。当前仍为 `Changes requested` 后的开发候选，未申请 Merge 授权。
+
+## TASK-009 第八轮 P1 修复自查（2026-07-26）
+
+- 审核反馈映射：PR #49 HEAD `cc643881c251bddc37bb4ae83564b7e14a79a853` 的 live-stack 探针将多行 Python 作为 `python -c` 原生参数，PowerShell/Docker 转换后引号丢失并产生 `SyntaxError`。
+- 结论：旧静态测试只证明源码文字存在，未证明探针可执行；该反馈成立。修复移除源码参数传递，改为 API 镜像内可直接执行的模块入口。
+- 验证证据：修复前新增用例 `2 failed, 1 passed`；修复后实际子进程探针、静态契约和 TASK-009 聚焦共 `20 passed, 2 warnings`，完整后端 `297 passed, 12 skipped, 2 warnings`，14 项静态回归、编译、JSON 与差异检查通过。
+- 变更边界：仅新增一个探针模块、修改现有验证脚本和其回归测试；无依赖、迁移、兼容层、额外抽象或无关修改。
+- 残余门禁：DEV-001 必须用 Windows PowerShell、Docker 和专用 RAGFlow Key 对 PR #49 新精确 HEAD 重跑完整 live-stack；在新审核前不申请 Merge 授权。

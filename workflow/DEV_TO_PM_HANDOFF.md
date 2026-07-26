@@ -419,6 +419,15 @@
 - 未验证：DEV-002 无 Docker 命令与专用 live-stack 配置，未执行 Compose 容器内 `RagflowAdapter` 断言、`/healthz` 或真实 TASK-009 RAGFlow 检索。请 DEV-001 对推送后的精确 HEAD 运行这些复验；`test_task005_live_stack.py` 在此环境为 `1 skipped, 2 warnings`。
 - 门禁：当前不得申请 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
 
+## TASK-009 第八轮 P1 可执行探针修复交接（2026-07-26）
+
+- 审核基准：PR #49 / HEAD `cc643881c251bddc37bb4ae83564b7e14a79a853`，结论 `Changes requested`；DEV-001 用专用 RAGFlow Key 复现 PowerShell/Docker 传参破坏多行 Python 源码并在检索前 `SyntaxError`。
+- 修复提交：`913cb44b262e34e7d49e25162a1fb5bf3bfe113f`。
+- 修复内容：移除 here-string 与 `python -c` 组合，新增 API 镜像内 `app.modules.knowledge.ragflow_probe`，由验证脚本以 `python -m` 运行，避免任何 Python 源码跨 PowerShell 原生命令参数边界。
+- 回归证据：修复前 `2 failed, 1 passed`；修复后实际子进程运行探针并验证认证请求，相关 `20 passed, 2 warnings`；完整后端 `297 passed, 12 skipped, 2 warnings`；14 项静态回归、编译、JSON 和差异检查通过。
+- 待 DEV-001：在 PR #49 推送后的最终精确 HEAD 上，用 Windows PowerShell、Docker 和专用 RAGFlow Key 重跑完整 live-stack，并复核 Compose、API 容器探针、adapter、`/healthz` 与真实 TASK-009 检索。
+- 门禁：仅请求重新审核，不请求 Merge 授权；不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
 ## TASK-009 第七轮 P1 API 容器连通性修复交接（2026-07-24）
 
 - 审核基准：PR #49 / HEAD `f920af89f7fbaefbb1f5547582ed4d44b44005ef`，结论 `Changes requested`；API 容器缺少 `host.docker.internal` 的 Linux host-gateway 映射，不能解析宿主机 RAGFlow。

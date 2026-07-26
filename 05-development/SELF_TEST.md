@@ -541,3 +541,12 @@
 - 完整后端：在 `codebase/backend` 下执行 `/private/tmp/equipment-task006-python/bin/python -m pytest -q` 为 `296 passed, 12 skipped, 2 warnings`。
 - 静态/编译：14 项 `06-testing/tests/*.test.js` 全部通过；`python3.13 -m compileall -q codebase/backend/app` 与 `git diff --check` 通过。
 - 未验证：DEV-002 当前无 Docker 或 PowerShell，未执行脚本的真实 Linux Docker 容器探针、Compose 重建、容器内 `/healthz`、adapter 断言或 RAGFlow 检索；必须由 DEV-001 对新 HEAD 运行。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第八轮 P1 探针执行修复自测（2026-07-26）
+
+- 审核输入：DEV-001 对 PR #49 精确 HEAD `cc643881c251bddc37bb4ae83564b7e14a79a853` 提交 `Changes requested`；多行 Python here-string 经 PowerShell/Docker 原生参数转换丢失引号，探针在真实检索前 `SyntaxError`。
+- 红灯验证：新回归在修复前同时因旧 `$apiRagflowProbe` 仍存在、`app.modules.knowledge.ragflow_probe` 不存在而 `2 failed, 1 passed`。
+- 修复提交：`913cb44b262e34e7d49e25162a1fb5bf3bfe113f`。脚本改为 `docker ... python -m app.modules.knowledge.ragflow_probe`，不再跨原生命令边界传递 Python 源码。
+- 可执行回归：真实 Python 子进程运行与容器相同的模块入口，向本地 HTTP stub 的 `/api/v1/datasets` 发起请求并验证 `Authorization: Bearer test-only-key`。
+- 验证：相关 `20 passed, 2 warnings`；完整后端 `297 passed, 12 skipped, 2 warnings`；14 项原型静态回归、`compileall`、JSON 解析和 `git diff --check` 通过。
+- 边界：未新增生产依赖、数据库迁移、兼容层或通用抽象；无无关修改。DEV-002 未执行 Windows PowerShell/Docker/真实 RAGFlow Key live-stack，需 DEV-001 对新 HEAD 复验。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
