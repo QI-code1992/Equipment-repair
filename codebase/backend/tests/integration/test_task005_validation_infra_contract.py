@@ -1,3 +1,8 @@
+import os
+import subprocess
+import sys
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 
@@ -44,10 +49,8 @@ def test_task005_validation_scripts_use_host_api_url_and_cleanup() -> None:
     assert "TASK005_RAGFLOW_DATASET_ID" in invoke
     assert '-e "TASK005_RAGFLOW_DATASET_ID=$datasetId"' in invoke
     assert "RAGFLOW_TIMEOUT_SECONDS" in invoke
-    assert "$apiRagflowProbe" in invoke
-    assert "docker @compose exec -T api python -c $apiRagflowProbe" in invoke
-    assert "socket.getaddrinfo" in invoke
-    assert "/api/v1/datasets" in invoke
+    assert "$apiRagflowProbe" not in invoke
+    assert "docker @compose exec -T api python -m app.modules.knowledge.ragflow_probe" in invoke
     assert "run --rm --no-deps --build" in invoke
     assert "down --volumes --remove-orphans" in invoke
     assert "run --rm --no-deps worker python -c" in invoke
@@ -67,3 +70,46 @@ def test_task005_validation_scripts_use_host_api_url_and_cleanup() -> None:
     assert "catch" in create_environment
     assert "$cleanupFailure" in remove_environment
     assert "if ($cleanupFailure)" in remove_environment
+
+
+def test_api_ragflow_probe_executes_authenticated_connectivity_check() -> None:
+    received_authorization: list[str | None] = []
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self) -> None:  # noqa: N802
+            received_authorization.append(self.headers.get("Authorization"))
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b'{"code": 0, "data": []}')
+
+        def log_message(self, format: str, *args: object) -> None:
+            return
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        environment = os.environ.copy()
+        environment.update(
+            {
+                "RAGFLOW_BASE_URL": f"http://127.0.0.1:{server.server_port}",
+                "RAGFLOW_API_KEY": "test-only-key",
+                "RAGFLOW_TIMEOUT_SECONDS": "2",
+            }
+        )
+        result = subprocess.run(
+            [sys.executable, "-m", "app.modules.knowledge.ragflow_probe"],
+            cwd=REPOSITORY_ROOT / "codebase" / "backend",
+            env=environment,
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+    assert result.returncode == 0, result.stderr
+    assert received_authorization == ["Bearer test-only-key"]

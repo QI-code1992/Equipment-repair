@@ -32,26 +32,6 @@ $hostRagflowUrl = Convert-ToHostUrl $settings.RAGFLOW_BASE_URL
 $headers = @{ Authorization = "Bearer $($settings.RAGFLOW_API_KEY)" }
 $datasetId = $null
 $validationFailure = $null
-$apiRagflowProbe = @'
-import os
-import socket
-from urllib.parse import urlparse
-from urllib.request import Request, urlopen
-
-base_url = os.environ["RAGFLOW_BASE_URL"].rstrip("/")
-api_key = os.environ["RAGFLOW_API_KEY"]
-timeout = float(os.environ["RAGFLOW_TIMEOUT_SECONDS"])
-target = urlparse(base_url)
-if target.scheme not in {"http", "https"} or not target.hostname or timeout <= 0:
-    raise RuntimeError("invalid RAGFlow API settings")
-port = target.port or (443 if target.scheme == "https" else 80)
-socket.getaddrinfo(target.hostname, port, type=socket.SOCK_STREAM)
-request = Request(f"{base_url}/api/v1/datasets", headers={"Authorization": f"Bearer {api_key}"})
-with urlopen(request, timeout=timeout) as response:
-    if response.status != 200:
-        raise RuntimeError(f"RAGFlow connectivity probe returned HTTP {response.status}")
-'@
-
 try {
     docker @compose config --quiet
     Assert-ExitCode 'TASK-005 Compose configuration is invalid'
@@ -74,7 +54,7 @@ try {
 
     $apiRagflowConnected = $false
     foreach ($attempt in 1..30) {
-        docker @compose exec -T api python -c $apiRagflowProbe
+        docker @compose exec -T api python -m app.modules.knowledge.ragflow_probe
         if ($LASTEXITCODE -eq 0) { $apiRagflowConnected = $true; break }
         Start-Sleep -Seconds 2
     }
