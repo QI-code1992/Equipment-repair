@@ -1,5 +1,15 @@
 # 开发记录
 
+## Stage 5 最终集成总结候选（2026-07-27，等待 Gate 决定）
+
+- 结论：DEV-001 已完成 Stage 5 最终集成总结，候选集成 HEAD 为 `8a5e6ced473ea6219666d858ce5b751e61362871`。这是供项目负责人审阅的 Gate 材料，不是 Stage 6 批准；`lastApprovedStage` 不变，任何 Stage 6 正式测试仍被禁止。
+- 任务与 FCP：任务书的依赖矩阵已记录 TASK-001—TASK-011（含 TASK-006-FE）均已审核、集成或完成合并后治理；现行 `workflow/state.json` 对 TASK-002、003、005、006-FE、007、008、009、010、011 均为 `CLOSED_POST_MERGE_GOVERNANCE_COMPLETED`。对应证据集中在 `05-development/CHECKPOINTS.md` 的 FCP-001、FCP-002-R6、FCP-003、FCP-005-R6、FCP-006-DB-R2、FCP-007、FCP-008、FCP-009-R9、FCP-010-R4 和 FCP-011；历史候选 FCP 仅保留可追溯性，不作为未完成状态。
+- 已合并关键链路：TASK-009 PR #49 → `0c0341b5112615780cf032b86869fa4ac205125c`；TASK-010 PR #50 → `e0c133bacf2328bdd091831450693008cb34c2ad`；TASK-011 代码/修复 PR #52、#53、#54 → `298ba147650652aed2af4dae35af640c59ff8a41`、`22f619f82ef876f86da30da38a0cf69ad008f313`、`b1e4ea6c409946667e22e4bff427c4dccaa86f22`；TASK-011 治理 PR #55、#56 → `53bdf90ec8ab743165d0542099a15d3c9de598b3`、`8a5e6ced473ea6219666d858ce5b751e61362871`。
+- 回归与 live-stack：最终记录显示后端 `309 passed, 13 skipped, 2 warnings`；前端 `26 passed` 且生产构建通过；14 项静态回归、`compileall`、JSON 解析与 `git diff --check` 通过。真实 live-stack 已覆盖 PostgreSQL 迁移、真实 RAGFlow Agent 成功与受控 `UNAVAILABLE` 降级、HTTPS E2E、API 重启恢复、备份与隔离恢复，详细命令、环境隔离名和结果见 `06-testing/TEST_REPORT.md`。
+- 残余风险：RAGFlow 外部依赖曾出现间歇性不可用，最终重跑通过但应在 Stage 6 持续监测；前端依赖审计有 2 项既有 high-severity 发现，未在本阶段擅自升级依赖；本总结不替代独立验证。
+- 回滚：如 Stage 6 发现阻断问题，按受影响任务的 Merge Commit 使用受控 `git revert -m 1 <merge-sha>` 回退；恢复应先在隔离项目验证，禁止删除命名卷、覆盖共享数据库或直接改写集成历史。
+- 建议的 Stage 6 测试计划（仅在项目负责人批准后执行）：以本候选 HEAD 固定环境，按 `06-testing/TEST_PLAN.md` 独立复核单元/API、权限与审计脱敏、Agent/SSE/引用、浏览器 E2E、RAG/附件安全、HTTPS/端口隔离、重启、备份恢复、安全与性能边界；每项记录精确 SHA、环境、夹具、结果和证据。
+
 - 状态：Stage 5 已建立工程基线
 - 候选源码：`03-ui-prototype/prototype/`（仅用于设计）
 - 生产源码目录：`codebase/backend/`、`codebase/frontend/`；基础设施位于 `codebase/infra/`

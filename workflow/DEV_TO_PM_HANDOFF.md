@@ -1,5 +1,14 @@
 # 开发到产品交接
 
+## Stage 5 最终集成 Gate 请求（2026-07-27）
+
+- 执行者：DEV-001。
+- 集成候选：`codex/stage-05-integration@8a5e6ced473ea6219666d858ce5b751e61362871`（PR #56 Merge Commit）。
+- 汇总：TASK-001—TASK-011（含 TASK-006-FE）的正式集成、FCP 和合并后治理证据已在任务书、检查点、测试报告和 `workflow/state.json` 中交叉记录；TASK-011 已为 `CLOSED_POST_MERGE_GOVERNANCE_COMPLETED`。
+- 验证：后端 `309 passed, 13 skipped, 2 warnings`；前端 `26 passed`、生产构建通过；静态回归、`compileall`、JSON 与 diff 检查通过。真实 live-stack 覆盖 RAGFlow 成功/降级、HTTPS、重启、备份和隔离恢复，详见 `06-testing/TEST_REPORT.md`。
+- 残余风险与回滚：RAGFlow 存在已观测到的间歇性外部可用性风险；前端依赖审计有 2 项既有 high-severity 发现。若后续发现阻断，按受影响 Merge Commit 做受控 `git revert -m 1` 并先在隔离环境验证；禁止覆盖数据库或删除卷。
+- 请求项目负责人：仅对以上精确 HEAD 明确批准或拒绝 Stage 5 -> Stage 6 Gate。未获批准前，DEV-001、DEV-002 均不得创建或执行 Stage 6 正式测试、Stage 7 验收或生产发布。
+
 ## TASK-011 合并后治理收尾（2026-07-27）
 
 - 交付结论：TASK-011 的开发 PR #52、后续 MinIO 初始化 PR #53 与备份输出修复 PR #54 已按授权合入；当前治理候选仅记录已完成的证据，不包含运行代码或配置。
