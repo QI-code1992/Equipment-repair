@@ -2,9 +2,9 @@
 
 静态原型检查点记录在 `03-ui-prototype/PROTOTYPE_CHECKPOINTS.md`，不得自动提升为生产检查点。
 
-## FCP-011：TASK-011 合并后治理收尾候选（2026-07-27）
+## FCP-011：TASK-011 合并后治理收尾（2026-07-27）
 
-- 状态：`CLOSED_POST_MERGE_GOVERNANCE_PENDING`；本记录合入后 TASK-011 才正式关闭，Stage 6 仍须单独获得正式门禁批准。
+- 状态：`CLOSED_POST_MERGE_GOVERNANCE_COMPLETED`；治理 PR #55 已合入 `53bdf90ec8ab743165d0542099a15d3c9de598b3`，TASK-011 正式关闭，Stage 6 仍须单独获得正式门禁批准。
 - 集成链：PR #52 / `b252ba27…` → `298ba147…`；PR #53 / `c55da7df…` → `22f619f…`；PR #54 / `f3150a2…` → `b1e4ea6c409946667e22e4bff427c4dccaa86f22`。三次均由 DEV-002 按绑定授权手动 Merge Commit 执行。
 - 合并后验证：在 `b1e4ea6…` 执行后端 `309 passed, 13 skipped, 2 warnings`、前端 `26 passed`、生产构建、备份/Nginx 契约、Compose config、`compileall` 与双亲 `diff --check`，全部通过。
 - 真实运行证据：`f3150a2…`（`b1e4ea6…` 的第二父提交）完成真实 RAGFlow Agent 成功与不可用降级路径、HTTPS E2E、API 重启恢复、备份和随机隔离恢复；临时数据集已删除并复核不存在。

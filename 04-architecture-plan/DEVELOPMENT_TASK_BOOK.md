@@ -426,7 +426,7 @@
 
 ### TASK-011：平台补齐、端到端、安全与发布准备
 
-- 状态：CLOSED_POST_MERGE_GOVERNANCE_PENDING（PR #52、#53、#54 已合入；本治理收尾 PR 合入后 TASK-011 正式关闭，Stage 6 仍须独立门禁）
+- 状态：CLOSED_POST_MERGE_GOVERNANCE_COMPLETED（PR #55 已以 Merge Commit `53bdf90ec8ab743165d0542099a15d3c9de598b3` 合入；Stage 6 仍须独立门禁）
 - 优先级：P0
 - 负责人：`DEV-001`
 - 任务开发者：`DEV-001`
@@ -450,6 +450,8 @@
 - 回滚：以最近稳定 FCP 和独立任务 Commit 选择性回退；不得整体回退丢失其他已接受功能。
 
 - 集成记录：PR #52 合入 `298ba147650652aed2af4dae35af640c59ff8a41`，PR #53 合入 `22f619f82ef876f86da30da38a0cf69ad008f313`，PR #54 合入 `b1e4ea6c409946667e22e4bff427c4dccaa86f22`；均由 DEV-002 按授权手动 Merge Commit 执行。最终合并提交上的全量回归、真实 RAGFlow Agent、HTTPS、重启、备份与隔离恢复证据见 `06-testing/TEST_REPORT.md`。本治理 PR 仅记录证据，不构成 Stage 6 批准。
+
+- 治理收尾记录：PR #55 已由 DEV-002 按授权手动 Merge Commit 合入 `53bdf90ec8ab743165d0542099a15d3c9de598b3`；其双亲为 `b1e4ea6…` 与治理候选 `351bce2…`。TASK-011 已正式关闭，但不解锁 Stage 6。
 
 ## 7. 人员分配与交叉审核矩阵
 

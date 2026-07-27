@@ -2,12 +2,13 @@
 
 - 状态：生产验证受阻
 
-## TASK-011 合并后最终验证与治理收尾候选（2026-07-27）
+## TASK-011 合并后最终验证与治理收尾（2026-07-27）
 
 - 合并基准：`b1e4ea6c409946667e22e4bff427c4dccaa86f22`，父提交为 `22f619f…` 与授权源 HEAD `f3150a27441b0e8e4308cdcc7a06a5357ca702e7`；PR #54 已合并至 `codex/stage-05-integration`。
 - 合并后回归：`python -m pytest -q`（`codebase/backend`）为 `309 passed, 13 skipped, 2 warnings`；前端测试 `26 passed`，生产构建通过；14 项静态回归、`compileall`、`docker compose ... config --quiet`、`git diff --check`（两父提交）均通过。
 - 真实 live-stack：在授权源 HEAD 上的 `verify-platform-readiness.ps1` 通过：PostgreSQL 迁移回归 `1 passed, 3 warnings`、真实 RAGFlow Agent 成功/`UNAVAILABLE` 降级路径 `1 passed, 2 warnings`、HTTPS E2E `1 passed`、API 重启恢复、备份与随机隔离恢复 `equipment-task011-restore-05b381455286` 均通过。
 - 清理与限制：临时 RAGFlow 数据集已通过 API 删除并复核不存在；无生产密钥、数据或卷被提交。Stage 6 独立测试、Stage 7 验收及生产发布均未获批准。
+- 收尾记录：治理 PR #55 已合入 `53bdf90ec8ab743165d0542099a15d3c9de598b3`，使 TASK-011 台账状态与已合并事实一致；不构成 Stage 6 批准。
 - 精确 Commit SHA：无
 - 正式迁移后的原型静态检查：通过。
 - 指标检查已改为检查可见的只读指标弹窗，而不是过期且不可达的编辑实现字符串；当前 40 项指标只读要求不变。
