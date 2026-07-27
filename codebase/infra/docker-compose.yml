@@ -1,4 +1,15 @@
 services:
+  nginx:
+    image: nginx:1.27-alpine
+    depends_on:
+      - api
+    ports:
+      - "127.0.0.1:${NGINX_HTTPS_PORT}:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/nginx.conf:ro
+      - ${NGINX_CERT_DIRECTORY}:/etc/nginx/certs:ro
+    networks: [platform]
+
   api:
     build:
       context: ../backend
