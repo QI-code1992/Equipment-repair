@@ -1,7 +1,7 @@
 {
-  "state": "AWAITING_STAGE_APPROVAL",
-  "updatedBy": "DEV-001 governance reconciliation",
-  "updatedAt": "2026-07-27T18:04:19+08:00",
+  "state": "IN_DEVELOPMENT",
+  "updatedBy": "DEV-002 Stage 6 gate record",
+  "updatedAt": "2026-07-27",
   "task010Delivery": {
     "taskId": "TASK-010",
     "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",
@@ -55,13 +55,16 @@
     "architectureCandidate": "04-architecture-plan/平台级架构设计.md",
     "automatedChecks": "06-testing/tests/"
   },
-  "lastApprovedStage": "Stage 4 — Architecture and Development Plan",
+  "lastApprovedStage": "Stage 5 — Development Implementation",
   "pendingStageApproval": {
     "gate": "Stage 5 -> Stage 6",
     "candidateIntegrationHead": "8a5e6ced473ea6219666d858ce5b751e61362871",
     "requestedBy": "DEV-001",
-    "status": "PENDING_PROJECT_OWNER_APPROVAL",
-    "scope": "Stage 5 final integration summary and a decision whether Stage 6 independent testing may start"
+    "status": "APPROVED_BY_PROJECT_OWNER",
+    "scope": "Stage 5 final integration summary; Stage 6 independent testing is authorized only for the approved candidate baseline",
+    "approvedBy": "project owner",
+    "approvedAt": "2026-07-27",
+    "nextAction": "Begin Stage 6 independent testing from the approved candidate baseline; Stage 7 acceptance and Stage 8 release remain prohibited pending their separate gates."
   },
   "collaborationGovernance": {
     "changeRequest": "CR-040",
