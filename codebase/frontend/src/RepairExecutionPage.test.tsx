@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { completeRepair, runFaultDiagnosis, startRepair } from "./api";
+import { completeRepair, getOperationGuidance, readRunEvents, runFaultDiagnosis, startAgentRun, startRepair } from "./api";
 import { RepairExecutionPage } from "./RepairExecutionPage";
 
 vi.mock("./api", async (importOriginal) => ({
@@ -9,6 +9,9 @@ vi.mock("./api", async (importOriginal) => ({
   runFaultDiagnosis: vi.fn(),
   startRepair: vi.fn(),
   completeRepair: vi.fn(),
+  getOperationGuidance: vi.fn(),
+  startAgentRun: vi.fn(),
+  readRunEvents: vi.fn(),
 }));
 
 beforeEach(() => vi.resetAllMocks());
@@ -43,6 +46,20 @@ it("sends only the server draft id and user evidence when advancing diagnosis", 
   fireEvent.change(screen.getByLabelText("证据内容"), { target: { value: "热机后复现" } });
   fireEvent.click(screen.getByRole("button", { name: "提交诊断证据" }));
   expect(runFaultDiagnosis).toHaveBeenLastCalledWith({ action: "evidence", diagnosis_draft_id: "draft-3", category: "reproduction", detail: "热机后复现" });
+});
+
+it("renders real guidance citations and runtime SSE statuses", async () => {
+  vi.mocked(getOperationGuidance).mockResolvedValue({ state: "QUESTIONING", question: "检查压力", evidence: [{ citation: "chunk-1", text: "检查溢流阀" }], manual_fallback: false, loading_seconds: 3 });
+  vi.mocked(startAgentRun).mockResolvedValue({ thread_id: "thread-1", run_id: "run-1" });
+  vi.mocked(readRunEvents).mockResolvedValue([{ event: "run_waiting", data: { status: "WAITING_FOR_MODEL" } }]);
+  render(<RepairExecutionPage />);
+  fireEvent.change(screen.getByLabelText("指引设备 ID"), { target: { value: "eq-9" } });
+  fireEvent.change(screen.getByLabelText("设备型号"), { target: { value: "L956" } });
+  fireEvent.change(screen.getByLabelText("指引故障现象"), { target: { value: "压力不足" } });
+  fireEvent.click(screen.getByRole("button", { name: "获取操作指引" }));
+  expect(await screen.findByText("查看 1 条引用")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "发送操作问题" }));
+  expect(await screen.findByText("运行状态：WAITING_FOR_MODEL")).toBeInTheDocument();
 });
 
 it("adopts a ready diagnosis and shows its summary after repair parts notes", async () => {

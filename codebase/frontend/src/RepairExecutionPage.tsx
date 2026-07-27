@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { ApiError, completeRepair, runFaultDiagnosis, startRepair, type DiagnosisResponse, type RepairStart, type RepairResult } from "./api";
+import { ApiError, completeRepair, getOperationGuidance, readRunEvents, runFaultDiagnosis, startAgentRun, startRepair, type DiagnosisResponse, type GuidanceResponse, type RepairStart, type RepairResult, type RuntimeEvent } from "./api";
 
 function diagnosisMessage(diagnosis: DiagnosisResponse) {
   if (diagnosis.state === "EVIDENCE_PENDING") return "证据仍不足，可补充信息或直接开始维修。";
@@ -16,6 +16,9 @@ export function RepairExecutionPage() {
   const [result, setResult] = useState<RepairResult>({ actual_cause: "", actual_solution: "", repair_result: "", parts_replacement_notes: "" });
   const [completed, setCompleted] = useState<RepairResult | null>(null);
   const [evidence, setEvidence] = useState("");
+  const [guidance, setGuidance] = useState<GuidanceResponse | null>(null);
+  const [guidanceContext, setGuidanceContext] = useState({ equipment_id: "", equipment_model: "", symptom: "", description: "" });
+  const [runtimeEvents, setRuntimeEvents] = useState<RuntimeEvent[]>([]);
 
   async function startDiagnosis() {
     setError(null);
@@ -59,6 +62,15 @@ export function RepairExecutionPage() {
     }
   }
 
+  async function loadGuidance() {
+    setGuidance(await getOperationGuidance(guidanceContext));
+  }
+
+  async function sendOperationQuestion() {
+    const run = await startAgentRun("operation_guidance", guidanceContext, guidanceContext.symptom);
+    setRuntimeEvents(await readRunEvents(run.run_id));
+  }
+
   const summaryText = diagnosis?.summary
     ? [diagnosis.summary.symptom, diagnosis.summary.root_cause].filter((value): value is string => typeof value === "string").join("；")
     : null;
@@ -82,6 +94,14 @@ export function RepairExecutionPage() {
         <button type="button" onClick={() => void submitResult()}>提交维修结果</button>
       </section>}
       {completed && <section aria-label="维修完成结果"><p>{completed.parts_replacement_notes}</p>{repair?.start_mode === "ADOPTED" && summaryText && <p>AI 对话摘要：{summaryText}</p>}</section>}
+      <section aria-label="操作指引"><h3>操作指引</h3>
+        <label>指引设备 ID<input aria-label="指引设备 ID" value={guidanceContext.equipment_id} onChange={(event) => setGuidanceContext({ ...guidanceContext, equipment_id: event.target.value })} /></label>
+        <label>设备型号<input aria-label="设备型号" value={guidanceContext.equipment_model} onChange={(event) => setGuidanceContext({ ...guidanceContext, equipment_model: event.target.value })} /></label>
+        <label>指引故障现象<input aria-label="指引故障现象" value={guidanceContext.symptom} onChange={(event) => setGuidanceContext({ ...guidanceContext, symptom: event.target.value })} /></label>
+        <button type="button" onClick={() => void loadGuidance()}>获取操作指引</button><button type="button" onClick={() => void sendOperationQuestion()}>发送操作问题</button>
+        {guidance?.evidence.length ? <details><summary>查看 {guidance.evidence.length} 条引用</summary>{guidance.evidence.map((item) => <p key={item.citation}><code>{item.citation}</code> {item.text}</p>)}</details> : null}
+        {runtimeEvents.map((item, index) => <p key={`${item.event}-${index}`}>运行状态：{String(item.data.status ?? item.event)}</p>)}
+      </section>
     </section>
   );
 }
