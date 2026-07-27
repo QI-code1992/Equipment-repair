@@ -1,5 +1,13 @@
 # 开发到产品交接
 
+## TASK-011 合并后治理收尾候选（2026-07-27）
+
+- 交付结论：TASK-011 的开发 PR #52、后续 MinIO 初始化 PR #53 与备份输出修复 PR #54 已按授权合入；当前治理候选仅记录已完成的证据，不包含运行代码或配置。
+- 精确事实：最终合并提交 `b1e4ea6c409946667e22e4bff427c4dccaa86f22`，双亲 `22f619f…` 与 `f3150a2…`；开发者 DEV-001，审核与合并执行者 DEV-002。
+- 验证：合并后后端 `309 passed, 13 skipped, 2 warnings`，前端 `26 passed` 与生产构建通过；真实 Agent/RAGFlow、HTTPS、重启、备份和隔离恢复证据已完成，临时数据集已清理。
+- 风险与门禁：外部 RAGFlow live-stack 曾有间歇性不可用，最终重跑已通过；生产发布、Stage 6 独立测试和 Stage 7 产品验收未执行。此治理 PR 合入后仅关闭 TASK-011，不构成任何下一阶段批准。
+- 下一步：项目负责人须对本治理 PR 的精确 HEAD 作出确认；随后由 DEV-002 手动 Merge Commit。合并后 DEV-001 只读核验治理记录和目标分支，不得自行宣布 Stage 6 开始。
+
 ## TASK-006-FE 正式集成后的治理收尾候选（2026-07-22）
 
 - 正式审核与集成：DEV-001 已批准精确 HEAD `a9c4fc0a2f651ed7465d8d2003342cb94d6f1629`；PR [#33](https://github.com/QI-code1992/Equipment-repair/pull/33) 由 DEV-001（`ll979053897-arch`）手动 Merge Commit 合入 `codex/stage-05-integration`，合并提交为 `25737f52a7e113224606cef6dbd3de49dbf7e4f4`。
