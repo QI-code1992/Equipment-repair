@@ -17,6 +17,14 @@ foreach ($required in @("pg_dump", "MINIO_BUCKET", "mc mirror", "minio.zip")) {
         throw "Backup contract missing: $required"
     }
 }
+foreach ($required in @('docker cp "${postgres}:$containerDump"', 'docker cp "${minio}:/tmp/task011-minio"', 'Write-Output $backupDirectory')) {
+    if ((Get-Content -Raw -LiteralPath $backup) -notmatch [regex]::Escape($required)) {
+        throw "Backup output contract missing: $required"
+    }
+}
+if (([regex]::Matches((Get-Content -Raw -LiteralPath $backup), 'docker cp[^\r\n]*\| Out-Null')).Count -lt 2) {
+    throw "Backup output contract requires Docker copy progress to be suppressed"
+}
 foreach ($required in @("pg_restore", "MINIO_BUCKET", "mc mirror", "minio.zip")) {
     if ((Get-Content -Raw -LiteralPath $restore) -notmatch [regex]::Escape($required)) {
         throw "Restore contract missing: $required"
@@ -32,6 +40,11 @@ $readinessContent = Get-Content -Raw -LiteralPath $readiness
 foreach ($required in @("TASK011_LIVE_HTTPS_URL", "RagflowDatasetId", "TASK005_RAGFLOW_DATASET_ID", "test_task005_live_stack.py", "ragflow_probe", "mc mb --ignore-existing", "`$minioBucket", "backup.ps1", "restore-verify.ps1", "docker info")) {
     if ($readinessContent -notmatch [regex]::Escape($required)) {
         throw "Live readiness contract missing: $required"
+    }
+}
+foreach ($required in @('$backupOutput', 'Select-Object -Last 1', 'Backup output directory is invalid')) {
+    if ($readinessContent -notmatch [regex]::Escape($required)) {
+        throw "Live readiness backup-output contract missing: $required"
     }
 }
 

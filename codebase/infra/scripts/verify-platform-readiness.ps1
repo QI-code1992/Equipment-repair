@@ -79,10 +79,12 @@ if ($LASTEXITCODE -ne 0) { throw "TASK-011 HTTPS E2E failed" }
 if ($LASTEXITCODE -ne 0) { throw "API restart failed" }
 Wait-HttpsHealth $LiveHttpsUrl
 
-$backupDirectory = & powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/scripts/backup.ps1 -EnvFile $resolvedEnv -OutputDirectory $BackupOutputDirectory -ProjectName $ProjectName
+$backupOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/scripts/backup.ps1 -EnvFile $resolvedEnv -OutputDirectory $BackupOutputDirectory -ProjectName $ProjectName
 if ($LASTEXITCODE -ne 0) { throw "Backup failed" }
+$backupDirectory = ([string](@($backupOutput | Select-Object -Last 1))).Trim()
+if (!(Test-Path -LiteralPath $backupDirectory -PathType Container)) { throw "Backup output directory is invalid" }
 $restoreProject = "equipment-task011-restore-" + [guid]::NewGuid().ToString("N").Substring(0, 12)
-& powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/scripts/restore-verify.ps1 -EnvFile $resolvedEnv -BackupDirectory $backupDirectory[-1] -ProjectName $restoreProject
+& powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/scripts/restore-verify.ps1 -EnvFile $resolvedEnv -BackupDirectory $backupDirectory -ProjectName $restoreProject
 if ($LASTEXITCODE -ne 0) { throw "Restore verification failed" }
 
 Write-Output "TASK-011 platform readiness: PASS; project=$ProjectName"
