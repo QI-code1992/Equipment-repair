@@ -20,6 +20,7 @@ export function RepairExecutionPage() {
   const [guidanceContext, setGuidanceContext] = useState({ equipment_id: "", equipment_model: "", symptom: "", description: "" });
   const [runtimeEvents, setRuntimeEvents] = useState<RuntimeEvent[]>([]);
   const [diagnosisLoading, setDiagnosisLoading] = useState(false);
+  const [guidanceError, setGuidanceError] = useState<string | null>(null);
 
   async function startDiagnosis() {
     setError(null);
@@ -71,12 +72,23 @@ export function RepairExecutionPage() {
   }
 
   async function loadGuidance() {
-    setGuidance(await getOperationGuidance(guidanceContext));
+    setGuidanceError(null);
+    try {
+      setGuidance(await getOperationGuidance(guidanceContext));
+    } catch {
+      setGuidance(null);
+      setGuidanceError("操作指引暂不可用，请按人工流程继续。");
+    }
   }
 
   async function sendOperationQuestion() {
-    const run = await startAgentRun("operation_guidance", guidanceContext, guidanceContext.symptom);
-    setRuntimeEvents(await readRunEvents(run.run_id));
+    setGuidanceError(null);
+    try {
+      const run = await startAgentRun("operation_guidance", guidanceContext, guidanceContext.symptom);
+      setRuntimeEvents(await readRunEvents(run.run_id));
+    } catch {
+      setGuidanceError("流式对话暂不可用，请按人工流程继续。");
+    }
   }
 
   const summaryText = diagnosis?.summary
@@ -110,6 +122,7 @@ export function RepairExecutionPage() {
         <button type="button" onClick={() => void loadGuidance()}>获取操作指引</button><button type="button" onClick={() => void sendOperationQuestion()}>发送操作问题</button>
         {guidance?.evidence.length ? <details><summary>查看 {guidance.evidence.length} 条引用</summary>{guidance.evidence.map((item) => <p key={item.citation}><code>{item.citation}</code> {item.text}</p>)}</details> : null}
         {runtimeEvents.map((item, index) => <p key={`${item.event}-${index}`}>运行状态：{String(item.data.status ?? item.event)}</p>)}
+        {guidanceError && <p role="alert">{guidanceError}</p>}
       </section>
     </section>
   );

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { completeRepair, getOperationGuidance, readRunEvents, runFaultDiagnosis, startAgentRun, startRepair } from "./api";
+import { ApiError, completeRepair, getOperationGuidance, readRunEvents, runFaultDiagnosis, startAgentRun, startRepair } from "./api";
 import { RepairExecutionPage } from "./RepairExecutionPage";
 
 vi.mock("./api", async (importOriginal) => ({
@@ -68,6 +68,18 @@ it("renders real guidance citations and runtime SSE statuses", async () => {
   expect(await screen.findByText("查看 1 条引用")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "发送操作问题" }));
   expect(await screen.findByText("运行状态：WAITING_FOR_MODEL")).toBeInTheDocument();
+});
+
+it("keeps direct repair available when operation guidance is unavailable", async () => {
+  vi.mocked(getOperationGuidance).mockRejectedValue(new ApiError(503, "RAGFLOW_TIMEOUT"));
+  render(<RepairExecutionPage />);
+  fireEvent.change(screen.getByLabelText("故障单 ID"), { target: { value: "fault-manual" } });
+  fireEvent.change(screen.getByLabelText("指引设备 ID"), { target: { value: "eq-manual" } });
+  fireEvent.change(screen.getByLabelText("设备型号"), { target: { value: "L956" } });
+  fireEvent.change(screen.getByLabelText("指引故障现象"), { target: { value: "压力不足" } });
+  fireEvent.click(screen.getByRole("button", { name: "获取操作指引" }));
+  expect(await screen.findByText("操作指引暂不可用，请按人工流程继续。")) .toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "直接开始维修" })).toBeEnabled();
 });
 
 it("adopts a ready diagnosis and shows its summary after repair parts notes", async () => {
