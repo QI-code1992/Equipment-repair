@@ -31,7 +31,7 @@ $containerDump = "/tmp/task011-backup.dump"
 & docker exec $postgres sh -lc 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" --format=custom --file /tmp/task011-backup.dump'
 if ($LASTEXITCODE -ne 0) { throw "pg_dump failed" }
 try {
-    & docker cp "${postgres}:$containerDump" (Join-Path $backupDirectory "postgres.dump")
+    & docker cp "${postgres}:$containerDump" (Join-Path $backupDirectory "postgres.dump") | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "Cannot copy PostgreSQL backup from container" }
 }
 finally {
@@ -45,13 +45,13 @@ $minioPassword = "$(& docker exec $minio printenv MINIO_ROOT_PASSWORD)".Trim()
 if (!$minioUser -or !$minioPassword) { throw "MinIO credentials are unavailable" }
 $minioDirectory = Join-Path $backupDirectory "minio"
 $minioArchive = Join-Path $backupDirectory "minio.zip"
-& docker exec $minio rm -rf /tmp/task011-minio
-& docker exec $minio mkdir -p /tmp/task011-minio
-& docker exec $minio mc alias set task011 http://127.0.0.1:9000 $minioUser $minioPassword
-& docker exec $minio mc mirror "task011/$minioBucket" /tmp/task011-minio
+& docker exec $minio rm -rf /tmp/task011-minio | Out-Null
+& docker exec $minio mkdir -p /tmp/task011-minio | Out-Null
+& docker exec $minio mc alias set task011 http://127.0.0.1:9000 $minioUser $minioPassword | Out-Null
+& docker exec $minio mc mirror "task011/$minioBucket" /tmp/task011-minio | Out-Null
 if ($LASTEXITCODE -ne 0) { throw "MinIO backup mirror failed" }
 try {
-    & docker cp "${minio}:/tmp/task011-minio" $minioDirectory
+    & docker cp "${minio}:/tmp/task011-minio" $minioDirectory | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "Cannot copy MinIO backup from container" }
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     [IO.Compression.ZipFile]::CreateFromDirectory($minioDirectory, $minioArchive)
