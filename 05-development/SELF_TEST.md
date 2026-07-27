@@ -566,3 +566,10 @@
 - 命令与结果：`npm --prefix codebase/frontend test -- --run src/RepairExecutionPage.test.tsx src/api.test.ts src/FaultReportPage.test.tsx src/WorkbenchPage.test.tsx src/App.test.tsx` 为 `22 passed`；`npm --prefix codebase/frontend run build` 通过；14 项 `node 06-testing/tests/*.test.js` 静态回归全部通过；`git diff --check` 通过。
 - 未验证：没有在 DEV-002 环境执行携带正式认证的浏览器端到端流或 Docker/PostgreSQL/RAGFlow/LLM live-stack；不将 mock API 测试误报为真实服务联调。
 - 边界：未新增生产依赖、迁移、兼容代码或通用抽象；未修改后端、基础设施、原型或智能配置页；无无关修改。仅请求 DEV-001 复审，不请求 Merge 授权、不合并、不解锁 TASK-011、不进入 Stage 6。
+
+## TASK-010 Bearer 认证 P1 修复自测（2026-07-27）
+
+- 审核输入：PR #50 的 `ec4e7be630f7bd40dc48ac731aba042e59993225` 未向正式 JSON 或 SSE 路由发送 Bearer token；所有这些路由受平台账号认证保护。
+- 修复提交：`aac8ac098465da3792ffbee11caa73d5ee16bc9e`。`requestJson` 和 `readRunEvents` 共用同一登录态 token 读取边界；token 在浏览器会话存储中不存在时保持无头请求，不伪造凭据。
+- 回归：新增 JSON 与 SSE 的 `Authorization: Bearer active-login-token` 精确断言；`npm --prefix codebase/frontend test -- --run src/api.test.ts` 为 `10 passed`；前端全量为 `23 passed`；生产构建、14 项静态回归、JSON 解析与完整 diff-check 通过。
+- 边界：未新增生产依赖、迁移、兼容层或通用抽象；未修改后端、部署、原型或智能配置页。真实登录页与真实认证浏览器 E2E 仍非本任务已验证范围，待 DEV-001 在最终 HEAD 复审；不请求 Merge 授权、不合并、不解锁 TASK-011、不进入 Stage 6。

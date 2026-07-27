@@ -393,6 +393,15 @@
 - 未验证：DEV-002 未执行带认证真实后端的浏览器端到端流、Docker/PostgreSQL/RAGFlow/LLM live-stack；这些需 DEV-001 在最终精确 HEAD 上复审/集成核验。
 - 门禁：本记录只请求代码复审，不是 Merge 授权；不得合并、解锁 TASK-011 或进入 Stage 6。
 
+## FCP-010-R3：TASK-010 Bearer 认证 P1 修复候选
+
+- 审核输入：DEV-001 对 PR #50 的 `ec4e7be630f7bd40dc48ac731aba042e59993225` 提交 `Changes requested`；原前端 JSON、Agent 与 SSE 请求没有 Bearer 认证，会收到 `401 UNAUTHENTICATED`。
+- 修复提交：`aac8ac098465da3792ffbee11caa73d5ee16bc9e`；最终候选以本证据提交推送后的 PR #50 完整 HEAD 为准。
+- 修复范围：统一 API 边界从现有登录态 `sessionStorage.access_token` 读取 token，并仅在 token 存在时追加 `Authorization: Bearer …`；JSON 请求保留原有内容类型和幂等键，SSE `GET /api/agent/runs/{run_id}/events` 使用相同认证边界。
+- 回归：新增 JSON 与 SSE 实际 fetch 初始化参数的 Bearer 断言；缺少 token 时不伪造认证头，后端继续作为唯一认证事实源。
+- 验证：API 专项 `10 passed`；前端全量 `23 passed`；生产构建、14 项静态回归、`workflow/state.json` JSON 解析和完整 diff-check 通过。
+- 门禁：旧审核结论已失效，等待 DEV-001 对新精确 HEAD 复审；不申请 Merge 授权、不合并、不解锁 TASK-011、不进入 Stage 6。
+
 ## FCP-010-R1：TASK-010 前端 API 客户端检查点
 
 - 状态：已验证的开发检查点；PR #50 未审核、未集成，不解锁 TASK-011 或 Stage 6。

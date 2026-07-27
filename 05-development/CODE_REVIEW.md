@@ -378,3 +378,10 @@
 - 交互核查：诊断按四阶段显示；操作指引引用可折叠；消息区独立滚动、输入区固定；Runtime SSE 展示服务端状态。
 - 本地证据：前端 `22 passed`、生产构建和 14 项静态回归均通过，`git diff --check` 通过。真实浏览器/API 认证及 Docker/PostgreSQL/RAGFlow/LLM 联调待 DEV-001。
 - 请求：请 DEV-001 对 PR #50 最终精确 HEAD 执行正式代码审核；本条不是 Merge 授权，审核通过前不得合并、解锁 TASK-011 或进入 Stage 6。
+
+## TASK-010 Bearer 认证 P1 复审请求（2026-07-27）
+
+- 反馈核验：API 客户端和 SSE 读取原先确实未发送 `Authorization`；后端正式业务、Agent 与运行事件路由使用 Bearer 会话认证，因此该 P1 成立。
+- 修复审查：认证头只在 API 边界生成，并从现有 `sessionStorage.access_token` 登录态读取；JSON、POST 幂等键、PUT 配置保存和 SSE 都由相同函数覆盖。token 不写日志、不进入页面状态，也不在缺失时构造伪 token。
+- 证据：JSON 与 SSE 均通过捕获实际 fetch 初始化参数验证 Bearer 值；API 专项 `10 passed`、前端全量 `23 passed`、构建、14 项静态回归、JSON 与 diff-check 通过。
+- 请求：请 DEV-001 对本次推送后的 PR #50 完整精确 HEAD 重新审核。该请求不是 Merge 授权；审核前不得合并、解锁 TASK-011 或进入 Stage 6。
