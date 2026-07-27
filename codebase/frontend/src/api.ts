@@ -73,6 +73,8 @@ export type GuidanceResponse = {
   loading_seconds: number;
 };
 
+export type RuntimeEvent = { event: string; data: Record<string, unknown> };
+
 function postJson<T>(path: string, body: unknown): Promise<T> {
   return requestJson<T>(path, {
     method: "POST",
@@ -121,6 +123,22 @@ export function runFaultDiagnosis(payload: {
   detail?: string;
 }) {
   return postJson<DiagnosisResponse>("/api/agent/fault-diagnosis", payload);
+}
+
+export async function readRunEvents(runId: string): Promise<RuntimeEvent[]> {
+  const response = await fetch(`/api/agent/runs/${runId}/events`);
+  if (!response.ok || !response.body) throw new ApiError(response.status, null);
+  const text = await response.text();
+  return text.split("\n\n").flatMap((block) => {
+    const event = block.match(/^event: (.+)$/m)?.[1];
+    const data = block.match(/^data: (.+)$/m)?.[1];
+    if (!event || !data) return [];
+    try {
+      return [{ event, data: JSON.parse(data) as Record<string, unknown> }];
+    } catch {
+      return [];
+    }
+  });
 }
 
 export type AgentConfig = {

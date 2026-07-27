@@ -4,6 +4,7 @@ import {
   ApiError,
   createFaultReport,
   getHealthScore,
+  readRunEvents,
   getAgentConfig,
   getAgentConfigs,
   requestJson,
@@ -116,6 +117,25 @@ describe("maintenance API", () => {
     expect(fetchMock.mock.calls.map(([path]) => path)).toEqual([
       "/api/agent/health-score/eq-1",
       "/api/agent/fault-reports/submit",
+    ]);
+  });
+});
+
+describe("Agent Runtime SSE API", () => {
+  it("parses only real SSE event names and JSON data", async () => {
+    const encoder = new TextEncoder();
+    const body = new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode('event: run_started\ndata: {"status":"RUNNING"}\n\n'));
+        controller.enqueue(encoder.encode('event: run_waiting\ndata: {"status":"WAITING_FOR_MODEL"}\n\n'));
+        controller.close();
+      },
+    });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(body, { status: 200 })));
+
+    await expect(readRunEvents("run-1")).resolves.toEqual([
+      { event: "run_started", data: { status: "RUNNING" } },
+      { event: "run_waiting", data: { status: "WAITING_FOR_MODEL" } },
     ]);
   });
 });
