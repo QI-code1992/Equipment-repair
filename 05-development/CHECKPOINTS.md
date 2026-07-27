@@ -402,6 +402,16 @@
 - 验证：API 专项 `10 passed`；前端全量 `23 passed`；生产构建、14 项静态回归、`workflow/state.json` JSON 解析和完整 diff-check 通过。
 - 门禁：旧审核结论已失效，等待 DEV-001 对新精确 HEAD 复审；不申请 Merge 授权、不合并、不解锁 TASK-011、不进入 Stage 6。
 
+## FCP-010-R4：TASK-010 登录与受保护路由 P1 修复候选
+
+- 审核输入：DEV-001 对 PR #50 的 `654439d8579d20ad67878607febc74e50bf652df` 提交 `Changes requested`；此前 token 只有测试写入，正式前端没有登录入口或未认证保护，首次使用会得到 401。
+- 项目负责人已确认范围：在同一 PR 最小新增 `/login`、`/api/auth/login` 调用、`sessionStorage.access_token` 会话写入、未认证路由保护和交互回归；不修改后端认证规则或公开契约。
+- 修复提交：`aef11599b0b820e7781abb5cb7faa83d8cb5b8b1`；最终候选以本证据提交推送后的 PR #50 完整 HEAD 为准。
+- 行为：未认证用户访问既有页面会转到 `/login`；登录成功仅写入返回的 token 后回到原目标页；已认证用户访问 `/login` 回到工作台。JSON 与 SSE 继续在单一 API 边界读取该会话 token，登录请求本身不附带认证头。
+- 验证：交互回归覆盖未认证重定向、成功登录写入 token、登录后受保护页面 JSON Bearer 请求；API 专项 `11 passed`，前端全量 `26 passed`，生产构建、14 项静态回归、`workflow/state.json` JSON 解析和完整 diff-check 通过。
+- 未验证：DEV-002 未执行携带真实账号的浏览器 E2E 或 Docker/PostgreSQL/RAGFlow/LLM live-stack；请 DEV-001 在最终精确 HEAD 上复核。
+- 门禁：仅请求代码复审，不是 Merge 授权；不得合并、解锁 TASK-011 或进入 Stage 6。
+
 ## FCP-010-R1：TASK-010 前端 API 客户端检查点
 
 - 状态：已验证的开发检查点；PR #50 未审核、未集成，不解锁 TASK-011 或 Stage 6。

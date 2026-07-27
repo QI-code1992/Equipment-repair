@@ -434,6 +434,14 @@
 - 证据：JSON、SSE 请求头回归均通过；API 专项 `10 passed`，前端全量 `23 passed`，生产构建、14 项静态回归、JSON 与完整 diff-check 通过。
 - 下一动作：推送本证据后，以 PR #50 新完整精确 HEAD 请求 DEV-001 重审。仅为代码复审，非 Merge 授权；不合并、不解锁 TASK-011、不进入 Stage 6。
 
+## TASK-010 登录与受保护路由 P1 修复交接（2026-07-27）
+
+- 审核反馈：PR #50 旧 HEAD `654439d8579d20ad67878607febc74e50bf652df` 的 token 没有正式生产写入路径；首次用户会在所有受保护路由得到 401。
+- 项目负责人授权：允许在同一 PR 增加最小 `/login`、登录 API、会话 token 写入、未认证保护和登录后 JSON/SSE Bearer 交互回归。
+- 修复提交：`aef11599b0b820e7781abb5cb7faa83d8cb5b8b1`。登录成功写入 `sessionStorage.access_token` 后返回原路径；无 token 统一重定向登录；JSON/SSE Bearer 继续通过单一 API 边界读取该 token。
+- 证据：API 专项 `11 passed`，前端全量 `26 passed`，生产构建、14 项静态回归、JSON 解析和完整 diff-check 通过。
+- 待 DEV-001：在本证据提交推送后的最终精确 HEAD 上复审；真实账号浏览器 E2E 和 Docker/PostgreSQL/RAGFlow/LLM live-stack 尚未由 DEV-002 执行。仅请求复审，非 Merge 授权；不合并、不解锁 TASK-011、不进入 Stage 6。
+
 ## TASK-009 第八轮 P1 可执行探针修复交接（2026-07-26）
 
 - 审核基准：PR #49 / HEAD `cc643881c251bddc37bb4ae83564b7e14a79a853`，结论 `Changes requested`；DEV-001 用专用 RAGFlow Key 复现 PowerShell/Docker 传参破坏多行 Python 源码并在检索前 `SyntaxError`。

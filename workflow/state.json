@@ -1,7 +1,7 @@
 {
   "state": "IN_DEVELOPMENT",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-27T10:50:00+08:00",
+  "updatedAt": "2026-07-27T11:06:00+08:00",
   "task010Delivery": {
     "taskId": "TASK-010",
     "status": "P1_REMEDIATION_AWAITING_DEV001_REVIEW",
@@ -10,9 +10,9 @@
     "pullRequest": 50,
     "branch": "codex/task-010-frontend-integration",
     "targetBranch": "codex/stage-05-integration",
-    "functionalCheckpoint": "aac8ac098465da3792ffbee11caa73d5ee16bc9e",
+    "functionalCheckpoint": "aef11599b0b820e7781abb5cb7faa83d8cb5b8b1",
     "candidateHead": "Bind the exact PR #50 head after governance evidence is pushed; do not substitute the functional checkpoint.",
-    "verification": "Bearer JSON and SSE regressions passed; frontend Vitest 23 passed; production build and 14 static regressions passed; diff check passed.",
+    "verification": "Login/route-guard/JSON-SSE Bearer regressions passed; frontend Vitest 26 passed; production build and 14 static regressions passed; diff check passed.",
     "unverified": "Authenticated browser E2E and Docker/PostgreSQL/RAGFlow/LLM live-stack require DEV-001 final-head verification.",
     "productionDependencyChange": false,
     "databaseMigrationChange": false,

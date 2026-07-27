@@ -385,3 +385,11 @@
 - 修复审查：认证头只在 API 边界生成，并从现有 `sessionStorage.access_token` 登录态读取；JSON、POST 幂等键、PUT 配置保存和 SSE 都由相同函数覆盖。token 不写日志、不进入页面状态，也不在缺失时构造伪 token。
 - 证据：JSON 与 SSE 均通过捕获实际 fetch 初始化参数验证 Bearer 值；API 专项 `10 passed`、前端全量 `23 passed`、构建、14 项静态回归、JSON 与 diff-check 通过。
 - 请求：请 DEV-001 对本次推送后的 PR #50 完整精确 HEAD 重新审核。该请求不是 Merge 授权；审核前不得合并、解锁 TASK-011 或进入 Stage 6。
+
+## TASK-010 登录与受保护路由 P1 复审请求（2026-07-27）
+
+- 反馈核验：此前正式前端确实没有 token 写入点、登录入口或路由保护，`sessionStorage.access_token` 仅在测试中出现，P1 成立。
+- 修复审查：`LoginPage` 仅处理用户名、密码、提交状态及通用失败提示；登录 API 成功后写 token。`RequireAuthentication` 是全局路由边界，保护除 `/login` 外的既有页面；API/SSE 使用相同会话源，登录请求显式不携带旧会话头。
+- 安全与范围：没有把 token 写到 URL、日志、页面文本或全局 React 状态；不改后端认证、权限、API、依赖、迁移、部署、原型或业务页契约。
+- 证据：API 专项 `11 passed`，交互测试覆盖重定向、登录写入和登录后 Bearer，前端全量 `26 passed`，构建、14 项静态回归、JSON 与 diff-check 通过。
+- 请求：请 DEV-001 对本次推送后的 PR #50 新完整精确 HEAD 复审；这不是 Merge 授权，审核前不得合并、解锁 TASK-011 或进入 Stage 6。
