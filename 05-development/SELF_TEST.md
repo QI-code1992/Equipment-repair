@@ -558,3 +558,25 @@
 - 降级验证：同一测试将生产 adapter 切换到容器内确定不可达的 `127.0.0.1:1`，再次调用同一路由，断言 HTTP 200、`state=UNAVAILABLE`、`manual_fallback=true`、`evidence=[]`。
 - 本地结果：相关 `7 passed, 1 skipped, 2 warnings`；完整后端 `297 passed, 12 skipped, 2 warnings`。跳过项即需要专用 PostgreSQL/MinIO/ClamAV/RAGFlow 环境的 live-stack 测试。
 - 边界：仅修改现有 opt-in 集成测试；未修改生产代码、依赖、迁移、基础设施、兼容层或抽象，无无关修改。真实执行仍由 DEV-001 在新 HEAD 上完成；当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-010 前端集成自测（2026-07-27）
+
+- 检查点：`76d348620859e8931fed40bf316d4f94131b28ad`；最终审查对象须为本证据提交推送后的 PR #50 完整 HEAD，不得以此父提交替代。
+- 覆盖：维护 API 的幂等与错误映射、人工/AI 故障提交、健康分可用/不可用边界、诊断阶段与仅服务端草稿 ID、直接/采纳维修、维修摘要关键证据、操作指引引用、Runtime SSE、权限与人工回退。
+- 命令与结果：`npm --prefix codebase/frontend test -- --run src/RepairExecutionPage.test.tsx src/api.test.ts src/FaultReportPage.test.tsx src/WorkbenchPage.test.tsx src/App.test.tsx` 为 `22 passed`；`npm --prefix codebase/frontend run build` 通过；14 项 `node 06-testing/tests/*.test.js` 静态回归全部通过；`git diff --check` 通过。
+- 未验证：没有在 DEV-002 环境执行携带正式认证的浏览器端到端流或 Docker/PostgreSQL/RAGFlow/LLM live-stack；不将 mock API 测试误报为真实服务联调。
+- 边界：未新增生产依赖、迁移、兼容代码或通用抽象；未修改后端、基础设施、原型或智能配置页；无无关修改。仅请求 DEV-001 复审，不请求 Merge 授权、不合并、不解锁 TASK-011、不进入 Stage 6。
+
+## TASK-010 Bearer 认证 P1 修复自测（2026-07-27）
+
+- 审核输入：PR #50 的 `ec4e7be630f7bd40dc48ac731aba042e59993225` 未向正式 JSON 或 SSE 路由发送 Bearer token；所有这些路由受平台账号认证保护。
+- 修复提交：`aac8ac098465da3792ffbee11caa73d5ee16bc9e`。`requestJson` 和 `readRunEvents` 共用同一登录态 token 读取边界；token 在浏览器会话存储中不存在时保持无头请求，不伪造凭据。
+- 回归：新增 JSON 与 SSE 的 `Authorization: Bearer active-login-token` 精确断言；`npm --prefix codebase/frontend test -- --run src/api.test.ts` 为 `10 passed`；前端全量为 `23 passed`；生产构建、14 项静态回归、JSON 解析与完整 diff-check 通过。
+- 边界：未新增生产依赖、迁移、兼容层或通用抽象；未修改后端、部署、原型或智能配置页。真实登录页与真实认证浏览器 E2E 仍非本任务已验证范围，待 DEV-001 在最终 HEAD 复审；不请求 Merge 授权、不合并、不解锁 TASK-011、不进入 Stage 6。
+
+## TASK-010 登录与受保护路由 P1 修复自测（2026-07-27）
+
+- 授权范围：项目负责人确认在 PR #50 补齐最小正式登录/会话入口、未认证路由保护及登录后 JSON/SSE Bearer 交互回归。
+- 修复提交：`aef11599b0b820e7781abb5cb7faa83d8cb5b8b1`。登录调用既有 `/api/auth/login`，成功时仅将 `access_token` 写入 `sessionStorage`；无 token 页面进入 `/login`，已认证用户不重复进入登录页。
+- 回归：`src/App.test.tsx` 覆盖无 token 重定向和登录成功后智能配置请求携带 Bearer；`src/api.test.ts` 覆盖登录写入、JSON 与 SSE 认证边界。前端全量 `26 passed`，生产构建、14 项静态回归、JSON 解析与完整 diff-check 通过。
+- 边界：无后端、迁移、部署、生产依赖、原型或智能配置页变更；token 不显示、不记录日志、不进入 URL 或 React 页面状态。真实账号浏览器 E2E 及 Docker/PostgreSQL/RAGFlow/LLM live-stack 待 DEV-001。仅请求复审，不请求 Merge 授权、不合并、不解锁 TASK-011、不进入 Stage 6。

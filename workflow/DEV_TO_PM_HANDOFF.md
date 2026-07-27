@@ -419,6 +419,29 @@
 - 未验证：DEV-002 无 Docker 命令与专用 live-stack 配置，未执行 Compose 容器内 `RagflowAdapter` 断言、`/healthz` 或真实 TASK-009 RAGFlow 检索。请 DEV-001 对推送后的精确 HEAD 运行这些复验；`test_task005_live_stack.py` 在此环境为 `1 skipped, 2 warnings`。
 - 门禁：当前不得申请 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
 
+## TASK-010 前端集成候选交接（2026-07-27）
+
+- 开发者/审核者：DEV-002 / DEV-001；唯一 Draft PR #50，分支 `codex/task-010-frontend-integration`，目标 `codex/stage-05-integration`。代码检查点为 `76d348620859e8931fed40bf316d4f94131b28ad`；请在推送治理证据后以 PR #50 的完整精确 HEAD 复审，不得把本父提交当作最终候选。
+- 已实现：前端改用既有维护和 Agent API；人工/AI 故障上报、健康分、分阶段诊断、服务端草稿证据、直接/采纳维修、结构化维修摘要、操作指引引用和 Agent Runtime SSE。权限或 AI/流式不可用时保留人工路径。
+- 本地证据：前端 Vitest `22 passed`，生产构建通过，14 项静态回归通过，`git diff --check` 通过。
+- 边界与待验：无后端、迁移、部署、生产依赖、原型或智能配置页修改；无兼容层或新通用抽象。DEV-002 未执行真实认证浏览器 E2E、Docker/PostgreSQL/RAGFlow/LLM live-stack；请 DEV-001 在最终 HEAD 上核验。
+- 门禁：此交接只请求正式复审，非 Merge 授权。未获审核与后续集成批准前，不合并、不解锁 TASK-011、不进入 Stage 6。
+
+## TASK-010 Bearer 认证 P1 修复交接（2026-07-27）
+
+- 审核反馈：PR #50 旧 HEAD `ec4e7be630f7bd40dc48ac731aba042e59993225` 未将浏览器登录态送至需要 Bearer 的业务、Agent 和 SSE 路由，真实调用会得到 `401 UNAUTHENTICATED`。
+- 修复提交：`aac8ac098465da3792ffbee11caa73d5ee16bc9e`；前端 API 边界从 `sessionStorage.access_token` 读取既有登录态，统一注入 Bearer 请求头，JSON 与 SSE 共用该路径；没有 token 时不伪造凭据。
+- 证据：JSON、SSE 请求头回归均通过；API 专项 `10 passed`，前端全量 `23 passed`，生产构建、14 项静态回归、JSON 与完整 diff-check 通过。
+- 下一动作：推送本证据后，以 PR #50 新完整精确 HEAD 请求 DEV-001 重审。仅为代码复审，非 Merge 授权；不合并、不解锁 TASK-011、不进入 Stage 6。
+
+## TASK-010 登录与受保护路由 P1 修复交接（2026-07-27）
+
+- 审核反馈：PR #50 旧 HEAD `654439d8579d20ad67878607febc74e50bf652df` 的 token 没有正式生产写入路径；首次用户会在所有受保护路由得到 401。
+- 项目负责人授权：允许在同一 PR 增加最小 `/login`、登录 API、会话 token 写入、未认证保护和登录后 JSON/SSE Bearer 交互回归。
+- 修复提交：`aef11599b0b820e7781abb5cb7faa83d8cb5b8b1`。登录成功写入 `sessionStorage.access_token` 后返回原路径；无 token 统一重定向登录；JSON/SSE Bearer 继续通过单一 API 边界读取该 token。
+- 证据：API 专项 `11 passed`，前端全量 `26 passed`，生产构建、14 项静态回归、JSON 解析和完整 diff-check 通过。
+- 待 DEV-001：在本证据提交推送后的最终精确 HEAD 上复审；真实账号浏览器 E2E 和 Docker/PostgreSQL/RAGFlow/LLM live-stack 尚未由 DEV-002 执行。仅请求复审，非 Merge 授权；不合并、不解锁 TASK-011、不进入 Stage 6。
+
 ## TASK-009 第八轮 P1 可执行探针修复交接（2026-07-26）
 
 - 审核基准：PR #49 / HEAD `cc643881c251bddc37bb4ae83564b7e14a79a853`，结论 `Changes requested`；DEV-001 用专用 RAGFlow Key 复现 PowerShell/Docker 传参破坏多行 Python 源码并在检索前 `SyntaxError`。

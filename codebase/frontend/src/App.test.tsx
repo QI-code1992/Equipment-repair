@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "./App";
 
@@ -12,6 +12,8 @@ describe("App", () => {
     deep_thinking_enabled: false, deep_thinking_level: "medium", max_reply_tokens: 4096,
     model_capability: { binding_id: "binding-1", display_name: "GPT 推理模型", supports_reasoning: true },
   };
+
+  beforeEach(() => window.sessionStorage.setItem("access_token", "existing-session-token"));
 
   it("loads an Agent configuration and saves only the selected Agent", async () => {
     const fetchMock = vi.fn()
@@ -67,5 +69,37 @@ describe("App", () => {
 
     expect(screen.getByText("当前模型不支持深度思考，请关闭开关或改绑支持推理的模型。")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("routes the fault-report navigation to the formal submission page", () => {
+    render(<MemoryRouter initialEntries={["/fault-report"]}><App /></MemoryRouter>);
+
+    expect(screen.getByRole("heading", { name: "故障上报" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "提交故障" })).toBeInTheDocument();
+    expect(screen.queryByText("业务内容将在对应任务中接入")).not.toBeInTheDocument();
+  });
+
+  it("redirects an unauthenticated visitor to the login page", () => {
+    window.sessionStorage.clear();
+    render(<MemoryRouter initialEntries={["/fault-report"]}><App /></MemoryRouter>);
+
+    expect(screen.getByRole("heading", { name: "登录" })).toBeInTheDocument();
+  });
+
+  it("stores a successful login then sends its Bearer token on the protected page request", async () => {
+    window.sessionStorage.clear();
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: "session-token", token_type: "bearer" }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([config]), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<MemoryRouter initialEntries={["/intelligent-config"]}><App /></MemoryRouter>);
+
+    fireEvent.change(screen.getByLabelText("用户名"), { target: { value: "repairer" } });
+    fireEvent.change(screen.getByLabelText("密码"), { target: { value: "correct-password" } });
+    fireEvent.click(screen.getByRole("button", { name: "登录" }));
+
+    expect(await screen.findByRole("heading", { name: "智能配置" })).toBeInTheDocument();
+    const [, init] = fetchMock.mock.calls[1] as [string, RequestInit];
+    expect(new Headers(init.headers).get("Authorization")).toBe("Bearer session-token");
   });
 });

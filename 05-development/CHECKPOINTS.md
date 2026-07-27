@@ -383,6 +383,43 @@
 - 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；真实 RAGFlow 引用与运行态降级由 DEV-001 在复审/集成阶段核验。
 - 门禁：PR #49 新 HEAD 会使旧审核结论失效；等待 DEV-001 重新审核，不得请求 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
 
+## FCP-010-R2：TASK-010 前端集成候选
+
+- 状态：Development Candidate / Draft PR #50 / 等待 DEV-001 对推送后的完整精确 HEAD 正式复审；未集成，不解锁 TASK-011 或 Stage 6。
+- 分支/目标：`codex/task-010-frontend-integration` → `codex/stage-05-integration`；功能检查点 `76d348620859e8931fed40bf316d4f94131b28ad`，最终候选以本次证据提交推送后的 PR #50 HEAD 为准。
+- 范围：以正式前端调用既有维护和 Agent API，覆盖人工/AI 故障上报、健康分工作台、诊断分阶段呈现、仅服务端草稿 ID 的证据补充、直接/采纳维修、结果与受限摘要、操作指引引用及 Runtime SSE 状态。权限或 AI 不可用时保留人工上报、直接维修或人工操作流程。
+- 验证：前端 Vitest `22 passed`；`npm --prefix codebase/frontend run build` 通过；14 项 `06-testing/tests/*.test.js` 静态回归通过；`git diff --check` 通过。
+- 边界：未修改后端、数据库迁移、部署、生产依赖、Stage 3 原型或 Agent 配置页；未新增兼容层或通用抽象。
+- 未验证：DEV-002 未执行带认证真实后端的浏览器端到端流、Docker/PostgreSQL/RAGFlow/LLM live-stack；这些需 DEV-001 在最终精确 HEAD 上复审/集成核验。
+- 门禁：本记录只请求代码复审，不是 Merge 授权；不得合并、解锁 TASK-011 或进入 Stage 6。
+
+## FCP-010-R3：TASK-010 Bearer 认证 P1 修复候选
+
+- 审核输入：DEV-001 对 PR #50 的 `ec4e7be630f7bd40dc48ac731aba042e59993225` 提交 `Changes requested`；原前端 JSON、Agent 与 SSE 请求没有 Bearer 认证，会收到 `401 UNAUTHENTICATED`。
+- 修复提交：`aac8ac098465da3792ffbee11caa73d5ee16bc9e`；最终候选以本证据提交推送后的 PR #50 完整 HEAD 为准。
+- 修复范围：统一 API 边界从现有登录态 `sessionStorage.access_token` 读取 token，并仅在 token 存在时追加 `Authorization: Bearer …`；JSON 请求保留原有内容类型和幂等键，SSE `GET /api/agent/runs/{run_id}/events` 使用相同认证边界。
+- 回归：新增 JSON 与 SSE 实际 fetch 初始化参数的 Bearer 断言；缺少 token 时不伪造认证头，后端继续作为唯一认证事实源。
+- 验证：API 专项 `10 passed`；前端全量 `23 passed`；生产构建、14 项静态回归、`workflow/state.json` JSON 解析和完整 diff-check 通过。
+- 门禁：旧审核结论已失效，等待 DEV-001 对新精确 HEAD 复审；不申请 Merge 授权、不合并、不解锁 TASK-011、不进入 Stage 6。
+
+## FCP-010-R4：TASK-010 登录与受保护路由 P1 修复候选
+
+- 审核输入：DEV-001 对 PR #50 的 `654439d8579d20ad67878607febc74e50bf652df` 提交 `Changes requested`；此前 token 只有测试写入，正式前端没有登录入口或未认证保护，首次使用会得到 401。
+- 项目负责人已确认范围：在同一 PR 最小新增 `/login`、`/api/auth/login` 调用、`sessionStorage.access_token` 会话写入、未认证路由保护和交互回归；不修改后端认证规则或公开契约。
+- 修复提交：`aef11599b0b820e7781abb5cb7faa83d8cb5b8b1`；最终候选以本证据提交推送后的 PR #50 完整 HEAD 为准。
+- 行为：未认证用户访问既有页面会转到 `/login`；登录成功仅写入返回的 token 后回到原目标页；已认证用户访问 `/login` 回到工作台。JSON 与 SSE 继续在单一 API 边界读取该会话 token，登录请求本身不附带认证头。
+- 验证：交互回归覆盖未认证重定向、成功登录写入 token、登录后受保护页面 JSON Bearer 请求；API 专项 `11 passed`，前端全量 `26 passed`，生产构建、14 项静态回归、`workflow/state.json` JSON 解析和完整 diff-check 通过。
+- 未验证：DEV-002 未执行携带真实账号的浏览器 E2E 或 Docker/PostgreSQL/RAGFlow/LLM live-stack；请 DEV-001 在最终精确 HEAD 上复核。
+- 门禁：仅请求代码复审，不是 Merge 授权；不得合并、解锁 TASK-011 或进入 Stage 6。
+
+## FCP-010-R1：TASK-010 前端 API 客户端检查点
+
+- 状态：已验证的开发检查点；PR #50 未审核、未集成，不解锁 TASK-011 或 Stage 6。
+- 分支/提交：`codex/task-010-frontend-integration` / `3c37d6c3a85bc02c00b79b550b0622846d39e574`。
+- 范围：正式前端的维护与 Agent API 类型、幂等 POST 边界，以及公开错误码映射；不修改后端、API 契约、原型、依赖或智能配置页。
+- 验证：TDD 红灯证明维护 API 尚不存在；`npm --prefix codebase/frontend test -- src/api.test.ts` 为 `6 passed`，`npm --prefix codebase/frontend run build` 通过，`git diff --check` 通过。
+- 回退：可单独回退该提交，不涉及数据、部署或生产操作。
+
 ## FCP-009-R8：TASK-009 可执行 RAGFlow 探针修复候选
 
 - 状态：Development Candidate / PowerShell 原生参数传递 P1 已修复 / 等待 DEV-001 对最终 PR #49 精确 HEAD 复审与 live-stack 复验；未集成、不解锁下游，Stage 6 仍禁止。
