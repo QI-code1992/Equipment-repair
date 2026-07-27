@@ -1,14 +1,115 @@
+export class ApiError extends Error {
+  constructor(
+    readonly status: number,
+    readonly code: string | null,
+  ) {
+    super(code ?? `HTTP_${status}`);
+  }
+}
+
 export async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, init);
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    const body = await response.json().catch(() => null) as { detail?: { code?: string } } | null;
+    throw new ApiError(response.status, body?.detail?.code ?? null);
   }
 
   return response.json() as Promise<T>;
 }
 
 export type DeepThinkingLevel = "low" | "medium" | "high";
+
+export type FaultReportCreate = {
+  equipment_id: string;
+  urgency: string;
+  symptom: string;
+  occurred_at: string;
+  possible_location?: string;
+  description?: string;
+  attachment_refs: Array<{ object_key: string; filename: string; size_bytes: number; content_type: string }>;
+};
+
+export type FaultReport = FaultReportCreate & { id: string; number: string; status: string };
+
+export type StartRepairRequest =
+  | { mode: "DIRECT"; diagnosis_draft_id?: never }
+  | { mode: "ADOPTED"; diagnosis_draft_id: string };
+
+export type RepairStart = {
+  work_order_id: string;
+  maintenance_record_id: string;
+  start_mode: "DIRECT" | "ADOPTED";
+  diagnosis_draft_id: string | null;
+};
+
+export type RepairResult = {
+  actual_cause: string;
+  actual_solution: string;
+  repair_result: string;
+  parts_replacement_notes?: string;
+};
+
+export type DiagnosisResponse = {
+  state: "OPEN_LOADING" | "QUESTIONING" | "EVIDENCE_PENDING" | "DIAGNOSIS_READY" | "UNAVAILABLE";
+  question: string | null;
+  evidence: Array<{ category: string; detail: string }>;
+  prefill: Record<string, unknown> | null;
+  summary: Record<string, unknown> | null;
+  steps: number;
+  questions: number;
+  diagnosis_draft_id: string | null;
+};
+
+export type GuidanceResponse = {
+  state: string;
+  question: string | null;
+  evidence: Array<{ citation: string; text: string }>;
+  manual_fallback: boolean;
+  loading_seconds: number;
+};
+
+function postJson<T>(path: string, body: unknown): Promise<T> {
+  return requestJson<T>(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() },
+    body: JSON.stringify(body),
+  });
+}
+
+export function createFaultReport(payload: FaultReportCreate) {
+  return postJson<FaultReport>("/api/fault-reports", payload);
+}
+
+export function startRepair(faultId: string, payload: StartRepairRequest) {
+  return postJson<RepairStart>(`/api/fault-reports/${faultId}/start-repair`, payload);
+}
+
+export function completeRepair(workOrderId: string, payload: RepairResult) {
+  return postJson<RepairResult>(`/api/work-orders/${workOrderId}/repair-result`, payload);
+}
+
+export function getOperationGuidance(payload: {
+  equipment_id: string;
+  equipment_model: string;
+  symptom: string;
+  description: string;
+  dataset_ids?: string[];
+}) {
+  return postJson<GuidanceResponse>("/api/agent/operation-guidance", payload);
+}
+
+export function runFaultDiagnosis(payload: {
+  action: "start" | "answer" | "evidence";
+  fault_report_id?: string;
+  alarm_code_present?: boolean;
+  diagnosis_draft_id?: string;
+  answer?: string;
+  category?: string;
+  detail?: string;
+}) {
+  return postJson<DiagnosisResponse>("/api/agent/fault-diagnosis", payload);
+}
 
 export type AgentConfig = {
   agent_id: string;

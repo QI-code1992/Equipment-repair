@@ -1,6 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { getAgentConfig, getAgentConfigs, requestJson, saveAgentConfig } from "./api";
+import {
+  ApiError,
+  createFaultReport,
+  getAgentConfig,
+  getAgentConfigs,
+  requestJson,
+  saveAgentConfig,
+  startRepair,
+} from "./api";
 
 describe("requestJson", () => {
   it("uses the browser fetch boundary and returns JSON", async () => {
@@ -51,5 +59,44 @@ describe("agent configuration API", () => {
 
     await getAgentConfig("metric_query");
     expect(fetchMock).toHaveBeenCalledWith("/api/agent-configs/metric_query", undefined);
+  });
+});
+
+describe("maintenance API", () => {
+  it("sends adopted repair start with an idempotency key", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ work_order_id: "wo-1" }), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await startRepair("fault-1", { mode: "ADOPTED", diagnosis_draft_id: "draft-1" });
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/fault-reports/fault-1/start-repair", expect.objectContaining({
+      method: "POST",
+      headers: expect.objectContaining({ "Idempotency-Key": expect.any(String) }),
+      body: JSON.stringify({ mode: "ADOPTED", diagnosis_draft_id: "draft-1" }),
+    }));
+  });
+
+  it("throws a public ApiError for a forbidden response", async () => {
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(
+      new Response(JSON.stringify({ detail: { code: "FORBIDDEN" } }), { status: 403 }),
+    ));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(createFaultReport({
+      equipment_id: "eq-1",
+      urgency: "HIGH",
+      symptom: "液压压力异常",
+      occurred_at: "2026-07-27T10:00:00+08:00",
+      attachment_refs: [],
+    })).rejects.toBeInstanceOf(ApiError);
+    await expect(createFaultReport({
+      equipment_id: "eq-1",
+      urgency: "HIGH",
+      symptom: "液压压力异常",
+      occurred_at: "2026-07-27T10:00:00+08:00",
+      attachment_refs: [],
+    })).rejects.toMatchObject({ status: 403, code: "FORBIDDEN" });
   });
 });
