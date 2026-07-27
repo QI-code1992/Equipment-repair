@@ -752,7 +752,7 @@
 ### CR-044：TASK-011 附件上传扫描与 Nginx HTTPS 部署补齐
 
 - 级别：L3
-- 状态：Approved / 书面设计待复核
+- 状态：In Development
 - 提出人：项目负责人
 - 提出时间：2026-07-27
 - 当前阶段：Stage 5 — 开发实施
@@ -767,7 +767,7 @@
   - 实施计划/任务书：TASK-011 范围内实施，负责人仍为 DEV-001、审核人为 DEV-002。
   - 测试/验收：增加上传、扫描、存储失败、审计脱敏、HTTPS/SSE 与内部端口隔离验证。
 - 决策：项目负责人已确认范围；按 `04-architecture-plan/TASK-011_ATTACHMENT_HTTPS_DESIGN.md` 书面设计实施。
-- 更新基线：待书面设计复核后更新 API_SPEC、SYSTEM_ARCHITECTURE、TASK-011 实施计划与测试材料。
+- 更新基线：书面设计已于 2026-07-27 获项目负责人复核；API_SPEC、SYSTEM_ARCHITECTURE 与 TASK-011 实施计划已按 CR-044 同步，测试材料随实现更新。
 - 实施：
   - Commit：待实施。
   - Owner：DEV-001。

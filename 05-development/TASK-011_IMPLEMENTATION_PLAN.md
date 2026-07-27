@@ -4,14 +4,14 @@
 
 **目标：** 在既有 Stage 5 集成基线上补齐健康分、附件安全、HTTPS、备份恢复、超时降级、真实全栈 E2E 与交接证据。
 
-**架构：** 保持 FastAPI、PostgreSQL、Redis、MinIO、ClamAV、RAGFlow 和前端的既有职责。新增内容以端到端测试、有限职责的部署脚本和 Nginx 反向代理为主；不得改变业务 API、数据库迁移、原型或 Agent 契约。
+**架构：** 保持 FastAPI、PostgreSQL、Redis、MinIO、ClamAV、RAGFlow 和前端的既有职责。按 CR-044 新增受控附件上传/扫描 API、端到端测试、有限职责的部署脚本和 Nginx 反向代理；不改变既有故障上报 API、数据库迁移、原型或 Agent 契约。
 
 **技术栈：** Python 3.13、pytest、FastAPI、Docker Compose、Nginx、PowerShell、TypeScript/Vitest。
 
 ## 全局约束
 
 - 基线为 `d460a40a028480fefae718dbcf28cd55a3328a91`；任务分支只允许推送到 `codex/*`，PR 目标固定为 `codex/stage-05-integration`。
-- 不新增生产依赖、数据库迁移、公开 API、认证/权限规则、兼容层或通用抽象；如实际缺口要求其中任一项，停止实施并先走变更控制。
+- 不新增生产依赖、数据库迁移、兼容层或通用抽象；CR-044 唯一允许新增公开 API 为 `POST /api/attachments`，它要求既有 `fault:create` 权限且只返回既有 `AttachmentRef`。
 - 附件只接受对象引用与元数据，单文件最大 100 MB；扫描、对象存储、RAGFlow 与外部 LLM 失败必须显式降级，不能伪造引用或业务结果。
 - 只 Nginx 暴露 HTTPS；PostgreSQL、Redis、MinIO、ClamAV、Worker、RAGFlow 与 Elasticsearch 不得暴露公网端口。
 - 真实运行用 Git 忽略的本地环境文件和仓库外的 RAGFlow Key；不得记录或打印密码、Token、Cookie、连接串或附件正文。
