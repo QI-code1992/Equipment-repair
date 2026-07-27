@@ -28,5 +28,13 @@ foreach ($required in @("listen 443 ssl", "proxy_pass http://api:8000", "proxy_b
         throw "Nginx contract missing: $required"
     }
 }
+foreach ($required in @("root /usr/share/nginx/html", 'try_files $uri $uri/ /index.html')) {
+    if ($nginxConfig -notmatch [regex]::Escape($required)) {
+        throw "Nginx frontend contract missing: $required"
+    }
+}
+if (@($nginx.volumes | Where-Object { $_.target -eq "/usr/share/nginx/html" -and $_.read_only }).Count -ne 1) {
+    throw "Nginx must mount the frontend production build"
+}
 
 Write-Output "TASK-011 nginx contract: PASS"

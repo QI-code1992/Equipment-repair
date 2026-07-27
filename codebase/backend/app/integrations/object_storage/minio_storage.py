@@ -1,5 +1,5 @@
 from io import BytesIO
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from typing import Protocol
 from uuid import uuid4
 
@@ -28,6 +28,19 @@ class MinioObjectStorage:
             length=len(content),
             content_type=content_type,
         )
+        return object_key
+
+    def put_file(self, *, filename: str, path: Path, size_bytes: int, content_type: str) -> str:
+        suffix = PurePosixPath(filename).suffix.lower()
+        object_key = f"knowledge/{uuid4().hex}{suffix}"
+        with path.open("rb") as source:
+            self.client.put_object(
+                bucket_name=self.bucket_name,
+                object_name=object_key,
+                data=source,
+                length=size_bytes,
+                content_type=content_type,
+            )
         return object_key
 
     def get(self, object_key: str) -> bytes:

@@ -1,4 +1,5 @@
 from hashlib import sha256
+from pathlib import Path
 from typing import Annotated, Protocol, cast
 
 from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Request, UploadFile
@@ -22,11 +23,15 @@ router = APIRouter(tags=["knowledge"])
 class ObjectStorage(Protocol):
     def put(self, **kwargs: object) -> str: ...
 
+    def put_file(self, **kwargs: object) -> str: ...
+
     def delete(self, object_key: str) -> None: ...
 
 
 class FileScanner(Protocol):
     def is_safe(self, content: bytes) -> bool: ...
+
+    def is_safe_file(self, path: Path) -> bool: ...
 
 
 def _dependency(request: Request, name: str, error_code: str) -> object:

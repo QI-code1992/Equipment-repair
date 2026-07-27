@@ -13,6 +13,7 @@ class FakeStorage:
     def __init__(self, *, unavailable: bool = False) -> None:
         self.put_calls: list[dict[str, object]] = []
         self.delete_calls: list[str] = []
+        self.file_put_paths: list[object] = []
         self.unavailable = unavailable
 
     def put(self, **kwargs: object) -> str:
@@ -24,6 +25,10 @@ class FakeStorage:
     def delete(self, object_key: str) -> None:
         self.delete_calls.append(object_key)
 
+    def put_file(self, *, filename: str, path, size_bytes: int, content_type: str) -> str:
+        self.file_put_paths.append(path)
+        return self.put(filename=filename, content=path.read_bytes(), content_type=content_type)
+
 
 class SafeScanner:
     def __init__(self, *, safe: bool = True, unavailable: bool = False) -> None:
@@ -34,6 +39,19 @@ class SafeScanner:
         if self.unavailable:
             raise ScannerUnavailable("scanner unavailable")
         return self.safe
+
+    def is_safe_file(self, path) -> bool:
+        return self.is_safe(path.read_bytes())
+
+
+class RecordingScanner(SafeScanner):
+    def __init__(self) -> None:
+        super().__init__()
+        self.paths: list[object] = []
+
+    def is_safe_file(self, path) -> bool:
+        self.paths.append(path)
+        return super().is_safe_file(path)
 
 
 def build_client(
@@ -80,6 +98,22 @@ def test_attachment_upload_scans_and_returns_reference() -> None:
             "content_type": "image/png",
         }
     ]
+
+
+def test_attachment_upload_scans_and_stores_the_same_temporary_file() -> None:
+    scanner = RecordingScanner()
+    client, token, storage = build_client(scanner=scanner)
+
+    response = client.post(
+        "/api/attachments",
+        headers={"Authorization": f"Bearer {token}", "Idempotency-Key": "temporary-file"},
+        files={"file": ("evidence.png", b"image-bytes", "image/png")},
+    )
+
+    assert response.status_code == 201
+    assert len(scanner.paths) == len(storage.file_put_paths) == 1
+    assert scanner.paths[0] == storage.file_put_paths[0]
+    assert not scanner.paths[0].exists()
 
 
 def test_attachment_upload_rejects_disallowed_mime_without_storing() -> None:

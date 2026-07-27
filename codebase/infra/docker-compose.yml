@@ -7,6 +7,7 @@ services:
       - "127.0.0.1:${NGINX_HTTPS_PORT}:443"
     volumes:
       - ./nginx/default.conf:/etc/nginx/nginx.conf:ro
+      - ../frontend/dist:/usr/share/nginx/html:ro
       - ${NGINX_CERT_DIRECTORY}:/etc/nginx/certs:ro
     networks: [platform]
 

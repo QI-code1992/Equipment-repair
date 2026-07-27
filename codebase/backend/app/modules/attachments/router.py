@@ -48,42 +48,55 @@ async def upload_attachment(
     storage: ObjectStorage = Depends(get_storage),
     scanner: FileScanner = Depends(get_scanner),
 ) -> dict[str, object] | JSONResponse:
-    content = await file.read(MAX_ATTACHMENT_SIZE + 1)
     content_type = file.content_type or ""
     filename = file.filename or ""
+    size_bytes = 0
+    digest = sha256()
+    temporary_path: Path | None = None
+    with NamedTemporaryFile(prefix="equipment-attachment-", delete=False) as temporary:
+        temporary_path = Path(temporary.name)
+        while chunk := await file.read(64 * 1024):
+            size_bytes += len(chunk)
+            if size_bytes > MAX_ATTACHMENT_SIZE:
+                break
+            digest.update(chunk)
+            temporary.write(chunk)
     request_body = {
         "filename": filename,
         "content_type": content_type,
-        "size_bytes": len(content),
-        "sha256": sha256(content).hexdigest(),
+        "size_bytes": size_bytes,
+        "sha256": digest.hexdigest(),
     }
-    replay = find_idempotent_response(
-        db,
-        user_id=actor.id,
-        method="POST",
-        path="/api/attachments",
-        key=idempotency_key,
-        request_body=request_body,
-    )
-    if replay is not None:
-        return JSONResponse(status_code=replay[0], content=replay[1])
-    if not content or len(content) > MAX_ATTACHMENT_SIZE or content_type not in ALLOWED_CONTENT_TYPES:
-        raise _invalid_attachment()
-
-    temporary_path: Path | None = None
     try:
-        with NamedTemporaryFile(prefix="equipment-attachment-", delete=False) as temporary:
-            temporary.write(content)
-            temporary_path = Path(temporary.name)
+        replay = find_idempotent_response(
+            db,
+            user_id=actor.id,
+            method="POST",
+            path="/api/attachments",
+            key=idempotency_key,
+            request_body=request_body,
+        )
+    except Exception:
+        temporary_path.unlink(missing_ok=True)
+        raise
+    if replay is not None:
+        temporary_path.unlink(missing_ok=True)
+        return JSONResponse(status_code=replay[0], content=replay[1])
+    try:
+        if not size_bytes or size_bytes > MAX_ATTACHMENT_SIZE or content_type not in ALLOWED_CONTENT_TYPES:
+            raise _invalid_attachment()
         try:
-            safe = scanner.is_safe(content)
+            safe = scanner.is_safe_file(temporary_path)
         except ScannerUnavailable:
             raise HTTPException(status_code=503, detail={"code": "ATTACHMENT_SCAN_UNAVAILABLE"}) from None
         if not safe:
             raise HTTPException(status_code=422, detail={"code": "ATTACHMENT_INFECTED"})
         try:
-            object_key = storage.put(
-                filename=filename, content=content, content_type=content_type
+            object_key = storage.put_file(
+                filename=filename,
+                path=temporary_path,
+                size_bytes=size_bytes,
+                content_type=content_type,
             )
         except Exception:
             raise HTTPException(status_code=503, detail={"code": "ATTACHMENT_STORAGE_UNAVAILABLE"}) from None
@@ -94,7 +107,7 @@ async def upload_attachment(
     response_body = {
         "object_key": object_key,
         "filename": filename,
-        "size_bytes": len(content),
+        "size_bytes": size_bytes,
         "content_type": content_type,
     }
     try:
