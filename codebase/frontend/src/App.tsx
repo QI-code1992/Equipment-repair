@@ -2,6 +2,7 @@ import { NavLink, Route, Routes, useLocation } from "react-router-dom";
 
 import { IntelligentConfigPage } from "./IntelligentConfigPage";
 import { FaultReportPage } from "./FaultReportPage";
+import { RepairExecutionPage } from "./RepairExecutionPage";
 
 type Page = {
   path: string;
@@ -72,7 +73,7 @@ export function App() {
           <div className="topbar__avatar" aria-label="当前用户">管</div>
         </header>
         <Routes>
-          {pages.map((page) => <Route key={page.path} path={page.path} element={page.path === "/intelligent-config" ? <IntelligentConfigPage /> : page.path === "/fault-report" ? <FaultReportPage /> : <PageShell label={page.label} />} />)}
+          {pages.map((page) => <Route key={page.path} path={page.path} element={page.path === "/intelligent-config" ? <IntelligentConfigPage /> : page.path === "/fault-report" ? <FaultReportPage /> : page.path === "/repair-execution" ? <RepairExecutionPage /> : <PageShell label={page.label} />} />)}
           <Route path="*" element={<PageShell label={activePage.label} />} />
         </Routes>
       </main>
