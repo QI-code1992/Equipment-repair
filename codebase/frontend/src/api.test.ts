@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   ApiError,
@@ -14,6 +14,8 @@ import {
   startRepair,
 } from "./api";
 
+afterEach(() => window.sessionStorage.clear());
+
 describe("requestJson", () => {
   it("uses the browser fetch boundary and returns JSON", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
@@ -23,6 +25,19 @@ describe("requestJson", () => {
 
     await expect(requestJson<{ status: string }>("/healthz")).resolves.toEqual({ status: "ok" });
     expect(fetchMock).toHaveBeenCalledWith("/healthz", undefined);
+  });
+
+  it("adds the active login token to JSON requests", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ status: "ok" }), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    window.sessionStorage.setItem("access_token", "active-login-token");
+
+    await requestJson<{ status: string }>("/api/agent-configs");
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(new Headers(init.headers).get("Authorization")).toBe("Bearer active-login-token");
   });
 });
 
@@ -132,12 +147,16 @@ describe("Agent Runtime SSE API", () => {
         controller.close();
       },
     });
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(body, { status: 200 })));
+    const fetchMock = vi.fn().mockResolvedValue(new Response(body, { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    window.sessionStorage.setItem("access_token", "active-login-token");
 
     await expect(readRunEvents("run-1")).resolves.toEqual([
       { event: "run_started", data: { status: "RUNNING" } },
       { event: "run_waiting", data: { status: "WAITING_FOR_MODEL" } },
     ]);
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(new Headers(init.headers).get("Authorization")).toBe("Bearer active-login-token");
   });
 
   it("creates an operation-guidance thread before starting its run", async () => {

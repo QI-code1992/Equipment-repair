@@ -7,8 +7,18 @@ export class ApiError extends Error {
   }
 }
 
+const accessTokenStorageKey = "access_token";
+
+function withAuthorization(init?: RequestInit): RequestInit | undefined {
+  const token = window.sessionStorage.getItem(accessTokenStorageKey);
+  if (!token) return init;
+  const headers = new Headers(init?.headers);
+  headers.set("Authorization", `Bearer ${token}`);
+  return { ...init, headers };
+}
+
 export async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(path, init);
+  const response = await fetch(path, withAuthorization(init));
 
   if (!response.ok) {
     const body = await response.json().catch(() => null) as { detail?: { code?: string } } | null;
@@ -126,7 +136,7 @@ export function runFaultDiagnosis(payload: {
 }
 
 export async function readRunEvents(runId: string): Promise<RuntimeEvent[]> {
-  const response = await fetch(`/api/agent/runs/${runId}/events`);
+  const response = await fetch(`/api/agent/runs/${runId}/events`, withAuthorization());
   if (!response.ok || !response.body) throw new ApiError(response.status, null);
   const text = await response.text();
   return text.split("\n\n").flatMap((block) => {
