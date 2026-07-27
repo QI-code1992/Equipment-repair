@@ -18,10 +18,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      minio:
-        condition: service_healthy
-      clamav:
-        condition: service_started
     environment:
       POSTGRES_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       REDIS_URL: ${REDIS_URL}
@@ -45,10 +41,6 @@ services:
     command: ["python", "-m", "app.modules.knowledge.worker_main", "--poll-seconds", "1"]
     depends_on:
       postgres:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-      clamav:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
