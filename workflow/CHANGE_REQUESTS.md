@@ -749,3 +749,28 @@
   - Workflow State: 标记 TASK-009、TASK-010 为 `CLOSED_POST_MERGE_GOVERNANCE_COMPLETED`，更新当前集成 SHA，并解除 TASK-011 的文档阻断。
 - Verification: `workflow/state.json` JSON 解析、仅治理文件范围检查与 `git diff --check` 必须通过；PR #49/#50 合并 SHA 和状态须与 GitHub 记录一致。
 - Stage Boundary: 此更正不批准 Stage 6，不构成 TASK-011 代码、测试或基础设施完成结论；TASK-011 仍按其独立 Draft PR、交叉审核、集成检查和逐 PR Merge 授权流程执行。
+### CR-044：TASK-011 附件上传扫描与 Nginx HTTPS 部署补齐
+
+- 级别：L3
+- 状态：In Development
+- 提出人：项目负责人
+- 提出时间：2026-07-27
+- 当前阶段：Stage 5 — 开发实施
+- 原始请求：确认 TASK-011 新增附件上传与病毒扫描 API、对象存储写入及 Nginx HTTPS 部署配置；允许在同一 TASK-011 PR 按 TDD 实施。
+- 明确需求：新增受 `fault:create` 与 Bearer 会话保护的 `POST /api/attachments`；依次执行 100 MiB/MIME 校验、ClamAV 扫描和 MinIO 写入，只返回既有 `AttachmentRef`。允许 JPEG、PNG、WebP、PDF、TXT、CSV、DOC、DOCX、XLS、XLSX；拒绝压缩包、宏格式与其他类型。Nginx 为唯一 HTTPS 入口，内部服务不暴露宿主端口；不提供明文 HTTP 回退。
+- 原因：当前正式契约仅保存附件引用，缺少生成可信引用的受控上传/扫描路径；部署基线尚未实现唯一 HTTPS 入口。
+- 影响：
+  - PRD：不改变 FR-003 的附件上限或用户流程。
+  - SPEC/API：新增附件上传路由、稳定错误和权限边界；既有故障 API 的 `attachment_refs` 不变。
+  - 原型：不修改。
+  - 架构：补充 FileObject、ClamAV、MinIO 与 Nginx 的实现边界。
+  - 实施计划/任务书：TASK-011 范围内实施，负责人仍为 DEV-001、审核人为 DEV-002。
+  - 测试/验收：增加上传、扫描、存储失败、审计脱敏、HTTPS/SSE 与内部端口隔离验证。
+- 决策：项目负责人已确认范围；按 `04-architecture-plan/TASK-011_ATTACHMENT_HTTPS_DESIGN.md` 书面设计实施。
+- 更新基线：书面设计已于 2026-07-27 获项目负责人复核；API_SPEC、SYSTEM_ARCHITECTURE 与 TASK-011 实施计划已按 CR-044 同步，测试材料随实现更新。
+- 实施：
+  - Commit：待实施。
+  - Owner：DEV-001。
+- 验证：
+  - 状态：待实施。
+  - 证据：TDD 红绿记录、Compose 静态验证、真实 Docker/RAGFlow 与恢复演练。

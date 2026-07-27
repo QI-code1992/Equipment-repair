@@ -1,4 +1,16 @@
 services:
+  nginx:
+    image: nginx:1.27-alpine
+    depends_on:
+      - api
+    ports:
+      - "127.0.0.1:${NGINX_HTTPS_PORT}:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/nginx.conf:ro
+      - ../frontend/dist:/usr/share/nginx/html:ro
+      - ${NGINX_CERT_DIRECTORY}:/etc/nginx/certs:ro
+    networks: [platform, ingress]
+
   api:
     build:
       context: ../backend
@@ -13,6 +25,12 @@ services:
       RAGFLOW_BASE_URL: ${RAGFLOW_BASE_URL}
       RAGFLOW_API_KEY: ${RAGFLOW_API_KEY}
       RAGFLOW_TIMEOUT_SECONDS: ${RAGFLOW_TIMEOUT_SECONDS}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      CLAMAV_HOST: clamav
+      CLAMAV_PORT: 3310
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks: [platform, ragflow-egress]
@@ -24,10 +42,6 @@ services:
     command: ["python", "-m", "app.modules.knowledge.worker_main", "--poll-seconds", "1"]
     depends_on:
       postgres:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-      clamav:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
@@ -115,8 +129,8 @@ services:
     networks: [platform]
 
   minio:
-    profiles: [validation]
     image: ${MINIO_IMAGE:-pgsty/minio:RELEASE.2026-03-25T00-00-00Z}
+    profiles: [validation]
     command: ["server", "/data"]
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
@@ -129,11 +143,12 @@ services:
     networks: [platform]
 
   clamav:
-    profiles: [validation]
     image: clamav/clamav:1.4.3
+    profiles: [validation]
     networks: [platform]
 
 networks:
   platform:
     internal: true
+  ingress: {}
   ragflow-egress: {}

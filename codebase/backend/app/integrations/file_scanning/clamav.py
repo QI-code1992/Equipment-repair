@@ -1,5 +1,6 @@
 import socket
 from collections.abc import Callable
+from pathlib import Path
 from struct import pack
 from typing import Protocol
 
@@ -35,13 +36,21 @@ class ClamAvScanner:
         self.socket_factory = socket_factory
 
     def is_safe(self, content: bytes) -> bool:
+        return self._scan_chunks(
+            (content[offset : offset + 64 * 1024] for offset in range(0, len(content), 64 * 1024))
+        )
+
+    def is_safe_file(self, path: Path) -> bool:
+        with path.open("rb") as source:
+            return self._scan_chunks(iter(lambda: source.read(64 * 1024), b""))
+
+    def _scan_chunks(self, chunks) -> bool:
         try:
             with self.socket_factory(
                 (self.host, self.port), timeout=self.timeout_seconds
             ) as connection:
                 connection.sendall(b"zINSTREAM\0")
-                for offset in range(0, len(content), 64 * 1024):
-                    chunk = content[offset : offset + 64 * 1024]
+                for chunk in chunks:
                     connection.sendall(pack("!I", len(chunk)) + chunk)
                 connection.sendall(pack("!I", 0))
                 response = self._response(connection)

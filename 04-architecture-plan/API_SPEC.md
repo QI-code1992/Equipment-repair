@@ -40,6 +40,23 @@
 | POST | `/api/knowledge/documents` | 上传并创建知识文档元数据。 |
 | GET | `/api/knowledge/documents/{id}` | 查询 RAGFlow 生命周期状态。 |
 
+## CR-044 附件上传与扫描契约
+
+| Method | Endpoint | 权限码 | 请求/成功响应 |
+|---|---|---|---|
+| POST | `/api/attachments` | `fault:create` | `multipart/form-data` 中唯一 `file` 字段；必填 `Idempotency-Key`；201 返回 `object_key,filename,size_bytes,content_type`。 |
+
+服务端按顺序读取文件、使用文件 SHA-256 与文件名、MIME、大小形成幂等请求摘要并回放同 Key 原响应；同 Key 不同摘要返回既有 `IDEMPOTENCY_KEY_REUSED` 409。随后校验文件存在、非空、最大 `104857600` 字节和明确允许的 MIME：`image/jpeg`、`image/png`、`image/webp`、`application/pdf`、`text/plain`、`text/csv`、`application/msword`、`application/vnd.openxmlformats-officedocument.wordprocessingml.document`、`application/vnd.ms-excel`、`application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`。`.zip` 等压缩包、宏格式和其他类型一律拒绝；再使用 ClamAV 扫描，最后写入 MinIO。若成功审计、幂等记录或数据库提交失败，服务端回滚数据库并删除刚写入对象。客户端不得指定 `object_key`，服务端以随机 UUID 生成键。成功响应可作为既有 `FaultReportCreate.attachment_refs` 项直接使用；故障上报 API 的字段、幂等和状态机不变。
+
+| HTTP | code | 场景 |
+|---|---|---|
+| 422 | `ATTACHMENT_INVALID` | 缺失、空文件、大小或 MIME 不合法。 |
+| 422 | `ATTACHMENT_INFECTED` | 病毒扫描明确判定感染。 |
+| 503 | `ATTACHMENT_SCAN_UNAVAILABLE` | 扫描超时或扫描服务不可用。 |
+| 503 | `ATTACHMENT_STORAGE_UNAVAILABLE` | 扫描成功后的对象存储写入失败。 |
+
+失败不返回 `AttachmentRef`；临时文件必须清理。审计仅保存动作、结果、文件名、类型、大小与对象键，不保存正文、字节、Base64、密码、Token、Cookie 或连接串。
+
 内部工具不直接暴露给浏览器：`retrieve_knowledge`、`get_similar_repair_cases`、`query_metric_batch`、`get_page_capability`、`get_operation_guidance`、`run_fault_diagnosis`、`create_fault_draft`、`submit_confirmed_business_action` 均经服务端参数模型、权限校验、超时和审计封装。禁止 Agent 生成 SQL 或任意文件系统命令。
 
 ## 诊断状态与错误契约

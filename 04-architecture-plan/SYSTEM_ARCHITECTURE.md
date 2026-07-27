@@ -29,6 +29,12 @@
 - **RAGFlow**：只处理非结构化文档、检索、重排与引用；同类设备历史维修记录只来自 PostgreSQL。
 - **后台 Worker**：执行预诊断草稿、文档处理状态同步、案例沉淀、通知与备份；不持有前台会话。
 
+## CR-044 附件与 HTTPS 部署边界
+
+附件由业务 API 接收，先执行大小/MIME 校验和 ClamAV 扫描，再写入 MinIO；浏览器只获得对象引用元数据。上传临时文件、感染文件和扫描/存储失败均不得形成可引用对象，审计只记录脱敏元数据。
+
+Nginx 是唯一宿主机入口，HTTPS 仅绑定 `127.0.0.1`，证书和私钥从 Git 忽略的本地目录挂载。它反代 `/api/` 到 FastAPI，并对 `/api/agent/runs/` 关闭代理缓冲以保持 SSE。PostgreSQL、Redis、MinIO、ClamAV、Worker、RAGFlow 和 Elasticsearch 没有宿主机端口；证书或上游不可用时明确失败，不提供明文 HTTP 回退。
+
 本期没有工厂/设备行级授权隔离或 `EquipmentGrant`。仍执行平台账号认证、角色、菜单与操作权限；Agent 线程只允许创建者或系统管理员读取。
 
 ## 四个 Agent
