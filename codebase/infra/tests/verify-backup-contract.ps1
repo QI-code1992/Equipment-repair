@@ -29,7 +29,7 @@ foreach ($required in @("manifest.project", "-eq $ProjectName", "restore project
 }
 if (!(Test-Path -LiteralPath $readiness)) { throw "Missing TASK-011 live readiness script" }
 $readinessContent = Get-Content -Raw -LiteralPath $readiness
-foreach ($required in @("TASK011_LIVE_HTTPS_URL", "RagflowDatasetId", "TASK005_RAGFLOW_DATASET_ID", "test_task005_live_stack.py", "ragflow_probe", "backup.ps1", "restore-verify.ps1", "docker info")) {
+foreach ($required in @("TASK011_LIVE_HTTPS_URL", "RagflowDatasetId", "TASK005_RAGFLOW_DATASET_ID", "test_task005_live_stack.py", "ragflow_probe", "mc mb --ignore-existing", "`$minioBucket", "backup.ps1", "restore-verify.ps1", "docker info")) {
     if ($readinessContent -notmatch [regex]::Escape($required)) {
         throw "Live readiness contract missing: $required"
     }
