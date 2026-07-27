@@ -141,6 +141,15 @@ export async function readRunEvents(runId: string): Promise<RuntimeEvent[]> {
   });
 }
 
+export async function startAgentRun(agentId: string, businessContext: Record<string, unknown>, text: string) {
+  const thread = await postJson<{ thread_id: string }>("/api/agent/threads", {
+    agent_id: agentId,
+    business_context: businessContext,
+  });
+  const run = await postJson<{ run_id: string }>(`/api/agent/threads/${thread.thread_id}/messages`, { text, attachment_refs: [] });
+  return { thread_id: thread.thread_id, run_id: run.run_id };
+}
+
 export type AgentConfig = {
   agent_id: string;
   enabled: boolean;

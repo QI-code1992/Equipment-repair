@@ -5,6 +5,7 @@ import {
   createFaultReport,
   getHealthScore,
   readRunEvents,
+  startAgentRun,
   getAgentConfig,
   getAgentConfigs,
   requestJson,
@@ -137,5 +138,15 @@ describe("Agent Runtime SSE API", () => {
       { event: "run_started", data: { status: "RUNNING" } },
       { event: "run_waiting", data: { status: "WAITING_FOR_MODEL" } },
     ]);
+  });
+
+  it("creates an operation-guidance thread before starting its run", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ thread_id: "thread-1" }), { status: 201 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ run_id: "run-1" }), { status: 202 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(startAgentRun("operation_guidance", { equipment_id: "eq-1" }, "如何安全检查？")).resolves.toEqual({ thread_id: "thread-1", run_id: "run-1" });
+    expect(fetchMock.mock.calls.map(([path]) => path)).toEqual(["/api/agent/threads", "/api/agent/threads/thread-1/messages"]);
   });
 });
