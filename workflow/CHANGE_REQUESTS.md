@@ -731,3 +731,21 @@
 - Corrected Important 3: 记录 DEV-002 批准的完整精确任务 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`、PR #20，以及 DEV-001（`ll979053897-arch`）手动生成的 Merge Commit `904886f48061e27c775f6ee2f8ddae99f5571ead`。
 - Verification Evidence: Python 3.13 `142 passed, 5 skipped, 1 warning`；PostgreSQL 17 专项 `5 passed, 1 warning`；Compose 健康和容器内 `/healthz` HTTP 200。当前 PR 仅做文档范围的 JSON、治理一致性和 diff 检查。
 - Coordination: PR #24 已关闭、未合并并由 PR #25 取代。PR #25 已完成项目负责人/DEV-002 治理确认、DEV-001 集成核查、逐 PR 授权与非作者合并；Stage 6 不因该纯治理合并而进入。
+
+### CR-041：同步 TASK-009 与 TASK-010 合并后治理事实
+
+- Level: L0 台账事实更正；不改变产品范围、需求、架构、API、数据模型、测试基线或任务依赖关系。
+- Status: Ready For Verification。
+- Raised By: DEV-001。
+- Raised At: 2026-07-27。
+- Current Stage: Stage 5 — Development Implementation。
+- Reason: `workflow/state.json` 仍将 TASK-009、TASK-010 记录为待审核候选，且 `currentCommitSha` 停留在 TASK-007；这与已完成的 PR #49、PR #50 合并及治理收尾相矛盾，错误阻断了 TASK-011。
+- Corrected Facts:
+  - TASK-009：PR #49 approved HEAD `e2f32249c52ebbf3841b3b490c97b14ff99041c0` 已由 DEV-001 手动合并为 `0c0341b5112615780cf032b86869fa4ac205125c`，真实 RAGFlow Agent 路由 live-stack、合并后双亲和治理核验均已通过。
+  - TASK-010：PR #50 approved HEAD `8439aa0c7c9d2b8057c3d5f06ab976f72fc10a5d` 已由 DEV-001 手动合并为 `e0c133bacf2328bdd091831450693008cb34c2ad`，合并后双亲和治理核验均已通过。
+- Impact:
+  - Product / PRD / SPEC / Prototype / Architecture / API / Data / Acceptance Criteria: 不变。
+  - Development Task Book: 不变；仅使现有 TASK-011 依赖状态与已合并事实一致。
+  - Workflow State: 标记 TASK-009、TASK-010 为 `CLOSED_POST_MERGE_GOVERNANCE_COMPLETED`，更新当前集成 SHA，并解除 TASK-011 的文档阻断。
+- Verification: `workflow/state.json` JSON 解析、仅治理文件范围检查与 `git diff --check` 必须通过；PR #49/#50 合并 SHA 和状态须与 GitHub 记录一致。
+- Stage Boundary: 此更正不批准 Stage 6，不构成 TASK-011 代码、测试或基础设施完成结论；TASK-011 仍按其独立 Draft PR、交叉审核、集成检查和逐 PR Merge 授权流程执行。

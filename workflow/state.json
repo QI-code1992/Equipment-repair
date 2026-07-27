@@ -1,23 +1,24 @@
 {
   "state": "IN_DEVELOPMENT",
-  "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-27T11:06:00+08:00",
+  "updatedBy": "DEV-001 governance reconciliation",
+  "updatedAt": "2026-07-27T11:35:00+08:00",
   "task010Delivery": {
     "taskId": "TASK-010",
-    "status": "P1_REMEDIATION_AWAITING_DEV001_REVIEW",
+    "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",
     "owner": "DEV-002",
     "reviewer": "DEV-001",
     "pullRequest": 50,
     "branch": "codex/task-010-frontend-integration",
     "targetBranch": "codex/stage-05-integration",
-    "functionalCheckpoint": "aef11599b0b820e7781abb5cb7faa83d8cb5b8b1",
-    "candidateHead": "Bind the exact PR #50 head after governance evidence is pushed; do not substitute the functional checkpoint.",
-    "verification": "Login/route-guard/JSON-SSE Bearer regressions passed; frontend Vitest 26 passed; production build and 14 static regressions passed; diff check passed.",
-    "unverified": "Authenticated browser E2E and Docker/PostgreSQL/RAGFlow/LLM live-stack require DEV-001 final-head verification.",
+    "approvedHead": "8439aa0c7c9d2b8057c3d5f06ab976f72fc10a5d",
+    "mergeCommit": "e0c133bacf2328bdd091831450693008cb34c2ad",
+    "mergeExecutor": "ll979053897-arch / DEV-001 / manual Merge Commit",
+    "verification": "DEV-001 approved the exact HEAD; API 11 passed, frontend 26 passed, production build, 14 static regressions, workflow JSON, ancestor, merge-tree and diff checks passed. Post-merge parent, target-branch, PR-state, workflow JSON and diff checks passed.",
+    "unverified": "Authenticated browser E2E and full Docker/PostgreSQL/RAGFlow/LLM live-stack are consolidated into TASK-011; they do not reopen the completed TASK-010 merge governance.",
     "productionDependencyChange": false,
     "databaseMigrationChange": false,
-    "dependencyUnlockAllowed": false,
-    "nextAction": "DEV-001 formal review of the exact final PR #50 head; this is not merge authorization."
+    "dependencyUnlockAllowed": true,
+    "nextAction": "TASK-010 is closed. TASK-011 may start because its task-book prerequisites are closed; Stage 6 remains prohibited without a separate formal gate."
   },
   "productBaseline": {
     "status": "requirements-interaction-and-prototype-approved",
@@ -81,7 +82,7 @@
     ],
     "historicalBoundary": "Does not rewrite completed TASK-001/TASK-002 or CR-037 through CR-039 history; applies to open Draft PRs and subsequent task PRs after integration"
   },
-  "currentCommitSha": "bf842626987148575173c6cf3f34970fc496ad7c",
+  "currentCommitSha": "e0c133bacf2328bdd091831450693008cb34c2ad",
   "task003Delivery": {
     "taskId": "TASK-003",
     "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",
@@ -168,22 +169,23 @@
   },
   "task009Delivery": {
     "taskId": "TASK-009",
-    "status": "DEVELOPMENT_CANDIDATE_AWAITING_DEV001_REVIEW",
+    "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",
     "owner": "DEV-002",
     "reviewer": "DEV-001",
     "branch": "codex/task-009-guidance-diagnosis",
     "integrationTarget": "codex/stage-05-integration",
     "baseCommit": "e0333e2196fc1db9dba0056021625972576215e2",
-    "candidateCommit": "36c3bbd07f4033aabda4e43ff3f5ee9178696ce7",
     "pullRequest": 49,
-    "candidateHead": "PR #49 headRefOid after governance evidence push; must be bound in the re-review request",
+    "approvedHead": "e2f32249c52ebbf3841b3b490c97b14ff99041c0",
+    "mergeCommit": "0c0341b5112615780cf032b86869fa4ac205125c",
+    "mergeExecutor": "ll979053897-arch / DEV-001 / manual Merge Commit",
     "scope": "operation guidance and pre-repair fault diagnosis Agent boundaries, evidence gates, bounded retrieval, adoption/direct-start and manual fallback",
-    "verification": "Python 3.13 local live-stack/infra-contract/operation-guidance focused regression 7 passed / 1 live-stack skipped / 2 warnings; full backend 297 passed / 12 skipped / 2 warnings. The opt-in live-stack now calls the TASK-009 operation-guidance route after real document ingestion, asserts real chunk citations, then verifies the same route returns UNAVAILABLE with manual fallback and no fabricated evidence when RAGFlow is unreachable.",
-    "unverified": "DEV-002 has no Windows PowerShell/Docker dedicated live-stack environment, so the new real-RAGFlow Agent route assertions were skipped locally. DEV-001 must run the complete Invoke-Validation.ps1 with the dedicated RAGFlow key on the final exact HEAD and confirm both citation and unavailable-degradation assertions.",
+    "verification": "DEV-001 approved the exact HEAD and ran the real Windows Docker/RAGFlow live-stack validation: 2 passed, 5 warnings, including real operation-guidance citations and unavailable manual fallback. Full backend 297 passed / 12 skipped / 2 warnings, 14 static regressions, compileall, workflow JSON, ancestor, merge-tree and diff checks passed. Post-merge parent, target-branch, PR-state, workflow JSON and diff checks passed.",
+    "unverified": "No TASK-009 merge-governance gap remains; broader E2E and release-readiness validation belongs to TASK-011.",
     "productionDependencyChange": false,
     "databaseMigrationChange": false,
-    "dependencyUnlockAllowed": false,
-    "nextAction": "Push the TASK-009 live Agent route validation and governance evidence to the same PR #49, bind the final exact HEAD, and request DEV-001 re-review plus execution of Invoke-Validation.ps1 with the dedicated RAGFlow key. Do not request merge authorization, merge, unlock downstream tasks or enter Stage 6 before review and integration gates."
+    "dependencyUnlockAllowed": true,
+    "nextAction": "TASK-009 is closed. TASK-011 may start because all of its task-book prerequisites are closed; Stage 6 remains prohibited without a separate formal gate."
   },
   "task005Delivery": {
     "taskId": "TASK-005",
