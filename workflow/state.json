@@ -1,7 +1,7 @@
 {
   "state": "IN_DEVELOPMENT",
   "updatedBy": "DEV-001 governance reconciliation",
-  "updatedAt": "2026-07-27T11:35:00+08:00",
+  "updatedAt": "2026-07-27T17:25:00+08:00",
   "task010Delivery": {
     "taskId": "TASK-010",
     "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",
@@ -19,6 +19,23 @@
     "databaseMigrationChange": false,
     "dependencyUnlockAllowed": true,
     "nextAction": "TASK-010 is closed. TASK-011 may start because its task-book prerequisites are closed; Stage 6 remains prohibited without a separate formal gate."
+  },
+  "task011Delivery": {
+    "taskId": "TASK-011",
+    "status": "CLOSED_POST_MERGE_GOVERNANCE_PENDING",
+    "owner": "DEV-001",
+    "reviewer": "DEV-002",
+    "implementationPullRequests": [52, 53, 54],
+    "targetBranch": "codex/stage-05-integration",
+    "approvedHeads": ["b252ba27dd64d8a31e249678d9c02a5c9c7fc198", "c55da7df47961506c15683ca5261d1bfce5b1627", "f3150a27441b0e8e4308cdcc7a06a5357ca702e7"],
+    "mergeCommits": ["298ba147650652aed2af4dae35af640c59ff8a41", "22f619f82ef876f86da30da38a0cf69ad008f313", "b1e4ea6c409946667e22e4bff427c4dccaa86f22"],
+    "mergeExecutor": "QI-code1992 / DEV-002 / manual Merge Commit",
+    "verification": "On merge commit b1e4ea6c409946667e22e4bff427c4dccaa86f22: backend 309 passed/13 skipped/2 warnings, frontend 26 passed, production build, backup and Nginx contracts, Compose config, compileall, and both parent diffs passed. The exact second-parent candidate completed real RAGFlow Agent success and unavailable paths, HTTPS E2E, API restart recovery, backup, and isolated restore; temporary datasets were deleted and checked absent.",
+    "unverified": "No Stage 6 independent test conclusion, Stage 7 acceptance, or production release authorization exists.",
+    "productionDependencyChange": false,
+    "databaseMigrationChange": false,
+    "dependencyUnlockAllowed": false,
+    "nextAction": "After this governance-only closeout PR is explicitly confirmed and merged, TASK-011 is closed. Stage 6 remains prohibited pending a separate formal gate."
   },
   "productBaseline": {
     "status": "requirements-interaction-and-prototype-approved",

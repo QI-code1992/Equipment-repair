@@ -426,7 +426,7 @@
 
 ### TASK-011：平台补齐、端到端、安全与发布准备
 
-- 状态：Planned
+- 状态：CLOSED_POST_MERGE_GOVERNANCE_PENDING（PR #52、#53、#54 已合入；本治理收尾 PR 合入后 TASK-011 正式关闭，Stage 6 仍须独立门禁）
 - 优先级：P0
 - 负责人：`DEV-001`
 - 任务开发者：`DEV-001`
@@ -448,6 +448,8 @@
 - Review：`DEV-002` 复核 Agent/前端回归、任务范围和验证证据；任何 Critical/Important 均退回 `DEV-001` 修复。
 - PR 与合并：DEV-001 创建并维护同一 Draft PR；DEV-002 批准精确 HEAD、DEV-001 完成集成检查并取得项目负责人逐 PR 明确授权后，由 DEV-002 合并至 `codex/stage-05-integration`。
 - 回滚：以最近稳定 FCP 和独立任务 Commit 选择性回退；不得整体回退丢失其他已接受功能。
+
+- 集成记录：PR #52 合入 `298ba147650652aed2af4dae35af640c59ff8a41`，PR #53 合入 `22f619f82ef876f86da30da38a0cf69ad008f313`，PR #54 合入 `b1e4ea6c409946667e22e4bff427c4dccaa86f22`；均由 DEV-002 按授权手动 Merge Commit 执行。最终合并提交上的全量回归、真实 RAGFlow Agent、HTTPS、重启、备份与隔离恢复证据见 `06-testing/TEST_REPORT.md`。本治理 PR 仅记录证据，不构成 Stage 6 批准。
 
 ## 7. 人员分配与交叉审核矩阵
 

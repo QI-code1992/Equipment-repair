@@ -2,6 +2,14 @@
 
 静态原型检查点记录在 `03-ui-prototype/PROTOTYPE_CHECKPOINTS.md`，不得自动提升为生产检查点。
 
+## FCP-011：TASK-011 合并后治理收尾候选（2026-07-27）
+
+- 状态：`CLOSED_POST_MERGE_GOVERNANCE_PENDING`；本记录合入后 TASK-011 才正式关闭，Stage 6 仍须单独获得正式门禁批准。
+- 集成链：PR #52 / `b252ba27…` → `298ba147…`；PR #53 / `c55da7df…` → `22f619f…`；PR #54 / `f3150a2…` → `b1e4ea6c409946667e22e4bff427c4dccaa86f22`。三次均由 DEV-002 按绑定授权手动 Merge Commit 执行。
+- 合并后验证：在 `b1e4ea6…` 执行后端 `309 passed, 13 skipped, 2 warnings`、前端 `26 passed`、生产构建、备份/Nginx 契约、Compose config、`compileall` 与双亲 `diff --check`，全部通过。
+- 真实运行证据：`f3150a2…`（`b1e4ea6…` 的第二父提交）完成真实 RAGFlow Agent 成功与不可用降级路径、HTTPS E2E、API 重启恢复、备份和随机隔离恢复；临时数据集已删除并复核不存在。
+- 范围与回退：本治理候选只改任务书、检查点、测试报告和交接台账；无代码、迁移、依赖、运行配置或兼容层。若需回退，按影响范围选择性 revert `b1e4ea6…`，不得删除卷或覆盖运行数据。
+
 ## FCP-006-NDB：TASK-006 Agent 配置非数据库切片
 
 - 状态：已验证的可恢复检查点，不构成 TASK-006 完成、集成或 Stage 6 依据。
