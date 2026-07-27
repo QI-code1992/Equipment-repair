@@ -6,8 +6,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-if ($ProjectName -notmatch '^equipment-task011-[a-z0-9-]+$') {
-    throw "ProjectName must be an isolated equipment-task011-* project"
+if ($ProjectName -notmatch '^equipment-task011-restore-[a-z0-9]{8,}$') {
+    throw "ProjectName must be an isolated equipment-task011-restore-<random> project"
 }
 $resolvedEnv = (Resolve-Path -LiteralPath $EnvFile).Path
 $resolvedBackup = (Resolve-Path -LiteralPath $BackupDirectory).Path
@@ -19,6 +19,9 @@ $minioArchive = Join-Path $resolvedBackup "minio.zip"
 if (!(Test-Path -LiteralPath $dumpPath)) { throw "Backup does not contain postgres.dump" }
 if (!(Test-Path -LiteralPath $minioArchive)) { throw "Backup does not contain minio.zip" }
 $manifest = Get-Content -Raw -LiteralPath (Join-Path $resolvedBackup "manifest.json") | ConvertFrom-Json
+if (!$manifest.project -or $manifest.project -eq $ProjectName) {
+    throw "restore project must differ from the backup source project"
+}
 if ($manifest.postgres_sha256 -ne (Get-FileHash -Algorithm SHA256 $dumpPath).Hash) { throw "PostgreSQL backup checksum mismatch" }
 if ($manifest.minio_sha256 -ne (Get-FileHash -Algorithm SHA256 $minioArchive).Hash) { throw "MinIO backup checksum mismatch" }
 

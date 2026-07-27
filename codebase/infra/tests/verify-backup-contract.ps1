@@ -21,5 +21,10 @@ foreach ($required in @("pg_restore", "MINIO_BUCKET", "mc mirror", "minio.zip"))
         throw "Restore contract missing: $required"
     }
 }
+foreach ($required in @("manifest.project", "-eq $ProjectName", "restore project must differ")) {
+    if ((Get-Content -Raw -LiteralPath $restore) -notmatch [regex]::Escape($required)) {
+        throw "Restore safety contract missing: $required"
+    }
+}
 
 Write-Output "TASK-011 backup contract: PASS"

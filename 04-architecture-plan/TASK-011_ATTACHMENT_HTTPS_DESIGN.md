@@ -11,7 +11,7 @@
 
 ### API
 
-`POST /api/attachments`：要求已有 `fault:create` 权限和 Bearer 会话；请求为 `multipart/form-data`，只含一个 `file` 字段。成功响应为既有 `AttachmentRef`：`object_key,filename,size_bytes,content_type`。
+`POST /api/attachments`：要求已有 `fault:create` 权限、Bearer 会话和非空 `Idempotency-Key`；请求为 `multipart/form-data`，只含一个 `file` 字段。成功响应为既有 `AttachmentRef`：`object_key,filename,size_bytes,content_type`。幂等摘要包含文件 SHA-256、文件名、MIME 与大小；同 Key 重放原响应，不同摘要返回既有 409。审计或提交失败时回滚数据库并删除刚写入对象。
 
 调用方只能把成功返回的引用放进既有 `POST /api/fault-reports` 或 Agent 故障上报草稿的 `attachment_refs`。这两个 API 的请求、响应、幂等和业务状态机不改变。
 
