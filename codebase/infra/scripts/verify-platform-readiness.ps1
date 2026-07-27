@@ -2,6 +2,7 @@ param(
     [Parameter(Mandatory = $true)][string]$EnvFile,
     [Parameter(Mandatory = $true)][string]$ProjectName,
     [Parameter(Mandatory = $true)][string]$LiveHttpsUrl,
+    [Parameter(Mandatory = $true)][string]$RagflowDatasetId,
     [Parameter(Mandatory = $true)][string]$BackupOutputDirectory
 )
 
@@ -40,8 +41,15 @@ Wait-HttpsHealth $LiveHttpsUrl
 & docker @compose exec -T api python -m app.modules.knowledge.ragflow_probe
 if ($LASTEXITCODE -ne 0) { throw "RAGFlow probe failed" }
 
-& docker @compose run --rm validator
-if ($LASTEXITCODE -ne 0) { throw "Live Agent/RAGFlow degradation validation failed" }
+& docker @compose run --rm validator python -m pytest tests/integration/test_task005_postgres.py -q
+if ($LASTEXITCODE -ne 0) { throw "Live PostgreSQL validation failed" }
+
+$liveAgentOutput = & docker @compose run --rm -e "TASK005_RAGFLOW_DATASET_ID=$RagflowDatasetId" validator python -m pytest tests/integration/test_task005_live_stack.py -q -rs
+$liveAgentOutput | Write-Output
+if ($LASTEXITCODE -ne 0) { throw "Live Agent/RAGFlow validation failed" }
+if (($liveAgentOutput -join "`n") -match '\bskipped\b') {
+    throw "Live Agent/RAGFlow validation must not skip"
+}
 
 $env:TASK011_LIVE_HTTPS_URL = $LiveHttpsUrl
 python -m pytest codebase/backend/tests/e2e/test_platform_readiness.py -q
