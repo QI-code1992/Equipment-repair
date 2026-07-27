@@ -550,3 +550,11 @@
 - 可执行回归：真实 Python 子进程运行与容器相同的模块入口，向本地 HTTP stub 的 `/api/v1/datasets` 发起请求并验证 `Authorization: Bearer test-only-key`。
 - 验证：相关 `20 passed, 2 warnings`；完整后端 `297 passed, 12 skipped, 2 warnings`；14 项原型静态回归、`compileall`、JSON 解析和 `git diff --check` 通过。
 - 边界：未新增生产依赖、数据库迁移、兼容层或通用抽象；无无关修改。DEV-002 未执行 Windows PowerShell/Docker/真实 RAGFlow Key live-stack，需 DEV-001 对新 HEAD 复验。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第九轮 live Agent 验证补齐自测（2026-07-27）
+
+- 审核输入：DEV-001 对 PR #49 精确 HEAD `42207a8093bb34ac7d63fb3f9e429585ede443d3` 提交 `Changes requested`；基础设施 live-stack 已通过，但尚未经真实 RAGFlow 调用 TASK-009 操作指引或故障诊断 API 并验证引用和不可用降级。
+- 测试提交：`36c3bbd07f4033aabda4e43ff3f5ee9178696ce7`。现有 `test_task005_live_document_lifecycle` 在文档 READY 后调用 `/api/agent/operation-guidance`，断言真实引用非空且引用内容包含本次唯一文档标记。
+- 降级验证：同一测试将生产 adapter 切换到容器内确定不可达的 `127.0.0.1:1`，再次调用同一路由，断言 HTTP 200、`state=UNAVAILABLE`、`manual_fallback=true`、`evidence=[]`。
+- 本地结果：相关 `7 passed, 1 skipped, 2 warnings`；完整后端 `297 passed, 12 skipped, 2 warnings`。跳过项即需要专用 PostgreSQL/MinIO/ClamAV/RAGFlow 环境的 live-stack 测试。
+- 边界：仅修改现有 opt-in 集成测试；未修改生产代码、依赖、迁移、基础设施、兼容层或抽象，无无关修改。真实执行仍由 DEV-001 在新 HEAD 上完成；当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。

@@ -361,3 +361,11 @@
 - 验证证据：修复前新增用例 `2 failed, 1 passed`；修复后实际子进程探针、静态契约和 TASK-009 聚焦共 `20 passed, 2 warnings`，完整后端 `297 passed, 12 skipped, 2 warnings`，14 项静态回归、编译、JSON 与差异检查通过。
 - 变更边界：仅新增一个探针模块、修改现有验证脚本和其回归测试；无依赖、迁移、兼容层、额外抽象或无关修改。
 - 残余门禁：DEV-001 必须用 Windows PowerShell、Docker 和专用 RAGFlow Key 对 PR #49 新精确 HEAD 重跑完整 live-stack；在新审核前不申请 Merge 授权。
+
+## TASK-009 第九轮 live Agent 验证自查（2026-07-27）
+
+- 审核反馈映射：此前 live-stack 只直接验证知识服务层，未通过 TASK-009 生产 API 路由；因此不能证明 Agent 路由实际返回真实引用或在 RAGFlow 不可用时保留人工流程。
+- 修复边界：扩展现有 opt-in live-stack 测试，不新增平行脚本或环境；成功路径走真实 RAGFlow、真实 PostgreSQL READY 文档与 `/api/agent/operation-guidance`，失败路径走同一路由和真实网络连接失败。
+- 断言：成功路径要求 `QUESTIONING`、非空 chunk citation、引用文本包含唯一文档标记；失败路径要求 `UNAVAILABLE`、`manual_fallback=true`、无伪引用。
+- 本地证据：相关 `7 passed, 1 skipped, 2 warnings`，完整后端 `297 passed, 12 skipped, 2 warnings`；live 项因缺少专用环境跳过，不误报为通过。
+- 残余门禁：DEV-001 需在最终精确 HEAD 上实际运行完整 live-stack 后重新审核；当前不申请 Merge 授权。

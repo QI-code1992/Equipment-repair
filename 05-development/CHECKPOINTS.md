@@ -393,6 +393,16 @@
 - 未验证：DEV-002 当前 Mac 环境无 PowerShell/Docker 专用 live-stack，未用真实专用 RAGFlow Key 重跑 Windows Docker 脚本；需 DEV-001 在新精确 HEAD 上复验 Compose、容器探针、adapter、`/healthz` 和真实检索。
 - 门禁：不得申请 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
 
+## FCP-009-R9：TASK-009 真实 RAGFlow Agent 路由验证候选
+
+- 状态：Development Candidate / 第八轮唯一 Important 验证缺口已补齐 / 等待 DEV-001 对最终 PR #49 精确 HEAD 复审与 live-stack 执行；未集成、不解锁下游，Stage 6 仍禁止。
+- 测试提交：`36c3bbd07f4033aabda4e43ff3f5ee9178696ce7`。
+- 验证范围：在既有真实文档上传、ClamAV 扫描、Worker 解析并达到 READY 后，通过 `/api/agent/operation-guidance` 实际调用真实 `RagflowAdapter`，验证响应包含真实 chunk 引用和文档标记内容；再将 adapter 指向确定不可达地址，验证同一路由返回 `UNAVAILABLE`、空引用及 `manual_fallback=true`。
+- 可重复执行：该验证属于现有 `test_task005_live_stack.py`，由 `Invoke-Validation.ps1` 在隔离 validator 容器中自动运行，继续复用专用数据库、临时 RAGFlow dataset、MinIO 对象和统一清理流程。
+- 本地验证：相关 `7 passed, 1 skipped, 2 warnings`；完整后端 `297 passed, 12 skipped, 2 warnings`；live Agent 一项因 DEV-002 无专用 live-stack 环境按设计跳过。
+- 待 DEV-001：在新精确 HEAD 上用专用 RAGFlow Key 运行完整 `Invoke-Validation.ps1`，确认 live Agent 成功引用与不可用降级均实际通过。
+- 门禁：不得申请 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
+
 ## FCP-009-R6：TASK-009 Compose RAGFlow 配置传递修复候选
 
 - 状态：Development Candidate / 第六轮 P1 修复 / PR #49 等待 DEV-001 对推送后的精确 HEAD 复审；未集成、不解锁下游，Stage 6 仍禁止。

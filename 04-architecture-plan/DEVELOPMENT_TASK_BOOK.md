@@ -376,7 +376,7 @@
 
 ### TASK-009：操作指引与维修前故障诊断 Agent
 
-- 状态：Development Candidate / API 容器 RAGFlow 探针参数传递 P1 已修复，等待 DEV-001 对新精确 HEAD 复审及 Windows Docker live-stack 复验；未集成，不解锁下游任务
+- 状态：Development Candidate / 真实 RAGFlow Agent 路由验证已补齐，等待 DEV-001 对新精确 HEAD 复审及 Windows Docker live-stack 执行；未集成，不解锁下游任务
 - 优先级：P0
 - 负责人：`DEV-002`
 - 任务开发者：`DEV-002`

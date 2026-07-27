@@ -428,6 +428,15 @@
 - 待 DEV-001：在 PR #49 推送后的最终精确 HEAD 上，用 Windows PowerShell、Docker 和专用 RAGFlow Key 重跑完整 live-stack，并复核 Compose、API 容器探针、adapter、`/healthz` 与真实 TASK-009 检索。
 - 门禁：仅请求重新审核，不请求 Merge 授权；不合并、不解锁 TASK-010/011、不进入 Stage 6。
 
+## TASK-009 第九轮 live Agent 验证交接（2026-07-27）
+
+- 审核基准：PR #49 / HEAD `42207a8093bb34ac7d63fb3f9e429585ede443d3`，结论 `Changes requested`；唯一 Important 为缺少真实 RAGFlow 经 TASK-009 API 路由的引用和不可用降级证据。
+- 测试提交：`36c3bbd07f4033aabda4e43ff3f5ee9178696ce7`。
+- 新增证据路径：现有隔离 live-stack 在真实文档 READY 后调用 `/api/agent/operation-guidance`，验证真实 chunk 引用及唯一文档标记；随后以不可达 adapter 调用同一路由，验证 `UNAVAILABLE`、人工回退和零伪引用。
+- 自动执行：`Invoke-Validation.ps1` 已运行包含该用例的 `test_task005_live_stack.py`，继续负责临时 dataset、业务数据、对象、容器、网络和卷清理。
+- 本地结果：相关 `7 passed, 1 skipped, 2 warnings`；完整后端 `297 passed, 12 skipped, 2 warnings`。live 项在 DEV-002 环境按设计跳过，必须由 DEV-001 用专用 Key 在最终 HEAD 上实际执行。
+- 门禁：仅请求重新审核和 live-stack 复验，不请求 Merge 授权；不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
 ## TASK-009 第七轮 P1 API 容器连通性修复交接（2026-07-24）
 
 - 审核基准：PR #49 / HEAD `f920af89f7fbaefbb1f5547582ed4d44b44005ef`，结论 `Changes requested`；API 容器缺少 `host.docker.internal` 的 Linux host-gateway 映射，不能解析宿主机 RAGFlow。
