@@ -23,7 +23,7 @@ foreach ($name in @("postgres", "redis", "minio", "clamav", "worker", "migrate",
 
 $configPath = Join-Path (Split-Path -Parent $ComposeFile) "nginx/default.conf"
 $nginxConfig = Get-Content -Raw -LiteralPath $configPath
-foreach ($required in @("listen 443 ssl", "proxy_pass http://api", "proxy_buffering off", "proxy_read_timeout")) {
+foreach ($required in @("listen 443 ssl", "proxy_pass http://api:8000", "proxy_buffering off", "proxy_read_timeout")) {
     if ($nginxConfig -notmatch [regex]::Escape($required)) {
         throw "Nginx contract missing: $required"
     }

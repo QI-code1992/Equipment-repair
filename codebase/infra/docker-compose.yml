@@ -18,12 +18,22 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      minio:
+        condition: service_healthy
+      clamav:
+        condition: service_started
     environment:
       POSTGRES_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       REDIS_URL: ${REDIS_URL}
       RAGFLOW_BASE_URL: ${RAGFLOW_BASE_URL}
       RAGFLOW_API_KEY: ${RAGFLOW_API_KEY}
       RAGFLOW_TIMEOUT_SECONDS: ${RAGFLOW_TIMEOUT_SECONDS}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      CLAMAV_HOST: clamav
+      CLAMAV_PORT: 3310
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks: [platform, ragflow-egress]
@@ -126,7 +136,6 @@ services:
     networks: [platform]
 
   minio:
-    profiles: [validation]
     image: ${MINIO_IMAGE:-pgsty/minio:RELEASE.2026-03-25T00-00-00Z}
     command: ["server", "/data"]
     environment:
@@ -140,7 +149,6 @@ services:
     networks: [platform]
 
   clamav:
-    profiles: [validation]
     image: clamav/clamav:1.4.3
     networks: [platform]
 
