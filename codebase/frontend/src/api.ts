@@ -32,6 +32,10 @@ export type FaultReportCreate = {
 
 export type FaultReport = FaultReportCreate & { id: string; number: string; status: string };
 
+export type AgentFaultDraft = FaultReportCreate & { duration_minutes: number };
+
+export type HealthScore = { status: string; score?: number };
+
 export type StartRepairRequest =
   | { mode: "DIRECT"; diagnosis_draft_id?: never }
   | { mode: "ADOPTED"; diagnosis_draft_id: string };
@@ -79,6 +83,14 @@ function postJson<T>(path: string, body: unknown): Promise<T> {
 
 export function createFaultReport(payload: FaultReportCreate) {
   return postJson<FaultReport>("/api/fault-reports", payload);
+}
+
+export function submitAgentFaultReport(payload: { draft: AgentFaultDraft; confirmed: boolean }) {
+  return postJson<FaultReport & { agent_status: string }>("/api/agent/fault-reports/submit", payload);
+}
+
+export function getHealthScore(equipmentId: string) {
+  return requestJson<HealthScore>(`/api/agent/health-score/${equipmentId}`);
 }
 
 export function startRepair(faultId: string, payload: StartRepairRequest) {

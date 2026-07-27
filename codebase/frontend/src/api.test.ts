@@ -3,10 +3,12 @@ import { describe, expect, it, vi } from "vitest";
 import {
   ApiError,
   createFaultReport,
+  getHealthScore,
   getAgentConfig,
   getAgentConfigs,
   requestJson,
   saveAgentConfig,
+  submitAgentFaultReport,
   startRepair,
 } from "./api";
 
@@ -98,5 +100,22 @@ describe("maintenance API", () => {
       occurred_at: "2026-07-27T10:00:00+08:00",
       attachment_refs: [],
     })).rejects.toMatchObject({ status: 403, code: "FORBIDDEN" });
+  });
+
+  it("loads a health score and submits a confirmed AI fault draft", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ status: "READY", score: 91 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "fault-1", agent_status: "AI_DRAFT" }), { status: 201 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(getHealthScore("eq-1")).resolves.toMatchObject({ score: 91 });
+    await expect(submitAgentFaultReport({
+      draft: { equipment_id: "eq-1", urgency: "HIGH", symptom: "液压压力异常", occurred_at: "2026-07-27T10:00:00+08:00", duration_minutes: 10, attachment_refs: [] },
+      confirmed: true,
+    })).resolves.toMatchObject({ agent_status: "AI_DRAFT" });
+    expect(fetchMock.mock.calls.map(([path]) => path)).toEqual([
+      "/api/agent/health-score/eq-1",
+      "/api/agent/fault-reports/submit",
+    ]);
   });
 });
