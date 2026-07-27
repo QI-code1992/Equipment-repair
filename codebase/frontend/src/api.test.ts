@@ -4,6 +4,7 @@ import {
   ApiError,
   createFaultReport,
   getHealthScore,
+  login,
   readRunEvents,
   startAgentRun,
   getAgentConfig,
@@ -38,6 +39,20 @@ describe("requestJson", () => {
 
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(new Headers(init.headers).get("Authorization")).toBe("Bearer active-login-token");
+  });
+
+  it("stores only the successful login access token in the browser session", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ access_token: "session-token", token_type: "bearer" }), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await login("repairer", "correct-password");
+
+    expect(window.sessionStorage.getItem("access_token")).toBe("session-token");
+    expect(fetchMock).toHaveBeenCalledWith("/api/auth/login", expect.objectContaining({
+      method: "POST", body: JSON.stringify({ username: "repairer", password: "correct-password" }),
+    }));
   });
 });
 

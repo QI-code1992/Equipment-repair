@@ -9,16 +9,16 @@ export class ApiError extends Error {
 
 const accessTokenStorageKey = "access_token";
 
-function withAuthorization(init?: RequestInit): RequestInit | undefined {
+function withAuthorization(init?: RequestInit, useSession = true): RequestInit | undefined {
   const token = window.sessionStorage.getItem(accessTokenStorageKey);
-  if (!token) return init;
+  if (!useSession || !token) return init;
   const headers = new Headers(init?.headers);
   headers.set("Authorization", `Bearer ${token}`);
   return { ...init, headers };
 }
 
-export async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(path, withAuthorization(init));
+export async function requestJson<T>(path: string, init?: RequestInit, useSession = true): Promise<T> {
+  const response = await fetch(path, withAuthorization(init, useSession));
 
   if (!response.ok) {
     const body = await response.json().catch(() => null) as { detail?: { code?: string } } | null;
@@ -26,6 +26,19 @@ export async function requestJson<T>(path: string, init?: RequestInit): Promise<
   }
 
   return response.json() as Promise<T>;
+}
+
+export function hasActiveSession() {
+  return Boolean(window.sessionStorage.getItem(accessTokenStorageKey)?.trim());
+}
+
+export async function login(username: string, password: string) {
+  const response = await requestJson<{ access_token: string }>("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  }, false);
+  window.sessionStorage.setItem(accessTokenStorageKey, response.access_token);
 }
 
 export type DeepThinkingLevel = "low" | "medium" | "high";

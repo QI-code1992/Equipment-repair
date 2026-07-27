@@ -1,9 +1,11 @@
-import { NavLink, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, NavLink, Route, Routes, useLocation } from "react-router-dom";
 
 import { IntelligentConfigPage } from "./IntelligentConfigPage";
 import { FaultReportPage } from "./FaultReportPage";
 import { RepairExecutionPage } from "./RepairExecutionPage";
 import { WorkbenchPage } from "./WorkbenchPage";
+import { hasActiveSession } from "./api";
+import { LoginPage } from "./LoginPage";
 
 type Page = {
   path: string;
@@ -29,7 +31,13 @@ function PageShell({ label }: { label: string }) {
   );
 }
 
-export function App() {
+function RequireAuthentication({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  if (!hasActiveSession()) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  return children;
+}
+
+function ApplicationShell() {
   const location = useLocation();
   const activePage = pages.find((page) => page.path === location.pathname) ?? pages[0];
   const groups = [...new Set(pages.map((page) => page.group))];
@@ -80,4 +88,11 @@ export function App() {
       </main>
     </div>
   );
+}
+
+export function App() {
+  return <Routes>
+    <Route path="/login" element={hasActiveSession() ? <Navigate to="/" replace /> : <LoginPage />} />
+    <Route path="*" element={<RequireAuthentication><ApplicationShell /></RequireAuthentication>} />
+  </Routes>;
 }
