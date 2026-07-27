@@ -558,3 +558,11 @@
 - 降级验证：同一测试将生产 adapter 切换到容器内确定不可达的 `127.0.0.1:1`，再次调用同一路由，断言 HTTP 200、`state=UNAVAILABLE`、`manual_fallback=true`、`evidence=[]`。
 - 本地结果：相关 `7 passed, 1 skipped, 2 warnings`；完整后端 `297 passed, 12 skipped, 2 warnings`。跳过项即需要专用 PostgreSQL/MinIO/ClamAV/RAGFlow 环境的 live-stack 测试。
 - 边界：仅修改现有 opt-in 集成测试；未修改生产代码、依赖、迁移、基础设施、兼容层或抽象，无无关修改。真实执行仍由 DEV-001 在新 HEAD 上完成；当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-010 前端集成自测（2026-07-27）
+
+- 检查点：`76d348620859e8931fed40bf316d4f94131b28ad`；最终审查对象须为本证据提交推送后的 PR #50 完整 HEAD，不得以此父提交替代。
+- 覆盖：维护 API 的幂等与错误映射、人工/AI 故障提交、健康分可用/不可用边界、诊断阶段与仅服务端草稿 ID、直接/采纳维修、维修摘要关键证据、操作指引引用、Runtime SSE、权限与人工回退。
+- 命令与结果：`npm --prefix codebase/frontend test -- --run src/RepairExecutionPage.test.tsx src/api.test.ts src/FaultReportPage.test.tsx src/WorkbenchPage.test.tsx src/App.test.tsx` 为 `22 passed`；`npm --prefix codebase/frontend run build` 通过；14 项 `node 06-testing/tests/*.test.js` 静态回归全部通过；`git diff --check` 通过。
+- 未验证：没有在 DEV-002 环境执行携带正式认证的浏览器端到端流或 Docker/PostgreSQL/RAGFlow/LLM live-stack；不将 mock API 测试误报为真实服务联调。
+- 边界：未新增生产依赖、迁移、兼容代码或通用抽象；未修改后端、基础设施、原型或智能配置页；无无关修改。仅请求 DEV-001 复审，不请求 Merge 授权、不合并、不解锁 TASK-011、不进入 Stage 6。

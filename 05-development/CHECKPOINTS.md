@@ -383,6 +383,16 @@
 - 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；真实 RAGFlow 引用与运行态降级由 DEV-001 在复审/集成阶段核验。
 - 门禁：PR #49 新 HEAD 会使旧审核结论失效；等待 DEV-001 重新审核，不得请求 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
 
+## FCP-010-R2：TASK-010 前端集成候选
+
+- 状态：Development Candidate / Draft PR #50 / 等待 DEV-001 对推送后的完整精确 HEAD 正式复审；未集成，不解锁 TASK-011 或 Stage 6。
+- 分支/目标：`codex/task-010-frontend-integration` → `codex/stage-05-integration`；功能检查点 `76d348620859e8931fed40bf316d4f94131b28ad`，最终候选以本次证据提交推送后的 PR #50 HEAD 为准。
+- 范围：以正式前端调用既有维护和 Agent API，覆盖人工/AI 故障上报、健康分工作台、诊断分阶段呈现、仅服务端草稿 ID 的证据补充、直接/采纳维修、结果与受限摘要、操作指引引用及 Runtime SSE 状态。权限或 AI 不可用时保留人工上报、直接维修或人工操作流程。
+- 验证：前端 Vitest `22 passed`；`npm --prefix codebase/frontend run build` 通过；14 项 `06-testing/tests/*.test.js` 静态回归通过；`git diff --check` 通过。
+- 边界：未修改后端、数据库迁移、部署、生产依赖、Stage 3 原型或 Agent 配置页；未新增兼容层或通用抽象。
+- 未验证：DEV-002 未执行带认证真实后端的浏览器端到端流、Docker/PostgreSQL/RAGFlow/LLM live-stack；这些需 DEV-001 在最终精确 HEAD 上复审/集成核验。
+- 门禁：本记录只请求代码复审，不是 Merge 授权；不得合并、解锁 TASK-011 或进入 Stage 6。
+
 ## FCP-010-R1：TASK-010 前端 API 客户端检查点
 
 - 状态：已验证的开发检查点；PR #50 未审核、未集成，不解锁 TASK-011 或 Stage 6。

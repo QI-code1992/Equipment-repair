@@ -419,6 +419,14 @@
 - 未验证：DEV-002 无 Docker 命令与专用 live-stack 配置，未执行 Compose 容器内 `RagflowAdapter` 断言、`/healthz` 或真实 TASK-009 RAGFlow 检索。请 DEV-001 对推送后的精确 HEAD 运行这些复验；`test_task005_live_stack.py` 在此环境为 `1 skipped, 2 warnings`。
 - 门禁：当前不得申请 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
 
+## TASK-010 前端集成候选交接（2026-07-27）
+
+- 开发者/审核者：DEV-002 / DEV-001；唯一 Draft PR #50，分支 `codex/task-010-frontend-integration`，目标 `codex/stage-05-integration`。代码检查点为 `76d348620859e8931fed40bf316d4f94131b28ad`；请在推送治理证据后以 PR #50 的完整精确 HEAD 复审，不得把本父提交当作最终候选。
+- 已实现：前端改用既有维护和 Agent API；人工/AI 故障上报、健康分、分阶段诊断、服务端草稿证据、直接/采纳维修、结构化维修摘要、操作指引引用和 Agent Runtime SSE。权限或 AI/流式不可用时保留人工路径。
+- 本地证据：前端 Vitest `22 passed`，生产构建通过，14 项静态回归通过，`git diff --check` 通过。
+- 边界与待验：无后端、迁移、部署、生产依赖、原型或智能配置页修改；无兼容层或新通用抽象。DEV-002 未执行真实认证浏览器 E2E、Docker/PostgreSQL/RAGFlow/LLM live-stack；请 DEV-001 在最终 HEAD 上核验。
+- 门禁：此交接只请求正式复审，非 Merge 授权。未获审核与后续集成批准前，不合并、不解锁 TASK-011、不进入 Stage 6。
+
 ## TASK-009 第八轮 P1 可执行探针修复交接（2026-07-26）
 
 - 审核基准：PR #49 / HEAD `cc643881c251bddc37bb4ae83564b7e14a79a853`，结论 `Changes requested`；DEV-001 用专用 RAGFlow Key 复现 PowerShell/Docker 传参破坏多行 Python 源码并在检索前 `SyntaxError`。

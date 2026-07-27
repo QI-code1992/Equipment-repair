@@ -369,3 +369,12 @@
 - 断言：成功路径要求 `QUESTIONING`、非空 chunk citation、引用文本包含唯一文档标记；失败路径要求 `UNAVAILABLE`、`manual_fallback=true`、无伪引用。
 - 本地证据：相关 `7 passed, 1 skipped, 2 warnings`，完整后端 `297 passed, 12 skipped, 2 warnings`；live 项因缺少专用环境跳过，不误报为通过。
 - 残余门禁：DEV-001 需在最终精确 HEAD 上实际运行完整 live-stack 后重新审核；当前不申请 Merge 授权。
+
+## TASK-010 前端集成自查与复审请求（2026-07-27）
+
+- 复审对象：PR #50，`codex/task-010-frontend-integration` → `codex/stage-05-integration`；开发者 DEV-002，审核者 DEV-001。最终复审必须绑定推送后的完整精确 HEAD。
+- 范围核查：仅正式 `codebase/frontend/` 与 TASK-010 证据台账；不存在 `codebase/backend/`、迁移、部署、生产依赖、Stage 3 原型或 Agent 配置页修改。
+- 契约与安全：客户端仅提交用户填写的输入和服务端签发的诊断草稿 ID；不传递或显示思维链；API 403 显示权限状态，503/运行时失败保留人工路径；采纳摘要仅显示症状、根因和关键证据。
+- 交互核查：诊断按四阶段显示；操作指引引用可折叠；消息区独立滚动、输入区固定；Runtime SSE 展示服务端状态。
+- 本地证据：前端 `22 passed`、生产构建和 14 项静态回归均通过，`git diff --check` 通过。真实浏览器/API 认证及 Docker/PostgreSQL/RAGFlow/LLM 联调待 DEV-001。
+- 请求：请 DEV-001 对 PR #50 最终精确 HEAD 执行正式代码审核；本条不是 Merge 授权，审核通过前不得合并、解锁 TASK-011 或进入 Stage 6。
