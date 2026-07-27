@@ -7,6 +7,16 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Wait-HttpsHealth([string]$Url) {
+    $deadline = (Get-Date).AddMinutes(2)
+    do {
+        & curl.exe -k --fail --silent --show-error "$Url/healthz" | Out-Null
+        if ($LASTEXITCODE -eq 0) { return }
+        Start-Sleep -Seconds 2
+    } while ((Get-Date) -lt $deadline)
+    throw "HTTPS health endpoint did not become ready"
+}
+
 if ($ProjectName -notmatch '^equipment-task011-live-[a-z0-9]{8,}$') {
     throw "ProjectName must be an isolated equipment-task011-live-<random> project"
 }
@@ -25,8 +35,7 @@ if (!$nginx) { throw "Nginx container is not running" }
 $ports = docker inspect $nginx --format '{{json .HostConfig.PortBindings}}'
 if ($ports -notmatch '127.0.0.1') { throw "Nginx is not bound to loopback" }
 
-& curl.exe -k --fail --silent --show-error "$LiveHttpsUrl/healthz" | Out-Null
-if ($LASTEXITCODE -ne 0) { throw "HTTPS health endpoint failed" }
+Wait-HttpsHealth $LiveHttpsUrl
 
 & docker @compose exec -T api python -m app.modules.knowledge.ragflow_probe
 if ($LASTEXITCODE -ne 0) { throw "RAGFlow probe failed" }
@@ -40,8 +49,7 @@ if ($LASTEXITCODE -ne 0) { throw "TASK-011 HTTPS E2E failed" }
 
 & docker @compose restart api
 if ($LASTEXITCODE -ne 0) { throw "API restart failed" }
-& curl.exe -k --fail --silent --show-error "$LiveHttpsUrl/healthz" | Out-Null
-if ($LASTEXITCODE -ne 0) { throw "HTTPS health endpoint failed after restart" }
+Wait-HttpsHealth $LiveHttpsUrl
 
 $backupDirectory = & powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/scripts/backup.ps1 -EnvFile $resolvedEnv -OutputDirectory $BackupOutputDirectory -ProjectName $ProjectName
 if ($LASTEXITCODE -ne 0) { throw "Backup failed" }

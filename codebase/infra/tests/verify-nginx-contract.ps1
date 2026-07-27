@@ -13,17 +13,23 @@ if ($null -eq $nginx) { throw "Nginx service is required" }
 if (@($nginx.ports).Count -ne 1 -or $nginx.ports[0].host_ip -ne "127.0.0.1" -or $nginx.ports[0].target -ne 443) {
     throw "Nginx must be the single loopback HTTPS entry"
 }
+if ($nginx.networks.PSObject.Properties.Name -notcontains "ingress") {
+    throw "Nginx must join the non-internal ingress network"
+}
 
 foreach ($name in @("postgres", "redis", "minio", "clamav", "worker", "migrate", "validator")) {
     $service = $config.services.$name
     if ($null -ne $service -and $null -ne $service.ports -and @($service.ports).Count -ne 0) {
         throw "Internal service exposes a host port: $name"
     }
+    if ($null -ne $service -and $service.networks.PSObject.Properties.Name -contains "ingress") {
+        throw "Internal service must not join ingress: $name"
+    }
 }
 
 $configPath = Join-Path (Split-Path -Parent $ComposeFile) "nginx/default.conf"
 $nginxConfig = Get-Content -Raw -LiteralPath $configPath
-foreach ($required in @("listen 443 ssl", "proxy_pass http://api:8000", "proxy_buffering off", "proxy_read_timeout")) {
+foreach ($required in @("listen 443 ssl", "resolver 127.0.0.11", 'set $api_upstream api:8000', 'proxy_pass http://$api_upstream', "proxy_buffering off", "proxy_read_timeout")) {
     if ($nginxConfig -notmatch [regex]::Escape($required)) {
         throw "Nginx contract missing: $required"
     }

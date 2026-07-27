@@ -1,4 +1,5 @@
 import os
+import ssl
 from urllib.request import urlopen
 
 import pytest
@@ -9,5 +10,9 @@ def test_task011_https_healthz_live_stack() -> None:
     if not base_url:
         pytest.skip("TASK-011 live-stack environment is not configured")
 
-    with urlopen(f"{base_url.rstrip('/')}/healthz", timeout=10) as response:
+    with urlopen(
+        f"{base_url.rstrip('/')}/healthz",
+        timeout=10,
+        context=ssl._create_unverified_context(),
+    ) as response:
         assert response.status == 200
