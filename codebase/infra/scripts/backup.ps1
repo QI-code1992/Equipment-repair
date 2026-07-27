@@ -23,7 +23,7 @@ New-Item -ItemType Directory -Force -Path $root | Out-Null
 $backupDirectory = Join-Path $root ("backup-" + (Get-Date -Format "yyyyMMddHHmmss"))
 New-Item -ItemType Directory -Path $backupDirectory | Out-Null
 
-$compose = @("compose", "-p", $ProjectName, "--env-file", $resolvedEnv, "-f", $composeFile)
+$compose = @("compose", "--profile", "validation", "-p", $ProjectName, "--env-file", $resolvedEnv, "-f", $composeFile)
 $postgres = (& docker @compose ps -q postgres).Trim()
 if (!$postgres) { throw "PostgreSQL container is not running for $ProjectName" }
 

@@ -25,7 +25,7 @@ if ($manifest.minio_sha256 -ne (Get-FileHash -Algorithm SHA256 $minioArchive).Ha
 $composeFile = "codebase/infra/docker-compose.yml"
 docker info *> $null
 if ($LASTEXITCODE -ne 0) { throw "Docker Desktop Linux engine is unavailable" }
-$compose = @("compose", "-p", $ProjectName, "--env-file", $resolvedEnv, "-f", $composeFile)
+$compose = @("compose", "--profile", "validation", "-p", $ProjectName, "--env-file", $resolvedEnv, "-f", $composeFile)
 & docker @compose up -d postgres redis minio
 if ($LASTEXITCODE -ne 0) { throw "Restore environment failed to start" }
 
