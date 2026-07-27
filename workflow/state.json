@@ -149,6 +149,25 @@
     "dependencyUnlockAllowed": true,
     "nextAction": "TASK-008 governance closeout is complete; downstream work may proceed only where all task-book prerequisites are satisfied. Stage 6 remains prohibited without its separate formal gate."
   },
+  "task009Delivery": {
+    "taskId": "TASK-009",
+    "status": "DEVELOPMENT_CANDIDATE_AWAITING_DEV001_REVIEW",
+    "owner": "DEV-002",
+    "reviewer": "DEV-001",
+    "branch": "codex/task-009-guidance-diagnosis",
+    "integrationTarget": "codex/stage-05-integration",
+    "baseCommit": "e0333e2196fc1db9dba0056021625972576215e2",
+    "candidateCommit": "36c3bbd07f4033aabda4e43ff3f5ee9178696ce7",
+    "pullRequest": 49,
+    "candidateHead": "PR #49 headRefOid after governance evidence push; must be bound in the re-review request",
+    "scope": "operation guidance and pre-repair fault diagnosis Agent boundaries, evidence gates, bounded retrieval, adoption/direct-start and manual fallback",
+    "verification": "Python 3.13 local live-stack/infra-contract/operation-guidance focused regression 7 passed / 1 live-stack skipped / 2 warnings; full backend 297 passed / 12 skipped / 2 warnings. The opt-in live-stack now calls the TASK-009 operation-guidance route after real document ingestion, asserts real chunk citations, then verifies the same route returns UNAVAILABLE with manual fallback and no fabricated evidence when RAGFlow is unreachable.",
+    "unverified": "DEV-002 has no Windows PowerShell/Docker dedicated live-stack environment, so the new real-RAGFlow Agent route assertions were skipped locally. DEV-001 must run the complete Invoke-Validation.ps1 with the dedicated RAGFlow key on the final exact HEAD and confirm both citation and unavailable-degradation assertions.",
+    "productionDependencyChange": false,
+    "databaseMigrationChange": false,
+    "dependencyUnlockAllowed": false,
+    "nextAction": "Push the TASK-009 live Agent route validation and governance evidence to the same PR #49, bind the final exact HEAD, and request DEV-001 re-review plus execution of Invoke-Validation.ps1 with the dedicated RAGFlow key. Do not request merge authorization, merge, unlock downstream tasks or enter Stage 6 before review and integration gates."
+  },
   "task005Delivery": {
     "taskId": "TASK-005",
     "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",

@@ -467,3 +467,94 @@
 - 集成事实：获批 HEAD `cac10a06d2ef48914c14fb7ad955cedb36878acd` 已由 DEV-001 手动 Merge Commit `58fc0b12db1298333eef52c8720ec7d3d5e4846c` 合入 `codex/stage-05-integration`；第一父为 `ca2a07f5f9f19620568cc75f74c97a2d10ed98d3`，第二父为获批 HEAD，结果树一致。
 - 合并后核验：双亲、祖先关系、目标分支、JSON 解析和两侧 `git diff --check` 通过；候选树与合并结果相同，因此获批候选的后端 `284 passed, 12 skipped, 2 warnings`、`pip check`、`compileall`、Compose 及真实 PostgreSQL 17/MinIO/ClamAV/RAGFlow/Worker 证据继续适用。
 - 门禁：本候选仅同步治理事实；未修改 `codebase/`、测试、迁移、依赖、基础设施或部署。项目负责人确认本纯治理 PR 内容与精确 HEAD、完成集成授权并合入前，不解锁下游，不进入 Stage 6。
+
+## TASK-009 开发候选自测（2026-07-24）
+
+- 代码提交：`f78deace39fde732bcea7ec36f9a3f5eea79dfc1`，分支 `codex/task-009-guidance-diagnosis`。
+- 定向验证：Agent API 与 Runtime 测试 `8 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`。
+- 其他验证：`node 06-testing/tests/fault-report-repair-agent.test.js` 通过；Python `compileall` 与 `git diff --check` 通过。
+- 覆盖：两次定向检索、人工降级、生产 API、TASK-003 历史案例、TASK-005 知识引用、DiagnosisDraft 写入、报警码否定证据、复现工况加第二类证据、8/24/4 上限、采纳/直接开始边界及工具白名单。
+- 未验证：当前环境无 Docker，未执行真实 PostgreSQL/RAGFlow/LLM 联调；由 DEV-001 在复审/集成阶段核验。未新增生产依赖、迁移、兼容层或通用抽象。
+- 门禁：候选未获 DEV-001 审核，不请求 Merge 授权、不合并、不解锁下游、不进入 Stage 6。
+
+## TASK-009 第二轮 P1 修复自测（2026-07-24）
+
+- 审核输入：DEV-001 对 PR #49 精确 HEAD `15a5947f95d52a0044d4ee2978da09cc2509e41e` 提交 `Changes requested`；P1 为故障诊断 API 信任客户端 `session`，可伪造 `DIAGNOSIS_READY`、根因和方案并重复创建草稿/成功审计。
+- 修复提交：`8d4d4c48aaa4ee39d01be4cbb5cb18de374a784c`。
+- 修复结果：诊断状态改为服务端受控 `DiagnosisDraft` 会话；后续请求只接受 `diagnosis_draft_id`；服务端校验草稿存在、归属用户、故障绑定和状态；READY 写入和 READY 后重放均不重复创建草稿或成功审计。
+- 定向验证：`/private/tmp/equipment-task006-python/bin/python -m pytest tests/agents/test_fault_diagnosis.py -q` 为 `5 passed, 2 warnings`。
+- 相关回归：`/private/tmp/equipment-task006-python/bin/python -m pytest tests/agents tests/modules/test_agent_runtime.py tests/modules/test_maintenance_lifecycle.py -q` 为 `49 passed, 2 warnings`。
+- 完整后端：`/private/tmp/equipment-task006-python/bin/python -m pytest -q` 为 `293 passed, 12 skipped, 2 warnings`。
+- 静态/编译：14 项 `06-testing/tests/*.test.js` 全部通过；`/private/tmp/equipment-task006-python/bin/python -m compileall -q codebase/backend/app`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
+- 环境说明：系统 `python3.13` 当前缺少 `pytest`，本轮使用隔离 Python 3.13.14 环境 `/private/tmp/equipment-task006-python` 并重新 editable 安装当前后端；安装生成的本地 `egg-info` 已清理，未修改生产依赖声明。
+- 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；需 DEV-001 在复审/集成阶段核验。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第三轮 P1 修复自测（2026-07-24）
+
+- 审核输入：DEV-001 对 PR #49 精确 HEAD `4b965715fe6fb6869c14da6b23f6b26479243595` 提交 `Changes requested`；P1 为仅有 `intelligence:agent` 可创建诊断草稿，且诊断上下文/知识数据集信任客户端字段，违反 AC-004/AC-037。
+- 修复提交：`e0c058e182d7c29881c3de75403b2ef0eb648de7`。
+- 修复结果：故障诊断 `start` 路径增加 `fault:repair` 门禁；客户端不再能提交设备型号、症状、描述或数据集；服务端从 `FaultReport`、`Equipment` 和 `fault_diagnosis` Agent 配置构造诊断上下文和知识检索范围。
+- 定向验证：`/private/tmp/equipment-task006-python/bin/python -m pytest tests/agents/test_fault_diagnosis.py -q` 为 `5 passed, 2 warnings`。
+- 相关回归：`/private/tmp/equipment-task006-python/bin/python -m pytest tests/agents tests/modules/test_agent_runtime.py tests/modules/test_maintenance_lifecycle.py -q` 为 `49 passed, 2 warnings`。
+- 完整后端：`/private/tmp/equipment-task006-python/bin/python -m pytest -q` 为 `293 passed, 12 skipped, 2 warnings`。
+- 静态/编译：14 项 `06-testing/tests/*.test.js` 全部通过；`/private/tmp/equipment-task006-python/bin/python -m compileall -q codebase/backend/app`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
+- 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；需 DEV-001 在复审/集成阶段核验。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第四轮 CR-043 基线收敛自测（2026-07-24）
+
+- 审核输入：DEV-001 对 PR #49 精确 HEAD `3b8adf2f37e2490c7ec5695bd2e789dd9813fae8` 提交 `Changes requested`；阻断为 AC-037、SPEC/API 契约和需求追踪矩阵仍未同步 CR-043，正式基线冲突未关闭。
+- 修复结果：PRD、SPEC、AC-037、需求追踪矩阵、API 契约、CR 台账和 `workflow/state.json` 已统一确认本期不实现 `EquipmentGrant` 或设备/工厂行级授权隔离；验收口径改为认证、角色/菜单/操作权限、线程/草稿隔离、服务端事实绑定、非法对象详情保护和审计。
+- 治理验证：`/private/tmp/equipment-task006-python/bin/python -m json.tool workflow/state.json` 通过；`git diff --check` 通过；授权冲突词扫描无剩余的设备授予/授权设备作为当前生效边界表述。
+- 代码验证：本次未修改 `codebase/`，未重跑后端测试；上一代码 HEAD 的 DEV-001 独立验证为后端全量 `293 passed, 12 skipped, 2 warnings`，Compose 配置解析、Python 3.13 编译和 14 项静态检查通过。
+- 未验证：DEV-002 当前无 Docker 环境，真实 Docker/PostgreSQL/RAGFlow/LLM 联调仍由 DEV-001 在复审/集成阶段核验。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第五轮 P1 修复自测（2026-07-24）
+
+- 审核输入：DEV-001 对 PR #49 精确 HEAD `ef6bda4ff28147280868b4088ede72e39bebedb3` 提交 `Changes requested`；P1 为生产应用工厂未根据 `RAGFLOW_BASE_URL` / `RAGFLOW_API_KEY` 装配 `RagflowAdapter` 到 `app.state.knowledge_adapter`，导致操作指引和故障诊断在真实部署中始终降级。
+- 红灯验证：新增应用工厂和操作指引 API 回归后，修复前 `test_app_factory_builds_ragflow_adapter_from_environment` 断言 adapter 为 `None` 失败，`test_operation_guidance_api_uses_app_factory_ragflow_adapter` 返回 `UNAVAILABLE` 失败。
+- 修复提交：`655d4a2309251fd0bd0ae874787e63b73f35effd`。
+- 修复结果：`Settings` 读取 `RAGFLOW_BASE_URL`、`RAGFLOW_API_KEY`、`RAGFLOW_TIMEOUT_SECONDS`；`create_app()` 在未显式注入 adapter 且配置齐全时创建 `RagflowAdapter + UrllibRagflowTransport`。新增操作指引和故障诊断 API 回归均通过真实应用工厂与本地 HTTP RAGFlow stub 检索链路。
+- 定向验证：`/private/tmp/equipment-task006-python/bin/python -m pytest codebase/backend/tests/test_health.py codebase/backend/tests/agents/test_operation_guidance.py codebase/backend/tests/agents/test_fault_diagnosis.py -q` 为 `16 passed, 2 warnings`。
+- 相关回归：`/private/tmp/equipment-task006-python/bin/python -m pytest codebase/backend/tests/agents codebase/backend/tests/modules/test_agent_runtime.py codebase/backend/tests/modules/test_maintenance_lifecycle.py -q` 为 `51 passed, 2 warnings`。
+- 完整后端：在 `codebase/backend` 下执行 `/private/tmp/equipment-task006-python/bin/python -m pytest -q` 为 `296 passed, 12 skipped, 2 warnings`。
+- 静态/编译：14 项 `06-testing/tests/*.test.js` 全部通过；`/private/tmp/equipment-task006-python/bin/python -m compileall -q codebase/backend/app`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
+- 未验证：`/private/tmp/equipment-task006-python/bin/python -m pytest codebase/backend/tests/integration/test_task005_live_stack.py -q` 因缺少专用 live-stack 环境为 `1 skipped, 2 warnings`；DEV-002 当前仍无稳定真实 RAGFlow 联调环境。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第六轮 P1 Compose 配置修复自测（2026-07-24）
+
+- 审核输入：DEV-001 对 PR #49 精确 HEAD `a173233d39d752fe5f025d1423d2038c54b685ba` 提交 `Changes requested`；`api` 服务遗漏三项 RAGFlow 环境变量，实际 Compose 容器无法装配 `RagflowAdapter`。
+- 红灯验证：将三项断言限定在 Compose `api` 服务块后，修复前 `RAGFLOW_BASE_URL` 断言失败；移除 `.env.example` 的超时值后，模板值断言也按预期失败。
+- 修复提交：`0599bb6de23ddab736b6d2f44a795c8303bee655`。
+- 修复结果：`api` 传递 `RAGFLOW_BASE_URL`、`RAGFLOW_API_KEY`、`RAGFLOW_TIMEOUT_SECONDS`；`.env.example` 提供 `RAGFLOW_TIMEOUT_SECONDS=30`，与 `Settings` 和 `create_app()` 的现有生产装配契约一致。
+- 定向验证：`/private/tmp/equipment-task006-python/bin/python -m pytest codebase/backend/tests/integration/test_task005_validation_infra_contract.py codebase/backend/tests/test_health.py codebase/backend/tests/agents/test_operation_guidance.py codebase/backend/tests/agents/test_fault_diagnosis.py -q` 为 `18 passed, 2 warnings`。
+- 完整后端：在 `codebase/backend` 下执行 `/private/tmp/equipment-task006-python/bin/python -m pytest -q` 为 `296 passed, 12 skipped, 2 warnings`。
+- 静态/编译：14 项 `06-testing/tests/*.test.js` 全部通过；`python3.13 -m compileall -q codebase/backend/app` 与 `git diff --check` 通过。
+- 未验证：DEV-002 当前环境无 Docker 命令，未运行 `docker compose config`、容器内 adapter 断言、`/healthz` 或真实 RAGFlow 检索；`test_task005_live_stack.py` 仍因无专用环境为 `1 skipped, 2 warnings`。这些是 DEV-001 复审/集成门禁，不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第七轮 P1 API 容器连通性修复自测（2026-07-24）
+
+- 审核输入：DEV-001 对 PR #49 精确 HEAD `f920af89f7fbaefbb1f5547582ed4d44b44005ef` 提交 `Changes requested`；API 容器无法解析 `host.docker.internal`，即使应用工厂已装配 adapter 也无法连接宿主机 RAGFlow。
+- 红灯验证：新增 API host 映射、RAGFlow egress 网络、验证环境超时和 API 容器探针断言后，修复前 Compose/脚本契约为 `2 failed`。
+- 修复提交：`a25f32f90ddf812c7cc75c1a940d09d5077a2eb5`。
+- 修复结果：API 复用 `host.docker.internal:host-gateway` 与 `ragflow-egress`；`Invoke-Validation.ps1` 在 API 容器中通过 `socket.getaddrinfo` 解析配置地址，并请求带 Bearer 凭据的 `/api/v1/datasets`，30 次重试后仍失败即中断验证。
+- 定向验证：`/private/tmp/equipment-task006-python/bin/python -m pytest codebase/backend/tests/integration/test_task005_validation_infra_contract.py codebase/backend/tests/test_health.py codebase/backend/tests/agents/test_operation_guidance.py codebase/backend/tests/agents/test_fault_diagnosis.py -q` 为 `18 passed, 2 warnings`。
+- 完整后端：在 `codebase/backend` 下执行 `/private/tmp/equipment-task006-python/bin/python -m pytest -q` 为 `296 passed, 12 skipped, 2 warnings`。
+- 静态/编译：14 项 `06-testing/tests/*.test.js` 全部通过；`python3.13 -m compileall -q codebase/backend/app` 与 `git diff --check` 通过。
+- 未验证：DEV-002 当前无 Docker 或 PowerShell，未执行脚本的真实 Linux Docker 容器探针、Compose 重建、容器内 `/healthz`、adapter 断言或 RAGFlow 检索；必须由 DEV-001 对新 HEAD 运行。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第八轮 P1 探针执行修复自测（2026-07-26）
+
+- 审核输入：DEV-001 对 PR #49 精确 HEAD `cc643881c251bddc37bb4ae83564b7e14a79a853` 提交 `Changes requested`；多行 Python here-string 经 PowerShell/Docker 原生参数转换丢失引号，探针在真实检索前 `SyntaxError`。
+- 红灯验证：新回归在修复前同时因旧 `$apiRagflowProbe` 仍存在、`app.modules.knowledge.ragflow_probe` 不存在而 `2 failed, 1 passed`。
+- 修复提交：`913cb44b262e34e7d49e25162a1fb5bf3bfe113f`。脚本改为 `docker ... python -m app.modules.knowledge.ragflow_probe`，不再跨原生命令边界传递 Python 源码。
+- 可执行回归：真实 Python 子进程运行与容器相同的模块入口，向本地 HTTP stub 的 `/api/v1/datasets` 发起请求并验证 `Authorization: Bearer test-only-key`。
+- 验证：相关 `20 passed, 2 warnings`；完整后端 `297 passed, 12 skipped, 2 warnings`；14 项原型静态回归、`compileall`、JSON 解析和 `git diff --check` 通过。
+- 边界：未新增生产依赖、数据库迁移、兼容层或通用抽象；无无关修改。DEV-002 未执行 Windows PowerShell/Docker/真实 RAGFlow Key live-stack，需 DEV-001 对新 HEAD 复验。当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。
+
+## TASK-009 第九轮 live Agent 验证补齐自测（2026-07-27）
+
+- 审核输入：DEV-001 对 PR #49 精确 HEAD `42207a8093bb34ac7d63fb3f9e429585ede443d3` 提交 `Changes requested`；基础设施 live-stack 已通过，但尚未经真实 RAGFlow 调用 TASK-009 操作指引或故障诊断 API 并验证引用和不可用降级。
+- 测试提交：`36c3bbd07f4033aabda4e43ff3f5ee9178696ce7`。现有 `test_task005_live_document_lifecycle` 在文档 READY 后调用 `/api/agent/operation-guidance`，断言真实引用非空且引用内容包含本次唯一文档标记。
+- 降级验证：同一测试将生产 adapter 切换到容器内确定不可达的 `127.0.0.1:1`，再次调用同一路由，断言 HTTP 200、`state=UNAVAILABLE`、`manual_fallback=true`、`evidence=[]`。
+- 本地结果：相关 `7 passed, 1 skipped, 2 warnings`；完整后端 `297 passed, 12 skipped, 2 warnings`。跳过项即需要专用 PostgreSQL/MinIO/ClamAV/RAGFlow 环境的 live-stack 测试。
+- 边界：仅修改现有 opt-in 集成测试；未修改生产代码、依赖、迁移、基础设施、兼容层或抽象，无无关修改。真实执行仍由 DEV-001 在新 HEAD 上完成；当前不请求 Merge 授权、不合并、不解锁 TASK-010/011、不进入 Stage 6。

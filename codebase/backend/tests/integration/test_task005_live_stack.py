@@ -110,7 +110,7 @@ def test_task005_live_document_lifecycle() -> None:
         client,
         username=f"task005-live-{suffix}",
         role_code="SYSTEM_ADMIN",
-        permission_codes=["intelligence:knowledge"],
+        permission_codes=["intelligence:knowledge", "intelligence:agent"],
     )
     headers = {"Authorization": f"Bearer {token}"}
     document_id = file_id = object_key = remote_id = None
@@ -163,6 +163,53 @@ def test_task005_live_document_lifecycle() -> None:
         assert result.citations
         assert all(item.business_document_id == document_id for item in result.citations)
         assert all(item.chunk_id for item in result.citations)
+
+        app.state.knowledge_adapter = adapter
+        guidance = client.post(
+            "/api/agent/operation-guidance",
+            headers=headers,
+            json={
+                "equipment_id": f"task005-live-equipment-{suffix}",
+                "equipment_model": marker,
+                "symptom": "hydraulic pressure inspection",
+                "description": marker,
+                "dataset_ids": [dataset_id],
+            },
+        )
+        assert guidance.status_code == 200
+        guidance_body = guidance.json()
+        assert guidance_body["state"] == "QUESTIONING"
+        assert guidance_body["manual_fallback"] is True
+        assert guidance_body["evidence"]
+        assert all(item["citation"] for item in guidance_body["evidence"])
+        assert all(marker in item["text"] for item in guidance_body["evidence"])
+
+        unavailable_base_url = "http://127.0.0.1:1"
+        app.state.knowledge_adapter = RagflowAdapter(
+            base_url=unavailable_base_url,
+            api_key="unavailable-test-key",
+            timeout_seconds=0.2,
+            transport=UrllibRagflowTransport(
+                base_url=unavailable_base_url,
+                api_key="unavailable-test-key",
+                timeout_seconds=0.2,
+            ),
+        )
+        unavailable = client.post(
+            "/api/agent/operation-guidance",
+            headers=headers,
+            json={
+                "equipment_id": f"task005-live-equipment-{suffix}",
+                "equipment_model": marker,
+                "symptom": "hydraulic pressure inspection",
+                "description": marker,
+                "dataset_ids": [dataset_id],
+            },
+        )
+        assert unavailable.status_code == 200
+        assert unavailable.json()["state"] == "UNAVAILABLE"
+        assert unavailable.json()["manual_fallback"] is True
+        assert unavailable.json()["evidence"] == []
     finally:
         with session_factory(engine)() as db:
             document = db.get(KnowledgeDocument, document_id) if document_id else None

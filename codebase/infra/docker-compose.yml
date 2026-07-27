@@ -10,7 +10,12 @@ services:
     environment:
       POSTGRES_DSN: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       REDIS_URL: ${REDIS_URL}
-    networks: [platform]
+      RAGFLOW_BASE_URL: ${RAGFLOW_BASE_URL}
+      RAGFLOW_API_KEY: ${RAGFLOW_API_KEY}
+      RAGFLOW_TIMEOUT_SECONDS: ${RAGFLOW_TIMEOUT_SECONDS}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks: [platform, ragflow-egress]
 
   worker:
     profiles: [validation]

@@ -23,7 +23,7 @@ function Convert-ToHostUrl([string]$Url) {
 
 $resolvedEnv = (Resolve-Path -LiteralPath $EnvFile).Path
 $settings = Read-EnvironmentFile $resolvedEnv
-$required = @('POSTGRES_DB', 'POSTGRES_USER', 'POSTGRES_PASSWORD', 'MINIO_ACCESS_KEY', 'MINIO_SECRET_KEY', 'MINIO_BUCKET', 'RAGFLOW_BASE_URL', 'RAGFLOW_API_KEY')
+$required = @('POSTGRES_DB', 'POSTGRES_USER', 'POSTGRES_PASSWORD', 'MINIO_ACCESS_KEY', 'MINIO_SECRET_KEY', 'MINIO_BUCKET', 'RAGFLOW_BASE_URL', 'RAGFLOW_API_KEY', 'RAGFLOW_TIMEOUT_SECONDS')
 $missing = @($required | Where-Object { -not $settings.ContainsKey($_) -or -not $settings[$_] })
 if ($missing.Count -gt 0) { throw "TASK-005 environment is missing required variables: $($missing -join ', ')" }
 
@@ -32,7 +32,6 @@ $hostRagflowUrl = Convert-ToHostUrl $settings.RAGFLOW_BASE_URL
 $headers = @{ Authorization = "Bearer $($settings.RAGFLOW_API_KEY)" }
 $datasetId = $null
 $validationFailure = $null
-
 try {
     docker @compose config --quiet
     Assert-ExitCode 'TASK-005 Compose configuration is invalid'
@@ -52,6 +51,14 @@ try {
         Start-Sleep -Seconds 2
     }
     if (!$ready) { throw 'TASK-005 validation stack did not become ready' }
+
+    $apiRagflowConnected = $false
+    foreach ($attempt in 1..30) {
+        docker @compose exec -T api python -m app.modules.knowledge.ragflow_probe
+        if ($LASTEXITCODE -eq 0) { $apiRagflowConnected = $true; break }
+        Start-Sleep -Seconds 2
+    }
+    if (!$apiRagflowConnected) { throw 'TASK-005 API container cannot resolve or connect to RAGFlow' }
 
     docker @compose run --rm --no-deps worker python -c "import os; from minio import Minio; c=Minio(os.environ['MINIO_ENDPOINT'], access_key=os.environ['MINIO_ACCESS_KEY'], secret_key=os.environ['MINIO_SECRET_KEY'], secure=False); b=os.environ['MINIO_BUCKET']; c.make_bucket(b) if not c.bucket_exists(b) else None"
     Assert-ExitCode 'TASK-005 MinIO bucket initialization failed'

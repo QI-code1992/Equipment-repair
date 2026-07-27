@@ -127,7 +127,7 @@ Given an AI fault report lacks occurrence time or duration, when the Agent inter
 Given an Agent attempts a non-allowlisted operation such as direct SQL, health-score write, user mutation or filesystem execution, when the request is evaluated, then it is rejected and audited.
 
 ### AC-037 Authorization detail protection
-Given an Agent requests an equipment outside the current user's grant, when the backend checks the request, then it rejects the request without returning that equipment's business details.
+Given an Agent request is unauthenticated, lacks the route-required role/menu/operation permission, targets a missing or invalid business object, attempts to read another user's thread or diagnosis draft, or submits client-supplied context that the server must own, when the backend checks the request, then it rejects the request without returning protected business details. This criterion does not require `EquipmentGrant`, equipment row-level filtering or factory row-level filtering in the current baseline.
 
 ### AC-038 Audit redaction
 Given an Agent call completes or fails, when its audit event is stored, then tool/model/citation/timing/result/error metadata is traceable while secrets, passwords, cookies, tokens and sensitive attachment contents are absent.

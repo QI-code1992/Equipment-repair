@@ -22,7 +22,7 @@
 | NFR-005 Operations | 10 | release criteria | prototype run notes | TC-OPS-* | Candidate |
 | NFR-006 AI runtime/configuration | 10, SPEC Agent runtime contract | AC-032, 035 | `04-architecture-plan/AI_RAGFLOW_LANGGRAPH_SPEC.md` | TC-AI-CONFIG-* | Candidate |
 | NFR-007 Citation and tool boundary | 1, 7, 8 | AC-033, 036 | RAGFlow/LangGraph architecture candidate | TC-AI-BOUNDARY-* | Candidate |
-| NFR-008 Thread and device isolation | 2, 7, 8 | AC-034, 037 | Agent permission boundary | TC-AI-PERM-* | Candidate |
+| NFR-008 Thread and authorization detail isolation | 2, 7, 8 | AC-034, 037 | Agent permission boundary; CR-043 excludes `EquipmentGrant` / equipment row-level filtering | TC-AI-PERM-* | Candidate updated by CR-043 |
 | NFR-009 Audit redaction | 10 | AC-038 | audit contract candidate | TC-SEC-AI-* | Candidate |
 | FR-010 Logout navigation | 2, 9 | AC-039 | global user menu | TC-AUTH-LOGOUT-* | Candidate |
 | FR-RA-001 动态诊断追问与建议 | PRD 12、SPEC 12.3 | AC-040 | `fault-report.html` | `fault-report-repair-agent.test.js` | Candidate v1.1 |

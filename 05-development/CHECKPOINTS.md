@@ -352,3 +352,92 @@
 - 合并关系：第一父 `ca2a07f5f9f19620568cc75f74c97a2d10ed98d3`，第二父为获批 HEAD；结果树与获批候选一致。
 - 证据：后端 `284 passed, 12 skipped, 2 warnings`；`pip check`、`compileall`、普通与 `validation` Compose 配置、JSON、merge-tree 与 `git diff --check` 通过；真实 PostgreSQL 17、MinIO、ClamAV、RAGFlow 和 Compose Worker 文档生命周期联调通过。
 - 结果：PR #47 已获项目负责人确认并由 DEV-002 以 Merge Commit `6763f1e7199765c08303aa567c3aed40210f7cf7` 合入；TASK-005 治理闭环完成，可按依赖矩阵解锁 TASK-009，Stage 6 仍禁止。
+
+## FCP-009-R1：TASK-009 操作指引与维修前诊断开发候选
+
+- 状态：Development Candidate / Superseded by FCP-009-R2；未集成，不解锁下游任务，Stage 6 仍禁止。
+- 分支/基线：`codex/task-009-guidance-diagnosis`，基于 `origin/codex/stage-05-integration@e0333e2196fc1db9dba0056021625972576215e2`；代码提交 `f78deace39fde732bcea7ec36f9a3f5eea79dfc1`。
+- 范围：操作指引最多两次定向检索与人工降级；报警码具体数字/否定证据；维修前诊断的复现工况加第二类技术证据门槛；8 步、24 问、4 项证据上限；采纳预填摘要与直接开始清除临时摘要；历史案例与知识引用均通过外部受控回调边界提供。
+- 变更边界：新增两个 Agent 模块、生产受控 API、TASK-003 历史案例和 TASK-005 知识引用回调、既有 DiagnosisDraft 写入，以及对应测试和 Runtime 工具白名单；未新增生产依赖、数据库迁移、兼容层或通用抽象，未修改 TASK-005。
+- 验证：Python 3.13 Agent API/Runtime `8 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；`node 06-testing/tests/fault-report-repair-agent.test.js` 通过；`compileall`、`git diff --check` 通过。警告为既有第三方弃用提示。
+- 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；真实 RAGFlow 引用与运行态降级由 DEV-001 在复审/集成阶段核验。
+- 门禁：该候选已被 DEV-001 第二轮 `Changes requested` 取代；同一 Draft PR #49 继续维护，不得自批、自合并、申请 Merge 授权、解锁 TASK-010/011 或进入 Stage 6。
+
+## FCP-009-R2：TASK-009 服务端受控诊断会话修复候选
+
+- 状态：Development Candidate / Superseded by FCP-009-R3；未集成，不解锁下游任务，Stage 6 仍禁止。
+- 分支/PR：`codex/task-009-guidance-diagnosis` / PR #49；代码修复提交 `8d4d4c48aaa4ee39d01be4cbb5cb18de374a784c`，最终候选 HEAD 以本证据提交推送后的 PR #49 完整 HEAD 为准。
+- 修复范围：`POST /api/agent/fault-diagnosis` 不再接受客户端回传的完整 `session` 作为事实源；诊断状态保存在服务端 `DiagnosisDraft.read_only_summary._session`，客户端后续步骤只提交 `diagnosis_draft_id`。服务端校验草稿存在、归属用户、故障绑定和状态，READY 后重复提交只返回既有服务端结果，不重复创建草稿或成功审计。
+- 回归覆盖：伪造 `DIAGNOSIS_READY`/根因的客户端 `session` 请求稳定 422；其他用户访问草稿返回 403；同一幂等 Key 重放返回原响应、不同请求体返回 `409 IDEMPOTENCY_KEY_REUSED`；READY 后不同 Key 重放不新增 `DiagnosisDraft` 或 `agent.fault_diagnosis.ready` 审计；既有 `/api/fault-reports/{fault_id}/start-repair` 的 `ADOPTED` 采纳路径仍通过。
+- 验证：Python 3.13 Agent/Runtime/Maintenance 聚焦回归 `49 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；14 项原型静态回归通过；`compileall`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。警告为既有第三方弃用提示。
+- 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；真实 RAGFlow 引用与运行态降级由 DEV-001 在复审/集成阶段核验。
+- 门禁：该候选已被 DEV-001 第三轮 `Changes requested` 取代；同一 PR #49 继续维护，不得请求 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
+
+## FCP-009-R3：TASK-009 诊断权限与服务端上下文修复候选
+
+- 状态：Development Candidate / 第三轮 P1 已修复 / 等待 DEV-001 绑定新精确 HEAD 复审；未集成，不解锁下游任务，Stage 6 仍禁止。
+- 分支/PR：`codex/task-009-guidance-diagnosis` / PR #49；代码修复提交 `e0c058e182d7c29881c3de75403b2ef0eb648de7`，最终候选 HEAD 以本证据提交推送后的 PR #49 完整 HEAD 为准。
+- 修复范围：`POST /api/agent/fault-diagnosis` 创建可采纳诊断草稿时除 `intelligence:agent` 外必须具备 `fault:repair`；`start` 请求不再接受客户端 `equipment_model`、`symptom`、`description` 或 `dataset_ids`。诊断上下文从服务端 `FaultReport` 与 `Equipment` 生成，知识数据集从 `fault_diagnosis` Agent 配置读取并随服务端会话保存。
+- 回归覆盖：仅有 `intelligence:agent` 的用户请求诊断草稿返回 403 且不创建 `DiagnosisDraft`；伪造客户端诊断上下文/数据集返回 422；成功路径检索问题绑定服务端设备型号、故障症状和描述，数据集绑定服务端 Agent 配置；既有越权、重放、READY 幂等和 `ADOPTED` 采纳路径继续通过。
+- 验证：Python 3.13 故障诊断定向 `5 passed, 2 warnings`；Agent/Runtime/Maintenance 聚焦回归 `49 passed, 2 warnings`；完整后端 `293 passed, 12 skipped, 2 warnings`；14 项原型静态回归通过；`compileall`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。警告为既有第三方弃用提示。
+- 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；真实 RAGFlow 引用与运行态降级由 DEV-001 在复审/集成阶段核验。
+- 门禁：PR #49 新 HEAD 会使旧审核结论失效；等待 DEV-001 重新审核，不得请求 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
+
+## FCP-009-R8：TASK-009 可执行 RAGFlow 探针修复候选
+
+- 状态：Development Candidate / PowerShell 原生参数传递 P1 已修复 / 等待 DEV-001 对最终 PR #49 精确 HEAD 复审与 live-stack 复验；未集成、不解锁下游，Stage 6 仍禁止。
+- 修复提交：`913cb44b262e34e7d49e25162a1fb5bf3bfe113f`。
+- 修复范围：删除 `Invoke-Validation.ps1` 通过 `python -c` 传递多行 here-string 的路径；新增可由 API 镜像直接运行的 `app.modules.knowledge.ragflow_probe`，脚本改用无源码参数的 `python -m` 执行。
+- 回归覆盖：实际 Python 子进程启动探针模块，访问本地 HTTP RAGFlow stub 的 `/api/v1/datasets` 并验证 Bearer 认证；静态契约同时禁止旧 `$apiRagflowProbe` 并固定模块入口。
+- 验证：相关 `20 passed, 2 warnings`；完整后端 `297 passed, 12 skipped, 2 warnings`；14 项原型静态回归、`compileall`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
+- 未验证：DEV-002 当前 Mac 环境无 PowerShell/Docker 专用 live-stack，未用真实专用 RAGFlow Key 重跑 Windows Docker 脚本；需 DEV-001 在新精确 HEAD 上复验 Compose、容器探针、adapter、`/healthz` 和真实检索。
+- 门禁：不得申请 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
+
+## FCP-009-R9：TASK-009 真实 RAGFlow Agent 路由验证候选
+
+- 状态：Development Candidate / 第八轮唯一 Important 验证缺口已补齐 / 等待 DEV-001 对最终 PR #49 精确 HEAD 复审与 live-stack 执行；未集成、不解锁下游，Stage 6 仍禁止。
+- 测试提交：`36c3bbd07f4033aabda4e43ff3f5ee9178696ce7`。
+- 验证范围：在既有真实文档上传、ClamAV 扫描、Worker 解析并达到 READY 后，通过 `/api/agent/operation-guidance` 实际调用真实 `RagflowAdapter`，验证响应包含真实 chunk 引用和文档标记内容；再将 adapter 指向确定不可达地址，验证同一路由返回 `UNAVAILABLE`、空引用及 `manual_fallback=true`。
+- 可重复执行：该验证属于现有 `test_task005_live_stack.py`，由 `Invoke-Validation.ps1` 在隔离 validator 容器中自动运行，继续复用专用数据库、临时 RAGFlow dataset、MinIO 对象和统一清理流程。
+- 本地验证：相关 `7 passed, 1 skipped, 2 warnings`；完整后端 `297 passed, 12 skipped, 2 warnings`；live Agent 一项因 DEV-002 无专用 live-stack 环境按设计跳过。
+- 待 DEV-001：在新精确 HEAD 上用专用 RAGFlow Key 运行完整 `Invoke-Validation.ps1`，确认 live Agent 成功引用与不可用降级均实际通过。
+- 门禁：不得申请 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
+
+## FCP-009-R6：TASK-009 Compose RAGFlow 配置传递修复候选
+
+- 状态：Development Candidate / 第六轮 P1 修复 / PR #49 等待 DEV-001 对推送后的精确 HEAD 复审；未集成、不解锁下游，Stage 6 仍禁止。
+- 修复提交：`0599bb6de23ddab736b6d2f44a795c8303bee655`。
+- 修复范围：`api` Compose 服务显式传递 `RAGFLOW_BASE_URL`、`RAGFLOW_API_KEY`、`RAGFLOW_TIMEOUT_SECONDS`；安全 `.env.example` 为超时提供 `30`。这使已存在的应用工厂装配逻辑可在 Compose 容器内创建 `RagflowAdapter`。
+- 回归覆盖：Compose 静态契约将三个变量限定断言在 `api` 服务块，并验证模板超时值；避免仅 `worker`/`validator` 配置变量而 API 长期降级。
+- 验证：先观察新增契约断言在修复前失败，再转绿；相关 `18 passed, 2 warnings`，完整后端 `296 passed, 12 skipped, 2 warnings`，14 项原型静态检查、`compileall` 和 `git diff --check` 通过。
+- 未验证：DEV-002 环境无 Docker 命令且无专用 live-stack 变量，未执行 Compose 容器内 adapter 断言、`/healthz` 或真实 RAGFlow 检索；这些由 DEV-001 复审/集成环境执行。
+- 门禁：旧 `a173233d39d752fe5f025d1423d2038c54b685ba` 的审核结论已失效；不得申请 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
+
+## FCP-009-R7：TASK-009 API 容器 RAGFlow 连通性修复候选
+
+- 状态：Development Candidate / 第七轮 P1 修复 / PR #49 等待 DEV-001 对推送后的精确 HEAD 复审；未集成、不解锁下游，Stage 6 仍禁止。
+- 修复提交：`a25f32f90ddf812c7cc75c1a940d09d5077a2eb5`。
+- 修复范围：`api` 服务复用既有 `host.docker.internal:host-gateway` 映射及受限 `ragflow-egress` 网络；TASK-005 验证环境补齐超时变量，验证脚本在 API 容器内解析配置 host，并以 Bearer 凭据请求 RAGFlow `/api/v1/datasets`。
+- 回归覆盖：Compose 契约限定检查 API 的 host 映射、RAGFlow egress 网络、超时模板及容器探针命令；运行脚本以 30 次重试将 DNS 或连接失败作为验证失败。
+- 验证：先观察 API 映射与验证脚本断言失败，再转绿；相关 `18 passed, 2 warnings`，完整后端 `296 passed, 12 skipped, 2 warnings`，14 项原型静态检查、`compileall` 和 `git diff --check` 通过。
+- 未验证：DEV-002 环境无 Docker 与 PowerShell，未运行实际 Compose 配置、容器内探针、`/healthz` 或真实 TASK-009 RAGFlow 检索；这些由 DEV-001 复审/集成环境执行。
+- 门禁：旧 `f920af89f7fbaefbb1f5547582ed4d44b44005ef` 的审核结论已失效；不得申请 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
+
+## FCP-009-R4：TASK-009 CR-043 正式基线收敛候选
+
+- 状态：Development Candidate / 第四轮基线冲突修复 / 等待 DEV-001 绑定新精确 HEAD 复审；未集成，不解锁下游任务，Stage 6 仍禁止。
+- 分支/PR：`codex/task-009-guidance-diagnosis` / PR #49；本次仅同步正式基线文档和治理台账，最终候选 HEAD 以本证据提交推送后的 PR #49 完整 HEAD 为准。
+- 修复范围：按项目负责人已批准的 CR-043，将 PRD、SPEC、AC-037、需求追踪矩阵和 API 契约统一为“本期不实现 `EquipmentGrant` 或设备/工厂行级授权隔离”；AC-037 收敛为认证、路由权限、线程/草稿创建者隔离、服务端事实绑定、非法对象不泄露详情和审计。
+- 变更边界：未修改 `codebase/`、测试、数据库迁移、生产依赖、部署或运行时配置；不新增兼容层或抽象层。
+- 验证：`workflow/state.json` JSON 解析、`git diff --check` 和授权冲突词扫描通过；因无代码变更，未重跑后端测试，沿用上一代码 HEAD 的 DEV-001 独立验证证据。
+- 门禁：PR #49 新 HEAD 会使旧审核结论失效；等待 DEV-001 重新审核，不得请求 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
+
+## FCP-009-R5：TASK-009 生产 RAGFlow Adapter 装配修复候选
+
+- 状态：Development Candidate / 第五轮 P1 已修复 / 等待 DEV-001 绑定新精确 HEAD 复审；未集成，不解锁下游任务，Stage 6 仍禁止。
+- 分支/PR：`codex/task-009-guidance-diagnosis` / PR #49；代码修复提交 `655d4a2309251fd0bd0ae874787e63b73f35effd`，最终候选 HEAD 以本证据提交推送后的 PR #49 完整 HEAD 为准。
+- 修复范围：`create_app()` 根据生产环境 `RAGFLOW_BASE_URL`、`RAGFLOW_API_KEY` 和 `RAGFLOW_TIMEOUT_SECONDS` 自动装配 `RagflowAdapter + UrllibRagflowTransport` 到 `app.state.knowledge_adapter`；显式传入 `knowledge_adapter` 的测试/集成路径仍可覆盖。
+- 回归覆盖：新增应用工厂回归验证 adapter 来自环境；新增操作指引与故障诊断 API 回归，使用真实应用工厂、真实 `UrllibRagflowTransport` 和本地 HTTP RAGFlow stub，不再手动注入 `app.state.knowledge_adapter` 或 monkeypatch 知识服务。
+- 验证：新增相关文件 `16 passed, 2 warnings`；Agent/Runtime/Maintenance 聚焦回归 `51 passed, 2 warnings`；完整后端 `296 passed, 12 skipped, 2 warnings`；14 项原型静态回归、`compileall`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
+- 未验证：当前 DEV-002 环境缺少 `TASK005_ALLOW_LIVE_TESTS=1` 和专用 RAGFlow/PostgreSQL/MinIO/ClamAV 环境变量，真实 RAGFlow 联调用例 `test_task005_live_stack.py` 为 `1 skipped`；需 DEV-001 在具备环境时执行 TASK-009 操作指引/故障诊断真实 RAGFlow 检索联调。
+- 门禁：PR #49 新 HEAD 会使旧审核结论失效；等待 DEV-001 重新审核，不得请求 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。

@@ -5,6 +5,7 @@ from app.core.config import Settings
 from app.core.database import create_database_engine, session_factory
 from app.integrations.file_scanning import ClamAvScanner
 from app.integrations.object_storage import build_minio_storage
+from app.integrations.ragflow import RagflowAdapter, UrllibRagflowTransport
 from app.modules.audit.http import register_audit_exception_handlers
 from app.modules.equipment.router import router as equipment_router
 from app.modules.equipment.organization_router import router as organization_router
@@ -23,6 +24,7 @@ def create_app(
     service_name: str | None = "equipment-operations-platform",
     knowledge_storage: object | None = None,
     knowledge_scanner: object | None = None,
+    knowledge_adapter: object | None = None,
 ) -> FastAPI:
     environment = Settings.from_environment()
     settings = Settings(
@@ -37,6 +39,9 @@ def create_app(
         clamav_host=environment.clamav_host,
         clamav_port=environment.clamav_port,
         file_scan_timeout_seconds=environment.file_scan_timeout_seconds,
+        ragflow_base_url=environment.ragflow_base_url,
+        ragflow_api_key=environment.ragflow_api_key,
+        ragflow_timeout_seconds=environment.ragflow_timeout_seconds,
     )
     app = FastAPI(title=settings.service_name or "unconfigured-application")
     if knowledge_storage is None and all(
@@ -60,8 +65,25 @@ def create_app(
             port=settings.clamav_port,
             timeout_seconds=settings.file_scan_timeout_seconds,
         )
+    if (
+        knowledge_adapter is None
+        and settings.ragflow_base_url
+        and settings.ragflow_api_key
+    ):
+        transport = UrllibRagflowTransport(
+            base_url=settings.ragflow_base_url,
+            api_key=settings.ragflow_api_key,
+            timeout_seconds=settings.ragflow_timeout_seconds,
+        )
+        knowledge_adapter = RagflowAdapter(
+            base_url=settings.ragflow_base_url,
+            api_key=settings.ragflow_api_key,
+            timeout_seconds=settings.ragflow_timeout_seconds,
+            transport=transport,
+        )
     app.state.knowledge_storage = knowledge_storage
     app.state.knowledge_scanner = knowledge_scanner
+    app.state.knowledge_adapter = knowledge_adapter
     if settings.postgres_dsn:
         app.state.engine = create_database_engine(settings.postgres_dsn)
         app.state.session_factory = session_factory(app.state.engine)

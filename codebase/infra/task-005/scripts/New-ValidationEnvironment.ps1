@@ -32,7 +32,8 @@ try {
         ('MINIO_SECRET_KEY=' + (New-RandomHex 24)),
         ('MINIO_BUCKET=task005-' + (New-RandomHex 6)),
         'RAGFLOW_BASE_URL=http://host.docker.internal:19380',
-        "RAGFLOW_API_KEY=$key"
+        "RAGFLOW_API_KEY=$key",
+        'RAGFLOW_TIMEOUT_SECONDS=30'
     )
     [IO.File]::WriteAllLines($envFile, $lines, [Text.UTF8Encoding]::new($false))
     $identity = [Security.Principal.WindowsIdentity]::GetCurrent().Name
