@@ -75,9 +75,9 @@ export function RepairExecutionPage() {
     setGuidanceError(null);
     try {
       setGuidance(await getOperationGuidance(guidanceContext));
-    } catch {
+    } catch (caught) {
       setGuidance(null);
-      setGuidanceError("操作指引暂不可用，请按人工流程继续。");
+      setGuidanceError(caught instanceof ApiError && caught.status === 403 ? "无权获取操作指引。" : "操作指引暂不可用，请按人工流程继续。");
     }
   }
 
@@ -86,14 +86,18 @@ export function RepairExecutionPage() {
     try {
       const run = await startAgentRun("operation_guidance", guidanceContext, guidanceContext.symptom);
       setRuntimeEvents(await readRunEvents(run.run_id));
-    } catch {
-      setGuidanceError("流式对话暂不可用，请按人工流程继续。");
+    } catch (caught) {
+      setGuidanceError(caught instanceof ApiError && caught.status === 403 ? "无权发送操作问题。" : "流式对话暂不可用，请按人工流程继续。");
     }
   }
 
-  const summaryText = diagnosis?.summary
-    ? [diagnosis.summary.symptom, diagnosis.summary.root_cause].filter((value): value is string => typeof value === "string").join("；")
+  const summary = diagnosis?.summary;
+  const summaryText = summary
+    ? [summary.symptom, summary.root_cause].filter((value): value is string => typeof value === "string").join("；")
     : null;
+  const keyEvidence = summary && Array.isArray(summary.key_evidence)
+    ? summary.key_evidence.filter((value): value is string => typeof value === "string")
+    : [];
 
   const canAdopt = diagnosis?.state === "DIAGNOSIS_READY" && Boolean(diagnosis.diagnosis_draft_id);
   return (
@@ -114,15 +118,19 @@ export function RepairExecutionPage() {
         <label>备件更换说明<textarea aria-label="备件更换说明" value={result.parts_replacement_notes} onChange={(event) => setResult({ ...result, parts_replacement_notes: event.target.value })} /></label>
         <button type="button" onClick={() => void submitResult()}>提交维修结果</button>
       </section>}
-      {completed && <section aria-label="维修完成结果"><p>{completed.parts_replacement_notes}</p>{repair?.start_mode === "ADOPTED" && summaryText && <p>AI 对话摘要：{summaryText}</p>}</section>}
-      <section aria-label="操作指引"><h3>操作指引</h3>
+      {completed && <section aria-label="维修完成结果"><p>{completed.parts_replacement_notes}</p>{repair?.start_mode === "ADOPTED" && summaryText && <><p>AI 对话摘要：{summaryText}</p>{keyEvidence.length > 0 && <p>关键证据：{keyEvidence.join("；")}</p>}</>}</section>}
+      <section className="agent-chat" aria-label="操作指引"><h3>操作指引</h3>
+        <div className="agent-chat__messages">
+          {guidance?.evidence.length ? <details><summary>查看 {guidance.evidence.length} 条引用</summary>{guidance.evidence.map((item) => <p key={item.citation}><code>{item.citation}</code> {item.text}</p>)}</details> : null}
+          {runtimeEvents.map((item, index) => <p key={`${item.event}-${index}`}>运行状态：{String(item.data.status ?? item.event)}</p>)}
+          {guidanceError && <p role="alert">{guidanceError}</p>}
+        </div>
+        <div className="agent-chat__input">
         <label>指引设备 ID<input aria-label="指引设备 ID" value={guidanceContext.equipment_id} onChange={(event) => setGuidanceContext({ ...guidanceContext, equipment_id: event.target.value })} /></label>
         <label>设备型号<input aria-label="设备型号" value={guidanceContext.equipment_model} onChange={(event) => setGuidanceContext({ ...guidanceContext, equipment_model: event.target.value })} /></label>
         <label>指引故障现象<input aria-label="指引故障现象" value={guidanceContext.symptom} onChange={(event) => setGuidanceContext({ ...guidanceContext, symptom: event.target.value })} /></label>
-        <button type="button" onClick={() => void loadGuidance()}>获取操作指引</button><button type="button" onClick={() => void sendOperationQuestion()}>发送操作问题</button>
-        {guidance?.evidence.length ? <details><summary>查看 {guidance.evidence.length} 条引用</summary>{guidance.evidence.map((item) => <p key={item.citation}><code>{item.citation}</code> {item.text}</p>)}</details> : null}
-        {runtimeEvents.map((item, index) => <p key={`${item.event}-${index}`}>运行状态：{String(item.data.status ?? item.event)}</p>)}
-        {guidanceError && <p role="alert">{guidanceError}</p>}
+        <div className="form-actions"><button type="button" disabled={!guidanceContext.equipment_id || !guidanceContext.equipment_model || !guidanceContext.symptom} onClick={() => void loadGuidance()}>获取操作指引</button><button type="button" disabled={!guidanceContext.equipment_id || !guidanceContext.equipment_model || !guidanceContext.symptom} onClick={() => void sendOperationQuestion()}>发送操作问题</button></div>
+        </div>
       </section>
     </section>
   );

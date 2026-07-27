@@ -100,4 +100,17 @@ it("adopts a ready diagnosis and shows its summary after repair parts notes", as
   fireEvent.change(screen.getByLabelText("备件更换说明"), { target: { value: "更换压力传感器" } });
   fireEvent.click(screen.getByRole("button", { name: "提交维修结果" }));
   expect(await screen.findByText("AI 对话摘要：压力异常；压力阀卡滞")).toBeInTheDocument();
+  expect(screen.getByText("关键证据：热机后复现")).toBeInTheDocument();
+});
+
+it("shows a permission state without removing the manual repair path", async () => {
+  vi.mocked(getOperationGuidance).mockRejectedValue(new ApiError(403, "PERMISSION_DENIED"));
+  render(<RepairExecutionPage />);
+  fireEvent.change(screen.getByLabelText("故障单 ID"), { target: { value: "fault-permission" } });
+  fireEvent.change(screen.getByLabelText("指引设备 ID"), { target: { value: "eq-permission" } });
+  fireEvent.change(screen.getByLabelText("设备型号"), { target: { value: "L956" } });
+  fireEvent.change(screen.getByLabelText("指引故障现象"), { target: { value: "压力不足" } });
+  fireEvent.click(screen.getByRole("button", { name: "获取操作指引" }));
+  expect(await screen.findByText("无权获取操作指引。")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "直接开始维修" })).toBeEnabled();
 });
