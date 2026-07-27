@@ -46,7 +46,7 @@
 |---|---|---|---|
 | POST | `/api/attachments` | `fault:create` | `multipart/form-data` 中唯一 `file` 字段；201 返回 `object_key,filename,size_bytes,content_type`。 |
 
-服务端按顺序校验文件存在、非空、最大 `104857600` 字节和明确允许的 MIME；再使用 ClamAV 扫描，最后写入 MinIO。客户端不得指定 `object_key`，服务端以随机 UUID 生成键。成功响应可作为既有 `FaultReportCreate.attachment_refs` 项直接使用；故障上报 API 的字段、幂等和状态机不变。
+服务端按顺序校验文件存在、非空、最大 `104857600` 字节和明确允许的 MIME：`image/jpeg`、`image/png`、`image/webp`、`application/pdf`、`text/plain`、`text/csv`、`application/msword`、`application/vnd.openxmlformats-officedocument.wordprocessingml.document`、`application/vnd.ms-excel`、`application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`。`.zip` 等压缩包、宏格式和其他类型一律拒绝；再使用 ClamAV 扫描，最后写入 MinIO。客户端不得指定 `object_key`，服务端以随机 UUID 生成键。成功响应可作为既有 `FaultReportCreate.attachment_refs` 项直接使用；故障上报 API 的字段、幂等和状态机不变。
 
 | HTTP | code | 场景 |
 |---|---|---|

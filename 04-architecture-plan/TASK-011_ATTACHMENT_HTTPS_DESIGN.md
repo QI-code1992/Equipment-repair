@@ -17,7 +17,7 @@
 
 ### 处理顺序
 
-1. 拒绝缺失文件、空文件、超过 100 MiB 的文件，以及不在显式允许 MIME 集合内的文件。
+1. 拒绝缺失文件、空文件、超过 100 MiB 的文件，以及不在以下允许 MIME 集合内的文件：`image/jpeg`、`image/png`、`image/webp`、`application/pdf`、`text/plain`、`text/csv`、`application/msword`、`application/vnd.openxmlformats-officedocument.wordprocessingml.document`、`application/vnd.ms-excel`、`application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`。`.zip` 等压缩包、宏格式和其他类型均拒绝。
 2. 将请求流写入受控临时文件，文件名由服务端随机化；不信任客户端路径或对象键。
 3. 使用现有 ClamAV 集成扫描临时文件；感染、扫描超时或扫描服务不可用均返回稳定错误，不写 MinIO。
 4. 扫描成功后通过既有 MinIO 集成写入按随机 UUID 生成的对象键；响应只返回元数据。

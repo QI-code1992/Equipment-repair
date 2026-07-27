@@ -757,7 +757,7 @@
 - 提出时间：2026-07-27
 - 当前阶段：Stage 5 — 开发实施
 - 原始请求：确认 TASK-011 新增附件上传与病毒扫描 API、对象存储写入及 Nginx HTTPS 部署配置；允许在同一 TASK-011 PR 按 TDD 实施。
-- 明确需求：新增受 `fault:create` 与 Bearer 会话保护的 `POST /api/attachments`；依次执行 100 MiB/MIME 校验、ClamAV 扫描和 MinIO 写入，只返回既有 `AttachmentRef`。Nginx 为唯一 HTTPS 入口，内部服务不暴露宿主端口；不提供明文 HTTP 回退。
+- 明确需求：新增受 `fault:create` 与 Bearer 会话保护的 `POST /api/attachments`；依次执行 100 MiB/MIME 校验、ClamAV 扫描和 MinIO 写入，只返回既有 `AttachmentRef`。允许 JPEG、PNG、WebP、PDF、TXT、CSV、DOC、DOCX、XLS、XLSX；拒绝压缩包、宏格式与其他类型。Nginx 为唯一 HTTPS 入口，内部服务不暴露宿主端口；不提供明文 HTTP 回退。
 - 原因：当前正式契约仅保存附件引用，缺少生成可信引用的受控上传/扫描路径；部署基线尚未实现唯一 HTTPS 入口。
 - 影响：
   - PRD：不改变 FR-003 的附件上限或用户流程。
