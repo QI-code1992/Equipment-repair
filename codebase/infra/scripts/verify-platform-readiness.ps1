@@ -18,6 +18,24 @@ function Wait-HttpsHealth([string]$Url) {
     throw "HTTPS health endpoint did not become ready"
 }
 
+function Initialize-MinioBucket([string[]]$Compose, [string]$EnvironmentFile) {
+    $values = @{}
+    Get-Content -LiteralPath $EnvironmentFile | Where-Object { $_ -match '^[A-Za-z_][A-Za-z0-9_]*=' } | ForEach-Object {
+        $pair = $_.Split('=', 2)
+        $values[$pair[0]] = $pair[1]
+    }
+    foreach ($name in @("MINIO_ACCESS_KEY", "MINIO_SECRET_KEY", "MINIO_BUCKET")) {
+        if (!$values[$name]) { throw "$name is required in the environment file" }
+    }
+    $minio = (& docker @Compose ps -q minio).Trim()
+    if (!$minio) { throw "MinIO container is not running" }
+    & docker exec $minio mc alias set task011 http://127.0.0.1:9000 $values["MINIO_ACCESS_KEY"] $values["MINIO_SECRET_KEY"] | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "MinIO alias configuration failed" }
+    $minioBucket = $values["MINIO_BUCKET"]
+    & docker exec $minio mc mb --ignore-existing "task011/$minioBucket" | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "MinIO bucket creation failed" }
+}
+
 if ($ProjectName -notmatch '^equipment-task011-live-[a-z0-9]{8,}$') {
     throw "ProjectName must be an isolated equipment-task011-live-<random> project"
 }
@@ -30,6 +48,8 @@ if ($LASTEXITCODE -ne 0) { throw "Docker Desktop Linux engine is unavailable" }
 $compose = @("compose", "--profile", "validation", "-p", $ProjectName, "--env-file", $resolvedEnv, "-f", $composeFile)
 & docker @compose up -d --build
 if ($LASTEXITCODE -ne 0) { throw "TASK-011 live stack failed to start" }
+
+Initialize-MinioBucket $compose $resolvedEnv
 
 $nginx = (& docker @compose ps -q nginx).Trim()
 if (!$nginx) { throw "Nginx container is not running" }
