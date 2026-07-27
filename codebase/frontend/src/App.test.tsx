@@ -68,4 +68,12 @@ describe("App", () => {
     expect(screen.getByText("当前模型不支持深度思考，请关闭开关或改绑支持推理的模型。")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it("routes the fault-report navigation to the formal submission page", () => {
+    render(<MemoryRouter initialEntries={["/fault-report"]}><App /></MemoryRouter>);
+
+    expect(screen.getByRole("heading", { name: "故障上报" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "提交故障" })).toBeInTheDocument();
+    expect(screen.queryByText("业务内容将在对应任务中接入")).not.toBeInTheDocument();
+  });
 });
