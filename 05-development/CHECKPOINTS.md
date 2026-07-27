@@ -383,6 +383,14 @@
 - 未验证：DEV-002 当前无 Docker 环境，未执行真实 Docker/PostgreSQL/RAGFlow/LLM 联调；真实 RAGFlow 引用与运行态降级由 DEV-001 在复审/集成阶段核验。
 - 门禁：PR #49 新 HEAD 会使旧审核结论失效；等待 DEV-001 重新审核，不得请求 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
 
+## FCP-010-R1：TASK-010 前端 API 客户端检查点
+
+- 状态：已验证的开发检查点；PR #50 未审核、未集成，不解锁 TASK-011 或 Stage 6。
+- 分支/提交：`codex/task-010-frontend-integration` / `3c37d6c3a85bc02c00b79b550b0622846d39e574`。
+- 范围：正式前端的维护与 Agent API 类型、幂等 POST 边界，以及公开错误码映射；不修改后端、API 契约、原型、依赖或智能配置页。
+- 验证：TDD 红灯证明维护 API 尚不存在；`npm --prefix codebase/frontend test -- src/api.test.ts` 为 `6 passed`，`npm --prefix codebase/frontend run build` 通过，`git diff --check` 通过。
+- 回退：可单独回退该提交，不涉及数据、部署或生产操作。
+
 ## FCP-009-R8：TASK-009 可执行 RAGFlow 探针修复候选
 
 - 状态：Development Candidate / PowerShell 原生参数传递 P1 已修复 / 等待 DEV-001 对最终 PR #49 精确 HEAD 复审与 live-stack 复验；未集成、不解锁下游，Stage 6 仍禁止。
