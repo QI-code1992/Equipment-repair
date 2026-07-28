@@ -11,9 +11,9 @@
 - 附件：初次执行发现隔离 MinIO 未创建已配置桶，接口受控返回 `ATTACHMENT_STORAGE_UNAVAILABLE`；仅在隔离环境创建该配置桶后重跑。`results-attachment-retest.json` 记录全部通过，P95 为 47.56、57.18、110.44、210.36 ms，实际覆盖 HTTPS、ClamAV 与 MinIO。
 - 真实 RAGFlow 成功路径：专用数据集探针、真实文档引用和 `POST /api/agent/operation-guidance` 均执行。`results-agent-success-final.json` 中 1/2/5/10 并发均为 `QUESTIONING`、零意外错误，P95 为 2,568、3,266、2,971、14,743 ms。此前 10 并发下偶发瞬态检索连接失败，已由本候选的一次重试修复；重试后的 10 并发诊断为 198/198 成功。
 - 受控降级路径：首次两次压测分别因请求体字段不符合正式路由契约、以及故障数据集没有 `READY` 文档而未触发远端检索；两次均标记为无效证据，不计入结果。补齐仅用于隔离故障库的 `READY` 映射后，`results-agent-unavailable-final.json` 记录 21,789 次真实 HTTPS 路由请求全部为 `UNAVAILABLE`、零意外错误，P95 为 44.04、46.38、73.40、153.07 ms；该路径未返回伪造引用。
-- 备份恢复：隔离备份与随机恢复项目已功能性成功，恢复命令退出码为 0；但一次包含大量附件压测对象的恢复耗时约 194.7 秒，超过已约定的 180 秒门槛，且尚未在备份/恢复同时施加 10 个只读请求。因此此项不判定通过，详见 `DEFECTS.md` 的 Stage 6 开放项。
+- 备份恢复：首次包含 15,525 个附件压测遗留对象的恢复耗时约 194.7 秒，已保留为对象数量边界发现，不能用作受控性能基线。随后在新的隔离项目中创建 1 个 API 实际写入的附件对象并重测：备份 3.578 秒、随机恢复项目 `equipment-task011-restore-bkp9d7d41` 恢复 10.584 秒，两个脚本均退出码 0。恢复期间固定运行 10 并发认证只读请求 60 秒，`results-backup-restore-readonly.json` 记录 12,443 次请求、零意外错误、P50 43.29 ms、P95 76.64 ms，满足恢复不超过 180 秒和只读 P95 不超过 2 秒的受控门槛。
 - 当前候选静态复核：Gitleaks 工作树扫描、Semgrep、Trivy（HIGH/CRITICAL）与 CodeQL 2.26.1 Python/JavaScript 安全套件均已执行；CodeQL 两份 SARIF 均无结果。Trivy 仍仅报告已处置的 `react-router` `GHSA-qwww-vcr4-c8h2`，不得将该历史风险处置改写为依赖已升级。
-- 当前结论：认证、附件、真实 RAGFlow 成功、真实 `UNAVAILABLE` 降级和重启后的容器运行态证据均通过；备份恢复性能/并发干扰验证仍未完成，故本报告不作 Stage 6 整体通过结论，也不放行 Stage 7。
+- 当前结论：认证、附件、真实 RAGFlow 成功、真实 `UNAVAILABLE` 降级、重启后的容器运行态，以及受控备份恢复/10 并发只读组合验证均通过。本报告仍不自行作 Stage 6 整体通过结论，也不放行 Stage 7；须经 DEV-002 对当前 PR 候选审核，并由 DEV-002 单独作出 Stage 6 Gate 决定。
 
 ## Stage 6 PR #61 合并后核心运行态验证（2026-07-28）
 

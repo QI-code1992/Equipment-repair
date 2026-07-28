@@ -1,0 +1,19 @@
+{
+  "scenario": "auth",
+  "max_concurrency": 10,
+  "duration_seconds_total": 60,
+  "duration_seconds_per_level": 60,
+  "p95_limit_ms": 2000,
+  "levels": [
+    {
+      "concurrency": 10,
+      "requests": 12443,
+      "unexpected_errors": 0,
+      "agent_states": {},
+      "p50_ms": 43.28519996488467,
+      "p95_ms": 76.64419995853677,
+      "pass": true
+    }
+  ],
+  "pass": true
+}
