@@ -32,9 +32,24 @@ def test_operation_guidance_prioritizes_page_capability_and_limits_directional_r
     )
 
     assert session.state is GuidanceState.QUESTIONING
-    assert len(calls) == 2
+    assert len(calls) == 1
     assert session.question
-    assert len(session.evidence) == 2
+    assert len(session.evidence) == 1
+
+
+def test_operation_guidance_combines_context_into_one_directional_retrieval():
+    calls: list[str] = []
+
+    def retrieve(query: str):
+        calls.append(query)
+        return [{"citation": "chunk-1", "text": "verified guidance"}]
+
+    session = OperationGuidanceAgent(retrieve).start(
+        GuidanceContext("eq-1", "X1", "pressure loss", "after warm-up")
+    )
+
+    assert calls == ["X1 pressure loss after warm-up"]
+    assert session.retrieval_count == 1
 
 
 def test_operation_guidance_failure_keeps_manual_path_available():
@@ -105,7 +120,6 @@ def test_operation_guidance_api_uses_task005_retrieval_boundary(client, monkeypa
 
     assert response.status_code == 200
     assert response.json()["evidence"] == [
-        {"citation": "chunk-1", "text": "inspect the pump"},
         {"citation": "chunk-1", "text": "inspect the pump"},
     ]
 

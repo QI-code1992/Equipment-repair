@@ -46,8 +46,7 @@ class OperationGuidanceAgent:
 
     def start(self, context: GuidanceContext) -> GuidanceSession:
         queries = (
-            f"{context.equipment_model} {context.symptom}",
-            f"{context.equipment_model} {context.description}",
+            f"{context.equipment_model} {context.symptom} {context.description}",
         )
         references: list[GuidanceReference] = []
         retrieval_count = 0
