@@ -19,6 +19,12 @@
 - Semgrep 人工分类：RAGFlow probe 已验证 URL scheme/host；业务 transport 仍未执行等效 URL 约束，作为待修复硬化项。Nginx `$api_upstream` 在仓库配置中固定为 `api:8000`，动态上游规则不适用；公开 `/api/` 必须供经 Bearer/权限校验的客户端使用，`internal` 规则不适用。
 - CodeQL：本地 cask 下载仍在进行，GitHub Code Scanning 未启用；无 CodeQL 结果前，本报告不得标记为静态审查完成。
 
+### CodeQL 本地扫描（2026-07-28）
+
+- 工具：CodeQL 2.26.1；Python 数据库扫描 136 个文件，JavaScript/TypeScript 数据库扫描完成。原始 SARIF：`/private/tmp/equipment-static-results/codeql/python.sarif`、`javascript.sarif`。
+- JavaScript/TypeScript：0 项结果。
+- Python：64 项结果；其中未使用导入、无效语句等质量项不构成安全阻断。CodeQL 在 `app/modules/agents/router.py:400-401` 报告 stack-trace exposure；人工复核确认 `MetricQueryService` 将 `ServiceUnavailableError`/`TimeoutError` 的 `str(error)` 直接置入 503 JSON 响应。P1-STATIC-003：必须映射为稳定、脱敏的业务错误码，禁止把底层异常文本返回客户端。
+
 ## TASK-011 合并后最终验证与治理收尾（2026-07-27）
 
 - 合并基准：`b1e4ea6c409946667e22e4bff427c4dccaa86f22`，父提交为 `22f619f…` 与授权源 HEAD `f3150a27441b0e8e4308cdcc7a06a5357ca702e7`；PR #54 已合并至 `codex/stage-05-integration`。
