@@ -12,6 +12,13 @@
 - 工具覆盖：Semgrep Community 已运行 520 条规则、118 个 Git 跟踪文件，报告 10 项；Gitleaks、Trivy、CodeQL 尚未形成可归档结论，GitHub Code Scanning 未启用。不得把未完成工具扫描记为通过。
 - 测试治理缺口：`06-testing/TEST_PLAN.md` 与 `TEST_CASES.md` 尚未列出 CodeQL、Semgrep、Gitleaks、Trivy 的命令、规则/阈值、范围和证据格式。状态：Open；在形成 Stage 6 结论前补齐。
 
+### 静态工具执行结果（2026-07-28）
+
+- Gitleaks `git`：扫描 357 个提交、约 3.95 MB 历史数据，报告 2 项 `curl-auth-user`。两项均为历史 PowerShell 清理命令对运行时 `ELASTIC_PASSWORD` 环境变量的引用，未含硬编码值；人工分类为 non-leak，不作为密钥缺陷关闭。
+- Trivy `fs --scanners vuln,secret,misconfig`：未发现 secret；发现 Dockerfile `DS-0002`（root 用户，已与 P1-STATIC-001 合并记录）和前端生产依赖 `react-router` 的 HIGH `GHSA-qwww-vcr4-c8h2`。两项均为 Open。
+- Semgrep 人工分类：RAGFlow probe 已验证 URL scheme/host；业务 transport 仍未执行等效 URL 约束，作为待修复硬化项。Nginx `$api_upstream` 在仓库配置中固定为 `api:8000`，动态上游规则不适用；公开 `/api/` 必须供经 Bearer/权限校验的客户端使用，`internal` 规则不适用。
+- CodeQL：本地 cask 下载仍在进行，GitHub Code Scanning 未启用；无 CodeQL 结果前，本报告不得标记为静态审查完成。
+
 ## TASK-011 合并后最终验证与治理收尾（2026-07-27）
 
 - 合并基准：`b1e4ea6c409946667e22e4bff427c4dccaa86f22`，父提交为 `22f619f…` 与授权源 HEAD `f3150a27441b0e8e4308cdcc7a06a5357ca702e7`；PR #54 已合并至 `codex/stage-05-integration`。
