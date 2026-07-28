@@ -1,6 +1,15 @@
 # 测试报告
 
-- 状态：Stage 6 独立测试进行中；静态全局审查完成，运行态验证尚未执行
+- 状态：Stage 6 独立测试进行中；静态全局审查与 PR #61 合并后的核心运行态验证已完成。性能边界、最终独立质量结论、Stage 7 验收及生产发布均未完成或获批。
+
+## Stage 6 PR #61 合并后核心运行态验证（2026-07-28）
+
+- 合并基线：`codex/stage-05-integration` 的 Merge Commit `144ad1ac5802dcbe53a55a426f46ce9bef8eba0f`；双亲为此前集成 HEAD `e32478e20c0f27558356d4f0e7d5a6d4c8eba477` 与获授权 PR #61 HEAD `b73311cfd3beebe048c5ef64320886ccdea363e0`。
+- 环境边界：Windows Docker Desktop 的隔离 Compose 项目、专用 PostgreSQL/MinIO/ClamAV、专用 RAGFlow 数据集和本地自签名 HTTPS；未连接生产数据库、对象存储或生产密钥。临时浏览器用户、Compose 项目、备份目录与 RAGFlow 数据集不得纳入仓库或作为生产数据。
+- 前端与静态：`npm ci`、前端 `26 passed`、生产构建和 Nginx 配置契约通过；15 项 `06-testing/tests/*.test.js` 全部通过。依赖安装仍报告既有两项 high severity，未执行自动升级；其 React Router 适用性处置继续受已记录的 BrowserRouter SPA 边界约束。
+- 真实运行态：`verify-platform-readiness.ps1` 在该 Merge Commit 上通过，包含真实 HTTPS 根入口的哈希 `.js/.css` 响应头断言、PostgreSQL 迁移 `1 passed, 3 warnings`、真实 Agent/RAGFlow 成功及 `UNAVAILABLE` 降级 `1 passed, 2 warnings`、HTTPS E2E `1 passed`、API 重启恢复、备份及随机隔离恢复 `equipment-task011-restore-393052f7ebe3`。
+- 浏览器：真实 Chromium/Edge 无头会话验证未认证访问重定向 `/login`，登录后会话令牌写入，且 `/intelligent-config`、`/fault-report` 两个受保护路由可访问。
+- 结论与未完成项：PR #61 的 MIME P1 已在合并结果验证关闭；但性能/负载边界尚未执行，最终独立质量结论、Stage 7 验收及生产发布均仍需各自门禁，不得由本记录自动放行。
 
 ## Stage 6 静态全局复扫（2026-07-28）
 

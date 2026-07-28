@@ -1,5 +1,12 @@
 # 开发到产品交接
 
+## Stage 6 PR #61 合并后验证与治理交接（2026-07-28）
+
+- 合并事实：DEV-002 已按授权以手动 Merge Commit `144ad1ac5802dcbe53a55a426f46ce9bef8eba0f` 合入 PR #61；双亲为 `e32478e20c0f27558356d4f0e7d5a6d4c8eba477` 与获授权 HEAD `b73311cfd3beebe048c5ef64320886ccdea363e0`。
+- DEV-001 合并后验证：在该 Merge Commit 的独立工作树中，前端 `26 passed`、生产构建、15 项静态回归、Nginx 契约和合并差异检查均通过；完整 readiness 验证真实 HTTPS MIME、PostgreSQL、RAGFlow 成功/降级、API 重启和隔离备份恢复通过；真实浏览器登录与两个受保护路由通过。
+- 残余风险与边界：依赖审计的既有 React Router 风险处置及 Stage 3 原型 P2 风险未因本轮关闭；性能/负载边界、Stage 6 最终独立质量结论、Stage 7 验收和生产发布均未获批准。
+- 下一动作：以本治理记录创建仅文档 PR，请项目负责人确认治理内容与精确 HEAD；确认、集成检查和逐 PR 授权完成前，不得将 Stage 6 标记为通过或启动 Stage 7。
+
 ## Stage 6 PR #61：Nginx 静态资源 MIME 修复交接（2026-07-28）
 
 - 范围与验证基线：PR #61 的实际运行验证候选为 HEAD `2875c1ff3a244398183a5c5a9be0a76ca016c24d`，目标 `codex/stage-05-integration`。该候选包含 Nginx MIME 修复、静态配置契约和真实 HTTPS 响应头回归；本次后续提交只补充本段证据，不改运行代码或测试逻辑。整个 PR 只修改 `codebase/infra/nginx/default.conf`、`codebase/infra/tests/verify-nginx-contract.ps1`、`codebase/infra/scripts/verify-platform-readiness.ps1` 与本交接文件；不修改业务 API、身份认证、数据迁移、依赖、RAGFlow 配置或运行数据。

@@ -66,6 +66,16 @@
     "approvedAt": "2026-07-27",
     "nextAction": "Begin Stage 6 independent testing from the approved candidate baseline; Stage 7 acceptance and Stage 8 release remain prohibited pending their separate gates."
   },
+  "stage6RuntimeValidation": {
+    "status": "POST_MERGE_CORE_RUNTIME_VALIDATION_COMPLETED_PENDING_FINAL_QUALITY_GATE",
+    "integrationMergeCommit": "144ad1ac5802dcbe53a55a426f46ce9bef8eba0f",
+    "sourcePullRequest": 61,
+    "approvedSourceHead": "b73311cfd3beebe048c5ef64320886ccdea363e0",
+    "mergeExecutor": "QI-code1992 / DEV-002 / manual Merge Commit",
+    "verification": "DEV-001 ran the merged result in an isolated Windows Docker environment: frontend 26 passed, production build, 15 static regressions, Nginx contract, real HTTPS JS/CSS MIME assertions, PostgreSQL migration 1 passed/3 warnings, real Agent/RAGFlow success and unavailable fallback 1 passed/2 warnings, HTTPS E2E 1 passed, API restart recovery, isolated backup/restore, and authenticated browser route checks passed.",
+    "residualRisk": "Existing React Router risk disposition and Stage 3 prototype P2 findings remain open; performance/load boundary testing and the final independent quality conclusion remain pending.",
+    "nextAction": "Merge the governance-evidence PR after its required confirmation and authorization. Do not mark Stage 6 passed or start Stage 7 until the remaining performance boundary and final quality gate are completed."
+  },
   "collaborationGovernance": {
     "changeRequest": "CR-040",
     "candidateVersion": "DEVELOPMENT_TASK_BOOK v1.3",
