@@ -1,6 +1,30 @@
+import json
 import unittest
+from unittest.mock import patch
 
-from stage6_performance import multipart_body, parse_levels, percentile, scenario_passes
+from stage6_performance import (
+    build_report,
+    multipart_body,
+    parse_levels,
+    percentile,
+    request_json,
+    scenario_passes,
+)
+
+
+class _Response:
+    def __init__(self, body: object) -> None:
+        self.status = 200
+        self._body = body
+
+    def read(self) -> bytes:
+        return json.dumps(self._body).encode("utf-8")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        return None
 
 
 class PerformanceThresholdTests(unittest.TestCase):
@@ -31,6 +55,51 @@ class PerformanceThresholdTests(unittest.TestCase):
         self.assertEqual(parse_levels("1,2,5,10"), [1, 2, 5, 10])
         with self.assertRaises(ValueError):
             parse_levels("1,11")
+
+    def test_agent_success_without_a_reference_is_an_invalid_outcome(self) -> None:
+        with patch("stage6_performance.urlopen", return_value=_Response({
+            "state": "QUESTIONING", "evidence": [], "manual_fallback": True,
+        })):
+            outcome = request_json(
+                base_url="https://example.test", token="token", scenario="agent-success",
+                agent_payload={}, insecure_tls=True,
+            )
+
+        self.assertFalse(outcome.valid)
+        self.assertEqual(outcome.error, "agent_contract")
+
+    def test_agent_unavailable_with_a_fabricated_reference_is_an_invalid_outcome(self) -> None:
+        with patch("stage6_performance.urlopen", return_value=_Response({
+            "state": "UNAVAILABLE", "evidence": [{"citation": "fake", "text": "fake"}],
+            "manual_fallback": True,
+        })):
+            outcome = request_json(
+                base_url="https://example.test", token="token", scenario="agent-unavailable",
+                agent_payload={}, insecure_tls=True,
+            )
+
+        self.assertFalse(outcome.valid)
+        self.assertEqual(outcome.error, "agent_contract")
+
+    def test_report_binds_candidate_environment_fixture_and_harness(self) -> None:
+        report = build_report(
+            scenario="agent-success",
+            levels=[{"concurrency": 10, "pass": True}],
+            duration_seconds=300,
+            p95_limit_ms=15_000,
+            metadata={
+                "sut_commit": "a" * 40,
+                "harness_commit": "b" * 40,
+                "environment": "isolated-compose-success",
+                "fixture": "ragflow-dataset:example",
+            },
+        )
+
+        self.assertEqual(report["metadata"]["sut_commit"], "a" * 40)
+        self.assertEqual(report["metadata"]["harness_commit"], "b" * 40)
+        self.assertEqual(report["metadata"]["environment"], "isolated-compose-success")
+        self.assertEqual(report["metadata"]["fixture"], "ragflow-dataset:example")
+        self.assertEqual(report["p95_limit_ms"], 15_000)
 
 
 if __name__ == "__main__":

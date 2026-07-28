@@ -42,6 +42,8 @@ class Outcome:
     valid: bool
     error: str | None
     state: str | None = None
+    reference_count: int = 0
+    manual_fallback: bool | None = None
 
 
 def multipart_body(filename: str, content: bytes) -> tuple[str, bytes]:
@@ -85,13 +87,50 @@ def request_json(
         context = ssl._create_unverified_context() if insecure_tls else None
         with urlopen(request, timeout=40, context=context) as response:
             status = response.status
-            body = json.loads(response.read()) if scenario.startswith("agent") else None
-        state = None if body is None else str(body.get("state"))
-        valid = status == (201 if scenario == "attachment" else 200) and (
-            not scenario.startswith("agent")
-            or body["state"] == ("UNAVAILABLE" if scenario == "agent-unavailable" else "QUESTIONING")
-        )
-        return Outcome((time.perf_counter() - started) * 1_000, status, valid, None, state)
+            raw_body = response.read() if scenario.startswith("agent") else None
+        if not scenario.startswith("agent"):
+            return Outcome(
+                (time.perf_counter() - started) * 1_000,
+                status,
+                status == (201 if scenario == "attachment" else 200),
+                None if status == (201 if scenario == "attachment" else 200) else "status",
+            )
+        try:
+            body = json.loads(raw_body)
+            if not isinstance(body, dict):
+                raise ValueError("agent response is not an object")
+            state = body["state"]
+            evidence = body["evidence"]
+            manual_fallback = body["manual_fallback"]
+            if not isinstance(state, str) or not isinstance(evidence, list) or not isinstance(manual_fallback, bool):
+                raise ValueError("agent response has invalid fields")
+            references_valid = all(
+                isinstance(item, dict)
+                and isinstance(item.get("citation"), str)
+                and bool(item["citation"].strip())
+                and isinstance(item.get("text"), str)
+                and bool(item["text"].strip())
+                for item in evidence
+            )
+            expected_state = "UNAVAILABLE" if scenario == "agent-unavailable" else "QUESTIONING"
+            expected_evidence = evidence == [] if scenario == "agent-unavailable" else bool(evidence) and references_valid
+            valid = status == 200 and state == expected_state and manual_fallback and expected_evidence
+            return Outcome(
+                (time.perf_counter() - started) * 1_000,
+                status,
+                valid,
+                None if valid else "agent_contract",
+                state,
+                len(evidence),
+                manual_fallback,
+            )
+        except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+            return Outcome(
+                (time.perf_counter() - started) * 1_000,
+                status,
+                False,
+                "agent_response",
+            )
     except HTTPError as error:
         return Outcome((time.perf_counter() - started) * 1_000, error.code, False, "http")
     except (URLError, TimeoutError, OSError) as error:
@@ -109,17 +148,27 @@ def run_level(
 
     def worker() -> None:
         while time.monotonic() < deadline:
-            outcome = request_json(
-                base_url=base_url, token=token, scenario=scenario,
-                agent_payload=agent_payload,
-                insecure_tls=insecure_tls,
-            )
+            started = time.perf_counter()
+            try:
+                outcome = request_json(
+                    base_url=base_url, token=token, scenario=scenario,
+                    agent_payload=agent_payload,
+                    insecure_tls=insecure_tls,
+                )
+            except Exception as error:
+                outcome = Outcome(
+                    (time.perf_counter() - started) * 1_000,
+                    None,
+                    False,
+                    f"worker_{type(error).__name__}",
+                )
             with lock:
                 outcomes.append(outcome)
 
     with ThreadPoolExecutor(max_workers=concurrency) as pool:
-        for _ in range(concurrency):
-            pool.submit(worker)
+        futures = [pool.submit(worker) for _ in range(concurrency)]
+        for future in futures:
+            future.result()
 
     latencies = [item.latency_ms for item in outcomes]
     errors = sum(not item.valid for item in outcomes)
@@ -129,11 +178,35 @@ def run_level(
         "requests": len(outcomes),
         "unexpected_errors": errors,
         "agent_states": dict(states),
+        "responses_with_references": sum(item.reference_count > 0 for item in outcomes),
+        "responses_without_references": sum(
+            item.state is not None and item.reference_count == 0 for item in outcomes
+        ),
         "p50_ms": percentile(latencies, 50),
         "p95_ms": percentile(latencies, 95),
         "pass": scenario_passes(
             latencies_ms=latencies, unexpected_errors=errors, p95_limit_ms=p95_limit_ms
         ),
+    }
+
+
+def build_report(
+    *,
+    scenario: str,
+    levels: list[dict[str, object]],
+    duration_seconds: int,
+    p95_limit_ms: int,
+    metadata: dict[str, str],
+) -> dict[str, object]:
+    return {
+        "scenario": scenario,
+        "metadata": metadata,
+        "max_concurrency": max(int(result["concurrency"]) for result in levels),
+        "duration_seconds_total": duration_seconds,
+        "duration_seconds_per_level": duration_seconds // len(levels),
+        "p95_limit_ms": p95_limit_ms,
+        "levels": levels,
+        "pass": all(bool(result["pass"]) for result in levels),
     }
 
 
@@ -147,6 +220,10 @@ def main() -> None:
     parser.add_argument("--duration-seconds", type=int, default=300)
     parser.add_argument("--concurrency-levels", default="1,2,5,10")
     parser.add_argument("--p95-limit-ms", type=int, required=True)
+    parser.add_argument("--sut-commit", required=True)
+    parser.add_argument("--harness-commit", required=True)
+    parser.add_argument("--environment", required=True)
+    parser.add_argument("--fixture", required=True)
     parser.add_argument("--insecure-tls", action="store_true")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
@@ -165,15 +242,18 @@ def main() -> None:
         )
         for level in levels
     ]
-    report = {
-        "scenario": args.scenario,
-        "max_concurrency": max(levels),
-        "duration_seconds_total": args.duration_seconds,
-        "duration_seconds_per_level": level_duration_seconds,
-        "p95_limit_ms": args.p95_limit_ms,
-        "levels": results,
-        "pass": all(result["pass"] for result in results),
-    }
+    report = build_report(
+        scenario=args.scenario,
+        levels=results,
+        duration_seconds=args.duration_seconds,
+        p95_limit_ms=args.p95_limit_ms,
+        metadata={
+            "sut_commit": args.sut_commit,
+            "harness_commit": args.harness_commit,
+            "environment": args.environment,
+            "fixture": args.fixture,
+        },
+    )
     with open(args.output, "w", encoding="utf-8") as handle:
         json.dump(report, handle, ensure_ascii=False, indent=2)
     if not report["pass"]:

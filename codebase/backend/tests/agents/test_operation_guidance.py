@@ -55,7 +55,7 @@ def test_operation_guidance_failure_keeps_manual_path_available():
     assert session.evidence == ()
 
 
-def test_operation_guidance_retries_one_transient_retrieval_failure():
+def test_operation_guidance_transient_retry_never_exceeds_two_total_retrievals():
     calls = 0
 
     def retrieve(_: str):
@@ -70,7 +70,8 @@ def test_operation_guidance_retries_one_transient_retrieval_failure():
     )
 
     assert session.state is GuidanceState.QUESTIONING
-    assert calls == 3
+    assert calls == 2
+    assert session.retrieval_count == 2
 
 
 def test_operation_guidance_api_uses_task005_retrieval_boundary(client, monkeypatch):

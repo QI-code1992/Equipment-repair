@@ -11,7 +11,6 @@ class GuidanceState(StrEnum):
 
 
 MAX_DIRECTIONAL_RETRIEVALS = 2
-MAX_RETRIEVAL_ATTEMPTS = 2
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,9 +50,18 @@ class OperationGuidanceAgent:
             f"{context.equipment_model} {context.description}",
         )
         references: list[GuidanceReference] = []
+        retrieval_count = 0
         try:
             for query in queries[:MAX_DIRECTIONAL_RETRIEVALS]:
-                references.extend(self._references(query))
+                retrieval_count += 1
+                try:
+                    references.extend(self._references(query))
+                except (ConnectionError, RagflowError, TimeoutError):
+                    if retrieval_count == MAX_DIRECTIONAL_RETRIEVALS:
+                        raise
+                    retrieval_count += 1
+                    references.extend(self._references(query))
+                    break
         except (ConnectionError, RagflowError, TimeoutError):
             return GuidanceSession(
                 context=context,
@@ -67,21 +75,15 @@ class OperationGuidanceAgent:
             state=GuidanceState.QUESTIONING,
             question="请描述故障出现时的工况或最近一次可复现步骤。",
             evidence=tuple(references),
-            retrieval_count=min(len(queries), MAX_DIRECTIONAL_RETRIEVALS),
+            retrieval_count=retrieval_count,
             manual_fallback=True,
         )
 
     def _references(self, query: str) -> list[GuidanceReference]:
-        for attempt in range(MAX_RETRIEVAL_ATTEMPTS):
-            try:
-                return [
-                    GuidanceReference(str(item["citation"]), str(item["text"]))
-                    for item in self._retrieve(query)
-                ]
-            except (ConnectionError, RagflowError, TimeoutError):
-                if attempt + 1 == MAX_RETRIEVAL_ATTEMPTS:
-                    raise
-        raise RuntimeError("unreachable")
+        return [
+            GuidanceReference(str(item["citation"]), str(item["text"]))
+            for item in self._retrieve(query)
+        ]
 
     def answer(self, session: GuidanceSession, answer: str) -> GuidanceSession:
         if session.state is GuidanceState.UNAVAILABLE:
