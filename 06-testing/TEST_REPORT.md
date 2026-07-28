@@ -2,6 +2,16 @@
 
 - 状态：生产验证受阻
 
+## Stage 6 静态全局审查问题台账（进行中，2026-07-28）
+
+- 测试基线：应用候选 `8a5e6ced473ea6219666d858ce5b751e61362871`；`138fc8858b19ab84a58816455c490099db53dbe8` 仅为 Gate 记录，不改变应用代码。
+- 范围：仅静态全局审查；未启动 RAGFlow、Docker 或其他运行态测试。
+- P1-STATIC-001：`codebase/backend/Dockerfile:12` 未设置非 root `USER`，API 容器默认以 root 运行。状态：Open；需在 Stage 5 修复并重新通过 Stage 6 静态审查。
+- P1-STATIC-002：`codebase/infra/nginx/default.conf` 未显式声明 `ssl_protocols TLSv1.2 TLSv1.3`。状态：Open；需在 Stage 5 修复并重新通过 Stage 6 静态审查。
+- 待分类：Semgrep 对 RAGFlow `urllib` 动态 URL、Nginx 固定 `$api_upstream` 与公开 API `proxy_pass` 共报告 8 项。当前不直接定性为漏洞：必须确认 URL 仅来自受控配置、`$api_upstream` 固定为 `api:8000`、公开 API 依赖应用鉴权而非 Nginx `internal`。状态：Pending manual triage。
+- 工具覆盖：Semgrep Community 已运行 520 条规则、118 个 Git 跟踪文件，报告 10 项；Gitleaks、Trivy、CodeQL 尚未形成可归档结论，GitHub Code Scanning 未启用。不得把未完成工具扫描记为通过。
+- 测试治理缺口：`06-testing/TEST_PLAN.md` 与 `TEST_CASES.md` 尚未列出 CodeQL、Semgrep、Gitleaks、Trivy 的命令、规则/阈值、范围和证据格式。状态：Open；在形成 Stage 6 结论前补齐。
+
 ## TASK-011 合并后最终验证与治理收尾（2026-07-27）
 
 - 合并基准：`b1e4ea6c409946667e22e4bff427c4dccaa86f22`，父提交为 `22f619f…` 与授权源 HEAD `f3150a27441b0e8e4308cdcc7a06a5357ca702e7`；PR #54 已合并至 `codex/stage-05-integration`。
