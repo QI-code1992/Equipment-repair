@@ -92,8 +92,8 @@ class MetricQueryService:
             )
         try:
             items = self._backend(request)
-        except (ServiceUnavailableError, TimeoutError) as error:
-            return {"status": "UNAVAILABLE", "items": [], "error": str(error)}
+        except (ServiceUnavailableError, TimeoutError):
+            return {"status": "UNAVAILABLE", "items": []}
         return {
             "status": "OK",
             "items": items,

@@ -1,11 +1,16 @@
 import json
 from secrets import token_hex
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 
 class UrllibRagflowTransport:
     def __init__(self, *, base_url: str, api_key: str, timeout_seconds: float) -> None:
-        self.base_url = base_url.rstrip("/")
+        normalized_base_url = base_url.rstrip("/")
+        parsed = urlparse(normalized_base_url)
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+            raise ValueError("valid HTTP RAGFlow base URL is required")
+        self.base_url = normalized_base_url
         self.api_key = api_key
         self.timeout_seconds = timeout_seconds
 

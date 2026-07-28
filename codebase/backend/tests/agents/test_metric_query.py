@@ -50,7 +50,7 @@ def test_metric_query_does_not_fabricate_values_when_service_fails() -> None:
         raise ServiceUnavailableError("metrics backend unavailable")
 
     result = MetricQueryService(failing_service).query(query)
-    assert result == {"status": "UNAVAILABLE", "items": [], "error": "metrics backend unavailable"}
+    assert result == {"status": "UNAVAILABLE", "items": []}
 
 
 def test_health_score_reader_returns_controlled_failure_without_score() -> None:
