@@ -1,5 +1,14 @@
 # 开发到产品交接
 
+## Stage 6 PR #61：Nginx 静态资源 MIME 修复交接（2026-07-28）
+
+- 范围与验证基线：PR #61 的实际运行验证候选为 HEAD `2875c1ff3a244398183a5c5a9be0a76ca016c24d`，目标 `codex/stage-05-integration`。该候选包含 Nginx MIME 修复、静态配置契约和真实 HTTPS 响应头回归；本次后续提交只补充本段证据，不改运行代码或测试逻辑。整个 PR 只修改 `codebase/infra/nginx/default.conf`、`codebase/infra/tests/verify-nginx-contract.ps1`、`codebase/infra/scripts/verify-platform-readiness.ps1` 与本交接文件；不修改业务 API、身份认证、数据迁移、依赖、RAGFlow 配置或运行数据。
+- 根因与风险：Nginx `http` 块未加载 `/etc/nginx/mime.types`，导致生产构建的 `.js` 与 `.css` 经 HTTPS 返回 `text/plain`。浏览器会拒绝模块脚本，造成前端空白；因此该项为 Stage 6 P1，未修复前不得给出 Stage 6 通过结论。
+- 修复与回归：加载官方 MIME 类型表；静态配置契约要求该指令；platform-readiness 在真实 HTTPS 入口中解析构建 `index.html` 的哈希资源，并分别断言 JavaScript 为 `application/javascript`、CSS 为 `text/css`。
+- 实际执行结果与边界：在 HEAD `2875c1f…` 上，前端 `26 passed`、生产构建、Nginx 契约和 `git diff --check` 通过；完整 `verify-platform-readiness.ps1` 通过，覆盖真实 HTTPS `.js/.css` MIME 响应、PostgreSQL 迁移 `1 passed, 3 warnings`、真实 Agent/RAGFlow `1 passed, 2 warnings`、HTTPS E2E `1 passed`、API 重启恢复及隔离备份恢复 `equipment-task011-restore-12f7edcc6dd7`。真实浏览器同时验证未认证跳转 `/login`、登录后会话令牌写入和 `/intelligent-config`、`/fault-report` 受保护路由访问。临时浏览器用户、专用 RAGFlow 数据集、Docker 项目与备份目录均不得进入仓库；此记录不构成 Merge 授权或 Stage 6 最终通过结论。
+- 回退：若该修复引起静态资源交付异常，回退 PR #61 的 MIME 配置提交即可恢复合入前配置；随后仍须以真实 HTTPS 响应头复现并重新处置，不能以健康检查或配置文本替代。
+- 请求动作：DEV-002 需针对 PR #61 新完整 HEAD 复审；在批准、DEV-001 最终集成检查及项目负责人绑定授权前，PR 保持 Draft，不申请 Merge 授权、不合并，Stage 6 仍不得出具最终通过结论。
+
 ## Stage 5 最终集成 Gate 请求（2026-07-27）
 
 - 执行者：DEV-001。

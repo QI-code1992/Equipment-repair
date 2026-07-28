@@ -18,6 +18,24 @@ function Wait-HttpsHealth([string]$Url) {
     throw "HTTPS health endpoint did not become ready"
 }
 
+function Assert-StaticAssetContentTypes([string]$Url) {
+    $index = & curl.exe -k --fail --silent --show-error "$Url/"
+    if ($LASTEXITCODE -ne 0) { throw "HTTPS frontend entry could not be fetched" }
+    $assets = @(
+        @{ Pattern = '<script[^>]+src="(?<path>/assets/[^"?]+\.js)"'; ContentType = 'application/javascript' },
+        @{ Pattern = '<link[^>]+href="(?<path>/assets/[^"?]+\.css)"'; ContentType = 'text/css' }
+    )
+    foreach ($asset in $assets) {
+        $match = [regex]::Match(($index -join "`n"), $asset.Pattern)
+        if (!$match.Success) { throw "Frontend entry does not reference the expected static asset" }
+        $headers = & curl.exe -k --fail --silent --show-error -I "$Url$($match.Groups['path'].Value)"
+        if ($LASTEXITCODE -ne 0) { throw "Frontend static asset could not be fetched" }
+        if (($headers -join "`n") -notmatch "(?im)^Content-Type:\s*$([regex]::Escape($asset.ContentType))(?:;|\s|$)") {
+            throw "Frontend static asset must be served as $($asset.ContentType)"
+        }
+    }
+}
+
 function Initialize-MinioBucket([string[]]$Compose, [string]$EnvironmentFile) {
     $values = @{}
     Get-Content -LiteralPath $EnvironmentFile | Where-Object { $_ -match '^[A-Za-z_][A-Za-z0-9_]*=' } | ForEach-Object {
@@ -57,6 +75,7 @@ $ports = docker inspect $nginx --format '{{json .HostConfig.PortBindings}}'
 if ($ports -notmatch '127.0.0.1') { throw "Nginx is not bound to loopback" }
 
 Wait-HttpsHealth $LiveHttpsUrl
+Assert-StaticAssetContentTypes $LiveHttpsUrl
 
 & docker @compose exec -T api python -m app.modules.knowledge.ragflow_probe
 if ($LASTEXITCODE -ne 0) { throw "RAGFlow probe failed" }
