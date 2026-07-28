@@ -2,14 +2,17 @@
 
 ### Gate-Candidate-Stage-005: Stage 5 -> Stage 6
 
-- 状态：等待项目负责人批准；这不是批准，也不授权 Stage 6 工作。
+- 状态：Approved。
 - 请求人：DEV-001
+- 批准人：项目负责人
+- 批准日期：2026-07-27
 - 当前阶段：Stage 5 — Development Implementation
 - 下一阶段：Stage 6 — Independent Testing and Quality Validation
 - 候选集成 HEAD：`8a5e6ced473ea6219666d858ce5b751e61362871`
 - 已审阅材料：`04-architecture-plan/DEVELOPMENT_TASK_BOOK.md`、`05-development/CHECKPOINTS.md`、`05-development/DEV_NOTES.md`、`06-testing/TEST_REPORT.md`、`06-testing/TEST_PLAN.md`、`workflow/state.json`、`workflow/DEV_TO_PM_HANDOFF.md`。
 - 已审阅证据：全部 Stage 5 任务关闭记录与 FCP；`codex/stage-05-integration` 的已合并 PR；全量后端和前端回归；真实 RAGFlow Agent 成功与受控 `UNAVAILABLE` 降级；HTTPS、重启恢复、备份与隔离恢复。
-- 请求决定：项目负责人必须对该精确 HEAD 明确批准或拒绝 Stage 5 -> Stage 6 Gate。在审批记录为 Approved 前，Stage 6 正式测试、Stage 7 验收、生产发布和直接合入 `main` 均继续禁止。
+- 决定：项目负责人明确批准候选集成 HEAD `8a5e6ced473ea6219666d858ce5b751e61362871` 通过 Stage 5 -> Stage 6 Gate，允许开始 Stage 6 独立测试。
+- 边界：该批准仅授权以该候选基线开展 Stage 6 独立测试；不批准 Stage 7 验收、生产发布或直接合入 `main`。若测试基线发生实质变更，必须按变更控制重新评估受影响 Gate。
 - 残余风险：外部 RAGFlow 在成功重跑前曾间歇性不可用；前端依赖审计报告 2 项既有 high-severity 发现；Stage 6 必须独立复核验收标准并记录自身证据。
 
 No formal stage transition approval was found during the 2026-07-14 takeover audit.
