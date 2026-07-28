@@ -55,6 +55,24 @@ def test_operation_guidance_failure_keeps_manual_path_available():
     assert session.evidence == ()
 
 
+def test_operation_guidance_retries_one_transient_retrieval_failure():
+    calls = 0
+
+    def retrieve(_: str):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise TimeoutError("temporary")
+        return [{"citation": "chunk", "text": "retry succeeded"}]
+
+    session = OperationGuidanceAgent(retrieve).start(
+        GuidanceContext("eq-1", "X1", "pressure", "warm-up")
+    )
+
+    assert session.state is GuidanceState.QUESTIONING
+    assert calls == 3
+
+
 def test_operation_guidance_api_uses_task005_retrieval_boundary(client, monkeypatch):
     client.app.state.knowledge_adapter = object()
     _, token = create_user_token(

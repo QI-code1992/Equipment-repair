@@ -11,6 +11,7 @@ class GuidanceState(StrEnum):
 
 
 MAX_DIRECTIONAL_RETRIEVALS = 2
+MAX_RETRIEVAL_ATTEMPTS = 2
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,10 +53,7 @@ class OperationGuidanceAgent:
         references: list[GuidanceReference] = []
         try:
             for query in queries[:MAX_DIRECTIONAL_RETRIEVALS]:
-                references.extend(
-                    GuidanceReference(str(item["citation"]), str(item["text"]))
-                    for item in self._retrieve(query)
-                )
+                references.extend(self._references(query))
         except (ConnectionError, RagflowError, TimeoutError):
             return GuidanceSession(
                 context=context,
@@ -72,6 +70,18 @@ class OperationGuidanceAgent:
             retrieval_count=min(len(queries), MAX_DIRECTIONAL_RETRIEVALS),
             manual_fallback=True,
         )
+
+    def _references(self, query: str) -> list[GuidanceReference]:
+        for attempt in range(MAX_RETRIEVAL_ATTEMPTS):
+            try:
+                return [
+                    GuidanceReference(str(item["citation"]), str(item["text"]))
+                    for item in self._retrieve(query)
+                ]
+            except (ConnectionError, RagflowError, TimeoutError):
+                if attempt + 1 == MAX_RETRIEVAL_ATTEMPTS:
+                    raise
+        raise RuntimeError("unreachable")
 
     def answer(self, session: GuidanceSession, answer: str) -> GuidanceSession:
         if session.state is GuidanceState.UNAVAILABLE:
