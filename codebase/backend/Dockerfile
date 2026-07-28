@@ -17,3 +17,6 @@ RUN pip install --no-cache-dir --group dev .
 COPY tests ./tests
 
 FROM runtime AS production
+
+RUN useradd --system --create-home appuser
+USER appuser

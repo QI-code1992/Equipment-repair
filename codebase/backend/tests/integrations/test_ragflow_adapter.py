@@ -5,6 +5,13 @@ from app.integrations.ragflow.adapter import (
     RagflowAdapter,
     RagflowError,
 )
+from app.integrations.ragflow.transport import UrllibRagflowTransport
+
+
+@pytest.mark.parametrize("base_url", ["file:///tmp/data", "ftp://ragflow", "not-a-url"])
+def test_ragflow_transport_rejects_non_http_base_url(base_url: str) -> None:
+    with pytest.raises(ValueError, match="valid HTTP RAGFlow base URL"):
+        UrllibRagflowTransport(base_url=base_url, api_key="test-key", timeout_seconds=2.0)
 
 
 class FakeTransport:

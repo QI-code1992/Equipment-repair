@@ -2,6 +2,13 @@
 
 - 状态：生产验证受阻
 
+## Stage 6 静态风险处置：GHSA-qwww-vcr4-c8h2（2026-07-28）
+
+- 依赖告警：Trivy/NPM 报告 `react-router-dom` 间接依赖 `react-router` 的 HIGH `GHSA-qwww-vcr4-c8h2`。公告所称修复版本 `8.3.0` 当前不存在；npm 可用的最新稳定版为 `7.18.1`，不得伪造升级结论。
+- 可达性证据：正式前端由 Vite 启动，入口使用 `BrowserRouter`、`Routes` 与 `Route`；仓库未使用 React Router RSC、SSR、route `action`、`loader` 或服务端 React Router。
+- 项目负责人风险处置：接受该公告在当前 Vite BrowserRouter SPA 架构下不适用；不得引入 React Router RSC、SSR、route action/loader 或服务端 React Router。若任一条件变化，必须重新评估风险并升级依赖。
+- 回归：`06-testing/tests/react-router-rsc-risk.test.js` 断言上述架构边界。
+
 ## TASK-011 合并后最终验证与治理收尾（2026-07-27）
 
 - 合并基准：`b1e4ea6c409946667e22e4bff427c4dccaa86f22`，父提交为 `22f619f…` 与授权源 HEAD `f3150a27441b0e8e4308cdcc7a06a5357ca702e7`；PR #54 已合并至 `codex/stage-05-integration`。
