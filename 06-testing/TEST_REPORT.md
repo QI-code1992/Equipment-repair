@@ -1,6 +1,23 @@
 # 测试报告
 
-- 状态：生产验证受阻
+- 状态：Stage 6 独立测试进行中；静态全局审查完成，运行态验证尚未执行
+
+## Stage 6 静态全局复扫（2026-07-28）
+
+- 基线：`codex/stage-05-integration`，Merge Commit `20dde0449f5fb4aadb99e0c008fe0f751b8b5b63`；该提交的双亲为 `138fc8858b19ab84a58816455c490099db53dbe8` 与经授权修复 HEAD `4f88415c02644e69ecf5ffe277210330158f1e14`。
+- 执行边界：仅执行静态工具和 Node 静态用例；未启动 Docker、RAGFlow、数据库、浏览器 E2E 或外部模型。
+- 静态用例：全部 `06-testing/tests/*.test.js` 通过（15 项，含 React Router RSC 风险边界用例）。
+- CodeQL 2.26.1：Python 安全与质量套件扫描 136 个 Python 文件，62 项均为未使用导入/迁移元数据、类型注释识别或控制流保守分析等质量提示；未发现新的生产安全规则结果。JavaScript/TypeScript 安全扩展套件扫描 34 个文件，19 项均位于 `03-ui-prototype/`，其中 18 项为原型页面对本地表单/文件名的 DOM HTML 重渲染路径，1 项为无效替换表达式；正式 `codebase/frontend/` 无 CodeQL 安全命中。
+- Semgrep 1.171.0：扫描 238 个 Git 跟踪文件、520 条规则，13 项。生产目录中的 Docker root 告警不适用：最终 `production` stage 已创建并使用 `appuser`，Trivy 也未报 root 运行。RAGFlow `urllib` 告警已由两处 HTTP(S)+hostname 校验和受控部署配置边界缓解；Nginx 动态上游为固定 `api:8000`，`/api/` 与 SSE 是受后端 Bearer/权限保护的公开业务入口，不应加 `internal`。其余命中均在 Stage 3 原型，见下方残余风险。
+- Gitleaks 8.30.1：当前工作树无泄露；完整历史扫描 362 个提交，有两项 `curl-auth-user` 命中，均为 `ELASTIC_PASSWORD` 环境变量引用，不是硬编码密码或 Token，报告中未保留秘密值。
+- Trivy 0.72.0：无秘密；依赖保留 `GHSA-qwww-vcr4-c8h2`（`react-router` 7.18.1，HIGH），适用性按项目负责人已批准的 BrowserRouter SPA 风险处置执行。Dockerfile 仅有 LOW `DS-0026`（未声明 `HEALTHCHECK`）；当前健康证据由 Compose/运行态 `/healthz` 演练提供，仍建议后续将镜像级健康检查纳入独立低优先级加固，不阻断本轮静态复扫。
+
+### 静态审查残余风险与结论
+
+- P2 / 原型路径边界：`03-ui-prototype/prototype/local-server-4209.js` 是仅绑定 `127.0.0.1` 的 Stage 3 本地预览服务器；路径已 `normalize` 并拒绝离开根目录，但 `startsWith(root)` 对同前缀兄弟目录不是稳健边界。不得将该服务器用于共享或生产部署；若需要发布原型，必须回到 Stage 3，改用相对路径校验并重新评审。
+- P2 / 原型供应链：两个 Stage 3 HTML 页面通过 CDN 加载资源但未声明 SRI。正式前端构建不使用这些页面；若原型需要对外托管，必须在 Stage 3 处理 SRI 或本地锁定资源并重新评审。
+- 不把上述原型风险或 Trivy LOW 建议写作已关闭；它们不构成当前正式 `codebase/` 的 Critical/Important 阻断。PR #59 的 Docker 非 root、TLS 限制、RAGFlow URL 约束和错误信息脱敏在当前合并基线仍有效。
+- 结论：静态全局复扫已完成，生产代码未发现新的 Critical/Important 静态安全阻断；但 Stage 6 整体仍未通过，必须继续完成真实 RAGFlow、容器/依赖运行验证、浏览器 E2E 和最终独立测试报告。
 
 ## Stage 6 静态风险处置：GHSA-qwww-vcr4-c8h2（2026-07-28）
 
