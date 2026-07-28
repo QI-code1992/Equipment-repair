@@ -1,0 +1,60 @@
+{
+  "scenario": "attachment",
+  "metadata": {
+    "sut_commit": "931df829877305d6ee51a3cef871fe7a9735b9e2",
+    "harness_commit": "93df55f6b124d00f140bd11cc303f5682f8c9c1b",
+    "environment": "isolated-compose-ragflow-success-18450",
+    "fixture": "attachment:stage6-performance.txt;clamav:minio:configured-bucket"
+  },
+  "max_concurrency": 10,
+  "duration_seconds_total": 300,
+  "duration_seconds_per_level": 75,
+  "p95_limit_ms": 1000,
+  "levels": [
+    {
+      "concurrency": 1,
+      "requests": 2423,
+      "unexpected_errors": 0,
+      "agent_states": {},
+      "responses_with_references": 0,
+      "responses_without_references": 0,
+      "p50_ms": 25.897199986502528,
+      "p95_ms": 47.87239996949211,
+      "pass": true
+    },
+    {
+      "concurrency": 2,
+      "requests": 3949,
+      "unexpected_errors": 0,
+      "agent_states": {},
+      "responses_with_references": 0,
+      "responses_without_references": 0,
+      "p50_ms": 35.54710000753403,
+      "p95_ms": 55.878000042866915,
+      "pass": true
+    },
+    {
+      "concurrency": 5,
+      "requests": 4510,
+      "unexpected_errors": 0,
+      "agent_states": {},
+      "responses_with_references": 0,
+      "responses_without_references": 0,
+      "p50_ms": 81.46020001731813,
+      "p95_ms": 110.57820002315566,
+      "pass": true
+    },
+    {
+      "concurrency": 10,
+      "requests": 4351,
+      "unexpected_errors": 0,
+      "agent_states": {},
+      "responses_with_references": 0,
+      "responses_without_references": 0,
+      "p50_ms": 168.7177999992855,
+      "p95_ms": 225.27540003648028,
+      "pass": true
+    }
+  ],
+  "pass": true
+}

@@ -1,0 +1,60 @@
+{
+  "scenario": "auth",
+  "metadata": {
+    "sut_commit": "931df829877305d6ee51a3cef871fe7a9735b9e2",
+    "harness_commit": "93df55f6b124d00f140bd11cc303f5682f8c9c1b",
+    "environment": "isolated-compose-ragflow-success-18450",
+    "fixture": "identity:stage6-final-user;no-write-auth-me"
+  },
+  "max_concurrency": 10,
+  "duration_seconds_total": 300,
+  "duration_seconds_per_level": 75,
+  "p95_limit_ms": 1000,
+  "levels": [
+    {
+      "concurrency": 1,
+      "requests": 4109,
+      "unexpected_errors": 0,
+      "agent_states": {},
+      "responses_with_references": 0,
+      "responses_without_references": 0,
+      "p50_ms": 12.325099960435182,
+      "p95_ms": 32.69699995871633,
+      "pass": true
+    },
+    {
+      "concurrency": 2,
+      "requests": 8726,
+      "unexpected_errors": 0,
+      "agent_states": {},
+      "responses_with_references": 0,
+      "responses_without_references": 0,
+      "p50_ms": 12.53740000538528,
+      "p95_ms": 33.10689999489114,
+      "pass": true
+    },
+    {
+      "concurrency": 5,
+      "requests": 15361,
+      "unexpected_errors": 0,
+      "agent_states": {},
+      "responses_with_references": 0,
+      "responses_without_references": 0,
+      "p50_ms": 22.765300003811717,
+      "p95_ms": 41.25419998308644,
+      "pass": true
+    },
+    {
+      "concurrency": 10,
+      "requests": 15742,
+      "unexpected_errors": 0,
+      "agent_states": {},
+      "responses_with_references": 0,
+      "responses_without_references": 0,
+      "p50_ms": 45.45580002013594,
+      "p95_ms": 71.62679999601096,
+      "pass": true
+    }
+  ],
+  "pass": true
+}

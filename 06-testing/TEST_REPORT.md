@@ -2,15 +2,16 @@
 
 - 状态：Stage 6 独立测试进行中；静态全局审查与 PR #61 合并后的核心运行态验证已完成。性能边界、最终独立质量结论、Stage 7 验收及生产发布均未完成或获批。
 
-## Stage 6 运行态性能边界与降级复验（2026-07-28）
+## Stage 6 运行态性能边界与降级复验（2026-07-28，候选 `931df829877305d6ee51a3cef871fe7a9735b9e2`）
 
-- 代码候选：`f6a188dcd3f4751e1d7a2dea54c51e6b4c1598ad`，基于集成基线 `d4fa5eefaa9ebfb9ed768f199ca5df2b0e2d397b`。本候选仅为操作指引检索增加一次瞬态 `ConnectionError`、`RagflowError` 或 `TimeoutError` 重试，并新增不引入生产依赖的标准库压测工具与单测。
+- SUT：`931df829877305d6ee51a3cef871fe7a9735b9e2`；压测工具：`93df55f6b124d00f140bd11cc303f5682f8c9c1b`。操作指引将设备型号、症状和描述合并为一次定向检索；实际检索总数不超过两次，避免以重试突破规格上限。
 - 环境：Windows Docker Desktop 的两个隔离 Compose 项目。成功路径通过 `https://127.0.0.1:18450` 调用专用 RAGFlow 数据集；故障路径通过 `https://127.0.0.1:18451`，仅将该项目的 `RAGFLOW_BASE_URL` 指向 `host.docker.internal:1`。两者均使用专用 PostgreSQL、MinIO、ClamAV、临时用户和本地自签名 TLS，未连接生产资源。`--insecure-tls` 仅用于该本机自签名测试环境。
-- 并发与阈值：每个业务场景总计 300 秒，依次运行 1、2、5、10 并发，最大并发严格限制为 10；认证与附件 P95 阈值 1 秒，Agent P95 阈值 15 秒。结果文件位于 `06-testing/performance/`，不含令牌、口令或密钥。
-- 认证：`results-auth.json` 记录 41,730 次请求、零意外错误；各档 P95 为 34.60、34.40、44.75、72.96 ms，全部通过。
-- 附件：初次执行发现隔离 MinIO 未创建已配置桶，接口受控返回 `ATTACHMENT_STORAGE_UNAVAILABLE`；仅在隔离环境创建该配置桶后重跑。`results-attachment-retest.json` 记录全部通过，P95 为 47.56、57.18、110.44、210.36 ms，实际覆盖 HTTPS、ClamAV 与 MinIO。
-- 真实 RAGFlow 成功路径：专用数据集探针、真实文档引用和 `POST /api/agent/operation-guidance` 均执行。`results-agent-success-final.json` 中 1/2/5/10 并发均为 `QUESTIONING`、零意外错误，P95 为 2,568、3,266、2,971、14,743 ms。此前 10 并发下偶发瞬态检索连接失败，已由本候选的一次重试修复；重试后的 10 并发诊断为 198/198 成功。
-- 受控降级路径：首次两次压测分别因请求体字段不符合正式路由契约、以及故障数据集没有 `READY` 文档而未触发远端检索；两次均标记为无效证据，不计入结果。补齐仅用于隔离故障库的 `READY` 映射后，`results-agent-unavailable-final.json` 记录 21,789 次真实 HTTPS 路由请求全部为 `UNAVAILABLE`、零意外错误，P95 为 44.04、46.38、73.40、153.07 ms；该路径未返回伪造引用。
+- 并发与阈值：每个业务场景总计 300 秒，依次运行 1、2、5、10 并发，最大并发为 10；认证与附件 P95 阈值 1 秒，两个 Agent 场景 P95 阈值 15 秒。每份结果 JSON 均记录 SUT、工具、环境和夹具，不含令牌、口令或密钥。
+- 认证：`results-auth-v2.json` 为 43,938 次、零意外错误，P95 为 32.70、33.11、41.25、71.63 ms。
+- 附件：`results-attachment-v2.json` 为 15,233 次、零意外错误，P95 为 47.87、55.88、110.58、225.28 ms，覆盖 HTTPS、ClamAV 和 MinIO。
+- 真实 RAGFlow 成功路径：`results-agent-success-final-v2.json` 为 1,204 次，均为 `QUESTIONING` 且每次都有非空引用，零意外错误，P95 为 2,021、1,928、1,372、2,219 ms。
+- 受控降级路径：`results-agent-unavailable-v2.json` 为 22,422 次，均为 `UNAVAILABLE`、每次零引用，零意外错误，P95 为 46.79、44.82、71.04、148.77 ms。
+- 历史结果处置：先前的 `f6a188…` / `6725bb…` 结果存在阈值、夹具或候选 SHA 追溯不足，均不作为本段通过证据。
 - 备份恢复：首次包含 15,525 个附件压测遗留对象的恢复耗时约 194.7 秒，已保留为对象数量边界发现，不能用作受控性能基线。随后在新的隔离项目中创建 1 个 API 实际写入的附件对象并重测：备份 3.578 秒、随机恢复项目 `equipment-task011-restore-bkp9d7d41` 恢复 10.584 秒，两个脚本均退出码 0。恢复期间固定运行 10 并发认证只读请求 60 秒，`results-backup-restore-readonly.json` 记录 12,443 次请求、零意外错误、P50 43.29 ms、P95 76.64 ms，满足恢复不超过 180 秒和只读 P95 不超过 2 秒的受控门槛。
 - 当前候选静态复核：Gitleaks 工作树扫描、Semgrep、Trivy（HIGH/CRITICAL）与 CodeQL 2.26.1 Python/JavaScript 安全套件均已执行；CodeQL 两份 SARIF 均无结果。Trivy 仍仅报告已处置的 `react-router` `GHSA-qwww-vcr4-c8h2`，不得将该历史风险处置改写为依赖已升级。
 - 当前结论：认证、附件、真实 RAGFlow 成功、真实 `UNAVAILABLE` 降级、重启后的容器运行态，以及受控备份恢复/10 并发只读组合验证均通过。本报告仍不自行作 Stage 6 整体通过结论，也不放行 Stage 7；须经 DEV-002 对当前 PR 候选审核，并由 DEV-002 单独作出 Stage 6 Gate 决定。

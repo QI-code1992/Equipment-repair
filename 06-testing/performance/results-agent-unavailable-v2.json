@@ -1,0 +1,68 @@
+{
+  "scenario": "agent-unavailable",
+  "metadata": {
+    "sut_commit": "931df829877305d6ee51a3cef871fe7a9735b9e2",
+    "harness_commit": "93df55f6b124d00f140bd11cc303f5682f8c9c1b",
+    "environment": "isolated-compose-ragflow-unavailable-18451",
+    "fixture": "local-dataset:98e39c49-9ae5-4e1a-a16c-5b192a3f6c2c;ready-document:stage6-fault-document;ragflow-base:unreachable"
+  },
+  "max_concurrency": 10,
+  "duration_seconds_total": 300,
+  "duration_seconds_per_level": 75,
+  "p95_limit_ms": 15000,
+  "levels": [
+    {
+      "concurrency": 1,
+      "requests": 2726,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "UNAVAILABLE": 2726
+      },
+      "responses_with_references": 0,
+      "responses_without_references": 2726,
+      "p50_ms": 24.02740000979975,
+      "p95_ms": 46.785199956502765,
+      "pass": true
+    },
+    {
+      "concurrency": 2,
+      "requests": 5449,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "UNAVAILABLE": 5449
+      },
+      "responses_with_references": 0,
+      "responses_without_references": 5449,
+      "p50_ms": 23.897900013253093,
+      "p95_ms": 44.81980000855401,
+      "pass": true
+    },
+    {
+      "concurrency": 5,
+      "requests": 7584,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "UNAVAILABLE": 7584
+      },
+      "responses_with_references": 0,
+      "responses_without_references": 7584,
+      "p50_ms": 47.70639998605475,
+      "p95_ms": 71.04200002504513,
+      "pass": true
+    },
+    {
+      "concurrency": 10,
+      "requests": 6663,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "UNAVAILABLE": 6663
+      },
+      "responses_with_references": 0,
+      "responses_without_references": 6663,
+      "p50_ms": 109.1213000472635,
+      "p95_ms": 148.76880001975223,
+      "pass": true
+    }
+  ],
+  "pass": true
+}

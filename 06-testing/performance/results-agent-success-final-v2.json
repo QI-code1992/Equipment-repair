@@ -1,0 +1,68 @@
+{
+  "scenario": "agent-success",
+  "metadata": {
+    "sut_commit": "931df829877305d6ee51a3cef871fe7a9735b9e2",
+    "harness_commit": "93df55f6b124d00f140bd11cc303f5682f8c9c1b",
+    "environment": "isolated-compose-ragflow-success-18450",
+    "fixture": "ragflow-dataset:811d16248a5411f1826e69e4863c3812;document:ba9159c48a5411f1826e69e4863c3812"
+  },
+  "max_concurrency": 10,
+  "duration_seconds_total": 300,
+  "duration_seconds_per_level": 75,
+  "p95_limit_ms": 15000,
+  "levels": [
+    {
+      "concurrency": 1,
+      "requests": 78,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "QUESTIONING": 78
+      },
+      "responses_with_references": 78,
+      "responses_without_references": 0,
+      "p50_ms": 847.7039000135846,
+      "p95_ms": 2021.065000037197,
+      "pass": true
+    },
+    {
+      "concurrency": 2,
+      "requests": 122,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "QUESTIONING": 122
+      },
+      "responses_with_references": 122,
+      "responses_without_references": 0,
+      "p50_ms": 848.7748000188731,
+      "p95_ms": 1928.1851000268944,
+      "pass": true
+    },
+    {
+      "concurrency": 5,
+      "requests": 385,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "QUESTIONING": 385
+      },
+      "responses_with_references": 385,
+      "responses_without_references": 0,
+      "p50_ms": 910.9994999598712,
+      "p95_ms": 1372.4407000117935,
+      "pass": true
+    },
+    {
+      "concurrency": 10,
+      "requests": 619,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "QUESTIONING": 619
+      },
+      "responses_with_references": 619,
+      "responses_without_references": 0,
+      "p50_ms": 1031.202900048811,
+      "p95_ms": 2219.0759999793954,
+      "pass": true
+    }
+  ],
+  "pass": true
+}
