@@ -1,0 +1,42 @@
+{
+  "scenario": "attachment",
+  "max_concurrency": 10,
+  "duration_seconds_total": 300,
+  "duration_seconds_per_level": 75,
+  "p95_limit_ms": 5000,
+  "levels": [
+    {
+      "concurrency": 1,
+      "requests": 2384,
+      "unexpected_errors": 0,
+      "p50_ms": 28.949500003363937,
+      "p95_ms": 47.55840002326295,
+      "pass": true
+    },
+    {
+      "concurrency": 2,
+      "requests": 3927,
+      "unexpected_errors": 0,
+      "p50_ms": 35.77680001035333,
+      "p95_ms": 57.18280002474785,
+      "pass": true
+    },
+    {
+      "concurrency": 5,
+      "requests": 4558,
+      "unexpected_errors": 0,
+      "p50_ms": 80.31789999222383,
+      "p95_ms": 110.44289998244494,
+      "pass": true
+    },
+    {
+      "concurrency": 10,
+      "requests": 4655,
+      "unexpected_errors": 0,
+      "p50_ms": 158.48189999815077,
+      "p95_ms": 210.35860001575202,
+      "pass": true
+    }
+  ],
+  "pass": true
+}

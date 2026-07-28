@@ -2,6 +2,19 @@
 
 - 状态：Stage 6 独立测试进行中；静态全局审查与 PR #61 合并后的核心运行态验证已完成。性能边界、最终独立质量结论、Stage 7 验收及生产发布均未完成或获批。
 
+## Stage 6 运行态性能边界与降级复验（2026-07-28）
+
+- 代码候选：`f6a188dcd3f4751e1d7a2dea54c51e6b4c1598ad`，基于集成基线 `d4fa5eefaa9ebfb9ed768f199ca5df2b0e2d397b`。本候选仅为操作指引检索增加一次瞬态 `ConnectionError`、`RagflowError` 或 `TimeoutError` 重试，并新增不引入生产依赖的标准库压测工具与单测。
+- 环境：Windows Docker Desktop 的两个隔离 Compose 项目。成功路径通过 `https://127.0.0.1:18450` 调用专用 RAGFlow 数据集；故障路径通过 `https://127.0.0.1:18451`，仅将该项目的 `RAGFLOW_BASE_URL` 指向 `host.docker.internal:1`。两者均使用专用 PostgreSQL、MinIO、ClamAV、临时用户和本地自签名 TLS，未连接生产资源。`--insecure-tls` 仅用于该本机自签名测试环境。
+- 并发与阈值：每个业务场景总计 300 秒，依次运行 1、2、5、10 并发，最大并发严格限制为 10；认证与附件 P95 阈值 1 秒，Agent P95 阈值 15 秒。结果文件位于 `06-testing/performance/`，不含令牌、口令或密钥。
+- 认证：`results-auth.json` 记录 41,730 次请求、零意外错误；各档 P95 为 34.60、34.40、44.75、72.96 ms，全部通过。
+- 附件：初次执行发现隔离 MinIO 未创建已配置桶，接口受控返回 `ATTACHMENT_STORAGE_UNAVAILABLE`；仅在隔离环境创建该配置桶后重跑。`results-attachment-retest.json` 记录全部通过，P95 为 47.56、57.18、110.44、210.36 ms，实际覆盖 HTTPS、ClamAV 与 MinIO。
+- 真实 RAGFlow 成功路径：专用数据集探针、真实文档引用和 `POST /api/agent/operation-guidance` 均执行。`results-agent-success-final.json` 中 1/2/5/10 并发均为 `QUESTIONING`、零意外错误，P95 为 2,568、3,266、2,971、14,743 ms。此前 10 并发下偶发瞬态检索连接失败，已由本候选的一次重试修复；重试后的 10 并发诊断为 198/198 成功。
+- 受控降级路径：首次两次压测分别因请求体字段不符合正式路由契约、以及故障数据集没有 `READY` 文档而未触发远端检索；两次均标记为无效证据，不计入结果。补齐仅用于隔离故障库的 `READY` 映射后，`results-agent-unavailable-final.json` 记录 21,789 次真实 HTTPS 路由请求全部为 `UNAVAILABLE`、零意外错误，P95 为 44.04、46.38、73.40、153.07 ms；该路径未返回伪造引用。
+- 备份恢复：隔离备份与随机恢复项目已功能性成功，恢复命令退出码为 0；但一次包含大量附件压测对象的恢复耗时约 194.7 秒，超过已约定的 180 秒门槛，且尚未在备份/恢复同时施加 10 个只读请求。因此此项不判定通过，详见 `DEFECTS.md` 的 Stage 6 开放项。
+- 当前候选静态复核：Gitleaks 工作树扫描、Semgrep、Trivy（HIGH/CRITICAL）与 CodeQL 2.26.1 Python/JavaScript 安全套件均已执行；CodeQL 两份 SARIF 均无结果。Trivy 仍仅报告已处置的 `react-router` `GHSA-qwww-vcr4-c8h2`，不得将该历史风险处置改写为依赖已升级。
+- 当前结论：认证、附件、真实 RAGFlow 成功、真实 `UNAVAILABLE` 降级和重启后的容器运行态证据均通过；备份恢复性能/并发干扰验证仍未完成，故本报告不作 Stage 6 整体通过结论，也不放行 Stage 7。
+
 ## Stage 6 PR #61 合并后核心运行态验证（2026-07-28）
 
 - 合并基线：`codex/stage-05-integration` 的 Merge Commit `144ad1ac5802dcbe53a55a426f46ce9bef8eba0f`；双亲为此前集成 HEAD `e32478e20c0f27558356d4f0e7d5a6d4c8eba477` 与获授权 PR #61 HEAD `b73311cfd3beebe048c5ef64320886ccdea363e0`。
