@@ -1,5 +1,14 @@
 # 开发到产品交接
 
+## Stage 6 PR #61：Nginx 静态资源 MIME 修复交接（2026-07-28）
+
+- 范围与基线：修复源候选为 PR #61 / HEAD `92abc483cf0309329698654781dd6611af683169`，目标 `codex/stage-05-integration`。本轮只修改 `codebase/infra/nginx/default.conf`、`codebase/infra/tests/verify-nginx-contract.ps1` 与 `codebase/infra/scripts/verify-platform-readiness.ps1`；不修改业务 API、身份认证、数据迁移、依赖、RAGFlow 配置或运行数据。
+- 根因与风险：Nginx `http` 块未加载 `/etc/nginx/mime.types`，导致生产构建的 `.js` 与 `.css` 经 HTTPS 返回 `text/plain`。浏览器会拒绝模块脚本，造成前端空白；因此该项为 Stage 6 P1，未修复前不得给出 Stage 6 通过结论。
+- 修复与回归：加载官方 MIME 类型表；静态配置契约要求该指令；platform-readiness 在真实 HTTPS 入口中解析构建 `index.html` 的哈希资源，并分别断言 JavaScript 为 `application/javascript`、CSS 为 `text/css`。
+- 验证与边界：修复前真实 HTTPS 响应已复现两类资源均为 `text/plain` 且浏览器拒绝模块；修复后必须重新执行前端测试/构建、真实浏览器未认证跳转与登录受保护路由、完整 `verify-platform-readiness.ps1`。临时浏览器用户、专用 RAGFlow 数据集、Docker 项目与备份目录均不得进入仓库。
+- 回退：若该修复引起静态资源交付异常，回退 PR #61 的 MIME 配置提交即可恢复合入前配置；随后仍须以真实 HTTPS 响应头复现并重新处置，不能以健康检查或配置文本替代。
+- 请求动作：DEV-002 需针对 PR #61 新完整 HEAD 复审；在批准、DEV-001 最终集成检查及项目负责人绑定授权前，PR 保持 Draft，不申请 Merge 授权、不合并，Stage 6 仍不得出具最终通过结论。
+
 ## Stage 5 最终集成 Gate 请求（2026-07-27）
 
 - 执行者：DEV-001。
