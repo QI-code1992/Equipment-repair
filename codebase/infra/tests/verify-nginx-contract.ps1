@@ -39,6 +39,9 @@ foreach ($required in @("root /usr/share/nginx/html", 'try_files $uri $uri/ /ind
         throw "Nginx frontend contract missing: $required"
     }
 }
+if ($nginxConfig -notmatch [regex]::Escape("include /etc/nginx/mime.types")) {
+    throw "Nginx frontend contract must load MIME types"
+}
 if (@($nginx.volumes | Where-Object { $_.target -eq "/usr/share/nginx/html" -and $_.read_only }).Count -ne 1) {
     throw "Nginx must mount the frontend production build"
 }
