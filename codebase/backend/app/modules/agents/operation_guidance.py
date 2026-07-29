@@ -23,6 +23,8 @@ class GuidanceContext:
 
 @dataclass(frozen=True, slots=True)
 class GuidanceReference:
+    document_id: str
+    chunk_id: str
     citation: str
     text: str
 
@@ -80,7 +82,12 @@ class OperationGuidanceAgent:
 
     def _references(self, query: str) -> list[GuidanceReference]:
         return [
-            GuidanceReference(str(item["citation"]), str(item["text"]))
+            GuidanceReference(
+                str(item["document_id"]),
+                str(item["chunk_id"]),
+                str(item["citation"]),
+                str(item["text"]),
+            )
             for item in self._retrieve(query)
         ]
 

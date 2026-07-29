@@ -1,4 +1,5 @@
 import json
+import inspect
 import unittest
 from unittest.mock import patch
 
@@ -62,7 +63,8 @@ class PerformanceThresholdTests(unittest.TestCase):
         })):
             outcome = request_json(
                 base_url="https://example.test", token="token", scenario="agent-success",
-                agent_payload={}, expected_reference_text=None, insecure_tls=True,
+                agent_payload={}, expected_reference_text=None,
+                expected_document_id=None, expected_chunk_id=None, insecure_tls=True,
             )
 
         self.assertFalse(outcome.valid)
@@ -75,7 +77,8 @@ class PerformanceThresholdTests(unittest.TestCase):
         })):
             outcome = request_json(
                 base_url="https://example.test", token="token", scenario="agent-unavailable",
-                agent_payload={}, expected_reference_text=None, insecure_tls=True,
+                agent_payload={}, expected_reference_text=None,
+                expected_document_id=None, expected_chunk_id=None, insecure_tls=True,
             )
 
         self.assertFalse(outcome.valid)
@@ -93,6 +96,39 @@ class PerformanceThresholdTests(unittest.TestCase):
                 scenario="agent-success",
                 agent_payload={},
                 expected_reference_text="TASK005 hydraulic pressure guidance",
+                expected_document_id="fixture-document",
+                expected_chunk_id="fixture-chunk",
+                insecure_tls=True,
+            )
+
+        self.assertFalse(outcome.valid)
+        self.assertEqual(outcome.error, "agent_contract")
+
+    def test_agent_success_requires_a_fixture_document_and_chunk_pair(self) -> None:
+        parameters = inspect.signature(request_json).parameters
+
+        self.assertIn("expected_document_id", parameters)
+        self.assertIn("expected_chunk_id", parameters)
+
+    def test_agent_success_with_a_matching_marker_but_fabricated_fixture_ids_is_invalid(self) -> None:
+        with patch("stage6_performance.urlopen", return_value=_Response({
+            "state": "QUESTIONING",
+            "evidence": [{
+                "citation": "fixture-chunk",
+                "document_id": "fabricated-document",
+                "chunk_id": "fabricated-chunk",
+                "text": "TASK005 hydraulic pressure guidance",
+            }],
+            "manual_fallback": True,
+        })):
+            outcome = request_json(
+                base_url="https://example.test",
+                token="token",
+                scenario="agent-success",
+                agent_payload={},
+                expected_reference_text="TASK005 hydraulic pressure guidance",
+                expected_document_id="fixture-document",
+                expected_chunk_id="fixture-chunk",
                 insecure_tls=True,
             )
 

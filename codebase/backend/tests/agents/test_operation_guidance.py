@@ -19,7 +19,7 @@ def test_operation_guidance_prioritizes_page_capability_and_limits_directional_r
 
     def retrieve(query: str):
         calls.append(query)
-        return [{"citation": f"case-{len(calls)}", "text": "verified guidance"}]
+        return [{"document_id": "doc-1", "chunk_id": f"case-{len(calls)}", "citation": f"case-{len(calls)}", "text": "verified guidance"}]
 
     agent = OperationGuidanceAgent(retrieve)
     session = agent.start(
@@ -42,7 +42,7 @@ def test_operation_guidance_combines_context_into_one_directional_retrieval():
 
     def retrieve(query: str):
         calls.append(query)
-        return [{"citation": "chunk-1", "text": "verified guidance"}]
+        return [{"document_id": "doc-1", "chunk_id": "chunk-1", "citation": "chunk-1", "text": "verified guidance"}]
 
     session = OperationGuidanceAgent(retrieve).start(
         GuidanceContext("eq-1", "X1", "pressure loss", "after warm-up")
@@ -78,7 +78,7 @@ def test_operation_guidance_transient_retry_never_exceeds_two_total_retrievals()
         calls += 1
         if calls == 1:
             raise TimeoutError("temporary")
-        return [{"citation": "chunk", "text": "retry succeeded"}]
+        return [{"document_id": "doc-1", "chunk_id": "chunk", "citation": "chunk", "text": "retry succeeded"}]
 
     session = OperationGuidanceAgent(retrieve).start(
         GuidanceContext("eq-1", "X1", "pressure", "warm-up")
@@ -120,7 +120,12 @@ def test_operation_guidance_api_uses_task005_retrieval_boundary(client, monkeypa
 
     assert response.status_code == 200
     assert response.json()["evidence"] == [
-        {"citation": "chunk-1", "text": "inspect the pump"},
+        {
+            "document_id": "doc-1",
+            "chunk_id": "chunk-1",
+            "citation": "chunk-1",
+            "text": "inspect the pump",
+        },
     ]
 
 
@@ -188,18 +193,17 @@ def test_operation_guidance_api_uses_app_factory_ragflow_adapter(monkeypatch):
             )
             db.add(file_object)
             db.flush()
-            db.add(
-                KnowledgeDocument(
-                    dataset_id=dataset.id,
-                    object_storage_file_id=file_object.id,
-                    ragflow_document_id="remote-ready",
-                    filename="manual.txt",
-                    content_type="text/plain",
-                    size_bytes=12,
-                    status=KnowledgeDocumentStatus.READY,
-                    created_by=user_id,
-                )
+            document = KnowledgeDocument(
+                dataset_id=dataset.id,
+                object_storage_file_id=file_object.id,
+                ragflow_document_id="remote-ready",
+                filename="manual.txt",
+                content_type="text/plain",
+                size_bytes=12,
+                status=KnowledgeDocumentStatus.READY,
+                created_by=user_id,
             )
+            db.add(document)
             db.commit()
             dataset_id = dataset.id
 
@@ -218,6 +222,8 @@ def test_operation_guidance_api_uses_app_factory_ragflow_adapter(monkeypatch):
         assert response.status_code == 200
         assert response.json()["state"] == "QUESTIONING"
         assert response.json()["evidence"][0] == {
+            "document_id": document.id,
+            "chunk_id": "chunk-1",
             "citation": "chunk-1",
             "text": "inspect the pump filter",
         }

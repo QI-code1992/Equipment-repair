@@ -66,6 +66,8 @@ def multipart_body(filename: str, content: bytes) -> tuple[str, bytes]:
 def request_json(
     *, base_url: str, token: str, scenario: str, agent_payload: dict[str, object] | None,
     expected_reference_text: str | None,
+    expected_document_id: str | None,
+    expected_chunk_id: str | None,
     insecure_tls: bool = False,
 ) -> Outcome:
     headers = {"Authorization": f"Bearer {token}"}
@@ -112,18 +114,26 @@ def request_json(
                 and bool(item["citation"].strip())
                 and isinstance(item.get("text"), str)
                 and bool(item["text"].strip())
+                and isinstance(item.get("document_id"), str)
+                and bool(item["document_id"].strip())
+                and isinstance(item.get("chunk_id"), str)
+                and bool(item["chunk_id"].strip())
                 for item in evidence
             )
             fixture_reference_count = sum(
                 1
                 for item in evidence
                 if expected_reference_text is not None
+                and expected_document_id is not None
+                and expected_chunk_id is not None
                 and isinstance(item, dict)
                 and expected_reference_text in str(item.get("text", ""))
+                and item.get("document_id") == expected_document_id
+                and item.get("chunk_id") == expected_chunk_id
             )
             fixture_bound = (
-                expected_reference_text is None
-                or (bool(evidence) and fixture_reference_count == len(evidence))
+                bool(evidence)
+                and fixture_reference_count == len(evidence)
             )
             expected_state = "UNAVAILABLE" if scenario == "agent-unavailable" else "QUESTIONING"
             expected_evidence = (
@@ -159,6 +169,8 @@ def run_level(
     *, base_url: str, token: str, scenario: str, agent_payload: dict[str, object] | None,
     concurrency: int, duration_seconds: int, p95_limit_ms: int,
     expected_reference_text: str | None,
+    expected_document_id: str | None,
+    expected_chunk_id: str | None,
     insecure_tls: bool,
 ) -> dict[str, object]:
     deadline = time.monotonic() + duration_seconds
@@ -173,6 +185,8 @@ def run_level(
                     base_url=base_url, token=token, scenario=scenario,
                     agent_payload=agent_payload,
                     expected_reference_text=expected_reference_text,
+                    expected_document_id=expected_document_id,
+                    expected_chunk_id=expected_chunk_id,
                     insecure_tls=insecure_tls,
                 )
             except Exception as error:
@@ -210,7 +224,7 @@ def run_level(
         "responses_without_fixture_reference": sum(
             item.state is not None
             and item.reference_count > 0
-            and item.fixture_reference_count == 0
+            and item.fixture_reference_count != item.reference_count
             for item in outcomes
         ),
         "p50_ms": percentile(latencies, 50),
@@ -249,6 +263,8 @@ def main() -> None:
     parser.add_argument("--agent-payload-json")
     parser.add_argument("--agent-payload-base64")
     parser.add_argument("--expected-reference-text")
+    parser.add_argument("--expected-document-id")
+    parser.add_argument("--expected-chunk-id")
     parser.add_argument("--duration-seconds", type=int, default=300)
     parser.add_argument("--concurrency-levels", default="1,2,5,10")
     parser.add_argument("--p95-limit-ms", type=int, required=True)
@@ -259,6 +275,14 @@ def main() -> None:
     parser.add_argument("--insecure-tls", action="store_true")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
+    if args.scenario == "agent-success" and not all((
+        args.expected_reference_text,
+        args.expected_document_id,
+        args.expected_chunk_id,
+    )):
+        parser.error(
+            "agent-success requires --expected-reference-text, --expected-document-id, and --expected-chunk-id"
+        )
     payload_text = args.agent_payload_json
     if args.agent_payload_base64 is not None:
         payload_text = base64.b64decode(args.agent_payload_base64).decode("utf-8")
@@ -271,6 +295,8 @@ def main() -> None:
             agent_payload=payload, concurrency=level, duration_seconds=level_duration_seconds,
             p95_limit_ms=args.p95_limit_ms,
             expected_reference_text=args.expected_reference_text,
+            expected_document_id=args.expected_document_id,
+            expected_chunk_id=args.expected_chunk_id,
             insecure_tls=args.insecure_tls,
         )
         for level in levels
@@ -288,6 +314,14 @@ def main() -> None:
             **(
                 {"expected_reference_text": args.expected_reference_text}
                 if args.expected_reference_text is not None
+                else {}
+            ),
+            **(
+                {
+                    "expected_document_id": args.expected_document_id,
+                    "expected_chunk_id": args.expected_chunk_id,
+                }
+                if args.expected_document_id is not None and args.expected_chunk_id is not None
                 else {}
             ),
         },

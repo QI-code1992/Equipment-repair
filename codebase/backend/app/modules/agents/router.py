@@ -108,7 +108,12 @@ def _guidance_references(db: Session, request: Request, context: GuidanceContext
     if result.unavailable:
         raise ConnectionError("knowledge service unavailable")
     return [
-        {"citation": item.chunk_id, "text": item.content}
+        {
+            "document_id": item.business_document_id,
+            "chunk_id": item.chunk_id,
+            "citation": item.chunk_id,
+            "text": item.content,
+        }
         for item in result.citations
     ]
 
@@ -117,7 +122,15 @@ def _guidance_body(session: GuidanceSession) -> dict[str, Any]:
     return {
         "state": session.state.value,
         "question": session.question,
-        "evidence": [{"citation": item.citation, "text": item.text} for item in session.evidence],
+        "evidence": [
+            {
+                "document_id": item.document_id,
+                "chunk_id": item.chunk_id,
+                "citation": item.citation,
+                "text": item.text,
+            }
+            for item in session.evidence
+        ],
         "retrieval_count": session.retrieval_count,
         "manual_fallback": session.manual_fallback,
         "loading_seconds": session.loading_seconds,
