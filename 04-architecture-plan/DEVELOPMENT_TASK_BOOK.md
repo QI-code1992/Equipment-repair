@@ -6,6 +6,7 @@
 - 当前阶段：Stage 5 — TASK-002 已通过 PR #20 完成代码集成，并通过 PR #25 完成合并后治理收尾；TASK-003、TASK-004 可按本任务书启动，Stage 6 仍未获批准
 - 任务书版本：v1.4（CR-041：前端工程初始化前置；PR #28 已合入 `codex/stage-05-integration`）
 - 状态：v1.4 是当前有效 Stage 5 协作基线；CR-041 的 PR #28 Merge Commit 为 `7a44401bacbdc48d58f697a6b252449ecf44bb29`。该修订只调整前端工程初始化的任务边界与依赖，不追溯改写既有 PR、Review 或 Merge 历史
+- 适用范围更正：本任务书的 DEV-001/DEV-002 交叉审核、任务开发者自批/自合并禁止、单 Draft PR 与非作者 Merge 执行规则仅适用于 Stage 5 开发任务 PR，以及后续阶段发现缺陷后回流的 Stage 5 修复 PR。它们不默认适用于 Stage 6 独立测试、测试结论或纯治理 PR；Stage 6 纯治理 PR 按项目负责人精确 HEAD 确认、适用集成检查和明确 Merge 授权处理，除非已批准的 Stage 6 规则另有要求。
 - v1.0 候选提交：`8272a8ed161b787098660f61ebb86fa5ccada564`
 - v1.0 审批记录提交：`20261a80f01de8d18e18a2acf9c97e07087e04bc`
 - v1.0 批准人：项目负责人
@@ -78,6 +79,8 @@
 
 ## 4. 分支与协作规则
 
+本节是 Stage 5 协作规则，不用于约束 Stage 6 独立测试、测试结论或 Stage 6 纯治理 PR。Stage 6 若发现必须修改业务代码、测试代码、数据库、基础设施、部署或运行时配置的缺陷，须登记后回流为 Stage 5 修复任务；该修复重新适用本节，完成精确 HEAD 的审核和集成后才可恢复 Stage 6。Stage 6 纯治理 PR 仍须项目负责人确认精确 HEAD、适用集成检查和明确 Merge 授权，但除非已批准的 Stage 6 规则另有要求，不要求 DEV-001/DEV-002 交叉审核或非作者 Merge。
+
 - 集成分支：`codex/stage-05-integration`
 - 任务分支：`codex/task-<task-id>-<short-name>`，例如 `codex/task-001-runtime-baseline`
 - 每位开发人员使用独立工作区或 Git worktree，不共享未提交文件。
@@ -85,17 +88,17 @@
 - Draft PR：任务开发者在任务开始或形成可审查切片后创建 Draft PR，并持续向同一任务分支 push；不得为同一 head/base 另建后继 PR 来代替正常复审。
 - Ready 条件：任务范围完成；自测和必要真实环境验证完成；`workflow/DEV_TO_PM_HANDOFF.md` 已记录精确 HEAD、证据、未验证项、风险和请求动作；任务开发者将同一 PR 转为 Ready 并请求指定审核者审核。
 - Review：指定审核者固定 PR HEAD，审查 Standards、Spec、任务边界、依赖和证据。有 Critical/Important 时提交 `Changes requested`；修订产生新 HEAD 后必须重新审核。通过时在同一 PR 上批准精确 HEAD。
-- Merge 前置条件：开发任务 PR 由另一名开发者批准当前 HEAD；纯治理文档 PR 由项目负责人确认治理内容和当前 HEAD。Required checks 通过；依赖和目标分支正确；共享契约无未批准漂移；无未解决阻断项；PR 无冲突且 Mergeable。
-- Merge 授权：DEV-001 完成集成检查后，必须向项目负责人报告 PR、TASK/CR、源/目标分支、精确 HEAD、适用的审核或治理确认结论、检查证据、依赖、冲突、风险、回滚和合并后计划，并逐 PR 请求授权。项目负责人未明确批准前不得合并。
-- 授权失效：项目负责人批准后只要 PR HEAD、目标分支、依赖状态或检查结论发生变化，原批准立即失效，必须重新审核、重新检查并重新询问。
-- Merge 执行：获批后由非任务开发者/非治理 PR 作者对同一 PR 执行 Merge Commit。DEV-002 开发的任务由 DEV-001 合并，DEV-001 开发的任务由 DEV-002 合并；纯治理 PR 由非 PR 作者的开发者合并。禁止自合并、auto-merge 和 merge queue。
+- Stage 5 Merge 前置条件：开发任务 PR 由另一名开发者批准当前 HEAD；Stage 5 纯治理文档 PR 由项目负责人确认治理内容和当前 HEAD。Required checks 通过；依赖和目标分支正确；共享契约无未批准漂移；无未解决阻断项；PR 无冲突且 Mergeable。
+- Stage 5 Merge 授权：DEV-001 完成集成检查后，必须向项目负责人报告 PR、TASK/CR、源/目标分支、精确 HEAD、适用的审核或治理确认结论、检查证据、依赖、冲突、风险、回滚和合并后计划，并逐 PR 请求授权。项目负责人未明确批准前不得合并。
+- Stage 5 授权失效：项目负责人批准后只要 PR HEAD、目标分支、依赖状态或检查结论发生变化，原批准立即失效，必须重新审核、重新检查并重新询问。
+- Stage 5 Merge 执行：获批后由非任务开发者/非治理 PR 作者对同一 PR 执行 Merge Commit。DEV-002 开发的任务由 DEV-001 合并，DEV-001 开发的任务由 DEV-002 合并；Stage 5 纯治理 PR 由非 PR 作者的开发者合并。禁止自合并、auto-merge 和 merge queue。
 - PR #15/#20 历史：PR #15 保留为 TASK-002 被拒绝候选的审核历史；PR #20 由 DEV-002 按 v1.2 创建并由 DEV-001 合入。v1.3 不追溯改写这两项历史。
 - 生效边界：v1.3 适用于治理 PR 合入后仍 Open 的 Draft PR 和所有后续任务 PR，包括现有 TASK-006 Draft PR #14；不追溯改写 TASK-001、TASK-002 及 CR-037—CR-039 的历史角色和操作记录。
 - PR 标题：`[TASK-xxx] <type>: <summary>`
 - Commit：遵循 `04-architecture-plan/AGENTS.md` 的 `type(scope): summary`。
 - 每个 Draft PR 必须包含任务 ID、任务开发者、指定审核者、目标分支、当前 HEAD、需求/AC 映射、修改文件、真实验证结果、未验证项、风险、回退方式、依赖/兼容/抽象层变化和共享契约影响。
 - 每次 Ready 审核请求必须明确请求指定审核者审核同一 PR 的精确 HEAD；每次 Merge 授权请求必须绑定 PR 编号和审核通过的精确 HEAD。
-- 纯治理文档 PR 仅限流程、任务书、AGENTS 和工作流台账，且不得包含 `codebase/`、测试代码、数据库迁移、基础设施或部署配置；该类 PR 不进入 DEV-001/DEV-002 交叉代码审核，改由项目负责人确认治理内容和精确 HEAD。
+- Stage 5 纯治理文档 PR 仅限流程、任务书、AGENTS 和工作流台账，且不得包含 `codebase/`、测试代码、数据库迁移、基础设施或部署配置；该类 PR 不进入 DEV-001/DEV-002 交叉代码审核，改由项目负责人确认治理内容和精确 HEAD。
 - 共享文件发生冲突时暂停合并，由 `DEV-001` 根据已批准 API、数据模型和本任务书决定；不能用后合并覆盖先合并。
 
 ## 5. 共享契约与所有权
@@ -482,15 +485,15 @@
 - 集成负责人：`DEV-001`
 - 集成负责人已由项目负责人确认：是。
 - 集成目标分支：`codex/stage-05-integration`
-- 唯一集成触发源：开发任务 PR 已由另一名开发者批准当前精确 HEAD，或纯治理文档 PR 已由项目负责人确认治理内容和当前精确 HEAD；DEV-001 集成检查通过，且项目负责人明确批准合并该 PR 和 HEAD。
+- Stage 5 唯一集成触发源：开发任务 PR 已由另一名开发者批准当前精确 HEAD，或 Stage 5 纯治理文档 PR 已由项目负责人确认治理内容和当前精确 HEAD；DEV-001 集成检查通过，且项目负责人明确批准合并该 PR 和 HEAD。
 - 不得作为集成触发源：任务分支 push、Draft PR 创建、单独 CI 通过、过期 approval、未绑定精确 HEAD 的口头批准、PR #15 被拒绝历史或未绑定任务书的自动化事件。
-- 自动化策略：允许开发者创建/更新自己的 Draft PR、执行检查、提交 Review、发送通知和准备 Merge 授权请求；禁止 GitHub auto-merge、merge queue 和自动进入 Stage 6。矩阵指定的非任务开发者获项目负责人逐 PR 授权后执行的 Merge Commit 不属于 auto-merge。
+- Stage 5 自动化策略：允许开发者创建/更新自己的 Draft PR、执行检查、提交 Review、发送通知和准备 Merge 授权请求；禁止 GitHub auto-merge、merge queue 和自动进入 Stage 6。矩阵指定的非任务开发者获项目负责人逐 PR 授权后执行的 Merge Commit 不属于 auto-merge。
 - 推荐集成顺序：TASK-001 → TASK-002 → TASK-006-FE → TASK-006 → TASK-007 → TASK-004 → TASK-005 → TASK-003 → TASK-008 → TASK-009 → TASK-010 → TASK-011。
 - 顺序允许在依赖满足后微调，但必须先更新本任务书；不得仅在聊天中改变。
-- 每次集成前检查：开发任务 PR 的另一名开发者已批准当前精确 HEAD且审核后无新增提交；纯治理文档 PR 的项目负责人已确认治理内容和当前精确 HEAD。目标分支正确；required checks 通过；依赖已正式集成；真实检查结果齐全；共享契约未漂移；无禁止范围修改；相关文档已更新；无未解决阻断项；PR 无冲突且 Mergeable。
-- Merge 授权请求：`DEV-001` 必须向项目负责人报告 TASK/CR、PR、源/目标分支、精确 HEAD、适用的审核或治理确认结论、Critical/Important/Minor 或治理检查结果、测试与 Docker 证据（如适用）、依赖、冲突、共享契约、风险、回滚和合并后验证计划，并询问是否批准合并。
-- 集成执行：只有项目负责人明确批准该 PR 和精确 HEAD 后，矩阵指定的非任务开发者/非治理 PR 作者才可执行 Merge Commit。DEV-002 开发的任务由 DEV-001 合并，DEV-001 开发的任务由 DEV-002 合并；纯治理 PR 由非 PR 作者的开发者合并。审批后 HEAD 或条件变化则重新核查和询问；开发任务 PR 还须重新审核。禁止 auto-merge 或 merge queue。合并失败或发现契约冲突时停止，不覆盖既有提交。
-- 每次集成后执行：记录 Merge Commit SHA；运行最小相关测试、受影响模块回归、`git diff --check`；涉及容器时由 `DEV-001` 执行 Compose/健康检查；记录风险和回滚方式。
+- Stage 5 每次集成前检查：开发任务 PR 的另一名开发者已批准当前精确 HEAD且审核后无新增提交；Stage 5 纯治理文档 PR 的项目负责人已确认治理内容和当前精确 HEAD。目标分支正确；required checks 通过；依赖已正式集成；真实检查结果齐全；共享契约未漂移；无禁止范围修改；相关文档已更新；无未解决阻断项；PR 无冲突且 Mergeable。
+- Stage 5 Merge 授权请求：`DEV-001` 必须向项目负责人报告 TASK/CR、PR、源/目标分支、精确 HEAD、适用的审核或治理确认结论、Critical/Important/Minor 或治理检查结果、测试与 Docker 证据（如适用）、依赖、冲突、共享契约、风险、回滚和合并后验证计划，并询问是否批准合并。
+- Stage 5 集成执行：只有项目负责人明确批准该 PR 和精确 HEAD 后，矩阵指定的非任务开发者/非治理 PR 作者才可执行 Merge Commit。DEV-002 开发的任务由 DEV-001 合并，DEV-001 开发的任务由 DEV-002 合并；Stage 5 纯治理 PR 由非 PR 作者的开发者合并。审批后 HEAD 或条件变化则重新核查和询问；开发任务 PR 还须重新审核。禁止 auto-merge 或 merge queue。合并失败或发现契约冲突时停止，不覆盖既有提交。
+- Stage 5 每次集成后执行：记录 Merge Commit SHA；运行最小相关测试、受影响模块回归、`git diff --check`；涉及容器时由 `DEV-001` 执行 Compose/健康检查；记录风险和回滚方式。
 - 功能检查点：每个任务集成并通过回归后，在 `05-development/CHECKPOINTS.md` 新增 FCP，记录远程 Commit SHA、范围、证据和恢复命令。
 - 冲突处理：
   1. 普通文件冲突由文件所有者提出解决方案，`DEV-001` 审核。
