@@ -1,6 +1,6 @@
 {
   "state": "IN_DEVELOPMENT",
-  "updatedBy": "DEV-001 PR #63 post-merge governance record",
+  "updatedBy": "DEV-002 PR #64 post-merge governance correction",
   "updatedAt": "2026-07-29",
   "task010Delivery": {
     "taskId": "TASK-010",
@@ -77,12 +77,14 @@
     "nextAction": "Historical PR #61 runtime-validation record. Follow stage6PerformanceBoundaryReview for the current governance action; Stage 7 remains prohibited pending separate project-owner approval."
   },
   "stage6PerformanceBoundaryReview": {
-    "status": "INDEPENDENT_TEST_CONCLUSION_SIGNED_PENDING_GOVERNANCE_MERGE",
+    "status": "INDEPENDENT_TEST_CONCLUSION_SIGNED_GOVERNANCE_MERGED",
     "sourcePullRequest": 63,
     "targetBranch": "codex/stage-05-integration",
     "targetParent": "d4fa5eefaa9ebfb9ed768f199ca5df2b0e2d397b",
     "approvedSourceHead": "46bd5b7f6579016d9ce9bb3f0d1d7226ccd503d1",
     "mergeCommit": "a5e4f6abec98f0df4c04f18a0cbf849e423624be",
+    "governanceCloseoutPullRequest": 64,
+    "governanceCloseoutMergeCommit": "1b43565d750eea8b85e5e66fab6b9f9ae1fdccaa",
     "mergeExecutor": "DEV-002 / manual Merge Commit",
     "mergeTreeMatchesApprovedSource": true,
     "independentTestConclusion": "SIGNED: the Stage 6 independent testing overall conclusion is bound to approved PR #63 HEAD 46bd5b7f6579016d9ce9bb3f0d1d7226ccd503d1 and Merge Commit a5e4f6abec98f0df4c04f18a0cbf849e423624be.",
@@ -90,7 +92,7 @@
     "unverified": "Docker live-stack and the full backend pytest suite were not rerun after this merge because the merge did not change their archived runtime evidence.",
     "residualRisk": "Existing React Router risk disposition and Stage 3 prototype P2 findings remain open. The signed Stage 6 conclusion does not authorize Stage 7 acceptance or production release.",
     "rollback": "If a regression is found, assess and validate git revert -m 1 a5e4f6abec98f0df4c04f18a0cbf849e423624be in an isolated environment before execution; do not delete volumes or overwrite data.",
-    "nextAction": "Project owner must confirm the governance content and exact PR #64 HEAD; then perform integration checking, obtain separate merge authorization, and have a non-author execute the manual merge. Do not start Stage 7 or request Stage 7 authorization until the project owner separately approves it."
+    "nextAction": "PR #64 governance closeout is merged. Stage 7 remains locked and may start only after the project owner separately approves the Stage 7 acceptance entry."
   },
   "collaborationGovernance": {
     "changeRequest": "CR-040",
