@@ -1,6 +1,7 @@
 import argparse
 import base64
 from collections import Counter
+from datetime import datetime, timezone
 import json
 import ssl
 import time
@@ -272,6 +273,7 @@ def main() -> None:
     parser.add_argument("--harness-commit", required=True)
     parser.add_argument("--environment", required=True)
     parser.add_argument("--fixture", required=True)
+    parser.add_argument("--evidence-subject-commit", required=True)
     parser.add_argument("--insecure-tls", action="store_true")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
@@ -311,6 +313,8 @@ def main() -> None:
             "harness_commit": args.harness_commit,
             "environment": args.environment,
             "fixture": args.fixture,
+            "executed_at_utc": datetime.now(timezone.utc).isoformat(),
+            "evidence_subject_commit": args.evidence_subject_commit,
             **(
                 {"expected_reference_text": args.expected_reference_text}
                 if args.expected_reference_text is not None
