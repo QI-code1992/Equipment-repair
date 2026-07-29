@@ -63,7 +63,7 @@
     "status": "APPROVED_BY_PROJECT_OWNER",
     "scope": "Stage 7 independent product acceptance is authorized only for the approved candidate baseline",
     "approvedBy": "project owner",
-    "approvedAt": "2026-07-27",
+    "approvedAt": "2026-07-29",
     "nextAction": "Begin Stage 7 independent product acceptance from the approved candidate baseline; Stage 8 release remains prohibited pending its separate gate."
   },
   "stage6RuntimeValidation": {
