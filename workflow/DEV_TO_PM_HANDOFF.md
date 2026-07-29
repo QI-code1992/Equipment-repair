@@ -1,5 +1,13 @@
 # 开发到产品交接
 
+## Stage 6 PR #63 合并后治理同步（2026-07-29）
+
+- 合并事实：DEV-002 已按单独授权以手动 Merge Commit `a5e4f6abec98f0df4c04f18a0cbf849e423624be` 将 PR #63 合入 `codex/stage-05-integration`；双亲为目标分支基线 `d4fa5eefaa9ebfb9ed768f199ca5df2b0e2d397b` 与获批候选 `46bd5b7f6579016d9ce9bb3f0d1d7226ccd503d1`。合并结果树与第二父候选一致，PR 状态和目标分支指针已核验。
+- 合并后验证：前端 `27 passed`、生产构建、Python 3.13 性能单元 `13 passed`、15 项 Node 静态回归、证据 JSON/SARIF 解析，以及相对两个父提交的差异检查均通过。
+- 未重跑边界：本次合并未改变已归档运行态证据，因此未重跑 Docker live-stack 或完整后端 pytest；该事实不将其替换为新的运行态结论。
+- 残余风险与回滚：既有 React Router 风险处置和 Stage 3 原型 P2 仍未关闭。若发现回归，先在隔离环境验证 `git revert -m 1 a5e4f6abec98f0df4c04f18a0cbf849e423624be`，经授权后再执行；不得删除卷或覆盖数据。
+- 当前门禁与下一动作：PR #63 的合并仅完成性能边界整改的集成和治理记录，不构成 Stage 6 总体通过、Stage 7 验收或生产发布授权。项目负责人必须单独决定 Stage 6 最终 Gate；在此之前 Stage 7 继续锁定。
+
 ## Stage 6 PR #61 合并后验证与治理交接（2026-07-28）
 
 - 合并事实：DEV-002 已按授权以手动 Merge Commit `144ad1ac5802dcbe53a55a426f46ce9bef8eba0f` 合入 PR #61；双亲为 `e32478e20c0f27558356d4f0e7d5a6d4c8eba477` 与获授权 HEAD `b73311cfd3beebe048c5ef64320886ccdea363e0`。

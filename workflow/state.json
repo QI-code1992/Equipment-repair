@@ -1,7 +1,7 @@
 {
   "state": "IN_DEVELOPMENT",
-  "updatedBy": "DEV-002 Stage 6 gate record",
-  "updatedAt": "2026-07-27",
+  "updatedBy": "DEV-001 PR #63 post-merge governance record",
+  "updatedAt": "2026-07-29",
   "task010Delivery": {
     "taskId": "TASK-010",
     "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",
@@ -75,6 +75,21 @@
     "verification": "DEV-001 ran the merged result in an isolated Windows Docker environment: frontend 26 passed, production build, 15 static regressions, Nginx contract, real HTTPS JS/CSS MIME assertions, PostgreSQL migration 1 passed/3 warnings, real Agent/RAGFlow success and unavailable fallback 1 passed/2 warnings, HTTPS E2E 1 passed, API restart recovery, isolated backup/restore, and authenticated browser route checks passed.",
     "residualRisk": "Existing React Router risk disposition and Stage 3 prototype P2 findings remain open; performance/load boundary testing and the final independent quality conclusion remain pending.",
     "nextAction": "Merge the governance-evidence PR after its required confirmation and authorization. Do not mark Stage 6 passed or start Stage 7 until the remaining performance boundary and final quality gate are completed."
+  },
+  "stage6PerformanceBoundaryReview": {
+    "status": "POST_MERGE_VALIDATION_COMPLETED_PENDING_FINAL_QUALITY_GATE",
+    "sourcePullRequest": 63,
+    "targetBranch": "codex/stage-05-integration",
+    "targetParent": "d4fa5eefaa9ebfb9ed768f199ca5df2b0e2d397b",
+    "approvedSourceHead": "46bd5b7f6579016d9ce9bb3f0d1d7226ccd503d1",
+    "mergeCommit": "a5e4f6abec98f0df4c04f18a0cbf849e423624be",
+    "mergeExecutor": "DEV-002 / manual Merge Commit",
+    "mergeTreeMatchesApprovedSource": true,
+    "verification": "Post-merge verification on the merged result: frontend 27 passed, production build, Python 3.13 performance unit tests 13 passed, 15 Node static regressions, evidence JSON/SARIF parsing, and both-parent diff checks passed.",
+    "unverified": "Docker live-stack and the full backend pytest suite were not rerun after this merge because the merge did not change their archived runtime evidence.",
+    "residualRisk": "Existing React Router risk disposition and Stage 3 prototype P2 findings remain open. Stage 6 has no final independent quality conclusion or project-owner final Gate approval.",
+    "rollback": "If a regression is found, assess and validate git revert -m 1 a5e4f6abec98f0df4c04f18a0cbf849e423624be in an isolated environment before execution; do not delete volumes or overwrite data.",
+    "nextAction": "Project owner must separately decide the Stage 6 final Gate. Do not start Stage 7, request Stage 7 authorization, or treat this PR merge as acceptance approval."
   },
   "collaborationGovernance": {
     "changeRequest": "CR-040",
