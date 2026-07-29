@@ -1,6 +1,6 @@
 {
-  "state": "IN_DEVELOPMENT",
-  "updatedBy": "DEV-002 PR #64 post-merge governance correction",
+  "state": "IN_ACCEPTANCE",
+  "updatedBy": "project owner Stage 6 -> Stage 7 Gate; recorded by workflow coordinator",
   "updatedAt": "2026-07-29",
   "task010Delivery": {
     "taskId": "TASK-010",
@@ -55,16 +55,16 @@
     "architectureCandidate": "04-architecture-plan/平台级架构设计.md",
     "automatedChecks": "06-testing/tests/"
   },
-  "lastApprovedStage": "Stage 5 — Development Implementation",
+  "lastApprovedStage": "Stage 6 — Test Verification",
   "pendingStageApproval": {
-    "gate": "Stage 5 -> Stage 6",
-    "candidateIntegrationHead": "8a5e6ced473ea6219666d858ce5b751e61362871",
-    "requestedBy": "DEV-001",
+    "gate": "Stage 6 -> Stage 7",
+    "candidateIntegrationHead": "89fbd2129169fb6ece42094b17907885637f3c48",
+    "requestedBy": "project owner",
     "status": "APPROVED_BY_PROJECT_OWNER",
-    "scope": "Stage 5 final integration summary; Stage 6 independent testing is authorized only for the approved candidate baseline",
+    "scope": "Stage 7 independent product acceptance is authorized only for the approved candidate baseline",
     "approvedBy": "project owner",
     "approvedAt": "2026-07-27",
-    "nextAction": "Begin Stage 6 independent testing from the approved candidate baseline; Stage 7 acceptance and Stage 8 release remain prohibited pending their separate gates."
+    "nextAction": "Begin Stage 7 independent product acceptance from the approved candidate baseline; Stage 8 release remains prohibited pending its separate gate."
   },
   "stage6RuntimeValidation": {
     "status": "POST_MERGE_CORE_RUNTIME_VALIDATION_COMPLETED_SUPERSEDED_BY_SIGNED_STAGE6_CONCLUSION",
@@ -136,7 +136,7 @@
     ],
     "historicalBoundary": "Does not rewrite completed TASK-001/TASK-002 or CR-037 through CR-039 history; applies to open Draft PRs and subsequent task PRs after integration"
   },
-  "currentCommitSha": "e0c133bacf2328bdd091831450693008cb34c2ad",
+  "currentCommitSha": "89fbd2129169fb6ece42094b17907885637f3c48",
   "task003Delivery": {
     "taskId": "TASK-003",
     "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",

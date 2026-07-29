@@ -15,15 +15,29 @@
 - 边界：该批准仅授权以该候选基线开展 Stage 6 独立测试；不批准 Stage 7 验收、生产发布或直接合入 `main`。若测试基线发生实质变更，必须按变更控制重新评估受影响 Gate。
 - 残余风险：外部 RAGFlow 在成功重跑前曾间歇性不可用；前端依赖审计报告 2 项既有 high-severity 发现；Stage 6 必须独立复核验收标准并记录自身证据。
 
+### Gate-Stage-006: Stage 6 -> Stage 7
+
+- 状态：Approved。
+- 批准人：项目负责人。
+- 批准日期：2026-07-29。
+- 当前阶段：Stage 6 — Test Verification。
+- 下一阶段：Stage 7 — Product Acceptance。
+- 候选集成 HEAD：`89fbd2129169fb6ece42094b17907885637f3c48`。
+- 已审阅材料：`06-testing/TEST_PLAN.md`、`06-testing/TEST_CASES.md`、`06-testing/TEST_REPORT.md`、Stage 6 静态与运行验证证据、`workflow/state.json`、`workflow/DEV_TO_PM_HANDOFF.md`、Stage 1—4 已批准基线。
+- 已审阅证据：Stage 6 独立测试结论已签发并绑定 PR #63 approved HEAD `46bd5b7f6579016d9ce9bb3f0d1d7226ccd503d1` 与 Merge Commit `a5e4f6abec98f0df4c04f18a0cbf849e423624be`；后续治理合并至当前候选不改变业务代码、测试逻辑、数据库、基础设施或运行时配置。
+- 决定：项目负责人明确批准集成 HEAD `89fbd2129169fb6ece42094b17907885637f3c48` 通过 Stage 6 -> Stage 7 Gate，允许开始独立产品验收。
+- 边界：本批准只启动 Stage 7 验收；不等于验收通过、Stage 8 发布、生产操作或直接合入 `main`。若验收发现基线或实现缺陷，须按受影响范围回流并重新评估后续 Gate。
+- 残余风险：既有 React Router 风险处置与 Stage 3 原型 P2 发现仍须在 Stage 7 验收报告中如实评估，不得因本 Gate 静默关闭。
+
 No formal stage transition approval was found during the 2026-07-14 takeover audit.
 
 ## Current gate position
 
-- Current effective state: `PRODUCT_CLARIFICATION_REQUIRED`
-- Last approved stage: none recorded
-- Pending approval: none; artifacts must first be reconciled
-- Earliest affected stage: Stage 1 — Requirements Definition
-- Stage 0 status: opportunity-validation evidence was not found; the project owner must either supply it or explicitly approve a scoped waiver before a formal Stage 1 gate is claimed
+- Current effective state: `IN_ACCEPTANCE`
+- Last approved stage: Stage 6 — Test Verification
+- Pending approval: Stage 7 final verdict and the separate Stage 8 release/handoff gate
+- Current acceptance candidate: `89fbd2129169fb6ece42094b17907885637f3c48`
+- Return rule: acceptance defects return to the earliest affected stage; implementation repairs return to Stage 5 before Stage 6 and Stage 7 evidence is refreshed
 
 Do not add an `Approved` record unless the user explicitly approves the transition and the reviewed artifact versions or Commit SHA are exact.
 
