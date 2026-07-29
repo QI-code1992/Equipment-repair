@@ -6,6 +6,7 @@
 - 当前阶段：Stage 5 — TASK-002 已通过 PR #20 完成代码集成，并通过 PR #25 完成合并后治理收尾；TASK-003、TASK-004 可按本任务书启动，Stage 6 仍未获批准
 - 任务书版本：v1.4（CR-041：前端工程初始化前置；PR #28 已合入 `codex/stage-05-integration`）
 - 状态：v1.4 是当前有效 Stage 5 协作基线；CR-041 的 PR #28 Merge Commit 为 `7a44401bacbdc48d58f697a6b252449ecf44bb29`。该修订只调整前端工程初始化的任务边界与依赖，不追溯改写既有 PR、Review 或 Merge 历史
+- 适用范围更正：本任务书的 DEV-001/DEV-002 交叉审核、任务开发者自批/自合并禁止、单 Draft PR 与非作者 Merge 执行规则仅适用于 Stage 5 开发任务 PR，以及后续阶段发现缺陷后回流的 Stage 5 修复 PR。它们不默认适用于 Stage 6 独立测试、测试结论或纯治理 PR；Stage 6 纯治理 PR 按项目负责人精确 HEAD 确认、适用集成检查和明确 Merge 授权处理，除非已批准的 Stage 6 规则另有要求。
 - v1.0 候选提交：`8272a8ed161b787098660f61ebb86fa5ccada564`
 - v1.0 审批记录提交：`20261a80f01de8d18e18a2acf9c97e07087e04bc`
 - v1.0 批准人：项目负责人
@@ -77,6 +78,8 @@
 - 原型只作为设计基线，继续位于 `03-ui-prototype/`；正式前端只位于 `codebase/frontend/`。
 
 ## 4. 分支与协作规则
+
+本节是 Stage 5 协作规则，不用于约束 Stage 6 独立测试、测试结论或 Stage 6 纯治理 PR。Stage 6 若发现必须修改业务代码、测试代码、数据库、基础设施、部署或运行时配置的缺陷，须登记后回流为 Stage 5 修复任务；该修复重新适用本节，完成精确 HEAD 的审核和集成后才可恢复 Stage 6。Stage 6 纯治理 PR 仍须项目负责人确认精确 HEAD、适用集成检查和明确 Merge 授权，但除非已批准的 Stage 6 规则另有要求，不要求 DEV-001/DEV-002 交叉审核或非作者 Merge。
 
 - 集成分支：`codex/stage-05-integration`
 - 任务分支：`codex/task-<task-id>-<short-name>`，例如 `codex/task-001-runtime-baseline`

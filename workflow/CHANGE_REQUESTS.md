@@ -774,3 +774,24 @@
 - 验证：
   - 状态：待实施。
   - 证据：TDD 红绿记录、Compose 静态验证、真实 Docker/RAGFlow 与恢复演练。
+
+### CR-045：明确 Stage 5 协作规则与 Stage 6 独立测试边界
+
+- 级别：L2 跨阶段流程治理更正。
+- 状态：Approved / 待合并生效。
+- 提出人：项目负责人。
+- 提出时间：2026-07-29。
+- 当前阶段：Stage 6 — Independent Testing and Quality Validation。
+- 原始请求：明确 Stage 5 的 DEV-001/DEV-002 开发者互审与非作者 Merge 规则仅适用于 Stage 5 开发阶段，并更新 `formal-software-delivery-workflow` 与所有适用规则文档。
+- 明确需求：
+  - Stage 6 独立测试、测试结论与纯治理 PR 不默认继承 Stage 5 的开发者互审、单 Draft PR、任务开发者自批/自合并禁止或非作者 Merge 执行规则。
+  - Stage 6 发现需修改业务代码、测试代码、数据库、基础设施、部署或运行时配置的缺陷时，必须登记缺陷并仅将修复范围回流 Stage 5；修复 PR 重新适用当前 Stage 5 任务书的审核、集成与授权规则，完成后才可恢复 Stage 6 独立测试。
+  - Stage 6 纯治理 PR 仅限测试和治理材料，须项目负责人确认精确 HEAD、完成适用集成检查并取得明确 Merge 授权；除非已批准的 Stage 6 规则另有要求，不强制 DEV-001/DEV-002 互审或非作者 Merge。
+- 原因：Stage 6 的独立测试职责被错误套用为 Stage 5 的两名开发者互审模式，导致阶段角色和合并执行条件发生不必要的混淆。
+- 影响：
+  - 产品、PRD、SPEC、原型、架构、API、数据模型与生产代码：不变。
+  - 全局工作流：更新 `formal-software-delivery-workflow` 技能及其 Stage-Gate、变更控制、任务书和 AGENTS 模板。
+  - 项目规则：更新项目根 `AGENTS.md`、`04-architecture-plan/AGENTS.md` 与 `04-architecture-plan/DEVELOPMENT_TASK_BOOK.md` 的前瞻性适用范围；不追溯改写历史 PR、审核、Merge 或测试证据。
+  - 阶段门禁：不构成 Stage 6 总体通过、Stage 7 验收或发布授权。
+- 决策：项目负责人已明确确认该阶段边界与回流规则。
+- 验证：规则文本范围检查、`workflow/state.json` JSON 解析、静态回归与 `git diff --check`；无业务代码、测试逻辑、数据库、基础设施、部署或运行时配置修改。
