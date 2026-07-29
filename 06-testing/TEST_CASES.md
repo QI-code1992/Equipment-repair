@@ -23,6 +23,6 @@
 | TC-STATIC-003 | Gitleaks 当前工作树及完整历史均扫描；无当前秘密，历史命中只保留脱敏分类说明。 | 两份脱敏 JSON 报告。 |
 | TC-STATIC-004 | Trivy 覆盖依赖、秘密、Dockerfile 与 Compose；HIGH/CRITICAL 必须关闭或有项目负责人明确风险处置；React Router 边界回归通过。 | Trivy JSON、风险处置、`react-router-rsc-risk.test.js`。 |
 | TC-PERF-001 | 认证和附件在 1/2/5/10 并发、每场景 300 秒下零意外错误，P95 不超过 1 秒。 | `results-auth-v2.json`、`results-attachment-v2.json`，含 SUT/harness/环境/夹具。 |
-| TC-PERF-002 | 真实 RAGFlow 成功路径在 1/2/5/10 并发下为 `QUESTIONING`；每条 evidence 的 marker、`document_id`、`chunk_id` 均绑定本次 fixture，P95 不超过 15 秒。 | `results-agent-success-final-v2.json`，含预期身份对与每层绑定统计。 |
+| TC-PERF-002 | 真实 RAGFlow 成功路径在 1/2/5/10 并发下为 `QUESTIONING`；每条 evidence 的 marker、`document_id`、`chunk_id` 均绑定本次 fixture，P95 不超过 15 秒。 | `results-agent-success-final-v2.json`，含 SUT/harness、预期身份对、每层绑定统计和逐层来源；独立重试保留为 `results-agent-success-10-concurrency-retry.json`。 |
 | TC-PERF-003 | 受控 RAGFlow 不可用路径在 1/2/5/10 并发下均为 `UNAVAILABLE`、零引用、零意外错误，P95 不超过 15 秒。 | `results-agent-unavailable-v2.json`，含 SUT/harness/环境/夹具。 |
 | TC-RESTORE-001 | 受控附件备份和随机隔离恢复不超过 180 秒；恢复期间 `/api/auth/me` 固定 10 并发只读 60 秒，零意外错误且 P95 不超过 2 秒。 | `results-backup-restore-readonly.json`，含 SUT/harness/恢复环境/受控附件与恢复项目 fixture。 |

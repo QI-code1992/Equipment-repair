@@ -1,5 +1,6 @@
 {
   "sut_commit": "a07b3b4bcc20439c786e8ad6a5dc7204dc390a3e",
+  "evidence_record_commit": "a3189e590897ca4dd7c3de90075c3a678be9469e",
   "evidence_basis": "Scans were executed against the worktree at sut_commit before this evidence artifact commit; the SARIF and JSON files below are the retained evidence.",
   "scanned_paths": [
     "codebase/backend",

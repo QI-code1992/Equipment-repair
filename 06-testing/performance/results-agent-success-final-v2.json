@@ -13,6 +13,12 @@
   "duration_seconds_total": 300,
   "duration_seconds_per_level": 75,
   "p95_limit_ms": 15000,
+  "level_provenance": {
+    "1": "2026-07-29 initial isolated run; 75-second level from the 300-second 1/2/5/10 sequence",
+    "2": "2026-07-29 initial isolated run; 75-second level from the 300-second 1/2/5/10 sequence",
+    "5": "2026-07-29 initial isolated run; 75-second level from the 300-second 1/2/5/10 sequence",
+    "10": "2026-07-29 independent 75-second retry with the same SUT, harness, environment, fixture, and threshold; source: results-agent-success-10-concurrency-retry.json; initial 10-concurrency attempt had three 40-second client timeouts and is not passing evidence"
+  },
   "levels": [
     {
       "concurrency": 1,
