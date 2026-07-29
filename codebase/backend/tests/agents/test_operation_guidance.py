@@ -70,6 +70,17 @@ def test_operation_guidance_failure_keeps_manual_path_available():
     assert session.evidence == ()
 
 
+def test_operation_guidance_empty_retrieval_states_no_citable_evidence():
+    session = OperationGuidanceAgent(lambda _: []).start(
+        GuidanceContext("eq-1", "X1", "pressure", "warm-up")
+    )
+
+    assert session.state is GuidanceState.NO_EVIDENCE
+    assert session.evidence == ()
+    assert session.manual_fallback is True
+    assert session.question == "未检索到可引用依据，请补充工况或直接按人工流程处理。"
+
+
 def test_operation_guidance_transient_retry_never_exceeds_two_total_retrievals():
     calls = 0
 
@@ -127,6 +138,37 @@ def test_operation_guidance_api_uses_task005_retrieval_boundary(client, monkeypa
             "text": "inspect the pump",
         },
     ]
+
+
+def test_operation_guidance_api_returns_no_citable_evidence_for_an_empty_retrieval(client, monkeypatch):
+    client.app.state.knowledge_adapter = object()
+    _, token = create_user_token(
+        client,
+        username="guidance-empty-user",
+        role_code="LINE_OPERATOR",
+        permission_codes=["intelligence:agent"],
+    )
+    monkeypatch.setattr(
+        "app.modules.agents.router.knowledge_service.retrieve_knowledge",
+        lambda *args, **kwargs: RetrievalResult(citations=[]),
+    )
+
+    response = client.post(
+        "/api/agent/operation-guidance",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "equipment_id": "equipment-1",
+            "equipment_model": "MODEL-1",
+            "symptom": "pressure loss",
+            "description": "drops under load",
+            "dataset_ids": ["dataset-1"],
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["state"] == "NO_EVIDENCE"
+    assert response.json()["evidence"] == []
+    assert response.json()["question"] == "未检索到可引用依据，请补充工况或直接按人工流程处理。"
 
 
 def test_operation_guidance_api_uses_app_factory_ragflow_adapter(monkeypatch):

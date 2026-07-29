@@ -7,6 +7,7 @@ from app.integrations.ragflow.adapter import RagflowError
 
 class GuidanceState(StrEnum):
     QUESTIONING = "QUESTIONING"
+    NO_EVIDENCE = "NO_EVIDENCE"
     UNAVAILABLE = "UNAVAILABLE"
 
 
@@ -71,6 +72,14 @@ class OperationGuidanceAgent:
             )
         except (KeyError, TypeError, ValueError) as error:
             raise ValueError("guidance retrieval returned an invalid reference") from error
+        if not references:
+            return GuidanceSession(
+                context=context,
+                state=GuidanceState.NO_EVIDENCE,
+                question="未检索到可引用依据，请补充工况或直接按人工流程处理。",
+                retrieval_count=retrieval_count,
+                manual_fallback=True,
+            )
         return GuidanceSession(
             context=context,
             state=GuidanceState.QUESTIONING,

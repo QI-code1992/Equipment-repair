@@ -33,7 +33,7 @@
 | POST | `/api/fault-reports/{id}/start-repair` | 直接开始或采纳已确认诊断后开始维修。 |
 | POST | `/api/work-orders/{id}/repair-result` | 提交维修人员最终处理结果。 |
 | GET | `/api/repair-cases/similar` | 结构化同类设备相似案例查询。 |
-| POST | `/api/agent/operation-guidance` | 操作指引，使用页面传入的设备/故障上下文进行受控知识检索；要求 `intelligence:agent`，不读取或判断设备行级授权。 |
+| POST | `/api/agent/operation-guidance` | 操作指引，使用页面传入的设备/故障上下文进行受控知识检索；要求 `intelligence:agent`，不读取或判断设备行级授权。响应为 `state`、`question`、`evidence`、`retrieval_count`、`manual_fallback`、`loading_seconds`；每个 `evidence` 项包含业务 `document_id`、RAGFlow `chunk_id`、`citation` 与 `text`。正常空检索返回 `NO_EVIDENCE`、空 `evidence` 和明确无可引用依据提示；检索不可用返回 `UNAVAILABLE`、空 `evidence` 和人工兜底。 |
 | POST | `/api/agent/fault-diagnosis` | 维修前故障诊断；要求 `intelligence:agent` 与 `fault:repair`，`start` 只接受 `fault_report_id` 与报警码状态，诊断上下文由服务端 `FaultReport`、`Equipment` 和 `fault_diagnosis` Agent 配置生成。 |
 | GET | `/api/metrics/catalog` | 固定指标目录。 |
 | POST | `/api/metrics/query-batch` | 一次正式查询最多五个已校验指标。 |
