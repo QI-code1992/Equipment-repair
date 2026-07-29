@@ -70,6 +70,24 @@ it("renders real guidance citations and runtime SSE statuses", async () => {
   expect(await screen.findByText("运行状态：WAITING_FOR_MODEL")).toBeInTheDocument();
 });
 
+it("shows the manual guidance prompt when retrieval has no citable evidence", async () => {
+  vi.mocked(getOperationGuidance).mockResolvedValue({
+    state: "NO_EVIDENCE",
+    question: "未检索到可引用依据，请补充工况或直接按人工流程处理。",
+    evidence: [],
+    manual_fallback: true,
+    loading_seconds: 3,
+  });
+  render(<RepairExecutionPage />);
+
+  fireEvent.change(screen.getByLabelText("指引设备 ID"), { target: { value: "eq-empty" } });
+  fireEvent.change(screen.getByLabelText("设备型号"), { target: { value: "L956" } });
+  fireEvent.change(screen.getByLabelText("指引故障现象"), { target: { value: "压力不足" } });
+  fireEvent.click(screen.getByRole("button", { name: "获取操作指引" }));
+
+  expect(await screen.findByText("未检索到可引用依据，请补充工况或直接按人工流程处理。")).toBeInTheDocument();
+});
+
 it("keeps direct repair available when operation guidance is unavailable", async () => {
   vi.mocked(getOperationGuidance).mockRejectedValue(new ApiError(503, "RAGFLOW_TIMEOUT"));
   render(<RepairExecutionPage />);
