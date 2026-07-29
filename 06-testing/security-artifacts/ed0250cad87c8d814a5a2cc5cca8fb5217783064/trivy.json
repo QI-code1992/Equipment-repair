@@ -1,0 +1,254 @@
+{
+  "SchemaVersion": 2,
+  "Trivy": {
+    "Version": "0.72.0"
+  },
+  "ReportID": "019fac32-bdc8-71f3-9e9c-9237b8f37c7a",
+  "CreatedAt": "2026-07-29T12:47:14.3761278+08:00",
+  "ArtifactName": ".",
+  "ArtifactType": "filesystem",
+  "Results": [
+    {
+      "Target": "codebase/frontend/package-lock.json",
+      "Class": "lang-pkgs",
+      "Type": "npm",
+      "Packages": [
+        {
+          "ID": "react@19.2.8",
+          "Name": "react",
+          "Identifier": {
+            "PURL": "pkg:npm/react@19.2.8",
+            "UID": "129acf2d664f9942"
+          },
+          "Version": "19.2.8",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "Locations": [
+            {
+              "StartLine": 2421,
+              "EndLine": 2429
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "react-dom@19.2.8",
+          "Name": "react-dom",
+          "Identifier": {
+            "PURL": "pkg:npm/react-dom@19.2.8",
+            "UID": "9bdd9857cc522bd3"
+          },
+          "Version": "19.2.8",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "react@19.2.8",
+            "scheduler@0.27.0"
+          ],
+          "Locations": [
+            {
+              "StartLine": 2430,
+              "EndLine": 2441
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "react-router-dom@7.18.1",
+          "Name": "react-router-dom",
+          "Identifier": {
+            "PURL": "pkg:npm/react-router-dom@7.18.1",
+            "UID": "468f91031dc9353d"
+          },
+          "Version": "7.18.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "react-dom@19.2.8",
+            "react-router@7.18.1",
+            "react@19.2.8"
+          ],
+          "Locations": [
+            {
+              "StartLine": 2482,
+              "EndLine": 2497
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "cookie@1.1.1",
+          "Name": "cookie",
+          "Identifier": {
+            "PURL": "pkg:npm/cookie@1.1.1",
+            "UID": "e9264990ece435af"
+          },
+          "Version": "1.1.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 1831,
+              "EndLine": 1843
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "react-router@7.18.1",
+          "Name": "react-router",
+          "Identifier": {
+            "PURL": "pkg:npm/react-router@7.18.1",
+            "UID": "21b476f7d62bf980"
+          },
+          "Version": "7.18.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "cookie@1.1.1",
+            "react-dom@19.2.8",
+            "react@19.2.8",
+            "set-cookie-parser@2.7.2"
+          ],
+          "Locations": [
+            {
+              "StartLine": 2460,
+              "EndLine": 2481
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "scheduler@0.27.0",
+          "Name": "scheduler",
+          "Identifier": {
+            "PURL": "pkg:npm/scheduler@0.27.0",
+            "UID": "c90cd4ca3e122a75"
+          },
+          "Version": "0.27.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 2584,
+              "EndLine": 2589
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "set-cookie-parser@2.7.2",
+          "Name": "set-cookie-parser",
+          "Identifier": {
+            "PURL": "pkg:npm/set-cookie-parser@2.7.2",
+            "UID": "572fcd03145dacfc"
+          },
+          "Version": "2.7.2",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 2600,
+              "EndLine": 2605
+            }
+          ],
+          "AnalyzedBy": "npm"
+        }
+      ],
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "GHSA-qwww-vcr4-c8h2",
+          "PkgID": "react-router@7.18.1",
+          "PkgName": "react-router",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/react-router@7.18.1",
+            "UID": "21b476f7d62bf980"
+          },
+          "InstalledVersion": "7.18.1",
+          "FixedVersion": "8.3.0",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://github.com/advisories/GHSA-qwww-vcr4-c8h2",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:7feabea86e3904250cdfff657944b9d7de3185b39c8a351a2925ba6a1d7ce807",
+          "Title": "React Router: RSC Mode CSRF Bypass Allows Action Execution Before 400 Response",
+          "Description": "This is a follow up to CVE-2026-22030 to address related CSRF flows in unstable RSC code paths.\n\n\u003e [!NOTE]\n\u003e This only affects your application if you are using the unstable RSC APIs",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "ghsa": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N",
+              "V40Score": 7.1
+            }
+          },
+          "References": [
+            "http://github.com/remix-run/react-router/pull/15311",
+            "https://github.com/remix-run/react-router",
+            "https://github.com/remix-run/react-router/blob/main/CHANGELOG.md#v830",
+            "https://github.com/remix-run/react-router/commit/7a71c728ad116bd78699a258b2014ce9585729f5",
+            "https://github.com/remix-run/react-router/releases/tag/react-router@8.3.0",
+            "https://github.com/remix-run/react-router/security/advisories/GHSA-qwww-vcr4-c8h2"
+          ],
+          "PublishedDate": "2026-07-24T16:44:43Z",
+          "LastModifiedDate": "2026-07-24T16:44:43Z"
+        }
+      ]
+    },
+    {
+      "Target": "codebase/backend/Dockerfile",
+      "Class": "config",
+      "Type": "dockerfile",
+      "MisconfSummary": {
+        "Successes": 26,
+        "Failures": 1
+      },
+      "Misconfigurations": [
+        {
+          "Type": "Dockerfile Security Check",
+          "ID": "DS-0026",
+          "Title": "No HEALTHCHECK defined",
+          "Description": "You should add HEALTHCHECK instruction in your docker container images to perform the health check on running containers.",
+          "Message": "Add HEALTHCHECK instruction in your Dockerfile",
+          "Namespace": "builtin.dockerfile.DS026",
+          "Query": "data.builtin.dockerfile.DS026.deny",
+          "Resolution": "Add HEALTHCHECK instruction in Dockerfile",
+          "Severity": "LOW",
+          "PrimaryURL": "https://avd.aquasec.com/misconfig/ds-0026",
+          "References": [
+            "https://blog.aquasec.com/docker-security-best-practices",
+            "https://avd.aquasec.com/misconfig/ds-0026"
+          ],
+          "Status": "FAIL",
+          "CauseMetadata": {
+            "Provider": "Dockerfile",
+            "Service": "general"
+          }
+        }
+      ]
+    }
+  ]
+}

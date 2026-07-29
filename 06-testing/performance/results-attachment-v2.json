@@ -1,10 +1,12 @@
 {
   "scenario": "attachment",
   "metadata": {
-    "sut_commit": "931df829877305d6ee51a3cef871fe7a9735b9e2",
-    "harness_commit": "93df55f6b124d00f140bd11cc303f5682f8c9c1b",
-    "environment": "isolated-compose-ragflow-success-18450",
-    "fixture": "attachment:stage6-performance.txt;clamav:minio:configured-bucket"
+    "sut_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064",
+    "harness_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064",
+    "environment": "isolated-compose-ragflow-success-18448",
+    "fixture": "attachment:stage6-performance.txt;clamav:minio:configured-bucket",
+    "executed_at_utc": "2026-07-29T04:28:24.506672+00:00",
+    "evidence_subject_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064"
   },
   "max_concurrency": 10,
   "duration_seconds_total": 300,
@@ -13,46 +15,54 @@
   "levels": [
     {
       "concurrency": 1,
-      "requests": 2423,
+      "requests": 2508,
       "unexpected_errors": 0,
       "agent_states": {},
       "responses_with_references": 0,
       "responses_without_references": 0,
-      "p50_ms": 25.897199986502528,
-      "p95_ms": 47.87239996949211,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 26.769699999931618,
+      "p95_ms": 46.789099998932215,
       "pass": true
     },
     {
       "concurrency": 2,
-      "requests": 3949,
+      "requests": 3997,
       "unexpected_errors": 0,
       "agent_states": {},
       "responses_with_references": 0,
       "responses_without_references": 0,
-      "p50_ms": 35.54710000753403,
-      "p95_ms": 55.878000042866915,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 35.465599999952246,
+      "p95_ms": 55.2440999999817,
       "pass": true
     },
     {
       "concurrency": 5,
-      "requests": 4510,
+      "requests": 4685,
       "unexpected_errors": 0,
       "agent_states": {},
       "responses_with_references": 0,
       "responses_without_references": 0,
-      "p50_ms": 81.46020001731813,
-      "p95_ms": 110.57820002315566,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 77.3272000005818,
+      "p95_ms": 110.42379999889818,
       "pass": true
     },
     {
       "concurrency": 10,
-      "requests": 4351,
+      "requests": 4586,
       "unexpected_errors": 0,
       "agent_states": {},
       "responses_with_references": 0,
       "responses_without_references": 0,
-      "p50_ms": 168.7177999992855,
-      "p95_ms": 225.27540003648028,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 158.2527000009577,
+      "p95_ms": 220.00070000103733,
       "pass": true
     }
   ],

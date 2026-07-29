@@ -1,0 +1,48 @@
+[
+    {
+        "RuleID":  "curl-auth-user",
+        "Description":  "Discovered a potential basic authorization token provided in a curl command, which could compromise the curl accessed resource.",
+        "StartLine":  143,
+        "EndLine":  143,
+        "StartColumn":  62,
+        "EndColumn":  129,
+        "Match":  "[REDACTED]",
+        "Secret":  "[REDACTED]",
+        "File":  "codebase/infra/ragflow/scripts/verify-persistence.ps1",
+        "SymlinkFile":  "",
+        "Commit":  "8af62abe327f9d3d6799aff4b1e3d729096c33f4",
+        "Link":  "https://github.com/QI-code1992/Equipment-repair/blob/8af62abe327f9d3d6799aff4b1e3d729096c33f4/codebase/infra/ragflow/scripts/verify-persistence.ps1#L143",
+        "Entropy":  4.812556,
+        "Author":  "ll979053897-arch",
+        "Email":  "ll979053897@gmail.com",
+        "Date":  "2026-07-20T05:05:15Z",
+        "Message":  "fix(task-004): close runtime verification gaps",
+        "Tags":  [
+
+                 ],
+        "Fingerprint":  "8af62abe327f9d3d6799aff4b1e3d729096c33f4:codebase/infra/ragflow/scripts/verify-persistence.ps1:curl-auth-user:143"
+    },
+    {
+        "RuleID":  "curl-auth-user",
+        "Description":  "Discovered a potential basic authorization token provided in a curl command, which could compromise the curl accessed resource.",
+        "StartLine":  131,
+        "EndLine":  131,
+        "StartColumn":  58,
+        "EndColumn":  125,
+        "Match":  "[REDACTED]",
+        "Secret":  "[REDACTED]",
+        "File":  "codebase/infra/ragflow/scripts/verify-persistence.ps1",
+        "SymlinkFile":  "",
+        "Commit":  "0ff29ed5bd6a64ad53dcc9c683f2111f1234da27",
+        "Link":  "https://github.com/QI-code1992/Equipment-repair/blob/0ff29ed5bd6a64ad53dcc9c683f2111f1234da27/codebase/infra/ragflow/scripts/verify-persistence.ps1#L131",
+        "Entropy":  4.812556,
+        "Author":  "ll979053897-arch",
+        "Email":  "ll979053897@gmail.com",
+        "Date":  "2026-07-20T02:33:48Z",
+        "Message":  "test(task-004): verify ragflow restart persistence",
+        "Tags":  [
+
+                 ],
+        "Fingerprint":  "0ff29ed5bd6a64ad53dcc9c683f2111f1234da27:codebase/infra/ragflow/scripts/verify-persistence.ps1:curl-auth-user:131"
+    }
+]

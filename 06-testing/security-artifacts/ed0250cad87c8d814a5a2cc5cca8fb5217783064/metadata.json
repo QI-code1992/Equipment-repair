@@ -1,0 +1,23 @@
+{
+  "source_candidate_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064",
+  "executed_at_utc": "2026-07-29T04:47:14+00:00",
+  "scope": [
+    "codebase/backend",
+    "codebase/frontend",
+    "03-ui-prototype",
+    "06-testing/performance",
+    "full git history"
+  ],
+  "artifacts": {
+    "codeql_python": "codeql-python.sarif",
+    "codeql_javascript": "codeql-javascript.sarif",
+    "semgrep": "semgrep.json",
+    "gitleaks_working_tree": "gitleaks-working-tree.json",
+    "gitleaks_full_history": "gitleaks-full-history.json",
+    "trivy": "trivy.json"
+  },
+  "gitleaks_history_redaction": {
+    "secret_field": "[REDACTED]",
+    "match_field": "[REDACTED]"
+  }
+}

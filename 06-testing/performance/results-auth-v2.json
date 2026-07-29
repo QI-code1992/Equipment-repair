@@ -1,10 +1,12 @@
 {
   "scenario": "auth",
   "metadata": {
-    "sut_commit": "931df829877305d6ee51a3cef871fe7a9735b9e2",
-    "harness_commit": "93df55f6b124d00f140bd11cc303f5682f8c9c1b",
-    "environment": "isolated-compose-ragflow-success-18450",
-    "fixture": "identity:stage6-final-user;no-write-auth-me"
+    "sut_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064",
+    "harness_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064",
+    "environment": "isolated-compose-ragflow-success-18448",
+    "fixture": "identity:ephemeral-stage6-performance-user;no-write-auth-me",
+    "executed_at_utc": "2026-07-29T04:23:22.547488+00:00",
+    "evidence_subject_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064"
   },
   "max_concurrency": 10,
   "duration_seconds_total": 300,
@@ -13,46 +15,54 @@
   "levels": [
     {
       "concurrency": 1,
-      "requests": 4109,
+      "requests": 3810,
       "unexpected_errors": 0,
       "agent_states": {},
       "responses_with_references": 0,
       "responses_without_references": 0,
-      "p50_ms": 12.325099960435182,
-      "p95_ms": 32.69699995871633,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 19.6219999997993,
+      "p95_ms": 34.253800000442425,
       "pass": true
     },
     {
       "concurrency": 2,
-      "requests": 8726,
+      "requests": 8351,
       "unexpected_errors": 0,
       "agent_states": {},
       "responses_with_references": 0,
       "responses_without_references": 0,
-      "p50_ms": 12.53740000538528,
-      "p95_ms": 33.10689999489114,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 12.886799999250798,
+      "p95_ms": 33.95009999985632,
       "pass": true
     },
     {
       "concurrency": 5,
-      "requests": 15361,
+      "requests": 16884,
       "unexpected_errors": 0,
       "agent_states": {},
       "responses_with_references": 0,
       "responses_without_references": 0,
-      "p50_ms": 22.765300003811717,
-      "p95_ms": 41.25419998308644,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 20.23370000097202,
+      "p95_ms": 39.81180000118911,
       "pass": true
     },
     {
       "concurrency": 10,
-      "requests": 15742,
+      "requests": 15794,
       "unexpected_errors": 0,
       "agent_states": {},
       "responses_with_references": 0,
       "responses_without_references": 0,
-      "p50_ms": 45.45580002013594,
-      "p95_ms": 71.62679999601096,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 45.38639999918814,
+      "p95_ms": 72.36569999986386,
       "pass": true
     }
   ],

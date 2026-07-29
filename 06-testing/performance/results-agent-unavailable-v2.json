@@ -1,10 +1,12 @@
 {
   "scenario": "agent-unavailable",
   "metadata": {
-    "sut_commit": "931df829877305d6ee51a3cef871fe7a9735b9e2",
-    "harness_commit": "93df55f6b124d00f140bd11cc303f5682f8c9c1b",
-    "environment": "isolated-compose-ragflow-unavailable-18451",
-    "fixture": "local-dataset:98e39c49-9ae5-4e1a-a16c-5b192a3f6c2c;ready-document:stage6-fault-document;ragflow-base:unreachable"
+    "sut_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064",
+    "harness_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064",
+    "environment": "isolated-compose-ragflow-unavailable-18448",
+    "fixture": "local-dataset:5a27e048-5429-4525-bc86-9f58aa9e0fb3;ready-document:stage6-fault-document;ragflow-base:host.docker.internal:9",
+    "executed_at_utc": "2026-07-29T04:42:16.919683+00:00",
+    "evidence_subject_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064"
   },
   "max_concurrency": 10,
   "duration_seconds_total": 300,
@@ -13,54 +15,62 @@
   "levels": [
     {
       "concurrency": 1,
-      "requests": 2726,
+      "requests": 2237,
       "unexpected_errors": 0,
       "agent_states": {
-        "UNAVAILABLE": 2726
+        "UNAVAILABLE": 2237
       },
       "responses_with_references": 0,
-      "responses_without_references": 2726,
-      "p50_ms": 24.02740000979975,
-      "p95_ms": 46.785199956502765,
+      "responses_without_references": 2237,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 32.23670000079437,
+      "p95_ms": 50.445199998648604,
       "pass": true
     },
     {
       "concurrency": 2,
-      "requests": 5449,
+      "requests": 4555,
       "unexpected_errors": 0,
       "agent_states": {
-        "UNAVAILABLE": 5449
+        "UNAVAILABLE": 4555
       },
       "responses_with_references": 0,
-      "responses_without_references": 5449,
-      "p50_ms": 23.897900013253093,
-      "p95_ms": 44.81980000855401,
+      "responses_without_references": 4555,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 32.221699999354314,
+      "p95_ms": 49.414400000387104,
       "pass": true
     },
     {
       "concurrency": 5,
-      "requests": 7584,
+      "requests": 7436,
       "unexpected_errors": 0,
       "agent_states": {
-        "UNAVAILABLE": 7584
+        "UNAVAILABLE": 7436
       },
       "responses_with_references": 0,
-      "responses_without_references": 7584,
-      "p50_ms": 47.70639998605475,
-      "p95_ms": 71.04200002504513,
+      "responses_without_references": 7436,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 49.42040000059933,
+      "p95_ms": 72.29809999989811,
       "pass": true
     },
     {
       "concurrency": 10,
-      "requests": 6663,
+      "requests": 6429,
       "unexpected_errors": 0,
       "agent_states": {
-        "UNAVAILABLE": 6663
+        "UNAVAILABLE": 6429
       },
       "responses_with_references": 0,
-      "responses_without_references": 6663,
-      "p50_ms": 109.1213000472635,
-      "p95_ms": 148.76880001975223,
+      "responses_without_references": 6429,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 114.10070000056294,
+      "p95_ms": 152.24309999939578,
       "pass": true
     }
   ],

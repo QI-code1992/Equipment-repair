@@ -1,10 +1,12 @@
 {
   "scenario": "agent-success",
   "metadata": {
-    "sut_commit": "a07b3b4bcc20439c786e8ad6a5dc7204dc390a3e",
-    "harness_commit": "a07b3b4bcc20439c786e8ad6a5dc7204dc390a3e",
+    "sut_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064",
+    "harness_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064",
     "environment": "isolated-compose-ragflow-success-18448",
     "fixture": "ragflow-dataset:811d16248a5411f1826e69e4863c3812;document:ba9159c48a5411f1826e69e4863c3812;business-document:1048a926-3dcb-4d85-a11e-c30a280734ea;chunk:ebe1aab2b5cb0ceb",
+    "executed_at_utc": "2026-07-29T04:35:00.909572+00:00",
+    "evidence_subject_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064",
     "expected_reference_text": "Stage6 unique RAGFlow verification marker.",
     "expected_document_id": "1048a926-3dcb-4d85-a11e-c30a280734ea",
     "expected_chunk_id": "ebe1aab2b5cb0ceb"
@@ -13,71 +15,65 @@
   "duration_seconds_total": 300,
   "duration_seconds_per_level": 75,
   "p95_limit_ms": 15000,
-  "level_provenance": {
-    "1": "2026-07-29 initial isolated run; 75-second level from the 300-second 1/2/5/10 sequence",
-    "2": "2026-07-29 initial isolated run; 75-second level from the 300-second 1/2/5/10 sequence",
-    "5": "2026-07-29 initial isolated run; 75-second level from the 300-second 1/2/5/10 sequence",
-    "10": "2026-07-29 independent 75-second retry with the same SUT, harness, environment, fixture, and threshold; source: results-agent-success-10-concurrency-retry.json; initial 10-concurrency attempt had three 40-second client timeouts and is not passing evidence"
-  },
   "levels": [
     {
       "concurrency": 1,
-      "requests": 61,
+      "requests": 40,
       "unexpected_errors": 0,
       "agent_states": {
-        "QUESTIONING": 61
+        "QUESTIONING": 40
       },
-      "responses_with_references": 61,
+      "responses_with_references": 40,
       "responses_without_references": 0,
-      "responses_bound_to_fixture": 61,
+      "responses_bound_to_fixture": 40,
       "responses_without_fixture_reference": 0,
-      "p50_ms": 1058.3149000003687,
-      "p95_ms": 2307.9026000004887,
+      "p50_ms": 810.5402999990474,
+      "p95_ms": 4480.042200000753,
       "pass": true
     },
     {
       "concurrency": 2,
-      "requests": 87,
+      "requests": 176,
       "unexpected_errors": 0,
       "agent_states": {
-        "QUESTIONING": 87
+        "QUESTIONING": 176
       },
-      "responses_with_references": 87,
+      "responses_with_references": 176,
       "responses_without_references": 0,
-      "responses_bound_to_fixture": 87,
+      "responses_bound_to_fixture": 176,
       "responses_without_fixture_reference": 0,
-      "p50_ms": 1175.3085999998802,
-      "p95_ms": 3790.6426999998075,
+      "p50_ms": 774.5091999986471,
+      "p95_ms": 1338.1783000004361,
       "pass": true
     },
     {
       "concurrency": 5,
-      "requests": 248,
+      "requests": 369,
       "unexpected_errors": 0,
       "agent_states": {
-        "QUESTIONING": 248
+        "QUESTIONING": 369
       },
-      "responses_with_references": 248,
+      "responses_with_references": 369,
       "responses_without_references": 0,
-      "responses_bound_to_fixture": 248,
+      "responses_bound_to_fixture": 369,
       "responses_without_fixture_reference": 0,
-      "p50_ms": 1104.1900000000169,
-      "p95_ms": 3717.2354000003907,
+      "p50_ms": 829.6269999991637,
+      "p95_ms": 1915.3213999998115,
       "pass": true
     },
     {
       "concurrency": 10,
-      "requests": 428,
+      "requests": 691,
       "unexpected_errors": 0,
       "agent_states": {
-        "QUESTIONING": 428
+        "QUESTIONING": 691
       },
-      "responses_with_references": 428,
+      "responses_with_references": 691,
       "responses_without_references": 0,
-      "responses_bound_to_fixture": 428,
+      "responses_bound_to_fixture": 691,
       "responses_without_fixture_reference": 0,
-      "p50_ms": 1116.6665000000648,
-      "p95_ms": 3822.0774999999776,
+      "p50_ms": 931.1987000000954,
+      "p95_ms": 1470.3669999998965,
       "pass": true
     }
   ],

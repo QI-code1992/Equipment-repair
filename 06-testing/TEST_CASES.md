@@ -25,4 +25,5 @@
 | TC-PERF-001 | 认证和附件在 1/2/5/10 并发、每场景 300 秒下零意外错误，P95 不超过 1 秒。 | `results-auth-v2.json`、`results-attachment-v2.json`，含 SUT/harness/环境/夹具。 |
 | TC-PERF-002 | 真实 RAGFlow 成功路径在 1/2/5/10 并发下为 `QUESTIONING`；每条 evidence 的 marker、`document_id`、`chunk_id` 均绑定本次 fixture，P95 不超过 15 秒。 | `results-agent-success-final-v2.json`，含 SUT/harness、预期身份对、每层绑定统计和逐层来源；独立重试保留为 `results-agent-success-10-concurrency-retry.json`。 |
 | TC-PERF-003 | 受控 RAGFlow 不可用路径在 1/2/5/10 并发下均为 `UNAVAILABLE`、零引用、零意外错误，P95 不超过 15 秒。 | `results-agent-unavailable-v2.json`，含 SUT/harness/环境/夹具。 |
+| TC-AGENT-EMPTY-001 | RAGFlow 正常返回但无 citation 时，响应为 `NO_EVIDENCE`、空 evidence，并给出无可引用依据的人工处理提示；不得返回 `QUESTIONING`。 | `tests/agents/test_operation_guidance.py` 单元与 API 回归。 |
 | TC-RESTORE-001 | 受控附件备份和随机隔离恢复不超过 180 秒；恢复期间 `/api/auth/me` 固定 10 并发只读 60 秒，零意外错误且 P95 不超过 2 秒。 | `results-backup-restore-readonly.json`，含 SUT/harness/恢复环境/受控附件与恢复项目 fixture。 |
