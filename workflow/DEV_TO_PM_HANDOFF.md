@@ -1,5 +1,12 @@
 # 开发到产品交接
 
+## Stage 6 → Stage 7 验收交接（2026-07-29）
+
+- Gate：项目负责人已批准 `89fbd2129169fb6ece42094b17907885637f3c48` 进入 Stage 7 独立产品验收。
+- 前置结论：Stage 6 独立测试总体结论已签发，绑定 PR #63 approved HEAD `46bd5b7f6579016d9ce9bb3f0d1d7226ccd503d1` 与 Merge Commit `a5e4f6abec98f0df4c04f18a0cbf849e423624be`；后续治理合并未改变业务或运行时内容。
+- 验收边界：基于 PRD、SPEC、AC、批准原型和当前精确候选逐项独立判定；既有 React Router 风险处置与 Stage 3 原型 P2 发现必须如实纳入验收报告。
+- 禁止事项：不得把本交接解释为验收通过、Stage 8 发布、生产操作或 `main` 合并授权。
+
 ## Stage 6 PR #63 合并后治理同步（2026-07-29）
 
 - 合并事实：DEV-002 已按单独授权以手动 Merge Commit `a5e4f6abec98f0df4c04f18a0cbf849e423624be` 将 PR #63 合入 `codex/stage-05-integration`；双亲为目标分支基线 `d4fa5eefaa9ebfb9ed768f199ca5df2b0e2d397b` 与获批候选 `46bd5b7f6579016d9ce9bb3f0d1d7226ccd503d1`。合并结果树与第二父候选一致，PR 状态和目标分支指针已核验。
