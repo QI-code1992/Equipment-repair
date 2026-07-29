@@ -817,5 +817,5 @@
   - Commit：待提交。
   - Owner：Stage 7 验收执行人。
 - 验证：
-  - 当前预检：验收候选与当前集成分支的 `codebase/` 无差异；本机未安装 Docker，尚未执行 Compose 或启动环境。
+  - 当前预检：验收候选与当前集成分支的 `codebase/` 无差异；`workflow/state.json` 可解析，15 项 Node 静态回归和 `git diff --check` 通过。本机未安装 Docker，尚未执行 Compose 或启动环境。
   - 后续证据：必须记录精确构建 SHA、环境标识、镜像身份、安全配置引用、测试数据边界、AC 操作结果、回退或清理结果。
