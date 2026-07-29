@@ -1,10 +1,12 @@
 {
   "scenario": "auth",
   "metadata": {
-    "sut_commit": "931df829877305d6ee51a3cef871fe7a9735b9e2",
-    "harness_commit": "93df55f6b124d00f140bd11cc303f5682f8c9c1b",
-    "environment": "isolated-compose-restore-bkp9d7d41",
-    "fixture": "backup:controlled-api-attachment-1;restore-project:equipment-task011-restore-bkp9d7d41;readonly:/api/auth/me"
+    "sut_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064",
+    "harness_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064",
+    "environment": "isolated-compose-restore-current9d7d41",
+    "fixture": "backup:controlled-api-attachment-1;restore-project:equipment-task011-restore-current9d7d41;readonly:/api/auth/me",
+    "executed_at_utc": "2026-07-29T05:21:56.143260+00:00",
+    "evidence_subject_commit": "2980c2041f35d462df563fa2e136445c26a2f2cd"
   },
   "max_concurrency": 10,
   "duration_seconds_total": 60,
@@ -13,15 +15,15 @@
   "levels": [
     {
       "concurrency": 10,
-      "requests": 12443,
+      "requests": 11047,
       "unexpected_errors": 0,
       "agent_states": {},
       "responses_with_references": 0,
       "responses_without_references": 0,
       "responses_bound_to_fixture": 0,
       "responses_without_fixture_reference": 0,
-      "p50_ms": 43.28519996488467,
-      "p95_ms": 76.64419995853677,
+      "p50_ms": 52.18039999999746,
+      "p95_ms": 82.78339999924356,
       "pass": true
     }
   ],

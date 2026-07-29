@@ -8,7 +8,7 @@
 - 动态执行：`results-auth-v2.json`、`results-attachment-v2.json`、`results-agent-success-final-v2.json` 和 `results-agent-unavailable-v2.json` 均记录 UTC 执行时间，且 `sut_commit`、`harness_commit`、`evidence_subject_commit` 均为本段 SHA。每项按 1/2/5/10 并发运行 300 秒并以零意外错误通过各自 P95 阈值。
 - 成功路径：真实 RAGFlow fixture 的 marker、业务 `document_id` 和 `chunk_id` 在每个响应中同时核验；四层 `responses_bound_to_fixture` 分别为 40/176/369/691，且无未绑定引用。正常但空的检索现在返回 `NO_EVIDENCE`、空 evidence 与“无可引用依据”提示，不再伪装为 `QUESTIONING`；不可用 RAGFlow 保持 `UNAVAILABLE`、空 evidence。
 - 静态复扫工件位于 `06-testing/security-artifacts/ed0250cad87c8d814a5a2cc5cca8fb5217783064/`：CodeQL Python 62 项质量诊断、JavaScript/TypeScript 0 项；Semgrep 15 项既有发现和 4 条解析警告；Trivy 1 个既有依赖告警、0 个秘密、1 个低风险配置项。Gitleaks 当前工作树 0 项；完整历史 383 个提交有 2 个 `curl-auth-user` 分类命中，归档 JSON 的 `Secret` 和 `Match` 均为固定脱敏占位符，未保存秘密值。
-- 恢复只读结果仍仅对其 JSON 内 `931df...` SUT/harness 有效，尚未以本段当前 SUT 重新演练；因此本报告不作 Stage 6 整体通过结论，不放行 Stage 7，也不请求合并。
+- 恢复只读结果已在干净隔离项目中以本段 SUT/harness 重跑：受控 API 附件备份 3.178 秒，随机恢复项目 `equipment-task011-restore-current9d7d41` 恢复 10.955 秒；恢复窗口中的固定 10 并发 `/api/auth/me` 负载为 11,047 次、零意外错误、P95 82.78 ms。JSON 记录 UTC 执行时间和本段 evidence subject SHA。该结果满足受控恢复门槛；本报告仍不自行作 Stage 6 整体通过结论，不放行 Stage 7，也不请求合并。
 
 ## Stage 6 运行态性能边界与降级复验（2026-07-29，候选 `a07b3b4bcc20439c786e8ad6a5dc7204dc390a3e`）
 

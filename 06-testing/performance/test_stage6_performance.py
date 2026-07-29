@@ -168,12 +168,13 @@ class PerformanceThresholdTests(unittest.TestCase):
 
         self.assertEqual(report["scenario"], "auth")
         self.assertEqual(report["max_concurrency"], 10)
-        self.assertEqual(report["metadata"]["sut_commit"], "931df829877305d6ee51a3cef871fe7a9735b9e2")
-        self.assertEqual(report["metadata"]["harness_commit"], "93df55f6b124d00f140bd11cc303f5682f8c9c1b")
-        self.assertEqual(report["metadata"]["environment"], "isolated-compose-restore-bkp9d7d41")
+        self.assertEqual(report["metadata"]["sut_commit"], "ed0250cad87c8d814a5a2cc5cca8fb5217783064")
+        self.assertEqual(report["metadata"]["harness_commit"], "ed0250cad87c8d814a5a2cc5cca8fb5217783064")
+        self.assertEqual(report["metadata"]["evidence_subject_commit"], "2980c2041f35d462df563fa2e136445c26a2f2cd")
+        self.assertIn("executed_at_utc", report["metadata"])
         self.assertEqual(
             report["metadata"]["fixture"],
-            "backup:controlled-api-attachment-1;restore-project:equipment-task011-restore-bkp9d7d41;readonly:/api/auth/me",
+            "backup:controlled-api-attachment-1;restore-project:equipment-task011-restore-current9d7d41;readonly:/api/auth/me",
         )
 
 
