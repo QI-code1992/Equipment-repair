@@ -1,5 +1,11 @@
 {
   "scenario": "auth",
+  "metadata": {
+    "sut_commit": "931df829877305d6ee51a3cef871fe7a9735b9e2",
+    "harness_commit": "93df55f6b124d00f140bd11cc303f5682f8c9c1b",
+    "environment": "isolated-compose-restore-bkp9d7d41",
+    "fixture": "backup:controlled-api-attachment-1;restore-project:equipment-task011-restore-bkp9d7d41;readonly:/api/auth/me"
+  },
   "max_concurrency": 10,
   "duration_seconds_total": 60,
   "duration_seconds_per_level": 60,
@@ -10,6 +16,10 @@
       "requests": 12443,
       "unexpected_errors": 0,
       "agent_states": {},
+      "responses_with_references": 0,
+      "responses_without_references": 0,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
       "p50_ms": 43.28519996488467,
       "p95_ms": 76.64419995853677,
       "pass": true

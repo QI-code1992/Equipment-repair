@@ -62,7 +62,7 @@ class PerformanceThresholdTests(unittest.TestCase):
         })):
             outcome = request_json(
                 base_url="https://example.test", token="token", scenario="agent-success",
-                agent_payload={}, insecure_tls=True,
+                agent_payload={}, expected_reference_text=None, insecure_tls=True,
             )
 
         self.assertFalse(outcome.valid)
@@ -75,7 +75,25 @@ class PerformanceThresholdTests(unittest.TestCase):
         })):
             outcome = request_json(
                 base_url="https://example.test", token="token", scenario="agent-unavailable",
-                agent_payload={}, insecure_tls=True,
+                agent_payload={}, expected_reference_text=None, insecure_tls=True,
+            )
+
+        self.assertFalse(outcome.valid)
+        self.assertEqual(outcome.error, "agent_contract")
+
+    def test_agent_success_with_a_fabricated_reference_not_bound_to_fixture_is_invalid(self) -> None:
+        with patch("stage6_performance.urlopen", return_value=_Response({
+            "state": "QUESTIONING",
+            "evidence": [{"citation": "fake", "text": "generic answer"}],
+            "manual_fallback": True,
+        })):
+            outcome = request_json(
+                base_url="https://example.test",
+                token="token",
+                scenario="agent-success",
+                agent_payload={},
+                expected_reference_text="TASK005 hydraulic pressure guidance",
+                insecure_tls=True,
             )
 
         self.assertFalse(outcome.valid)
@@ -100,6 +118,20 @@ class PerformanceThresholdTests(unittest.TestCase):
         self.assertEqual(report["metadata"]["environment"], "isolated-compose-success")
         self.assertEqual(report["metadata"]["fixture"], "ragflow-dataset:example")
         self.assertEqual(report["p95_limit_ms"], 15_000)
+
+    def test_recovery_readonly_result_binds_candidate_environment_fixture_and_harness(self) -> None:
+        with open("results-backup-restore-readonly.json", encoding="utf-8") as handle:
+            report = json.load(handle)
+
+        self.assertEqual(report["scenario"], "auth")
+        self.assertEqual(report["max_concurrency"], 10)
+        self.assertEqual(report["metadata"]["sut_commit"], "931df829877305d6ee51a3cef871fe7a9735b9e2")
+        self.assertEqual(report["metadata"]["harness_commit"], "93df55f6b124d00f140bd11cc303f5682f8c9c1b")
+        self.assertEqual(report["metadata"]["environment"], "isolated-compose-restore-bkp9d7d41")
+        self.assertEqual(
+            report["metadata"]["fixture"],
+            "backup:controlled-api-attachment-1;restore-project:equipment-task011-restore-bkp9d7d41;readonly:/api/auth/me",
+        )
 
 
 if __name__ == "__main__":

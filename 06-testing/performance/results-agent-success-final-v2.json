@@ -4,7 +4,8 @@
     "sut_commit": "931df829877305d6ee51a3cef871fe7a9735b9e2",
     "harness_commit": "93df55f6b124d00f140bd11cc303f5682f8c9c1b",
     "environment": "isolated-compose-ragflow-success-18450",
-    "fixture": "ragflow-dataset:811d16248a5411f1826e69e4863c3812;document:ba9159c48a5411f1826e69e4863c3812"
+    "fixture": "ragflow-dataset:811d16248a5411f1826e69e4863c3812;document:ba9159c48a5411f1826e69e4863c3812",
+    "expected_reference_text": "TASK005 hydraulic pressure guidance"
   },
   "max_concurrency": 10,
   "duration_seconds_total": 300,
@@ -20,6 +21,8 @@
       },
       "responses_with_references": 78,
       "responses_without_references": 0,
+      "responses_bound_to_fixture": 78,
+      "responses_without_fixture_reference": 0,
       "p50_ms": 847.7039000135846,
       "p95_ms": 2021.065000037197,
       "pass": true
@@ -33,6 +36,8 @@
       },
       "responses_with_references": 122,
       "responses_without_references": 0,
+      "responses_bound_to_fixture": 122,
+      "responses_without_fixture_reference": 0,
       "p50_ms": 848.7748000188731,
       "p95_ms": 1928.1851000268944,
       "pass": true
@@ -46,6 +51,8 @@
       },
       "responses_with_references": 385,
       "responses_without_references": 0,
+      "responses_bound_to_fixture": 385,
+      "responses_without_fixture_reference": 0,
       "p50_ms": 910.9994999598712,
       "p95_ms": 1372.4407000117935,
       "pass": true
@@ -59,6 +66,8 @@
       },
       "responses_with_references": 619,
       "responses_without_references": 0,
+      "responses_bound_to_fixture": 619,
+      "responses_without_fixture_reference": 0,
       "p50_ms": 1031.202900048811,
       "p95_ms": 2219.0759999793954,
       "pass": true

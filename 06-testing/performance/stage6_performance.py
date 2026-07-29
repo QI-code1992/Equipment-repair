@@ -43,6 +43,7 @@ class Outcome:
     error: str | None
     state: str | None = None
     reference_count: int = 0
+    fixture_reference_count: int = 0
     manual_fallback: bool | None = None
 
 
@@ -64,6 +65,7 @@ def multipart_body(filename: str, content: bytes) -> tuple[str, bytes]:
 
 def request_json(
     *, base_url: str, token: str, scenario: str, agent_payload: dict[str, object] | None,
+    expected_reference_text: str | None,
     insecure_tls: bool = False,
 ) -> Outcome:
     headers = {"Authorization": f"Bearer {token}"}
@@ -112,8 +114,23 @@ def request_json(
                 and bool(item["text"].strip())
                 for item in evidence
             )
+            fixture_reference_count = sum(
+                1
+                for item in evidence
+                if expected_reference_text is not None
+                and isinstance(item, dict)
+                and expected_reference_text in str(item.get("text", ""))
+            )
+            fixture_bound = (
+                expected_reference_text is None
+                or (bool(evidence) and fixture_reference_count == len(evidence))
+            )
             expected_state = "UNAVAILABLE" if scenario == "agent-unavailable" else "QUESTIONING"
-            expected_evidence = evidence == [] if scenario == "agent-unavailable" else bool(evidence) and references_valid
+            expected_evidence = (
+                evidence == []
+                if scenario == "agent-unavailable"
+                else bool(evidence) and references_valid and fixture_bound
+            )
             valid = status == 200 and state == expected_state and manual_fallback and expected_evidence
             return Outcome(
                 (time.perf_counter() - started) * 1_000,
@@ -122,6 +139,7 @@ def request_json(
                 None if valid else "agent_contract",
                 state,
                 len(evidence),
+                fixture_reference_count,
                 manual_fallback,
             )
         except (json.JSONDecodeError, KeyError, TypeError, ValueError):
@@ -140,6 +158,7 @@ def request_json(
 def run_level(
     *, base_url: str, token: str, scenario: str, agent_payload: dict[str, object] | None,
     concurrency: int, duration_seconds: int, p95_limit_ms: int,
+    expected_reference_text: str | None,
     insecure_tls: bool,
 ) -> dict[str, object]:
     deadline = time.monotonic() + duration_seconds
@@ -153,6 +172,7 @@ def run_level(
                 outcome = request_json(
                     base_url=base_url, token=token, scenario=scenario,
                     agent_payload=agent_payload,
+                    expected_reference_text=expected_reference_text,
                     insecure_tls=insecure_tls,
                 )
             except Exception as error:
@@ -181,6 +201,17 @@ def run_level(
         "responses_with_references": sum(item.reference_count > 0 for item in outcomes),
         "responses_without_references": sum(
             item.state is not None and item.reference_count == 0 for item in outcomes
+        ),
+        "responses_bound_to_fixture": sum(
+            item.reference_count > 0
+            and item.fixture_reference_count == item.reference_count
+            for item in outcomes
+        ),
+        "responses_without_fixture_reference": sum(
+            item.state is not None
+            and item.reference_count > 0
+            and item.fixture_reference_count == 0
+            for item in outcomes
         ),
         "p50_ms": percentile(latencies, 50),
         "p95_ms": percentile(latencies, 95),
@@ -217,6 +248,7 @@ def main() -> None:
     parser.add_argument("--scenario", choices=("auth", "attachment", "agent-success", "agent-unavailable"), required=True)
     parser.add_argument("--agent-payload-json")
     parser.add_argument("--agent-payload-base64")
+    parser.add_argument("--expected-reference-text")
     parser.add_argument("--duration-seconds", type=int, default=300)
     parser.add_argument("--concurrency-levels", default="1,2,5,10")
     parser.add_argument("--p95-limit-ms", type=int, required=True)
@@ -238,6 +270,7 @@ def main() -> None:
             base_url=args.base_url.rstrip("/"), token=args.token, scenario=args.scenario,
             agent_payload=payload, concurrency=level, duration_seconds=level_duration_seconds,
             p95_limit_ms=args.p95_limit_ms,
+            expected_reference_text=args.expected_reference_text,
             insecure_tls=args.insecure_tls,
         )
         for level in levels
@@ -252,6 +285,11 @@ def main() -> None:
             "harness_commit": args.harness_commit,
             "environment": args.environment,
             "fixture": args.fixture,
+            **(
+                {"expected_reference_text": args.expected_reference_text}
+                if args.expected_reference_text is not None
+                else {}
+            ),
         },
     )
     with open(args.output, "w", encoding="utf-8") as handle:
