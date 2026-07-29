@@ -812,6 +812,7 @@
   - Stage 8：不启动；生产发布、生产资源、公开域名和 `main` 合并继续禁止。
   - 基础设施：复用已批准的 `codebase/infra/` 配置；若需要新云资源、公开 DNS、生产类证书、外部承诺或实质配置变更，必须先新增并批准适用变更请求。
 - 决策：项目负责人已明确确认先进行隔离测试部署，并以实际表现决定验收结论；进一步明确必须先确认具体部署方案，当前仅可编制和核验候选方案，未授权实际启动。
+- 方案选择：项目负责人已拒绝将外部 ECS、FRP 或 PostgreSQL 16 环境纳入本次方案；保持已批准的单机 Windows Docker Desktop/WSL2、PostgreSQL 17、独立 RAGFlow 和回环 HTTPS 设计。该外部环境从未成为正式基线，因此不产生代码或配置回滚。
 - 更新基线：`07-acceptance/ACCEPTANCE_REPORT.md`、`07-acceptance/ACCEPTANCE_EVIDENCE.md`、`07-acceptance/ACCEPTANCE_ENVIRONMENT_DEPLOYMENT.md`。
 - 实施：
   - Commit：待提交。
