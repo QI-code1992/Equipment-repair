@@ -1,0 +1,54 @@
+{
+  "scenario": "agent-success",
+  "max_concurrency": 10,
+  "duration_seconds_total": 300,
+  "duration_seconds_per_level": 75,
+  "p95_limit_ms": 20000,
+  "levels": [
+    {
+      "concurrency": 1,
+      "requests": 44,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "QUESTIONING": 44
+      },
+      "p50_ms": 1578.7797999801114,
+      "p95_ms": 2568.2546999887563,
+      "pass": true
+    },
+    {
+      "concurrency": 2,
+      "requests": 69,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "QUESTIONING": 69
+      },
+      "p50_ms": 1628.517799952533,
+      "p95_ms": 3266.0330000217073,
+      "pass": true
+    },
+    {
+      "concurrency": 5,
+      "requests": 157,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "QUESTIONING": 157
+      },
+      "p50_ms": 1856.82409995934,
+      "p95_ms": 2971.3349000085145,
+      "pass": true
+    },
+    {
+      "concurrency": 10,
+      "requests": 242,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "QUESTIONING": 242
+      },
+      "p50_ms": 2134.87680000253,
+      "p95_ms": 14743.047400028445,
+      "pass": true
+    }
+  ],
+  "pass": true
+}

@@ -7,6 +7,7 @@ from app.integrations.ragflow.adapter import RagflowError
 
 class GuidanceState(StrEnum):
     QUESTIONING = "QUESTIONING"
+    NO_EVIDENCE = "NO_EVIDENCE"
     UNAVAILABLE = "UNAVAILABLE"
 
 
@@ -23,6 +24,8 @@ class GuidanceContext:
 
 @dataclass(frozen=True, slots=True)
 class GuidanceReference:
+    document_id: str
+    chunk_id: str
     citation: str
     text: str
 
@@ -46,16 +49,21 @@ class OperationGuidanceAgent:
 
     def start(self, context: GuidanceContext) -> GuidanceSession:
         queries = (
-            f"{context.equipment_model} {context.symptom}",
-            f"{context.equipment_model} {context.description}",
+            f"{context.equipment_model} {context.symptom} {context.description}",
         )
         references: list[GuidanceReference] = []
+        retrieval_count = 0
         try:
             for query in queries[:MAX_DIRECTIONAL_RETRIEVALS]:
-                references.extend(
-                    GuidanceReference(str(item["citation"]), str(item["text"]))
-                    for item in self._retrieve(query)
-                )
+                retrieval_count += 1
+                try:
+                    references.extend(self._references(query))
+                except (ConnectionError, RagflowError, TimeoutError):
+                    if retrieval_count == MAX_DIRECTIONAL_RETRIEVALS:
+                        raise
+                    retrieval_count += 1
+                    references.extend(self._references(query))
+                    break
         except (ConnectionError, RagflowError, TimeoutError):
             return GuidanceSession(
                 context=context,
@@ -64,14 +72,33 @@ class OperationGuidanceAgent:
             )
         except (KeyError, TypeError, ValueError) as error:
             raise ValueError("guidance retrieval returned an invalid reference") from error
+        if not references:
+            return GuidanceSession(
+                context=context,
+                state=GuidanceState.NO_EVIDENCE,
+                question="未检索到可引用依据，请补充工况或直接按人工流程处理。",
+                retrieval_count=retrieval_count,
+                manual_fallback=True,
+            )
         return GuidanceSession(
             context=context,
             state=GuidanceState.QUESTIONING,
             question="请描述故障出现时的工况或最近一次可复现步骤。",
             evidence=tuple(references),
-            retrieval_count=min(len(queries), MAX_DIRECTIONAL_RETRIEVALS),
+            retrieval_count=retrieval_count,
             manual_fallback=True,
         )
+
+    def _references(self, query: str) -> list[GuidanceReference]:
+        return [
+            GuidanceReference(
+                str(item["document_id"]),
+                str(item["chunk_id"]),
+                str(item["citation"]),
+                str(item["text"]),
+            )
+            for item in self._retrieve(query)
+        ]
 
     def answer(self, session: GuidanceSession, answer: str) -> GuidanceSession:
         if session.state is GuidanceState.UNAVAILABLE:

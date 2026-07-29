@@ -1,0 +1,42 @@
+{
+  "scenario": "auth",
+  "max_concurrency": 10,
+  "duration_seconds_total": 300,
+  "duration_seconds_per_level": 75,
+  "p95_limit_ms": 1000,
+  "levels": [
+    {
+      "concurrency": 1,
+      "requests": 3971,
+      "unexpected_errors": 0,
+      "p50_ms": 13.868499954696745,
+      "p95_ms": 34.59729999303818,
+      "pass": true
+    },
+    {
+      "concurrency": 2,
+      "requests": 8343,
+      "unexpected_errors": 0,
+      "p50_ms": 14.051100006327033,
+      "p95_ms": 34.402000019326806,
+      "pass": true
+    },
+    {
+      "concurrency": 5,
+      "requests": 13866,
+      "unexpected_errors": 0,
+      "p50_ms": 25.323200039565563,
+      "p95_ms": 44.74560002563521,
+      "pass": true
+    },
+    {
+      "concurrency": 10,
+      "requests": 15550,
+      "unexpected_errors": 0,
+      "p50_ms": 45.75980000663549,
+      "p95_ms": 72.95760000124574,
+      "pass": true
+    }
+  ],
+  "pass": true
+}

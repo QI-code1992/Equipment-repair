@@ -89,9 +89,9 @@ export type DiagnosisResponse = {
 };
 
 export type GuidanceResponse = {
-  state: string;
+  state: "QUESTIONING" | "NO_EVIDENCE" | "UNAVAILABLE";
   question: string | null;
-  evidence: Array<{ citation: string; text: string }>;
+  evidence: Array<{ document_id: string; chunk_id: string; citation: string; text: string }>;
   manual_fallback: boolean;
   loading_seconds: number;
 };

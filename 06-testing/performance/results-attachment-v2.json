@@ -1,0 +1,70 @@
+{
+  "scenario": "attachment",
+  "metadata": {
+    "sut_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064",
+    "harness_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064",
+    "environment": "isolated-compose-ragflow-success-18448",
+    "fixture": "attachment:stage6-performance.txt;clamav:minio:configured-bucket",
+    "executed_at_utc": "2026-07-29T04:28:24.506672+00:00",
+    "evidence_subject_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064"
+  },
+  "max_concurrency": 10,
+  "duration_seconds_total": 300,
+  "duration_seconds_per_level": 75,
+  "p95_limit_ms": 1000,
+  "levels": [
+    {
+      "concurrency": 1,
+      "requests": 2508,
+      "unexpected_errors": 0,
+      "agent_states": {},
+      "responses_with_references": 0,
+      "responses_without_references": 0,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 26.769699999931618,
+      "p95_ms": 46.789099998932215,
+      "pass": true
+    },
+    {
+      "concurrency": 2,
+      "requests": 3997,
+      "unexpected_errors": 0,
+      "agent_states": {},
+      "responses_with_references": 0,
+      "responses_without_references": 0,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 35.465599999952246,
+      "p95_ms": 55.2440999999817,
+      "pass": true
+    },
+    {
+      "concurrency": 5,
+      "requests": 4685,
+      "unexpected_errors": 0,
+      "agent_states": {},
+      "responses_with_references": 0,
+      "responses_without_references": 0,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 77.3272000005818,
+      "p95_ms": 110.42379999889818,
+      "pass": true
+    },
+    {
+      "concurrency": 10,
+      "requests": 4586,
+      "unexpected_errors": 0,
+      "agent_states": {},
+      "responses_with_references": 0,
+      "responses_without_references": 0,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 158.2527000009577,
+      "p95_ms": 220.00070000103733,
+      "pass": true
+    }
+  ],
+  "pass": true
+}

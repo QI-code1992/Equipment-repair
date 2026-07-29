@@ -1,0 +1,54 @@
+{
+  "scenario": "agent-unavailable",
+  "max_concurrency": 10,
+  "duration_seconds_total": 300,
+  "duration_seconds_per_level": 75,
+  "p95_limit_ms": 15000,
+  "levels": [
+    {
+      "concurrency": 1,
+      "requests": 2847,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "UNAVAILABLE": 2847
+      },
+      "p50_ms": 21.89520001411438,
+      "p95_ms": 44.04340003384277,
+      "pass": true
+    },
+    {
+      "concurrency": 2,
+      "requests": 5266,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "UNAVAILABLE": 5266
+      },
+      "p50_ms": 24.874299997463822,
+      "p95_ms": 46.383899985812604,
+      "pass": true
+    },
+    {
+      "concurrency": 5,
+      "requests": 7304,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "UNAVAILABLE": 7304
+      },
+      "p50_ms": 49.547199974767864,
+      "p95_ms": 73.40490003116429,
+      "pass": true
+    },
+    {
+      "concurrency": 10,
+      "requests": 6372,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "UNAVAILABLE": 6372
+      },
+      "p50_ms": 114.49030000949278,
+      "p95_ms": 153.067099978216,
+      "pass": true
+    }
+  ],
+  "pass": true
+}

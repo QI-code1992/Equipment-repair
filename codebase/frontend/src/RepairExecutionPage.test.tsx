@@ -57,7 +57,7 @@ it("sends only the server draft id and user evidence when advancing diagnosis", 
 });
 
 it("renders real guidance citations and runtime SSE statuses", async () => {
-  vi.mocked(getOperationGuidance).mockResolvedValue({ state: "QUESTIONING", question: "检查压力", evidence: [{ citation: "chunk-1", text: "检查溢流阀" }], manual_fallback: false, loading_seconds: 3 });
+  vi.mocked(getOperationGuidance).mockResolvedValue({ state: "QUESTIONING", question: "检查压力", evidence: [{ document_id: "document-1", chunk_id: "chunk-1", citation: "chunk-1", text: "检查溢流阀" }], manual_fallback: false, loading_seconds: 3 });
   vi.mocked(startAgentRun).mockResolvedValue({ thread_id: "thread-1", run_id: "run-1" });
   vi.mocked(readRunEvents).mockResolvedValue([{ event: "run_waiting", data: { status: "WAITING_FOR_MODEL" } }]);
   render(<RepairExecutionPage />);
@@ -68,6 +68,24 @@ it("renders real guidance citations and runtime SSE statuses", async () => {
   expect(await screen.findByText("查看 1 条引用")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "发送操作问题" }));
   expect(await screen.findByText("运行状态：WAITING_FOR_MODEL")).toBeInTheDocument();
+});
+
+it("shows the manual guidance prompt when retrieval has no citable evidence", async () => {
+  vi.mocked(getOperationGuidance).mockResolvedValue({
+    state: "NO_EVIDENCE",
+    question: "未检索到可引用依据，请补充工况或直接按人工流程处理。",
+    evidence: [],
+    manual_fallback: true,
+    loading_seconds: 3,
+  });
+  render(<RepairExecutionPage />);
+
+  fireEvent.change(screen.getByLabelText("指引设备 ID"), { target: { value: "eq-empty" } });
+  fireEvent.change(screen.getByLabelText("设备型号"), { target: { value: "L956" } });
+  fireEvent.change(screen.getByLabelText("指引故障现象"), { target: { value: "压力不足" } });
+  fireEvent.click(screen.getByRole("button", { name: "获取操作指引" }));
+
+  expect(await screen.findByText("未检索到可引用依据，请补充工况或直接按人工流程处理。")).toBeInTheDocument();
 });
 
 it("keeps direct repair available when operation guidance is unavailable", async () => {

@@ -1,0 +1,38 @@
+{
+  "candidate_commit": "9e568b8bebc376c513a8e700918c03f45c3512e2",
+  "runtime_agent_sut_commit": "a07b3b4bcc20439c786e8ad6a5dc7204dc390a3e",
+  "scope": "Current PR candidate. The Agent runtime source is unchanged since a07b3b4; 9e568b8 adds evidence-provenance documentation only.",
+  "tools": {
+    "codeql": {
+      "version": "2.26.1",
+      "commands": [
+        "codeql database create <temp>/python --language=python --source-root codebase/backend --overwrite",
+        "codeql database analyze <temp>/python codeql/python-queries:codeql-suites/python-security-and-quality.qls --format=sarifv2.1.0 --no-sarif-add-file-contents --no-sarif-add-snippets --sarif-include-query-help=never --output codeql-python.sarif",
+        "codeql database create <temp>/javascript --language=javascript-typescript --source-root codebase/frontend --overwrite",
+        "codeql database analyze <temp>/javascript codeql/javascript-queries:codeql-suites/javascript-security-and-quality.qls --format=sarifv2.1.0 --no-sarif-add-file-contents --no-sarif-add-snippets --sarif-include-query-help=never --output codeql-javascript.sarif"
+      ],
+      "artifacts": {
+        "codeql-python.sarif": "136 Python files; 62 quality results: 23 ineffectual statements, 20 unused globals, 14 unused imports, 2 uninitialized-local-variable, 2 unused locals, 1 implicit string concatenation. The two router results are existing fault-diagnosis restore-path diagnostics at lines 354 and 362, outside the operation-guidance fixture-identity change.",
+        "codeql-javascript.sarif": "15 JavaScript/TypeScript files; 0 results."
+      }
+    },
+    "semgrep": {
+      "version": "1.172.0",
+      "command": "semgrep scan --config p/default --json --output semgrep.json 03-ui-prototype codebase 06-testing/performance",
+      "artifact": "semgrep.json",
+      "result_summary": "174 Git-tracked code files, 520 rules, 15 findings, 4 parser warnings. Findings remain the reviewed Stage 3 prototype HTTP/path/SRI items, test-only self-signed TLS/dynamic urllib, Dockerfile multi-stage USER false positive, RAGFlow URL boundary, and fixed Nginx upstream/public API entries. No new finding is introduced by the operation-guidance fixture identity change."
+    },
+    "gitleaks": {
+      "version": "8.30.1",
+      "command": "gitleaks detect --source . --no-git --max-target-megabytes 1 --report-format json --report-path gitleaks-working-tree.json",
+      "artifact": "gitleaks-working-tree.json",
+      "result_summary": "0 findings. Large local CodeQL cache files were skipped by the 1 MB limit; tracked source and the committed evidence files are below that limit."
+    },
+    "trivy": {
+      "version": "0.72.0",
+      "command": "trivy fs --scanners vuln,secret,misconfig --format json --output trivy.json --skip-dirs .git --skip-dirs <local-codeql-cache> .",
+      "artifact": "trivy.json",
+      "result_summary": "1 vulnerability, 0 secrets, 1 misconfiguration. GHSA-qwww-vcr4-c8h2 for react-router 7.18.1 remains under the recorded BrowserRouter SPA applicability disposition; DS-0026 missing HEALTHCHECK is LOW."
+    }
+  }
+}

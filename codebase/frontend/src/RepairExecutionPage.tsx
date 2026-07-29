@@ -121,6 +121,7 @@ export function RepairExecutionPage() {
       {completed && <section aria-label="维修完成结果"><p>{completed.parts_replacement_notes}</p>{repair?.start_mode === "ADOPTED" && summaryText && <><p>AI 对话摘要：{summaryText}</p>{keyEvidence.length > 0 && <p>关键证据：{keyEvidence.join("；")}</p>}</>}</section>}
       <section className="agent-chat" aria-label="操作指引"><h3>操作指引</h3>
         <div className="agent-chat__messages">
+          {guidance?.question && <p role="status">{guidance.question}</p>}
           {guidance?.evidence.length ? <details><summary>查看 {guidance.evidence.length} 条引用</summary>{guidance.evidence.map((item) => <p key={item.citation}><code>{item.citation}</code> {item.text}</p>)}</details> : null}
           {runtimeEvents.map((item, index) => <p key={`${item.event}-${index}`}>运行状态：{String(item.data.status ?? item.event)}</p>)}
           {guidanceError && <p role="alert">{guidanceError}</p>}

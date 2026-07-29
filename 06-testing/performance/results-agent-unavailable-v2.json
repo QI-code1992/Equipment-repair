@@ -1,0 +1,78 @@
+{
+  "scenario": "agent-unavailable",
+  "metadata": {
+    "sut_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064",
+    "harness_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064",
+    "environment": "isolated-compose-ragflow-unavailable-18448",
+    "fixture": "local-dataset:5a27e048-5429-4525-bc86-9f58aa9e0fb3;ready-document:stage6-fault-document;ragflow-base:host.docker.internal:9",
+    "executed_at_utc": "2026-07-29T04:42:16.919683+00:00",
+    "evidence_subject_commit": "ed0250cad87c8d814a5a2cc5cca8fb5217783064"
+  },
+  "max_concurrency": 10,
+  "duration_seconds_total": 300,
+  "duration_seconds_per_level": 75,
+  "p95_limit_ms": 15000,
+  "levels": [
+    {
+      "concurrency": 1,
+      "requests": 2237,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "UNAVAILABLE": 2237
+      },
+      "responses_with_references": 0,
+      "responses_without_references": 2237,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 32.23670000079437,
+      "p95_ms": 50.445199998648604,
+      "pass": true
+    },
+    {
+      "concurrency": 2,
+      "requests": 4555,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "UNAVAILABLE": 4555
+      },
+      "responses_with_references": 0,
+      "responses_without_references": 4555,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 32.221699999354314,
+      "p95_ms": 49.414400000387104,
+      "pass": true
+    },
+    {
+      "concurrency": 5,
+      "requests": 7436,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "UNAVAILABLE": 7436
+      },
+      "responses_with_references": 0,
+      "responses_without_references": 7436,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 49.42040000059933,
+      "p95_ms": 72.29809999989811,
+      "pass": true
+    },
+    {
+      "concurrency": 10,
+      "requests": 6429,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "UNAVAILABLE": 6429
+      },
+      "responses_with_references": 0,
+      "responses_without_references": 6429,
+      "responses_bound_to_fixture": 0,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 114.10070000056294,
+      "p95_ms": 152.24309999939578,
+      "pass": true
+    }
+  ],
+  "pass": true
+}
