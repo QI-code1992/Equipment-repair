@@ -1,0 +1,46 @@
+{
+  "sut_commit": "a07b3b4bcc20439c786e8ad6a5dc7204dc390a3e",
+  "evidence_basis": "Scans were executed against the worktree at sut_commit before this evidence artifact commit; the SARIF and JSON files below are the retained evidence.",
+  "scanned_paths": [
+    "codebase/backend",
+    "codebase/frontend",
+    "06-testing/performance"
+  ],
+  "tools": {
+    "codeql": {
+      "version": "2.26.1",
+      "artifacts": [
+        {
+          "file": "codeql-python.sarif",
+          "language": "python",
+          "command": "codeql database create codeql-python-db --language=python --source-root codebase/backend --overwrite; codeql database analyze codeql-python-db codeql/python-queries:codeql-suites/python-security-and-quality.qls --format=sarif-latest --output codeql-python.sarif",
+          "result_summary": "62 security-and-quality results. Review classified them as quality diagnostics; no newly confirmed production security blocker in the Agent fixture-identity change."
+        },
+        {
+          "file": "codeql-javascript.sarif",
+          "language": "javascript-typescript",
+          "command": "codeql database create codeql-javascript-db --language=javascript-typescript --source-root codebase/frontend --overwrite; codeql database analyze codeql-javascript-db codeql/javascript-queries:codeql-suites/javascript-security-and-quality.qls --format=sarifv2.1.0 --no-sarif-add-file-contents --no-sarif-add-snippets --sarif-include-query-help=never --output codeql-javascript.sarif",
+          "result_summary": "0 results."
+        }
+      ]
+    },
+    "semgrep": {
+      "version": "1.172.0",
+      "artifact": "semgrep.json",
+      "scope": "254 Git-tracked files; 520 rules",
+      "result_summary": "15 findings. They are the already-reviewed Stage 3 prototype findings, test-only self-signed TLS/dynamic urllib findings, Dockerfile multi-stage USER false positive, RAGFlow URL boundary findings, and fixed Nginx upstream/public API findings; no newly confirmed Agent fixture-identity blocker."
+    },
+    "gitleaks": {
+      "version": "8.30.1",
+      "artifact": "gitleaks-working-tree.json",
+      "scope": "current worktree",
+      "result_summary": "0 findings."
+    },
+    "trivy": {
+      "version": "0.72.0",
+      "artifact": "trivy.json",
+      "scope": "filesystem dependency, secret, and misconfiguration scan",
+      "result_summary": "0 secrets; existing GHSA-qwww-vcr4-c8h2 HIGH for react-router 7.18.1 remains subject to the recorded BrowserRouter SPA applicability disposition; DS-0026 missing HEALTHCHECK is LOW."
+    }
+  }
+}

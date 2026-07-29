@@ -1,11 +1,13 @@
 {
   "scenario": "agent-success",
   "metadata": {
-    "sut_commit": "931df829877305d6ee51a3cef871fe7a9735b9e2",
-    "harness_commit": "93df55f6b124d00f140bd11cc303f5682f8c9c1b",
-    "environment": "isolated-compose-ragflow-success-18450",
-    "fixture": "ragflow-dataset:811d16248a5411f1826e69e4863c3812;document:ba9159c48a5411f1826e69e4863c3812",
-    "expected_reference_text": "TASK005 hydraulic pressure guidance"
+    "sut_commit": "a07b3b4bcc20439c786e8ad6a5dc7204dc390a3e",
+    "harness_commit": "a07b3b4bcc20439c786e8ad6a5dc7204dc390a3e",
+    "environment": "isolated-compose-ragflow-success-18448",
+    "fixture": "ragflow-dataset:811d16248a5411f1826e69e4863c3812;document:ba9159c48a5411f1826e69e4863c3812;business-document:1048a926-3dcb-4d85-a11e-c30a280734ea;chunk:ebe1aab2b5cb0ceb",
+    "expected_reference_text": "Stage6 unique RAGFlow verification marker.",
+    "expected_document_id": "1048a926-3dcb-4d85-a11e-c30a280734ea",
+    "expected_chunk_id": "ebe1aab2b5cb0ceb"
   },
   "max_concurrency": 10,
   "duration_seconds_total": 300,
@@ -14,62 +16,62 @@
   "levels": [
     {
       "concurrency": 1,
-      "requests": 78,
+      "requests": 61,
       "unexpected_errors": 0,
       "agent_states": {
-        "QUESTIONING": 78
+        "QUESTIONING": 61
       },
-      "responses_with_references": 78,
+      "responses_with_references": 61,
       "responses_without_references": 0,
-      "responses_bound_to_fixture": 78,
+      "responses_bound_to_fixture": 61,
       "responses_without_fixture_reference": 0,
-      "p50_ms": 847.7039000135846,
-      "p95_ms": 2021.065000037197,
+      "p50_ms": 1058.3149000003687,
+      "p95_ms": 2307.9026000004887,
       "pass": true
     },
     {
       "concurrency": 2,
-      "requests": 122,
+      "requests": 87,
       "unexpected_errors": 0,
       "agent_states": {
-        "QUESTIONING": 122
+        "QUESTIONING": 87
       },
-      "responses_with_references": 122,
+      "responses_with_references": 87,
       "responses_without_references": 0,
-      "responses_bound_to_fixture": 122,
+      "responses_bound_to_fixture": 87,
       "responses_without_fixture_reference": 0,
-      "p50_ms": 848.7748000188731,
-      "p95_ms": 1928.1851000268944,
+      "p50_ms": 1175.3085999998802,
+      "p95_ms": 3790.6426999998075,
       "pass": true
     },
     {
       "concurrency": 5,
-      "requests": 385,
+      "requests": 248,
       "unexpected_errors": 0,
       "agent_states": {
-        "QUESTIONING": 385
+        "QUESTIONING": 248
       },
-      "responses_with_references": 385,
+      "responses_with_references": 248,
       "responses_without_references": 0,
-      "responses_bound_to_fixture": 385,
+      "responses_bound_to_fixture": 248,
       "responses_without_fixture_reference": 0,
-      "p50_ms": 910.9994999598712,
-      "p95_ms": 1372.4407000117935,
+      "p50_ms": 1104.1900000000169,
+      "p95_ms": 3717.2354000003907,
       "pass": true
     },
     {
       "concurrency": 10,
-      "requests": 619,
+      "requests": 428,
       "unexpected_errors": 0,
       "agent_states": {
-        "QUESTIONING": 619
+        "QUESTIONING": 428
       },
-      "responses_with_references": 619,
+      "responses_with_references": 428,
       "responses_without_references": 0,
-      "responses_bound_to_fixture": 619,
+      "responses_bound_to_fixture": 428,
       "responses_without_fixture_reference": 0,
-      "p50_ms": 1031.202900048811,
-      "p95_ms": 2219.0759999793954,
+      "p50_ms": 1116.6665000000648,
+      "p95_ms": 3822.0774999999776,
       "pass": true
     }
   ],

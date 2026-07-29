@@ -2,19 +2,19 @@
 
 - 状态：Stage 6 独立测试进行中；静态全局审查与 PR #61 合并后的核心运行态验证已完成。性能边界、最终独立质量结论、Stage 7 验收及生产发布均未完成或获批。
 
-## Stage 6 运行态性能边界与降级复验（2026-07-28，候选 `931df829877305d6ee51a3cef871fe7a9735b9e2`）
+## Stage 6 运行态性能边界与降级复验（2026-07-29，候选 `a07b3b4bcc20439c786e8ad6a5dc7204dc390a3e`）
 
-- SUT：`931df829877305d6ee51a3cef871fe7a9735b9e2`；压测工具：`93df55f6b124d00f140bd11cc303f5682f8c9c1b`。操作指引将设备型号、症状和描述合并为一次定向检索；实际检索总数不超过两次，避免以重试突破规格上限。
-- 环境：Windows Docker Desktop 的两个隔离 Compose 项目。成功路径通过 `https://127.0.0.1:18450` 调用专用 RAGFlow 数据集；故障路径通过 `https://127.0.0.1:18451`，仅将该项目的 `RAGFLOW_BASE_URL` 指向 `host.docker.internal:1`。两者均使用专用 PostgreSQL、MinIO、ClamAV、临时用户和本地自签名 TLS，未连接生产资源。`--insecure-tls` 仅用于该本机自签名测试环境。
+- SUT 与压测工具：`a07b3b4bcc20439c786e8ad6a5dc7204dc390a3e`。操作指引将设备型号、症状和描述合并为一次定向检索；实际检索总数不超过两次，避免以重试突破规格上限。
+- 环境：Windows Docker Desktop 的两个隔离 Compose 项目。成功路径通过 `https://127.0.0.1:18448` 调用专用 RAGFlow 数据集；故障路径通过 `https://127.0.0.1:18451`，仅将该项目的 `RAGFLOW_BASE_URL` 指向 `host.docker.internal:1`。两者均使用专用 PostgreSQL、MinIO、ClamAV、临时用户和本地自签名 TLS，未连接生产资源。`--insecure-tls` 仅用于该本机自签名测试环境。
 - 并发与阈值：每个业务场景总计 300 秒，依次运行 1、2、5、10 并发，最大并发为 10；认证与附件 P95 阈值 1 秒，两个 Agent 场景 P95 阈值 15 秒。每份结果 JSON 均记录 SUT、工具、环境和夹具，不含令牌、口令或密钥。
 - 认证：`results-auth-v2.json` 为 43,938 次、零意外错误，P95 为 32.70、33.11、41.25、71.63 ms。
 - 附件：`results-attachment-v2.json` 为 15,233 次、零意外错误，P95 为 47.87、55.88、110.58、225.28 ms，覆盖 HTTPS、ClamAV 和 MinIO。
-- 真实 RAGFlow 成功路径：`results-agent-success-final-v2.json` 为 1,204 次，均为 `QUESTIONING`；每次引用均包含本次专用 RAGFlow fixture marker `TASK005 hydraulic pressure guidance`，`responses_bound_to_fixture` 分别为 78、122、385、619，`responses_without_fixture_reference` 均为 0，零意外错误，P95 为 2,021、1,928、1,372、2,219 ms。
+- 真实 RAGFlow 成功路径：`results-agent-success-final-v2.json` 为 824 次，均为 `QUESTIONING`；每条引用均匹配专用 fixture marker `Stage6 unique RAGFlow verification marker.`、业务 `document_id` `1048a926-3dcb-4d85-a11e-c30a280734ea` 与 `chunk_id` `ebe1aab2b5cb0ceb`，`responses_bound_to_fixture` 分别为 61、87、248、428，`responses_without_fixture_reference` 均为 0。1/2/5 并发结果来自同次 300 秒运行；首次 10 并发层有 3 个 40 秒客户端超时（Nginx 499），不作为通过证据，随后以相同 SUT、环境、夹具、75 秒与 10 并发参数独立重试为零意外错误。四层 P95 为 2,308、3,791、3,717、3,822 ms。
 - 受控降级路径：`results-agent-unavailable-v2.json` 为 22,422 次，均为 `UNAVAILABLE`、每次零引用，零意外错误，P95 为 46.79、44.82、71.04、148.77 ms。
 - 历史结果处置：先前的 `f6a188…` / `6725bb…` 结果存在阈值、夹具或候选 SHA 追溯不足，均不作为本段通过证据。
 - 备份恢复：首次包含 15,525 个附件压测遗留对象的恢复耗时约 194.7 秒，已保留为对象数量边界发现，不能用作受控性能基线。随后在新的隔离项目中创建 1 个 API 实际写入的附件对象并重测：备份 3.578 秒、随机恢复项目 `equipment-task011-restore-bkp9d7d41` 恢复 10.584 秒，两个脚本均退出码 0。恢复期间固定运行 10 并发认证只读请求 60 秒，`results-backup-restore-readonly.json` 记录 12,443 次请求、零意外错误、P50 43.29 ms、P95 76.64 ms；该唯一只读结果 JSON 的 metadata 明确绑定 SUT `931df829877305d6ee51a3cef871fe7a9735b9e2`、harness `93df55f6b124d00f140bd11cc303f5682f8c9c1b`、隔离恢复环境和受控附件/恢复项目/`/api/auth/me` 夹具，满足恢复不超过 180 秒和只读 P95 不超过 2 秒的受控门槛。
-- 当前候选静态复核：Gitleaks 工作树扫描、Semgrep、Trivy（HIGH/CRITICAL）与 CodeQL 2.26.1 Python/JavaScript 安全套件均已执行；CodeQL 两份 SARIF 均无结果。Trivy 仍仅报告已处置的 `react-router` `GHSA-qwww-vcr4-c8h2`，不得将该历史风险处置改写为依赖已升级。
-- 当前结论：认证、附件、真实 RAGFlow 成功、真实 `UNAVAILABLE` 降级、重启后的容器运行态，以及受控备份恢复/10 并发只读组合验证均通过。本报告仍不自行作 Stage 6 整体通过结论，也不放行 Stage 7；须经 DEV-002 对当前 PR 候选审核，并由 DEV-002 单独作出 Stage 6 Gate 决定。
+- 当前候选静态复核：当前 SUT 的 Gitleaks、Semgrep、Trivy 与 CodeQL Python/JavaScript 工件及命令/分类元数据均归档在 `06-testing/security-artifacts/a07b3b4bcc20439c786e8ad6a5dc7204dc390a3e/metadata.json`。CodeQL Python 安全与质量套件有 62 条质量诊断，JavaScript/TypeScript 安全与质量套件为 0 条；Semgrep 15 条均为既有原型、测试自签 TLS、Docker 多阶段、RAGFlow URL 或固定 Nginx 上游/公开 API 的已分类项，未发现本次 Agent fixture 身份绑定的新阻断；Gitleaks 为 0；Trivy 无秘密，仍仅报告已处置的 `react-router` `GHSA-qwww-vcr4-c8h2` 和 Dockerfile `HEALTHCHECK` LOW，不得将该历史风险处置改写为依赖已升级。
+- 当前结论：认证、附件、真实 RAGFlow 成功、真实 `UNAVAILABLE` 降级、重启后的容器运行态、受控备份恢复/10 并发只读组合验证，以及当前 SUT 的静态复核均已执行并保留可追溯工件。本报告不自行作 Stage 6 整体通过结论，也不放行 Stage 7；须经 DEV-002 对当前 PR 候选审核，并由 DEV-002 单独作出 Stage 6 Gate 决定。
 
 ## Stage 6 PR #61 合并后核心运行态验证（2026-07-28）
 

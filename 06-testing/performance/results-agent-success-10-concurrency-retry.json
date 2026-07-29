@@ -1,0 +1,34 @@
+{
+  "scenario": "agent-success",
+  "metadata": {
+    "sut_commit": "a07b3b4bcc20439c786e8ad6a5dc7204dc390a3e",
+    "harness_commit": "a07b3b4bcc20439c786e8ad6a5dc7204dc390a3e",
+    "environment": "isolated-compose-ragflow-success-18448",
+    "fixture": "ragflow-dataset:811d16248a5411f1826e69e4863c3812;document:ba9159c48a5411f1826e69e4863c3812;business-document:1048a926-3dcb-4d85-a11e-c30a280734ea;chunk:ebe1aab2b5cb0ceb",
+    "expected_reference_text": "Stage6 unique RAGFlow verification marker.",
+    "expected_document_id": "1048a926-3dcb-4d85-a11e-c30a280734ea",
+    "expected_chunk_id": "ebe1aab2b5cb0ceb"
+  },
+  "max_concurrency": 10,
+  "duration_seconds_total": 75,
+  "duration_seconds_per_level": 75,
+  "p95_limit_ms": 15000,
+  "levels": [
+    {
+      "concurrency": 10,
+      "requests": 428,
+      "unexpected_errors": 0,
+      "agent_states": {
+        "QUESTIONING": 428
+      },
+      "responses_with_references": 428,
+      "responses_without_references": 0,
+      "responses_bound_to_fixture": 428,
+      "responses_without_fixture_reference": 0,
+      "p50_ms": 1116.6665000000648,
+      "p95_ms": 3822.0774999999776,
+      "pass": true
+    }
+  ],
+  "pass": true
+}
