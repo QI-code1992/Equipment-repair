@@ -580,3 +580,14 @@
 - 修复提交：`aef11599b0b820e7781abb5cb7faa83d8cb5b8b1`。登录调用既有 `/api/auth/login`，成功时仅将 `access_token` 写入 `sessionStorage`；无 token 页面进入 `/login`，已认证用户不重复进入登录页。
 - 回归：`src/App.test.tsx` 覆盖无 token 重定向和登录成功后智能配置请求携带 Bearer；`src/api.test.ts` 覆盖登录写入、JSON 与 SSE 认证边界。前端全量 `26 passed`，生产构建、14 项静态回归、JSON 解析与完整 diff-check 通过。
 - 边界：无后端、迁移、部署、生产依赖、原型或智能配置页变更；token 不显示、不记录日志、不进入 URL 或 React 页面状态。真实账号浏览器 E2E 及 Docker/PostgreSQL/RAGFlow/LLM live-stack 待 DEV-001。仅请求复审，不请求 Merge 授权、不合并、不解锁 TASK-011、不进入 Stage 6。
+
+## TASK-012-API-001 Workbench 读取 API 自测（2026-07-30）
+
+- 补充提交：`44992b5b34f6a2c77378383a363bfb2a3f86fd25` 新增已完成故障排除过滤和相同提交时间 ID 次级排序回归。
+- 补充验证：定向测试 `3 passed, 2 warnings`；全量后端 `319 passed, 13 skipped, 2 warnings`；`py -3.13 -m compileall -q app tests`、Compose `config --quiet` 与 `git diff --check` 通过。
+- 令牌夹具说明：测试先创建全部故障样本，再签发工作台令牌，避免共享角色权限重设造成误报；未修改生产认证或权限实现。
+
+- 范围确认：项目负责人确认记录为 `https://github.com/QI-code1992/Equipment-repair/pull/70#issuecomment-5130657800`；实现提交 `7ba0e5e77e6a784f0dd6a0622c91ebce691e00a1`。
+- 红绿：新增 `test_workbench_api.py` 在路由缺失时为 `3 failed`（404）；注册最小路由后转绿，当前定向为 `3 passed, 2 warnings`。
+- 完整验证：`py -3.13 -m pytest -q` 为 `319 passed, 13 skipped, 2 warnings`；`py -3.13 -m compileall -q app tests`、`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet` 与完整差异检查均通过。
+- 边界：无数据库迁移、生产依赖、Compose 改动、兼容代码或额外通用抽象；未执行容器运行态、PostgreSQL 实例或浏览器联调，因为本任务未修改这些边界。仅请求 DEV-002 审核，不请求 Merge 授权、不合并、不解锁下游。

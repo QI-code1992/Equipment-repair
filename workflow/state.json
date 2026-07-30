@@ -70,6 +70,16 @@
     "defect": "DEF-STAGE7-001",
     "changeRequest": "CR-047",
     "status": "PLANNING_INTEGRATED_API_PREREQUISITES_BLOCKED",
+    "api001": {
+      "status": "DEVELOPMENT_CANDIDATE_PENDING_DEV002_REVIEW",
+      "branch": "codex/task-012-api-001-workbench",
+      "implementationCommit": "7ba0e5e77e6a784f0dd6a0622c91ebce691e00a1",
+      "latestEvidenceCommit": "44992b5b34f6a2c77378383a363bfb2a3f86fd25",
+      "pullRequest": 71,
+      "scopeConfirmation": "https://github.com/QI-code1992/Equipment-repair/pull/70#issuecomment-5130657800",
+      "dependencyUnlockAllowed": false,
+      "nextAction": "DEV-002 must review the latest exact HEAD on PR #71; no Merge authorization, integration, or TASK-012 frontend unlock before approval."
+    },
     "triggerBaseline": "a334afd1b8cb4eeb139d78b7f5f1b5617bb2cd32",
     "stage7Candidate": "89fbd2129169fb6ece42094b17907885637f3c48",
     "scope": "Implement every P0 page from the approved Stage 3 prototype as independent React/TypeScript production UI with real API, authorization, loading, empty and error states; do not copy prototype runtime source or use fabricated business data.",
@@ -81,7 +91,7 @@
     "mergeCommit": "be9de719c7a1a14f7bf98aab792a2b73bf0278d5",
     "mergeExecutor": "ll979053897-arch / DEV-001 / manual Merge Commit",
     "verification": "Merge parents, source-tree equivalence, merge diff check, workflow JSON and 15 Node static regressions passed.",
-    "nextAction": "TASK-012 remains blocked until every TASK-012-API prerequisite receives project-owner public API scope confirmation and is reviewed, integrated and closed. Stage 7 acceptance remains blocked for affected UI."
+    "nextAction": "DEV-002 must review TASK-012-API-001 after its Draft PR is created; TASK-012-API-002—007 must each complete their own Draft PR, review and authorized integration. TASK-012 and Stage 7 acceptance remain blocked until all seven API prerequisites are integrated and closed."
   },
   "stage6RuntimeValidation": {
     "status": "POST_MERGE_CORE_RUNTIME_VALIDATION_COMPLETED_SUPERSEDED_BY_SIGNED_STAGE6_CONCLUSION",

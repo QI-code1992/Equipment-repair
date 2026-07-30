@@ -257,3 +257,19 @@ Stage 3 原型中的动态自定义角色控件与 FR-010 及 CR-036 的固定�
 | 409 | `EQUIPMENT_ACTIVE_FAULT` | 活跃故障存在时禁止停用；`fields.status=active_fault`。 |
 
 相似案例查询只访问 PostgreSQL `historical_repair_cases`：类型与型号精确匹配优先，其次为单字段或症状字面文本匹配，同优先级按完成时间倒序；查询中的 `%`、`_` 不具备通配符含义。空结果返回 `items=[]`；不产生成功审计，不进行网络请求，也不返回知识库引用。
+
+## TASK-012-API-001 正式契约
+
+本节为 Workbench 的当前待办、告警摘要与快捷事项提供唯一的正式只读契约。接口只使用既有故障、工单、设备和权限事实；不新增告警表、任务分配表、健康分聚合、迁移或外部服务调用。当前权限基线不包含设备或组织行级授权，因此结果由 `workbench:view` 控制，不按工厂、组织或设备再过滤。
+
+### 路由、筛选与权限
+
+| Method | Endpoint | 权限 | 查询参数 | 成功响应 |
+|---|---|---|---|---|
+| GET | `/api/workbench/todos` | `workbench:view` | `status` 可选，只能是 `PENDING_ACCEPT` 或 `IN_REPAIR`；`urgency` 可选，为现存故障紧急度的精确值；`limit` 默认为 20、范围 1--100 | 返回 `items,count`。只返回活跃故障；按 `submitted_at` 倒序，随后按 `id` 升序。 |
+| GET | `/api/workbench/alert-summary` | `workbench:view` | 无 | 返回当前活跃故障的 `active_fault_count`、按状态聚合的 `status_counts` 与按紧急度聚合的 `urgency_counts`。 |
+| GET | `/api/workbench/shortcuts` | `workbench:view` | 无 | 返回当前调用方可执行的快捷事项 `items`。当前唯一事项为具有 `fault:create` 时的 `fault_report`。 |
+
+`todos.items` 的每项只包含 `id,number,equipment_id,equipment_code,equipment_name,urgency,symptom,occurred_at,submitted_at,status`；不返回故障描述、附件、组织快照、提交人、维修记录、审计或任何凭据。`status_counts` 的每项为 `status,count`；`urgency_counts` 的每项为 `urgency,count`，二者均按 `count` 倒序、值升序稳定排序。快捷事项为 `id,label,path`，当前 `fault_report` 的值固定为 `fault_report,故障上报,/fault-report`。
+
+空待办返回 `items=[]`、`count=0`；空告警摘要返回 `active_fault_count=0`、两个空计数列表；无可执行快捷事项返回 `items=[]`。三个端点均不写成功审计、幂等记录或业务事实。未认证返回 `401 UNAUTHENTICATED`，缺少 `workbench:view` 返回 `403 PERMISSION_DENIED`，非法 `status` 或 `limit` 返回 `422 VALIDATION_ERROR`。

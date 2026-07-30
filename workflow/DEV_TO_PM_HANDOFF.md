@@ -9,6 +9,14 @@
 
 ## Stage 6 → Stage 7 验收交接（2026-07-29）
 
+## TASK-012-API-001 开发候选复审交接（2026-07-30）
+
+- PR #71 分支 `codex/task-012-api-001-workbench` 已补齐 API-001 的边界回归，最新测试证据提交为 `44992b5b34f6a2c77378383a363bfb2a3f86fd25`。
+- 验证：定向 `3 passed, 2 warnings`；后端全量 `319 passed, 13 skipped, 2 warnings`；Python 3.13 compileall、Compose config 和 diff-check 通过。
+- 当前门禁：等待 DEV-002 对 PR #71 最新精确 HEAD 正式审核；未申请 Merge 授权、未合并、未解锁 TASK-012 前端或 Stage 6/7/8。新 HEAD 必须重新绑定审核结论。
+
+## Stage 6 → Stage 7 验收交接（2026-07-29）
+
 - Gate：项目负责人已批准 `89fbd2129169fb6ece42094b17907885637f3c48` 进入 Stage 7 独立产品验收。
 - 前置结论：Stage 6 独立测试总体结论已签发，绑定 PR #63 approved HEAD `46bd5b7f6579016d9ce9bb3f0d1d7226ccd503d1` 与 Merge Commit `a5e4f6abec98f0df4c04f18a0cbf849e423624be`；后续治理合并未改变业务或运行时内容。
 - 验收边界：基于 PRD、SPEC、AC、批准原型和当前精确候选逐项独立判定；既有 React Router 风险处置与 Stage 3 原型 P2 发现必须如实纳入验收报告。

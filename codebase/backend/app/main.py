@@ -13,6 +13,7 @@ from app.modules.identity.router import router as identity_router
 from app.modules.identity.admin_router import router as identity_admin_router
 from app.modules.agent_config.router import router as agent_config_router
 from app.modules.maintenance.router import router as maintenance_router
+from app.modules.maintenance.workbench_router import router as workbench_router
 from app.modules.knowledge.router import router as knowledge_router
 from app.modules.agent_runtime.router import router as agent_runtime_router
 from app.modules.agents.router import router as agents_router
@@ -94,6 +95,7 @@ def create_app(
     app.include_router(equipment_router)
     app.include_router(organization_router)
     app.include_router(maintenance_router)
+    app.include_router(workbench_router)
     app.include_router(knowledge_router)
     app.include_router(agent_runtime_router)
     app.include_router(agents_router)
