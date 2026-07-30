@@ -2,7 +2,7 @@
 
 ## TASK-012-API-001 独立复审补充（2026-07-30）
 
-- 复审范围：API-001 实现提交 `7ba0e5e77e6a784f0dd6a0622c91ebce691e00a1` 及测试补充提交 `44992b5c9b530632fecf1b96ce8b5df58004b1a1`。
+- 复审范围：API-001 实现提交 `7ba0e5e77e6a784f0dd6a0622c91ebce691e00a1` 及测试补充提交 `44992b5b34f6a2c77378383a363bfb2a3f86fd25`。
 - 独立结论：未发现 Critical、Important 或 Minor 阻断项。补充测试直接覆盖已完成故障排除活动待办，以及相同 `submitted_at` 时按 `id ASC` 的稳定次级排序。
 - 验收证据：定向 `3 passed, 2 warnings`；全量后端 `319 passed, 13 skipped, 2 warnings`；Python 3.13 `compileall`、Compose `config --quiet` 和 `git diff --check` 通过。
 - 正式门禁：本结论不替代 DEV-002 对 PR #71 最新精确 HEAD 的正式审核，不构成 Merge 授权、集成或下游解锁。

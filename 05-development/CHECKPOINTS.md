@@ -3,7 +3,7 @@
 ## FCP-012-API-001 复审证据补充（2026-07-30）
 
 - 状态：`DEVELOPMENT_CANDIDATE_PENDING_DEV002_REVIEW`；PR #71 仍未集成，不解锁 TASK-012 或 Stage 6/7/8。
-- 最新测试证据提交：`44992b5c9b530632fecf1b96ce8b5df58004b1a1`。
+- 最新测试证据提交：`44992b5b34f6a2c77378383a363bfb2a3f86fd25`。
 - 证据：API-001 定向 `3 passed, 2 warnings`；后端全量 `319 passed, 13 skipped, 2 warnings`；compileall、Compose config 和 diff-check 通过。
 - 回滚：如候选被拒，仅回退测试补充提交；不删除已存在的 API-001 实现候选，也不改变已确认的 API 范围。
 
