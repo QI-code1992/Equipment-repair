@@ -53,10 +53,14 @@ def test_workbench_todos_returns_only_active_faults_with_server_filters(
     first = _create_fault_with_urgency(client, equipment_id, "LOW")
     second = _create_fault_with_urgency(client, equipment_id, "HIGH")
     repair_fault = _create_fault_with_urgency(client, equipment_id, "HIGH")
-    start_repair(client, repair_fault, token=repairer(client)[1])
+    work_order_id, repairer_token = start_repair(
+        client, repair_fault, token=repairer(client)[1]
+    )
     base = datetime(2026, 7, 30, tzinfo=UTC)
     _set_submitted_at(client, first, base)
     _set_submitted_at(client, second, base + timedelta(minutes=1))
+    tied = _create_fault_with_urgency(client, equipment_id, "LOW")
+    _set_submitted_at(client, tied, base)
     token = _workbench_token(client, "workbench:view")
 
     response = client.get(
@@ -67,7 +71,7 @@ def test_workbench_todos_returns_only_active_faults_with_server_filters(
     assert response.status_code == 200
     body = response.json()
     assert body["count"] == 2
-    assert [item["id"] for item in body["items"]] == [second, first]
+    assert [item["id"] for item in body["items"]] == [second, min(first, tied)]
     assert set(body["items"][0]) == {
         "id", "number", "equipment_id", "equipment_code", "equipment_name",
         "urgency", "symptom", "occurred_at", "submitted_at", "status",
@@ -83,6 +87,29 @@ def test_workbench_todos_returns_only_active_faults_with_server_filters(
     assert {item["status"] for item in filtered.json()["items"]} == {
         "PENDING_ACCEPT", "IN_REPAIR"
     }
+
+    tied_items = client.get(
+        "/api/workbench/todos?status=PENDING_ACCEPT&urgency=LOW",
+        headers=auth_headers(token),
+    ).json()["items"]
+    assert [item["id"] for item in tied_items] == sorted([first, tied])
+
+    completion = client.post(
+        f"/api/work-orders/{work_order_id}/repair-result",
+        headers=auth_headers(repairer_token, key="complete-workbench-active-boundary"),
+        json={
+            "actual_cause": "cause",
+            "actual_solution": "solution",
+            "repair_result": "completed",
+        },
+    )
+    assert completion.status_code == 200
+    active_high = client.get(
+        "/api/workbench/todos?urgency=HIGH", headers=auth_headers(token)
+    )
+    assert active_high.status_code == 200
+    assert active_high.json()["count"] == 1
+    assert active_high.json()["items"][0]["id"] == second
 
 
 def test_workbench_summary_empty_state_shortcuts_and_permission_boundary(
