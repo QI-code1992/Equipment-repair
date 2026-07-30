@@ -5,6 +5,8 @@
 - 参照：`02-product-interaction-design/PAGE_FUNCTION_MATRIX.md`、`03-ui-prototype/`、`04-architecture-plan/API_SPEC.md` 与 `codebase/backend/app/main.py` 注册的 Router。
 - 规则：`AVAILABLE` 仅表示可按现有契约实现；`PARTIAL` 表示部分 P0 需明确降级或补契约；`BLOCKED_API_GAP` 禁止用原型样例或 mock 填充。Data import 已批准排除，不进入本矩阵。
 
+无论页面当前标记为何，只有其全部 P0 功能具备已集成的真实 API、自动化和浏览器证据后才可计为完成。开发期或运行期的“数据不可用”提示只能如实呈现故障，不能作为 `PARTIAL` 页面、TASK-012 或 `DEF-STAGE7-001` 的关闭依据。
+
 | P0 页面 / 正式路由 | 原型参考 | 已确认可消费的正式 API 与权限 | 必须覆盖的真实状态 | 结论与下一动作 |
 |---|---|---|---|---|
 | Login `/login` | `pages/login.html` | `POST /api/auth/login`、`GET /api/auth/me`、`DELETE /api/auth/session`；登录后 Bearer 会话 | 登录中、凭据错误、禁用、会话失效、登出 | `AVAILABLE`。正式登录页、会话恢复、受保护路由与测试可实施。 |

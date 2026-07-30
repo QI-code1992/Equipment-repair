@@ -60,23 +60,23 @@
     "gate": "Stage 6 -> Stage 7",
     "candidateIntegrationHead": "89fbd2129169fb6ece42094b17907885637f3c48",
     "requestedBy": "project owner",
-    "status": "APPROVED_BY_PROJECT_OWNER",
+    "status": "SUPERSEDED_BY_DEF_STAGE7_001_STAGE5_REMEDIATION",
     "scope": "Stage 7 independent product acceptance is authorized only for the approved candidate baseline",
     "approvedBy": "project owner",
     "approvedAt": "2026-07-29",
-    "nextAction": "Begin Stage 7 independent product acceptance from the approved candidate baseline; Stage 8 release remains prohibited pending its separate gate."
+    "nextAction": "The prior Stage 7 entry approval remains historical only. Acceptance is blocked by DEF-STAGE7-001 until TASK-012 and all TASK-012-API prerequisites are integrated, affected Stage 6 evidence is revalidated, and the project owner explicitly reauthorizes the new exact acceptance candidate."
   },
   "stage7P0FrontendRemediation": {
     "defect": "DEF-STAGE7-001",
     "changeRequest": "CR-047",
-    "status": "GOVERNANCE_CANDIDATE_READY_FOR_PROJECT_OWNER_CONFIRMATION",
+    "status": "CHANGES_REQUESTED_BY_DEV001_PENDING_REVIEW",
     "triggerBaseline": "a334afd1b8cb4eeb139d78b7f5f1b5617bb2cd32",
     "stage7Candidate": "89fbd2129169fb6ece42094b17907885637f3c48",
     "scope": "Implement every P0 page from the approved Stage 3 prototype as independent React/TypeScript production UI with real API, authorization, loading, empty and error states; do not copy prototype runtime source or use fabricated business data.",
     "design": "05-development/STAGE7_P0_FRONTEND_REMEDIATION_DESIGN.md",
     "implementationPlan": "05-development/STAGE7_P0_FRONTEND_REMEDIATION_IMPLEMENTATION_PLAN.md",
     "apiAvailabilityMatrix": "05-development/P0_FRONTEND_API_AVAILABILITY_MATRIX.md",
-    "nextAction": "Project owner confirms the v1.5 task-book and API-availability governance candidate at its exact HEAD; after its authorized Merge Commit, TASK-012 may create its single Draft PR. Stage 7 acceptance remains blocked for affected UI."
+    "nextAction": "PR #69 must correct DEV-001 review findings and request a new review on its new exact HEAD. After approved integration and explicit Merge authorization, TASK-012 may create one Draft PR only after each TASK-012-API prerequisite has an approved public API scope. Stage 7 acceptance remains blocked for affected UI."
   },
   "stage6RuntimeValidation": {
     "status": "POST_MERGE_CORE_RUNTIME_VALIDATION_COMPLETED_SUPERSEDED_BY_SIGNED_STAGE6_CONCLUSION",
