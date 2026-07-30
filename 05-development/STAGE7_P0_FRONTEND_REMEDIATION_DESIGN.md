@@ -1,6 +1,6 @@
 # Stage 7 发现的全部 P0 正式前端修复设计
 
-- 状态：待项目负责人复核本书面设计；尚未开始编码。
+- 状态：项目负责人已确认本书面设计；实施计划见 `05-development/STAGE7_P0_FRONTEND_REMEDIATION_IMPLEMENTATION_PLAN.md`，尚未开始编码。
 - 发现基线：`a334afd1b8cb4eeb139d78b7f5f1b5617bb2cd32`。
 - 关联验收候选：`89fbd2129169fb6ece42094b17907885637f3c48`。
 - 触发缺陷：`DEF-STAGE7-001`。
