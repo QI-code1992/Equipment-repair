@@ -1,5 +1,12 @@
 # 功能/页面检查点
 
+## FCP-012-API-001 复审证据补充（2026-07-30）
+
+- 状态：`DEVELOPMENT_CANDIDATE_PENDING_DEV002_REVIEW`；PR #71 仍未集成，不解锁 TASK-012 或 Stage 6/7/8。
+- 最新测试证据提交：`44992b5c9b530632fecf1b96ce8b5df58004b1a1`。
+- 证据：API-001 定向 `3 passed, 2 warnings`；后端全量 `319 passed, 13 skipped, 2 warnings`；compileall、Compose config 和 diff-check 通过。
+- 回滚：如候选被拒，仅回退测试补充提交；不删除已存在的 API-001 实现候选，也不改变已确认的 API 范围。
+
 静态原型检查点记录在 `03-ui-prototype/PROTOTYPE_CHECKPOINTS.md`，不得自动提升为生产检查点。
 
 ## FCP-012-API-001：Workbench 读取 API 开发候选（2026-07-30）

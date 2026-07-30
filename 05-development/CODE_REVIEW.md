@@ -1,5 +1,12 @@
 # 代码评审
 
+## TASK-012-API-001 独立复审补充（2026-07-30）
+
+- 复审范围：API-001 实现提交 `7ba0e5e77e6a784f0dd6a0622c91ebce691e00a1` 及测试补充提交 `44992b5c9b530632fecf1b96ce8b5df58004b1a1`。
+- 独立结论：未发现 Critical、Important 或 Minor 阻断项。补充测试直接覆盖已完成故障排除活动待办，以及相同 `submitted_at` 时按 `id ASC` 的稳定次级排序。
+- 验收证据：定向 `3 passed, 2 warnings`；全量后端 `319 passed, 13 skipped, 2 warnings`；Python 3.13 `compileall`、Compose `config --quiet` 和 `git diff --check` 通过。
+- 正式门禁：本结论不替代 DEV-002 对 PR #71 最新精确 HEAD 的正式审核，不构成 Merge 授权、集成或下游解锁。
+
 - 状态：TASK-001 已完成独立审查；TASK-002 已获 DEV-002 正式批准并由 DEV-001 手动合入 PR #20，技术验证完成；合并后治理收尾已通过 PR #25 合入，TASK-002 前置已解除。
 - 范围：已审查 TASK-001 平台运行基线、TASK-002 CR-036 修复候选及其正式集成，以及 TASK-006 已验证的非数据库切片；后续任务仍须逐任务交叉审核。
 - 评审门禁：每个有意义的实现切片都必须完成规格符合性、质量评审、测试，并具备可追溯的功能/页面检查点。
