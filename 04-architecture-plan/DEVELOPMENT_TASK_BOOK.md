@@ -33,6 +33,9 @@
 - v1.4 修订原因：TASK-006 与 TASK-007 分别包含正式前端智能配置模块和共享前端对话组件，而 TASK-010 原先才建立正式 TypeScript 前端工程，形成前端工程能力晚于其消费者的依赖矛盾。
 - v1.4 批准与合入：项目负责人确认 PR #28 的精确 HEAD `ee3383bf56aa2eb1b0dc90d1b253fbf9666dbce5` 的治理内容，并授权由 DEV-001（`ll979053897-arch`）执行 Merge Commit；PR #28 已以 `7a44401bacbdc48d58f697a6b252449ecf44bb29` 合入目标分支。
 - v1.4 边界：新增 `TASK-006-FE` 作为可提前执行的正式前端工程初始化与共享基础任务。它只建立前端工程、构建/测试脚本、应用壳和非业务共享基础；不得实现 Agent 配置页面、Agent 对话、流式事件、引用、采纳/直接开始或任何业务页面。TASK-006 与 TASK-007 保留各自的前端业务范围和验收责任；TASK-010 保留已批准流程的完整页面/API 集成责任，但不再重复建立工程基础。
+- v1.5 修订原因：Stage 7 验收发现 `DEF-STAGE7-001`——已集成的 TASK-010 未实际覆盖批准原型中的全部 P0 页面。`CR-047` 不改变产品、原型或验收基线，而是将该实现偏离回流 Stage 5，新增可审查、可回退的正式前端修复任务。
+- v1.5 生效条件：本修订作为纯治理候选，须由项目负责人确认治理内容与精确 HEAD，并完成适用的集成检查和单独 Merge 授权后生效；在此之前不得开始 `TASK-012` 代码实现。
+- v1.5 边界：`TASK-012` 只实现 `PAGE_FUNCTION_MATRIX.md` 中除 Data import 外的 P0 正式页面、真实 API 消费、认证/权限以及加载、空、错误和禁用状态。不得复制、导入或运行 `03-ui-prototype/prototype/`；不得使用演示业务数据掩盖缺失接口。缺少公开 API、迁移、权限或部署契约时，先登记 P1 缺口并取得项目负责人对精确范围的确认。
 - 关联基线：
   - PRD：`01-requirements/PRD.md`，已批准 v1.1
   - SPEC：`01-requirements/SPEC.md`，已批准 v1.1
@@ -456,12 +459,31 @@
 
 - 治理收尾记录：PR #55 已由 DEV-002 按授权手动 Merge Commit 合入 `53bdf90ec8ab743165d0542099a15d3c9de598b3`；其双亲为 `b1e4ea6…` 与治理候选 `351bce2…`。TASK-011 已正式关闭，但不解锁 Stage 6。
 
+### TASK-012：Stage 7 P0 正式前端偏离修复
+
+- 状态：Blocked pending v1.5 governance integration / `DEF-STAGE7-001` 已确认，尚未开始代码实现。
+- 优先级：P0。
+- 负责人、任务开发者、Draft PR 创建者：`DEV-002`。
+- 指定审核者、最终集成检查与 DEV-002 开发任务 Merge 执行者：`DEV-001`。
+- PR 目标分支：`codex/stage-05-integration`；任务开发者创建并维护同一 Draft PR，HEAD 变化必须由 DEV-001 重新审核。
+- 并行属性：Sequential After v1.5 governance integration and API availability matrix; 现有 TASK-001—011 的历史完成状态不因本任务被改写。
+- 需求映射：`PAGE_FUNCTION_MATRIX.md` 全部 P0 页面（Data import 明确排除）、FR-001—010 的既有 UI 映射、AC-001—044 中受前端页面影响的条目、`DEF-STAGE7-001`、`CR-047`。
+- 范围：以已批准 Stage 3 原型为视觉/交互参照，正式 React/TypeScript 实现 Login、Workbench、驾驶舱 BI、Factory modeling、Equipment ledger/add/edit/detail、Fault report/start-repair diagnosis、Agent report、Global Agent、Maintenance records、Repair execution、System management、Intelligent config；接入正式认证、权限、JSON/SSE、附件、幂等写入，以及真实的加载、空、错误、禁用状态。
+- 不包含：Data import、原型修改、运行原型源码、伪造业务数据、擅自新增公共 API/迁移/权限模型/依赖/部署配置、Stage 6 重测结论、Stage 7 验收通过或 Stage 8 发布。
+- 共享契约：`04-architecture-plan/API_SPEC.md` 和任务 0 输出的 `05-development/P0_FRONTEND_API_AVAILABILITY_MATRIX.md` 是唯一消费清单。页面声明的原型功能若无正式契约，必须标记 `BLOCKED_API_GAP`，由 DEV-001 设计最小后端契约并经项目负责人确认后才可实现。
+- 实施步骤：先更新每个页面的失败交互测试；按已批准的 `STAGE7_P0_FRONTEND_REMEDIATION_IMPLEMENTATION_PLAN.md` 实现共享壳、页面域和真实客户端；每个稳定路由/流程记录独立检查点；完成差异矩阵、浏览器对照和交接。
+- 验收标准：所有 P0 行均有可达正式路由、真实 API 或获批的明确不可用状态、权限与关键 UI 状态测试、原型对照证据；无生产代码引用原型运行目录或静态业务样例。
+- 验证：`npm --prefix codebase/frontend test -- --run`；`npm --prefix codebase/frontend run build`；`node --test 06-testing/tests/*.test.js`；相关后端 API 契约测试；`git diff --check`。Docker、真实 RAGFlow、附件扫描、HTTPS 与浏览器 live-stack 验证仅由 DEV-001 在隔离环境执行。
+- 分支：`codex/task-012-p0-frontend-remediation`。
+- Review 与 Merge：DEV-002 完成自测后在同一 PR 请求 DEV-001 审核精确 HEAD；DEV-001 通过后执行集成检查并向项目负责人请求 PR/HEAD 绑定的 Merge 授权；获授权后 DEV-001 手动 Merge Commit。不得 auto-merge、merge queue、自批或自合并。
+- 回滚：按该任务的独立 Merge Commit 选择性 `git revert -m 1 <merge-sha>`，先在隔离环境验证；不得删除卷、数据或其他已接受功能。
+
 ## 7. 人员分配与交叉审核矩阵
 
 | 开发者 | 分配开发任务 | 默认审核任务 | Draft PR 创建责任 | 主要范围 | Docker 责任 | 集成责任 |
 |---|---|---|---|---|---|---|
-| DEV-001 | TASK-001、002、003、004、011 | TASK-005、006、007、008、009、010 | 创建并维护自己的任务 Draft PR | 平台事实、权限、维修、基础设施、E2E | 唯一验证人 | 对全部 PR 执行集成检查和授权请求；合并 DEV-002 的 PR；负责合并后回归 |
-| DEV-002 | TASK-005、006-FE、006、007、008、009、010 | TASK-002、003、004、011；TASK-001 仅保留历史独立审查 | 创建并维护自己的任务 Draft PR | 知识适配、Agent、正式前端 | 无本地 Docker；提交给 DEV-001 验证 | 合并 DEV-001 的获批 PR；提供模块开发、交叉审核与回归证据 |
+| DEV-001 | TASK-001、002、003、004、011 | TASK-005、006、007、008、009、010、012 | 创建并维护自己的任务 Draft PR | 平台事实、权限、维修、基础设施、E2E | 唯一验证人 | 对全部 PR 执行集成检查和授权请求；合并 DEV-002 的 PR；负责合并后回归 |
+| DEV-002 | TASK-005、006-FE、006、007、008、009、010、012 | TASK-002、003、004、011；TASK-001 仅保留历史独立审查 | 创建并维护自己的任务 Draft PR | 知识适配、Agent、正式前端 | 无本地 Docker；提交给 DEV-001 验证 | 合并 DEV-001 的获批 PR；提供模块开发、交叉审核与回归证据 |
 
 ## 8. 依赖、并行与协作矩阵
 
@@ -479,6 +501,7 @@
 | TASK-009 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003, TASK-005, TASK-006, TASK-007 | 维修、案例、知识和 Runtime 全部已审核并正式集成 |
 | TASK-010 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003, TASK-008, TASK-009, TASK-006-FE | 所有正式页面所需 API、Agent 和前端工程基础已审核并正式集成 |
 | TASK-011 | DEV-001 | DEV-002 | DEV-002，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003—010 | 所有模块 PR 已 Review、合入集成分支并完成回归 |
+| TASK-012 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Sequential After v1.5 governance integration | `CR-047` 已获确认；v1.5 任务书已合入；P0 API 可用性矩阵已核对；缺失契约已获项目负责人批准或对应页面保持阻断 |
 
 ## 9. 集成计划
 
@@ -488,7 +511,7 @@
 - Stage 5 唯一集成触发源：开发任务 PR 已由另一名开发者批准当前精确 HEAD，或 Stage 5 纯治理文档 PR 已由项目负责人确认治理内容和当前精确 HEAD；DEV-001 集成检查通过，且项目负责人明确批准合并该 PR 和 HEAD。
 - 不得作为集成触发源：任务分支 push、Draft PR 创建、单独 CI 通过、过期 approval、未绑定精确 HEAD 的口头批准、PR #15 被拒绝历史或未绑定任务书的自动化事件。
 - Stage 5 自动化策略：允许开发者创建/更新自己的 Draft PR、执行检查、提交 Review、发送通知和准备 Merge 授权请求；禁止 GitHub auto-merge、merge queue 和自动进入 Stage 6。矩阵指定的非任务开发者获项目负责人逐 PR 授权后执行的 Merge Commit 不属于 auto-merge。
-- 推荐集成顺序：TASK-001 → TASK-002 → TASK-006-FE → TASK-006 → TASK-007 → TASK-004 → TASK-005 → TASK-003 → TASK-008 → TASK-009 → TASK-010 → TASK-011。
+- 推荐集成顺序：TASK-001 → TASK-002 → TASK-006-FE → TASK-006 → TASK-007 → TASK-004 → TASK-005 → TASK-003 → TASK-008 → TASK-009 → TASK-010 → TASK-011 → TASK-012。
 - 顺序允许在依赖满足后微调，但必须先更新本任务书；不得仅在聊天中改变。
 - Stage 5 每次集成前检查：开发任务 PR 的另一名开发者已批准当前精确 HEAD且审核后无新增提交；Stage 5 纯治理文档 PR 的项目负责人已确认治理内容和当前精确 HEAD。目标分支正确；required checks 通过；依赖已正式集成；真实检查结果齐全；共享契约未漂移；无禁止范围修改；相关文档已更新；无未解决阻断项；PR 无冲突且 Mergeable。
 - Stage 5 Merge 授权请求：`DEV-001` 必须向项目负责人报告 TASK/CR、PR、源/目标分支、精确 HEAD、适用的审核或治理确认结论、Critical/Important/Minor 或治理检查结果、测试与 Docker 证据（如适用）、依赖、冲突、共享契约、风险、回滚和合并后验证计划，并询问是否批准合并。

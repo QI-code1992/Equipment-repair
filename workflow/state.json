@@ -1,6 +1,6 @@
 {
   "state": "CHANGES_REQUESTED",
-  "updatedBy": "project owner requested full P0 frontend remediation; recorded by workflow coordinator",
+  "updatedBy": "project owner confirmed the Stage 7 P0 frontend remediation plan; governance candidate prepared by workflow coordinator",
   "updatedAt": "2026-07-30",
   "task010Delivery": {
     "taskId": "TASK-010",
@@ -69,12 +69,14 @@
   "stage7P0FrontendRemediation": {
     "defect": "DEF-STAGE7-001",
     "changeRequest": "CR-047",
-    "status": "APPROVED_FOR_STAGE5_REPAIR_DESIGN_REVIEW",
+    "status": "GOVERNANCE_CANDIDATE_READY_FOR_PROJECT_OWNER_CONFIRMATION",
     "triggerBaseline": "a334afd1b8cb4eeb139d78b7f5f1b5617bb2cd32",
     "stage7Candidate": "89fbd2129169fb6ece42094b17907885637f3c48",
     "scope": "Implement every P0 page from the approved Stage 3 prototype as independent React/TypeScript production UI with real API, authorization, loading, empty and error states; do not copy prototype runtime source or use fabricated business data.",
     "design": "05-development/STAGE7_P0_FRONTEND_REMEDIATION_DESIGN.md",
-    "nextAction": "Project owner reviews the written remediation design. Then update the Stage 5 task book and implementation plan before any code changes; Stage 7 acceptance remains blocked for affected UI."
+    "implementationPlan": "05-development/STAGE7_P0_FRONTEND_REMEDIATION_IMPLEMENTATION_PLAN.md",
+    "apiAvailabilityMatrix": "05-development/P0_FRONTEND_API_AVAILABILITY_MATRIX.md",
+    "nextAction": "Project owner confirms the v1.5 task-book and API-availability governance candidate at its exact HEAD; after its authorized Merge Commit, TASK-012 may create its single Draft PR. Stage 7 acceptance remains blocked for affected UI."
   },
   "stage6RuntimeValidation": {
     "status": "POST_MERGE_CORE_RUNTIME_VALIDATION_COMPLETED_SUPERSEDED_BY_SIGNED_STAGE6_CONCLUSION",

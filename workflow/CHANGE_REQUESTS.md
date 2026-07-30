@@ -824,7 +824,7 @@
 ### CR-047：全部 P0 正式前端按批准原型回流修复
 
 - 级别：L0 实现偏离修正；不改变 PRD、SPEC、页面功能矩阵、原型、架构或验收标准。
-- 状态：Approved for Stage 5 repair design review。
+- 状态：Approved for Stage 5 remediation planning; governance task-book candidate in preparation.
 - 提出人：项目负责人。
 - 提出时间：2026-07-30。
 - 当前阶段：Stage 7 验收发现，受影响范围回流 Stage 5。
@@ -838,6 +838,6 @@
   - 测试 / 验收：补充原型页面到正式路由、API、状态、浏览器对照证据的追溯；受影响 Stage 7 验收暂停。
   - 依赖 / 部署：不新增生产依赖；不改变当前隔离部署方案。
 - 决策：项目负责人已确认修复全部 P0 页面，并确认正式前端须还原原型的视觉和交互基线，同时接入真实 API 与权限状态。
-- 设计：`05-development/STAGE7_P0_FRONTEND_REMEDIATION_DESIGN.md`；书面设计待项目负责人复核后，才创建更新后的 Stage 5 任务书、实施计划和代码 PR。
+- 设计与计划：项目负责人已确认 `05-development/STAGE7_P0_FRONTEND_REMEDIATION_DESIGN.md`；实施计划为 `05-development/STAGE7_P0_FRONTEND_REMEDIATION_IMPLEMENTATION_PLAN.md`。当前先生成 v1.5 任务书与 API 可用性矩阵的纯治理候选；该候选合入前不得创建代码 PR。
 - 验证：页面/API/状态差异矩阵、逐页自动化测试、生产构建、相关后端验证、浏览器视觉/交互对照和 `git diff --check`。
 - 阶段边界：本 CR 不撤销既有 Stage 1—4 批准；不构成修复完成、Stage 6 重测通过、Stage 7 验收通过或 Stage 8 发布授权。
