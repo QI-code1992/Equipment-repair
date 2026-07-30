@@ -461,7 +461,7 @@
 
 ### TASK-012：Stage 7 P0 正式前端偏离修复
 
-- 状态：Blocked pending v1.5 governance integration / `DEF-STAGE7-001` 已确认，尚未开始代码实现。
+- 状态：规划已由 PR #69 合入；受 `TASK-012-API-001`—`007` 前置任务阻断，尚未开始代码实现。
 - 优先级：P0。
 - 负责人、任务开发者、Draft PR 创建者：`DEV-002`。
 - 指定审核者、最终集成检查与 DEV-002 开发任务 Merge 执行者：`DEV-001`。
