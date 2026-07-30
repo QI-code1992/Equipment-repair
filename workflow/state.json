@@ -1,6 +1,6 @@
 {
   "state": "CHANGES_REQUESTED",
-  "updatedBy": "project owner confirmed the Stage 7 P0 frontend remediation plan; governance candidate prepared by workflow coordinator",
+  "updatedBy": "DEV-001 post-merge governance verification for PR #69",
   "updatedAt": "2026-07-30",
   "task010Delivery": {
     "taskId": "TASK-010",
@@ -69,14 +69,19 @@
   "stage7P0FrontendRemediation": {
     "defect": "DEF-STAGE7-001",
     "changeRequest": "CR-047",
-    "status": "CHANGES_REQUESTED_BY_DEV001_PENDING_REVIEW",
+    "status": "PLANNING_INTEGRATED_API_PREREQUISITES_BLOCKED",
     "triggerBaseline": "a334afd1b8cb4eeb139d78b7f5f1b5617bb2cd32",
     "stage7Candidate": "89fbd2129169fb6ece42094b17907885637f3c48",
     "scope": "Implement every P0 page from the approved Stage 3 prototype as independent React/TypeScript production UI with real API, authorization, loading, empty and error states; do not copy prototype runtime source or use fabricated business data.",
     "design": "05-development/STAGE7_P0_FRONTEND_REMEDIATION_DESIGN.md",
     "implementationPlan": "05-development/STAGE7_P0_FRONTEND_REMEDIATION_IMPLEMENTATION_PLAN.md",
     "apiAvailabilityMatrix": "05-development/P0_FRONTEND_API_AVAILABILITY_MATRIX.md",
-    "nextAction": "PR #69 must correct DEV-001 review findings and request a new review on its new exact HEAD. After approved integration and explicit Merge authorization, TASK-012 may create one Draft PR only after each TASK-012-API prerequisite has an approved public API scope. Stage 7 acceptance remains blocked for affected UI."
+    "planningPullRequest": 69,
+    "approvedHead": "9b89adb9d32dc067a9ea9b1cb4aa8c5f9c6d1fd8",
+    "mergeCommit": "be9de719c7a1a14f7bf98aab792a2b73bf0278d5",
+    "mergeExecutor": "ll979053897-arch / DEV-001 / manual Merge Commit",
+    "verification": "Merge parents, source-tree equivalence, merge diff check, workflow JSON and 15 Node static regressions passed.",
+    "nextAction": "TASK-012 remains blocked until every TASK-012-API prerequisite receives project-owner public API scope confirmation and is reviewed, integrated and closed. Stage 7 acceptance remains blocked for affected UI."
   },
   "stage6RuntimeValidation": {
     "status": "POST_MERGE_CORE_RUNTIME_VALIDATION_COMPLETED_SUPERSEDED_BY_SIGNED_STAGE6_CONCLUSION",
@@ -148,7 +153,7 @@
     ],
     "historicalBoundary": "Does not rewrite completed TASK-001/TASK-002 or CR-037 through CR-039 history; applies to open Draft PRs and subsequent task PRs after integration"
   },
-  "currentCommitSha": "89fbd2129169fb6ece42094b17907885637f3c48",
+  "currentCommitSha": "be9de719c7a1a14f7bf98aab792a2b73bf0278d5",
   "task003Delivery": {
     "taskId": "TASK-003",
     "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",

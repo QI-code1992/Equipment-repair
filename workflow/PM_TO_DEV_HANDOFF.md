@@ -3,7 +3,7 @@
 ## Stage 7 P0 正式前端偏离回流 Stage 5（2026-07-30）
 
 - 决定：项目负责人已确认 `DEF-STAGE7-001` 的书面设计和实施计划，要求修复页面功能矩阵中的全部 P0 页面；Data import 继续排除。
-- 当前治理候选：任务书 v1.5、新增 TASK-012 与 `05-development/P0_FRONTEND_API_AVAILABILITY_MATRIX.md`。该候选尚待项目负责人对精确 HEAD 的治理确认、集成检查和单独 Merge 授权；此前禁止创建 TASK-012 代码 PR。
+- 当前治理状态：任务书 v1.5、新增 TASK-012 与 `05-development/P0_FRONTEND_API_AVAILABILITY_MATRIX.md` 已经由 PR #69 Merge Commit `be9de719c7a1a14f7bf98aab792a2b73bf0278d5` 集成。TASK-012 仍被 `TASK-012-API-001`—`007` 阻断，禁止创建 TASK-012 代码 PR。
 - 实施边界：正式 React 前端以批准 Stage 3 原型的结构、布局、导航与交互状态为基线，但只能消费正式 API、真实权限与运行状态；严禁复制/运行原型源码、伪造业务数据或未经确认新增 API、迁移、依赖、权限和部署配置。
 - API 阻断：工作台待办/告警、BI 聚合、设备历史、维修/工单读取、审计读取、智能调用记录等缺口已逐项登记为 `API-GAP-001`—`007`。任何缺口须先由项目负责人确认精确公开 API 范围，不能以前端 mock 替代。
 - 当前门禁：Stage 7 受影响 UI 验收暂停；本回流不改写 Stage 1—4 基线、不构成 Stage 6 重测通过、Stage 7 验收通过或 Stage 8 发布授权。

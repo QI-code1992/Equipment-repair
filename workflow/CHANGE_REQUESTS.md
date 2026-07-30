@@ -824,7 +824,7 @@
 ### CR-047：全部 P0 正式前端按批准原型回流修复
 
 - 级别：L0 实现偏离修正；不改变 PRD、SPEC、页面功能矩阵、原型、架构或验收标准。
-- 状态：Changes requested by DEV-001; awaiting corrected Stage 5 planning candidate and re-review.
+- 状态：Stage 5 planning integrated; API prerequisite tasks pending.
 - 提出人：项目负责人。
 - 提出时间：2026-07-30。
 - 当前阶段：Stage 7 验收发现，受影响范围回流 Stage 5。
@@ -839,6 +839,6 @@
   - 测试 / 验收：补充原型页面到正式路由、API、状态、浏览器对照证据的追溯；受影响 Stage 7 验收暂停。
   - 依赖 / 部署：不新增生产依赖；不改变当前隔离部署方案。
 - 决策：项目负责人已确认修复全部 P0 页面，并确认正式前端须还原原型的视觉和交互基线，同时接入真实 API 与权限状态。
-  - 设计与计划：项目负责人已确认 `05-development/STAGE7_P0_FRONTEND_REMEDIATION_DESIGN.md`；实施计划为 `05-development/STAGE7_P0_FRONTEND_REMEDIATION_IMPLEMENTATION_PLAN.md`。当前 v1.5 候选同时包含 Stage 5 设计、计划与缺陷记录，不适用纯治理 PR 豁免；该候选须经 DEV-001 精确 HEAD 审核、集成检查和项目负责人授权后才可合入，合入前不得创建代码 PR。
+  - 设计与计划：项目负责人已确认 `05-development/STAGE7_P0_FRONTEND_REMEDIATION_DESIGN.md`；实施计划为 `05-development/STAGE7_P0_FRONTEND_REMEDIATION_IMPLEMENTATION_PLAN.md`。v1.5 规划候选已由 PR #69 的获批 HEAD `9b89adb9d32dc067a9ea9b1cb4aa8c5f9c6d1fd8` 经 DEV-001 手动 Merge Commit `be9de719c7a1a14f7bf98aab792a2b73bf0278d5` 集成。TASK-012 仍须等待全部 API 前置任务关闭，禁止创建代码 PR。
 - 验证：页面/API/状态差异矩阵、逐页自动化测试、生产构建、相关后端验证、浏览器视觉/交互对照和 `git diff --check`。
 - 阶段边界：本 CR 不撤销既有 Stage 1—4 批准；不构成修复完成、Stage 6 重测通过、Stage 7 验收通过或 Stage 8 发布授权。
