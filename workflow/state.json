@@ -1,7 +1,7 @@
 {
-  "state": "IN_ACCEPTANCE",
-  "updatedBy": "project owner Stage 6 -> Stage 7 Gate; recorded by workflow coordinator",
-  "updatedAt": "2026-07-29",
+  "state": "CHANGES_REQUESTED",
+  "updatedBy": "project owner requested full P0 frontend remediation; recorded by workflow coordinator",
+  "updatedAt": "2026-07-30",
   "task010Delivery": {
     "taskId": "TASK-010",
     "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",
@@ -65,6 +65,16 @@
     "approvedBy": "project owner",
     "approvedAt": "2026-07-29",
     "nextAction": "Begin Stage 7 independent product acceptance from the approved candidate baseline; Stage 8 release remains prohibited pending its separate gate."
+  },
+  "stage7P0FrontendRemediation": {
+    "defect": "DEF-STAGE7-001",
+    "changeRequest": "CR-047",
+    "status": "APPROVED_FOR_STAGE5_REPAIR_DESIGN_REVIEW",
+    "triggerBaseline": "a334afd1b8cb4eeb139d78b7f5f1b5617bb2cd32",
+    "stage7Candidate": "89fbd2129169fb6ece42094b17907885637f3c48",
+    "scope": "Implement every P0 page from the approved Stage 3 prototype as independent React/TypeScript production UI with real API, authorization, loading, empty and error states; do not copy prototype runtime source or use fabricated business data.",
+    "design": "05-development/STAGE7_P0_FRONTEND_REMEDIATION_DESIGN.md",
+    "nextAction": "Project owner reviews the written remediation design. Then update the Stage 5 task book and implementation plan before any code changes; Stage 7 acceptance remains blocked for affected UI."
   },
   "stage6RuntimeValidation": {
     "status": "POST_MERGE_CORE_RUNTIME_VALIDATION_COMPLETED_SUPERSEDED_BY_SIGNED_STAGE6_CONCLUSION",
