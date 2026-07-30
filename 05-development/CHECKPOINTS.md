@@ -2,6 +2,14 @@
 
 静态原型检查点记录在 `03-ui-prototype/PROTOTYPE_CHECKPOINTS.md`，不得自动提升为生产检查点。
 
+## FCP-012-API-001：Workbench 读取 API 开发候选（2026-07-30）
+
+- 状态：`DEVELOPMENT_CANDIDATE_PENDING_DEV002_REVIEW`；未集成，不解锁 TASK-012 或 Stage 6/7/8。
+- 分支/实现提交：`codex/task-012-api-001-workbench` / `7ba0e5e77e6a784f0dd6a0622c91ebce691e00a1`。
+- 范围：`GET /api/workbench/todos`、`alert-summary`、`shortcuts` 的只读契约和最小后端实现；只读既有故障、设备及权限事实，不新增迁移、依赖、健康分聚合、任务分配、兼容层或通用抽象。
+- 验证：Python 3.13 定向 `3 passed, 2 warnings`；后端全量 `319 passed, 13 skipped, 2 warnings`；`compileall`、Compose `config --quiet` 和完整差异检查通过。
+- 审核与回退：等待 DEV-002 对 Draft PR 的精确 HEAD 审核；获批与项目负责人逐 PR/HEAD 授权前不得合并。可选择性回退该功能提交，不涉及数据或部署状态。
+
 ## FCP-011：TASK-011 合并后治理收尾（2026-07-27）
 
 - 状态：`CLOSED_POST_MERGE_GOVERNANCE_COMPLETED`；治理 PR #55 已合入 `53bdf90ec8ab743165d0542099a15d3c9de598b3`，TASK-011 正式关闭，Stage 6 仍须单独获得正式门禁批准。
