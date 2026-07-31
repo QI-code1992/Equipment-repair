@@ -523,3 +523,13 @@
 - 范围：在 `codex/task-012-p0-frontend-remediation` 的唯一 Draft PR 中新增 BI、设备历史、维修记录、工单、审计与智能只读 API，并接入正式 React 路由、组织/设备/系统管理、智能审计与全局 Agent 入口。
 - 约束：全部读取均使用现有 Bearer 会话和服务端真实事实；没有持久化的智能调用指标返回明确空集合，不伪造仪表盘数值；FAILED 知识文档可通过既有 Worker 队列重试。
 - 本地验证：TASK-012 定向后端 `4 passed, 2 warnings`；既有模块全量 `265 passed, 2 warnings`；前端 `29 passed`、生产构建和 15 项 Node 静态检查通过。Docker/live-stack/浏览器验收未在 DEV-002 环境执行，留给 DEV-001 最终验证。
+
+## FCP-012-API-002—007 与 P0 前端完整候选检查点（2026-07-31）
+
+- 状态：`DEVELOPMENT_CANDIDATE_PENDING_FINAL_DEV001_REVIEW`；不构成审核、集成、Merge 或 Stage 7 放行。
+- 当前分支：`codex/task-012-p0-frontend-remediation`；变更仍集中在唯一 Draft PR。
+- 新增范围：API-002—007 真实读模型与参数边界；Agent 线程历史列表（创建者隔离）、线程详情/resume/SSE；维修记录知识筛选、设备趋势、工单状态筛选；AI 故障上报附件安全引用。
+- 验证：前端 `49 passed`、生产构建；后端 `328 passed, 13 skipped, 2 warnings`、compileall；15 项 Node 静态回归；JSON 解析与 `git diff --check`。
+- 回退：当前未提交；稳定单元仍可按文件/提交选择性回退。不得把本检查点 SHA 当成最终候选，最终 SHA 需在提交后重新记录。
+- 未验证：macOS 无 Docker/PowerShell，未执行 Windows 隔离 live-stack、RAGFlow、ClamAV/MinIO、HTTPS、浏览器逐页 E2E。
+- 下一步：完成完整 diff 和文档审计后提交同一 Draft PR，才可一次性请求 DEV-001 对完整候选审核。

@@ -126,6 +126,29 @@ def create_thread(
     return response
 
 
+@router.get("/threads")
+def list_threads(
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permission("intelligence:agent")),
+) -> dict[str, object]:
+    rows = db.scalars(
+        select(AgentThread)
+        .where(AgentThread.creator_user_id == user.id)
+        .order_by(AgentThread.updated_at.desc(), AgentThread.id.asc())
+    ).all()
+    items = [
+        {
+            "thread_id": thread.id,
+            "agent_id": thread.agent_id,
+            "status": thread.status,
+            "created_at": thread.created_at.isoformat(),
+            "updated_at": thread.updated_at.isoformat(),
+        }
+        for thread in rows
+    ]
+    return {"items": items, "count": len(items)}
+
+
 @router.post("/threads/{thread_id}/messages", status_code=202)
 def create_run(
     thread_id: str,

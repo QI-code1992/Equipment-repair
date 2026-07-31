@@ -15,6 +15,7 @@ import {
   saveAgentConfig,
   updateModelBinding,
   updateModelProvider,
+  uploadKnowledgeDocument,
 } from "./api";
 
 const agentLabels: Record<string, string> = {
@@ -44,6 +45,8 @@ export function IntelligentConfigPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [knowledgeDatasetId, setKnowledgeDatasetId] = useState("");
+  const [knowledgeUploading, setKnowledgeUploading] = useState(false);
 
   useEffect(() => {
     Promise.all([getAgentConfigs(), getModelProviders(), getModelBindings()])
@@ -171,6 +174,23 @@ export function IntelligentConfigPage() {
     } catch (caught) { setError(`更新模型绑定失败：${errorText(caught)}`); }
   }
 
+  async function uploadKnowledge(file: File | undefined) {
+    if (!file || !knowledgeDatasetId.trim()) {
+      setError("请先填写正式知识库 Dataset ID。");
+      return;
+    }
+    setKnowledgeUploading(true);
+    setError(null);
+    try {
+      await uploadKnowledgeDocument(knowledgeDatasetId.trim(), file);
+      setNotice("知识文档已提交，后续状态由正式 Worker 更新。");
+    } catch (caught) {
+      setError(`知识文档上传失败：${errorText(caught)}`);
+    } finally {
+      setKnowledgeUploading(false);
+    }
+  }
+
   if (loading) return <section className="page-shell"><p role="status">正在加载智能配置…</p></section>;
   if (error && !draft) return <section className="page-shell"><p role="alert">{error}</p></section>;
 
@@ -192,6 +212,7 @@ export function IntelligentConfigPage() {
       <form className="portal-form" onSubmit={addBinding}><label>提供商<select name="provider_id" aria-label="绑定提供商" required defaultValue=""><option value="" disabled>请选择启用提供商</option>{providers.filter((provider) => provider.enabled).map((provider) => <option key={provider.id} value={provider.id}>{provider.name}</option>)}</select></label><label>绑定名称<input aria-label="绑定名称" name="binding_name" required /></label><label>模型名称<input aria-label="模型名称" name="model_name" required /></label><label><input name="supports_reasoning" type="checkbox" /> 支持深度思考</label><button type="submit" disabled={!providers.some((provider) => provider.enabled)}>新增模型绑定</button></form>
       {editingBinding && <form className="portal-form" onSubmit={saveBindingEdit}><h4>编辑模型绑定</h4><label>提供商<select aria-label="编辑绑定提供商" name="provider_id" defaultValue={editingBinding.provider_id} required>{providers.filter((provider) => provider.enabled).map((provider) => <option key={provider.id} value={provider.id}>{provider.name}</option>)}</select></label><label>绑定名称<input aria-label="编辑绑定名称" name="binding_name" defaultValue={editingBinding.name} required /></label><label>模型名称<input aria-label="编辑模型名称" name="model_name" defaultValue={editingBinding.model_name} required /></label><label><input aria-label="编辑绑定支持深度思考" name="supports_reasoning" type="checkbox" defaultChecked={editingBinding.supports_reasoning} /> 支持深度思考</label><label><input name="enabled" type="checkbox" defaultChecked={editingBinding.enabled} /> 启用模型绑定</label><button type="submit">保存模型绑定</button><button type="button" onClick={() => setEditingBinding(null)}>取消</button></form>}
     </section>
+    <section className="data-card" aria-labelledby="knowledge-heading"><h3 id="knowledge-heading">知识文档入口</h3><p>仅提交安全扫描后的正式文档引用；页面不显示对象键、扫描内部细节或正文。</p><label>正式 Dataset ID<input aria-label="正式 Dataset ID" value={knowledgeDatasetId} onChange={(event) => setKnowledgeDatasetId(event.target.value)} /></label><label>上传知识文档<input aria-label="上传知识文档" type="file" disabled={knowledgeUploading} onChange={(event) => void uploadKnowledge(event.target.files?.[0])} /></label>{knowledgeUploading && <p role="status">正在上传并扫描知识文档…</p>}</section>
     <div className="config-layout"><div className="config-agent-list" aria-label="Agent 配置列表">{configs.map((config) => <button className={config.agent_id === selectedId ? "config-agent config-agent--active" : "config-agent"} key={config.agent_id} type="button" onClick={() => select(config.agent_id)}>{agentLabel(config.agent_id)}</button>)}</div>
       {draft ? <form className="config-form" onSubmit={(event) => { event.preventDefault(); void save(); }}><h3>{agentLabel(draft.agent_id)}</h3><p className="config-form__model">当前模型：{selectedBinding ? `${selectedBinding.name}（${selectedBinding.model_name}）` : "未绑定模型"}</p><label>模型绑定<select aria-label="Agent 模型绑定" value={draft.model_binding_id ?? ""} onChange={(event) => setDraft({ ...draft, model_binding_id: event.target.value || null })}><option value="">未绑定模型</option>{usableBindings.map((binding) => <option key={binding.id} value={binding.id}>{binding.name}（{binding.model_name}）</option>)}</select></label><label><input type="checkbox" checked={draft.enabled} onChange={(event) => setDraft({ ...draft, enabled: event.target.checked })} /> 启用 Agent</label><label><input aria-label="启用深度思考" type="checkbox" checked={draft.deep_thinking_enabled} onChange={(event) => setDraft({ ...draft, deep_thinking_enabled: event.target.checked })} /> 启用深度思考</label>{reasoningUnsupported && <p role="alert">当前模型不支持深度思考，请关闭开关或改绑支持推理的模型。</p>}<label>上下文轮数<input aria-label="上下文轮数" type="number" min="0" max="10" value={draft.context_turns} onChange={(event) => setDraft({ ...draft, context_turns: Number(event.target.value) })} /></label><button type="submit" disabled={saving || reasoningUnsupported}>{saving ? "保存中…" : "保存 Agent 配置"}</button></form> : <p>尚无可配置的 Agent。</p>}
     </div>

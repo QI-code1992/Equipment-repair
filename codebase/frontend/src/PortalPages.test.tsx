@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 
-import { AgentReportPage, BiDashboardPage, EquipmentAddPage, EquipmentLedgerPage, FactoryModelingPage, IntelligentAuditPage, MaintenanceRecordDetailPage, MaintenanceRecordsPage, SystemManagementPage } from "./PortalPages";
+import { AgentReportPage, BiDashboardPage, EquipmentAddPage, EquipmentDetailPage, EquipmentLedgerPage, FactoryModelingPage, IntelligentAuditPage, MaintenanceRecordDetailPage, MaintenanceRecordsPage, SystemManagementPage } from "./PortalPages";
 
 describe("TASK-012 portal pages", () => {
   it("renders BI only from its formal API response", async () => {
@@ -68,7 +68,7 @@ describe("TASK-012 portal pages", () => {
   it("shows an empty maintenance state instead of fabricated records", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 })));
 
-    render(<MaintenanceRecordsPage />);
+    render(<MemoryRouter><MaintenanceRecordsPage /></MemoryRouter>);
 
     expect(await screen.findByText("暂无可展示的正式业务数据。")).toBeInTheDocument();
   });
@@ -84,6 +84,26 @@ describe("TASK-012 portal pages", () => {
     expect(await screen.findByText("轴承磨损")).toBeInTheDocument();
     expect(screen.getByText("NOT_LINKED")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith("/api/maintenance-records/record-1", undefined);
+  });
+
+  it("renders the real equipment repair trend returned by API-003", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "eq-1", code: "EQ-1", name: "设备", model: "M", type: "LOADER", manufacturer: "厂", status: "NORMAL", organization_id: "line", owner_user_id: null, operating_hours: 1 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20, trend: [{ date: "2026-07-30", completed_count: 2 }] }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<MemoryRouter initialEntries={["/equipment/eq-1"]}><Routes><Route path="/equipment/:id" element={<EquipmentDetailPage />} /></Routes></MemoryRouter>);
+    expect(await screen.findByText(/2026-07-30：完成 2 次/)).toBeInTheDocument();
+  });
+
+  it("sends the selected knowledge status to the maintenance-record API", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [{ maintenance_record_id: "r-1", work_order_number: "WO-1", status: "COMPLETED", symptom: "异响", repair_result: "通过", knowledge_status: "NOT_LINKED" }], count: 1, page: 1, page_size: 20 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<MemoryRouter><MaintenanceRecordsPage /></MemoryRouter>);
+    fireEvent.change(await screen.findByLabelText("维修记录知识状态筛选"), { target: { value: "LINKED" } });
+    await screen.findByText("暂无可展示的正式业务数据。");
+    expect(fetchMock.mock.calls[1][0]).toBe("/api/maintenance-records?knowledge_status=LINKED");
   });
 
   it("filters the equipment ledger with real loaded equipment", async () => {

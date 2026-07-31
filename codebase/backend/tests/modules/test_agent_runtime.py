@@ -80,6 +80,34 @@ def test_thread_message_persists_snapshot_and_sse_hides_input(client) -> None:
     assert "reasoning_status" in events.text
 
 
+def test_thread_history_lists_only_current_users_threads(client) -> None:
+    _, token = create_user_token(
+        client,
+        username="runtime-history-owner",
+        role_code="REPAIR_WORKER",
+        permission_codes=["intelligence:agent"],
+    )
+    _, other_token = create_user_token(
+        client,
+        username="runtime-history-other",
+        role_code="REPAIR_WORKER",
+        permission_codes=["intelligence:agent"],
+    )
+    for current_token, key in ((token, "history-1"), (other_token, "history-2")):
+        response = client.post(
+            "/api/agent/threads",
+            headers={**auth(current_token), "Idempotency-Key": key},
+            json={"agent_id": "fault_reporting", "business_context": {}},
+        )
+        assert response.status_code == 201
+
+    history = client.get("/api/agent/threads", headers=auth(token))
+
+    assert history.status_code == 200
+    assert history.json()["count"] == 1
+    assert set(history.json()["items"][0]) == {"thread_id", "agent_id", "status", "created_at", "updated_at"}
+
+
 def test_thread_isolation_and_checkpoint_resume(client) -> None:
     _, owner_token = create_user_token(
         client,

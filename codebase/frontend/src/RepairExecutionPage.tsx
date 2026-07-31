@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { ApiError, completeRepair, getOperationGuidance, getWorkOrders, readRunEvents, runFaultDiagnosis, startAgentRun, startRepair, type DiagnosisResponse, type GuidanceResponse, type RepairStart, type RepairResult, type RuntimeEvent, type WorkOrder } from "./api";
+import { ApiError, completeRepair, getOperationGuidance, getWorkOrder, getWorkOrders, readRunEvents, runFaultDiagnosis, startAgentRun, startRepair, type DiagnosisResponse, type GuidanceResponse, type RepairStart, type RepairResult, type RuntimeEvent, type WorkOrder } from "./api";
 
 function diagnosisMessage(diagnosis: DiagnosisResponse) {
   if (diagnosis.state === "EVIDENCE_PENDING") return "证据仍不足，可补充信息或直接开始维修。";
@@ -22,13 +22,27 @@ export function RepairExecutionPage() {
   const [diagnosisLoading, setDiagnosisLoading] = useState(false);
   const [guidanceError, setGuidanceError] = useState<string | null>(null);
   const [assignedOrders, setAssignedOrders] = useState<WorkOrder[] | null>(null);
+  const [orderStatus, setOrderStatus] = useState("");
   const [ordersError, setOrdersError] = useState<string | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<WorkOrder | null>(null);
 
   useEffect(() => {
-    getWorkOrders().then((data) => setAssignedOrders(data.items)).catch((caught: unknown) => {
+    setOrdersError(null);
+    getWorkOrders({ status: orderStatus || undefined }).then((data) => setAssignedOrders(data.items)).catch((caught: unknown) => {
       setOrdersError(caught instanceof ApiError && caught.status === 403 ? "无权读取已分配工单。" : "已分配工单加载失败，请稍后重试。");
     });
-  }, []);
+  }, [orderStatus]);
+
+  async function selectOrder(order: WorkOrder) {
+    setError(null);
+    setSelectedOrder(null);
+    setFaultId(order.fault_report_id);
+    try {
+      setSelectedOrder(await getWorkOrder(order.id));
+    } catch (caught) {
+      setError(caught instanceof ApiError && caught.status === 403 ? "无权读取该工单详情。" : caught instanceof ApiError && caught.status === 404 ? "该工单不存在或已被关闭。" : "工单详情加载失败，请稍后重试。");
+    }
+  }
 
   async function startDiagnosis() {
     setError(null);
@@ -112,7 +126,7 @@ export function RepairExecutionPage() {
     <section className="page-shell" aria-labelledby="page-heading">
       <div className="page-shell__eyebrow">现场作业</div>
       <h2 id="page-heading">维修执行</h2>
-      <section aria-label="已分配工单"><h3>已分配工单</h3>{assignedOrders === null ? <p>正在加载工单…</p> : assignedOrders.length === 0 ? <p>暂无已分配工单。</p> : <ul>{assignedOrders.map((order) => <li key={order.id}><button type="button" onClick={() => setFaultId(order.fault_report_id)}>{order.number} · {order.status} · {order.symptom}</button></li>)}</ul>}{ordersError && <p role="alert">{ordersError}</p>}</section>
+      <section aria-label="已分配工单"><h3>已分配工单</h3><label>工单状态<select aria-label="维修执行工单状态筛选" value={orderStatus} onChange={(event) => { setOrderStatus(event.target.value); setAssignedOrders(null); setSelectedOrder(null); }}><option value="">全部</option><option value="PENDING_ACCEPT">待接单</option><option value="IN_REPAIR">维修中</option><option value="PENDING_INSPECTION">待验收</option><option value="COMPLETED">已完成</option></select></label>{assignedOrders === null ? <p>正在加载工单…</p> : assignedOrders.length === 0 ? <p>暂无已分配工单。</p> : <ul>{assignedOrders.map((order) => <li key={order.id}><button type="button" onClick={() => void selectOrder(order)}>{order.number} · {order.status} · {order.symptom}</button></li>)}</ul>}{selectedOrder && <dl className="detail-list"><dt>当前工单</dt><dd>{selectedOrder.number}</dd><dt>状态</dt><dd>{selectedOrder.status}</dd><dt>设备</dt><dd>{selectedOrder.equipment_id}</dd></dl>}{ordersError && <p role="alert">{ordersError}</p>}</section>
       <label>故障单 ID<input aria-label="故障单 ID" value={faultId} onChange={(event) => setFaultId(event.target.value)} /></label>
       <div className="form-actions"><button type="button" disabled={!faultId} onClick={() => void startDiagnosis()}>开始 AI 诊断</button><button type="button" disabled={!faultId} onClick={() => void directStart()}>直接开始维修</button></div>
       {diagnosisLoading && <section aria-label="诊断加载"><p>理解故障</p><p>检索同类维修</p><p>检索知识库</p><p>形成首问</p></section>}

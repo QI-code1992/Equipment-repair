@@ -609,3 +609,14 @@
 - 前端：新增 BI、工厂建模、设备台账/新增/编辑/详情、维修记录、系统管理、智能审计、全局 Agent 路由和真实 API 客户端；`npm test -- --run` 为 `29 passed`，`npm run build` 通过。
 - 静态：`node --test 06-testing/tests/*.test.js` 为 `15 passed`；`git diff --check` 通过。
 - 未验证：DEV-002 未执行 Docker Compose、真实 RAGFlow、附件扫描、HTTPS 或浏览器 live-stack；这些不能用 mock 结果替代，必须由 DEV-001 在完整候选上执行。TASK-012 尚未完成，不请求审核或 Merge。
+
+## TASK-012 API-002—007 与 P0 前端完整候选自测（2026-07-31）
+
+- 当前分支：`codex/task-012-p0-frontend-remediation`；仍为唯一 Draft PR 开发分支。本记录不构成正式审核、Ready、Merge 或 Stage 6/7/8 放行。
+- 代码范围：API-002—007 的 BI 时间窗/组织校验、设备维修历史趋势、维修记录知识状态筛选、工单状态/详情、审计字段筛选分页、智能调用/知识文档只读边界；P0 页面新增真实筛选、历史趋势、附件安全流程、Agent 线程历史/详情/resume/SSE 状态和配置入口。
+- TDD 回归：新增线程历史测试先因 `GET /api/agent/threads` 返回 `405` 失败，增加按创建者隔离的正式只读路由后转绿；恢复 payload 回归确认 `resume` 为布尔值，避免真实 API `422`。
+- 前端验证：`npm test -- --run` 为 `49 passed`；`npm run build` 通过。
+- 后端验证：`python -m pytest tests -q` 为 `328 passed, 13 skipped, 2 warnings`；`python -m compileall -q app tests` 通过。
+- 静态验证：`node --test 06-testing/tests/*.test.js` 为 `15 passed`；`python3 -m json.tool workflow/state.json`、`git diff --check` 通过。
+- 未验证：当前 macOS 环境没有 Docker/PowerShell/真实 RAGFlow；未执行 Windows 隔离 live-stack、ClamAV/MinIO 附件扫描、HTTPS、浏览器逐页 E2E、真实 RAGFlow 引用/降级或生产部署。上述必须由 DEV-001 在最终精确候选上独立验证。
+- 未完成事项：最终候选尚未提交、PR 尚未转 Ready、DEV-001 尚未整体审核；页面矩阵全部仍标记“实现中候选”，`DEF-STAGE7-001` 不得关闭。

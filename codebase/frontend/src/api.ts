@@ -203,8 +203,10 @@ export async function startAgentRun(agentId: string, businessContext: Record<str
 }
 
 export type AgentThread = { thread_id: string; agent_id: string; status: string; messages: Array<Record<string, unknown>>; runs: Array<{ run_id: string; status: string; state: Record<string, unknown> }> };
+export type AgentThreadSummary = { thread_id: string; agent_id: string; status: string; created_at: string; updated_at: string };
+export const getAgentThreads = () => requestJson<{ items: AgentThreadSummary[]; count: number }>("/api/agent/threads");
 export const getAgentThread = (threadId: string) => requestJson<AgentThread>(`/api/agent/threads/${threadId}`);
-export const resumeAgentThread = (threadId: string, payload: { resume: string; confirmation: Record<string, unknown> }) => postJson<{ run_id: string; thread_id: string; status: string }>(`/api/agent/threads/${threadId}/resume`, payload);
+export const resumeAgentThread = (threadId: string, payload: { resume: boolean; confirmation: Record<string, unknown> }) => postJson<{ run_id: string; thread_id: string; status: string }>(`/api/agent/threads/${threadId}/resume`, payload);
 
 export type AgentConfig = {
   agent_id: string;

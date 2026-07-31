@@ -5,7 +5,7 @@ import { IntelligentConfigPage } from "./IntelligentConfigPage";
 import { FaultReportPage } from "./FaultReportPage";
 import { RepairExecutionPage } from "./RepairExecutionPage";
 import { WorkbenchPage } from "./WorkbenchPage";
-import { ApiError, getAgentThread, getCurrentUser, hasActiveSession, logout, readRunEvents, startAgentRun, type AgentThread, type RuntimeEvent } from "./api";
+import { ApiError, getAgentThread, getAgentThreads, getCurrentUser, hasActiveSession, logout, readRunEvents, resumeAgentThread, startAgentRun, type AgentThread, type AgentThreadSummary, type RuntimeEvent } from "./api";
 import { LoginPage } from "./LoginPage";
 import { AgentReportPage, BiDashboardPage, EquipmentAddPage, EquipmentDetailPage, EquipmentEditPage, EquipmentLedgerPage, FactoryModelingPage, IntelligentAuditPage, MaintenanceRecordDetailPage, MaintenanceRecordsPage, SystemManagementPage } from "./PortalPages";
 
@@ -144,6 +144,12 @@ function GlobalAgentDrawer({ onClose }: { onClose: () => void }) {
   const [thread, setThread] = useState<AgentThread | null>(null);
   const [events, setEvents] = useState<RuntimeEvent[]>([]);
   const [tab, setTab] = useState<"compose" | "history">("compose");
+  const [history, setHistory] = useState<AgentThreadSummary[] | null>(null);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  useEffect(() => {
+    if (tab !== "history") return;
+    getAgentThreads().then((value) => { setHistory(value.items); setHistoryError(null); }).catch((error) => setHistoryError(error instanceof ApiError ? error.code ?? "REQUEST_FAILED" : "REQUEST_FAILED"));
+  }, [tab]);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!text.trim()) return;
@@ -157,7 +163,18 @@ function GlobalAgentDrawer({ onClose }: { onClose: () => void }) {
       setMessage(`请求失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`);
     }
   }
-  return <aside className="agent-drawer" aria-label="全局 Agent"><header><strong>全局 Agent</strong><button type="button" onClick={onClose}>关闭</button></header><div className="tab-list"><button type="button" aria-pressed={tab === "compose"} onClick={() => setTab("compose")}>新建任务</button><button type="button" aria-pressed={tab === "history"} onClick={() => setTab("history")}>当前历史</button></div>{tab === "compose" ? <><p>仅可创建故障上报、智能问数和操作指引任务。</p><form onSubmit={submit}><label>类型<select value={agentId} onChange={(event) => setAgentId(event.target.value)}><option value="fault_reporting">AI 故障上报</option><option value="metric_query">智能问数</option><option value="operation_guidance">操作指引</option></select></label><label>问题<textarea value={text} onChange={(event) => setText(event.target.value)} required /></label><button type="submit">发起任务</button></form></> : <section aria-label="Agent 历史">{thread ? <><p>线程：{thread.thread_id}</p><p>状态：{thread.status}</p>{thread.messages.map((item, index) => <p key={index}>消息已记录（内容受保护）</p>)}</> : <p>暂无当前线程历史。</p>}</section>}{events.length > 0 && <section aria-label="Agent 运行状态">{events.map((item, index) => <p key={`${item.event}-${index}`}>{item.event}：{String(item.data.status ?? "已收到")}</p>)}</section>}{message && <p role="status">{message}</p>}</aside>;
+  async function resume() {
+    if (!thread) return;
+    try {
+      const latest = thread.runs[thread.runs.length - 1];
+      if (!latest) return;
+      const resumed = await resumeAgentThread(thread.thread_id, { resume: true, confirmation: { source: "user" } });
+      setMessage(`已恢复任务：${resumed.run_id}`);
+    } catch (error) {
+      setMessage(`恢复失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`);
+    }
+  }
+  return <aside className="agent-drawer" aria-label="全局 Agent"><header><strong>全局 Agent</strong><button type="button" onClick={onClose}>关闭</button></header><div className="tab-list"><button type="button" aria-pressed={tab === "compose"} onClick={() => setTab("compose")}>新建任务</button><button type="button" aria-pressed={tab === "history"} onClick={() => setTab("history")}>线程历史</button></div>{tab === "compose" ? <><p>仅可创建故障上报、智能问数和操作指引任务。</p><form onSubmit={submit}><label>类型<select value={agentId} onChange={(event) => setAgentId(event.target.value)}><option value="fault_reporting">AI 故障上报</option><option value="metric_query">智能问数</option><option value="operation_guidance">操作指引</option></select></label><label>问题<textarea value={text} onChange={(event) => setText(event.target.value)} required /></label><button type="submit">发起任务</button></form></> : <section aria-label="Agent 历史">{historyError && <p role="alert">线程历史加载失败：{historyError}</p>}{history === null && !historyError ? <p role="status">正在加载线程历史…</p> : history?.length === 0 ? <p>暂无线程历史。</p> : <ul>{history?.map((item) => <li key={item.thread_id}><button type="button" onClick={() => void getAgentThread(item.thread_id).then(setThread).catch((error) => setHistoryError(error instanceof ApiError ? error.code ?? "REQUEST_FAILED" : "REQUEST_FAILED"))}>{item.agent_id} · {item.status}</button></li>)}</ul>}{thread && <div><p>线程：{thread.thread_id}</p><p>状态：{thread.status}</p>{thread.messages.map((item, index) => <p key={index}>消息已记录（内容受保护）</p>)}{thread.runs.length > 0 && <button type="button" onClick={() => void resume()}>恢复最近任务</button>}</div>}</section>}{events.length > 0 && <section aria-label="Agent 运行状态">{events.map((item, index) => <p key={`${item.event}-${index}`}>{item.event}：{String(item.data.status ?? "已收到")}</p>)}</section>}{message && <p role="status">{message}</p>}</aside>;
 }
 
 export function App() {

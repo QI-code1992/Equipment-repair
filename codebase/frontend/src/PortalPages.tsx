@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { ApiError, AuditEvent, BiDashboard, Equipment, MaintenanceRecord, WorkOrder, createOrganization, createUser, deleteOrganization, getAuditEvents, getBiDashboard, getEquipment, getEquipmentDetail, getEquipmentHistory, getIntelligenceUsage, getKnowledgeDocuments, getMaintenanceRecord, getMaintenanceRecords, getOrganizations, getPermissions, getRoles, getUsers, getWorkOrders, requestJson, retryKnowledgeDocument, startAgentRun, submitAgentFaultReport, updateOrganization, updateRolePermissions, updateUser } from "./api";
+import { ApiError, AuditEvent, BiDashboard, Equipment, MaintenanceRecord, WorkOrder, createOrganization, createUser, deleteOrganization, getAuditEvents, getBiDashboard, getEquipment, getEquipmentDetail, getEquipmentHistory, getIntelligenceUsage, getKnowledgeDocuments, getMaintenanceRecord, getMaintenanceRecords, getOrganizations, getPermissions, getRoles, getUsers, getWorkOrders, requestJson, retryKnowledgeDocument, startAgentRun, submitAgentFaultReport, uploadAttachment, updateOrganization, updateRolePermissions, updateUser, type AttachmentRef } from "./api";
 
 type LoadState<T> = { value: T | null; error: string | null; loading: boolean };
 
@@ -47,7 +47,7 @@ export function EquipmentDetailPage() {
   const { id = "" } = useParams();
   const equipment = useData(() => getEquipmentDetail(id), [id]);
   const history = useData(() => getEquipmentHistory(id), [id]);
-  return <Page title="设备详情"><State state={equipment}>{(item) => <><dl className="detail-list"><dt>设备编码</dt><dd>{item.code}</dd><dt>设备名称</dt><dd>{item.name}</dd><dt>运行状态</dt><dd>{item.status}</dd><dt>累计工时</dt><dd>{item.operating_hours}</dd></dl><Link to={`/equipment/${item.id}/edit`}>编辑设备</Link></>}</State><h3>维修历史</h3><State state={history} empty={(data) => !data.count}>{(data) => <RecordsTable items={data.items} />}</State></Page>;
+  return <Page title="设备详情"><State state={equipment}>{(item) => <><dl className="detail-list"><dt>设备编码</dt><dd>{item.code}</dd><dt>设备名称</dt><dd>{item.name}</dd><dt>运行状态</dt><dd>{item.status}</dd><dt>累计工时</dt><dd>{item.operating_hours}</dd></dl><Link to={`/equipment/${item.id}/edit`}>编辑设备</Link></>}</State><h3>维修历史</h3><State state={history}>{(data) => <>{data.count ? <RecordsTable items={data.items} /> : <p role="status">暂无维修历史记录。</p>}<section className="data-card" aria-label="维修完成趋势"><h4>维修完成趋势</h4>{data.trend.length ? <ul>{data.trend.map((item) => <li key={item.date}>{item.date}：完成 {item.completed_count} 次</li>)}</ul> : <p>暂无维修完成趋势。</p>}</section></>}</State></Page>;
 }
 
 function EquipmentForm({ edit = false }: { edit?: boolean }) {
@@ -77,17 +77,20 @@ function RecordsTable({ items }: { items: MaintenanceRecord[] }) { return <table
 
 export function MaintenanceRecordsPage() {
   const [equipmentId, setEquipmentId] = useState("");
+  const [knowledgeStatus, setKnowledgeStatus] = useState("");
   const [page, setPage] = useState(1);
-  const state = useData(() => getMaintenanceRecords({ equipmentId: equipmentId || undefined, page }), [equipmentId, page]);
-  return <Page title="维修记录"><label>设备筛选<input aria-label="维修记录设备筛选" value={equipmentId} onChange={(event) => { setEquipmentId(event.target.value); setPage(1); }} /></label><State state={state} empty={(data) => !data.count}>{(data) => <><RecordsTable items={data.items} /><div className="pager"><button type="button" disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>上一页</button><span>第 {page} 页</span><button type="button" disabled={data.items.length < data.page_size} onClick={() => setPage((current) => current + 1)}>下一页</button></div></>}</State></Page>;
+  const state = useData(() => getMaintenanceRecords({ equipmentId: equipmentId || undefined, knowledgeStatus: knowledgeStatus || undefined, page }), [equipmentId, knowledgeStatus, page]);
+  return <Page title="维修记录"><label>设备筛选<input aria-label="维修记录设备筛选" value={equipmentId} onChange={(event) => { setEquipmentId(event.target.value); setPage(1); }} /></label><label>知识状态<select aria-label="维修记录知识状态筛选" value={knowledgeStatus} onChange={(event) => { setKnowledgeStatus(event.target.value); setPage(1); }}><option value="">全部</option><option value="NOT_LINKED">未关联</option><option value="LINKED">已关联</option></select></label><State state={state} empty={(data) => !data.count}>{(data) => <><RecordsTable items={data.items} /><div className="pager"><button type="button" disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>上一页</button><span>第 {page} 页</span><button type="button" disabled={data.items.length < data.page_size} onClick={() => setPage((current) => current + 1)}>下一页</button></div></>}</State></Page>;
 }
 export function MaintenanceRecordDetailPage() { const { id = "" } = useParams(); const state = useData(() => getMaintenanceRecord(id), [id]); return <Page title="维修记录详情"><State state={state}>{(item) => <dl className="detail-list"><dt>工单</dt><dd>{item.work_order_number}</dd><dt>故障现象</dt><dd>{item.symptom}</dd><dt>实际原因</dt><dd>{item.actual_cause ?? "未填写"}</dd><dt>解决方案</dt><dd>{item.actual_solution ?? "未填写"}</dd><dt>维修结果</dt><dd>{item.repair_result ?? "未完成"}</dd><dt>更换部件</dt><dd>{item.parts_replacement_notes ?? "无"}</dd><dt>知识状态</dt><dd>{item.knowledge_status}</dd></dl>}</State></Page>; }
-export function WorkOrdersPage() { const state = useData(getWorkOrders, []); return <Page title="维修执行"><State state={state} empty={(data) => !data.count}>{(data) => <table><thead><tr><th>工单</th><th>设备</th><th>状态</th><th>故障</th></tr></thead><tbody>{data.items.map((item: WorkOrder) => <tr key={item.id}><td>{item.number}</td><td>{item.equipment_id}</td><td>{item.status}</td><td>{item.symptom}</td></tr>)}</tbody></table>}</State></Page>; }
+export function WorkOrdersPage() { const [status, setStatus] = useState(""); const [page, setPage] = useState(1); const state = useData(() => getWorkOrders({ status: status || undefined, page }), [status, page]); return <Page title="维修执行"><label>工单状态<select aria-label="工单状态筛选" value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }}><option value="">全部</option><option value="PENDING_ACCEPT">待接单</option><option value="IN_REPAIR">维修中</option><option value="PENDING_INSPECTION">待验收</option><option value="COMPLETED">已完成</option></select></label><State state={state} empty={(data) => !data.count}>{(data) => <><table><thead><tr><th>工单</th><th>设备</th><th>状态</th><th>故障</th></tr></thead><tbody>{data.items.map((item: WorkOrder) => <tr key={item.id}><td>{item.number}</td><td>{item.equipment_id}</td><td>{item.status}</td><td>{item.symptom}</td></tr>)}</tbody></table><div className="pager"><button type="button" disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>上一页</button><span>第 {page} 页</span><button type="button" disabled={data.items.length < data.page_size} onClick={() => setPage((current) => current + 1)}>下一页</button></div></>}</State></Page>; }
 
 export function SystemManagementPage() { return <SystemManagementContent />; }
 
 function SystemManagementContent() {
-  const audits = useData(getAuditEvents, []);
+  const [auditAction, setAuditAction] = useState("");
+  const [auditPage, setAuditPage] = useState(1);
+  const audits = useData(() => getAuditEvents({ action: auditAction || undefined, page: auditPage }), [auditAction, auditPage]);
   const users = useData(getUsers, []);
   const roles = useData(getRoles, []);
   const permissions = useData(getPermissions, []);
@@ -127,7 +130,7 @@ function SystemManagementContent() {
     <h3>角色</h3>
     <State state={roles} empty={(items) => !items.length}>{(items) => <div>{items.map((item) => <RolePermissionEditor key={item.id} role={item} permissions={permissions.value ?? []} onSaved={() => setNotice("角色权限已提交更新，请刷新列表确认。")} onFailed={() => setNotice("角色更新失败，请检查权限后重试。")} />)}</div>}</State>
     <h3>权限目录</h3><State state={permissions} empty={(items) => !items.length}>{(items) => <p>{items.map((item) => item.code).join("、")}</p>}</State>
-    <h3>审计事件</h3><State state={audits} empty={(data) => !data.count}>{(data) => <table><thead><tr><th>时间</th><th>动作</th><th>资源</th><th>结果</th></tr></thead><tbody>{data.items.map((item: AuditEvent) => <tr key={item.id}><td>{item.created_at}</td><td>{item.action}</td><td>{item.resource_type}</td><td>{item.result}</td></tr>)}</tbody></table>}</State>
+    <h3>审计事件</h3><label>动作筛选<input aria-label="审计动作筛选" value={auditAction} onChange={(event) => { setAuditAction(event.target.value); setAuditPage(1); }} placeholder="输入正式动作" /></label><State state={audits} empty={(data) => !data.count}>{(data) => <><table><thead><tr><th>时间</th><th>动作</th><th>资源</th><th>结果</th></tr></thead><tbody>{data.items.map((item: AuditEvent) => <tr key={item.id}><td>{item.created_at}</td><td>{item.action}</td><td>{item.resource_type}</td><td>{item.result}</td></tr>)}</tbody></table><div className="pager"><button type="button" disabled={auditPage <= 1} onClick={() => setAuditPage((current) => current - 1)}>上一页</button><span>第 {auditPage} 页</span><button type="button" disabled={data.items.length < data.page_size} onClick={() => setAuditPage((current) => current + 1)}>下一页</button></div></>}</State>
   </Page>;
 }
 
@@ -214,6 +217,23 @@ export function AgentReportPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [attachments, setAttachments] = useState<AttachmentRef[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  async function addAttachment(file: File | undefined) {
+    if (!file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const attachment = await uploadAttachment(file);
+      setAttachments((current) => [...current, attachment]);
+      setNotice("附件已通过安全检查，可在确认时提交。");
+    } catch (caught) {
+      setError(caught instanceof ApiError && caught.code === "ATTACHMENT_INFECTED" ? "附件未通过安全检查，未加入 AI 故障草稿。" : "附件上传失败，未加入 AI 故障草稿。");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function collect(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -230,11 +250,11 @@ export function AgentReportPage() {
     setError(null);
     setSubmitting(true);
     try {
-      const created = await submitAgentFaultReport({ draft: { equipment_id: equipmentId, urgency, symptom, occurred_at: new Date(occurredAt).toISOString(), possible_location: undefined, description: description || undefined, attachment_refs: [], duration_minutes: 0 }, confirmed: true });
+      const created = await submitAgentFaultReport({ draft: { equipment_id: equipmentId, urgency, symptom, occurred_at: new Date(occurredAt).toISOString(), possible_location: undefined, description: description || undefined, attachment_refs: attachments, duration_minutes: 0 }, confirmed: true });
       if ("draft" in created) throw new Error("unexpected preview");
       setNotice(`故障已正式提交：${created.number}`);
     } catch (caught) { setError(`正式提交失败：${caught instanceof ApiError ? caught.code : "REQUEST_FAILED"}`); } finally { setSubmitting(false); }
   }
 
-  return <Page title="AI 故障上报"><p>AI 只负责受控收集；它不会直接写入故障事实。正式上报必须由用户完成结构化确认。</p><form className="portal-form" onSubmit={collect}><label>设备 ID<input aria-label="设备 ID" value={equipmentId} onChange={(event) => setEquipmentId(event.target.value)} required /></label><label>故障描述<textarea aria-label="故障描述" value={symptom} onChange={(event) => setSymptom(event.target.value)} required /></label><button type="submit">开始 AI 收集</button></form>{collected && <form className="portal-form" onSubmit={confirm}><h3>结构化确认</h3><label>紧急程度<select value={urgency} onChange={(event) => setUrgency(event.target.value)}><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></label><label>发生时间<input aria-label="发生时间" type="datetime-local" value={occurredAt} onChange={(event) => setOccurredAt(event.target.value)} required /></label><label>补充说明<textarea value={description} onChange={(event) => setDescription(event.target.value)} /></label><button type="submit" disabled={submitting || !occurredAt}>{submitting ? "提交中…" : "确认并提交正式故障单"}</button></form>}{error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}<p><Link to="/fault-report">转到人工故障上报</Link></p></Page>;
+  return <Page title="AI 故障上报"><p>AI 只负责受控收集；它不会直接写入故障事实。正式上报必须由用户完成结构化确认。</p><form className="portal-form" onSubmit={collect}><label>设备 ID<input aria-label="设备 ID" value={equipmentId} onChange={(event) => setEquipmentId(event.target.value)} required /></label><label>故障描述<textarea aria-label="故障描述" value={symptom} onChange={(event) => setSymptom(event.target.value)} required /></label><button type="submit">开始 AI 收集</button></form>{collected && <form className="portal-form" onSubmit={confirm}><h3>结构化确认</h3><label>紧急程度<select value={urgency} onChange={(event) => setUrgency(event.target.value)}><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></label><label>发生时间<input aria-label="发生时间" type="datetime-local" value={occurredAt} onChange={(event) => setOccurredAt(event.target.value)} required /></label><label>补充说明<textarea value={description} onChange={(event) => setDescription(event.target.value)} /></label><label>附件<input aria-label="AI 故障附件" type="file" disabled={uploading || submitting} onChange={(event) => void addAttachment(event.target.files?.[0])} /></label>{uploading && <p role="status">附件正在上传并进行安全检查…</p>}{attachments.length > 0 && <ul aria-label="AI 草稿附件">{attachments.map((item) => <li key={item.object_key}>{item.filename}</li>)}</ul>}<button type="submit" disabled={submitting || uploading || !occurredAt}>{submitting ? "提交中…" : "确认并提交正式故障单"}</button></form>}{error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}<p><Link to="/fault-report">转到人工故障上报</Link></p></Page>;
 }

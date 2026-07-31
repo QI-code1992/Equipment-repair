@@ -112,4 +112,22 @@ describe("App", () => {
     const [, init] = fetchMock.mock.calls[1] as [string, RequestInit];
     expect(new Headers(init.headers).get("Authorization")).toBe("Bearer session-token");
   });
+
+  it("loads authenticated Agent thread history and never renders raw message text", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "admin", enabled: true, permission_codes: ["intelligence:agent"] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ active_fault_count: 0, status_counts: [], urgency_counts: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [{ thread_id: "thread-1", agent_id: "operation_guidance", status: "OPEN", created_at: "2026-07-31T00:00:00Z", updated_at: "2026-07-31T00:01:00Z" }], count: 1 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ thread_id: "thread-1", agent_id: "operation_guidance", status: "OPEN", messages: [{ role: "user", text: "secret internal text" }], runs: [] }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: "全局 Agent" }));
+    fireEvent.click(screen.getByRole("button", { name: "线程历史" }));
+    expect(await screen.findByRole("button", { name: /operation_guidance/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /operation_guidance/ }));
+    expect(await screen.findByText("消息已记录（内容受保护）")).toBeInTheDocument();
+    expect(screen.queryByText("secret internal text")).not.toBeInTheDocument();
+  });
 });

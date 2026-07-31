@@ -16,6 +16,9 @@ import {
   startRepair,
   getBiDashboard,
   getKnowledgeDocuments,
+  getAgentThreads,
+  getAgentThread,
+  resumeAgentThread,
   retryKnowledgeDocument,
 } from "./api";
 
@@ -193,6 +196,18 @@ describe("maintenance API", () => {
 });
 
 describe("Agent Runtime SSE API", () => {
+  it("loads thread history and resumes with the boolean contract", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ thread_id: "thread-1", agent_id: "operation_guidance", status: "OPEN", messages: [], runs: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ run_id: "run-2", thread_id: "thread-1", status: "RESUMED" }), { status: 202 }));
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(getAgentThreads()).resolves.toEqual({ items: [], count: 0 });
+    await expect(getAgentThread("thread-1")).resolves.toMatchObject({ thread_id: "thread-1" });
+    await resumeAgentThread("thread-1", { resume: true, confirmation: { source: "user" } });
+    expect(JSON.parse(String((fetchMock.mock.calls[2][1] as RequestInit).body))).toEqual({ resume: true, confirmation: { source: "user" } });
+  });
+
   it("parses only real SSE event names and JSON data", async () => {
     const encoder = new TextEncoder();
     const body = new ReadableStream({

@@ -88,6 +88,17 @@ def test_bi_filter_scopes_ranking_and_calculates_completed_duration(client: Test
     assert other_organization_id != organization_id
 
 
+def test_bi_supports_explicit_periods_and_rejects_unknown_organization(client: TestClient) -> None:
+    token = _token(client, "bi:view")
+    response = client.get("/api/bi/dashboard?period=day", headers=auth_headers(token))
+    assert response.status_code == 200
+    assert response.json()["period"] == "day"
+    assert len(response.json()["trend"]) == 1
+    missing = client.get("/api/bi/dashboard?organization_id=missing", headers=auth_headers(token))
+    assert missing.status_code == 404
+    assert missing.json()["detail"]["code"] == "ORGANIZATION_NOT_FOUND"
+
+
 def test_maintenance_and_assigned_work_orders_have_controlled_read_models(client: TestClient) -> None:
     equipment_id, _, work_order_id = _completed_work(client)
     token = _token(client, "maintenance:view", "maintenance:detail", "equipment:read")
@@ -106,6 +117,8 @@ def test_maintenance_and_assigned_work_orders_have_controlled_read_models(client
     assert order.status_code == 200
     assert order.json()["id"] == work_order_id
     assert "diagnosis_prefill" not in detail.json()
+    invalid_status = client.get("/api/work-orders?status=UNKNOWN", headers=auth_headers(token))
+    assert invalid_status.status_code == 422
 
 
 def test_audit_and_intelligence_read_models_are_whitelisted_and_empty_safe(client: TestClient) -> None:

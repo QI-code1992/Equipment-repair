@@ -19,6 +19,7 @@
 | Method | Endpoint | 请求/响应要点 | 约束 |
 |---|---|---|---|
 | POST | `/api/agent/threads` | `agent_id`、业务上下文，返回 `thread_id` | 全局入口仅接受前三个 Agent；诊断仅由开始维修上下文创建。 |
+| GET | `/api/agent/threads` | 当前用户线程摘要列表 | 仅返回创建者自己的 `thread_id,agent_id,status,created_at,updated_at`，按更新时间倒序；不返回消息正文或其他用户线程。 |
 | POST | `/api/agent/threads/{thread_id}/messages` | 用户文本/附件引用，返回 `run_id` | 后端按 `agent_id` 加载配置并写入运行快照。 |
 | GET | `/api/agent/runs/{run_id}/events` | SSE 事件流 | 仅推送真实过程状态、令牌、引用和建议；不推送思维链。 |
 | POST | `/api/agent/threads/{thread_id}/resume` | 确认、补充信息或恢复标记 | 只能恢复创建者的线程或管理员线程。 |
@@ -65,9 +66,9 @@
 
 | 工作包 | Method | Endpoint | 权限 | 成功响应与约束 |
 |---|---|---|---|---|
-| API-002 | GET | `/api/bi/dashboard?organization_id=` | `bi:view` | 从设备、故障和工单事实返回摘要、近 7 日趋势、效率、组织排行和历史对比；组织排行最多 20 条，不由浏览器拼接。 |
-| API-003 | GET | `/api/maintenance-history/equipment/{id}` | `equipment:read` | 返回该设备受控维修历史；不存在为 `404 EQUIPMENT_NOT_FOUND`。 |
-| API-004 | GET | `/api/maintenance-records`、`/api/maintenance-records/{id}` | `maintenance:view`、详情 `maintenance:detail` | 列表支持设备筛选和分页；详情只返回人工结论与知识状态，不返回诊断预填、原始摘要或敏感附件内容。 |
+| API-002 | GET | `/api/bi/dashboard?organization_id=&period=` | `bi:view` | 从设备、故障和工单事实返回摘要、日/周/月趋势、效率、组织排行和对应窗口历史对比；`period` 为 `day/week/month`，组织排行最多 20 条，不由浏览器拼接；不存在组织为 `404 ORGANIZATION_NOT_FOUND`。 |
+| API-003 | GET | `/api/maintenance-history/equipment/{id}` | `equipment:read` | 返回该设备受控维修历史、按完成日期聚合的真实趋势；不存在为 `404 EQUIPMENT_NOT_FOUND`。 |
+| API-004 | GET | `/api/maintenance-records`、`/api/maintenance-records/{id}` | `maintenance:view`、详情 `maintenance:detail` | 列表支持设备/知识状态筛选和分页；详情只返回人工结论与知识状态，不返回诊断预填、原始摘要或敏感附件内容。 |
 | API-005 | GET | `/api/work-orders`、`/api/work-orders/{id}` | `maintenance:view` | 无 `maintenance:detail` 的维修人员仅可读取分配给自己的工单；详情越权返回 `403 PERMISSION_DENIED`。 |
 | API-006 | GET | `/api/audit-events` | `system:audit` | 支持动作筛选和分页；字段白名单为 `id,actor_user_id,action,resource_type,resource_id,result,created_at`。 |
 | API-007 | GET | `/api/intelligence/usage`、`/api/intelligence/knowledge-documents` | `intelligence:audit` | 调用统计保留期为 30 天；没有正式已持久化调用指标时返回空列表而不伪造数据。知识文档只返回状态、失败原因和是否可重试。 |
@@ -91,11 +92,12 @@
 
 本节是 `CR-036` 修复后身份权限、组织和设备主数据 API 的唯一正式契约。所有接口均要求平台 Bearer 会话认证；权限只控制角色、菜单与操作，不增加工厂、组织或设备的行级过滤。动态角色创建接口 `POST /api/roles` 已移除。
 
+会话用户读取接口 `/api/auth/me` 属于认证会话契约，不属于本节冻结的 TASK-002 主数据路由矩阵；其返回的 `permission_codes` 由正式前端用于菜单可见性，服务端权限校验仍以各受保护路由为准。
+
 ### 路由矩阵
 
 | Method | Endpoint | 权限码 | Idempotency-Key | 请求与成功响应 |
 |---|---|---|---|---|
-| GET | `/api/auth/me` | authenticated | 不使用 | 返回当前会话用户的 `id,username,enabled,permission_codes`；权限码只用于客户端菜单和操作可见性，不替代服务端权限校验。 |
 | GET | `/api/permissions` | `identity:read` | 不使用 | 返回 `[{code}]` 的固定权限目录。 |
 | GET | `/api/roles` | `identity:read` | 不使用 | 返回四个固定角色的 `id,code,name,permission_codes`。 |
 | PATCH | `/api/roles/{role_id}/permissions` | `identity:write` | 必填 | 请求 `permission_codes`；返回角色字段及 `audit_event_id`。 |
