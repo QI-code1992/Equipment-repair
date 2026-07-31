@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import { ApiError, completeRepair, getOperationGuidance, readRunEvents, runFaultDiagnosis, startAgentRun, startRepair, type DiagnosisResponse, type GuidanceResponse, type RepairStart, type RepairResult, type RuntimeEvent } from "./api";
+import { ApiError, completeRepair, getOperationGuidance, getWorkOrders, readRunEvents, runFaultDiagnosis, startAgentRun, startRepair, type DiagnosisResponse, type GuidanceResponse, type RepairStart, type RepairResult, type RuntimeEvent, type WorkOrder } from "./api";
 
 function diagnosisMessage(diagnosis: DiagnosisResponse) {
   if (diagnosis.state === "EVIDENCE_PENDING") return "证据仍不足，可补充信息或直接开始维修。";
@@ -21,6 +21,14 @@ export function RepairExecutionPage() {
   const [runtimeEvents, setRuntimeEvents] = useState<RuntimeEvent[]>([]);
   const [diagnosisLoading, setDiagnosisLoading] = useState(false);
   const [guidanceError, setGuidanceError] = useState<string | null>(null);
+  const [assignedOrders, setAssignedOrders] = useState<WorkOrder[] | null>(null);
+  const [ordersError, setOrdersError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getWorkOrders().then((data) => setAssignedOrders(data.items)).catch((caught: unknown) => {
+      setOrdersError(caught instanceof ApiError && caught.status === 403 ? "无权读取已分配工单。" : "已分配工单加载失败，请稍后重试。");
+    });
+  }, []);
 
   async function startDiagnosis() {
     setError(null);
@@ -104,6 +112,7 @@ export function RepairExecutionPage() {
     <section className="page-shell" aria-labelledby="page-heading">
       <div className="page-shell__eyebrow">现场作业</div>
       <h2 id="page-heading">维修执行</h2>
+      <section aria-label="已分配工单"><h3>已分配工单</h3>{assignedOrders === null ? <p>正在加载工单…</p> : assignedOrders.length === 0 ? <p>暂无已分配工单。</p> : <ul>{assignedOrders.map((order) => <li key={order.id}><button type="button" onClick={() => setFaultId(order.fault_report_id)}>{order.number} · {order.status} · {order.symptom}</button></li>)}</ul>}{ordersError && <p role="alert">{ordersError}</p>}</section>
       <label>故障单 ID<input aria-label="故障单 ID" value={faultId} onChange={(event) => setFaultId(event.target.value)} /></label>
       <div className="form-actions"><button type="button" disabled={!faultId} onClick={() => void startDiagnosis()}>开始 AI 诊断</button><button type="button" disabled={!faultId} onClick={() => void directStart()}>直接开始维修</button></div>
       {diagnosisLoading && <section aria-label="诊断加载"><p>理解故障</p><p>检索同类维修</p><p>检索知识库</p><p>形成首问</p></section>}

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ApiError, completeRepair, getOperationGuidance, readRunEvents, runFaultDiagnosis, startAgentRun, startRepair } from "./api";
+import { ApiError, completeRepair, getOperationGuidance, getWorkOrders, readRunEvents, runFaultDiagnosis, startAgentRun, startRepair } from "./api";
 import { RepairExecutionPage } from "./RepairExecutionPage";
 
 vi.mock("./api", async (importOriginal) => ({
@@ -12,9 +12,10 @@ vi.mock("./api", async (importOriginal) => ({
   getOperationGuidance: vi.fn(),
   startAgentRun: vi.fn(),
   readRunEvents: vi.fn(),
+  getWorkOrders: vi.fn(),
 }));
 
-beforeEach(() => vi.resetAllMocks());
+beforeEach(() => { vi.resetAllMocks(); vi.mocked(getWorkOrders).mockResolvedValue({ items: [], count: 0, page: 1, page_size: 20 }); });
 
 describe("RepairExecutionPage", () => {
   it("shows staged loading before displaying the server diagnosis question", async () => {
