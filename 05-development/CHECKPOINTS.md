@@ -508,3 +508,11 @@
 - 验证：新增相关文件 `16 passed, 2 warnings`；Agent/Runtime/Maintenance 聚焦回归 `51 passed, 2 warnings`；完整后端 `296 passed, 12 skipped, 2 warnings`；14 项原型静态回归、`compileall`、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
 - 未验证：当前 DEV-002 环境缺少 `TASK005_ALLOW_LIVE_TESTS=1` 和专用 RAGFlow/PostgreSQL/MinIO/ClamAV 环境变量，真实 RAGFlow 联调用例 `test_task005_live_stack.py` 为 `1 skipped`；需 DEV-001 在具备环境时执行 TASK-009 操作指引/故障诊断真实 RAGFlow 检索联调。
 - 门禁：PR #49 新 HEAD 会使旧审核结论失效；等待 DEV-001 重新审核，不得请求 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
+## FCP-012-CR048 治理候选合并后检查点（2026-07-31）
+
+- 状态：`INTEGRATED_PENDING_FORMAL_START_NOTICE`
+- 范围：记录 CR-048 治理候选 PR #73 的正式合入，不包含业务代码、测试、迁移、依赖、Compose 或部署变更。
+- 获批 HEAD：`b4e28368c1294f30b80f4dd72187660eba06fc10`
+- Merge Commit：`8d9beaefe01baef38e54baecbe3426d9ab816623`
+- 验证：双亲、目标分支指针、`git diff --check`、`workflow/state.json` JSON 解析通过；Python 3.13 后端 `319 passed, 13 skipped, 2 warnings`。
+- 下一步：DEV-001 向项目负责人 DEV-002 发送正式 TASK-012 开发启动通知；确认前 API-002—007、P0 前端和 Stage 6/7/8 继续锁定。

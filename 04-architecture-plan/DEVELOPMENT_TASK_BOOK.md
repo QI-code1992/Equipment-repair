@@ -573,3 +573,9 @@
 - [x] 项目负责人确认修订后的任务书 v1.1 属于 Stage 4 开发基线。
 - [x] 项目负责人对更新后的精确 SHA 明确批准 Stage 4 → Stage 5。
 - [x] 门禁批准记录已提交并推送，新 Stage 4 基线标签 `baseline/stage-04-development-v1.1` 已绑定获批 SHA 且不可移动。
+## CR-048 合并后生效说明（2026-07-31）
+
+- PR #73 已以 Merge Commit `8d9beaefe01baef38e54baecbe3426d9ab816623` 合入 `codex/stage-05-integration`，治理候选正式集成。
+- DEV-001 为最终集成负责人和合并执行者；DEV-002 同时承担项目负责人确认与 TASK-012 开发者职责。DEV-002 不得审核或合并自己的统一 Draft PR。
+- 开发启动条件：DEV-001 已向 DEV-002 发送正式启动通知，且 DEV-002 明确确认收到。确认后才可创建 `codex/task-012-p0-frontend-remediation` 唯一 Draft PR。
+- API-002—007、P0 前端和 Stage 6/7/8 在确认前继续锁定。

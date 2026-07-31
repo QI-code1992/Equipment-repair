@@ -1,6 +1,6 @@
 {
-  "state": "STAGE5_TASK012_CONSOLIDATED_GOVERNANCE_PENDING_INTEGRATION",
-  "updatedBy": "DEV-002 for CR-048",
+  "state": "STAGE5_TASK012_CONSOLIDATED_GOVERNANCE_INTEGRATED_PENDING_START_NOTICE",
+  "updatedBy": "DEV-001 post-merge governance verification for CR-048",
   "updatedAt": "2026-07-31",
   "task010Delivery": {
     "taskId": "TASK-010",
@@ -69,7 +69,7 @@
   "stage7P0FrontendRemediation": {
     "defect": "DEF-STAGE7-001",
     "changeRequest": "CR-047",
-    "status": "CONSOLIDATED_TASK012_GOVERNANCE_PENDING_INTEGRATION",
+    "status": "CONSOLIDATED_TASK012_GOVERNANCE_INTEGRATED_PENDING_START_NOTICE",
     "api001": {
       "status": "INTEGRATED",
       "branch": "codex/task-012-api-001-workbench",
@@ -97,17 +97,23 @@
     "verification": "Merge parents, source-tree equivalence, merge diff check, workflow JSON and 15 Node static regressions passed.",
     "consolidatedDevelopment": {
       "changeRequest": "CR-048",
-      "status": "GOVERNANCE_PENDING_INTEGRATION",
+      "status": "INTEGRATED_PENDING_START_NOTICE",
       "taskDeveloper": "DEV-002",
       "reviewer": "DEV-001 after all work packages complete",
       "mergeExecutor": "DEV-001 after project-owner exact PR/HEAD authorization",
       "singleDraftPrBranch": "codex/task-012-p0-frontend-remediation",
       "workPackages": ["TASK-012-API-001", "TASK-012-API-002", "TASK-012-API-003", "TASK-012-API-004", "TASK-012-API-005", "TASK-012-API-006", "TASK-012-API-007", "TASK-012 frontend"],
       "approval": "Project owner approved the consolidated development and one final DEV-001 review on 2026-07-31.",
+      "governancePullRequest": 73,
+      "governanceApprovedHead": "b4e28368c1294f30b80f4dd72187660eba06fc10",
+      "governanceMergeCommit": "8d9beaefe01baef38e54baecbe3426d9ab816623",
+      "governanceMergeExecutor": "ll979053897-arch / DEV-001 / manual Merge Commit",
+      "governanceIntegratedAt": "2026-07-31T01:28:39Z",
+      "governanceVerification": "PR state MERGED; target branch points to the merge commit; merge parents are 274673b72d5201986ffee77b038f516022cd174d and b4e28368c1294f30b80f4dd72187660eba06fc10; git diff --check and workflow/state.json parsing passed; Python 3.13 backend 319 passed, 13 skipped, 2 warnings.",
       "startCondition": "CR-048 governance candidate must be integrated and the project owner must receive a formal development-start notice.",
-      "nextAction": "Do not start implementation, request intermediate reviews, merge, or unlock later stages until the governance candidate is integrated."
+      "nextAction": "DEV-001 must send the formal TASK-012 development-start notice to the project owner. After the project owner confirms receipt, DEV-002 may create the single Draft PR and begin API-002—007 and P0 frontend implementation. Do not unlock Stage 6/7/8."
     },
-    "nextAction": "CR-048 changes TASK-012 from seven independently reviewed and integrated API prerequisites to one consolidated development package. API-002—007 and all P0 frontend work remain blocked until CR-048 is integrated and the formal development-start notice is sent. TASK-012 and Stage 7 acceptance remain locked until the unified PR is reviewed, authorized, and integrated."
+    "nextAction": "CR-048 is integrated by PR #73 Merge Commit 8d9beaefe01baef38e54baecbe3426d9ab816623. DEV-001 must send the formal development-start notice to the project owner; only after confirmation may DEV-002 start the unified TASK-012 Draft PR. TASK-012 and Stage 7 acceptance remain locked until the unified PR is reviewed, authorized, and integrated."
   },
   "stage6RuntimeValidation": {
     "status": "POST_MERGE_CORE_RUNTIME_VALIDATION_COMPLETED_SUPERSEDED_BY_SIGNED_STAGE6_CONCLUSION",
@@ -179,7 +185,7 @@
     ],
     "historicalBoundary": "Does not rewrite completed TASK-001/TASK-002 or CR-037 through CR-039 history; applies to open Draft PRs and subsequent task PRs after integration"
   },
-  "currentCommitSha": "be9de719c7a1a14f7bf98aab792a2b73bf0278d5",
+  "currentCommitSha": "8d9beaefe01baef38e54baecbe3426d9ab816623",
   "task003Delivery": {
     "taskId": "TASK-003",
     "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",

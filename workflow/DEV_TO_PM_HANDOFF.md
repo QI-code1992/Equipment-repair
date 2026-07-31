@@ -538,3 +538,9 @@
 - 回归证据：新增静态 Compose/脚本契约先失败后转绿；相关 `18 passed, 2 warnings`，完整后端 `296 passed, 12 skipped, 2 warnings`，14 项原型静态检查、编译和差异检查通过。
 - 未验证：DEV-002 环境没有 Docker 或 PowerShell，尚未执行真实 Compose 重建、API 容器 `/healthz`、adapter 断言和 RAGFlow 实际检索。请 DEV-001 对推送后的精确 HEAD 执行这些复验，再决定是否可重新批准。
 - 门禁：当前不得申请 Merge 授权、合并、解锁 TASK-010/011 或进入 Stage 6。
+## CR-048 治理候选合并后正式启动通知（2026-07-31）
+
+- PR #73 已按授权合入 `codex/stage-05-integration`。
+- 获批 HEAD：`b4e28368c1294f30b80f4dd72187660eba06fc10`；Merge Commit：`8d9beaefe01baef38e54baecbe3426d9ab816623`。
+- 合并后验证：双亲、目标分支、`git diff --check`、`workflow/state.json` 解析通过；Python 3.13 后端 `319 passed, 13 skipped, 2 warnings`。
+- 正式请求：请项目负责人 DEV-002 确认已收到 TASK-012 开发启动通知。确认后 DEV-002 才可创建唯一 Draft PR `codex/task-012-p0-frontend-remediation`；API-002—007、P0 前端和 Stage 6/7/8 在确认前继续锁定。

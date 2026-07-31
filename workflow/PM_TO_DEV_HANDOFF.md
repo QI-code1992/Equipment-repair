@@ -53,3 +53,8 @@ TASK-001、TASK-002 均已完成并保留历史交接。所有开发只允许在
 - 代码事实：DEV-002 已批准精确任务 HEAD `2e89dcd8d8dff6af5b841f32ac0a7d5feb794e15`；PR #20 已由 DEV-001（`ll979053897-arch`）手动合入，Merge Commit `904886f48061e27c775f6ee2f8ddae99f5571ead`；Python 3.13、PostgreSQL 17、Compose 健康和 `/healthz` 证据均已归档。
 - PR #25 治理合并：获批 HEAD `92ec18ec17f08d1d2226b0d98f59eeb2eba78d2f` 已由 DEV-002（`QI-code1992`）以 Merge Commit `028da42eb9ab4b55ef981ac462e09993a31e8813` 合入。
 - 有效状态：TASK-002 治理收尾关闭；TASK-003/004 可按任务书启动；TASK-005 仍等待 TASK-004；TASK-006 已解除 TASK-002 的数据库前置，但仍按自身任务范围和 PR 门禁执行；不进入 Stage 6。
+## CR-048 治理候选已集成，等待开发启动确认（2026-07-31）
+
+- PR #73 的获批 HEAD `b4e28368c1294f30b80f4dd72187660eba06fc10` 已由 DEV-001 合入，Merge Commit 为 `8d9beaefe01baef38e54baecbe3426d9ab816623`。
+- 本合入只生效 TASK-012 的统一开发边界，不代表 API-002—007 或前端已完成，也不解锁 Stage 6/7/8。
+- DEV-002（项目负责人兼 TASK-012 开发者）需明确确认开发启动；确认后在唯一 Draft PR `codex/task-012-p0-frontend-remediation` 中先更新 API 规格和失败契约测试，再开始实现。
