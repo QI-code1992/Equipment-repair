@@ -5,6 +5,7 @@ import {
   createFaultReport,
   getHealthScore,
   login,
+  logout,
   readRunEvents,
   startAgentRun,
   getAgentConfig,
@@ -56,6 +57,17 @@ describe("requestJson", () => {
     expect(fetchMock).toHaveBeenCalledWith("/api/auth/login", expect.objectContaining({
       method: "POST", body: JSON.stringify({ username: "repairer", password: "correct-password" }),
     }));
+  });
+
+  it("clears the browser session after requesting logout", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response("null", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    window.sessionStorage.setItem("access_token", "session-token");
+
+    await logout();
+
+    expect(window.sessionStorage.getItem("access_token")).toBeNull();
+    expect(fetchMock).toHaveBeenCalledWith("/api/auth/session", expect.objectContaining({ method: "DELETE" }));
   });
 });
 

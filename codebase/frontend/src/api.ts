@@ -41,6 +41,14 @@ export async function login(username: string, password: string) {
   window.sessionStorage.setItem(accessTokenStorageKey, response.access_token);
 }
 
+export async function logout() {
+  try {
+    await requestJson<unknown>("/api/auth/session", { method: "DELETE" });
+  } finally {
+    window.sessionStorage.removeItem(accessTokenStorageKey);
+  }
+}
+
 export type DeepThinkingLevel = "low" | "medium" | "high";
 
 export type FaultReportCreate = {

@@ -1,11 +1,11 @@
 import { FormEvent, useState } from "react";
-import { Navigate, NavLink, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
 import { IntelligentConfigPage } from "./IntelligentConfigPage";
 import { FaultReportPage } from "./FaultReportPage";
 import { RepairExecutionPage } from "./RepairExecutionPage";
 import { WorkbenchPage } from "./WorkbenchPage";
-import { ApiError, hasActiveSession, startAgentRun } from "./api";
+import { ApiError, hasActiveSession, logout, startAgentRun } from "./api";
 import { LoginPage } from "./LoginPage";
 import { AgentReportPage, BiDashboardPage, EquipmentAddPage, EquipmentDetailPage, EquipmentEditPage, EquipmentLedgerPage, FactoryModelingPage, IntelligentAuditPage, MaintenanceRecordsPage, SystemManagementPage } from "./PortalPages";
 
@@ -48,6 +48,7 @@ function RequireAuthentication({ children }: { children: React.ReactNode }) {
 
 function ApplicationShell() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [agentOpen, setAgentOpen] = useState(false);
   const activePage = pages.find((page) => page.path === location.pathname) ?? pages[0];
   const groups = [...new Set(pages.map((page) => page.group))];
@@ -89,7 +90,7 @@ function ApplicationShell() {
             <p>设备智能运维平台 / {activePage.group}</p>
             <h1>设备智能运维平台</h1>
           </div>
-          <div className="topbar__actions"><button type="button" className="agent-trigger" onClick={() => setAgentOpen(true)}>全局 Agent</button><div className="topbar__avatar" aria-label="当前用户">管</div></div>
+          <div className="topbar__actions"><button type="button" className="agent-trigger" onClick={() => setAgentOpen(true)}>全局 Agent</button><button type="button" className="agent-trigger" onClick={() => void logout().finally(() => navigate("/login", { replace: true }))}>退出</button><div className="topbar__avatar" aria-label="当前用户">管</div></div>
         </header>
         <Routes>
           <Route path="/" element={<WorkbenchPage />} />
