@@ -155,6 +155,9 @@ Review record only. No business-code fix is included in this governance branch. 
 - DEF-TASK012-035 (P1): PR #75 claims the backend suite passed, but the reproducible root run is `339 passed, 13 skipped, 2 failed, 2 warnings`; evidence boundary is inaccurate.
 - DEF-TASK012-036 (P1): Knowledge retry tests do not click/assert the dual-permission request; the path is unverified (`PortalPages.test.tsx`).
 - DEF-TASK012-037 (P1): The existing retry test blockage remains unresolved while candidate evidence reports green.
+- DEF-TASK012-038 (P1): Equipment add/edit is gated only by `equipment:read`, but the form also loads `/api/organizations` and `/api/users`; users with equipment permission but without organization/identity read receive a blank/error form before they can save. Evidence: `App.tsx`, `PortalPages.tsx`, P0 API availability matrix.
+- DEF-TASK012-039 (P1): After an AI preview is generated, the ordinary “提交故障” action remains enabled; a user can create a manual fault and then confirm the preview, producing two contradictory records from one report flow. Evidence: `FaultReportPage.tsx` preview branch and submit button.
+- DEF-TASK012-040 (P1): `readRunEvents()` awaits `response.text()` and parses only after the SSE response closes; Runtime status is not consumed incrementally, so the required live `run_started`/tool/status experience is not delivered. Evidence: `codebase/frontend/src/api.ts`, `App.tsx`, `RepairExecutionPage.tsx`, Runtime SSE contract.
 
 ### Gate
 

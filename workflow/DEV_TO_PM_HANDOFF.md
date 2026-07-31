@@ -566,3 +566,4 @@
 - The complete inventory is `06-testing/DEFECTS.md`, DEF-TASK012-001 through DEF-TASK012-037. It includes prior P1 findings and additional permission, data-loss, filtering, interaction, duplicate-submit, and test-evidence findings.
 - DEV-002 must fix the applicable items in the same TASK-012 development PR. This governance PR is only the review/evidence handoff and does not fix or close any defect.
 - Until a new exact HEAD is reviewed and integration-checked, PR #75 must not be merged and TASK-012, Stage 6/7/8 remain locked.
+- Second-pass additions are DEF-TASK012-038 through DEF-TASK012-040; DEV-002 must include them in the same remediation cycle.

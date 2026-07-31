@@ -426,3 +426,4 @@
 - Scope: fail-closed authentication, composite permission gates, API contract alignment, server-fact binding, field preservation, idempotency/in-flight state, BI filtering, Agent thread UX, and evidence reproducibility.
 - Boundary: this governance branch contains no business-code fix. DEV-002 must fix all applicable findings in PR #75, rerun the complete frontend/backend/static suites, and submit a new exact HEAD for whole-candidate review.
 - Gate: no Merge authorization, merge, TASK-012 closure, or Stage 6/7/8 unlock is permitted before that review and a fresh integration check.
+- Second-pass additions: DEF-TASK012-038 dependency permission mismatch on equipment forms, DEF-TASK012-039 AI preview/manual-submit double-write path, and DEF-TASK012-040 buffered rather than incremental Runtime SSE consumption.

@@ -635,3 +635,4 @@
 - Reproducible backend command from repository root: `339 passed, 13 skipped, 2 failed, 2 warnings`. The two failures are `06-testing/performance/test_stage6_performance.py` cases that use a working-directory-relative JSON path.
 - Existing frontend evidence: Vitest `55 passed`, production build passed, and Node static regressions `15 passed`; the retry-path coverage is incomplete because the dual-permission test does not click/assert the request.
 - Review conclusion: evidence is insufficient for approval while the two reproducibility failures and the open defect inventory remain unresolved. This record intentionally contains no code fix.
+- Second-pass review added three findings: equipment form dependency permissions, AI preview bypass/double-submit, and non-incremental SSE parsing. No business-code change was made.
