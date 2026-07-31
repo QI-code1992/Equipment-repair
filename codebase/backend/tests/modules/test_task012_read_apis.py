@@ -4,7 +4,7 @@ from uuid import uuid4
 from fastapi.testclient import TestClient
 
 from app.modules.audit.models import AuditEvent
-from app.modules.knowledge.models import KnowledgeDataset, KnowledgeDocument, KnowledgeDocumentStatus
+from app.modules.knowledge.models import FileObject, FileScanStatus, KnowledgeDataset, KnowledgeDocument, KnowledgeDocumentStatus
 from app.modules.maintenance.models import FaultReport, HistoricalRepairCase, MaintenanceRecord, WorkOrder
 from tests.modules.maintenance_support import auth_headers, create_equipment, create_fault, repairer, start_repair
 from tests.modules.support import create_user_token
@@ -39,7 +39,7 @@ def test_bi_and_equipment_history_are_server_aggregated_and_permissioned(client:
 
     dashboard = client.get("/api/bi/dashboard", headers=auth_headers(token))
     history = client.get(
-        f"/api/equipment/{equipment_id}/maintenance-history", headers=auth_headers(token)
+        f"/api/maintenance-history/equipment/{equipment_id}", headers=auth_headers(token)
     )
 
     assert dashboard.status_code == 200
@@ -97,3 +97,27 @@ def test_audit_and_intelligence_read_models_are_whitelisted_and_empty_safe(clien
     assert usage.json() == {"items": [], "count": 0, "retention_days": 30}
     assert documents.status_code == 200
     assert documents.json() == {"items": [], "count": 0, "page": 1, "page_size": 20}
+
+
+def test_failed_knowledge_document_can_be_retried_once_with_authorized_idempotency(client: TestClient) -> None:
+    user_id, token = create_user_token(
+        client, username=f"knowledge-retry-{uuid4().hex[:8]}", role_code="SYSTEM_ADMIN", permission_codes=["intelligence:knowledge"]
+    )
+    with client.app.state.session_factory() as db:
+        dataset = KnowledgeDataset(name="Task 012", ragflow_dataset_id=f"rag-{uuid4()}")
+        db.add(dataset)
+        db.flush()
+        file_object = FileObject(object_key=f"test/{uuid4()}", filename="manual.pdf", content_type="application/pdf", size_bytes=10, sha256="0" * 64, scan_status=FileScanStatus.CLEAN, created_by=user_id)
+        db.add(file_object)
+        db.flush()
+        document = KnowledgeDocument(dataset_id=dataset.id, object_storage_file_id=file_object.id, filename="manual.pdf", content_type="application/pdf", size_bytes=10, status=KnowledgeDocumentStatus.FAILED, failure_reason="retryable", created_by=user_id)
+        db.add(document)
+        db.commit()
+        document_id = document.id
+
+    response = client.post(f"/api/knowledge/documents/{document_id}/retry", headers=auth_headers(token, key="retry-document"))
+    replay = client.post(f"/api/knowledge/documents/{document_id}/retry", headers=auth_headers(token, key="retry-document"))
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "UPLOADING"
+    assert replay.status_code == 200

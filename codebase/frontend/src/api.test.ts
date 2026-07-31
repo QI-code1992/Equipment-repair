@@ -13,6 +13,9 @@ import {
   saveAgentConfig,
   submitAgentFaultReport,
   startRepair,
+  getBiDashboard,
+  getKnowledgeDocuments,
+  retryKnowledgeDocument,
 } from "./api";
 
 afterEach(() => window.sessionStorage.clear());
@@ -97,6 +100,31 @@ describe("agent configuration API", () => {
 });
 
 describe("maintenance API", () => {
+  it("reads dashboard and knowledge status through the authenticated API boundary", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ summary: {} }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    window.sessionStorage.setItem("access_token", "active-login-token");
+
+    await getBiDashboard();
+    await getKnowledgeDocuments();
+
+    expect(fetchMock.mock.calls.map(([path]) => path)).toEqual(["/api/bi/dashboard", "/api/intelligence/knowledge-documents"]);
+    expect(new Headers((fetchMock.mock.calls[0][1] as RequestInit).headers).get("Authorization")).toBe("Bearer active-login-token");
+  });
+
+  it("sends a knowledge retry with an idempotency key", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "doc-1", status: "UPLOADING" }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await retryKnowledgeDocument("doc-1");
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/knowledge/documents/doc-1/retry", expect.objectContaining({
+      method: "POST", headers: expect.objectContaining({ "Idempotency-Key": expect.any(String) }),
+    }));
+  });
+
   it("sends adopted repair start with an idempotency key", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ work_order_id: "wo-1" }), { status: 200 }),

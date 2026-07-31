@@ -66,7 +66,7 @@
 | 工作包 | Method | Endpoint | 权限 | 成功响应与约束 |
 |---|---|---|---|---|
 | API-002 | GET | `/api/bi/dashboard?organization_id=` | `bi:view` | 从设备、故障和工单事实返回摘要、近 7 日趋势、效率、组织排行和历史对比；组织排行最多 20 条，不由浏览器拼接。 |
-| API-003 | GET | `/api/equipment/{id}/maintenance-history` | `equipment:read` | 返回该设备受控维修历史；不存在为 `404 EQUIPMENT_NOT_FOUND`。 |
+| API-003 | GET | `/api/maintenance-history/equipment/{id}` | `equipment:read` | 返回该设备受控维修历史；不存在为 `404 EQUIPMENT_NOT_FOUND`。 |
 | API-004 | GET | `/api/maintenance-records`、`/api/maintenance-records/{id}` | `maintenance:view`、详情 `maintenance:detail` | 列表支持设备筛选和分页；详情只返回人工结论与知识状态，不返回诊断预填、原始摘要或敏感附件内容。 |
 | API-005 | GET | `/api/work-orders`、`/api/work-orders/{id}` | `maintenance:view` | 无 `maintenance:detail` 的维修人员仅可读取分配给自己的工单；详情越权返回 `403 PERMISSION_DENIED`。 |
 | API-006 | GET | `/api/audit-events` | `system:audit` | 支持动作筛选和分页；字段白名单为 `id,actor_user_id,action,resource_type,resource_id,result,created_at`。 |

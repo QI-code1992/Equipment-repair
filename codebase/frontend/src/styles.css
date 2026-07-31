@@ -31,6 +31,8 @@ a { color: inherit; text-decoration: none; }
 .topbar p { margin: 0 0 3px; color: #637594; font-size: 13px; }
 .topbar h1 { margin: 0; font-size: clamp(20px, 2vw, 26px); }
 .topbar__avatar { width: 36px; height: 36px; color: #2d64ba; background: #e7f0ff; }
+.topbar__actions { display: flex; align-items: center; gap: 10px; }.agent-trigger, .agent-drawer button { padding: 8px 12px; color: #fff; background: #3173dd; border: 0; border-radius: 8px; cursor: pointer; }
+.agent-drawer { position: fixed; z-index: 3; top: 0; right: 0; display: grid; align-content: start; gap: 14px; width: min(100%, 400px); min-height: 100vh; padding: 24px; background: #fff; border-left: 1px solid #dce6f2; box-shadow: -18px 0 42px #1f355c24; }.agent-drawer header { display: flex; justify-content: space-between; align-items: center; }.agent-drawer p { margin: 0; color: #637594; }.agent-drawer form, .agent-drawer label { display: grid; gap: 8px; }.agent-drawer textarea, .agent-drawer select { width: 100%; min-height: 38px; padding: 8px; border: 1px solid #b8c9dd; border-radius: 8px; font: inherit; }
 .page-shell { max-width: 920px; margin: clamp(28px, 7vw, 88px) auto; padding: clamp(28px, 6vw, 56px); background: #fff; border: 1px solid #e2eaf4; border-radius: 16px; box-shadow: 0 10px 28px #1f355c14; }
 .page-shell__eyebrow { color: #3b78df; font-size: 13px; font-weight: 700; letter-spacing: .08em; }
 .page-shell h2 { margin: 10px 0 8px; font-size: clamp(26px, 4vw, 38px); }

@@ -223,10 +223,16 @@ export type BiDashboard = { summary: { fault_count: number; active_fault_count: 
 export const getBiDashboard = () => requestJson<BiDashboard>("/api/bi/dashboard");
 export const getEquipment = () => requestJson<Equipment[]>("/api/equipment");
 export const getEquipmentDetail = (id: string) => requestJson<Equipment>(`/api/equipment/${id}`);
-export const getEquipmentHistory = (id: string) => requestJson<PageResult<MaintenanceRecord>>(`/api/equipment/${id}/maintenance-history`);
+export const getEquipmentHistory = (id: string) => requestJson<PageResult<MaintenanceRecord>>(`/api/maintenance-history/equipment/${id}`);
 export const getMaintenanceRecords = () => requestJson<PageResult<MaintenanceRecord>>("/api/maintenance-records");
 export const getMaintenanceRecord = (id: string) => requestJson<MaintenanceRecord>(`/api/maintenance-records/${id}`);
 export const getWorkOrders = () => requestJson<PageResult<WorkOrder>>("/api/work-orders");
 export const getAuditEvents = () => requestJson<PageResult<AuditEvent>>("/api/audit-events");
 export const getIntelligenceUsage = () => requestJson<{ items: Array<Record<string, unknown>>; count: number; retention_days: number }>("/api/intelligence/usage");
 export const getKnowledgeDocuments = () => requestJson<PageResult<{ id: string; filename: string; status: string; failure_reason: string | null; retry_available: boolean }>>("/api/intelligence/knowledge-documents");
+export const getOrganizations = () => requestJson<Array<{ id: string; type: string; code: string; name: string; parent_id: string | null; enabled: boolean }>>("/api/organizations");
+export const getUsers = () => requestJson<Array<{ id: string; username: string; enabled: boolean; role_ids: string[] }>>("/api/users");
+export const retryKnowledgeDocument = (id: string) => postJson<{ id: string; status: string }>(`/api/knowledge/documents/${id}/retry`, {});
+export const getRoles = () => requestJson<Array<{ id: string; code: string; name: string; permission_codes: string[] }>>("/api/roles");
+export const getPermissions = () => requestJson<Array<{ code: string }>>("/api/permissions");
+export const createOrganization = (body: { type: string; code: string; name: string; parent_id: string; sort_order: number; enabled: boolean; remark: string }) => postJson<{ id: string }>("/api/organizations", body);

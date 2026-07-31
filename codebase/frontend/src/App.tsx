@@ -1,10 +1,11 @@
+import { FormEvent, useState } from "react";
 import { Navigate, NavLink, Route, Routes, useLocation } from "react-router-dom";
 
 import { IntelligentConfigPage } from "./IntelligentConfigPage";
 import { FaultReportPage } from "./FaultReportPage";
 import { RepairExecutionPage } from "./RepairExecutionPage";
 import { WorkbenchPage } from "./WorkbenchPage";
-import { hasActiveSession } from "./api";
+import { ApiError, hasActiveSession, startAgentRun } from "./api";
 import { LoginPage } from "./LoginPage";
 import { AgentReportPage, BiDashboardPage, EquipmentAddPage, EquipmentDetailPage, EquipmentEditPage, EquipmentLedgerPage, FactoryModelingPage, IntelligentAuditPage, MaintenanceRecordsPage, SystemManagementPage } from "./PortalPages";
 
@@ -47,6 +48,7 @@ function RequireAuthentication({ children }: { children: React.ReactNode }) {
 
 function ApplicationShell() {
   const location = useLocation();
+  const [agentOpen, setAgentOpen] = useState(false);
   const activePage = pages.find((page) => page.path === location.pathname) ?? pages[0];
   const groups = [...new Set(pages.map((page) => page.group))];
 
@@ -87,7 +89,7 @@ function ApplicationShell() {
             <p>设备智能运维平台 / {activePage.group}</p>
             <h1>设备智能运维平台</h1>
           </div>
-          <div className="topbar__avatar" aria-label="当前用户">管</div>
+          <div className="topbar__actions"><button type="button" className="agent-trigger" onClick={() => setAgentOpen(true)}>全局 Agent</button><div className="topbar__avatar" aria-label="当前用户">管</div></div>
         </header>
         <Routes>
           <Route path="/" element={<WorkbenchPage />} />
@@ -106,9 +108,28 @@ function ApplicationShell() {
           <Route path="/system-management" element={<SystemManagementPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        {agentOpen && <GlobalAgentDrawer onClose={() => setAgentOpen(false)} />}
       </main>
     </div>
   );
+}
+
+function GlobalAgentDrawer({ onClose }: { onClose: () => void }) {
+  const [agentId, setAgentId] = useState("operation_guidance");
+  const [text, setText] = useState("");
+  const [message, setMessage] = useState<string | null>(null);
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!text.trim()) return;
+    setMessage("正在创建正式 Agent 任务…");
+    try {
+      const run = await startAgentRun(agentId, {}, text.trim());
+      setMessage(`已创建任务：${run.run_id}`);
+    } catch (error) {
+      setMessage(`请求失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`);
+    }
+  }
+  return <aside className="agent-drawer" aria-label="全局 Agent"><header><strong>全局 Agent</strong><button type="button" onClick={onClose}>关闭</button></header><p>仅可创建故障上报、智能问数和操作指引任务。</p><form onSubmit={submit}><label>类型<select value={agentId} onChange={(event) => setAgentId(event.target.value)}><option value="fault_reporting">AI 故障上报</option><option value="metric_query">智能问数</option><option value="operation_guidance">操作指引</option></select></label><label>问题<textarea value={text} onChange={(event) => setText(event.target.value)} required /></label><button type="submit">发起任务</button></form>{message && <p role="status">{message}</p>}</aside>;
 }
 
 export function App() {

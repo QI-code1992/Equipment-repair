@@ -83,7 +83,7 @@ def bi_dashboard(
     }
 
 
-@router.get("/api/equipment/{equipment_id}/maintenance-history", response_model=None)
+@router.get("/api/maintenance-history/equipment/{equipment_id}", response_model=None)
 def equipment_maintenance_history(
     equipment_id: str,
     page: int = Query(default=1, ge=1),
