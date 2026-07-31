@@ -583,6 +583,9 @@
 
 ## TASK-012-API-001 Workbench 读取 API 自测（2026-07-30）
 
+- 合并后复验：Merge Commit `274673b72d5201986ffee77b038f516022cd174d` 的结果树已核对；Python 3.13 定向 `3 passed, 2 warnings`、全量 `319 passed, 13 skipped, 2 warnings`、compileall、Compose config、workflow JSON 和 diff-check 通过。
+- 门禁：API-001 的合并后治理仍待本候选 PR 获项目负责人确认；API-002—007、TASK-012 前端和 Stage 6/7/8 继续阻断。
+
 - 补充提交：`44992b5b34f6a2c77378383a363bfb2a3f86fd25` 新增已完成故障排除过滤和相同提交时间 ID 次级排序回归。
 - 补充验证：定向测试 `3 passed, 2 warnings`；全量后端 `319 passed, 13 skipped, 2 warnings`；`py -3.13 -m compileall -q app tests`、Compose `config --quiet` 与 `git diff --check` 通过。
 - 令牌夹具说明：测试先创建全部故障样本，再签发工作台令牌，避免共享角色权限重设造成误报；未修改生产认证或权限实现。

@@ -10,7 +10,7 @@
 | P0 页面 / 正式路由 | 原型参考 | 已确认可消费的正式 API 与权限 | 必须覆盖的真实状态 | 结论与下一动作 |
 |---|---|---|---|---|
 | Login `/login` | `pages/login.html` | `POST /api/auth/login`、`GET /api/auth/me`、`DELETE /api/auth/session`；登录后 Bearer 会话 | 登录中、凭据错误、禁用、会话失效、登出 | `AVAILABLE`。正式登录页、会话恢复、受保护路由与测试可实施。 |
-| Workbench `/` | `pages/workbench.html` | `GET /api/agent/health-score/{equipment_id}`（`intelligence:agent`）、`GET /api/equipment`（`equipment:read`） | 加载、无设备、健康服务失败、无权限 | `PARTIAL`。健康查询与设备入口可实现；待办、告警汇总和快捷事项无等价读取接口，列为 `API-GAP-001`。 |
+| Workbench `/` | `pages/workbench.html` | `GET /api/agent/health-score/{equipment_id}`（`intelligence:agent`）、`GET /api/equipment`（`equipment:read`）、`GET /api/workbench/todos`、`GET /api/workbench/alert-summary`、`GET /api/workbench/shortcuts`（后三者均为 `workbench:view`） | 加载、无设备、健康服务失败、无权限、待办/告警/快捷事项为空 | API-001 已由 PR #71 Merge Commit `274673b72d5201986ffee77b038f516022cd174d` 集成；Workbench 的 API 前置可消费，但正式页面仍等待 TASK-012 在其余 API 前置全部关闭后启动。 |
 | 驾驶舱 BI `/bi-dashboard` | `pages/bi-dashboard.html`、`驾驶舱BI设计细化.md` | `GET /api/metrics/catalog`、`POST /api/metrics/query-batch`（最多 5 项、`equipment:read`） | 筛选中、查询中、空、错误、无权限、图表切换 | `PARTIAL`。受控指标查询可实现；管理摘要、趋势、效率、区域/工厂/车间排行、历史对比和全局筛选聚合无等价接口，列为 `API-GAP-002`。 |
 | Factory modeling `/factory-modeling` | `pages/factory-modeling.html` | `GET/POST/PATCH/DELETE /api/organizations`；`organization:read/write` | 树加载、搜索、展开/收起、表单校验、根节点/删除受阻、错误、无权限 | `AVAILABLE`。前端按 `parent_id` 构树，服务端返回阻断错误。 |
 | Equipment ledger `/equipment` | `pages/equipment-ledger.html` | `GET /api/equipment`；`equipment:read` | 加载、空、筛选无结果、错误、无权限 | `AVAILABLE`。浏览器本地筛选仅作用于真实列表，不伪造分页或统计。 |
@@ -29,7 +29,7 @@
 
 | 编号 | 缺口 | 受影响页面 | 需要先确认的范围 |
 |---|---|---|---|
-| API-GAP-001 | 当前用户待办、告警摘要与快捷事项读取 | Workbench | 资源定义、角色/权限、排序/筛选、空态和错误语义；不在前端计算或伪造。 |
+| API-GAP-001 | 当前用户待办、告警摘要与快捷事项读取 | Workbench | 已关闭：项目负责人确认范围后，PR #71 将正式只读 API 合入 `codex/stage-05-integration`；接口、权限、排序/筛选、空态和错误语义以 `API_SPEC.md` 为准。 |
 | API-GAP-002 | BI 管理摘要、趋势、效率、组织层级排行、历史对比与全局筛选 | BI | 指标口径、时间窗、组织维度、权限、聚合来源与响应上限；可能影响架构/API 基线。 |
 | API-GAP-003 | 设备详情维修历史与趋势读取 | Equipment detail | 是否提供设备级历史/趋势，数据来源、权限、分页和脱敏字段。 |
 | API-GAP-004 | 维修记录列表、详情及知识状态读取 | Maintenance records | 工单/维修记录查询模型、筛选、角色权限、知识状态定义和分页。 |
@@ -37,4 +37,4 @@
 | API-GAP-006 | 审计事件只读查询 | System management | 审计字段白名单、筛选、分页、权限和脱敏保证；禁止返回敏感请求摘要。 |
 | API-GAP-007 | 智能配置调用记录、Token 用量、知识重试与只读指标读取 | Intelligent config | 指标来源、保留期、聚合维度、权限、重试行为和隐私边界。 |
 
-这些缺口在获得项目负责人对精确 API 范围的确认前保持阻断；可先实现矩阵中标记为 `AVAILABLE` 的页面部分，但不得以静态样例伪造缺失业务能力。
+`API-GAP-002`—`007` 在获得项目负责人对精确 API 范围的确认前保持阻断；可先实现矩阵中标记为 `AVAILABLE` 的页面部分，但不得以静态样例伪造缺失业务能力。

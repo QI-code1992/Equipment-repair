@@ -1,5 +1,11 @@
 # 代码评审
 
+## TASK-012-API-001 合并后治理检查（2026-07-30）
+
+- 审核与授权：DEV-002 对 `c1273fd01e5ec91b2de3af59aab371844d228cd6` 正式批准；项目负责人授权后，DEV-002 执行 Merge Commit `274673b72d5201986ffee77b038f516022cd174d`。
+- 集成结论：PR 目标分支、获批 HEAD、双亲、祖先关系、merge-tree 和工作树结果一致；无 Critical、Important 或 Minor 集成阻断项。
+- 边界：API-001 已集成，但本检查不批准 API-002—007、TASK-012 前端、Stage 6/7/8 或新的公开 API 范围。
+
 ## TASK-012-API-001 独立复审补充（2026-07-30）
 
 - 复审范围：API-001 实现提交 `7ba0e5e77e6a784f0dd6a0622c91ebce691e00a1` 及测试补充提交 `44992b5b34f6a2c77378383a363bfb2a3f86fd25`。

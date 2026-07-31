@@ -1,5 +1,11 @@
 # 开发到产品交接
 
+## TASK-012-API-001 合并后治理收尾候选（2026-07-30）
+
+- 集成：PR #71 的获批 HEAD `c1273fd01e5ec91b2de3af59aab371844d228cd6` 已由 DEV-002 在项目负责人授权后以 Merge Commit `274673b72d5201986ffee77b038f516022cd174d` 合入 `codex/stage-05-integration`；双亲和结果树已核验。
+- 合并后证据：Python 3.13 定向 `3 passed, 2 warnings`、后端全量 `319 passed, 13 skipped, 2 warnings`、compileall、Compose config、workflow JSON 与 diff-check 均通过。
+- 依赖结论：API-001 已集成；API-002—007 尚未关闭，TASK-012 前端和 Stage 6/7/8 继续锁定。本候选只请求项目负责人确认治理记录，不请求启动任何下游任务。
+
 ## Stage 7 P0 正式前端回流规划已集成（2026-07-30）
 
 - 背景：验收发现正式 React 前端只有四个业务路由，且工作台只提供设备 ID 健康分查询，不能覆盖批准原型的全部 P0 页面。`DEF-STAGE7-001` 与 `CR-047` 已登记。

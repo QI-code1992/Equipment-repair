@@ -1,5 +1,12 @@
 # 功能/页面检查点
 
+## FCP-012-API-001 合并后治理收尾候选（2026-07-30）
+
+- 集成事实：PR #71 的获批 HEAD `c1273fd01e5ec91b2de3af59aab371844d228cd6` 已由 DEV-002 手动 Merge Commit `274673b72d5201986ffee77b038f516022cd174d` 合入 `codex/stage-05-integration`；双亲为 `866875d4071a725d9c780f535d6be10e1202ba4e` 与获批 HEAD。
+- 合并后核验：祖先关系、merge-tree、完整 diff-check、Python 3.13 定向 `3 passed, 2 warnings`、全量 `319 passed, 13 skipped, 2 warnings`、compileall、Compose config 与 workflow JSON 解析通过。
+- 状态：`POST_MERGE_GOVERNANCE_CANDIDATE_PENDING_OWNER_CONFIRMATION`。本候选合入后才可将 API-001 标记为治理闭环；API-002—007 仍未关闭，TASK-012 前端和 Stage 6/7/8 不解锁。
+- 回滚：如发现回归，先在隔离环境验证 `git revert -m 1 274673b72d5201986ffee77b038f516022cd174d`；不得删除运行数据、卷或其他已接受功能。
+
 ## FCP-012-API-001 复审证据补充（2026-07-30）
 
 - 状态：`DEVELOPMENT_CANDIDATE_PENDING_DEV002_REVIEW`；PR #71 仍未集成，不解锁 TASK-012 或 Stage 6/7/8。

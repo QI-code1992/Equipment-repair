@@ -1,7 +1,7 @@
 {
-  "state": "CHANGES_REQUESTED",
-  "updatedBy": "DEV-001 post-merge governance verification for PR #69",
-  "updatedAt": "2026-07-30",
+  "state": "STAGE5_TASK012_CONSOLIDATED_GOVERNANCE_PENDING_INTEGRATION",
+  "updatedBy": "DEV-002 for CR-048",
+  "updatedAt": "2026-07-31",
   "task010Delivery": {
     "taskId": "TASK-010",
     "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",
@@ -69,16 +69,20 @@
   "stage7P0FrontendRemediation": {
     "defect": "DEF-STAGE7-001",
     "changeRequest": "CR-047",
-    "status": "PLANNING_INTEGRATED_API_PREREQUISITES_BLOCKED",
+    "status": "CONSOLIDATED_TASK012_GOVERNANCE_PENDING_INTEGRATION",
     "api001": {
-      "status": "DEVELOPMENT_CANDIDATE_PENDING_DEV002_REVIEW",
+      "status": "INTEGRATED",
       "branch": "codex/task-012-api-001-workbench",
       "implementationCommit": "7ba0e5e77e6a784f0dd6a0622c91ebce691e00a1",
       "latestEvidenceCommit": "44992b5b34f6a2c77378383a363bfb2a3f86fd25",
       "pullRequest": 71,
+      "approvedHead": "c1273fd01e5ec91b2de3af59aab371844d228cd6",
+      "mergeCommit": "274673b72d5201986ffee77b038f516022cd174d",
+      "mergeExecutor": "QI-code1992 / DEV-002 / manual Merge Commit",
+      "verification": "Merge parents, ancestor and merge-tree checks, complete diff-check, Python 3.13 targeted 3 passed/2 warnings, backend 319 passed/13 skipped/2 warnings, compileall, Compose config and workflow JSON parsing passed.",
       "scopeConfirmation": "https://github.com/QI-code1992/Equipment-repair/pull/70#issuecomment-5130657800",
-      "dependencyUnlockAllowed": false,
-      "nextAction": "DEV-002 must review the latest exact HEAD on PR #71; no Merge authorization, integration, or TASK-012 frontend unlock before approval."
+      "dependencyUnlockAllowed": true,
+      "nextAction": "API-001 is integrated. It is retained as evidence in the consolidated TASK-012 change package and is not reimplemented. Stage 6/7/8 remain locked."
     },
     "triggerBaseline": "a334afd1b8cb4eeb139d78b7f5f1b5617bb2cd32",
     "stage7Candidate": "89fbd2129169fb6ece42094b17907885637f3c48",
@@ -91,7 +95,19 @@
     "mergeCommit": "be9de719c7a1a14f7bf98aab792a2b73bf0278d5",
     "mergeExecutor": "ll979053897-arch / DEV-001 / manual Merge Commit",
     "verification": "Merge parents, source-tree equivalence, merge diff check, workflow JSON and 15 Node static regressions passed.",
-    "nextAction": "DEV-002 must review TASK-012-API-001 after its Draft PR is created; TASK-012-API-002—007 must each complete their own Draft PR, review and authorized integration. TASK-012 and Stage 7 acceptance remain blocked until all seven API prerequisites are integrated and closed."
+    "consolidatedDevelopment": {
+      "changeRequest": "CR-048",
+      "status": "GOVERNANCE_PENDING_INTEGRATION",
+      "taskDeveloper": "DEV-002",
+      "reviewer": "DEV-001 after all work packages complete",
+      "mergeExecutor": "DEV-001 after project-owner exact PR/HEAD authorization",
+      "singleDraftPrBranch": "codex/task-012-p0-frontend-remediation",
+      "workPackages": ["TASK-012-API-001", "TASK-012-API-002", "TASK-012-API-003", "TASK-012-API-004", "TASK-012-API-005", "TASK-012-API-006", "TASK-012-API-007", "TASK-012 frontend"],
+      "approval": "Project owner approved the consolidated development and one final DEV-001 review on 2026-07-31.",
+      "startCondition": "CR-048 governance candidate must be integrated and the project owner must receive a formal development-start notice.",
+      "nextAction": "Do not start implementation, request intermediate reviews, merge, or unlock later stages until the governance candidate is integrated."
+    },
+    "nextAction": "CR-048 changes TASK-012 from seven independently reviewed and integrated API prerequisites to one consolidated development package. API-002—007 and all P0 frontend work remain blocked until CR-048 is integrated and the formal development-start notice is sent. TASK-012 and Stage 7 acceptance remain locked until the unified PR is reviewed, authorized, and integrated."
   },
   "stage6RuntimeValidation": {
     "status": "POST_MERGE_CORE_RUNTIME_VALIDATION_COMPLETED_SUPERSEDED_BY_SIGNED_STAGE6_CONCLUSION",
