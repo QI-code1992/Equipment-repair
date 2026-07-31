@@ -112,7 +112,7 @@ function ApplicationShell() {
           <Route path="/equipment/:id" element={guarded("/equipment", <EquipmentDetailPage />)} />
           <Route path="/equipment/:id/edit" element={guarded("/equipment", <EquipmentEditPage />)} />
           <Route path="/intelligent-config" element={guarded("/intelligent-config", <IntelligentConfigPage />)} />
-          <Route path="/intelligence-audit" element={guarded("/intelligence-audit", <IntelligentAuditPage />)} />
+          <Route path="/intelligence-audit" element={guarded("/intelligence-audit", <IntelligentAuditPage permissionCodes={permissionCodes ?? []} />)} />
           <Route path="/fault-report" element={guarded("/fault-report", <FaultReportPage />)} />
           <Route path="/agent-report" element={guarded("/agent-report", <AgentReportPage />)} />
           <Route path="/maintenance-records" element={guarded("/maintenance-records", <MaintenanceRecordsPage />)} />
