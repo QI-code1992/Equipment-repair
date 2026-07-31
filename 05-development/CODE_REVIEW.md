@@ -413,3 +413,9 @@
 - 安全与范围：没有把 token 写到 URL、日志、页面文本或全局 React 状态；不改后端认证、权限、API、依赖、迁移、部署、原型或业务页契约。
 - 证据：API 专项 `11 passed`，交互测试覆盖重定向、登录写入和登录后 Bearer，前端全量 `26 passed`，构建、14 项静态回归、JSON 与 diff-check 通过。
 - 请求：请 DEV-001 对本次推送后的 PR #50 新完整精确 HEAD 复审；这不是 Merge 授权，审核前不得合并、解锁 TASK-011 或进入 Stage 6。
+## CR-048 治理候选合并后集成复核（2026-07-31）
+
+- DEV-001 核验 PR #73 精确 HEAD `b4e28368c1294f30b80f4dd72187660eba06fc10`，目标 `codex/stage-05-integration`，并以 Merge Commit `8d9beaefe01baef38e54baecbe3426d9ab816623` 合入。
+- 检查结论：PR 状态为 `MERGED`；双亲为 `274673b72d5201986ffee77b038f516022cd174d` 与获批 HEAD；`git diff --check`、工作流 JSON 解析和 Python 3.13 后端全量回归 `319 passed, 13 skipped, 2 warnings` 通过。
+- 范围结论：差异仅为治理台账；无业务代码、测试、数据库、基础设施或部署变更。
+- 剩余门禁：等待 DEV-001 向项目负责人 DEV-002 发送并获得正式 TASK-012 开发启动确认；不提前解锁 API-002—007、P0 前端或 Stage 6/7/8。

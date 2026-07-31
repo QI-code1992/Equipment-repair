@@ -872,3 +872,11 @@
   - 开始门槛：本治理候选已合入 `codex/stage-05-integration`，且 DEV-002 已向项目负责人发出正式开发开始通知。
 - 验证：JSON 解析、任务书/状态一致性、剩余 API 依赖扫描、`git diff --check` 与适用 Markdown/规则检查。该治理候选不运行或变更业务代码、测试逻辑、数据库、基础设施、依赖或运行配置。
 - 阶段边界：本 CR 不构成 TASK-012 完成、DEV-001 最终审核批准、Merge 授权、Stage 6 重测通过、Stage 7 验收通过或 Stage 8 发布授权。
+### CR-048 Post-Merge Governance Record (2026-07-31)
+
+- Status: `INTEGRATED_PENDING_FORMAL_START_NOTICE`.
+- Governance PR: #73; approved HEAD `b4e28368c1294f30b80f4dd72187660eba06fc10`; Merge Commit `8d9beaefe01baef38e54baecbe3426d9ab816623`; target `codex/stage-05-integration`.
+- Executor: DEV-001 (`ll979053897-arch`) by manual Merge Commit after project-owner authorization.
+- Verification: merge parents, target ref, `git diff --check`, `workflow/state.json` parsing, and Python 3.13 backend `319 passed, 13 skipped, 2 warnings` passed.
+- Boundary: governance-only files; no business code, tests, database, dependencies, infrastructure, deployment or runtime configuration changed.
+- Next gate: DEV-001 sends the formal TASK-012 development-start notice to DEV-002 as project owner. DEV-002 may create the single Draft PR only after confirming receipt. API-002—007, P0 frontend, and Stage 6/7/8 remain locked.

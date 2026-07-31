@@ -594,3 +594,10 @@
 - 红绿：新增 `test_workbench_api.py` 在路由缺失时为 `3 failed`（404）；注册最小路由后转绿，当前定向为 `3 passed, 2 warnings`。
 - 完整验证：`py -3.13 -m pytest -q` 为 `319 passed, 13 skipped, 2 warnings`；`py -3.13 -m compileall -q app tests`、`docker compose --env-file codebase/infra/.env.example -f codebase/infra/docker-compose.yml config --quiet` 与完整差异检查均通过。
 - 边界：无数据库迁移、生产依赖、Compose 改动、兼容代码或额外通用抽象；未执行容器运行态、PostgreSQL 实例或浏览器联调，因为本任务未修改这些边界。仅请求 DEV-002 审核，不请求 Merge 授权、不合并、不解锁下游。
+## CR-048 治理候选合并后自测记录（2026-07-31）
+
+- PR #73 获批 HEAD：`b4e28368c1294f30b80f4dd72187660eba06fc10`。
+- Merge Commit：`8d9beaefe01baef38e54baecbe3426d9ab816623`，由 DEV-001 手动执行。
+- 合并后验证：目标分支指针、双亲关系、`git diff --check`、`workflow/state.json` JSON 解析通过；Python 3.13 后端全量 `319 passed, 13 skipped, 2 warnings`。
+- 变更边界：仅治理文档；未修改业务代码、测试逻辑、迁移、生产依赖、Compose 或运行配置。
+- 门禁：仅完成 CR-048 治理集成；正式开发启动通知尚未完成，API-002—007、TASK-012 前端和 Stage 6/7/8 不解锁。
