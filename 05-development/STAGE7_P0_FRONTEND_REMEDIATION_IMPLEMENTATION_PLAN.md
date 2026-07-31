@@ -1,6 +1,6 @@
 # Stage 7 P0 正式前端偏离修复实施计划
 
-- 状态：设计已获项目负责人确认；本计划待项目负责人授权后执行。
+- 状态：`CR-048` 已由 PR #73 合入，项目负责人已确认正式开发启动；本计划在唯一 TASK-012 Draft PR 中执行。
 - 关联缺陷：`DEF-STAGE7-001`。
 - 关联变更：`CR-047`。
 - 当前修复基线：`a334afd1b8cb4eeb139d78b7f5f1b5617bb2cd32`。
@@ -20,8 +20,8 @@
 
 ## 2. 约束与实施顺序
 
-- 这是 Stage 7 发现并回流的 Stage 5 代码修复。实施期间适用 `04-architecture-plan/AGENTS.md` 和任务书的 Draft PR、交叉审核、非作者 Merge、精确 HEAD 授权规则。
-- 先建立并获确认的任务书修订，再创建任何业务代码 PR。每个开发任务由 DEV-002 创建和维护一个指向 `codex/stage-05-integration` 的 Draft PR，DEV-001 审核与集成；每次 Merge 均须项目负责人对 PR 编号和精确 HEAD 单独授权。
+- 这是 Stage 7 发现并回流的 Stage 5 代码修复。实施期间适用 `04-architecture-plan/AGENTS.md` 与经 `CR-048` 修订的任务书：DEV-002 在 `codex/task-012-p0-frontend-remediation` 上维护唯一 Draft PR，所有 API-002—007 与前端工作包均在其中完成。
+- 开发期间不进行 API 分项正式审核、集成或 Merge；全部工作包完成后，由 DEV-001 对完整候选的精确 HEAD 一次审核、集成检查并请求项目负责人单独 Merge 授权。获授权后由 DEV-001 手动 Merge Commit。
 - 不新增生产依赖；沿用 React、React Router、现有测试栈和现有图标/样式能力。任何例外另行走变更确认。
 - 公开 API、数据模型、权限或部署配置缺口，不得由前端自行猜测或 mock；先登记为 P1 契约缺口，更新 API 规格、任务书和 CR，并取得项目负责人对精确范围的确认后，才可由相应所有者实现。
 - 后端、迁移或基础设施缺口由 DEV-001 负责；前端功能由 DEV-002 负责。Docker/live-stack 验证只由具备环境的 DEV-001 执行。
@@ -48,7 +48,7 @@
 ### 任务 2：工作台、BI 与数据展示契约
 
 1. 为 `WorkbenchPage.test.tsx` 和新增 `BiDashboardPage.test.tsx` 写失败用例，覆盖真实数据加载、空态、错误、筛选/图表切换和权限拒绝；断言不渲染原型的静态指标。
-2. 若任务 0 证明现有健康分、指标目录/批量查询接口足以满足某项展示，直接通过 `api.ts` 接入；待办/告警、趋势、效率、排行或历史对比没有已批准 API 时，只允许在开发中显示明确阻断状态，且不得将该页面、TASK-012 或 `DEF-STAGE7-001` 标记完成。对应 `TASK-012-API-*` 前置任务集成后，必须重新实现并验证真实功能；不伪造卡片、曲线或排行。
+2. 若现有健康分、指标目录/批量查询接口足以满足某项展示，直接通过 `api.ts` 接入；待办/告警、趋势、效率、排行和历史对比按同一 PR 中的 `TASK-012-API-*` 契约实现。不得伪造卡片、曲线或排行。
 3. 实现 `WorkbenchPage.tsx` 和新建 `BiDashboardPage.tsx`：还原原型的标题区、摘要卡、筛选栏、列表/图表区域和快捷入口的视觉层级；仅在有正式数据时渲染数值、趋势和排行榜。
 4. 将路由 `/` 与 `/bi-dashboard` 接入应用壳，并为过滤条件与 URL 状态增加交互测试。
 5. 验证：前端测试、构建、无静态业务数据扫描、浏览器人工对照工作台与 BI 原型；需要 Docker 的真实数据验证由 DEV-001 后续执行。
@@ -61,7 +61,7 @@
    - `/equipment`、`/equipment/new`、`/equipment/:id/edit`、`/equipment/:id`：设备列表/筛选、详情入口、表单校验、保存、健康信息与可用历史数据。
    - `/system-management`：用户、角色/权限、审计标签页；仅显示当前 API 返回的字段与权限允许的动作。
 3. 所有 POST/PATCH/DELETE 操作通过 `api.ts` 生成并测试幂等键；服务端返回的 401/403/409/422 显示为用户可理解、可恢复的页面状态。
-4. 对设备历史、审计列表等尚无读取契约的原型区域，按相应 `TASK-012-API-*` 的审批和集成结果实现；没有批准/集成前不加入假历史表，也不得将页面矩阵行标为完成。
+4. 对设备历史、审计列表等区域，按同一 PR 内相应 `TASK-012-API-*` 契约实现；不得加入假历史表或将页面矩阵行提前标为完成。
 5. 验证：前端测试、构建、原型页面逐项对照；DEV-001 对实际权限、幂等及数据库副作用运行 API/容器验证。
 
 ### 任务 4：故障上报、Agent 上报、维修记录与维修执行
@@ -69,13 +69,13 @@
 1. 扩展 `FaultReportPage.test.tsx`、`RepairExecutionPage.test.tsx`，新增 `AgentReportPage.test.tsx`、`MaintenanceRecordsPage.test.tsx`，先覆盖：人工上报、附件上传进度/失败、AI 草稿人工确认、诊断 `QUESTIONING`/`NO_EVIDENCE`/`UNAVAILABLE`、引用、采纳/直接开始边界、维修结果提交和禁用/权限状态。
 2. 使用现有 `/api/attachments`、`/api/fault-reports`、`/api/agent/fault-reports/submit`、`/api/agent/fault-diagnosis`、`/api/agent/operation-guidance`、`/api/work-orders/{id}/repair-result`、`/api/repair-cases/similar` 与 Agent Runtime 契约实现真实流程。附件不在浏览器保留敏感正文；错误信息不泄露对象存储或扫描内部细节。
 3. 实现 `/fault-report`、`/agent-report`、`/maintenance-records`、`/repair-execution` 页面，使双栏诊断、引用、问题收集、预填/人工最终字段、状态提示和操作边界符合批准原型。
-4. 工单分配/列表/详情、维修记录/知识状态等如缺少读取或写入 API，受对应 `TASK-012-API-*` 阻断；只能暂停对应交互，不将原型样例写入代码，也不得据此关闭受影响 P0 行。
+4. 工单分配/列表/详情、维修记录/知识状态等由同一 PR 内对应 `TASK-012-API-*` 契约实现；不将原型样例写入代码，也不得据此关闭受影响 P0 行。
 5. 验证：前端交互测试、API 契约测试；由 DEV-001 在隔离 live-stack 验证上传扫描、真实 RAGFlow 引用、`NO_EVIDENCE`/`UNAVAILABLE` 降级和事务状态。
 
 ### 任务 5：智能配置与整体验收封口
 
 1. 为 `IntelligentConfigPage.tsx` 补齐 `IntelligentConfigPage.test.tsx`：模型提供商/绑定、四 Agent 独立配置、知识文档生命周期、失败重试、调用记录、Token 使用和只读指标的加载、空、错误、权限与禁用状态。
-2. 仅消费现有 `/api/model-providers*`、`/api/model-bindings*`、`/api/agent-configs*`、`/api/knowledge/documents*`、`/api/metrics/*` 与 `/api/agent/*` 契约；调用记录、Token 使用和知识重试/只读指标由 `TASK-012-API-007` 补齐。该前置未集成前不能展示静态仪表盘数值，也不得标记本页面完成。
+2. 仅消费现有 `/api/model-providers*`、`/api/model-bindings*`、`/api/agent-configs*`、`/api/knowledge/documents*`、`/api/metrics/*` 与 `/api/agent/*` 契约；调用记录、Token 使用和知识重试/只读指标由同一 PR 内的 `TASK-012-API-007` 补齐，不能展示静态仪表盘数值。
 3. 新建 `06-testing/FRONTEND_PROTOTYPE_DIFFERENCE_MATRIX.md` 与适用的 `06-testing/tests/*.test.js` 静态规则：逐页确认正式路由、原型参考、真实接口、权限、状态测试和浏览器证据；明确排除“数据导入”。
 4. 更新 `06-testing/TEST_CASES.md`、`06-testing/TEST_REPORT.md`、`06-testing/DEFECTS.md`、`05-development/SELF_TEST.md`、`05-development/CHECKPOINTS.md` 与交接台账，绑定实际候选 SHA、前置 API 任务、未验证项、回退方式。只有所有 `TASK-012-API-001`—`007` 已集成且所有 P0 行均有真实 API 的可复核证据，才可关闭 `DEF-STAGE7-001`。
 5. 验证：
@@ -89,10 +89,10 @@
 
 ## 4. PR、检查点与回退
 
-1. 任务 0 的规划 PR 包含 `05-development/` 设计/计划和 `06-testing/DEFECTS.md`，不适用纯治理 PR 豁免；除项目负责人确认外，必须先由 DEV-001 对精确 HEAD 正式审核，再执行集成检查和单独 Merge 授权。
-2. 任务 1 至任务 5 是同一 `TASK-012` 的顺序实施工作包，不是独立任务或独立 PR。所有前端代码、测试和 TASK-012 交接始终保留在一个由 DEV-002 创建和维护的 Draft PR；工作包间以独立 Commit 和 `CHECKPOINTS.md` 保持可回退性。新增公开 API 只能由下表定义的独立 `TASK-012-API-*` 任务各自建立 PR。
+1. 任务 0 的治理准入已通过 PR #69、#73、#74 完成；本 PR 从 API-002 开始执行实现、测试与交接。
+2. 任务 1 至任务 5 是同一 `TASK-012` 的顺序实施工作包，不是独立任务或独立 PR。所有前端代码、测试、API-002—007 契约与实现以及 TASK-012 交接始终保留在一个由 DEV-002 创建和维护的 Draft PR；工作包间以独立 Commit 和 `CHECKPOINTS.md` 保持可回退性。
 3. 每个稳定单元提交可恢复 Commit，并在 `05-development/CHECKPOINTS.md` 记录前端路由、API 契约、测试结果与回退命令。回退只撤回对应修复任务的 Merge Commit；有数据迁移时采用经验证的 downgrade 或前向修复，绝不删除运行数据。
-4. DEV-002 开发的每一个代码 PR 必须由 DEV-001 对当前精确 HEAD 审核；DEV-001 完成集成检查后，项目负责人另行授权，DEV-001 执行手动 Merge Commit。HEAD、目标分支、依赖或检查结论任一变化均使授权失效。
+4. 全部工作包完成后，DEV-001 对当前精确 HEAD 一次审核；DEV-001 完成集成检查后，项目负责人另行授权，DEV-001 执行手动 Merge Commit。HEAD、目标分支、依赖或检查结论任一变化均使授权失效。
 
 ## 5. 停止条件
 
