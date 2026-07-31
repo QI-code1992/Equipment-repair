@@ -461,26 +461,26 @@
 
 ### TASK-012：Stage 7 P0 正式前端偏离修复
 
-- 状态：`TASK-012-API-001` 已由 PR #71 合入；`TASK-012-API-002`—`007` 尚未关闭；TASK-012 前端代码仍受剩余六项 API 前置任务阻断。
+- 状态：`CR-048` 已获项目负责人批准，等待其治理候选合入后启动正式开发。`TASK-012-API-001` 已由 PR #71 合入；`TASK-012-API-002`—`007` 与 TASK-012 前端实现改为同一重大变更开发包，不再作为逐项 PR、逐项审核或逐项合并门禁。
 - 优先级：P0。
 - 负责人、任务开发者、Draft PR 创建者：`DEV-002`。
 - 指定审核者、最终集成检查与 DEV-002 开发任务 Merge 执行者：`DEV-001`。
-- PR 目标分支：`codex/stage-05-integration`；任务开发者创建并维护同一 Draft PR，HEAD 变化必须由 DEV-001 重新审核。
-- 并行属性：Sequential After v1.5 governance integration and API availability matrix; 现有 TASK-001—011 的历史完成状态不因本任务被改写。
+- PR 目标分支：`codex/stage-05-integration`；DEV-002 创建并维护唯一 Draft PR `codex/task-012-p0-frontend-remediation`。所有 API-002—007、前端页面、相关测试与交接提交均在该 PR 中完成；HEAD 变化后只能由 DEV-001 对最终完整候选重新审核。
+- 并行属性：单一串行重大变更包；开发开始条件为 `CR-048` 治理候选已集成并已向项目负责人发出正式开发开始通知。现有 TASK-001—011 的历史完成状态不因本任务被改写。
 - 需求映射：`PAGE_FUNCTION_MATRIX.md` 全部 P0 页面（Data import 明确排除）、FR-001—010 的既有 UI 映射、AC-001—044 中受前端页面影响的条目、`DEF-STAGE7-001`、`CR-047`。
 - 范围：以已批准 Stage 3 原型为视觉/交互参照，正式 React/TypeScript 实现 Login、Workbench、驾驶舱 BI、Factory modeling、Equipment ledger/add/edit/detail、Fault report/start-repair diagnosis、Agent report、Global Agent、Maintenance records、Repair execution、System management、Intelligent config；接入正式认证、权限、JSON/SSE、附件、幂等写入，以及真实的加载、空、错误、禁用状态。
 - 不包含：Data import、原型修改、运行原型源码、伪造业务数据、擅自新增公共 API/迁移/权限模型/依赖/部署配置、Stage 6 重测结论、Stage 7 验收通过或 Stage 8 发布。
-- 共享契约：`04-architecture-plan/API_SPEC.md` 和任务 0 输出的 `05-development/P0_FRONTEND_API_AVAILABILITY_MATRIX.md` 是唯一消费清单。页面声明的原型功能若无正式契约，必须由对应 `TASK-012-API-*` 完成设计、项目负责人范围确认、审核与集成；阻断状态只能作为开发期真实错误状态，不得计入 P0 页面、TASK-012 或 `DEF-STAGE7-001` 的完成。
-- 实施步骤：先更新每个页面的失败交互测试；按已批准的 `STAGE7_P0_FRONTEND_REMEDIATION_IMPLEMENTATION_PLAN.md` 实现共享壳、页面域和真实客户端；每个稳定路由/流程记录独立检查点；完成差异矩阵、浏览器对照和交接。
+- 共享契约：`04-architecture-plan/API_SPEC.md` 和任务 0 输出的 `05-development/P0_FRONTEND_API_AVAILABILITY_MATRIX.md` 是唯一消费清单。API-002—007 的资源、权限、字段、错误、分页/聚合和隐私边界已获项目负责人确认；必须先在同一 Draft PR 更新正式 API 规格和失败契约测试，再实现后端与前端消费者。阻断状态只能作为开发期真实错误状态，不得计入 P0 页面、TASK-012 或 `DEF-STAGE7-001` 的完成。
+- 实施步骤：先为 API-002—007 与每个页面更新失败契约/交互测试；按已批准的 `STAGE7_P0_FRONTEND_REMEDIATION_IMPLEMENTATION_PLAN.md` 在同一 PR 实现 API、共享壳、页面域和真实客户端；每个稳定 API 或路由/流程记录检查点；完成差异矩阵、浏览器对照、完整回归和交接。
 - 验收标准：所有 P0 行均有可达正式路由、已集成真实 API、权限与关键 UI 状态测试、原型对照证据；所有 `TASK-012-API-*` 均已关闭。API 不可用状态只能作为运行降级或开发期阻断证据，不能替代业务功能完成；无生产代码引用原型运行目录或静态业务样例。
-- 验证：`npm --prefix codebase/frontend test -- --run`；`npm --prefix codebase/frontend run build`；`node --test 06-testing/tests/*.test.js`；相关后端 API 契约测试；`git diff --check`。Docker、真实 RAGFlow、附件扫描、HTTPS 与浏览器 live-stack 验证仅由 DEV-001 在隔离环境执行。
+- 验证：各 API 先运行对应后端契约测试，再运行后端全量回归；`npm --prefix codebase/frontend test -- --run`；`npm --prefix codebase/frontend run build`；`node --test 06-testing/tests/*.test.js`；完整差异矩阵与 `git diff --check`。Docker、真实 RAGFlow、附件扫描、HTTPS 与浏览器 live-stack 验证仅由 DEV-001 在隔离环境执行。
 - 分支：`codex/task-012-p0-frontend-remediation`。
-- Review 与 Merge：DEV-002 完成自测后在同一 PR 请求 DEV-001 审核精确 HEAD；DEV-001 通过后执行集成检查并向项目负责人请求 PR/HEAD 绑定的 Merge 授权；获授权后 DEV-001 手动 Merge Commit。不得 auto-merge、merge queue、自批或自合并。
+- Review 与 Merge：开发期不执行 API-002—007 的逐项正式审核、逐项集成或逐项 Merge。全部工作包完成且 PR 转为 Ready 后，DEV-001 对完整候选的当前精确 HEAD 执行一次正式审核；审核通过后，DEV-001 执行最终集成检查并向项目负责人请求 PR/HEAD 绑定的 Merge 授权；获授权后 DEV-001 手动 Merge Commit。不得 auto-merge、merge queue、自批或自合并。
 - 回滚：按该任务的独立 Merge Commit 选择性 `git revert -m 1 <merge-sha>`，先在隔离环境验证；不得删除卷、数据或其他已接受功能。
 
-#### TASK-012 的 API 前置子任务
+#### TASK-012 的 API 工作包
 
-以下任务均为独立 Stage 5 开发任务：负责人/任务开发者为 DEV-001，指定审核者和获授权后的 Merge 执行者为 DEV-002，目标为 `codex/stage-05-integration`。每项均须先更新 API 规格、获得项目负责人对精确公开 API 范围的确认、在自己的单一 Draft PR 中完成测试/审核/集成；未关闭前，TASK-012 及受影响页面不得完成。
+`CR-048` 生效后，以下标识保留为同一 TASK-012 内的可追溯 API 工作包，而非独立 PR、独立审核或独立 Merge 单元。API-001 已集成；API-002—007 由 DEV-002 在 TASK-012 唯一 Draft PR 中完成。每项仍须有正式 API 规格、最小失败测试、实现、回归与检查点；只有全部工作包满足验收标准后，DEV-001 才可对完整候选进行一次正式审核。
 
 | 子任务 | API 缺口与范围 | 依赖 | 验收标准 |
 |---|---|---|---|
@@ -515,8 +515,8 @@
 | TASK-009 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003, TASK-005, TASK-006, TASK-007 | 维修、案例、知识和 Runtime 全部已审核并正式集成 |
 | TASK-010 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003, TASK-008, TASK-009, TASK-006-FE | 所有正式页面所需 API、Agent 和前端工程基础已审核并正式集成 |
 | TASK-011 | DEV-001 | DEV-002 | DEV-002，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003—010 | 所有模块 PR 已 Review、合入集成分支并完成回归 |
-| TASK-012 | DEV-002 | DEV-001 | DEV-001，需项目负责人逐 PR 授权 | P0 | Sequential After v1.5 planning PR integration and TASK-012-API-001—007 | `CR-047` 已获确认；v1.5 任务书已合入；全部 API 前置子任务已获项目负责人范围确认并完成集成；P0 API 矩阵无未关闭缺口 |
-| TASK-012-API-001—007 | DEV-001（各自独立 PR） | DEV-002 | DEV-002，需项目负责人逐 PR 授权 | P0 | Blocked by project-owner public API scope confirmation | 每项资源、权限、字段、错误、分页/聚合和迁移影响均获精确确认；对应 API 规格、测试、审核与集成完成 |
+| TASK-012 | DEV-002 | DEV-001（完整候选一次审核） | DEV-001，需项目负责人对完整 PR 逐 PR 授权 | P0 | Sequential After CR-048 governance integration | `CR-047` 与 `CR-048` 均已生效；API-001 已集成；API-002—007 公开范围已获确认；唯一 Draft PR 已创建并已通知项目负责人正式开发开始 |
+| TASK-012-API-001—007 | DEV-002（同一 TASK-012 Draft PR 内工作包） | DEV-001（仅最终完整候选） | DEV-001，需项目负责人对完整 PR 授权 | P0 | API-001 Integrated; API-002—007 Sequential Within TASK-012 | 每项资源、权限、字段、错误、分页/聚合和迁移影响均获确认；全部 API 规格、测试和实现完成后统一审核、集成与合并 |
 
 ## 9. 集成计划
 

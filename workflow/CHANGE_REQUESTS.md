@@ -842,3 +842,33 @@
   - 设计与计划：项目负责人已确认 `05-development/STAGE7_P0_FRONTEND_REMEDIATION_DESIGN.md`；实施计划为 `05-development/STAGE7_P0_FRONTEND_REMEDIATION_IMPLEMENTATION_PLAN.md`。v1.5 规划候选已由 PR #69 的获批 HEAD `9b89adb9d32dc067a9ea9b1cb4aa8c5f9c6d1fd8` 经 DEV-001 手动 Merge Commit `be9de719c7a1a14f7bf98aab792a2b73bf0278d5` 集成。TASK-012 仍须等待全部 API 前置任务关闭，禁止创建代码 PR。
 - 验证：页面/API/状态差异矩阵、逐页自动化测试、生产构建、相关后端验证、浏览器视觉/交互对照和 `git diff --check`。
 - 阶段边界：本 CR 不撤销既有 Stage 1—4 批准；不构成修复完成、Stage 6 重测通过、Stage 7 验收通过或 Stage 8 发布授权。
+
+### CR-048：TASK-012 合并重大变更开发与一次最终审核
+
+- 级别：L3 协作、计划与集成边界变更；不改变已确认的产品范围、原型、公开 API 范围、权限模型或验收标准。
+- 状态：Approved / Governance Candidate Pending Integration。
+- 提出人：项目负责人。
+- 提出时间：2026-07-31。
+- 当前阶段：Stage 7 验收发现，受影响范围回流 Stage 5。
+- 原始请求：跳过 TASK-012 中 API-GAP-001—007 的逐项评审，由 DEV-002 完成 API-001—007 与 TASK-012 的全部开发工作后，统一交由 DEV-001 做正式审核。
+- 明确需求：
+  - API-001 已通过 PR #71 合入，不重新实现；将其作为统一候选的已集成前序证据。
+  - API-002—007、P0 前端页面、关联 API 规格、后端/前端测试、检查点和交接必须由 DEV-002 在唯一 Draft PR `codex/task-012-p0-frontend-remediation` 中完成。
+  - 开发期不执行 API-002—007 的逐项正式审核、逐项集成或逐项 Merge；每个工作包仍必须先更新正式契约和失败测试，并保留独立检查点与可追溯证据。
+  - 全部工作包完成且 PR 转为 Ready 后，DEV-001 对完整候选的当前精确 HEAD 执行一次正式审核；审核通过后执行集成检查，并向项目负责人请求绑定 PR、HEAD 与目标分支的单独 Merge 授权。获授权后由 DEV-001 手动 Merge Commit。
+  - 在本 CR 治理候选合入且已向项目负责人发送正式开发开始通知前，不得开始 API-002—007 或 TASK-012 前端实现；不解锁 Stage 6、Stage 7 或 Stage 8。
+- 原因：项目负责人要求将相互关联的 P0 页面、缺失 API 和跨模块验证作为一个可整体评估的重大变更候选，避免在中间 API 切片完成前形成不完整前端集成状态。
+- 影响：
+  - PRD / SPEC / Prototype / Acceptance Criteria：不变；所有已有 API 范围和 P0 完成标准继续有效。
+  - API / 数据 / 权限 / 部署：不放宽任何边界；每个新增或修订的 API 仍须先写入 `API_SPEC.md` 并由契约测试覆盖，未经新的项目负责人确认不得扩展已确认范围。
+  - Development Task Book：TASK-012-API-001—007 从独立 PR/审核/集成单元调整为同一 TASK-012 内工作包；DEV-002 统一开发，DEV-001 对最终完整候选审核、集成并在获授权后合并。
+  - Workflow State：以 `CR-048` 和单一 PR 状态跟踪开始条件、审核、授权、合并和阶段锁定；历史 PR #71 记录保留。
+  - 测试 / 验收：不减少契约、单元、前端、构建、静态、浏览器或隔离运行态验证；Stage 7 验收继续暂停，直至统一候选完成并针对新精确基线重新验证。
+- 决策：项目负责人于 2026-07-31 明确批准上述合并开发与一次最终 DEV-001 审核流程。
+- 更新基线：`04-architecture-plan/DEVELOPMENT_TASK_BOOK.md`、`workflow/state.json`、本台账；PR #72 的 API-001 合并后治理事实被纳入本后继治理候选，避免平行台账发生覆盖。
+- 实施：
+  - Commit：待提交。
+  - Owner：DEV-002。
+  - 开始门槛：本治理候选已合入 `codex/stage-05-integration`，且 DEV-002 已向项目负责人发出正式开发开始通知。
+- 验证：JSON 解析、任务书/状态一致性、剩余 API 依赖扫描、`git diff --check` 与适用 Markdown/规则检查。该治理候选不运行或变更业务代码、测试逻辑、数据库、基础设施、依赖或运行配置。
+- 阶段边界：本 CR 不构成 TASK-012 完成、DEV-001 最终审核批准、Merge 授权、Stage 6 重测通过、Stage 7 验收通过或 Stage 8 发布授权。
