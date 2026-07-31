@@ -6,6 +6,7 @@ import { RepairExecutionPage } from "./RepairExecutionPage";
 import { WorkbenchPage } from "./WorkbenchPage";
 import { hasActiveSession } from "./api";
 import { LoginPage } from "./LoginPage";
+import { AgentReportPage, BiDashboardPage, EquipmentAddPage, EquipmentDetailPage, EquipmentEditPage, EquipmentLedgerPage, FactoryModelingPage, IntelligentAuditPage, MaintenanceRecordsPage, SystemManagementPage } from "./PortalPages";
 
 type Page = {
   path: string;
@@ -16,9 +17,16 @@ type Page = {
 
 const pages: Page[] = [
   { path: "/", label: "运维工作台", group: "工作台", mark: "台" },
+  { path: "/bi-dashboard", label: "驾驶舱 BI", group: "工作台", mark: "BI" },
+  { path: "/factory-modeling", label: "工厂建模", group: "资产管理", mark: "厂" },
+  { path: "/equipment", label: "设备台账", group: "资产管理", mark: "设" },
   { path: "/intelligent-config", label: "智能配置", group: "智能运维", mark: "智" },
+  { path: "/intelligence-audit", label: "智能审计", group: "智能运维", mark: "审" },
   { path: "/fault-report", label: "故障上报", group: "现场作业", mark: "报" },
+  { path: "/agent-report", label: "AI 故障上报", group: "现场作业", mark: "AI" },
+  { path: "/maintenance-records", label: "维修记录", group: "现场作业", mark: "记" },
   { path: "/repair-execution", label: "维修执行", group: "现场作业", mark: "修" },
+  { path: "/system-management", label: "系统管理", group: "系统管理", mark: "管" },
 ];
 
 function PageShell({ label }: { label: string }) {
@@ -82,8 +90,21 @@ function ApplicationShell() {
           <div className="topbar__avatar" aria-label="当前用户">管</div>
         </header>
         <Routes>
-          {pages.map((page) => <Route key={page.path} path={page.path} element={page.path === "/" ? <WorkbenchPage /> : page.path === "/intelligent-config" ? <IntelligentConfigPage /> : page.path === "/fault-report" ? <FaultReportPage /> : page.path === "/repair-execution" ? <RepairExecutionPage /> : <PageShell label={page.label} />} />)}
-          <Route path="*" element={<PageShell label={activePage.label} />} />
+          <Route path="/" element={<WorkbenchPage />} />
+          <Route path="/bi-dashboard" element={<BiDashboardPage />} />
+          <Route path="/factory-modeling" element={<FactoryModelingPage />} />
+          <Route path="/equipment" element={<EquipmentLedgerPage />} />
+          <Route path="/equipment/new" element={<EquipmentAddPage />} />
+          <Route path="/equipment/:id" element={<EquipmentDetailPage />} />
+          <Route path="/equipment/:id/edit" element={<EquipmentEditPage />} />
+          <Route path="/intelligent-config" element={<IntelligentConfigPage />} />
+          <Route path="/intelligence-audit" element={<IntelligentAuditPage />} />
+          <Route path="/fault-report" element={<FaultReportPage />} />
+          <Route path="/agent-report" element={<AgentReportPage />} />
+          <Route path="/maintenance-records" element={<MaintenanceRecordsPage />} />
+          <Route path="/repair-execution" element={<RepairExecutionPage />} />
+          <Route path="/system-management" element={<SystemManagementPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
     </div>

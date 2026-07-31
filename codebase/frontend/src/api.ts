@@ -212,3 +212,21 @@ export async function saveAgentConfig(config: Omit<AgentConfig, "model_capabilit
     body: JSON.stringify(config),
   });
 }
+
+export type PageResult<T> = { items: T[]; count: number; page: number; page_size: number };
+export type Equipment = { id: string; code: string; name: string; model: string; type: string; manufacturer: string; status: string; organization_id: string; owner_user_id: string | null; operating_hours: number };
+export type WorkOrder = { id: string; number: string; fault_report_id: string; equipment_id: string; status: string; repairer_user_id: string | null; symptom: string; started_at: string | null; completed_at: string | null };
+export type MaintenanceRecord = { maintenance_record_id: string; work_order_id: string; equipment_id: string; work_order_number: string; status: string; symptom: string; actual_cause: string | null; actual_solution: string | null; repair_result: string | null; completed_at: string | null; knowledge_status: string };
+export type AuditEvent = { id: string; actor_user_id: string | null; action: string; resource_type: string; resource_id: string | null; result: string; created_at: string };
+export type BiDashboard = { summary: { fault_count: number; active_fault_count: number; completed_work_order_count: number; completion_rate: number }; trend: Array<{ date: string; fault_count: number; completed_work_order_count: number }>; organization_ranking: Array<{ organization_id: string; organization_name: string; fault_count: number }> };
+
+export const getBiDashboard = () => requestJson<BiDashboard>("/api/bi/dashboard");
+export const getEquipment = () => requestJson<Equipment[]>("/api/equipment");
+export const getEquipmentDetail = (id: string) => requestJson<Equipment>(`/api/equipment/${id}`);
+export const getEquipmentHistory = (id: string) => requestJson<PageResult<MaintenanceRecord>>(`/api/equipment/${id}/maintenance-history`);
+export const getMaintenanceRecords = () => requestJson<PageResult<MaintenanceRecord>>("/api/maintenance-records");
+export const getMaintenanceRecord = (id: string) => requestJson<MaintenanceRecord>(`/api/maintenance-records/${id}`);
+export const getWorkOrders = () => requestJson<PageResult<WorkOrder>>("/api/work-orders");
+export const getAuditEvents = () => requestJson<PageResult<AuditEvent>>("/api/audit-events");
+export const getIntelligenceUsage = () => requestJson<{ items: Array<Record<string, unknown>>; count: number; retention_days: number }>("/api/intelligence/usage");
+export const getKnowledgeDocuments = () => requestJson<PageResult<{ id: string; filename: string; status: string; failure_reason: string | null; retry_available: boolean }>>("/api/intelligence/knowledge-documents");

@@ -59,6 +59,20 @@
 
 内部工具不直接暴露给浏览器：`retrieve_knowledge`、`get_similar_repair_cases`、`query_metric_batch`、`get_page_capability`、`get_operation_guidance`、`run_fault_diagnosis`、`create_fault_draft`、`submit_confirmed_business_action` 均经服务端参数模型、权限校验、超时和审计封装。禁止 Agent 生成 SQL 或任意文件系统命令。
 
+## TASK-012 正式只读 API 契约
+
+以下接口由 `TASK-012-API-002`—`007` 在同一重大变更包中实现。所有接口均要求 Bearer 认证；分页读取统一返回 `items,count,page,page_size`，其中 `page>=1`、`page_size=1..100`。读取失败遵循统一错误矩阵，不返回存储正文、Token、Cookie、密码或连接串。
+
+| 工作包 | Method | Endpoint | 权限 | 成功响应与约束 |
+|---|---|---|---|---|
+| API-002 | GET | `/api/bi/dashboard?organization_id=` | `bi:view` | 从设备、故障和工单事实返回摘要、近 7 日趋势、效率、组织排行和历史对比；组织排行最多 20 条，不由浏览器拼接。 |
+| API-003 | GET | `/api/equipment/{id}/maintenance-history` | `equipment:read` | 返回该设备受控维修历史；不存在为 `404 EQUIPMENT_NOT_FOUND`。 |
+| API-004 | GET | `/api/maintenance-records`、`/api/maintenance-records/{id}` | `maintenance:view`、详情 `maintenance:detail` | 列表支持设备筛选和分页；详情只返回人工结论与知识状态，不返回诊断预填、原始摘要或敏感附件内容。 |
+| API-005 | GET | `/api/work-orders`、`/api/work-orders/{id}` | `maintenance:view` | 无 `maintenance:detail` 的维修人员仅可读取分配给自己的工单；详情越权返回 `403 PERMISSION_DENIED`。 |
+| API-006 | GET | `/api/audit-events` | `system:audit` | 支持动作筛选和分页；字段白名单为 `id,actor_user_id,action,resource_type,resource_id,result,created_at`。 |
+| API-007 | GET | `/api/intelligence/usage`、`/api/intelligence/knowledge-documents` | `intelligence:audit` | 调用统计保留期为 30 天；没有正式已持久化调用指标时返回空列表而不伪造数据。知识文档只返回状态、失败原因和是否可重试。 |
+| API-007 | POST | `/api/knowledge/documents/{id}/retry` | `intelligence:knowledge` | 仅 `FAILED` 文档可重试，需 `Idempotency-Key`；重置为 `UPLOADING` 交由既有知识 Worker 处理；其他状态为 `409 KNOWLEDGE_DOCUMENT_RETRY_NOT_AVAILABLE`。 |
+
 ## 诊断状态与错误契约
 
 诊断运行状态：`QUEUED`、`OPEN_LOADING`、`QUESTIONING`、`EVIDENCE_PENDING`、`DIAGNOSIS_READY`、`ADOPTED`、`DIRECT_START`、`UNAVAILABLE`。仅 `DIAGNOSIS_READY` 可以返回“采纳 AI 建议并开始维修”。

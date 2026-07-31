@@ -13,7 +13,7 @@ from app.modules.audit.service import write_audit_event
 from app.modules.identity.dependencies import require_permission
 from app.modules.identity.models import User
 from app.modules.knowledge import service
-from app.modules.knowledge.models import FileObject, FileScanStatus, KnowledgeDataset, KnowledgeDocument
+from app.modules.knowledge.models import FileObject, FileScanStatus, KnowledgeDataset, KnowledgeDocument, KnowledgeDocumentStatus
 
 
 MAX_FILE_SIZE = 100 * 1024 * 1024
@@ -169,3 +169,43 @@ def get_document(
     if document is None:
         raise HTTPException(status_code=404, detail={"code": "KNOWLEDGE_DOCUMENT_NOT_FOUND"})
     return document_body(document)
+
+
+@router.post(
+    "/api/knowledge/documents/{document_id}/retry",
+    response_model=None,
+    name="knowledge_document.retry",
+)
+def retry_document(
+    document_id: str,
+    idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
+    db: Session = Depends(get_db),
+    actor: User = Depends(require_permission("intelligence:knowledge")),
+) -> dict[str, object] | JSONResponse:
+    path = f"/api/knowledge/documents/{document_id}/retry"
+    request_body = {"document_id": document_id}
+    replay = find_idempotent_response(
+        db, user_id=actor.id, method="POST", path=path,
+        key=idempotency_key, request_body=request_body,
+    )
+    if replay is not None:
+        return JSONResponse(status_code=replay[0], content=replay[1])
+    document = db.get(KnowledgeDocument, document_id)
+    if document is None:
+        raise HTTPException(status_code=404, detail={"code": "KNOWLEDGE_DOCUMENT_NOT_FOUND"})
+    if document.status is not KnowledgeDocumentStatus.FAILED:
+        raise HTTPException(status_code=409, detail={"code": "KNOWLEDGE_DOCUMENT_RETRY_NOT_AVAILABLE"})
+    document.status = KnowledgeDocumentStatus.UPLOADING
+    document.failure_reason = None
+    event = write_audit_event(
+        db, actor_user_id=actor.id, action="knowledge_document.retry",
+        resource_type="knowledge_document", resource_id=document.id,
+        result="success", metadata=request_body,
+    )
+    body = {**document_body(document), "audit_event_id": event.id}
+    save_idempotent_response(
+        db, user_id=actor.id, method="POST", path=path,
+        key=idempotency_key, request_body=request_body, status=200, body=body,
+    )
+    db.commit()
+    return body
