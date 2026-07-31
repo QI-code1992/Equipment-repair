@@ -516,3 +516,10 @@
 - Merge Commit：`8d9beaefe01baef38e54baecbe3426d9ab816623`
 - 验证：双亲、目标分支指针、`git diff --check`、`workflow/state.json` JSON 解析通过；Python 3.13 后端 `319 passed, 13 skipped, 2 warnings`。
 - 下一步：DEV-001 向项目负责人 DEV-002 发送正式 TASK-012 开发启动通知；确认前 API-002—007、P0 前端和 Stage 6/7/8 继续锁定。
+
+## FCP-012-API-002—007 与 P0 前端实现检查点（2026-07-31）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；仅记录当前实现检查点，不构成审核、集成、Merge 或 Stage 7 解锁。
+- 范围：在 `codex/task-012-p0-frontend-remediation` 的唯一 Draft PR 中新增 BI、设备历史、维修记录、工单、审计与智能只读 API，并接入正式 React 路由、组织/设备/系统管理、智能审计与全局 Agent 入口。
+- 约束：全部读取均使用现有 Bearer 会话和服务端真实事实；没有持久化的智能调用指标返回明确空集合，不伪造仪表盘数值；FAILED 知识文档可通过既有 Worker 队列重试。
+- 本地验证：TASK-012 定向后端 `4 passed, 2 warnings`；既有模块全量 `265 passed, 2 warnings`；前端 `29 passed`、生产构建和 15 项 Node 静态检查通过。Docker/live-stack/浏览器验收未在 DEV-002 环境执行，留给 DEV-001 最终验证。

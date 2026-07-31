@@ -601,3 +601,11 @@
 - 合并后验证：目标分支指针、双亲关系、`git diff --check`、`workflow/state.json` JSON 解析通过；Python 3.13 后端全量 `319 passed, 13 skipped, 2 warnings`。
 - 变更边界：仅治理文档；未修改业务代码、测试逻辑、迁移、生产依赖、Compose 或运行配置。
 - 门禁：仅完成 CR-048 治理集成；正式开发启动通知尚未完成，API-002—007、TASK-012 前端和 Stage 6/7/8 不解锁。
+
+## TASK-012 API-002—007 与 P0 前端阶段性自测（2026-07-31）
+
+- 开发启动：DEV-001 已通知、DEV-002 已确认；本记录只描述同一 Draft PR 中的实现证据，不触发中途审核。
+- 后端：新增 BI 聚合、设备维修历史、维修记录/工单读取、审计事件字段白名单、智能调用空统计、知识状态与失败重试。`python -m pytest tests/modules/test_task012_read_apis.py -q` 为 `4 passed, 2 warnings`；`python -m pytest tests/modules -q` 为 `265 passed, 2 warnings`；`compileall` 通过。
+- 前端：新增 BI、工厂建模、设备台账/新增/编辑/详情、维修记录、系统管理、智能审计、全局 Agent 路由和真实 API 客户端；`npm test -- --run` 为 `29 passed`，`npm run build` 通过。
+- 静态：`node --test 06-testing/tests/*.test.js` 为 `15 passed`；`git diff --check` 通过。
+- 未验证：DEV-002 未执行 Docker Compose、真实 RAGFlow、附件扫描、HTTPS 或浏览器 live-stack；这些不能用 mock 结果替代，必须由 DEV-001 在完整候选上执行。TASK-012 尚未完成，不请求审核或 Merge。
