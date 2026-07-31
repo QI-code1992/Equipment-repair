@@ -97,7 +97,7 @@
     "verification": "Merge parents, source-tree equivalence, merge diff check, workflow JSON and 15 Node static regressions passed.",
     "consolidatedDevelopment": {
       "changeRequest": "CR-048",
-      "status": "IMPLEMENTATION_IN_PROGRESS",
+      "status": "DEVELOPMENT_COMPLETE_PENDING_DEV001_REVIEW",
       "taskDeveloper": "DEV-002",
       "reviewer": "DEV-001 after all work packages complete",
       "mergeExecutor": "DEV-001 after project-owner exact PR/HEAD authorization",
@@ -113,9 +113,11 @@
       "startCondition": "CR-048 governance candidate must be integrated and the project owner must receive a formal development-start notice.",
       "developmentStartNotice": "https://github.com/QI-code1992/Equipment-repair/pull/74#issuecomment-5138434725",
       "developmentStartAcknowledgement": "https://github.com/QI-code1992/Equipment-repair/pull/74#issuecomment-5138470417",
-      "nextAction": "DEV-002 is implementing API-002—007 and every P0 page in the single Draft PR. Do not start formal review, integration, merge, Stage 6, Stage 7 or Stage 8 until the complete candidate is handed to DEV-001."
+      "implementationHead": "08e1576",
+      "localVerification": "Frontend 53 passed and production build passed; backend 328 passed, 13 skipped, 2 warnings; compileall, 15 Node static regressions, JSON parsing and git diff --check passed.",
+      "nextAction": "All API-002—007 and P0 frontend work packages are locally complete in the single Draft PR. DEV-001 must perform one whole-candidate review against exact HEAD 08e1576. Do not turn Ready, request Merge, merge, or enter Stage 6/7/8 before review, integration check and project-owner authorization."
     },
-    "nextAction": "TASK-012 development is in progress in the single Draft PR. TASK-012 and Stage 7 acceptance remain locked until the unified PR is finally reviewed, authorized, and integrated."
+    "nextAction": "TASK-012 local development is complete at 08e1576 and awaits one whole-candidate DEV-001 review. TASK-012 and Stage 7 acceptance remain locked until review, authorization and integration; live-stack/browser evidence remains outstanding."
   },
   "stage6RuntimeValidation": {
     "status": "POST_MERGE_CORE_RUNTIME_VALIDATION_COMPLETED_SUPERSEDED_BY_SIGNED_STAGE6_CONCLUSION",

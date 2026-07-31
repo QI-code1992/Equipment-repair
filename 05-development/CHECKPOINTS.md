@@ -1,5 +1,13 @@
 # 功能/页面检查点
 
+## FCP-012 整体开发候选本地完成（2026-07-31）
+
+- 分支：`codex/task-012-p0-frontend-remediation`；最新精确开发提交：`08e1576`。
+- 范围：API-002—007 读模型、全部除 Data import 外的 P0 正式页面、权限/会话、附件引用、Agent 线程历史与 SSE、前端回归和治理材料。
+- 本地验证：前端 7 个测试文件 `53 passed`，生产构建通过；后端 `328 passed, 13 skipped, 2 warnings`；compileall、15 项 Node 静态回归、JSON 解析和 `git diff --check` 通过。
+- 状态：`DEVELOPMENT_COMPLETE_PENDING_DEV001_REVIEW`。所有工作包已完成本地实现，但尚未完成 DEV-001 整体审核、Windows Docker/WSL2 live-stack、真实 RAGFlow/ClamAV/MinIO、浏览器 E2E 与最终 Stage 6/7 门禁。
+- 回退：正式合入前按单一任务 PR 的 Merge Commit 进行选择性 revert；当前未合并，不执行回退或数据操作。
+
 ## FCP-012-API-001 合并后治理收尾候选（2026-07-30）
 
 - 集成事实：PR #71 的获批 HEAD `c1273fd01e5ec91b2de3af59aab371844d228cd6` 已由 DEV-002 手动 Merge Commit `274673b72d5201986ffee77b038f516022cd174d` 合入 `codex/stage-05-integration`；双亲为 `866875d4071a725d9c780f535d6be10e1202ba4e` 与获批 HEAD。
