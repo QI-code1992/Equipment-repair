@@ -419,3 +419,10 @@
 - 检查结论：PR 状态为 `MERGED`；双亲为 `274673b72d5201986ffee77b038f516022cd174d` 与获批 HEAD；`git diff --check`、工作流 JSON 解析和 Python 3.13 后端全量回归 `319 passed, 13 skipped, 2 warnings` 通过。
 - 范围结论：差异仅为治理台账；无业务代码、测试、数据库、基础设施或部署变更。
 - 剩余门禁：等待 DEV-001 向项目负责人 DEV-002 发送并获得正式 TASK-012 开发启动确认；不提前解锁 API-002—007、P0 前端或 Stage 6/7/8。
+## TASK-012 DEV-001 complete defect review (2026-07-31)
+
+- Review target: PR #75, exact HEAD `77a54a1587544374ed876e902bc132d58cf8ed9b`, branch `codex/task-012-p0-frontend-remediation`.
+- Result: `Changes requested`; 37 open findings are consolidated in `06-testing/DEFECTS.md` as DEF-TASK012-001 through DEF-TASK012-037.
+- Scope: fail-closed authentication, composite permission gates, API contract alignment, server-fact binding, field preservation, idempotency/in-flight state, BI filtering, Agent thread UX, and evidence reproducibility.
+- Boundary: this governance branch contains no business-code fix. DEV-002 must fix all applicable findings in PR #75, rerun the complete frontend/backend/static suites, and submit a new exact HEAD for whole-candidate review.
+- Gate: no Merge authorization, merge, TASK-012 closure, or Stage 6/7/8 unlock is permitted before that review and a fresh integration check.

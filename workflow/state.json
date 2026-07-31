@@ -113,11 +113,12 @@
       "startCondition": "CR-048 governance candidate must be integrated and the project owner must receive a formal development-start notice.",
       "developmentStartNotice": "https://github.com/QI-code1992/Equipment-repair/pull/74#issuecomment-5138434725",
       "developmentStartAcknowledgement": "https://github.com/QI-code1992/Equipment-repair/pull/74#issuecomment-5138470417",
-      "implementationHead": "46bf6e7ad804fe77beb609904a8f3c9abe3a449f",
-      "localVerification": "Frontend 55 passed and production build passed; backend 328 passed, 13 skipped, 2 warnings; compileall, 15 Node static regressions, JSON parsing and git diff --check passed.",
-      "nextAction": "All API-002—007 and P0 frontend work packages are locally complete in the single PR. DEV-001 must perform one whole-candidate re-review against exact HEAD 46bf6e7ad804fe77beb609904a8f3c9abe3a449f after the P1 permission remediation. Do not request Merge, merge, or enter Stage 6/7/8 before re-review, integration check and project-owner authorization."
+      "implementationHead": "77a54a1587544374ed876e902bc132d58cf8ed9b",
+      "localVerification": "Frontend 55 passed and production build passed; Node static regressions 15 passed; repository-root backend run 339 passed, 13 skipped, 2 failed, 2 warnings because two performance tests use working-directory-relative JSON paths.",
+      "defectInventory": "06-testing/DEFECTS.md DEF-TASK012-001..037; DEV-001 complete review recorded Changes requested against exact HEAD 77a54a1.",
+      "nextAction": "DEV-001 complete review against exact HEAD 77a54a1587544374ed876e902bc132d58cf8ed9b recorded Changes requested with DEF-TASK012-001..037. DEV-002 must remediate in the same PR and submit a new exact HEAD. Do not request Merge, merge, or enter Stage 6/7/8 before re-review, integration check and project-owner authorization."
     },
-    "nextAction": "TASK-012 local development is complete at 46bf6e7ad804fe77beb609904a8f3c9abe3a449f and awaits one whole-candidate DEV-001 re-review. TASK-012 and Stage 7 acceptance remain locked until re-review, authorization and integration; live-stack/browser evidence remains outstanding."
+    "nextAction": "TASK-012 remains blocked at PR #75 HEAD 77a54a1587544374ed876e902bc132d58cf8ed9b by DEF-TASK012-001..037 and two reproducibility failures. DEV-002 must remediate in the same development PR; DEV-001 must then re-review the new exact HEAD. TASK-012 and Stage 7 acceptance remain locked until review, authorization and integration; live-stack/browser evidence remains outstanding."
   },
   "stage6RuntimeValidation": {
     "status": "POST_MERGE_CORE_RUNTIME_VALIDATION_COMPLETED_SUPERSEDED_BY_SIGNED_STAGE6_CONCLUSION",

@@ -108,3 +108,54 @@
 - 根因和修复见 `CODE_REVIEW.md` R11；代码候选 `ea4338bad15f16048226a329801d3144b367909e`，新增直接和落库反例测试。
 - 残余风险：无敏感语义的未知字段默认脱敏未实施，须作为独立安全强化项评估；不得把 R11 结论表述为可识别任意秘密。
 - 当前状态：DEV-001 内部复核未见 Critical/Important；真实 PostgreSQL 17、Compose 与 `/healthz` 已复测。外部审核仍未通过，TASK-002 不得视为完成或解除依赖。
+-
+## TASK-012 consolidated defect inventory (DEV-001 review, 2026-07-31)
+
+Review record only. No business-code fix is included in this governance branch. DEV-002 must address these findings in the single TASK-012 development PR and submit a new exact HEAD.
+
+### Previously reported findings
+
+- DEF-TASK012-001 (P1): `/api/auth/me` failure leaves the protected shell mounted; permission loading is not fail-closed (`codebase/frontend/src/App.tsx`).
+- DEF-TASK012-002 (P1): Pages check one permission while their API calls require combinations, causing predictable 403 responses (`App.tsx`, `PortalPages.tsx`, `api.ts`).
+- DEF-TASK012-003 (P1): Logout omits the required `Idempotency-Key` (`codebase/frontend/src/api.ts`).
+- DEF-TASK012-004 (P1): Operation guidance trusts client `dataset_ids`, while the normal page does not provide required dataset context.
+- DEF-TASK012-005 (P1): Fault diagnosis does not validate enabled Agent configuration and model binding.
+- DEF-TASK012-006 (P1): Diagnosis can emit a fixed root cause/recommendation without real case or knowledge evidence.
+- DEF-TASK012-007 (P1): Diagnosis form cannot submit alarm-code and second-evidence fields needed for `DIAGNOSIS_READY`.
+- DEF-TASK012-008 (P1): Diagnosis rejected promises are not consistently handled, leaving stale UI and unhandled errors.
+- DEF-TASK012-009 (P1): Diagnosis questions remain a fixed template instead of using the dynamic contract.
+- DEF-TASK012-010 (P1): Repair execution context is client-controlled instead of bound to formal work order, fault and equipment facts.
+- DEF-TASK012-011 (P1): Maintenance records show fixed `NOT_LINKED`, and invalid filter values are not surfaced as 422.
+- DEF-TASK012-012 (P1): Manual fault submission and AI draft generation remain available while attachment scanning is pending.
+- DEF-TASK012-013 (P1): AI confirmation submits the old preview and ignores edits made after preview generation.
+- DEF-TASK012-014 (P1): AI reporting always sends `duration_minutes: 0` instead of collecting actual duration.
+- DEF-TASK012-015 (P1): Agent reporting starts Runtime but does not consume thread, SSE, result state or missing-field flow.
+
+### Additional findings from the complete candidate
+
+- DEF-TASK012-016 (P1): BI `period` changes trend length only; summary, efficiency and organization ranking still use all history (`PortalPages.tsx`, `api.ts`).
+- DEF-TASK012-017 (P1): Equipment edit sends `manufactured_at: null`, `commissioned_at: null` and `image_refs: []`, silently clearing existing fields.
+- DEF-TASK012-018 (P1): Equipment page is gated by `equipment:read`, but create/edit require `equipment:write`; read-only users see unusable actions.
+- DEF-TASK012-019 (P1): Factory modeling is gated by `organization:read`, but create/edit/enable/delete require `organization:write` and are not disabled.
+- DEF-TASK012-020 (P1): Maintenance list requires `maintenance:view`, while detail requires `maintenance:detail`; the detail link predictably fails for ordinary viewers.
+- DEF-TASK012-021 (P1): Repair execution is gated by `fault:repair`, while loading work orders needs `maintenance:view` and submitting results needs `fault:close`.
+- DEF-TASK012-022 (P1): Fault report page is gated by `fault:create`, but AI pre-diagnosis needs `intelligence:agent`; the AI button is not permission-aware.
+- DEF-TASK012-023 (P1): Agent report page is gated by `intelligence:agent`, but final submission also requires `fault:create`.
+- DEF-TASK012-024 (P1): System management is gated by `identity:read`, while user and role writes require `identity:write`.
+- DEF-TASK012-025 (P1): Global Agent drawer is visible to every authenticated user although Runtime endpoints require `intelligence:agent`.
+- DEF-TASK012-026 (P1): Intelligent configuration route checks `intelligence:model`, but `/api/agent-configs` requires `intelligence:agent`.
+- DEF-TASK012-027 (P1): Root workbench route has no `workbench:view` gate and exposes requests that fail for users without it.
+- DEF-TASK012-028 (P1): Equipment edit has no date or image controls, compounding the field-clearing payload defect.
+- DEF-TASK012-029 (P1): BI page provides list-only output and omits the approved chart-switching interaction.
+- DEF-TASK012-030 (P1): Workbench health score requires manually typing an equipment ID instead of selecting from the formal equipment list.
+- DEF-TASK012-031 (P2): Successful writes often show only “refresh to confirm” and do not reconcile local data, leaving stale UI and repeat-submit risk.
+- DEF-TASK012-032 (P2): Organization, equipment, user and role writes lack consistent post-write refresh or state reconciliation.
+- DEF-TASK012-033 (P1): Create/submit controls lack consistent in-flight guards; repeated clicks can create duplicate Runtime runs and records.
+- DEF-TASK012-034 (P1): Root pytest has two real failures because `06-testing/performance/*.py` opens JSON through a working-directory-relative path.
+- DEF-TASK012-035 (P1): PR #75 claims the backend suite passed, but the reproducible root run is `339 passed, 13 skipped, 2 failed, 2 warnings`; evidence boundary is inaccurate.
+- DEF-TASK012-036 (P1): Knowledge retry tests do not click/assert the dual-permission request; the path is unverified (`PortalPages.test.tsx`).
+- DEF-TASK012-037 (P1): The existing retry test blockage remains unresolved while candidate evidence reports green.
+
+### Gate
+
+All items are open findings against PR #75 HEAD `77a54a1587544374ed876e902bc132d58cf8ed9b`. PR #75 must remain unmerged and Stage 6/7/8 locked until DEV-002 fixes the findings in the same development PR, publishes reproducible evidence, and DEV-001 reviews the new exact HEAD.

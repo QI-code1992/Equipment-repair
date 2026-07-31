@@ -2,7 +2,7 @@
 
 ## TASK-012 P1 权限修复复审交接（2026-07-31）
 
-- PR：#75；最新精确 HEAD：`46bf6e7ad804fe77beb609904a8f3c9abe3a449f`；目标 `codex/stage-05-integration`；PR 继续保持 Ready，未申请 Merge 授权。
+- PR：#75；最新精确 HEAD：`77a54a1587544374ed876e902bc132d58cf8ed9b`；目标 `codex/stage-05-integration`；PR 继续保持 Ready，未申请 Merge 授权。
 - 根因：仅 `intelligence:audit` 用户可见知识重试按钮，但后端写入接口要求 `intelligence:knowledge`，点击必然 403。
 - 修复：`IntelligentAuditPage` 接收当前会话权限；无知识写权限时禁用“重新同步”并显示明确提示；审计+知识双权限仍可执行重试。
 - 验证：修复前审计-only 回归失败；修复后定向 17 passed，前端全量 55 passed，生产构建、15 项 Node 静态回归和 diff-check 通过。
@@ -560,3 +560,9 @@
 - 获批 HEAD：`b4e28368c1294f30b80f4dd72187660eba06fc10`；Merge Commit：`8d9beaefe01baef38e54baecbe3426d9ab816623`。
 - 合并后验证：双亲、目标分支、`git diff --check`、`workflow/state.json` 解析通过；Python 3.13 后端 `319 passed, 13 skipped, 2 warnings`。
 - 正式请求：请项目负责人 DEV-002 确认已收到 TASK-012 开发启动通知。确认后 DEV-002 才可创建唯一 Draft PR `codex/task-012-p0-frontend-remediation`；API-002—007、P0 前端和 Stage 6/7/8 在确认前继续锁定。
+## TASK-012 complete defect inventory handoff (2026-07-31)
+
+- DEV-001 reviewed PR #75 exact HEAD `77a54a1587544374ed876e902bc132d58cf8ed9b` and recorded `Changes requested`.
+- The complete inventory is `06-testing/DEFECTS.md`, DEF-TASK012-001 through DEF-TASK012-037. It includes prior P1 findings and additional permission, data-loss, filtering, interaction, duplicate-submit, and test-evidence findings.
+- DEV-002 must fix the applicable items in the same TASK-012 development PR. This governance PR is only the review/evidence handoff and does not fix or close any defect.
+- Until a new exact HEAD is reviewed and integration-checked, PR #75 must not be merged and TASK-012, Stage 6/7/8 remain locked.

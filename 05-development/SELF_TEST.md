@@ -629,3 +629,9 @@
 - 静态验证：`node --test 06-testing/tests/*.test.js` 为 `15 passed`；`python3 -m json.tool workflow/state.json`、`git diff --check` 通过。
 - 未验证：当前 macOS 环境没有 Docker/PowerShell/真实 RAGFlow；未执行 Windows 隔离 live-stack、ClamAV/MinIO 附件扫描、HTTPS、浏览器逐页 E2E、真实 RAGFlow 引用/降级或生产部署。上述必须由 DEV-001 在最终精确候选上独立验证。
 - 未完成事项：最终候选尚未提交、PR 尚未转 Ready、DEV-001 尚未整体审核；页面矩阵全部仍标记“实现中候选”，`DEF-STAGE7-001` 不得关闭。
+## TASK-012 DEV-001 complete defect review evidence (2026-07-31)
+
+- Review baseline: PR #75 HEAD `77a54a1587544374ed876e902bc132d58cf8ed9b`.
+- Reproducible backend command from repository root: `339 passed, 13 skipped, 2 failed, 2 warnings`. The two failures are `06-testing/performance/test_stage6_performance.py` cases that use a working-directory-relative JSON path.
+- Existing frontend evidence: Vitest `55 passed`, production build passed, and Node static regressions `15 passed`; the retry-path coverage is incomplete because the dual-permission test does not click/assert the request.
+- Review conclusion: evidence is insufficient for approval while the two reproducibility failures and the open defect inventory remain unresolved. This record intentionally contains no code fix.
