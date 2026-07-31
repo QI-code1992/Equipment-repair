@@ -1,6 +1,7 @@
 services:
   nginx:
     image: nginx:1.27-alpine
+    restart: unless-stopped
     depends_on:
       - api
     ports:
@@ -14,6 +15,7 @@ services:
   api:
     build:
       context: ../backend
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
@@ -39,6 +41,7 @@ services:
     profiles: [validation]
     build:
       context: ../backend
+    restart: unless-stopped
     command: ["python", "-m", "app.modules.knowledge.worker_main", "--poll-seconds", "1"]
     depends_on:
       postgres:
@@ -108,6 +111,7 @@ services:
 
   postgres:
     image: ${DOCKER_IMAGE_PREFIX:-}postgres:17-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -121,6 +125,7 @@ services:
 
   redis:
     image: ${DOCKER_IMAGE_PREFIX:-}redis:7-alpine
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -130,6 +135,7 @@ services:
 
   minio:
     image: ${MINIO_IMAGE:-pgsty/minio:RELEASE.2026-03-25T00-00-00Z}
+    restart: unless-stopped
     profiles: [validation]
     command: ["server", "/data"]
     environment:
@@ -144,6 +150,7 @@ services:
 
   clamav:
     image: clamav/clamav:1.4.3
+    restart: unless-stopped
     profiles: [validation]
     networks: [platform]
 

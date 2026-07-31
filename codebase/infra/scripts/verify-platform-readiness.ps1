@@ -83,15 +83,39 @@ if ($LASTEXITCODE -ne 0) { throw "RAGFlow probe failed" }
 & docker @compose run --rm validator python -m pytest tests/integration/test_task005_postgres.py -q
 if ($LASTEXITCODE -ne 0) { throw "Live PostgreSQL validation failed" }
 
-$liveAgentOutput = & docker @compose run --rm -e "TASK005_RAGFLOW_DATASET_ID=$RagflowDatasetId" validator python -m pytest tests/integration/test_task005_live_stack.py -q -rs
-$liveAgentOutput | Write-Output
-if ($LASTEXITCODE -ne 0) { throw "Live Agent/RAGFlow validation failed" }
-if (($liveAgentOutput -join "`n") -match '\bskipped\b') {
-    throw "Live Agent/RAGFlow validation must not skip"
+$postgres = (& docker @compose ps -q postgres).Trim()
+if (!$postgres) { throw "PostgreSQL container is not running" }
+$postgresUser = (& docker exec $postgres printenv POSTGRES_USER).Trim()
+$postgresPassword = (& docker exec $postgres printenv POSTGRES_PASSWORD).Trim()
+$postgresDatabase = (& docker exec $postgres printenv POSTGRES_DB).Trim()
+$task005Database = "equipment_task5_validation_" + [guid]::NewGuid().ToString("N").Substring(0, 12)
+$task005Dsn = "postgresql://${postgresUser}:${postgresPassword}@postgres:5432/$task005Database"
+$task005Worker = ""
+
+& docker exec $postgres psql -U $postgresUser -d $postgresDatabase -v ON_ERROR_STOP=1 -c "CREATE DATABASE $task005Database" *> $null
+if ($LASTEXITCODE -ne 0) { throw "TASK-005 validation database creation failed" }
+try {
+    & docker @compose run --rm --no-deps -e "POSTGRES_DSN=$task005Dsn" migrate alembic upgrade head
+    if ($LASTEXITCODE -ne 0) { throw "TASK-005 validation database migration failed" }
+
+    $task005Worker = "$ProjectName-task005-worker-" + [guid]::NewGuid().ToString("N").Substring(0, 8)
+    & docker @compose run -d --name $task005Worker --no-deps -e "POSTGRES_DSN=$task005Dsn" worker
+    if ($LASTEXITCODE -ne 0) { throw "TASK-005 validation worker startup failed" }
+
+    $liveAgentOutput = & docker @compose run --rm --no-deps -e "TASK005_POSTGRES_DSN=$task005Dsn" -e "TASK005_RAGFLOW_DATASET_ID=$RagflowDatasetId" validator python -m pytest tests/integration/test_task005_live_stack.py -q -rs
+    $liveAgentOutput | Write-Output
+    if ($LASTEXITCODE -ne 0) { throw "Live Agent/RAGFlow validation failed" }
+    if (($liveAgentOutput -join "`n") -match '\bskipped\b') {
+        throw "Live Agent/RAGFlow validation must not skip"
+    }
+}
+finally {
+    if ($task005Worker) { & docker rm -f $task005Worker *> $null }
+    & docker exec $postgres psql -U $postgresUser -d $postgresDatabase -v ON_ERROR_STOP=1 -c "DROP DATABASE IF EXISTS $task005Database WITH (FORCE)" *> $null
 }
 
-$env:TASK011_LIVE_HTTPS_URL = $LiveHttpsUrl
-python -m pytest codebase/backend/tests/e2e/test_platform_readiness.py -q
+$containerLiveHttpsUrl = $LiveHttpsUrl -replace '://127\.0\.0\.1(?=[:/]|$)', '://host.docker.internal'
+& docker @compose run --rm --no-deps -e "TASK011_LIVE_HTTPS_URL=$containerLiveHttpsUrl" validator python -m pytest tests/e2e/test_platform_readiness.py -q
 if ($LASTEXITCODE -ne 0) { throw "TASK-011 HTTPS E2E failed" }
 
 & docker @compose restart api
