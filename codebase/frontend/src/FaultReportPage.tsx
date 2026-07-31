@@ -4,6 +4,8 @@ import {
   ApiError,
   createFaultReport,
   submitAgentFaultReport,
+  uploadAttachment,
+  type AttachmentRef,
   type AgentFaultDraft,
   type AgentFaultPreview,
   type FaultReportCreate,
@@ -27,14 +29,31 @@ export function FaultReportPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [preview, setPreview] = useState<AgentFaultPreview | null>(null);
+  const [attachments, setAttachments] = useState<AttachmentRef[]>([]);
+  const [uploading, setUploading] = useState(false);
 
   const payload = useMemo<FaultReportCreate>(() => ({
     ...form,
     occurred_at: form.occurred_at ? new Date(form.occurred_at).toISOString() : "",
     possible_location: form.possible_location || undefined,
     description: form.description || undefined,
-    attachment_refs: [],
-  }), [form]);
+    attachment_refs: attachments,
+  }), [form, attachments]);
+
+  async function addAttachment(file: File | undefined) {
+    if (!file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const attachment = await uploadAttachment(file);
+      setAttachments((current) => [...current, attachment]);
+      setNotice(`附件已通过安全检查：${attachment.filename}`);
+    } catch (caught) {
+      setError(caught instanceof ApiError && caught.code === "ATTACHMENT_INFECTED" ? "附件未通过安全检查，未加入故障单。" : "附件上传失败，未加入故障单。 ");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   function draft(): AgentFaultDraft {
     return { ...payload, duration_minutes: 0 };
@@ -85,6 +104,9 @@ export function FaultReportPage() {
       <label>发生时间<input aria-label="发生时间" type="datetime-local" required value={form.occurred_at} onChange={(event) => setForm({ ...form, occurred_at: event.target.value })} /></label>
       <label>可能位置<input value={form.possible_location} onChange={(event) => setForm({ ...form, possible_location: event.target.value })} /></label>
       <label>补充说明<textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} /></label>
+      <label>附件<input aria-label="故障附件" type="file" accept="image/jpeg,image/png,image/webp,application/pdf,text/plain" disabled={uploading || submitting} onChange={(event) => void addAttachment(event.target.files?.[0])} /></label>
+      {uploading && <p role="status">附件正在上传并进行安全检查…</p>}
+      {attachments.length > 0 && <ul aria-label="已上传附件">{attachments.map((item) => <li key={item.object_key}>{item.filename}（{item.size_bytes} bytes）</li>)}</ul>}
       {preview && <section className="data-card" aria-label="AI 草稿预览"><h3>AI 草稿预览</h3><p>设备：{preview.draft.equipment_id}；紧急程度：{preview.draft.urgency}</p><p>故障现象：{preview.draft.symptom}</p><button type="button" disabled={submitting} onClick={() => void confirmPreview()}>确认并提交 AI 草稿</button></section>}
       {error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}
       <div className="form-actions"><button type="button" disabled={submitting} onClick={() => void generatePreview()}>生成 AI 草稿</button><button type="submit" disabled={submitting}>{submitting ? "提交中…" : "提交故障"}</button></div>

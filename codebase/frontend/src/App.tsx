@@ -5,7 +5,7 @@ import { IntelligentConfigPage } from "./IntelligentConfigPage";
 import { FaultReportPage } from "./FaultReportPage";
 import { RepairExecutionPage } from "./RepairExecutionPage";
 import { WorkbenchPage } from "./WorkbenchPage";
-import { ApiError, getCurrentUser, hasActiveSession, logout, startAgentRun } from "./api";
+import { ApiError, getAgentThread, getCurrentUser, hasActiveSession, logout, readRunEvents, startAgentRun, type AgentThread, type RuntimeEvent } from "./api";
 import { LoginPage } from "./LoginPage";
 import { AgentReportPage, BiDashboardPage, EquipmentAddPage, EquipmentDetailPage, EquipmentEditPage, EquipmentLedgerPage, FactoryModelingPage, IntelligentAuditPage, MaintenanceRecordDetailPage, MaintenanceRecordsPage, SystemManagementPage } from "./PortalPages";
 
@@ -59,9 +59,8 @@ function ApplicationShell() {
   const visiblePages = useMemo(() => permissionCodes === null ? [] : pages.filter((page) => page.path === "/" || pagePermission(page.path, permissionCodes)), [permissionCodes]);
   const groups = [...new Set(visiblePages.map((page) => page.group))];
   function guarded(path: string, element: React.ReactNode) {
-    if (permissionCodes === null) return <section className="page-shell"><p role="status">正在加载当前用户权限…</p></section>;
-    if (permissionError || !pagePermission(path, permissionCodes)) return <section className="page-shell"><p role="alert">你没有访问此页面的权限。</p></section>;
-    return element;
+    if (permissionCodes === null || permissionError) return element;
+    return pagePermission(path, permissionCodes) ? element : <section className="page-shell"><p role="alert">你没有访问此页面的权限。</p></section>;
   }
 
   return (
@@ -104,7 +103,7 @@ function ApplicationShell() {
           </div>
           <div className="topbar__actions"><button type="button" className="agent-trigger" onClick={() => setAgentOpen(true)}>全局 Agent</button><button type="button" className="agent-trigger" onClick={() => void logout().finally(() => navigate("/login", { replace: true }))}>退出</button><div className="topbar__avatar" aria-label="当前用户">管</div></div>
         </header>
-        <Routes>
+        {permissionCodes === null && !permissionError ? <section className="page-shell" aria-live="polite"><p role="status">正在加载会话权限…</p></section> : <Routes>
           <Route path="/" element={<WorkbenchPage />} />
           <Route path="/bi-dashboard" element={guarded("/bi-dashboard", <BiDashboardPage />)} />
           <Route path="/factory-modeling" element={guarded("/factory-modeling", <FactoryModelingPage />)} />
@@ -121,7 +120,7 @@ function ApplicationShell() {
           <Route path="/repair-execution" element={guarded("/repair-execution", <RepairExecutionPage />)} />
           <Route path="/system-management" element={guarded("/system-management", <SystemManagementPage />)} />
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        </Routes>}
         {agentOpen && <GlobalAgentDrawer onClose={() => setAgentOpen(false)} />}
       </main>
     </div>
@@ -142,6 +141,9 @@ function GlobalAgentDrawer({ onClose }: { onClose: () => void }) {
   const [agentId, setAgentId] = useState("operation_guidance");
   const [text, setText] = useState("");
   const [message, setMessage] = useState<string | null>(null);
+  const [thread, setThread] = useState<AgentThread | null>(null);
+  const [events, setEvents] = useState<RuntimeEvent[]>([]);
+  const [tab, setTab] = useState<"compose" | "history">("compose");
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!text.trim()) return;
@@ -149,11 +151,13 @@ function GlobalAgentDrawer({ onClose }: { onClose: () => void }) {
     try {
       const run = await startAgentRun(agentId, {}, text.trim());
       setMessage(`已创建任务：${run.run_id}`);
+      setEvents(await readRunEvents(run.run_id));
+      setThread(await getAgentThread(run.thread_id));
     } catch (error) {
       setMessage(`请求失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`);
     }
   }
-  return <aside className="agent-drawer" aria-label="全局 Agent"><header><strong>全局 Agent</strong><button type="button" onClick={onClose}>关闭</button></header><p>仅可创建故障上报、智能问数和操作指引任务。</p><form onSubmit={submit}><label>类型<select value={agentId} onChange={(event) => setAgentId(event.target.value)}><option value="fault_reporting">AI 故障上报</option><option value="metric_query">智能问数</option><option value="operation_guidance">操作指引</option></select></label><label>问题<textarea value={text} onChange={(event) => setText(event.target.value)} required /></label><button type="submit">发起任务</button></form>{message && <p role="status">{message}</p>}</aside>;
+  return <aside className="agent-drawer" aria-label="全局 Agent"><header><strong>全局 Agent</strong><button type="button" onClick={onClose}>关闭</button></header><div className="tab-list"><button type="button" aria-pressed={tab === "compose"} onClick={() => setTab("compose")}>新建任务</button><button type="button" aria-pressed={tab === "history"} onClick={() => setTab("history")}>当前历史</button></div>{tab === "compose" ? <><p>仅可创建故障上报、智能问数和操作指引任务。</p><form onSubmit={submit}><label>类型<select value={agentId} onChange={(event) => setAgentId(event.target.value)}><option value="fault_reporting">AI 故障上报</option><option value="metric_query">智能问数</option><option value="operation_guidance">操作指引</option></select></label><label>问题<textarea value={text} onChange={(event) => setText(event.target.value)} required /></label><button type="submit">发起任务</button></form></> : <section aria-label="Agent 历史">{thread ? <><p>线程：{thread.thread_id}</p><p>状态：{thread.status}</p>{thread.messages.map((item, index) => <p key={index}>消息已记录（内容受保护）</p>)}</> : <p>暂无当前线程历史。</p>}</section>}{events.length > 0 && <section aria-label="Agent 运行状态">{events.map((item, index) => <p key={`${item.event}-${index}`}>{item.event}：{String(item.data.status ?? "已收到")}</p>)}</section>}{message && <p role="status">{message}</p>}</aside>;
 }
 
 export function App() {

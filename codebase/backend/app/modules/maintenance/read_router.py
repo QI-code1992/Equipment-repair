@@ -1,5 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
+from typing import Literal
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -55,9 +57,12 @@ def _record_body(record: MaintenanceRecord, order: WorkOrder, fault: FaultReport
 @router.get("/api/bi/dashboard", response_model=None)
 def bi_dashboard(
     organization_id: str | None = None,
+    period: Literal["day", "week", "month"] = Query(default="week"),
     db: Session = Depends(get_db),
     _: User = Depends(require_permission("bi:view")),
 ) -> dict[str, object]:
+    if organization_id is not None and db.get(Organization, organization_id) is None:
+        raise HTTPException(status_code=404, detail={"code": "ORGANIZATION_NOT_FOUND"})
     equipment_filter = select(Equipment.id)
     if organization_id is not None:
         equipment_filter = equipment_filter.where(Equipment.organization_id == organization_id)
@@ -83,10 +88,11 @@ def bi_dashboard(
         if item.started_at is not None and item.completed_at >= item.started_at
     ]
     now = datetime.now(UTC)
-    current_window_start = now - timedelta(days=7)
-    previous_window_start = now - timedelta(days=14)
+    window_days = {"day": 1, "week": 7, "month": 30}[period]
+    current_window_start = now - timedelta(days=window_days)
+    previous_window_start = now - timedelta(days=window_days * 2)
     trend = []
-    for offset in range(6, -1, -1):
+    for offset in range(window_days - 1, -1, -1):
         day = (now - timedelta(days=offset)).date().isoformat()
         trend.append({"date": day, "fault_count": sum(item.submitted_at.date().isoformat() == day for item in faults), "completed_work_order_count": sum(item.completed_at is not None and item.completed_at.date().isoformat() == day for item in orders)})
     return {
@@ -101,6 +107,7 @@ def bi_dashboard(
             "current_fault_count": sum(_utc(item.submitted_at) >= current_window_start for item in faults),
             "previous_fault_count": sum(previous_window_start <= _utc(item.submitted_at) < current_window_start for item in faults),
         },
+        "period": period,
     }
 
 
@@ -121,12 +128,24 @@ def equipment_maintenance_history(
         .where(WorkOrder.equipment_id == equipment_id)
         .order_by(WorkOrder.completed_at.desc(), WorkOrder.id.asc())
     ).all()
-    return _page([_record_body(*row, include_detail=False) for row in rows], page, page_size)
+    items = [_record_body(*row, include_detail=False) for row in rows]
+    return {**_page(items, page, page_size), "trend": _history_trend(rows)}
+
+
+def _history_trend(rows: list[tuple[MaintenanceRecord, WorkOrder, FaultReport]]) -> list[dict[str, object]]:
+    counts: dict[str, int] = {}
+    for _, order, _ in rows:
+        if order.completed_at is None:
+            continue
+        day = _utc(order.completed_at).date().isoformat()
+        counts[day] = counts.get(day, 0) + 1
+    return [{"date": day, "completed_count": counts[day]} for day in sorted(counts)]
 
 
 @router.get("/api/maintenance-records", response_model=None)
 def maintenance_records(
     equipment_id: str | None = None,
+    knowledge_status: str | None = Query(default=None, min_length=1, max_length=30),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -136,7 +155,10 @@ def maintenance_records(
     if equipment_id is not None:
         statement = statement.where(WorkOrder.equipment_id == equipment_id)
     rows = db.execute(statement.order_by(WorkOrder.completed_at.desc(), WorkOrder.id.asc())).all()
-    return _page([_record_body(*row, include_detail=False) for row in rows], page, page_size)
+    items = [_record_body(*row, include_detail=False) for row in rows]
+    if knowledge_status is not None:
+        items = [item for item in items if item["knowledge_status"] == knowledge_status]
+    return _page(items, page, page_size)
 
 
 @router.get("/api/maintenance-records/{record_id}", response_model=None)
@@ -153,7 +175,7 @@ def maintenance_record_detail(
 
 @router.get("/api/work-orders", response_model=None)
 def work_orders(
-    status: str | None = None,
+    status: Literal["DRAFT", "PENDING_ACCEPT", "IN_REPAIR", "PENDING_INSPECTION", "COMPLETED"] | None = None,
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -206,6 +228,7 @@ def intelligence_usage(
     db: Session = Depends(get_db),
     _: User = Depends(require_permission("intelligence:audit")),
 ) -> dict[str, object]:
+    cutoff = datetime.now(UTC) - timedelta(days=30)
     rows = db.execute(
         select(
             AgentThread.agent_id,
@@ -214,6 +237,7 @@ def intelligence_usage(
             func.coalesce(func.sum(AgentRun.config_snapshot_json["max_reply_tokens"].as_integer()), 0),
         )
         .join(AgentThread, AgentRun.thread_id == AgentThread.id)
+        .where((AgentRun.started_at.is_(None)) | (AgentRun.started_at >= cutoff))
         .group_by(AgentThread.agent_id, AgentRun.status)
         .order_by(AgentThread.agent_id.asc(), AgentRun.status.asc())
     ).all()

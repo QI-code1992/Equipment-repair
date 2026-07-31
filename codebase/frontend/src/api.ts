@@ -65,6 +65,7 @@ export type FaultReportCreate = {
 };
 
 export type FaultReport = FaultReportCreate & { id: string; number: string; status: string };
+export type AttachmentRef = { object_key: string; filename: string; size_bytes: number; content_type: string };
 
 export type AgentFaultDraft = FaultReportCreate & { duration_minutes: number };
 export type AgentFaultPreview = { agent_status: "PREVIEW"; draft: AgentFaultDraft; missing_fields: string[] };
@@ -110,6 +111,21 @@ export type GuidanceResponse = {
 };
 
 export type RuntimeEvent = { event: string; data: Record<string, unknown> };
+
+export async function uploadAttachment(file: File): Promise<AttachmentRef> {
+  const headers = new Headers();
+  const token = window.sessionStorage.getItem(accessTokenStorageKey);
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  headers.set("Idempotency-Key", crypto.randomUUID());
+  const body = new FormData();
+  body.append("file", file);
+  const response = await fetch("/api/attachments", { method: "POST", headers, body });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null) as { detail?: { code?: string } } | null;
+    throw new ApiError(response.status, payload?.detail?.code ?? null);
+  }
+  return response.json() as Promise<AttachmentRef>;
+}
 
 function postJson<T>(path: string, body: unknown): Promise<T> {
   return requestJson<T>(path, {
@@ -185,6 +201,10 @@ export async function startAgentRun(agentId: string, businessContext: Record<str
   const run = await postJson<{ run_id: string }>(`/api/agent/threads/${thread.thread_id}/messages`, { text, attachment_refs: [] });
   return { thread_id: thread.thread_id, run_id: run.run_id };
 }
+
+export type AgentThread = { thread_id: string; agent_id: string; status: string; messages: Array<Record<string, unknown>>; runs: Array<{ run_id: string; status: string; state: Record<string, unknown> }> };
+export const getAgentThread = (threadId: string) => requestJson<AgentThread>(`/api/agent/threads/${threadId}`);
+export const resumeAgentThread = (threadId: string, payload: { resume: string; confirmation: Record<string, unknown> }) => postJson<{ run_id: string; thread_id: string; status: string }>(`/api/agent/threads/${threadId}/resume`, payload);
 
 export type AgentConfig = {
   agent_id: string;
@@ -270,22 +290,68 @@ export type AuditEvent = { id: string; actor_user_id: string | null; action: str
 export type BiDashboard = { summary: { fault_count: number; active_fault_count: number; completed_work_order_count: number; completion_rate: number }; trend: Array<{ date: string; fault_count: number; completed_work_order_count: number }>; efficiency: { completed_work_order_count: number; average_completion_hours: number | null }; organization_ranking: Array<{ organization_id: string; organization_name: string; fault_count: number }>; history_comparison: { current_fault_count: number; previous_fault_count: number } };
 export type IntelligenceUsage = { items: Array<{ agent_id: string; status: string; run_count: number; configured_max_reply_tokens: number }>; count: number; retention_days: number; token_measurement: "configured_max_reply_tokens_not_actual_usage" };
 
-export const getBiDashboard = (organizationId?: string) => requestJson<BiDashboard>(organizationId ? `/api/bi/dashboard?organization_id=${encodeURIComponent(organizationId)}` : "/api/bi/dashboard");
+export const getBiDashboard = (organizationId?: string, period?: "day" | "week" | "month") => {
+  const query = new URLSearchParams();
+  if (organizationId) query.set("organization_id", organizationId);
+  if (period) query.set("period", period);
+  return requestJson<BiDashboard>(`/api/bi/dashboard${query.size ? `?${query}` : ""}`);
+};
 export const getWorkbenchTodos = () => requestJson<{ items: Array<{ id: string; number: string; equipment_name: string; urgency: string; symptom: string; status: string }>; count: number }>("/api/workbench/todos");
 export const getWorkbenchAlertSummary = () => requestJson<{ active_fault_count: number; status_counts: Array<{ status: string; count: number }>; urgency_counts: Array<{ urgency: string; count: number }> }>("/api/workbench/alert-summary");
 export const getWorkbenchShortcuts = () => requestJson<{ items: Array<{ id: string; label: string; path: string }> }>("/api/workbench/shortcuts");
 export const getEquipment = () => requestJson<Equipment[]>("/api/equipment");
 export const getEquipmentDetail = (id: string) => requestJson<Equipment>(`/api/equipment/${id}`);
-export const getEquipmentHistory = (id: string) => requestJson<PageResult<MaintenanceRecord>>(`/api/maintenance-history/equipment/${id}`);
-export const getMaintenanceRecords = () => requestJson<PageResult<MaintenanceRecord>>("/api/maintenance-records");
+export const getEquipmentHistory = (id: string) => requestJson<PageResult<MaintenanceRecord> & { trend: Array<{ date: string; completed_count: number }> }>(`/api/maintenance-history/equipment/${id}`);
+export const getMaintenanceRecords = (params?: { page?: number; pageSize?: number; equipmentId?: string; knowledgeStatus?: string }) => {
+  const query = new URLSearchParams();
+  if (params?.page && params.page !== 1) query.set("page", String(params.page));
+  if (params?.pageSize && params.pageSize !== 20) query.set("page_size", String(params.pageSize));
+  if (params?.equipmentId) query.set("equipment_id", params.equipmentId);
+  if (params?.knowledgeStatus) query.set("knowledge_status", params.knowledgeStatus);
+  return requestJson<PageResult<MaintenanceRecord>>(`/api/maintenance-records${query.size ? `?${query}` : ""}`);
+};
 export const getMaintenanceRecord = (id: string) => requestJson<MaintenanceRecord>(`/api/maintenance-records/${id}`);
-export const getWorkOrders = () => requestJson<PageResult<WorkOrder>>("/api/work-orders");
-export const getAuditEvents = () => requestJson<PageResult<AuditEvent>>("/api/audit-events");
+export const getWorkOrders = (params?: { status?: string; page?: number; pageSize?: number }) => {
+  const query = new URLSearchParams();
+  if (params?.status) query.set("status", params.status);
+  if (params?.page && params.page !== 1) query.set("page", String(params.page));
+  if (params?.pageSize && params.pageSize !== 20) query.set("page_size", String(params.pageSize));
+  return requestJson<PageResult<WorkOrder>>(`/api/work-orders${query.size ? `?${query}` : ""}`);
+};
+export const getWorkOrder = (id: string) => requestJson<WorkOrder & { pending_inspection_at: string | null }>(`/api/work-orders/${id}`);
+export const getAuditEvents = (params?: { action?: string; page?: number; pageSize?: number }) => {
+  const query = new URLSearchParams();
+  if (params?.action) query.set("action", params.action);
+  if (params?.page && params.page !== 1) query.set("page", String(params.page));
+  if (params?.pageSize && params.pageSize !== 20) query.set("page_size", String(params.pageSize));
+  return requestJson<PageResult<AuditEvent>>(`/api/audit-events${query.size ? `?${query}` : ""}`);
+};
 export const getIntelligenceUsage = () => requestJson<IntelligenceUsage>("/api/intelligence/usage");
-export const getKnowledgeDocuments = () => requestJson<PageResult<{ id: string; filename: string; status: string; failure_reason: string | null; retry_available: boolean }>>("/api/intelligence/knowledge-documents");
+export const getKnowledgeDocuments = (params?: { page?: number; pageSize?: number }) => {
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.pageSize) query.set("page_size", String(params.pageSize));
+  return requestJson<PageResult<{ id: string; filename: string; status: string; failure_reason: string | null; retry_available: boolean }>>(`/api/intelligence/knowledge-documents${query.size ? `?${query}` : ""}`);
+};
+
+export async function uploadKnowledgeDocument(datasetId: string, file: File): Promise<{ id: string; filename: string; status: string }> {
+  const headers = new Headers();
+  const token = window.sessionStorage.getItem(accessTokenStorageKey);
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  headers.set("Idempotency-Key", crypto.randomUUID());
+  const body = new FormData();
+  body.append("dataset_id", datasetId);
+  body.append("file", file);
+  const response = await fetch("/api/knowledge/documents", { method: "POST", headers, body });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null) as { detail?: { code?: string } } | null;
+    throw new ApiError(response.status, payload?.detail?.code ?? null);
+  }
+  return response.json() as Promise<{ id: string; filename: string; status: string }>;
+}
 export const getOrganizations = () => requestJson<Array<{ id: string; type: string; code: string; name: string; parent_id: string | null; enabled: boolean }>>("/api/organizations");
 export const getUsers = () => requestJson<Array<{ id: string; username: string; enabled: boolean; role_ids: string[] }>>("/api/users");
-export const retryKnowledgeDocument = (id: string) => postJson<{ id: string; status: string }>(`/api/knowledge/documents/${id}/retry`, {});
+export const retryKnowledgeDocument = (id: string) => postJson<{ id: string; status: string }>(`/api/knowledge/documents/${id}/retry`, { document_id: id });
 export const getRoles = () => requestJson<Array<{ id: string; code: string; name: string; permission_codes: string[] }>>("/api/roles");
 export const getPermissions = () => requestJson<Array<{ code: string }>>("/api/permissions");
 export const createOrganization = (body: { type: string; code: string; name: string; parent_id: string; sort_order: number; enabled: boolean; remark: string }) => postJson<{ id: string }>("/api/organizations", body);
