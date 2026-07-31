@@ -7,7 +7,7 @@ import { RepairExecutionPage } from "./RepairExecutionPage";
 import { WorkbenchPage } from "./WorkbenchPage";
 import { ApiError, hasActiveSession, logout, startAgentRun } from "./api";
 import { LoginPage } from "./LoginPage";
-import { AgentReportPage, BiDashboardPage, EquipmentAddPage, EquipmentDetailPage, EquipmentEditPage, EquipmentLedgerPage, FactoryModelingPage, IntelligentAuditPage, MaintenanceRecordsPage, SystemManagementPage } from "./PortalPages";
+import { AgentReportPage, BiDashboardPage, EquipmentAddPage, EquipmentDetailPage, EquipmentEditPage, EquipmentLedgerPage, FactoryModelingPage, IntelligentAuditPage, MaintenanceRecordDetailPage, MaintenanceRecordsPage, SystemManagementPage } from "./PortalPages";
 
 type Page = {
   path: string;
@@ -105,6 +105,7 @@ function ApplicationShell() {
           <Route path="/fault-report" element={<FaultReportPage />} />
           <Route path="/agent-report" element={<AgentReportPage />} />
           <Route path="/maintenance-records" element={<MaintenanceRecordsPage />} />
+          <Route path="/maintenance-records/:id" element={<MaintenanceRecordDetailPage />} />
           <Route path="/repair-execution" element={<RepairExecutionPage />} />
           <Route path="/system-management" element={<SystemManagementPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

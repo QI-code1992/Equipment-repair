@@ -1,9 +1,12 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
+from sqlalchemy import select
 
 from app.modules.audit.models import AuditEvent
+from app.modules.agent_runtime.models import AgentRun, AgentThread
+from app.modules.equipment.models import Equipment
 from app.modules.knowledge.models import FileObject, FileScanStatus, KnowledgeDataset, KnowledgeDocument, KnowledgeDocumentStatus
 from app.modules.maintenance.models import FaultReport, HistoricalRepairCase, MaintenanceRecord, WorkOrder
 from tests.modules.maintenance_support import auth_headers, create_equipment, create_fault, repairer, start_repair
@@ -55,6 +58,36 @@ def test_bi_and_equipment_history_are_server_aggregated_and_permissioned(client:
     assert denied.status_code == 403
 
 
+def test_bi_filter_scopes_ranking_and_calculates_completed_duration(client: TestClient) -> None:
+    equipment_id, _, work_order_id = _completed_work(client)
+    other_equipment_id, _, _ = _completed_work(client)
+    with client.app.state.session_factory() as db:
+        first = db.get(WorkOrder, work_order_id)
+        assert first is not None
+        first.started_at = first.completed_at - timedelta(hours=3)
+        first.created_at = first.started_at
+        old_fault = db.scalar(select(FaultReport).where(FaultReport.equipment_id == equipment_id))
+        assert old_fault is not None
+        old_fault.submitted_at = datetime.now(UTC) - timedelta(days=8)
+        db.commit()
+        first_equipment = db.get(Equipment, equipment_id)
+        other_equipment = db.get(Equipment, other_equipment_id)
+        assert first_equipment is not None and other_equipment is not None
+        organization_id = first_equipment.organization_id
+        other_organization_id = other_equipment.organization_id
+
+    token = _token(client, "bi:view")
+    response = client.get(f"/api/bi/dashboard?organization_id={organization_id}", headers=auth_headers(token))
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["summary"]["completed_work_order_count"] == 1
+    assert body["efficiency"]["average_completion_hours"] == 3.0
+    assert {item["organization_id"] for item in body["organization_ranking"]} == {organization_id}
+    assert body["history_comparison"] == {"current_fault_count": 0, "previous_fault_count": 1}
+    assert other_organization_id != organization_id
+
+
 def test_maintenance_and_assigned_work_orders_have_controlled_read_models(client: TestClient) -> None:
     equipment_id, _, work_order_id = _completed_work(client)
     token = _token(client, "maintenance:view", "maintenance:detail", "equipment:read")
@@ -94,7 +127,10 @@ def test_audit_and_intelligence_read_models_are_whitelisted_and_empty_safe(clien
     assert set(audit.json()["items"][0]) == {"id", "actor_user_id", "action", "resource_type", "resource_id", "result", "created_at"}
     assert "metadata_json" not in audit.json()["items"][0]
     assert usage.status_code == 200
-    assert usage.json() == {"items": [], "count": 0, "retention_days": 30}
+    assert usage.json() == {
+        "items": [], "count": 0, "retention_days": 30,
+        "token_measurement": "configured_max_reply_tokens_not_actual_usage",
+    }
     assert documents.status_code == 200
     assert documents.json() == {"items": [], "count": 0, "page": 1, "page_size": 20}
 
@@ -121,3 +157,29 @@ def test_failed_knowledge_document_can_be_retried_once_with_authorized_idempoten
     assert response.status_code == 200
     assert response.json()["status"] == "UPLOADING"
     assert replay.status_code == 200
+
+
+def test_intelligence_usage_aggregates_persisted_runs_without_claiming_actual_tokens(client: TestClient) -> None:
+    user_id, token = create_user_token(
+        client, username=f"intelligence-audit-{uuid4().hex[:8]}", role_code="SYSTEM_ADMIN", permission_codes=["intelligence:audit"]
+    )
+    with client.app.state.session_factory() as db:
+        thread = AgentThread(agent_id="operation_guidance", creator_user_id=user_id)
+        db.add(thread)
+        db.flush()
+        db.add_all([
+            AgentRun(thread_id=thread.id, config_snapshot_json={"max_reply_tokens": 256}, state_json={}, status="RUNNING"),
+            AgentRun(thread_id=thread.id, config_snapshot_json={"max_reply_tokens": 256}, state_json={}, status="RUNNING"),
+        ])
+        db.commit()
+
+    response = client.get("/api/intelligence/usage", headers=auth_headers(token))
+
+    assert response.status_code == 200
+    assert response.json()["items"] == [{
+        "agent_id": "operation_guidance",
+        "status": "RUNNING",
+        "run_count": 2,
+        "configured_max_reply_tokens": 512,
+    }]
+    assert response.json()["token_measurement"] == "configured_max_reply_tokens_not_actual_usage"

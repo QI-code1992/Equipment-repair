@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.modules.audit.models import AuditEvent
+from app.modules.agent_runtime.models import AgentRun, AgentThread
 from app.modules.equipment.models import Equipment, Organization
 from app.modules.identity.dependencies import require_permission
 from app.modules.identity.models import User
@@ -15,6 +16,10 @@ from app.modules.maintenance.models import FaultReport, HistoricalRepairCase, Ma
 
 
 router = APIRouter(tags=["task-012-read-models"])
+
+
+def _utc(value: datetime) -> datetime:
+    return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
 
 
 def _page(items: list[dict[str, object]], page: int, page_size: int) -> dict[str, object]:
@@ -59,7 +64,7 @@ def bi_dashboard(
     fault_statement = select(FaultReport).where(FaultReport.equipment_id.in_(equipment_filter))
     faults = db.scalars(fault_statement).all()
     orders = db.scalars(select(WorkOrder).where(WorkOrder.equipment_id.in_(equipment_filter))).all()
-    by_org = db.execute(
+    ranking_statement = (
         select(Organization.id, Organization.name, func.count(FaultReport.id))
         .select_from(Organization)
         .join(Equipment, Equipment.organization_id == Organization.id)
@@ -67,9 +72,19 @@ def bi_dashboard(
         .group_by(Organization.id, Organization.name)
         .order_by(func.count(FaultReport.id).desc(), Organization.id.asc())
         .limit(20)
-    ).all()
+    )
+    if organization_id is not None:
+        ranking_statement = ranking_statement.where(Organization.id == organization_id)
+    by_org = db.execute(ranking_statement).all()
     completed = [item for item in orders if item.completed_at is not None]
+    completed_durations = [
+        (item.completed_at - item.started_at).total_seconds() / 3600
+        for item in completed
+        if item.started_at is not None and item.completed_at >= item.started_at
+    ]
     now = datetime.now(UTC)
+    current_window_start = now - timedelta(days=7)
+    previous_window_start = now - timedelta(days=14)
     trend = []
     for offset in range(6, -1, -1):
         day = (now - timedelta(days=offset)).date().isoformat()
@@ -77,9 +92,15 @@ def bi_dashboard(
     return {
         "summary": {"fault_count": len(faults), "active_fault_count": sum(item.status.value != "PROCESSED" for item in faults), "completed_work_order_count": len(completed), "completion_rate": round(len(completed) / len(orders), 4) if orders else 0.0},
         "trend": trend,
-        "efficiency": {"completed_work_order_count": len(completed), "average_completion_hours": 0.0},
+        "efficiency": {
+            "completed_work_order_count": len(completed),
+            "average_completion_hours": round(sum(completed_durations) / len(completed_durations), 2) if completed_durations else None,
+        },
         "organization_ranking": [{"organization_id": item[0], "organization_name": item[1], "fault_count": int(item[2])} for item in by_org],
-        "history_comparison": {"current_fault_count": len(faults), "previous_fault_count": 0},
+        "history_comparison": {
+            "current_fault_count": sum(_utc(item.submitted_at) >= current_window_start for item in faults),
+            "previous_fault_count": sum(previous_window_start <= _utc(item.submitted_at) < current_window_start for item in faults),
+        },
     }
 
 
@@ -182,9 +203,35 @@ def audit_events(
 
 @router.get("/api/intelligence/usage", response_model=None)
 def intelligence_usage(
+    db: Session = Depends(get_db),
     _: User = Depends(require_permission("intelligence:audit")),
 ) -> dict[str, object]:
-    return {"items": [], "count": 0, "retention_days": 30}
+    rows = db.execute(
+        select(
+            AgentThread.agent_id,
+            AgentRun.status,
+            func.count(AgentRun.id),
+            func.coalesce(func.sum(AgentRun.config_snapshot_json["max_reply_tokens"].as_integer()), 0),
+        )
+        .join(AgentThread, AgentRun.thread_id == AgentThread.id)
+        .group_by(AgentThread.agent_id, AgentRun.status)
+        .order_by(AgentThread.agent_id.asc(), AgentRun.status.asc())
+    ).all()
+    items = [
+        {
+            "agent_id": agent_id,
+            "status": status,
+            "run_count": int(run_count),
+            "configured_max_reply_tokens": int(token_budget),
+        }
+        for agent_id, status, run_count, token_budget in rows
+    ]
+    return {
+        "items": items,
+        "count": len(items),
+        "retention_days": 30,
+        "token_measurement": "configured_max_reply_tokens_not_actual_usage",
+    }
 
 
 @router.get("/api/intelligence/knowledge-documents", response_model=None)

@@ -224,11 +224,12 @@ export async function saveAgentConfig(config: Omit<AgentConfig, "model_capabilit
 export type PageResult<T> = { items: T[]; count: number; page: number; page_size: number };
 export type Equipment = { id: string; code: string; name: string; model: string; type: string; manufacturer: string; status: string; organization_id: string; owner_user_id: string | null; operating_hours: number };
 export type WorkOrder = { id: string; number: string; fault_report_id: string; equipment_id: string; status: string; repairer_user_id: string | null; symptom: string; started_at: string | null; completed_at: string | null };
-export type MaintenanceRecord = { maintenance_record_id: string; work_order_id: string; equipment_id: string; work_order_number: string; status: string; symptom: string; actual_cause: string | null; actual_solution: string | null; repair_result: string | null; completed_at: string | null; knowledge_status: string };
+export type MaintenanceRecord = { maintenance_record_id: string; work_order_id: string; fault_report_id?: string; equipment_id: string; work_order_number: string; status: string; symptom: string; actual_cause: string | null; actual_solution: string | null; repair_result: string | null; completed_at: string | null; knowledge_status: string; start_mode?: string; parts_replacement_notes?: string | null; created_at?: string; updated_at?: string };
 export type AuditEvent = { id: string; actor_user_id: string | null; action: string; resource_type: string; resource_id: string | null; result: string; created_at: string };
-export type BiDashboard = { summary: { fault_count: number; active_fault_count: number; completed_work_order_count: number; completion_rate: number }; trend: Array<{ date: string; fault_count: number; completed_work_order_count: number }>; organization_ranking: Array<{ organization_id: string; organization_name: string; fault_count: number }> };
+export type BiDashboard = { summary: { fault_count: number; active_fault_count: number; completed_work_order_count: number; completion_rate: number }; trend: Array<{ date: string; fault_count: number; completed_work_order_count: number }>; efficiency: { completed_work_order_count: number; average_completion_hours: number | null }; organization_ranking: Array<{ organization_id: string; organization_name: string; fault_count: number }>; history_comparison: { current_fault_count: number; previous_fault_count: number } };
+export type IntelligenceUsage = { items: Array<{ agent_id: string; status: string; run_count: number; configured_max_reply_tokens: number }>; count: number; retention_days: number; token_measurement: "configured_max_reply_tokens_not_actual_usage" };
 
-export const getBiDashboard = () => requestJson<BiDashboard>("/api/bi/dashboard");
+export const getBiDashboard = (organizationId?: string) => requestJson<BiDashboard>(organizationId ? `/api/bi/dashboard?organization_id=${encodeURIComponent(organizationId)}` : "/api/bi/dashboard");
 export const getWorkbenchTodos = () => requestJson<{ items: Array<{ id: string; number: string; equipment_name: string; urgency: string; symptom: string; status: string }>; count: number }>("/api/workbench/todos");
 export const getWorkbenchAlertSummary = () => requestJson<{ active_fault_count: number; status_counts: Array<{ status: string; count: number }>; urgency_counts: Array<{ urgency: string; count: number }> }>("/api/workbench/alert-summary");
 export const getWorkbenchShortcuts = () => requestJson<{ items: Array<{ id: string; label: string; path: string }> }>("/api/workbench/shortcuts");
@@ -239,7 +240,7 @@ export const getMaintenanceRecords = () => requestJson<PageResult<MaintenanceRec
 export const getMaintenanceRecord = (id: string) => requestJson<MaintenanceRecord>(`/api/maintenance-records/${id}`);
 export const getWorkOrders = () => requestJson<PageResult<WorkOrder>>("/api/work-orders");
 export const getAuditEvents = () => requestJson<PageResult<AuditEvent>>("/api/audit-events");
-export const getIntelligenceUsage = () => requestJson<{ items: Array<Record<string, unknown>>; count: number; retention_days: number }>("/api/intelligence/usage");
+export const getIntelligenceUsage = () => requestJson<IntelligenceUsage>("/api/intelligence/usage");
 export const getKnowledgeDocuments = () => requestJson<PageResult<{ id: string; filename: string; status: string; failure_reason: string | null; retry_available: boolean }>>("/api/intelligence/knowledge-documents");
 export const getOrganizations = () => requestJson<Array<{ id: string; type: string; code: string; name: string; parent_id: string | null; enabled: boolean }>>("/api/organizations");
 export const getUsers = () => requestJson<Array<{ id: string; username: string; enabled: boolean; role_ids: string[] }>>("/api/users");
@@ -247,3 +248,8 @@ export const retryKnowledgeDocument = (id: string) => postJson<{ id: string; sta
 export const getRoles = () => requestJson<Array<{ id: string; code: string; name: string; permission_codes: string[] }>>("/api/roles");
 export const getPermissions = () => requestJson<Array<{ code: string }>>("/api/permissions");
 export const createOrganization = (body: { type: string; code: string; name: string; parent_id: string; sort_order: number; enabled: boolean; remark: string }) => postJson<{ id: string }>("/api/organizations", body);
+export const updateOrganization = (id: string, body: { code: string; name: string; sort_order: number; enabled: boolean; remark: string }) => requestJson(`/api/organizations/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify(body) });
+export const deleteOrganization = (id: string) => requestJson(`/api/organizations/${id}`, { method: "DELETE" });
+export const createUser = (body: { username: string; password: string; role_ids: string[] }) => postJson<{ id: string }>("/api/users", body);
+export const updateUser = (id: string, body: { enabled: boolean; role_ids: string[] }) => requestJson(`/api/users/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify(body) });
+export const updateRolePermissions = (id: string, permission_codes: string[]) => requestJson(`/api/roles/${id}/permissions`, { method: "PATCH", headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify({ permission_codes }) });
