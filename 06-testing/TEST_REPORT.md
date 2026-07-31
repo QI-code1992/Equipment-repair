@@ -1,5 +1,12 @@
 # 测试报告
 
+## TASK-012 P1 权限修复（2026-07-31）
+
+- 问题：`/intelligence-audit` 原先对仅有 `intelligence:audit` 的账号显示可点击知识文档重试按钮，但后端重试接口要求 `intelligence:knowledge`，会产生必然 403。
+- 修复提交：`46bf6e7ad804fe77beb609904a8f3c9abe3a449f`；页面现在按当前会话权限禁用写操作，并对审计-only 用户显示明确不可用状态；同时保留审计+知识双权限的可用路径。
+- 回归：修复前新增审计-only 用例按预期失败；修复后定向 `17 passed`，前端全量 `55 passed`，生产构建、15 项 Node 静态回归及 `git diff --check` 通过。
+- 门禁：该修复仍在同一 Draft PR #75，未申请合并授权；新 HEAD 必须由 DEV-001 重新整体审核。
+
 ## TASK-012 整体开发候选本地验证（2026-07-31）
 
 - 候选分支：`codex/task-012-p0-frontend-remediation`；开发提交：`08e1576`。

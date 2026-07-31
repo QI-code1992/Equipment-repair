@@ -1,5 +1,13 @@
 # 开发到产品交接
 
+## TASK-012 P1 权限修复复审交接（2026-07-31）
+
+- PR：#75；最新精确 HEAD：`46bf6e7ad804fe77beb609904a8f3c9abe3a449f`；目标 `codex/stage-05-integration`；PR 继续保持 Ready，未申请 Merge 授权。
+- 根因：仅 `intelligence:audit` 用户可见知识重试按钮，但后端写入接口要求 `intelligence:knowledge`，点击必然 403。
+- 修复：`IntelligentAuditPage` 接收当前会话权限；无知识写权限时禁用“重新同步”并显示明确提示；审计+知识双权限仍可执行重试。
+- 验证：修复前审计-only 回归失败；修复后定向 17 passed，前端全量 55 passed，生产构建、15 项 Node 静态回归和 diff-check 通过。
+- 下一步：请 DEV-001 基于新精确 HEAD 重新进行 TASK-012 完整整体审核；不申请合并授权、不合并，Stage 6/7/8 继续锁定。
+
 ## TASK-012 整体开发候选交接（2026-07-31）
 
 - 开发分支：`codex/task-012-p0-frontend-remediation`；最新精确提交：`08e1576`；PR 继续保持 Draft。
