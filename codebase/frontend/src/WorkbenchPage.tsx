@@ -1,11 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
-import { ApiError, getHealthScore, type HealthScore } from "./api";
+import { ApiError, getHealthScore, getWorkbenchAlertSummary, getWorkbenchShortcuts, getWorkbenchTodos, type HealthScore } from "./api";
 
 export function WorkbenchPage() {
   const [equipmentId, setEquipmentId] = useState("");
   const [health, setHealth] = useState<HealthScore | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [todos, setTodos] = useState<Array<{ id: string; number: string; equipment_name: string; urgency: string; symptom: string; status: string }> | null>(null);
+  const [summary, setSummary] = useState<{ active_fault_count: number } | null>(null);
+  const [shortcuts, setShortcuts] = useState<Array<{ id: string; label: string; path: string }> | null>(null);
+
+  useEffect(() => {
+    Promise.all([getWorkbenchTodos(), getWorkbenchAlertSummary(), getWorkbenchShortcuts()])
+      .then(([todoData, summaryData, shortcutData]) => { setTodos(todoData.items); setSummary(summaryData); setShortcuts(shortcutData.items); })
+      .catch((error: unknown) => setMessage(error instanceof ApiError && error.status === 403 ? "无权查看工作台数据。" : "工作台数据加载失败，请稍后重试。"));
+  }, []);
 
   async function loadHealth() {
     setMessage(null);
@@ -22,7 +32,10 @@ export function WorkbenchPage() {
 
   return <section className="page-shell" aria-labelledby="page-heading">
     <div className="page-shell__eyebrow">工作台</div><h2 id="page-heading">运维工作台</h2>
-    <p>输入设备编号后读取业务服务提供的健康分。</p>
+    <p>工作台只展示正式业务服务返回的待办、告警与快捷入口。</p>
+    {summary && <p role="status">活动故障：{summary.active_fault_count}</p>}
+    {todos === null ? <p>正在加载待办…</p> : todos.length === 0 ? <p>暂无活动待办。</p> : <section aria-label="当前待办"><h3>当前待办</h3><ul>{todos.map((todo) => <li key={todo.id}>{todo.number} · {todo.equipment_name} · {todo.urgency} · {todo.symptom}</li>)}</ul></section>}
+    {shortcuts && <section aria-label="快捷事项">{shortcuts.map((item) => <Link key={item.id} to={item.path}>{item.label}</Link>)}</section>}
     <label>设备 ID<input aria-label="设备 ID" value={equipmentId} onChange={(event) => setEquipmentId(event.target.value)} /></label>
     <button type="button" disabled={!equipmentId} onClick={() => void loadHealth()}>查询健康分</button>
     {health && <p role="status">当前健康分：{health.score}</p>}

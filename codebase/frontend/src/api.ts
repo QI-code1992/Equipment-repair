@@ -229,6 +229,9 @@ export type AuditEvent = { id: string; actor_user_id: string | null; action: str
 export type BiDashboard = { summary: { fault_count: number; active_fault_count: number; completed_work_order_count: number; completion_rate: number }; trend: Array<{ date: string; fault_count: number; completed_work_order_count: number }>; organization_ranking: Array<{ organization_id: string; organization_name: string; fault_count: number }> };
 
 export const getBiDashboard = () => requestJson<BiDashboard>("/api/bi/dashboard");
+export const getWorkbenchTodos = () => requestJson<{ items: Array<{ id: string; number: string; equipment_name: string; urgency: string; symptom: string; status: string }>; count: number }>("/api/workbench/todos");
+export const getWorkbenchAlertSummary = () => requestJson<{ active_fault_count: number; status_counts: Array<{ status: string; count: number }>; urgency_counts: Array<{ urgency: string; count: number }> }>("/api/workbench/alert-summary");
+export const getWorkbenchShortcuts = () => requestJson<{ items: Array<{ id: string; label: string; path: string }> }>("/api/workbench/shortcuts");
 export const getEquipment = () => requestJson<Equipment[]>("/api/equipment");
 export const getEquipmentDetail = (id: string) => requestJson<Equipment>(`/api/equipment/${id}`);
 export const getEquipmentHistory = (id: string) => requestJson<PageResult<MaintenanceRecord>>(`/api/maintenance-history/equipment/${id}`);
