@@ -32,6 +32,9 @@ export function hasActiveSession() {
   return Boolean(window.sessionStorage.getItem(accessTokenStorageKey)?.trim());
 }
 
+export type CurrentUser = { id: string; username: string; enabled: boolean; permission_codes: string[] };
+export const getCurrentUser = () => requestJson<CurrentUser>("/api/auth/me");
+
 export async function login(username: string, password: string) {
   const response = await requestJson<{ access_token: string }>("/api/auth/login", {
     method: "POST",
@@ -64,6 +67,8 @@ export type FaultReportCreate = {
 export type FaultReport = FaultReportCreate & { id: string; number: string; status: string };
 
 export type AgentFaultDraft = FaultReportCreate & { duration_minutes: number };
+export type AgentFaultPreview = { agent_status: "PREVIEW"; draft: AgentFaultDraft; missing_fields: string[] };
+export type AgentFaultSubmission = (FaultReport & { agent_status: string }) | AgentFaultPreview;
 
 export type HealthScore = { status: string; score?: number };
 
@@ -119,7 +124,7 @@ export function createFaultReport(payload: FaultReportCreate) {
 }
 
 export function submitAgentFaultReport(payload: { draft: AgentFaultDraft; confirmed: boolean }) {
-  return postJson<FaultReport & { agent_status: string }>("/api/agent/fault-reports/submit", payload);
+  return postJson<AgentFaultSubmission>("/api/agent/fault-reports/submit", payload);
 }
 
 export function getHealthScore(equipmentId: string) {
@@ -202,6 +207,18 @@ export type AgentConfig = {
   } | null;
 };
 
+export type ModelProvider = { id: string; name: string; enabled: boolean };
+export type ModelProviderWrite = { name: string; secret_ref: string; enabled: boolean };
+export type ModelBinding = {
+  id: string;
+  provider_id: string;
+  name: string;
+  model_name: string;
+  supports_reasoning: boolean;
+  enabled: boolean;
+};
+export type ModelBindingWrite = Omit<ModelBinding, "id">;
+
 export async function getAgentConfigs(): Promise<AgentConfig[]> {
   return requestJson<AgentConfig[]>("/api/agent-configs");
 }
@@ -220,6 +237,30 @@ export async function saveAgentConfig(config: Omit<AgentConfig, "model_capabilit
     body: JSON.stringify(config),
   });
 }
+
+function putJson<T>(path: string, body: unknown): Promise<T> {
+  return requestJson<T>(path, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() },
+    body: JSON.stringify(body),
+  });
+}
+
+function deleteJson<T>(path: string): Promise<T> {
+  return requestJson<T>(path, {
+    method: "DELETE",
+    headers: { "Idempotency-Key": crypto.randomUUID() },
+  });
+}
+
+export const getModelProviders = () => requestJson<ModelProvider[]>("/api/model-providers");
+export const createModelProvider = (body: ModelProviderWrite) => postJson<ModelProvider>("/api/model-providers", body);
+export const updateModelProvider = (id: string, body: ModelProviderWrite) => putJson<ModelProvider>(`/api/model-providers/${id}`, body);
+export const deleteModelProvider = (id: string) => deleteJson<{ id: string }>(`/api/model-providers/${id}`);
+export const getModelBindings = () => requestJson<ModelBinding[]>("/api/model-bindings");
+export const createModelBinding = (body: ModelBindingWrite) => postJson<ModelBinding>("/api/model-bindings", body);
+export const updateModelBinding = (id: string, body: ModelBindingWrite) => putJson<ModelBinding>(`/api/model-bindings/${id}`, body);
+export const deleteModelBinding = (id: string) => deleteJson<{ id: string }>(`/api/model-bindings/${id}`);
 
 export type PageResult<T> = { items: T[]; count: number; page: number; page_size: number };
 export type Equipment = { id: string; code: string; name: string; model: string; type: string; manufacturer: string; status: string; organization_id: string; owner_user_id: string | null; operating_hours: number };

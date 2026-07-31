@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError, createFaultReport, submitAgentFaultReport } from "./api";
 import { FaultReportPage } from "./FaultReportPage";
@@ -11,6 +11,29 @@ vi.mock("./api", async (importOriginal) => ({
 }));
 
 describe("FaultReportPage", () => {
+  beforeEach(() => vi.clearAllMocks());
+  it("shows an AI draft first and writes a formal fault only after explicit confirmation", async () => {
+    const draft = {
+      equipment_id: "eq-1", urgency: "HIGH", symptom: "液压压力异常", occurred_at: "2026-07-27T10:00:00+08:00",
+      duration_minutes: 0, attachment_refs: [],
+    };
+    vi.mocked(submitAgentFaultReport)
+      .mockResolvedValueOnce({ agent_status: "PREVIEW", draft, missing_fields: [] })
+      .mockResolvedValueOnce({ id: "fault-1", number: "FR-001", status: "PENDING_ACCEPT", ...draft, agent_status: "AI_DRAFT" });
+    render(<FaultReportPage />);
+
+    fireEvent.change(screen.getByLabelText("设备 ID"), { target: { value: "eq-1" } });
+    fireEvent.change(screen.getByLabelText("故障现象"), { target: { value: "液压压力异常" } });
+    fireEvent.change(screen.getByLabelText("发生时间"), { target: { value: "2026-07-27T10:00" } });
+    fireEvent.click(screen.getByRole("button", { name: "生成 AI 草稿" }));
+
+    expect(await screen.findByText("请核对 AI 草稿后再正式提交。")).toBeInTheDocument();
+    expect(submitAgentFaultReport).toHaveBeenCalledWith(expect.objectContaining({ confirmed: false }));
+    fireEvent.click(screen.getByRole("button", { name: "确认并提交 AI 草稿" }));
+    await waitFor(() => expect(submitAgentFaultReport).toHaveBeenLastCalledWith(expect.objectContaining({ confirmed: true })));
+    expect(await screen.findByText("故障已提交：FR-001")).toBeInTheDocument();
+  });
+
   it("keeps manual fault submission available when AI submission is unavailable", async () => {
     vi.mocked(submitAgentFaultReport).mockRejectedValue(new ApiError(503, "AGENT_CONFIG_INVALID"));
     vi.mocked(createFaultReport).mockResolvedValue({
@@ -23,7 +46,7 @@ describe("FaultReportPage", () => {
     fireEvent.change(screen.getByLabelText("设备 ID"), { target: { value: "eq-1" } });
     fireEvent.change(screen.getByLabelText("故障现象"), { target: { value: "液压压力异常" } });
     fireEvent.change(screen.getByLabelText("发生时间"), { target: { value: "2026-07-27T10:00" } });
-    fireEvent.click(screen.getByRole("button", { name: "使用 AI 整理" }));
+    fireEvent.click(screen.getByRole("button", { name: "生成 AI 草稿" }));
 
     expect(await screen.findByText("AI 故障上报暂不可用，请继续人工填写。")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "提交故障" })).toBeEnabled();

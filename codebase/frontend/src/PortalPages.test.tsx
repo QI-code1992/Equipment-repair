@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 
-import { BiDashboardPage, EquipmentAddPage, EquipmentLedgerPage, FactoryModelingPage, IntelligentAuditPage, MaintenanceRecordDetailPage, MaintenanceRecordsPage, SystemManagementPage } from "./PortalPages";
+import { AgentReportPage, BiDashboardPage, EquipmentAddPage, EquipmentLedgerPage, FactoryModelingPage, IntelligentAuditPage, MaintenanceRecordDetailPage, MaintenanceRecordsPage, SystemManagementPage } from "./PortalPages";
 
 describe("TASK-012 portal pages", () => {
   it("renders BI only from its formal API response", async () => {
@@ -198,5 +198,27 @@ describe("TASK-012 portal pages", () => {
     expect(await screen.findByText("operation_guidance")).toBeInTheDocument();
     expect(screen.getByText(/配置 Token 预算统计，不代表模型实际消耗/)).toBeInTheDocument();
     expect(screen.getByText("512")).toBeInTheDocument();
+  });
+
+  it("requires an explicit structured confirmation before AI fault reporting writes a formal fault", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ thread_id: "thread-1" }), { status: 201 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ run_id: "run-1" }), { status: 202 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "fault-1", number: "FR-1", agent_status: "submitted" }), { status: 201 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<MemoryRouter><AgentReportPage /></MemoryRouter>);
+
+    expect(screen.queryByRole("button", { name: "确认并提交正式故障单" })).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("设备 ID"), { target: { value: "eq-1" } });
+    fireEvent.change(screen.getByLabelText("故障描述"), { target: { value: "液压异响" } });
+    fireEvent.click(screen.getByRole("button", { name: "开始 AI 收集" }));
+    await screen.findByText("AI 收集任务已创建，请补全并确认正式上报字段。");
+    fireEvent.change(screen.getByLabelText("发生时间"), { target: { value: "2026-07-31T10:00" } });
+    fireEvent.click(screen.getByRole("button", { name: "确认并提交正式故障单" }));
+
+    await screen.findByText("故障已正式提交：FR-1");
+    expect(fetchMock.mock.calls[2][0]).toBe("/api/agent/fault-reports/submit");
+    expect(JSON.parse(String((fetchMock.mock.calls[2][1] as RequestInit).body))).toMatchObject({ confirmed: true, draft: { equipment_id: "eq-1", symptom: "液压异响" } });
   });
 });

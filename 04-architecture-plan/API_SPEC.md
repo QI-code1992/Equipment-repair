@@ -95,6 +95,7 @@
 
 | Method | Endpoint | 权限码 | Idempotency-Key | 请求与成功响应 |
 |---|---|---|---|---|
+| GET | `/api/auth/me` | authenticated | 不使用 | 返回当前会话用户的 `id,username,enabled,permission_codes`；权限码只用于客户端菜单和操作可见性，不替代服务端权限校验。 |
 | GET | `/api/permissions` | `identity:read` | 不使用 | 返回 `[{code}]` 的固定权限目录。 |
 | GET | `/api/roles` | `identity:read` | 不使用 | 返回四个固定角色的 `id,code,name,permission_codes`。 |
 | PATCH | `/api/roles/{role_id}/permissions` | `identity:write` | 必填 | 请求 `permission_codes`；返回角色字段及 `audit_event_id`。 |

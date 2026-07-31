@@ -457,6 +457,12 @@ def submit_fault_report(
     agent = FaultReportingAgent(submitter)
     try:
         preview = agent.preview(payload.draft)
+        if not payload.confirmed:
+            return JSONResponse(status_code=200, content={
+                "agent_status": "PREVIEW",
+                "draft": preview.draft.model_dump(mode="json"),
+                "missing_fields": list(preview.missing_fields),
+            })
         result = agent.submit(preview, confirmed=payload.confirmed)
     except MissingFaultFieldsError as error:
         raise HTTPException(

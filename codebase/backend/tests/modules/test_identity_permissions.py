@@ -154,6 +154,16 @@ def test_protected_request_requires_login(client: TestClient) -> None:
     assert client.get("/api/auth/me").status_code == 401
 
 
+def test_current_user_returns_only_its_effective_permission_codes(client: TestClient) -> None:
+    token = create_user_token(client, ["equipment:read", "fault:create"])
+
+    response = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
+
+    assert response.status_code == 200
+    assert response.json()["permission_codes"] == ["equipment:read", "fault:create"]
+    assert set(response.json()) == {"id", "username", "enabled", "permission_codes"}
+
+
 def test_user_without_operation_permission_is_forbidden(client: TestClient) -> None:
     token = create_user_token(client, [])
 

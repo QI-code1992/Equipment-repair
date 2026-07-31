@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { ApiError, AuditEvent, BiDashboard, Equipment, MaintenanceRecord, WorkOrder, createOrganization, createUser, deleteOrganization, getAuditEvents, getBiDashboard, getEquipment, getEquipmentDetail, getEquipmentHistory, getIntelligenceUsage, getKnowledgeDocuments, getMaintenanceRecord, getMaintenanceRecords, getOrganizations, getPermissions, getRoles, getUsers, getWorkOrders, requestJson, retryKnowledgeDocument, startAgentRun, updateOrganization, updateRolePermissions, updateUser } from "./api";
+import { ApiError, AuditEvent, BiDashboard, Equipment, MaintenanceRecord, WorkOrder, createOrganization, createUser, deleteOrganization, getAuditEvents, getBiDashboard, getEquipment, getEquipmentDetail, getEquipmentHistory, getIntelligenceUsage, getKnowledgeDocuments, getMaintenanceRecord, getMaintenanceRecords, getOrganizations, getPermissions, getRoles, getUsers, getWorkOrders, requestJson, retryKnowledgeDocument, startAgentRun, submitAgentFaultReport, updateOrganization, updateRolePermissions, updateUser } from "./api";
 
 type LoadState<T> = { value: T | null; error: string | null; loading: boolean };
 
@@ -198,4 +198,37 @@ function OrganizationTree({ items, query, collapsed, onToggle, onEdit, onStateCh
   for (const item of items) if (!visited.has(item.id) && matches(item)) { visited.add(item.id); rows.push({ item, depth: 0 }); }
   return <table><thead><tr><th>类型</th><th>编码</th><th>名称</th><th>父节点</th><th>状态</th><th>操作</th></tr></thead><tbody>{rows.map(({ item, depth }) => { const hasChildren = (byParent.get(item.id) ?? []).length > 0; const root = item.type === "ROOT"; return <tr key={item.id}><td>{item.type}</td><td>{item.code}</td><td style={{ paddingLeft: `${depth * 20}px` }}>{hasChildren && <button type="button" aria-label={`${collapsed.includes(item.id) ? "展开" : "收起"} ${item.name}`} onClick={() => onToggle(item.id)}>{collapsed.includes(item.id) ? "+" : "−"}</button>} {item.name}</td><td>{item.parent_id ?? "—"}</td><td>{item.enabled ? "启用" : "停用"}</td><td>{root ? "根节点受保护" : <><button type="button" onClick={() => onEdit(item)}>编辑</button><button type="button" aria-label={`${item.enabled ? "停用" : "启用"} ${item.name}`} onClick={() => void onStateChange(item)}>{item.enabled ? "停用" : "启用"}</button><button type="button" onClick={() => void onDelete(item)}>删除</button></>}</td></tr>; })}</tbody></table>;
 }
-export function AgentReportPage() { const [equipmentId, setEquipmentId] = useState(""); const [description, setDescription] = useState(""); const [notice, setNotice] = useState<string | null>(null); async function submit(event: FormEvent<HTMLFormElement>) { event.preventDefault(); try { const run = await startAgentRun("fault_reporting", { equipment_id: equipmentId }, description); setNotice(`已创建 AI 上报任务：${run.run_id}`); } catch (error) { setNotice(`创建失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`); } } return <Page title="AI 故障上报"><p>提交前由服务端创建受控故障上报线程；正式业务写入仍须在确认后完成。</p><form className="portal-form" onSubmit={submit}><label>设备 ID<input value={equipmentId} onChange={(event) => setEquipmentId(event.target.value)} required /></label><label>故障描述<textarea value={description} onChange={(event) => setDescription(event.target.value)} required /></label><button type="submit">开始 AI 收集</button></form>{notice && <p role="status">{notice}</p>}<p><Link to="/fault-report">转到人工确认上报</Link></p></Page>; }
+export function AgentReportPage() {
+  const [equipmentId, setEquipmentId] = useState("");
+  const [symptom, setSymptom] = useState("");
+  const [description, setDescription] = useState("");
+  const [urgency, setUrgency] = useState("HIGH");
+  const [occurredAt, setOccurredAt] = useState("");
+  const [collected, setCollected] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function collect(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    try {
+      await startAgentRun("fault_reporting", { equipment_id: equipmentId }, symptom);
+      setCollected(true);
+      setNotice("AI 收集任务已创建，请补全并确认正式上报字段。");
+    } catch (caught) { setError(`创建 AI 收集任务失败：${caught instanceof ApiError ? caught.code : "REQUEST_FAILED"}`); }
+  }
+
+  async function confirm(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      const created = await submitAgentFaultReport({ draft: { equipment_id: equipmentId, urgency, symptom, occurred_at: new Date(occurredAt).toISOString(), possible_location: undefined, description: description || undefined, attachment_refs: [], duration_minutes: 0 }, confirmed: true });
+      if ("draft" in created) throw new Error("unexpected preview");
+      setNotice(`故障已正式提交：${created.number}`);
+    } catch (caught) { setError(`正式提交失败：${caught instanceof ApiError ? caught.code : "REQUEST_FAILED"}`); } finally { setSubmitting(false); }
+  }
+
+  return <Page title="AI 故障上报"><p>AI 只负责受控收集；它不会直接写入故障事实。正式上报必须由用户完成结构化确认。</p><form className="portal-form" onSubmit={collect}><label>设备 ID<input aria-label="设备 ID" value={equipmentId} onChange={(event) => setEquipmentId(event.target.value)} required /></label><label>故障描述<textarea aria-label="故障描述" value={symptom} onChange={(event) => setSymptom(event.target.value)} required /></label><button type="submit">开始 AI 收集</button></form>{collected && <form className="portal-form" onSubmit={confirm}><h3>结构化确认</h3><label>紧急程度<select value={urgency} onChange={(event) => setUrgency(event.target.value)}><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></label><label>发生时间<input aria-label="发生时间" type="datetime-local" value={occurredAt} onChange={(event) => setOccurredAt(event.target.value)} required /></label><label>补充说明<textarea value={description} onChange={(event) => setDescription(event.target.value)} /></label><button type="submit" disabled={submitting || !occurredAt}>{submitting ? "提交中…" : "确认并提交正式故障单"}</button></form>}{error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}<p><Link to="/fault-report">转到人工故障上报</Link></p></Page>;
+}
