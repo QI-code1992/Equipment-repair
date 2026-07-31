@@ -18,7 +18,7 @@ vi.mock("./api", async (importOriginal) => ({
 beforeEach(() => { vi.resetAllMocks(); vi.mocked(getWorkOrders).mockResolvedValue({ items: [], count: 0, page: 1, page_size: 20 }); });
 
 describe("RepairExecutionPage", () => {
-  it("shows staged loading before displaying the server diagnosis question", async () => {
+it("shows staged loading before displaying the server diagnosis question", async () => {
     vi.mocked(runFaultDiagnosis).mockResolvedValue({ state: "QUESTIONING", question: "请描述故障复现工况。", evidence: [], prefill: null, summary: null, steps: 0, questions: 0, diagnosis_draft_id: "draft-loading" });
     render(<RepairExecutionPage />);
     fireEvent.change(screen.getByLabelText("故障单 ID"), { target: { value: "fault-loading" } });
@@ -42,6 +42,16 @@ describe("RepairExecutionPage", () => {
     expect(await screen.findByText("维修工单已创建：wo-1")).toBeInTheDocument();
     expect(startRepair).toHaveBeenCalledWith("fault-1", { mode: "DIRECT" });
   });
+});
+
+it("reloads assigned work orders with the selected status", async () => {
+  vi.mocked(getWorkOrders)
+    .mockResolvedValueOnce({ items: [], count: 0, page: 1, page_size: 20 })
+    .mockResolvedValueOnce({ items: [{ id: "wo-1", number: "WO-1", fault_report_id: "fault-1", equipment_id: "eq-1", status: "IN_REPAIR", repairer_user_id: "user-1", symptom: "异响", started_at: null, completed_at: null }], count: 1, page: 1, page_size: 20 });
+  render(<RepairExecutionPage />);
+  fireEvent.change(await screen.findByLabelText("维修执行工单状态筛选"), { target: { value: "IN_REPAIR" } });
+  expect(await screen.findByText(/WO-1/)).toBeInTheDocument();
+  expect(getWorkOrders).toHaveBeenLastCalledWith({ status: "IN_REPAIR" });
 });
 
 it("sends only the server draft id and user evidence when advancing diagnosis", async () => {

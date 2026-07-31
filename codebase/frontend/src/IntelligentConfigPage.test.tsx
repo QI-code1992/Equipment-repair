@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { createModelBinding, createModelProvider, getAgentConfigs, getModelBindings, getModelProviders, saveAgentConfig, updateModelBinding, updateModelProvider } from "./api";
+import { createModelBinding, createModelProvider, getAgentConfigs, getModelBindings, getModelProviders, saveAgentConfig, updateModelBinding, updateModelProvider, uploadKnowledgeDocument } from "./api";
 import { IntelligentConfigPage } from "./IntelligentConfigPage";
 
 vi.mock("./api", async (importOriginal) => ({
@@ -15,6 +15,7 @@ vi.mock("./api", async (importOriginal) => ({
   updateModelProvider: vi.fn(),
   updateModelBinding: vi.fn(),
   saveAgentConfig: vi.fn(),
+  uploadKnowledgeDocument: vi.fn(),
 }));
 
 const config = {
@@ -78,5 +79,18 @@ describe("IntelligentConfigPage", () => {
     await waitFor(() => expect(updateModelBinding).toHaveBeenCalledWith("binding-1", expect.objectContaining({
       name: "已更新运维模型", model_name: "ops-2", supports_reasoning: false,
     })));
+  });
+
+  it("uploads a knowledge document only after a dataset is supplied", async () => {
+    vi.mocked(getAgentConfigs).mockResolvedValue([config]);
+    vi.mocked(getModelProviders).mockResolvedValue([]);
+    vi.mocked(getModelBindings).mockResolvedValue([]);
+    vi.mocked(uploadKnowledgeDocument).mockResolvedValue({ id: "doc-1", filename: "manual.pdf", status: "UPLOADING" });
+    render(<IntelligentConfigPage />);
+    await screen.findByText("暂无模型提供商。");
+    fireEvent.change(screen.getByLabelText("正式 Dataset ID"), { target: { value: "dataset-1" } });
+    fireEvent.change(screen.getByLabelText("上传知识文档"), { target: { files: [new File(["manual"], "manual.pdf", { type: "application/pdf" })] } });
+    await waitFor(() => expect(uploadKnowledgeDocument).toHaveBeenCalledWith("dataset-1", expect.any(File)));
+    expect(await screen.findByText("知识文档已提交，后续状态由正式 Worker 更新。")).toBeInTheDocument();
   });
 });

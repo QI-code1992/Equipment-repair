@@ -12,6 +12,15 @@
 | TC-SEC-* | login, permission, audit, secrets | AC-001–005 |
 | TC-RES-* | outage fallback, repeated submit, UI states | AC-029–031 |
 
+## TASK-012 统一开发候选回归（2026-07-31）
+
+| ID | 用例与通过条件 | 当前证据 |
+|---|---|---|
+| TC-T012-READ-001 | BI 日/周/月窗口、组织不存在、设备历史趋势、维修记录知识状态、工单状态和审计筛选均调用正式 API；不拼接业务聚合。 | `tests/modules/test_task012_read_apis.py`；前端 `PortalPages.test.tsx`。 |
+| TC-T012-AGENT-001 | 线程历史只返回当前用户摘要；详情、resume 布尔契约、SSE 状态可用；原始用户消息和思维链不渲染。 | `test_agent_runtime.py`；`App.test.tsx`、`api.test.ts`。 |
+| TC-T012-ATTACH-001 | 故障上报和 AI 故障上报只接受附件上传 API 返回的安全引用；上传中/失败时不能写入附件引用。 | `FaultReportPage.test.tsx`、`IntelligentConfigPage.test.tsx`。 |
+| TC-T012-UI-001 | 全部正式 P0 路由拥有加载、空、错误、禁用或权限状态；数据导入明确排除。 | `FRONTEND_PROTOTYPE_DIFFERENCE_MATRIX.md` 与页面测试。 |
+
 动态、浏览器与 live-stack 可执行用例在相应 Stage 6 验证启动前补齐并绑定精确集成提交；不得将下列静态用例替代其运行态证据。
 
 ## Stage 6 静态全局审查用例

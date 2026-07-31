@@ -1,5 +1,14 @@
 # 自测
 
+## TASK-012 整体开发候选本地回归（2026-07-31）
+
+- 当前开发分支：`codex/task-012-p0-frontend-remediation`；主体提交 `9986475`，本轮测试回归随后纳入最终候选。
+- 前端：`npm test -- --run` 为 `7 files / 53 passed`；`npm run build` 通过。
+- 后端：`.venv/bin/python -m pytest tests -q` 为 `328 passed, 13 skipped, 2 warnings`；`.venv/bin/python -m compileall -q app tests` 通过。
+- 静态回归：`node --test 06-testing/tests/*.test.js` 为 `15 passed`；`workflow/state.json` JSON 解析和 `git diff --check` 通过。
+- 本轮补充回归覆盖安全附件引用、知识文档上传前置 Dataset、维修执行工单状态筛选；未新增生产依赖、兼容层或抽象层。
+- 未验证：Windows Docker Desktop/WSL2、真实 ClamAV/MinIO、真实 RAGFlow、HTTPS、浏览器逐页 E2E、重启/备份恢复和生产部署；这些必须由具备环境的最终审核者在最终精确候选上验证。
+
 - 状态：Stage 5 开发自测与真实 PostgreSQL/Compose 验证已执行；Stage 6 独立测试和生产环境验收尚未执行
 - 原型证据：Node 静态检查位于 `06-testing/tests/`，不属于生产测试。
 - 必要生产检查：单元、API 契约、权限、健康分、Agent/RAGFlow 集成、安全、性能和端到端测试。

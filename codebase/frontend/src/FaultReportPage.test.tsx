@@ -1,13 +1,14 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ApiError, createFaultReport, submitAgentFaultReport } from "./api";
+import { ApiError, createFaultReport, submitAgentFaultReport, uploadAttachment } from "./api";
 import { FaultReportPage } from "./FaultReportPage";
 
 vi.mock("./api", async (importOriginal) => ({
   ...await importOriginal<typeof import("./api")>(),
   createFaultReport: vi.fn(),
   submitAgentFaultReport: vi.fn(),
+  uploadAttachment: vi.fn(),
 }));
 
 describe("FaultReportPage", () => {
@@ -53,5 +54,20 @@ describe("FaultReportPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "提交故障" }));
     await waitFor(() => expect(createFaultReport).toHaveBeenCalledOnce());
     expect(await screen.findByText("故障已提交：FR-001")).toBeInTheDocument();
+  });
+
+  it("adds only a clean uploaded attachment to the formal fault payload", async () => {
+    vi.mocked(uploadAttachment).mockResolvedValue({ object_key: "safe/file.pdf", filename: "manual.pdf", size_bytes: 12, content_type: "application/pdf" });
+    vi.mocked(createFaultReport).mockResolvedValue({
+      id: "fault-2", number: "FR-002", status: "PENDING_ACCEPT", equipment_id: "eq-1", urgency: "HIGH", symptom: "异响", occurred_at: "2026-07-27T10:00:00+08:00", attachment_refs: [{ object_key: "safe/file.pdf", filename: "manual.pdf", size_bytes: 12, content_type: "application/pdf" }],
+    });
+    render(<FaultReportPage />);
+    fireEvent.change(screen.getByLabelText("设备 ID"), { target: { value: "eq-1" } });
+    fireEvent.change(screen.getByLabelText("故障现象"), { target: { value: "异响" } });
+    fireEvent.change(screen.getByLabelText("发生时间"), { target: { value: "2026-07-27T10:00" } });
+    fireEvent.change(screen.getByLabelText("故障附件"), { target: { files: [new File(["safe"], "manual.pdf", { type: "application/pdf" })] } });
+    expect(await screen.findByText(/附件已通过安全检查/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "提交故障" }));
+    await waitFor(() => expect(createFaultReport).toHaveBeenCalledWith(expect.objectContaining({ attachment_refs: [{ object_key: "safe/file.pdf", filename: "manual.pdf", size_bytes: 12, content_type: "application/pdf" }] })));
   });
 });
