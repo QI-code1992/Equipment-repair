@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { ApiError, AuditEvent, BiDashboard, Equipment, MaintenanceRecord, WorkOrder, createOrganization, createUser, deleteOrganization, getAuditEvents, getBiDashboard, getEquipment, getEquipmentDetail, getEquipmentHistory, getIntelligenceUsage, getKnowledgeDocuments, getMaintenanceRecord, getMaintenanceRecords, getOrganizations, getPermissions, getRoles, getUsers, getWorkOrders, requestJson, retryKnowledgeDocument, startAgentRun, submitAgentFaultReport, uploadAttachment, updateOrganization, updateRolePermissions, updateUser, type AttachmentRef } from "./api";
+import { ApiError, AuditEvent, BiDashboard, Equipment, MaintenanceRecord, WorkOrder, createOrganization, createUser, deleteOrganization, getAuditEvents, getBiDashboard, getEquipment, getEquipmentDetail, getEquipmentHistory, getIntelligenceUsage, getKnowledgeDocuments, getMaintenanceRecord, getMaintenanceRecords, getOrganizations, getPermissions, getRoles, getUsers, getWorkOrders, readRunEvents, requestJson, retryKnowledgeDocument, startAgentRun, submitAgentFaultReport, uploadAttachment, updateOrganization, updateRolePermissions, updateUser, type AttachmentRef, type RuntimeEvent } from "./api";
 
 type LoadState<T> = { value: T | null; error: string | null; loading: boolean };
 
@@ -219,6 +219,8 @@ export function AgentReportPage() {
   const [submitting, setSubmitting] = useState(false);
   const [attachments, setAttachments] = useState<AttachmentRef[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [durationMinutes, setDurationMinutes] = useState(0);
+  const [runtimeEvents, setRuntimeEvents] = useState<RuntimeEvent[]>([]);
 
   async function addAttachment(file: File | undefined) {
     if (!file) return;
@@ -239,7 +241,8 @@ export function AgentReportPage() {
     event.preventDefault();
     setError(null);
     try {
-      await startAgentRun("fault_reporting", { equipment_id: equipmentId }, symptom);
+      const run = await startAgentRun("fault_reporting", { equipment_id: equipmentId }, symptom);
+      setRuntimeEvents(await readRunEvents(run.run_id));
       setCollected(true);
       setNotice("AI 收集任务已创建，请补全并确认正式上报字段。");
     } catch (caught) { setError(`创建 AI 收集任务失败：${caught instanceof ApiError ? caught.code : "REQUEST_FAILED"}`); }
@@ -250,11 +253,11 @@ export function AgentReportPage() {
     setError(null);
     setSubmitting(true);
     try {
-      const created = await submitAgentFaultReport({ draft: { equipment_id: equipmentId, urgency, symptom, occurred_at: new Date(occurredAt).toISOString(), possible_location: undefined, description: description || undefined, attachment_refs: attachments, duration_minutes: 0 }, confirmed: true });
+      const created = await submitAgentFaultReport({ draft: { equipment_id: equipmentId, urgency, symptom, occurred_at: new Date(occurredAt).toISOString(), possible_location: undefined, description: description || undefined, attachment_refs: attachments, duration_minutes: durationMinutes }, confirmed: true });
       if ("draft" in created) throw new Error("unexpected preview");
       setNotice(`故障已正式提交：${created.number}`);
     } catch (caught) { setError(`正式提交失败：${caught instanceof ApiError ? caught.code : "REQUEST_FAILED"}`); } finally { setSubmitting(false); }
   }
 
-  return <Page title="AI 故障上报"><p>AI 只负责受控收集；它不会直接写入故障事实。正式上报必须由用户完成结构化确认。</p><form className="portal-form" onSubmit={collect}><label>设备 ID<input aria-label="设备 ID" value={equipmentId} onChange={(event) => setEquipmentId(event.target.value)} required /></label><label>故障描述<textarea aria-label="故障描述" value={symptom} onChange={(event) => setSymptom(event.target.value)} required /></label><button type="submit">开始 AI 收集</button></form>{collected && <form className="portal-form" onSubmit={confirm}><h3>结构化确认</h3><label>紧急程度<select value={urgency} onChange={(event) => setUrgency(event.target.value)}><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></label><label>发生时间<input aria-label="发生时间" type="datetime-local" value={occurredAt} onChange={(event) => setOccurredAt(event.target.value)} required /></label><label>补充说明<textarea value={description} onChange={(event) => setDescription(event.target.value)} /></label><label>附件<input aria-label="AI 故障附件" type="file" disabled={uploading || submitting} onChange={(event) => void addAttachment(event.target.files?.[0])} /></label>{uploading && <p role="status">附件正在上传并进行安全检查…</p>}{attachments.length > 0 && <ul aria-label="AI 草稿附件">{attachments.map((item) => <li key={item.object_key}>{item.filename}</li>)}</ul>}<button type="submit" disabled={submitting || uploading || !occurredAt}>{submitting ? "提交中…" : "确认并提交正式故障单"}</button></form>}{error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}<p><Link to="/fault-report">转到人工故障上报</Link></p></Page>;
+  return <Page title="AI 故障上报"><p>AI 只负责受控收集；它不会直接写入故障事实。正式上报必须由用户完成结构化确认。</p><form className="portal-form" onSubmit={collect}><label>设备 ID<input aria-label="设备 ID" value={equipmentId} onChange={(event) => setEquipmentId(event.target.value)} required /></label><label>故障描述<textarea aria-label="故障描述" value={symptom} onChange={(event) => setSymptom(event.target.value)} required /></label><button type="submit">开始 AI 收集</button></form>{runtimeEvents.length > 0 && <section aria-label="AI 运行状态">{runtimeEvents.map((item, index) => <p key={`${item.event}-${index}`}>运行状态：{String(item.data.status ?? item.event)}</p>)}</section>}{collected && <form className="portal-form" onSubmit={confirm}><h3>结构化确认</h3><label>紧急程度<select value={urgency} onChange={(event) => setUrgency(event.target.value)}><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></label><label>发生时间<input aria-label="发生时间" type="datetime-local" value={occurredAt} onChange={(event) => setOccurredAt(event.target.value)} required /></label><label>持续时间（分钟）<input aria-label="持续时间（分钟）" type="number" min="0" value={durationMinutes} onChange={(event) => setDurationMinutes(Number(event.target.value))} /></label><label>补充说明<textarea value={description} onChange={(event) => setDescription(event.target.value)} /></label><label>附件<input aria-label="AI 故障附件" type="file" disabled={uploading || submitting} onChange={(event) => void addAttachment(event.target.files?.[0])} /></label>{uploading && <p role="status">附件正在上传并进行安全检查…</p>}{attachments.length > 0 && <ul aria-label="AI 草稿附件">{attachments.map((item) => <li key={item.object_key}>{item.filename}</li>)}</ul>}<button type="submit" disabled={submitting || uploading || !occurredAt}>{submitting ? "提交中…" : "确认并提交正式故障单"}</button></form>}{error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}<p><Link to="/fault-report">转到人工故障上报</Link></p></Page>;
 }

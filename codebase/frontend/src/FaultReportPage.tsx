@@ -88,7 +88,7 @@ export function FaultReportPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const created = await submitAgentFaultReport({ draft: preview.draft, confirmed: true });
+      const created = await submitAgentFaultReport({ draft: { ...preview.draft, ...payload, duration_minutes: preview.draft.duration_minutes }, confirmed: true });
       if (isPreview(created)) throw new Error("unexpected preview");
       setPreview(null);
       setNotice(`故障已提交：${created.number}`);
@@ -107,9 +107,9 @@ export function FaultReportPage() {
       <label>附件<input aria-label="故障附件" type="file" accept="image/jpeg,image/png,image/webp,application/pdf,text/plain" disabled={uploading || submitting} onChange={(event) => void addAttachment(event.target.files?.[0])} /></label>
       {uploading && <p role="status">附件正在上传并进行安全检查…</p>}
       {attachments.length > 0 && <ul aria-label="已上传附件">{attachments.map((item) => <li key={item.object_key}>{item.filename}（{item.size_bytes} bytes）</li>)}</ul>}
-      {preview && <section className="data-card" aria-label="AI 草稿预览"><h3>AI 草稿预览</h3><p>设备：{preview.draft.equipment_id}；紧急程度：{preview.draft.urgency}</p><p>故障现象：{preview.draft.symptom}</p><button type="button" disabled={submitting} onClick={() => void confirmPreview()}>确认并提交 AI 草稿</button></section>}
+      {preview && <section className="data-card" aria-label="AI 草稿预览"><h3>AI 草稿预览</h3><p>设备：{preview.draft.equipment_id}；紧急程度：{preview.draft.urgency}</p><p>故障现象：{preview.draft.symptom}</p><button type="button" disabled={submitting || uploading} onClick={() => void confirmPreview()}>确认并提交 AI 草稿</button></section>}
       {error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}
-      <div className="form-actions"><button type="button" disabled={submitting} onClick={() => void generatePreview()}>生成 AI 草稿</button><button type="submit" disabled={submitting}>{submitting ? "提交中…" : "提交故障"}</button></div>
+      <div className="form-actions"><button type="button" disabled={submitting || uploading || Boolean(preview)} onClick={() => void generatePreview()}>生成 AI 草稿</button><button type="submit" disabled={submitting || uploading || Boolean(preview)}>{submitting ? "提交中…" : "提交故障"}</button></div>
     </form>
   </section>;
 }

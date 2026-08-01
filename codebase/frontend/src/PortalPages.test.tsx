@@ -252,9 +252,11 @@ describe("TASK-012 portal pages", () => {
   });
 
   it("requires an explicit structured confirmation before AI fault reporting writes a formal fault", async () => {
+    const encoder = new TextEncoder();
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ thread_id: "thread-1" }), { status: 201 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({ run_id: "run-1" }), { status: 202 }))
+      .mockResolvedValueOnce(new Response(new ReadableStream({ start(controller) { controller.enqueue(encoder.encode('event: run_started\ndata: {"status":"RUNNING"}\n\n')); controller.close(); } }), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({ id: "fault-1", number: "FR-1", agent_status: "submitted" }), { status: 201 }));
     vi.stubGlobal("fetch", fetchMock);
 
@@ -265,11 +267,13 @@ describe("TASK-012 portal pages", () => {
     fireEvent.change(screen.getByLabelText("故障描述"), { target: { value: "液压异响" } });
     fireEvent.click(screen.getByRole("button", { name: "开始 AI 收集" }));
     await screen.findByText("AI 收集任务已创建，请补全并确认正式上报字段。");
+    expect(await screen.findByText("运行状态：RUNNING")).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("发生时间"), { target: { value: "2026-07-31T10:00" } });
+    fireEvent.change(screen.getByLabelText("持续时间（分钟）"), { target: { value: "25" } });
     fireEvent.click(screen.getByRole("button", { name: "确认并提交正式故障单" }));
 
     await screen.findByText("故障已正式提交：FR-1");
-    expect(fetchMock.mock.calls[2][0]).toBe("/api/agent/fault-reports/submit");
-    expect(JSON.parse(String((fetchMock.mock.calls[2][1] as RequestInit).body))).toMatchObject({ confirmed: true, draft: { equipment_id: "eq-1", symptom: "液压异响" } });
+    expect(fetchMock.mock.calls[3][0]).toBe("/api/agent/fault-reports/submit");
+    expect(JSON.parse(String((fetchMock.mock.calls[3][1] as RequestInit).body))).toMatchObject({ confirmed: true, draft: { equipment_id: "eq-1", symptom: "液压异响", duration_minutes: 25 } });
   });
 });
