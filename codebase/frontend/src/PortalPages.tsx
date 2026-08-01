@@ -56,19 +56,48 @@ function EquipmentForm({ edit = false }: { edit?: boolean }) {
   const organizations = useData(getOrganizations, []);
   const users = useData(getUsers, []);
   const [message, setMessage] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saving) return;
     const form = new FormData(event.currentTarget);
     const ownerUserId = String(form.get("owner_user_id") ?? "");
-    const body = { code: String(form.get("code")), name: String(form.get("name")), model: String(form.get("model")), type: String(form.get("type")), manufacturer: String(form.get("manufacturer")), manufactured_at: null, commissioned_at: null, operating_hours: Number(form.get("operating_hours")), status: String(form.get("status")), organization_id: String(form.get("organization_id")), owner_user_id: ownerUserId || null, image_refs: [] };
-    try { await requestJson(edit ? `/api/equipment/${id}` : "/api/equipment", { method: edit ? "PATCH" : "POST", headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify(body) }); setMessage("已保存正式设备数据。"); } catch (error) { setMessage(`保存失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`); }
+    const manufacturedAt = String(form.get("manufactured_at") ?? "");
+    const commissionedAt = String(form.get("commissioned_at") ?? "");
+    const imageObjectKey = String(form.get("image_object_key") ?? "").trim();
+    const imageFilename = String(form.get("image_filename") ?? "").trim();
+    const imageRefs = imageObjectKey && imageFilename ? [{ object_key: imageObjectKey, filename: imageFilename }] : [];
+    const body = {
+      code: String(form.get("code")),
+      name: String(form.get("name")),
+      model: String(form.get("model")),
+      type: String(form.get("type")),
+      manufacturer: String(form.get("manufacturer")),
+      manufactured_at: manufacturedAt || null,
+      commissioned_at: commissionedAt || null,
+      operating_hours: Number(form.get("operating_hours")),
+      status: String(form.get("status")),
+      organization_id: String(form.get("organization_id")),
+      owner_user_id: ownerUserId || null,
+      image_refs: imageRefs,
+    };
+    setSaving(true);
+    try {
+      await requestJson(edit ? `/api/equipment/${id}` : "/api/equipment", { method: edit ? "PATCH" : "POST", headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify(body) });
+      setMessage("已保存正式设备数据。");
+    } catch (error) {
+      setMessage(`保存失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`);
+    } finally {
+      setSaving(false);
+    }
   }
   const current = details.value;
+  const currentImage = current?.image_refs[0];
   if (details.loading || organizations.loading || users.loading) return <Page title={edit ? "编辑设备" : "新增设备"}><p role="status">正在加载…</p></Page>;
   if (details.error || organizations.error || users.error) return <Page title={edit ? "编辑设备" : "新增设备"}><p role="alert">无法加载设备依赖：{details.error ?? organizations.error ?? users.error}</p></Page>;
   const lines = (organizations.value ?? []).filter((item) => item.type === "LINE" && item.enabled);
   const owners = (users.value ?? []).filter((item) => item.enabled);
-  return <Page title={edit ? "编辑设备" : "新增设备"}><form className="portal-form" onSubmit={submit}><label>设备编码<input name="code" required defaultValue={current?.code} /></label><label>设备名称<input name="name" required defaultValue={current?.name} /></label><label>型号<input name="model" required defaultValue={current?.model} /></label><label>类型<input name="type" required defaultValue={current?.type} /></label><label>制造商<input name="manufacturer" required defaultValue={current?.manufacturer} /></label><label>所属产线<select name="organization_id" aria-label="所属产线" required defaultValue={current?.organization_id ?? lines[0]?.id ?? ""}><option value="" disabled>请选择启用产线</option>{lines.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label><label>负责人<select name="owner_user_id" aria-label="负责人" defaultValue={current?.owner_user_id ?? ""}><option value="">未分配</option>{owners.map((item) => <option key={item.id} value={item.id}>{item.username}</option>)}</select></label><label>运行工时<input name="operating_hours" type="number" min="0" defaultValue={current?.operating_hours ?? 0} /></label><label>状态<select name="status" defaultValue={current?.status ?? "NORMAL"}><option>NORMAL</option><option>FAULT</option><option>REPAIRING</option><option>DISABLED</option></select></label><button type="submit" disabled={!lines.length}>保存</button>{!lines.length && <p role="alert">没有可用产线，无法保存设备。</p>}{message && <p role="status">{message}</p>}</form></Page>;
+  return <Page title={edit ? "编辑设备" : "新增设备"}><form className="portal-form" onSubmit={submit}><label>设备编码<input name="code" required defaultValue={current?.code} /></label><label>设备名称<input name="name" required defaultValue={current?.name} /></label><label>型号<input name="model" required defaultValue={current?.model} /></label><label>类型<input name="type" required defaultValue={current?.type} /></label><label>制造商<input name="manufacturer" required defaultValue={current?.manufacturer} /></label><label>制造日期<input aria-label="制造日期" name="manufactured_at" type="date" defaultValue={current?.manufactured_at ?? ""} /></label><label>投用日期<input aria-label="投用日期" name="commissioned_at" type="date" defaultValue={current?.commissioned_at ?? ""} /></label><label>图片对象键<input aria-label="图片对象键" name="image_object_key" defaultValue={currentImage?.object_key ?? ""} /></label><label>图片文件名<input aria-label="图片文件名" name="image_filename" defaultValue={currentImage?.filename ?? ""} /></label><label>所属产线<select name="organization_id" aria-label="所属产线" required defaultValue={current?.organization_id ?? lines[0]?.id ?? ""}><option value="" disabled>请选择启用产线</option>{lines.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label><label>负责人<select name="owner_user_id" aria-label="负责人" defaultValue={current?.owner_user_id ?? ""}><option value="">未分配</option>{owners.map((item) => <option key={item.id} value={item.id}>{item.username}</option>)}</select></label><label>运行工时<input name="operating_hours" type="number" min="0" defaultValue={current?.operating_hours ?? 0} /></label><label>状态<select name="status" defaultValue={current?.status ?? "NORMAL"}><option>NORMAL</option><option>FAULT</option><option>REPAIRING</option><option>DISABLED</option></select></label><button type="submit" disabled={!lines.length || saving}>{saving ? "保存中…" : "保存"}</button>{!lines.length && <p role="alert">没有可用产线，无法保存设备。</p>}{message && <p role="status">{message}</p>}</form></Page>;
 }
 export const EquipmentAddPage = () => <EquipmentForm />;
 export const EquipmentEditPage = () => <EquipmentForm edit />;

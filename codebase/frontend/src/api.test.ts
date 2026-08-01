@@ -231,6 +231,31 @@ describe("Agent Runtime SSE API", () => {
     expect(new Headers(init.headers).get("Authorization")).toBe("Bearer active-login-token");
   });
 
+  it("emits SSE events as chunks arrive before the stream closes", async () => {
+    const encoder = new TextEncoder();
+    let controller!: ReadableStreamDefaultController<Uint8Array>;
+    const body = new ReadableStream<Uint8Array>({
+      start(activeController) {
+        controller = activeController;
+        controller.enqueue(encoder.encode('event: run_started\ndata: {"status":"RUNNING"}\n\n'));
+      },
+    });
+    const fetchMock = vi.fn().mockResolvedValue(new Response(body, { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const seen: Array<{ event: string; data: Record<string, unknown> }> = [];
+
+    const pending = readRunEvents("run-1", (event) => seen.push(event));
+    for (let index = 0; index < 10 && seen.length === 0; index += 1) await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(seen).toEqual([{ event: "run_started", data: { status: "RUNNING" } }]);
+    controller.enqueue(encoder.encode('event: run_completed\ndata: {"status":"COMPLETED"}\n\n'));
+    controller.close();
+    await expect(pending).resolves.toEqual([
+      { event: "run_started", data: { status: "RUNNING" } },
+      { event: "run_completed", data: { status: "COMPLETED" } },
+    ]);
+  });
+
   it("creates an operation-guidance thread before starting its run", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ thread_id: "thread-1" }), { status: 201 }))

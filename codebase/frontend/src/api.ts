@@ -184,20 +184,36 @@ export function runFaultDiagnosis(payload: {
   return postJson<DiagnosisResponse>("/api/agent/fault-diagnosis", payload);
 }
 
-export async function readRunEvents(runId: string): Promise<RuntimeEvent[]> {
+export async function readRunEvents(runId: string, onEvent?: (event: RuntimeEvent) => void): Promise<RuntimeEvent[]> {
   const response = await fetch(`/api/agent/runs/${runId}/events`, withAuthorization());
   if (!response.ok || !response.body) throw new ApiError(response.status, null);
-  const text = await response.text();
-  return text.split("\n\n").flatMap((block) => {
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  const events: RuntimeEvent[] = [];
+  let buffered = "";
+  const emit = (block: string) => {
     const event = block.match(/^event: (.+)$/m)?.[1];
     const data = block.match(/^data: (.+)$/m)?.[1];
-    if (!event || !data) return [];
+    if (!event || !data) return;
     try {
-      return [{ event, data: JSON.parse(data) as Record<string, unknown> }];
+      const parsed = { event, data: JSON.parse(data) as Record<string, unknown> };
+      events.push(parsed);
+      onEvent?.(parsed);
     } catch {
-      return [];
+      return;
     }
-  });
+  };
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffered += decoder.decode(value, { stream: true });
+    const blocks = buffered.split("\n\n");
+    buffered = blocks.pop() ?? "";
+    blocks.forEach(emit);
+  }
+  buffered += decoder.decode();
+  if (buffered.trim()) emit(buffered);
+  return events;
 }
 
 export async function startAgentRun(agentId: string, businessContext: Record<string, unknown>, text: string) {
@@ -292,7 +308,7 @@ export const updateModelBinding = (id: string, body: ModelBindingWrite) => putJs
 export const deleteModelBinding = (id: string) => deleteJson<{ id: string }>(`/api/model-bindings/${id}`);
 
 export type PageResult<T> = { items: T[]; count: number; page: number; page_size: number };
-export type Equipment = { id: string; code: string; name: string; model: string; type: string; manufacturer: string; status: string; organization_id: string; owner_user_id: string | null; operating_hours: number };
+export type Equipment = { id: string; code: string; name: string; model: string; type: string; manufacturer: string; manufactured_at: string | null; commissioned_at: string | null; status: string; organization_id: string; owner_user_id: string | null; operating_hours: number; image_refs: Array<{ object_key: string; filename: string }> };
 export type WorkOrder = { id: string; number: string; fault_report_id: string; equipment_id: string; status: string; repairer_user_id: string | null; symptom: string; started_at: string | null; completed_at: string | null };
 export type MaintenanceRecord = { maintenance_record_id: string; work_order_id: string; fault_report_id?: string; equipment_id: string; work_order_number: string; status: string; symptom: string; actual_cause: string | null; actual_solution: string | null; repair_result: string | null; completed_at: string | null; knowledge_status: string; start_mode?: string; parts_replacement_notes?: string | null; created_at?: string; updated_at?: string };
 export type AuditEvent = { id: string; actor_user_id: string | null; action: string; resource_type: string; resource_id: string | null; result: string; created_at: string };

@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 
-import { AgentReportPage, BiDashboardPage, EquipmentAddPage, EquipmentDetailPage, EquipmentLedgerPage, FactoryModelingPage, IntelligentAuditPage, MaintenanceRecordDetailPage, MaintenanceRecordsPage, SystemManagementPage } from "./PortalPages";
+import { AgentReportPage, BiDashboardPage, EquipmentAddPage, EquipmentDetailPage, EquipmentEditPage, EquipmentLedgerPage, FactoryModelingPage, IntelligentAuditPage, MaintenanceRecordDetailPage, MaintenanceRecordsPage, SystemManagementPage } from "./PortalPages";
 
 describe("TASK-012 portal pages", () => {
   it("renders BI only from its formal API response", async () => {
@@ -145,6 +145,35 @@ describe("TASK-012 portal pages", () => {
     const init = fetchMock.mock.calls[2][1] as RequestInit;
     expect(new Headers(init.headers).get("Idempotency-Key")).toBeTruthy();
     expect(JSON.parse(String(init.body))).toMatchObject({ organization_id: "line-1", owner_user_id: "user-1" });
+  });
+
+  it("preserves editable equipment dates and image refs instead of clearing formal fields", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        id: "eq-1", code: "EQ-01", name: "装载机", model: "L-1", type: "LOADER", manufacturer: "M",
+        manufactured_at: "2026-01-10", commissioned_at: "2026-02-01", operating_hours: 12,
+        status: "NORMAL", organization_id: "line-1", owner_user_id: "user-1",
+        image_refs: [{ object_key: "equipment/eq-1.png", filename: "eq-1.png" }],
+      }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "line-1", type: "LINE", code: "LINE", name: "一线", parent_id: "factory", enabled: true }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "user-1", username: "owner", enabled: true, role_ids: [] }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "eq-1" }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<MemoryRouter initialEntries={["/equipment/eq-1/edit"]}><Routes><Route path="/equipment/:id/edit" element={<EquipmentEditPage />} /></Routes></MemoryRouter>);
+
+    expect(await screen.findByDisplayValue("2026-01-10")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("2026-02-01")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("equipment/eq-1.png")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "保存" }));
+
+    await screen.findByText("已保存正式设备数据。");
+    const init = fetchMock.mock.calls[3][1] as RequestInit;
+    expect(JSON.parse(String(init.body))).toMatchObject({
+      manufactured_at: "2026-01-10",
+      commissioned_at: "2026-02-01",
+      image_refs: [{ object_key: "equipment/eq-1.png", filename: "eq-1.png" }],
+    });
   });
 
   it("keeps management lists behind their formal endpoints", async () => {
