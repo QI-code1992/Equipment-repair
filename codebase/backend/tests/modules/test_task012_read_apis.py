@@ -81,9 +81,10 @@ def test_bi_filter_scopes_ranking_and_calculates_completed_duration(client: Test
 
     assert response.status_code == 200
     body = response.json()
+    assert body["summary"]["fault_count"] == 0
     assert body["summary"]["completed_work_order_count"] == 1
     assert body["efficiency"]["average_completion_hours"] == 3.0
-    assert {item["organization_id"] for item in body["organization_ranking"]} == {organization_id}
+    assert body["organization_ranking"] == [{"organization_id": organization_id, "organization_name": body["organization_ranking"][0]["organization_name"], "fault_count": 0}]
     assert body["history_comparison"] == {"current_fault_count": 0, "previous_fault_count": 1}
     assert other_organization_id != organization_id
 
@@ -111,12 +112,18 @@ def test_maintenance_and_assigned_work_orders_have_controlled_read_models(client
 
     assert records.status_code == 200
     assert records.json()["items"][0]["equipment_id"] == equipment_id
+    assert records.json()["items"][0]["knowledge_status"] == "LINKED"
     assert detail.status_code == 200
-    assert detail.json()["knowledge_status"] == "NOT_LINKED"
+    assert detail.json()["knowledge_status"] == "LINKED"
     assert orders.status_code == 200
     assert order.status_code == 200
     assert order.json()["id"] == work_order_id
     assert "diagnosis_prefill" not in detail.json()
+    linked = client.get("/api/maintenance-records?knowledge_status=LINKED", headers=auth_headers(token))
+    assert linked.status_code == 200
+    assert linked.json()["count"] == 1
+    invalid_knowledge_status = client.get("/api/maintenance-records?knowledge_status=UNKNOWN", headers=auth_headers(token))
+    assert invalid_knowledge_status.status_code == 422
     invalid_status = client.get("/api/work-orders?status=UNKNOWN", headers=auth_headers(token))
     assert invalid_status.status_code == 422
 

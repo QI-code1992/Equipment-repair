@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -29,7 +29,7 @@ def _page(items: list[dict[str, object]], page: int, page_size: int) -> dict[str
     return {"items": items[start:start + page_size], "count": len(items), "page": page, "page_size": page_size}
 
 
-def _record_body(record: MaintenanceRecord, order: WorkOrder, fault: FaultReport, *, include_detail: bool) -> dict[str, object]:
+def _record_body(record: MaintenanceRecord, order: WorkOrder, fault: FaultReport, *, include_detail: bool, linked_work_order_ids: set[str] | None = None) -> dict[str, object]:
     body: dict[str, object] = {
         "maintenance_record_id": record.id,
         "work_order_id": order.id,
@@ -42,7 +42,7 @@ def _record_body(record: MaintenanceRecord, order: WorkOrder, fault: FaultReport
         "actual_solution": record.actual_solution,
         "repair_result": record.repair_result,
         "completed_at": order.completed_at.isoformat() if order.completed_at else None,
-        "knowledge_status": "NOT_LINKED",
+        "knowledge_status": "LINKED" if linked_work_order_ids is not None and order.id in linked_work_order_ids else "NOT_LINKED",
     }
     if include_detail:
         body.update({
@@ -53,6 +53,11 @@ def _record_body(record: MaintenanceRecord, order: WorkOrder, fault: FaultReport
         })
     return body
 
+
+def _linked_work_order_ids(db: Session, work_order_ids: list[str]) -> set[str]:
+    if not work_order_ids:
+        return set()
+    return set(db.scalars(select(HistoricalRepairCase.source_work_order_id).where(HistoricalRepairCase.source_work_order_id.in_(work_order_ids))).all())
 
 @router.get("/api/bi/dashboard", response_model=None)
 def bi_dashboard(
@@ -69,11 +74,18 @@ def bi_dashboard(
     fault_statement = select(FaultReport).where(FaultReport.equipment_id.in_(equipment_filter))
     faults = db.scalars(fault_statement).all()
     orders = db.scalars(select(WorkOrder).where(WorkOrder.equipment_id.in_(equipment_filter))).all()
+    now = datetime.now(UTC)
+    window_days = {"day": 1, "week": 7, "month": 30}[period]
+    current_window_start = now - timedelta(days=window_days)
+    previous_window_start = now - timedelta(days=window_days * 2)
+    current_faults = [item for item in faults if _utc(item.submitted_at) >= current_window_start]
+    current_completed = [item for item in orders if item.completed_at is not None and _utc(item.completed_at) >= current_window_start]
+    current_orders = [item for item in orders if _utc(item.created_at) >= current_window_start or (item.completed_at is not None and _utc(item.completed_at) >= current_window_start)]
     ranking_statement = (
         select(Organization.id, Organization.name, func.count(FaultReport.id))
         .select_from(Organization)
         .join(Equipment, Equipment.organization_id == Organization.id)
-        .outerjoin(FaultReport, FaultReport.equipment_id == Equipment.id)
+        .outerjoin(FaultReport, and_(FaultReport.equipment_id == Equipment.id, FaultReport.submitted_at >= current_window_start))
         .group_by(Organization.id, Organization.name)
         .order_by(func.count(FaultReport.id).desc(), Organization.id.asc())
         .limit(20)
@@ -81,25 +93,20 @@ def bi_dashboard(
     if organization_id is not None:
         ranking_statement = ranking_statement.where(Organization.id == organization_id)
     by_org = db.execute(ranking_statement).all()
-    completed = [item for item in orders if item.completed_at is not None]
     completed_durations = [
-        (item.completed_at - item.started_at).total_seconds() / 3600
-        for item in completed
-        if item.started_at is not None and item.completed_at >= item.started_at
+        (_utc(item.completed_at) - _utc(item.started_at)).total_seconds() / 3600
+        for item in current_completed
+        if item.started_at is not None and _utc(item.completed_at) >= _utc(item.started_at)
     ]
-    now = datetime.now(UTC)
-    window_days = {"day": 1, "week": 7, "month": 30}[period]
-    current_window_start = now - timedelta(days=window_days)
-    previous_window_start = now - timedelta(days=window_days * 2)
     trend = []
     for offset in range(window_days - 1, -1, -1):
         day = (now - timedelta(days=offset)).date().isoformat()
-        trend.append({"date": day, "fault_count": sum(item.submitted_at.date().isoformat() == day for item in faults), "completed_work_order_count": sum(item.completed_at is not None and item.completed_at.date().isoformat() == day for item in orders)})
+        trend.append({"date": day, "fault_count": sum(_utc(item.submitted_at).date().isoformat() == day for item in faults), "completed_work_order_count": sum(item.completed_at is not None and _utc(item.completed_at).date().isoformat() == day for item in orders)})
     return {
-        "summary": {"fault_count": len(faults), "active_fault_count": sum(item.status.value != "PROCESSED" for item in faults), "completed_work_order_count": len(completed), "completion_rate": round(len(completed) / len(orders), 4) if orders else 0.0},
+        "summary": {"fault_count": len(current_faults), "active_fault_count": sum(item.status.value != "PROCESSED" for item in current_faults), "completed_work_order_count": len(current_completed), "completion_rate": round(len(current_completed) / len(current_orders), 4) if current_orders else 0.0},
         "trend": trend,
         "efficiency": {
-            "completed_work_order_count": len(completed),
+            "completed_work_order_count": len(current_completed),
             "average_completion_hours": round(sum(completed_durations) / len(completed_durations), 2) if completed_durations else None,
         },
         "organization_ranking": [{"organization_id": item[0], "organization_name": item[1], "fault_count": int(item[2])} for item in by_org],
@@ -128,7 +135,8 @@ def equipment_maintenance_history(
         .where(WorkOrder.equipment_id == equipment_id)
         .order_by(WorkOrder.completed_at.desc(), WorkOrder.id.asc())
     ).all()
-    items = [_record_body(*row, include_detail=False) for row in rows]
+    linked_work_order_ids = _linked_work_order_ids(db, [row[1].id for row in rows])
+    items = [_record_body(*row, include_detail=False, linked_work_order_ids=linked_work_order_ids) for row in rows]
     return {**_page(items, page, page_size), "trend": _history_trend(rows)}
 
 
@@ -145,7 +153,7 @@ def _history_trend(rows: list[tuple[MaintenanceRecord, WorkOrder, FaultReport]])
 @router.get("/api/maintenance-records", response_model=None)
 def maintenance_records(
     equipment_id: str | None = None,
-    knowledge_status: str | None = Query(default=None, min_length=1, max_length=30),
+    knowledge_status: Literal["LINKED", "NOT_LINKED"] | None = None,
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -155,7 +163,8 @@ def maintenance_records(
     if equipment_id is not None:
         statement = statement.where(WorkOrder.equipment_id == equipment_id)
     rows = db.execute(statement.order_by(WorkOrder.completed_at.desc(), WorkOrder.id.asc())).all()
-    items = [_record_body(*row, include_detail=False) for row in rows]
+    linked_work_order_ids = _linked_work_order_ids(db, [row[1].id for row in rows])
+    items = [_record_body(*row, include_detail=False, linked_work_order_ids=linked_work_order_ids) for row in rows]
     if knowledge_status is not None:
         items = [item for item in items if item["knowledge_status"] == knowledge_status]
     return _page(items, page, page_size)
@@ -170,7 +179,8 @@ def maintenance_record_detail(
     row = db.execute(select(MaintenanceRecord, WorkOrder, FaultReport).join(WorkOrder, MaintenanceRecord.work_order_id == WorkOrder.id).join(FaultReport, WorkOrder.fault_report_id == FaultReport.id).where(MaintenanceRecord.id == record_id)).one_or_none()
     if row is None:
         raise HTTPException(status_code=404, detail={"code": "MAINTENANCE_RECORD_NOT_FOUND"})
-    return _record_body(*row, include_detail=True)
+    linked_work_order_ids = _linked_work_order_ids(db, [row[1].id])
+    return _record_body(*row, include_detail=True, linked_work_order_ids=linked_work_order_ids)
 
 
 @router.get("/api/work-orders", response_model=None)
