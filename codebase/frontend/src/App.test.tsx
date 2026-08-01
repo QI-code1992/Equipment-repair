@@ -147,6 +147,7 @@ describe("App", () => {
       .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0 }), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({ active_fault_count: 0, status_counts: [], urgency_counts: [] }), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({ items: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({ items: [{ thread_id: "thread-1", agent_id: "operation_guidance", status: "OPEN", created_at: "2026-07-31T00:00:00Z", updated_at: "2026-07-31T00:01:00Z" }], count: 1 }), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({ thread_id: "thread-1", agent_id: "operation_guidance", status: "OPEN", messages: [{ role: "user", text: "secret internal text" }], runs: [] }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);

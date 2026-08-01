@@ -117,7 +117,7 @@ function ApplicationShell() {
           <Route path="/equipment/new" element={guarded("/equipment/new", <EquipmentAddPage />)} />
           <Route path="/equipment/:id" element={guarded("/equipment/:id", <EquipmentDetailPage />)} />
           <Route path="/equipment/:id/edit" element={guarded("/equipment/:id/edit", <EquipmentEditPage />)} />
-          <Route path="/intelligent-config" element={guarded("/intelligent-config", <IntelligentConfigPage />)} />
+          <Route path="/intelligent-config" element={guarded("/intelligent-config", <IntelligentConfigPage permissionCodes={permissionCodes ?? []} />)} />
           <Route path="/intelligence-audit" element={guarded("/intelligence-audit", <IntelligentAuditPage permissionCodes={permissionCodes ?? []} />)} />
           <Route path="/fault-report" element={guarded("/fault-report", <FaultReportPage />)} />
           <Route path="/agent-report" element={guarded("/agent-report", <AgentReportPage />)} />
@@ -142,7 +142,7 @@ function pagePermission(path: string, codes: string[]) {
     "/equipment/new": ["equipment:read", "equipment:write", "organization:read", "identity:read"],
     "/equipment/:id": ["equipment:read"],
     "/equipment/:id/edit": ["equipment:read", "equipment:write", "organization:read", "identity:read"],
-    "/intelligent-config": ["intelligence:model", "intelligence:agent", "intelligence:knowledge"],
+    "/intelligent-config": ["intelligence:model", "intelligence:agent"],
     "/intelligence-audit": ["intelligence:audit"],
     "/fault-report": ["fault:create", "intelligence:agent"],
     "/agent-report": ["intelligence:agent", "fault:create"],

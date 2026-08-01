@@ -14,7 +14,7 @@ describe("TASK-012 portal pages", () => {
     render(<BiDashboardPage />);
 
     expect(await screen.findByText("2")).toBeInTheDocument();
-    expect(screen.getByText("暂无排行数据。")).toBeInTheDocument();
+    expect(screen.getByText("暂无趋势数据。")).toBeInTheDocument();
   });
 
   it("reloads the BI dashboard with a selected formal organization filter", async () => {
