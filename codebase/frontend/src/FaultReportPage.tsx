@@ -70,8 +70,10 @@ export function FaultReportPage() {
   }
 
   async function generatePreview() {
+    if (submitting || uploading) return;
     setError(null);
     setNotice(null);
+    setSubmitting(true);
     try {
       const result = await submitAgentFaultReport({ draft: draft(), confirmed: false });
       if (!isPreview(result)) {
@@ -80,7 +82,7 @@ export function FaultReportPage() {
       }
       setPreview(result);
       setNotice("请核对 AI 草稿后再正式提交。");
-    } catch (caught) { setError(messageFor(caught)); }
+    } catch (caught) { setError(messageFor(caught)); } finally { setSubmitting(false); }
   }
 
   async function confirmPreview() {

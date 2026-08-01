@@ -271,6 +271,7 @@ export function AgentReportPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [collecting, setCollecting] = useState(false);
   const [attachments, setAttachments] = useState<AttachmentRef[]>([]);
   const [uploading, setUploading] = useState(false);
   const [durationMinutes, setDurationMinutes] = useState(0);
@@ -293,13 +294,15 @@ export function AgentReportPage() {
 
   async function collect(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (collecting || submitting) return;
     setError(null);
+    setCollecting(true);
     try {
       const run = await startAgentRun("fault_reporting", { equipment_id: equipmentId }, symptom);
       setRuntimeEvents(await readRunEvents(run.run_id));
       setCollected(true);
       setNotice("AI 收集任务已创建，请补全并确认正式上报字段。");
-    } catch (caught) { setError(`创建 AI 收集任务失败：${caught instanceof ApiError ? caught.code : "REQUEST_FAILED"}`); }
+    } catch (caught) { setError(`创建 AI 收集任务失败：${caught instanceof ApiError ? caught.code : "REQUEST_FAILED"}`); } finally { setCollecting(false); }
   }
 
   async function confirm(event: FormEvent<HTMLFormElement>) {

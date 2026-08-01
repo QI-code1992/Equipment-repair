@@ -22,6 +22,7 @@ export function RepairExecutionPage() {
   const [guidanceContext, setGuidanceContext] = useState({ equipment_id: "", equipment_model: "", symptom: "", description: "" });
   const [runtimeEvents, setRuntimeEvents] = useState<RuntimeEvent[]>([]);
   const [diagnosisLoading, setDiagnosisLoading] = useState(false);
+  const [evidenceSubmitting, setEvidenceSubmitting] = useState(false);
   const [guidanceError, setGuidanceError] = useState<string | null>(null);
   const [assignedOrders, setAssignedOrders] = useState<WorkOrder[] | null>(null);
   const [orderStatus, setOrderStatus] = useState("");
@@ -77,12 +78,15 @@ export function RepairExecutionPage() {
   }
 
   async function submitEvidence() {
-    if (!diagnosis?.diagnosis_draft_id || !evidence.trim()) return;
-    const response = evidenceCategory === "alarm_code"
-      ? await runFaultDiagnosis({ action: "answer", diagnosis_draft_id: diagnosis.diagnosis_draft_id, answer: evidence.trim() })
-      : await runFaultDiagnosis({ action: "evidence", diagnosis_draft_id: diagnosis.diagnosis_draft_id, category: evidenceCategory, detail: evidence.trim() });
-    setDiagnosis(response);
-    setEvidence("");
+    if (!diagnosis?.diagnosis_draft_id || !evidence.trim() || evidenceSubmitting) return;
+    setEvidenceSubmitting(true);
+    try {
+      const response = evidenceCategory === "alarm_code"
+        ? await runFaultDiagnosis({ action: "answer", diagnosis_draft_id: diagnosis.diagnosis_draft_id, answer: evidence.trim() })
+        : await runFaultDiagnosis({ action: "evidence", diagnosis_draft_id: diagnosis.diagnosis_draft_id, category: evidenceCategory, detail: evidence.trim() });
+      setDiagnosis(response);
+      setEvidence("");
+    } finally { setEvidenceSubmitting(false); }
   }
 
   async function submitResult() {
