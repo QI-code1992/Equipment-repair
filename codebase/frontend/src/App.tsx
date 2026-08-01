@@ -5,7 +5,7 @@ import { IntelligentConfigPage } from "./IntelligentConfigPage";
 import { FaultReportPage } from "./FaultReportPage";
 import { RepairExecutionPage } from "./RepairExecutionPage";
 import { WorkbenchPage } from "./WorkbenchPage";
-import { ApiError, getAgentThread, getAgentThreads, getCurrentUser, hasActiveSession, logout, readRunEvents, resumeAgentThread, startAgentRun, type AgentThread, type AgentThreadSummary, type RuntimeEvent } from "./api";
+import { ApiError, clearActiveSession, getAgentThread, getAgentThreads, getCurrentUser, hasActiveSession, logout, readRunEvents, resumeAgentThread, startAgentRun, type AgentThread, type AgentThreadSummary, type RuntimeEvent } from "./api";
 import { LoginPage } from "./LoginPage";
 import { AgentReportPage, BiDashboardPage, EquipmentAddPage, EquipmentDetailPage, EquipmentEditPage, EquipmentLedgerPage, FactoryModelingPage, IntelligentAuditPage, MaintenanceRecordDetailPage, MaintenanceRecordsPage, SystemManagementPage } from "./PortalPages";
 
@@ -52,16 +52,22 @@ function ApplicationShell() {
   const [agentOpen, setAgentOpen] = useState(false);
   const [permissionCodes, setPermissionCodes] = useState<string[] | null>(null);
   const [permissionError, setPermissionError] = useState<string | null>(null);
+  const [authFailed, setAuthFailed] = useState(false);
   useEffect(() => {
-    getCurrentUser().then((user) => setPermissionCodes(user.permission_codes)).catch(() => setPermissionError("当前会话权限加载失败，请刷新后重试。"));
+    getCurrentUser().then((user) => setPermissionCodes(user.permission_codes)).catch(() => {
+      clearActiveSession();
+      setPermissionError("当前会话权限加载失败，请重新登录。");
+      setAuthFailed(true);
+    });
   }, []);
   const activePage = pages.find((page) => page.path === location.pathname) ?? pages[0];
-  const visiblePages = useMemo(() => permissionCodes === null ? [] : pages.filter((page) => page.path === "/" || pagePermission(page.path, permissionCodes)), [permissionCodes]);
+  const visiblePages = useMemo(() => permissionCodes === null ? [] : pages.filter((page) => pagePermission(page.path, permissionCodes)), [permissionCodes]);
   const groups = [...new Set(visiblePages.map((page) => page.group))];
   function guarded(path: string, element: React.ReactNode) {
     if (permissionCodes === null || permissionError) return element;
     return pagePermission(path, permissionCodes) ? element : <section className="page-shell"><p role="alert">你没有访问此页面的权限。</p></section>;
   }
+  if (authFailed) return <LoginPage />;
 
   return (
     <div className="app-shell">
@@ -101,40 +107,51 @@ function ApplicationShell() {
             <p>设备智能运维平台 / {activePage.group}</p>
             <h1>设备智能运维平台</h1>
           </div>
-          <div className="topbar__actions"><button type="button" className="agent-trigger" onClick={() => setAgentOpen(true)}>全局 Agent</button><button type="button" className="agent-trigger" onClick={() => void logout().finally(() => navigate("/login", { replace: true }))}>退出</button><div className="topbar__avatar" aria-label="当前用户">管</div></div>
+          <div className="topbar__actions">{permissionCodes?.includes("intelligence:agent") && <button type="button" className="agent-trigger" onClick={() => setAgentOpen(true)}>全局 Agent</button>}<button type="button" className="agent-trigger" onClick={() => void logout().finally(() => navigate("/login", { replace: true }))}>退出</button><div className="topbar__avatar" aria-label="当前用户">管</div></div>
         </header>
         {permissionCodes === null && !permissionError ? <section className="page-shell" aria-live="polite"><p role="status">正在加载会话权限…</p></section> : <Routes>
-          <Route path="/" element={<WorkbenchPage />} />
+          <Route path="/" element={guarded("/", <WorkbenchPage />)} />
           <Route path="/bi-dashboard" element={guarded("/bi-dashboard", <BiDashboardPage />)} />
           <Route path="/factory-modeling" element={guarded("/factory-modeling", <FactoryModelingPage />)} />
           <Route path="/equipment" element={guarded("/equipment", <EquipmentLedgerPage />)} />
-          <Route path="/equipment/new" element={guarded("/equipment", <EquipmentAddPage />)} />
-          <Route path="/equipment/:id" element={guarded("/equipment", <EquipmentDetailPage />)} />
-          <Route path="/equipment/:id/edit" element={guarded("/equipment", <EquipmentEditPage />)} />
+          <Route path="/equipment/new" element={guarded("/equipment/new", <EquipmentAddPage />)} />
+          <Route path="/equipment/:id" element={guarded("/equipment/:id", <EquipmentDetailPage />)} />
+          <Route path="/equipment/:id/edit" element={guarded("/equipment/:id/edit", <EquipmentEditPage />)} />
           <Route path="/intelligent-config" element={guarded("/intelligent-config", <IntelligentConfigPage />)} />
           <Route path="/intelligence-audit" element={guarded("/intelligence-audit", <IntelligentAuditPage permissionCodes={permissionCodes ?? []} />)} />
           <Route path="/fault-report" element={guarded("/fault-report", <FaultReportPage />)} />
           <Route path="/agent-report" element={guarded("/agent-report", <AgentReportPage />)} />
           <Route path="/maintenance-records" element={guarded("/maintenance-records", <MaintenanceRecordsPage />)} />
-          <Route path="/maintenance-records/:id" element={guarded("/maintenance-records", <MaintenanceRecordDetailPage />)} />
+          <Route path="/maintenance-records/:id" element={guarded("/maintenance-records/:id", <MaintenanceRecordDetailPage />)} />
           <Route path="/repair-execution" element={guarded("/repair-execution", <RepairExecutionPage />)} />
           <Route path="/system-management" element={guarded("/system-management", <SystemManagementPage />)} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>}
-        {agentOpen && <GlobalAgentDrawer onClose={() => setAgentOpen(false)} />}
+        {agentOpen && permissionCodes?.includes("intelligence:agent") && <GlobalAgentDrawer onClose={() => setAgentOpen(false)} />}
       </main>
     </div>
   );
 }
 
 function pagePermission(path: string, codes: string[]) {
-  const required: Record<string, string> = {
-    "/bi-dashboard": "bi:view", "/factory-modeling": "organization:read", "/equipment": "equipment:read",
-    "/intelligent-config": "intelligence:model", "/intelligence-audit": "intelligence:audit",
-    "/fault-report": "fault:create", "/agent-report": "intelligence:agent", "/maintenance-records": "maintenance:view",
-    "/repair-execution": "fault:repair", "/system-management": "identity:read",
+  const required: Record<string, string[]> = {
+    "/": ["workbench:view"],
+    "/bi-dashboard": ["bi:view"],
+    "/factory-modeling": ["organization:read", "organization:write"],
+    "/equipment": ["equipment:read"],
+    "/equipment/new": ["equipment:read", "equipment:write", "organization:read", "identity:read"],
+    "/equipment/:id": ["equipment:read"],
+    "/equipment/:id/edit": ["equipment:read", "equipment:write", "organization:read", "identity:read"],
+    "/intelligent-config": ["intelligence:model", "intelligence:agent", "intelligence:knowledge"],
+    "/intelligence-audit": ["intelligence:audit"],
+    "/fault-report": ["fault:create", "intelligence:agent"],
+    "/agent-report": ["intelligence:agent", "fault:create"],
+    "/maintenance-records": ["maintenance:view"],
+    "/maintenance-records/:id": ["maintenance:view", "maintenance:detail"],
+    "/repair-execution": ["maintenance:view", "fault:repair", "fault:close", "intelligence:agent"],
+    "/system-management": ["identity:read", "identity:write", "system:audit"],
   };
-  return !required[path] || (codes ?? []).includes(required[path]);
+  return (required[path] ?? []).every((code) => codes.includes(code));
 }
 
 function GlobalAgentDrawer({ onClose }: { onClose: () => void }) {

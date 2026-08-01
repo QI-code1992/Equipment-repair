@@ -71,6 +71,8 @@ describe("requestJson", () => {
 
     expect(window.sessionStorage.getItem("access_token")).toBeNull();
     expect(fetchMock).toHaveBeenCalledWith("/api/auth/session", expect.objectContaining({ method: "DELETE" }));
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(new Headers(init.headers).get("Idempotency-Key")).toBeTruthy();
   });
 });
 

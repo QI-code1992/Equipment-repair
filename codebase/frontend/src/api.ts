@@ -32,6 +32,10 @@ export function hasActiveSession() {
   return Boolean(window.sessionStorage.getItem(accessTokenStorageKey)?.trim());
 }
 
+export function clearActiveSession() {
+  window.sessionStorage.removeItem(accessTokenStorageKey);
+}
+
 export type CurrentUser = { id: string; username: string; enabled: boolean; permission_codes: string[] };
 export const getCurrentUser = () => requestJson<CurrentUser>("/api/auth/me");
 
@@ -46,9 +50,12 @@ export async function login(username: string, password: string) {
 
 export async function logout() {
   try {
-    await requestJson<unknown>("/api/auth/session", { method: "DELETE" });
+    await requestJson<unknown>("/api/auth/session", {
+      method: "DELETE",
+      headers: { "Idempotency-Key": crypto.randomUUID() },
+    });
   } finally {
-    window.sessionStorage.removeItem(accessTokenStorageKey);
+    clearActiveSession();
   }
 }
 

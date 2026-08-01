@@ -17,9 +17,37 @@ describe("App", () => {
 
   beforeEach(() => window.sessionStorage.setItem("access_token", "existing-session-token"));
 
+  it("fails closed to login when the current session cannot be loaded", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ detail: { code: "UNAUTHENTICATED" } }), { status: 401 })));
+
+    render(<MemoryRouter initialEntries={["/bi-dashboard"]}><App /></MemoryRouter>);
+
+    expect(await screen.findByRole("heading", { name: "登录" })).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "主导航" })).not.toBeInTheDocument();
+    expect(window.sessionStorage.getItem("access_token")).toBeNull();
+  });
+
+  it("guards the root workbench and global Agent entry with formal permissions", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "user-1", username: "limited", enabled: true, permission_codes: ["equipment:read"] }), { status: 200 })));
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+
+    expect(await screen.findByText("你没有访问此页面的权限。")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "全局 Agent" })).not.toBeInTheDocument();
+  });
+
+  it("requires every formal dependency permission before opening equipment creation", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "user-1", username: "reader", enabled: true, permission_codes: ["equipment:read"] }), { status: 200 })));
+
+    render(<MemoryRouter initialEntries={["/equipment/new"]}><App /></MemoryRouter>);
+
+    expect(await screen.findByText("你没有访问此页面的权限。")).toBeInTheDocument();
+    expect(screen.queryByLabelText("设备编码")).not.toBeInTheDocument();
+  });
+
   it("loads an Agent configuration and saves only the selected Agent", async () => {
     const fetchMock = vi.fn()
-      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "admin", enabled: true, permission_codes: ["bi:view", "organization:read", "equipment:read", "intelligence:model", "intelligence:audit", "fault:create", "intelligence:agent", "maintenance:view", "fault:repair", "identity:read"] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "admin", enabled: true, permission_codes: ["bi:view", "organization:read", "organization:write", "equipment:read", "equipment:write", "intelligence:model", "intelligence:audit", "intelligence:agent", "intelligence:knowledge", "fault:create", "maintenance:view", "maintenance:detail", "fault:repair", "fault:close", "identity:read", "identity:write", "system:audit", "workbench:view"] }), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([config]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([provider]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([binding]), { status: 200 }))
@@ -47,7 +75,7 @@ describe("App", () => {
 
   it("shows a controlled empty state when the formal Agent catalogue is empty", async () => {
     const fetchMock = vi.fn()
-      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "admin", enabled: true, permission_codes: ["intelligence:model"] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "admin", enabled: true, permission_codes: ["intelligence:model", "intelligence:agent", "intelligence:knowledge"] }), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }));
@@ -63,7 +91,7 @@ describe("App", () => {
   it("does not submit unsupported deep thinking configuration", async () => {
     const unsupported = { ...config, model_capability: { ...config.model_capability, supports_reasoning: false } };
     const fetchMock = vi.fn()
-      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "admin", enabled: true, permission_codes: ["intelligence:model"] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "admin", enabled: true, permission_codes: ["intelligence:model", "intelligence:agent", "intelligence:knowledge"] }), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([unsupported]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([provider]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([{ ...binding, supports_reasoning: false }]), { status: 200 }));
@@ -78,7 +106,7 @@ describe("App", () => {
   });
 
   it("routes the fault-report navigation to the formal submission page", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "user-1", username: "admin", enabled: true, permission_codes: ["fault:create"] }), { status: 200 })));
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "user-1", username: "admin", enabled: true, permission_codes: ["fault:create", "intelligence:agent"] }), { status: 200 })));
     render(<MemoryRouter initialEntries={["/fault-report"]}><App /></MemoryRouter>);
 
     expect(await screen.findByRole("heading", { name: "故障上报" })).toBeInTheDocument();
@@ -97,7 +125,7 @@ describe("App", () => {
     window.sessionStorage.clear();
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: "session-token", token_type: "bearer" }), { status: 200 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "repairer", enabled: true, permission_codes: ["intelligence:model"] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "repairer", enabled: true, permission_codes: ["intelligence:model", "intelligence:agent", "intelligence:knowledge"] }), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([config]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([provider]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([binding]), { status: 200 }));
@@ -115,7 +143,7 @@ describe("App", () => {
 
   it("loads authenticated Agent thread history and never renders raw message text", async () => {
     const fetchMock = vi.fn()
-      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "admin", enabled: true, permission_codes: ["intelligence:agent"] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "admin", enabled: true, permission_codes: ["intelligence:agent", "workbench:view"] }), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0 }), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({ active_fault_count: 0, status_counts: [], urgency_counts: [] }), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({ items: [] }), { status: 200 }))

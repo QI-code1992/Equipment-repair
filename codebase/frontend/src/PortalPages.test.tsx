@@ -236,13 +236,19 @@ describe("TASK-012 portal pages", () => {
   it("enables knowledge retry when audit and knowledge permissions are present", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, retention_days: 30, token_measurement: "configured_max_reply_tokens_not_actual_usage" }), { status: 200 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [{ id: "doc-1", filename: "manual.pdf", status: "FAILED", failure_reason: "retryable", retry_available: true }], count: 1, page: 1, page_size: 20 }), { status: 200 }));
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [{ id: "doc-1", filename: "manual.pdf", status: "FAILED", failure_reason: "retryable", retry_available: true }], count: 1, page: 1, page_size: 20 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "doc-1", status: "UPLOADING" }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
 
     render(<IntelligentAuditPage permissionCodes={["intelligence:audit", "intelligence:knowledge"]} />);
 
-    expect(await screen.findByRole("button", { name: "重新同步" })).toBeEnabled();
+    const retry = await screen.findByRole("button", { name: "重新同步" });
+    expect(retry).toBeEnabled();
     expect(screen.queryByText("当前账号没有知识库写入权限。")).not.toBeInTheDocument();
+    fireEvent.click(retry);
+    await screen.findByText("已提交知识文档重试请求。");
+    expect(fetchMock.mock.calls[2][0]).toBe("/api/knowledge/documents/doc-1/retry");
+    expect(new Headers((fetchMock.mock.calls[2][1] as RequestInit).headers).get("Idempotency-Key")).toBeTruthy();
   });
 
   it("requires an explicit structured confirmation before AI fault reporting writes a formal fault", async () => {

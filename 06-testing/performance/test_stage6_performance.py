@@ -1,6 +1,7 @@
 import json
 import inspect
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from stage6_performance import (
@@ -11,6 +12,9 @@ from stage6_performance import (
     request_json,
     scenario_passes,
 )
+
+
+BASE_DIR = Path(__file__).resolve().parent
 
 
 class _Response:
@@ -156,14 +160,14 @@ class PerformanceThresholdTests(unittest.TestCase):
         self.assertEqual(report["p95_limit_ms"], 15_000)
 
     def test_performance_result_records_execution_time_and_evidence_subject(self) -> None:
-        with open("results-agent-success-final-v2.json", encoding="utf-8") as handle:
+        with open(BASE_DIR / "results-agent-success-final-v2.json", encoding="utf-8") as handle:
             report = json.load(handle)
 
         self.assertIn("executed_at_utc", report["metadata"])
         self.assertIn("evidence_subject_commit", report["metadata"])
 
     def test_recovery_readonly_result_binds_candidate_environment_fixture_and_harness(self) -> None:
-        with open("results-backup-restore-readonly.json", encoding="utf-8") as handle:
+        with open(BASE_DIR / "results-backup-restore-readonly.json", encoding="utf-8") as handle:
             report = json.load(handle)
 
         self.assertEqual(report["scenario"], "auth")
