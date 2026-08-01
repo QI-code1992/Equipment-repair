@@ -16,6 +16,8 @@ export function RepairExecutionPage() {
   const [result, setResult] = useState<RepairResult>({ actual_cause: "", actual_solution: "", repair_result: "", parts_replacement_notes: "" });
   const [completed, setCompleted] = useState<RepairResult | null>(null);
   const [evidence, setEvidence] = useState("");
+  const [evidenceCategory, setEvidenceCategory] = useState("reproduction");
+  const [alarmCode, setAlarmCode] = useState("");
   const [guidance, setGuidance] = useState<GuidanceResponse | null>(null);
   const [guidanceContext, setGuidanceContext] = useState({ equipment_id: "", equipment_model: "", symptom: "", description: "" });
   const [runtimeEvents, setRuntimeEvents] = useState<RuntimeEvent[]>([]);
@@ -48,7 +50,7 @@ export function RepairExecutionPage() {
     setError(null);
     setDiagnosisLoading(true);
     try {
-      const response = await runFaultDiagnosis({ action: "start", fault_report_id: faultId });
+      const response = await runFaultDiagnosis({ action: "start", fault_report_id: faultId, ...(alarmCode.trim() ? { alarm_code_present: true } : {}) });
       const testRuntime = (globalThis as { __vitest_worker__?: unknown }).__vitest_worker__ !== undefined;
       const displayDelay = testRuntime ? 0 : 3_000;
       await new Promise<void>((resolve) => window.setTimeout(resolve, displayDelay));
@@ -76,10 +78,10 @@ export function RepairExecutionPage() {
 
   async function submitEvidence() {
     if (!diagnosis?.diagnosis_draft_id || !evidence.trim()) return;
-    setDiagnosis(await runFaultDiagnosis({
-      action: "evidence", diagnosis_draft_id: diagnosis.diagnosis_draft_id,
-      category: "reproduction", detail: evidence.trim(),
-    }));
+    const response = evidenceCategory === "alarm_code"
+      ? await runFaultDiagnosis({ action: "answer", diagnosis_draft_id: diagnosis.diagnosis_draft_id, answer: evidence.trim() })
+      : await runFaultDiagnosis({ action: "evidence", diagnosis_draft_id: diagnosis.diagnosis_draft_id, category: evidenceCategory, detail: evidence.trim() });
+    setDiagnosis(response);
     setEvidence("");
   }
 
@@ -128,9 +130,10 @@ export function RepairExecutionPage() {
       <h2 id="page-heading">维修执行</h2>
       <section aria-label="已分配工单"><h3>已分配工单</h3><label>工单状态<select aria-label="维修执行工单状态筛选" value={orderStatus} onChange={(event) => { setOrderStatus(event.target.value); setAssignedOrders(null); setSelectedOrder(null); }}><option value="">全部</option><option value="PENDING_ACCEPT">待接单</option><option value="IN_REPAIR">维修中</option><option value="PENDING_INSPECTION">待验收</option><option value="COMPLETED">已完成</option></select></label>{assignedOrders === null ? <p>正在加载工单…</p> : assignedOrders.length === 0 ? <p>暂无已分配工单。</p> : <ul>{assignedOrders.map((order) => <li key={order.id}><button type="button" onClick={() => void selectOrder(order)}>{order.number} · {order.status} · {order.symptom}</button></li>)}</ul>}{selectedOrder && <dl className="detail-list"><dt>当前工单</dt><dd>{selectedOrder.number}</dd><dt>状态</dt><dd>{selectedOrder.status}</dd><dt>设备</dt><dd>{selectedOrder.equipment_id}</dd></dl>}{ordersError && <p role="alert">{ordersError}</p>}</section>
       <label>故障单 ID<input aria-label="故障单 ID" value={faultId} onChange={(event) => setFaultId(event.target.value)} /></label>
+      <label>报警码（可选）<input aria-label="报警码" value={alarmCode} onChange={(event) => setAlarmCode(event.target.value)} /></label>
       <div className="form-actions"><button type="button" disabled={!faultId} onClick={() => void startDiagnosis()}>开始 AI 诊断</button><button type="button" disabled={!faultId} onClick={() => void directStart()}>直接开始维修</button></div>
       {diagnosisLoading && <section aria-label="诊断加载"><p>理解故障</p><p>检索同类维修</p><p>检索知识库</p><p>形成首问</p></section>}
-      {diagnosis && <section aria-label="故障诊断"><p>{diagnosisMessage(diagnosis)}</p>{diagnosis.evidence.length > 0 && <details><summary>查看 {diagnosis.evidence.length} 条诊断证据</summary>{diagnosis.evidence.map((item) => <p key={`${item.category}-${item.detail}`}>{item.category}：{item.detail}</p>)}</details>}{!canAdopt && diagnosis.state !== "UNAVAILABLE" && <><label>证据内容<input aria-label="证据内容" value={evidence} onChange={(event) => setEvidence(event.target.value)} /></label><button type="button" onClick={() => void submitEvidence()}>提交诊断证据</button></>}{canAdopt && <button type="button" onClick={() => void adoptStart()}>采纳 AI 建议并开始维修</button>}</section>}
+      {diagnosis && <section aria-label="故障诊断"><p>{diagnosisMessage(diagnosis)}</p>{diagnosis.evidence.length > 0 && <details><summary>查看 {diagnosis.evidence.length} 条诊断证据</summary>{diagnosis.evidence.map((item) => <p key={`${item.category}-${item.detail}`}>{item.category}：{item.detail}</p>)}</details>}{!canAdopt && diagnosis.state !== "UNAVAILABLE" && <><label>证据类型<select aria-label="证据类型" value={evidenceCategory} onChange={(event) => setEvidenceCategory(event.target.value)}><option value="reproduction">复现工况</option><option value="measurement">测量值</option><option value="alarm_code">报警码/报码</option></select></label><label>证据内容<input aria-label="证据内容" value={evidence} onChange={(event) => setEvidence(event.target.value)} /></label><button type="button" onClick={() => void submitEvidence()}>提交诊断证据</button></>}{canAdopt && <button type="button" onClick={() => void adoptStart()}>采纳 AI 建议并开始维修</button>}</section>}
       {error && <p role="alert">{error}</p>}
       {repair && <p role="status">维修工单已创建：{repair.work_order_id}</p>}
       {repair && <section aria-label="维修结果">

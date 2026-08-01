@@ -189,12 +189,16 @@ def _restore_diagnosis_session(raw: dict[str, Any]) -> DiagnosisSession:
 
 
 def _fault_diagnosis_dataset_ids(db: Session) -> list[str]:
+    return _configured_dataset_ids(db, AgentId.FAULT_DIAGNOSIS)
+
+
+def _configured_dataset_ids(db: Session, agent_id: AgentId) -> list[str]:
     config = db.scalar(
-        select(AgentConfigModel).where(
-            AgentConfigModel.agent_id == AgentId.FAULT_DIAGNOSIS.value
-        )
+        select(AgentConfigModel).where(AgentConfigModel.agent_id == agent_id.value)
     )
-    return [] if config is None else list(config.knowledge_dataset_ids)
+    if config is None or not config.enabled:
+        return []
+    return list(config.knowledge_dataset_ids)
 
 
 def _server_diagnosis_context(
@@ -222,9 +226,10 @@ def operation_guidance(
         symptom=payload.symptom,
         description=payload.description,
     )
+    dataset_ids = _configured_dataset_ids(db, AgentId.OPERATION_GUIDANCE)
     agent = OperationGuidanceAgent(
         lambda query: _guidance_references(
-            db, request, context, payload.dataset_ids
+            db, request, context, dataset_ids
         )
     )
     session = agent.start(context)
