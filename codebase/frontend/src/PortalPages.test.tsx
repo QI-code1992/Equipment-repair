@@ -49,7 +49,8 @@ describe("TASK-012 portal pages", () => {
         { id: "root", type: "ROOT", code: "ROOT", name: "根节点", parent_id: null, enabled: true, sort_order: 0, remark: "" },
         { id: "line-1", type: "LINE", code: "LINE-01", name: "装配线", parent_id: "root", enabled: true, sort_order: 0, remark: "" },
       ]), { status: 200 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "line-1" }), { status: 200 }));
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "line-1" }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
 
     render(<FactoryModelingPage />);
@@ -58,7 +59,7 @@ describe("TASK-012 portal pages", () => {
     expect(screen.getByText("装配线")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "停用 装配线" }));
 
-    await screen.findByText("组织状态已提交更新，请刷新页面确认。");
+    await screen.findByText("组织状态已更新。");
     expect(fetchMock.mock.calls[1][0]).toBe("/api/organizations/line-1");
     const init = fetchMock.mock.calls[1][1] as RequestInit;
     expect(init.method).toBe("PATCH");
@@ -205,7 +206,7 @@ describe("TASK-012 portal pages", () => {
 
     (await screen.findByRole("button", { name: "保存角色权限" })).click();
 
-    await screen.findByText("角色权限已提交更新，请刷新列表确认。");
+    await screen.findByText("角色权限已更新。");
     expect(fetchMock.mock.calls[4][0]).toBe("/api/roles/role-1/permissions");
     const init = fetchMock.mock.calls[4][1] as RequestInit;
     expect(init.method).toBe("PATCH");
@@ -227,7 +228,7 @@ describe("TASK-012 portal pages", () => {
     fireEvent.click(checkbox);
     fireEvent.click(screen.getByRole("button", { name: "保存角色权限" }));
 
-    await screen.findByText("角色权限已提交更新，请刷新列表确认。");
+    await screen.findByText("角色权限已更新。");
     expect(JSON.parse(String((fetchMock.mock.calls[4][1] as RequestInit).body))).toEqual({
       permission_codes: ["workbench:view", "fault:create"],
     });

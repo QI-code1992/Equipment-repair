@@ -117,36 +117,44 @@ export function WorkOrdersPage() { const [status, setStatus] = useState(""); con
 export function SystemManagementPage() { return <SystemManagementContent />; }
 
 function SystemManagementContent() {
+  const [refresh, setRefresh] = useState(0);
+  const [saving, setSaving] = useState(false);
   const [auditAction, setAuditAction] = useState("");
   const [auditPage, setAuditPage] = useState(1);
-  const audits = useData(() => getAuditEvents({ action: auditAction || undefined, page: auditPage }), [auditAction, auditPage]);
-  const users = useData(getUsers, []);
-  const roles = useData(getRoles, []);
-  const permissions = useData(getPermissions, []);
+  const audits = useData(() => getAuditEvents({ action: auditAction || undefined, page: auditPage }), [auditAction, auditPage, refresh]);
+  const users = useData(getUsers, [refresh]);
+  const roles = useData(getRoles, [refresh]);
+  const permissions = useData(getPermissions, [refresh]);
   const [notice, setNotice] = useState<string | null>(null);
 
   async function toggle(user: { id: string; enabled: boolean; role_ids: string[] }) {
+    if (saving) return;
+    setSaving(true);
     try {
       await updateUser(user.id, { enabled: !user.enabled, role_ids: user.role_ids });
-      setNotice("账号状态已提交更新，请刷新列表确认。");
+      setRefresh((value) => value + 1);
+      setNotice("账号状态已更新。");
     } catch {
       setNotice("账号更新失败，请检查权限或状态后重试。");
-    }
+    } finally { setSaving(false); }
   }
 
   async function create(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saving) return;
     const form = new FormData(event.currentTarget);
+    setSaving(true);
     try {
       await createUser({
         username: String(form.get("username")),
         password: String(form.get("password")),
         role_ids: [String(form.get("role_id"))],
       });
-      setNotice("账号已创建，请刷新列表确认。");
+      setRefresh((value) => value + 1);
+      setNotice("账号已创建。");
     } catch {
       setNotice("账号创建失败，请检查输入和权限后重试。");
-    }
+    } finally { setSaving(false); }
   }
 
   return <Page title="系统管理">
@@ -157,7 +165,7 @@ function SystemManagementContent() {
       <form className="portal-form" onSubmit={create}><label>用户名<input name="username" required /></label><label>初始密码<input name="password" type="password" minLength={8} required /></label><label>角色<select name="role_id">{roles.value?.map((role) => <option key={role.id} value={role.id}>{role.name}</option>)}</select></label><button type="submit">创建账号</button></form>
     </>}</State>
     <h3>角色</h3>
-    <State state={roles} empty={(items) => !items.length}>{(items) => <div>{items.map((item) => <RolePermissionEditor key={item.id} role={item} permissions={permissions.value ?? []} onSaved={() => setNotice("角色权限已提交更新，请刷新列表确认。")} onFailed={() => setNotice("角色更新失败，请检查权限后重试。")} />)}</div>}</State>
+    <State state={roles} empty={(items) => !items.length}>{(items) => <div>{items.map((item) => <RolePermissionEditor key={item.id} role={item} permissions={permissions.value ?? []} onSaved={() => { setRefresh((value) => value + 1); setNotice("角色权限已更新。"); }} onFailed={() => setNotice("角色更新失败，请检查权限后重试。")} />)}</div>}</State>
     <h3>权限目录</h3><State state={permissions} empty={(items) => !items.length}>{(items) => <p>{items.map((item) => item.code).join("、")}</p>}</State>
     <h3>审计事件</h3><label>动作筛选<input aria-label="审计动作筛选" value={auditAction} onChange={(event) => { setAuditAction(event.target.value); setAuditPage(1); }} placeholder="输入正式动作" /></label><State state={audits} empty={(data) => !data.count}>{(data) => <><table><thead><tr><th>时间</th><th>动作</th><th>资源</th><th>结果</th></tr></thead><tbody>{data.items.map((item: AuditEvent) => <tr key={item.id}><td>{item.created_at}</td><td>{item.action}</td><td>{item.resource_type}</td><td>{item.result}</td></tr>)}</tbody></table><div className="pager"><button type="button" disabled={auditPage <= 1} onClick={() => setAuditPage((current) => current - 1)}>上一页</button><span>第 {auditPage} 页</span><button type="button" disabled={data.items.length < data.page_size} onClick={() => setAuditPage((current) => current + 1)}>下一页</button></div></>}</State>
   </Page>;
@@ -165,16 +173,19 @@ function SystemManagementContent() {
 
 function RolePermissionEditor({ role, permissions, onSaved, onFailed }: { role: { id: string; name: string; permission_codes: string[] }; permissions: Array<{ code: string }>; onSaved: () => void; onFailed: () => void }) {
   const [selected, setSelected] = useState(role.permission_codes);
+  const [saving, setSaving] = useState(false);
   useEffect(() => setSelected(role.permission_codes), [role.id, role.permission_codes]);
   async function save() {
+    if (saving) return;
+    setSaving(true);
     try {
       await updateRolePermissions(role.id, selected);
       onSaved();
     } catch {
       onFailed();
-    }
+    } finally { setSaving(false); }
   }
-  return <fieldset className="portal-form"><legend>{role.name}</legend><p>已选 {selected.length} 项权限。</p>{permissions.map((permission) => <label key={permission.code}><input type="checkbox" aria-label={permission.code} checked={selected.includes(permission.code)} onChange={(event) => setSelected((current) => event.target.checked ? [...current, permission.code] : current.filter((code) => code !== permission.code))} />{permission.code}</label>)}<button type="button" onClick={() => void save()}>保存角色权限</button></fieldset>;
+  return <fieldset className="portal-form"><legend>{role.name}</legend><p>已选 {selected.length} 项权限。</p>{permissions.map((permission) => <label key={permission.code}><input type="checkbox" aria-label={permission.code} checked={selected.includes(permission.code)} onChange={(event) => setSelected((current) => event.target.checked ? [...current, permission.code] : current.filter((code) => code !== permission.code))} />{permission.code}</label>)}<button type="button" disabled={saving} onClick={() => void save()}>{saving ? "保存中…" : "保存角色权限"}</button></fieldset>;
 }
 
 export function IntelligentAuditPage({ permissionCodes = [] }: { permissionCodes?: string[] }) { const usage = useData(getIntelligenceUsage, []); const documents = useData(() => getKnowledgeDocuments({ page: 1 }), []); const [notice, setNotice] = useState<string | null>(null); const [action, setAction] = useState(""); const canRetryKnowledge = permissionCodes.includes("intelligence:knowledge"); async function retry(id: string) { if (!canRetryKnowledge) return; try { await retryKnowledgeDocument(id); setNotice("已提交知识文档重试请求。"); } catch (error) { setNotice(`重试失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`); } } return <Page title="智能运维审计"><h3>调用统计</h3><State state={usage}>{(data) => <><p>保留期：{data.retention_days} 天；当前受控记录：{data.count} 条。</p><p>配置 Token 预算统计，不代表模型实际消耗。</p>{data.items.length ? <table><thead><tr><th>Agent</th><th>状态</th><th>调用数</th><th>配置 Token 预算</th></tr></thead><tbody>{data.items.map((item) => <tr key={`${item.agent_id}-${item.status}`}><td>{item.agent_id}</td><td>{item.status}</td><td>{item.run_count}</td><td>{item.configured_max_reply_tokens}</td></tr>)}</tbody></table> : <p>暂无受控调用记录。</p>}</>}</State><h3>知识文档状态</h3>{notice && <p role="status">{notice}</p>}{!canRetryKnowledge && <p role="status">当前账号没有知识库写入权限。</p>}<label>动作筛选<select aria-label="知识状态筛选" value={action} onChange={(event) => setAction(event.target.value)}><option value="">全部</option><option value="FAILED">失败</option><option value="READY">完成</option></select></label><State state={documents} empty={(data) => !data.count}>{(data) => <table><thead><tr><th>文件</th><th>状态</th><th>失败原因</th><th>操作</th></tr></thead><tbody>{data.items.filter((item) => !action || item.status === action).map((item) => <tr key={item.id}><td>{item.filename}</td><td>{item.status}</td><td>{item.failure_reason ?? "—"}</td><td>{item.retry_available ? <button type="button" disabled={!canRetryKnowledge} onClick={() => void retry(item.id)}>重新同步</button> : "—"}</td></tr>)}</tbody></table>}</State></Page>; }
@@ -182,7 +193,9 @@ export function IntelligentAuditPage({ permissionCodes = [] }: { permissionCodes
 type OrganizationItem = { id: string; type: string; code: string; name: string; parent_id: string | null; enabled: boolean; sort_order?: number; remark?: string };
 
 export function FactoryModelingPage() {
-  const state = useData(getOrganizations, []);
+  const [refresh, setRefresh] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const state = useData(getOrganizations, [refresh]);
   const [query, setQuery] = useState("");
   const [collapsed, setCollapsed] = useState<string[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
@@ -190,36 +203,47 @@ export function FactoryModelingPage() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saving) return;
     const form = new FormData(event.currentTarget);
+    setSaving(true);
     try {
       await createOrganization({ type: String(form.get("type")), code: String(form.get("code")), name: String(form.get("name")), parent_id: String(form.get("parent_id")), sort_order: Number(form.get("sort_order")), enabled: true, remark: String(form.get("remark") ?? "") });
-      setNotice("已创建组织节点，请刷新页面查看最新结构。");
-    } catch (error) { setNotice(`创建失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`); }
+      setRefresh((value) => value + 1);
+      setNotice("已创建组织节点。");
+    } catch (error) { setNotice(`创建失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`); } finally { setSaving(false); }
   }
 
   async function toggle(item: OrganizationItem) {
+    if (saving) return;
+    setSaving(true);
     try {
       await updateOrganization(item.id, { code: item.code, name: item.name, sort_order: item.sort_order ?? 0, enabled: !item.enabled, remark: item.remark ?? "" });
-      setNotice("组织状态已提交更新，请刷新页面确认。");
-    } catch (error) { setNotice(`状态更新失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`); }
+      setRefresh((value) => value + 1);
+      setNotice("组织状态已更新。");
+    } catch (error) { setNotice(`状态更新失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`); } finally { setSaving(false); }
   }
 
   async function remove(item: OrganizationItem) {
+    if (saving) return;
+    setSaving(true);
     try {
       await deleteOrganization(item.id);
-      setNotice("删除请求已提交，请刷新页面确认。");
-    } catch (error) { setNotice(`删除受阻：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`); }
+      setRefresh((value) => value + 1);
+      setNotice("组织节点已删除。");
+    } catch (error) { setNotice(`删除受阻：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`); } finally { setSaving(false); }
   }
 
   async function saveEdit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!editing) return;
+    if (!editing || saving) return;
     const form = new FormData(event.currentTarget);
+    setSaving(true);
     try {
       await updateOrganization(editing.id, { code: String(form.get("code")), name: String(form.get("name")), sort_order: Number(form.get("sort_order")), enabled: editing.enabled, remark: String(form.get("remark") ?? "") });
       setEditing(null);
-      setNotice("组织信息已提交更新，请刷新页面确认。");
-    } catch (error) { setNotice(`编辑失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`); }
+      setRefresh((value) => value + 1);
+      setNotice("组织信息已更新。");
+    } catch (error) { setNotice(`编辑失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`); } finally { setSaving(false); }
   }
 
   return <Page title="工厂建模"><p>组织结构由正式组织 API 提供。</p>{notice && <p role="status">{notice}</p>}<label>搜索组织<input aria-label="搜索组织" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="按编码或名称筛选" /></label><State state={state} empty={(items) => !items.length}>{(items) => <><OrganizationTree items={items as OrganizationItem[]} query={query} collapsed={collapsed} onToggle={(id) => setCollapsed((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id])} onEdit={setEditing} onStateChange={toggle} onDelete={remove} /><h3>新增组织节点</h3><form className="portal-form" onSubmit={submit}><label>类型<select name="type"><option>FACTORY</option><option>WORKSHOP</option><option>LINE</option></select></label><label>编码<input name="code" required /></label><label>名称<input name="name" required /></label><label>父节点 ID<input name="parent_id" required /></label><label>排序<input name="sort_order" type="number" min="0" defaultValue="0" /></label><label>备注<input name="remark" /></label><button type="submit">创建节点</button></form>{editing && <form className="portal-form" onSubmit={saveEdit}><h3>编辑组织：{editing.name}</h3><label>编码<input name="code" required defaultValue={editing.code} /></label><label>名称<input name="name" required defaultValue={editing.name} /></label><label>排序<input name="sort_order" type="number" min="0" defaultValue={editing.sort_order ?? 0} /></label><label>备注<input name="remark" defaultValue={editing.remark ?? ""} /></label><button type="submit">保存组织</button><button type="button" onClick={() => setEditing(null)}>取消</button></form>}</>}</State></Page>;
