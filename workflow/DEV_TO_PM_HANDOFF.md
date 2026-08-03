@@ -608,3 +608,4 @@
 - The newly supplied dedicated RAGFlow Token authenticated successfully. With the disposable MinIO bucket initialized and destructive schema testing sequenced before Worker lifecycle execution, `test_task005_live_stack.py` passed (`1 passed, 2 warnings`); PostgreSQL migration passed separately.
 - The run covered real ClamAV/MinIO, Worker synchronization, RAGFlow document lifecycle, temporary Agent configuration, operation-guidance success/degradation, citations and cleanup. HTTPS ingress and health/MIME checks also passed.
 - Remaining action: authenticated browser login and protected-route E2E on exact HEAD `a0bbfdbe`; until then DEF-TASK012-046 remains open and PR #75 cannot be approved or merged.
+- Browser E2E remains blocked only by certificate trust: the browser rejected the disposable self-signed HTTPS certificate before login. Provide a trusted temporary certificate or approved browser trust profile; do not weaken production TLS configuration.

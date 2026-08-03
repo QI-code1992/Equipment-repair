@@ -682,3 +682,4 @@
 - Dedicated RAGFlow Token probe: HTTP 200.
 - After MinIO bucket initialization and sequential migration/lifecycle execution: `test_task005_live_stack.py` `1 passed, 2 warnings`; PostgreSQL migration test passed separately. ClamAV, MinIO, Worker, RAGFlow Agent binding, operation-guidance success/degradation and cleanup were exercised.
 - HTTPS ingress `/healthz`, JS/CSS MIME and HTTPS health E2E passed. Authenticated browser login/protected-route E2E remains outstanding.
+- Browser E2E follow-up: browser navigation was blocked by `ERR_CERT_AUTHORITY_INVALID` for the disposable certificate. HTTPS command-line checks remain valid; authenticated browser E2E is still open.
