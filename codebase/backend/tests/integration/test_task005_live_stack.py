@@ -99,6 +99,7 @@ def test_task005_live_document_lifecycle() -> None:
     )
     client = TestClient(app)
     suffix = uuid4().hex
+    agent_config_id = None
     dataset = KnowledgeDataset(
         name=f"task005-live-{suffix}",
         ragflow_dataset_id=_setting("TASK005_RAGFLOW_DATASET_ID"),
@@ -106,23 +107,24 @@ def test_task005_live_document_lifecycle() -> None:
     with app.state.session_factory() as db:
         db.add(dataset)
         db.flush()
-        db.add(
-            AgentConfigModel(
-                agent_id="operation_guidance",
-                enabled=True,
-                model_binding_id=None,
-                knowledge_dataset_ids=[dataset.id],
-                streaming_enabled=True,
-                suggestions_enabled=True,
-                sources_enabled=True,
-                context_turns=3,
-                retrieval_limit=6,
-                similarity_threshold=0.62,
-                deep_thinking_enabled=False,
-                deep_thinking_level="medium",
-                max_reply_tokens=4096,
-            )
+        agent_config = AgentConfigModel(
+            agent_id="operation_guidance",
+            enabled=True,
+            model_binding_id=None,
+            knowledge_dataset_ids=[dataset.id],
+            streaming_enabled=True,
+            suggestions_enabled=True,
+            sources_enabled=True,
+            context_turns=3,
+            retrieval_limit=6,
+            similarity_threshold=0.62,
+            deep_thinking_enabled=False,
+            deep_thinking_level="medium",
+            max_reply_tokens=4096,
         )
+        db.add(agent_config)
+        db.flush()
+        agent_config_id = agent_config.id
         db.commit()
         dataset_id = dataset.id
     _, token = create_user_token(
@@ -231,6 +233,11 @@ def test_task005_live_document_lifecycle() -> None:
         assert unavailable.json()["evidence"] == []
     finally:
         with session_factory(engine)() as db:
+            agent_config = (
+                db.get(AgentConfigModel, agent_config_id) if agent_config_id else None
+            )
+            if agent_config is not None:
+                db.delete(agent_config)
             document = db.get(KnowledgeDocument, document_id) if document_id else None
             if document is not None:
                 db.delete(document)
