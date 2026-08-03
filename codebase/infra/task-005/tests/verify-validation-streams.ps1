@@ -36,6 +36,9 @@ try {
 Write-Output 'TASK-005 validation stream contract: PASS'
 
 $composeCalls = 0
+Invoke-ValidationCleanup -DatasetId '' -DeleteDataset { throw 'must not run' } -ComposeCleanup { $script:composeCalls++ }
+Assert-Contract ($composeCalls -eq 1) 'empty dataset id must still run Compose cleanup'
+$composeCalls = 0
 try {
     Invoke-ValidationCleanup -DatasetId 'dataset-1' -DeleteDataset { throw 'dataset sentinel' } -ComposeCleanup { $script:composeCalls++ ; throw 'compose sentinel' }
     throw 'expected combined cleanup failure'

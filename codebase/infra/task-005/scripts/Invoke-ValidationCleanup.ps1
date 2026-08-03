@@ -1,6 +1,6 @@
 function Invoke-ValidationCleanup {
     param(
-        [Parameter(Mandatory = $true)][string]$DatasetId,
+        [Parameter(Mandatory = $false)][AllowEmptyString()][string]$DatasetId,
         [Parameter(Mandatory = $true)][scriptblock]$DeleteDataset,
         [Parameter(Mandatory = $true)][scriptblock]$ComposeCleanup
     )
