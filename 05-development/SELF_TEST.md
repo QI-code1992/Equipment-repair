@@ -651,3 +651,12 @@
 - Inspection result: operation-guidance idempotency, atomic Agent start, in-flight guards, authoritative manual fallback and incremental SSE framing are present in the candidate diff.
 - DEV-002 reported frontend `65 passed`, backend focused `17 passed, 2 warnings`, production build, Node static regressions `15 passed`, compileall and diff-check.
 - Still not independently verified: Docker Compose/container health and `/healthz`, PostgreSQL, RAGFlow, ClamAV/MinIO, HTTPS and browser E2E/live-stack. These remain DEF-TASK012-046 and block approval.
+
+### DEV-001 Windows Docker verification (exact HEAD ee149dda, 2026-08-03)
+
+- `docker compose --env-file .env.example -f codebase/infra/docker-compose.yml config --quiet`: passed.
+- API image build from exact HEAD: passed.
+- PostgreSQL 17 and Redis 7 containers: healthy.
+- API container startup: passed; container logs show Uvicorn listening on `0.0.0.0:8000`.
+- Container-local `GET /healthz`: HTTP 200, `{"status":"ok","service":"equipment-operations-platform"}`.
+- Not executed: real RAGFlow authenticated retrieval (example key is not a dedicated credential), ClamAV/MinIO attachment flow, HTTPS ingress and authenticated browser E2E. DEF-TASK012-046 remains open for those paths.

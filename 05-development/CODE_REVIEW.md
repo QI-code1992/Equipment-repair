@@ -441,3 +441,8 @@
 - Code inspection confirms remediation direction for DEF-TASK012-041 (operation-guidance idempotency), DEF-TASK012-042 (atomic Global Agent start and in-flight guard), DEF-TASK012-043 (manual fallback only after authoritative empty order result), and DEF-TASK012-045 (incremental SSE framing with multi-line data/CRLF and stream failure handling). Page write controls were also separated from read-page access for the affected areas.
 - Review status remains `Changes requested` pending reproducible execution of DEF-TASK012-046 on this exact HEAD. The reported frontend/backend unit results are not a substitute for Docker Compose, container health and `/healthz`, PostgreSQL, RAGFlow, ClamAV/MinIO, HTTPS and browser live-stack evidence.
 - No Merge authorization, merge, TASK-012 closure or Stage 6/7/8 unlock is permitted before DEV-001 completes that environment verification and a final whole-candidate review.
+
+### Environment verification update
+
+- On exact HEAD `ee149dda2b262f9350bfe58c54d5603bcffa068c`, Windows Docker verification passed Compose config, API image build, PostgreSQL/Redis health, API startup and container-local `/healthz` HTTP 200.
+- The remaining DEF-TASK012-046 scope is real authenticated RAGFlow retrieval/degradation, ClamAV/MinIO attachment scanning, HTTPS and authenticated browser E2E. Until those are executed, this is not an approval or merge authorization.

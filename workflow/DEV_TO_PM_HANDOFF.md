@@ -581,3 +581,8 @@
 - DEV-001 inspection finds the code-level remediation direction for DEF-TASK012-041, 042, 043 and 045, plus page-level write guards; this is not final approval.
 - DEF-TASK012-046 remains open because Docker/live-stack, PostgreSQL, RAGFlow, ClamAV/MinIO, HTTPS and browser E2E evidence has not been executed on the new exact HEAD.
 - DEV-001 must perform the isolated environment verification and final whole-candidate review. Until then PR #75 is not mergeable by governance decision; TASK-012 and Stage 6/7/8 remain locked.
+
+### DEV-001 environment result
+
+- Exact HEAD `ee149dda2b262f9350bfe58c54d5603bcffa068c` passed Compose config, API build, PostgreSQL/Redis health, API startup and container-local `/healthz` HTTP 200 on Windows Docker.
+- Real RAGFlow credentials/service, ClamAV/MinIO attachment scanning, HTTPS and authenticated browser E2E remain unverified. DEF-TASK012-046 remains open; no Merge authorization or stage unlock.
