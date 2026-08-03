@@ -59,11 +59,11 @@
 
 ### DEF-STAGE6-006：后端生产容器未声明非 root 运行用户
 
-- 严重程度：Stage 6 P1 安全阻断 / 回流 Stage 5。
-- 状态：Open / 待最小修复设计。
+- 严重程度：Stage 6 P2 静态扫描待核验项；尚未确认代码缺陷或 Stage 5 回流。
+- 状态：Open / 等待容器 UID 运行证据。
 - 发现基线：`6fbb9e5be6267851482fda425c704acdada92c50`。
-- 证据：Semgrep `dockerfile.security.missing-user.missing-user` 命中 `codebase/backend/Dockerfile`。当前 Dockerfile 未设置最终 `USER`，容器进程默认以 root 身份运行。
-- 关闭条件：先以失败容器契约测试证明最终进程 UID 非 0，再采用不引入新依赖的最小 Dockerfile/挂载权限修复；在 Windows 隔离 Compose、健康检查、迁移、附件与 Worker 场景复验后，按 Stage 5 修复 PR 审核和集成。
+- 根因调查：Semgrep 未识别 Docker 多阶段构建的最终 `production` stage。该 stage 继承 `runtime` 后创建 `appuser` 并声明 `USER appuser`；Compose 未指定 build target，按 Docker 语义会构建最终 stage。因此“当前 Dockerfile 未设置最终 USER”的结论不成立。
+- 关闭条件：在 Windows 隔离 Compose 中对 `api` 和 `worker` 执行不含敏感信息的 `id -u`，确认均非 `0`；若实际为 root，才以最小 Dockerfile/挂载权限修复回流 Stage 5。
 
 ### DEF-STAGE6-007：性能 harness 的不校验证书分支缺少受控边界验证
 

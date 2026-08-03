@@ -61,7 +61,7 @@
     "sutCommit": "6fbb9e5be6267851482fda425c704acdada92c50",
     "evidencePullRequest": 79,
     "evidenceHead": "3764a0a9a2020711225f88e69edc9e15920d10e2",
-    "blockingDefects": ["DEF-STAGE6-003", "DEF-STAGE6-004", "DEF-STAGE6-005", "DEF-STAGE6-006", "DEF-STAGE6-007"],
+    "blockingDefects": ["DEF-STAGE6-003", "DEF-STAGE6-004", "DEF-STAGE6-005"],
     "stage7Locked": true,
     "nextAction": "Complete root-cause investigation and the applicable Stage 5 remediation for code, test, infrastructure or runtime defects; then rerun all affected independent Stage 6 cases against the resulting exact integration SHA."
   },
