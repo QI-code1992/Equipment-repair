@@ -44,6 +44,18 @@ it("shows staged loading before displaying the server diagnosis question", async
     expect(await screen.findByText("维修工单已创建：wo-1")).toBeInTheDocument();
     expect(startRepair).toHaveBeenCalledWith("fault-1", { mode: "DIRECT" });
   });
+
+  it("disables direct repair while the formal work-order request is pending", async () => {
+    let resolveStart: (value: { work_order_id: string; maintenance_record_id: string; start_mode: "DIRECT"; diagnosis_draft_id: null }) => void;
+    vi.mocked(startRepair).mockImplementation(() => new Promise((resolve) => { resolveStart = resolve; }));
+    render(<RepairExecutionPage />);
+    await screen.findByText("暂无已分配工单。");
+    fireEvent.change(screen.getByLabelText("故障单 ID"), { target: { value: "fault-pending" } });
+    fireEvent.click(screen.getByRole("button", { name: "直接开始维修" }));
+    expect(screen.getByRole("button", { name: "直接开始维修" })).toBeDisabled();
+    resolveStart!({ work_order_id: "wo-pending", maintenance_record_id: "mr-pending", start_mode: "DIRECT", diagnosis_draft_id: null });
+    expect(await screen.findByText("维修工单已创建：wo-pending")).toBeInTheDocument();
+  });
 });
 
 it("reloads assigned work orders with the selected status", async () => {
@@ -83,6 +95,21 @@ it("renders real guidance citations and runtime SSE statuses", async () => {
   fireEvent.click(screen.getByRole("button", { name: "获取操作指引" }));
   expect(await screen.findByText("查看 1 条引用")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "发送操作问题" }));
+  expect(await screen.findByText("运行状态：WAITING_FOR_MODEL")).toBeInTheDocument();
+});
+
+it("disables the operation-question action while an Agent run is starting", async () => {
+  let resolveRun: (value: { thread_id: string; run_id: string }) => void;
+  vi.mocked(startAgentRun).mockImplementation(() => new Promise((resolve) => { resolveRun = resolve; }));
+  vi.mocked(readRunEvents).mockResolvedValue([{ event: "run_waiting", data: { status: "WAITING_FOR_MODEL" } }]);
+  render(<RepairExecutionPage />);
+  await screen.findByText("暂无已分配工单。");
+  fireEvent.change(screen.getByLabelText("指引设备 ID"), { target: { value: "eq-1" } });
+  fireEvent.change(screen.getByLabelText("设备型号"), { target: { value: "L-900" } });
+  fireEvent.change(screen.getByLabelText("指引故障现象"), { target: { value: "液压异响" } });
+  fireEvent.click(screen.getByRole("button", { name: "发送操作问题" }));
+  expect(screen.getByRole("button", { name: "发送中…" })).toBeDisabled();
+  resolveRun!({ thread_id: "thread-pending", run_id: "run-pending" });
   expect(await screen.findByText("运行状态：WAITING_FOR_MODEL")).toBeInTheDocument();
 });
 

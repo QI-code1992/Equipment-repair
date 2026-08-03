@@ -295,6 +295,7 @@ describe("TASK-012 portal pages", () => {
     fireEvent.change(screen.getByLabelText("设备 ID"), { target: { value: "eq-1" } });
     fireEvent.change(screen.getByLabelText("故障描述"), { target: { value: "液压异响" } });
     fireEvent.click(screen.getByRole("button", { name: "开始 AI 收集" }));
+    expect(screen.getByRole("button", { name: "AI 收集中…" })).toBeDisabled();
     await screen.findByText("AI 收集任务已创建，请补全并确认正式上报字段。");
     expect(await screen.findByText("运行状态：RUNNING")).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("发生时间"), { target: { value: "2026-07-31T10:00" } });
