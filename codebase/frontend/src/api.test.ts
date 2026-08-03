@@ -273,14 +273,16 @@ describe("Agent Runtime SSE API", () => {
     ]);
   });
 
-  it("creates an operation-guidance thread before starting its run", async () => {
+  it("atomically starts an operation-guidance thread and run", async () => {
     const fetchMock = vi.fn()
-      .mockResolvedValueOnce(new Response(JSON.stringify({ thread_id: "thread-1" }), { status: 201 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ run_id: "run-1" }), { status: 202 }));
+      .mockResolvedValueOnce(new Response(JSON.stringify({ thread_id: "thread-1", run_id: "run-1" }), { status: 202 }));
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(startAgentRun("operation_guidance", { equipment_id: "eq-1" }, "如何安全检查？")).resolves.toEqual({ thread_id: "thread-1", run_id: "run-1" });
-    expect(fetchMock.mock.calls.map(([path]) => path)).toEqual(["/api/agent/threads", "/api/agent/threads/thread-1/messages"]);
-    expect(new Headers((fetchMock.mock.calls[0][1] as RequestInit).headers).get("Idempotency-Key")).toBe(new Headers((fetchMock.mock.calls[1][1] as RequestInit).headers).get("Idempotency-Key"));
+    expect(fetchMock.mock.calls.map(([path]) => path)).toEqual(["/api/agent/threads/start"]);
+    expect(new Headers((fetchMock.mock.calls[0][1] as RequestInit).headers).get("Idempotency-Key")).toBeTruthy();
+    expect(JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string)).toEqual({
+      agent_id: "operation_guidance", business_context: { equipment_id: "eq-1" }, text: "如何安全检查？", attachment_refs: [],
+    });
   });
 });

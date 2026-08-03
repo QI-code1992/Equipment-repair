@@ -19,6 +19,7 @@
 | Method | Endpoint | 请求/响应要点 | 约束 |
 |---|---|---|---|
 | POST | `/api/agent/threads` | `agent_id`、业务上下文，返回 `thread_id` | 全局入口仅接受前三个 Agent；诊断仅由开始维修上下文创建。 |
+| POST | `/api/agent/threads/start` | `agent_id`、业务上下文、首条文本与附件引用，返回 `thread_id,run_id,status` | 全局入口创建首条运行的唯一前端入口；线程与首条运行在同一事务中创建，配置无效或任一写入失败时不保留孤立线程；要求 `Idempotency-Key`。 |
 | GET | `/api/agent/threads` | 当前用户线程摘要列表 | 仅返回创建者自己的 `thread_id,agent_id,status,created_at,updated_at`，按更新时间倒序；不返回消息正文或其他用户线程。 |
 | POST | `/api/agent/threads/{thread_id}/messages` | 用户文本/附件引用，返回 `run_id` | 后端按 `agent_id` 加载配置并写入运行快照。 |
 | GET | `/api/agent/runs/{run_id}/events` | SSE 事件流 | 仅推送真实过程状态、令牌、引用和建议；不推送思维链。 |

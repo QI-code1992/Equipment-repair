@@ -10,6 +10,11 @@ class ThreadCreate(BaseModel):
     business_context: dict[str, Any] = Field(default_factory=dict)
 
 
+class ThreadStartCreate(ThreadCreate):
+    text: str = Field(min_length=1, max_length=20_000)
+    attachment_refs: list[dict[str, str]] = Field(default_factory=list)
+
+
 class MessageCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

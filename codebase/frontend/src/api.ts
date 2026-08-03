@@ -225,13 +225,12 @@ export async function readRunEvents(runId: string, onEvent?: (event: RuntimeEven
 }
 
 export async function startAgentRun(agentId: string, businessContext: Record<string, unknown>, text: string) {
-  const idempotencyKey = crypto.randomUUID();
-  const thread = await postJson<{ thread_id: string }>("/api/agent/threads", {
+  return postJson<{ thread_id: string; run_id: string }>("/api/agent/threads/start", {
     agent_id: agentId,
     business_context: businessContext,
-  }, idempotencyKey);
-  const run = await postJson<{ run_id: string }>(`/api/agent/threads/${thread.thread_id}/messages`, { text, attachment_refs: [] }, idempotencyKey);
-  return { thread_id: thread.thread_id, run_id: run.run_id };
+    text,
+    attachment_refs: [],
+  });
 }
 
 export type AgentThread = { thread_id: string; agent_id: string; status: string; messages: Array<Record<string, unknown>>; runs: Array<{ run_id: string; status: string; state: Record<string, unknown> }> };
