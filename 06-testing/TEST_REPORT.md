@@ -1,5 +1,13 @@
 # 测试报告
 
+## TASK-012 后 Stage 6 独立重测（待执行）
+
+- 测试基线：`codex/stage-05-integration@75276cbf5291dd19932595aadc6daa6a3f782bc6`。
+- 状态：`NOT_STARTED_PENDING_TEST_PLAN_CONFIRMATION`。本段只登记重测边界，尚无静态、运行态、浏览器、性能或恢复结果，不能表述为通过。
+- 触发原因：TASK-012 的 API-002—007、P0 前端与其修复改变了业务代码和测试基线；此前 Stage 6 结论与 Stage 6 → Stage 7 Gate 不可直接沿用。
+- 执行范围与退出条件：见 `TEST_PLAN.md` 的“TASK-012 后 Stage 6 独立重测（候选计划）”及 `TEST_CASES.md` 的 `TC-S6-T012-*`。
+- 门禁：若发现缺陷，登记后仅将受影响修复范围回流 Stage 5；本报告最终结论和项目负责人对精确候选的重新 Gate 批准前，Stage 7 与 Stage 8 保持锁定。
+
 ## TASK-012 P1 权限修复（2026-07-31）
 
 - 问题：`/intelligence-audit` 原先对仅有 `intelligence:audit` 的账号显示可点击知识文档重试按钮，但后端重试接口要求 `intelligence:knowledge`，会产生必然 403。

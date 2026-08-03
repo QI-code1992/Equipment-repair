@@ -1,9 +1,19 @@
 # 测试计划
 
-- 状态：Stage 6 独立测试结论已签发；项目负责人已批准候选 `89fbd2129169fb6ece42094b17907885637f3c48` 进入 Stage 7。Stage 7 正在准备隔离验收环境；最终验收与 Stage 8 发布均未完成或获批准。
+- 状态：此前 Stage 6 结论与 Stage 6 → Stage 7 Gate 仅保留历史。TASK-012 已在新的集成基线 `75276cbf5291dd19932595aadc6daa6a3f782bc6` 完成 Stage 5 合并后治理；本计划新增的重测范围尚待项目负责人确认，未执行 Stage 6 重测、Stage 7 验收或 Stage 8 发布。
 - 范围：Stage 1 验收标准、Stage 2 流程、Stage 3 状态、Stage 4 契约、生产实现和发布风险。
 
 Test layers: unit; API/schema; permission; health-score rule; Agent graph/checkpoint/SSE; RAG citation and document lifecycle; integration; browser E2E; security; performance; backup/restore. Each case must identify environment, fixture, exact Commit SHA, result and evidence. Production tests must verify missing model configuration fails clearly, unauthorized Agent equipment is rejected without detail leakage, non-catalog metrics are rejected, AI fault interrupts resume by the same thread, and secrets never appear in audit records.
+
+## TASK-012 后 Stage 6 独立重测（候选计划）
+
+- 基线：仅测试 `codex/stage-05-integration` 的精确提交 `75276cbf5291dd19932595aadc6daa6a3f782bc6`。此前 PR #63、PR #61 或 PR #75 候选的结果只保留历史追溯，不能证明该新集成树通过。
+- 独立性：由独立测试角色执行和签发结论；不继承 Stage 5 的开发者互审、单 Draft PR 或非作者 Merge 规则。任何业务代码、测试代码、数据库、基础设施、部署或运行配置缺陷均须登记并回流 Stage 5。
+- 静态与回归：重新执行 CodeQL（Python、JavaScript/TypeScript）、Semgrep、Gitleaks（工作树与完整历史）、Trivy、15 项 Node 静态回归、后端全量回归、前端全量测试与生产构建。所有扫描工件须存入以本次 SUT SHA 命名的目录；HIGH/CRITICAL 仅可通过可验证修复或项目负责人已签署且仍适用的风险处置关闭。
+- 隔离运行态：使用专用 PostgreSQL、Redis、MinIO、ClamAV、RAGFlow 数据集、临时账号和本地 HTTPS；不得使用生产数据、凭据、卷或公网暴露。验证 Compose、迁移、`/healthz`、Worker 文档生命周期、真实 RAGFlow 成功、`UNAVAILABLE` 降级、`NO_EVIDENCE`、附件扫描、API 重启恢复、HTTPS 与 JS/CSS MIME。
+- 浏览器 E2E：在受信任的临时 HTTPS 配置下，验证未认证重定向、登录、Workbench、`/intelligent-config`、`/fault-report`、权限受限写操作和退出跳转 `/login`；记录浏览器版本、临时夹具与 SUT SHA，不记录账号口令或 Token。
+- 性能与恢复：按本计划既有 1/2/5/10 并发与 P95 阈值重跑认证、附件、真实 RAGFlow 成功和不可用降级；重新执行受控附件备份、随机隔离恢复及恢复期间 10 并发只读验证。每份动态 JSON 的 `sut_commit`、`harness_commit` 与 `evidence_subject_commit` 必须为本次基线，或明确说明为何 harness 不同及其不可变关联。
+- 退出条件：所有适用测试用例有 `PASS` 或经项目负责人接受的残余风险；无未处置 Critical/Important；测试报告绑定本次精确 SHA 并给出独立结论。仅在项目负责人明确批准该结论和精确候选后，方可重新进入 Stage 7。
 
 ## Stage 6 静态全局审查
 
