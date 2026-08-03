@@ -461,7 +461,7 @@
 
 ### TASK-012：Stage 7 P0 正式前端偏离修复
 
-- 状态：`CR-048` 已获项目负责人批准，等待其治理候选合入后启动正式开发。`TASK-012-API-001` 已由 PR #71 合入；`TASK-012-API-002`—`007` 与 TASK-012 前端实现改为同一重大变更开发包，不再作为逐项 PR、逐项审核或逐项合并门禁。
+- 状态：`CLOSED_POST_MERGE_GOVERNANCE_COMPLETED`。`TASK-012-API-001` 已由 PR #71 合入；`TASK-012-API-002`—`007` 与 P0 前端已由 PR #75 合入，PR #76 已完成合并后治理收尾。受影响的 Stage 6 必须针对新集成基线重新独立验证，Stage 7/8 继续锁定。
 - 优先级：P0。
 - 负责人、任务开发者、Draft PR 创建者：`DEV-002`。
 - 指定审核者、最终集成检查与 DEV-002 开发任务 Merge 执行者：`DEV-001`。
@@ -475,7 +475,7 @@
 - 验收标准：所有 P0 行均有可达正式路由、已集成真实 API、权限与关键 UI 状态测试、原型对照证据；所有 `TASK-012-API-*` 均已关闭。API 不可用状态只能作为运行降级或开发期阻断证据，不能替代业务功能完成；无生产代码引用原型运行目录或静态业务样例。
 - 验证：各 API 先运行对应后端契约测试，再运行后端全量回归；`npm --prefix codebase/frontend test -- --run`；`npm --prefix codebase/frontend run build`；`node --test 06-testing/tests/*.test.js`；完整差异矩阵与 `git diff --check`。Docker、真实 RAGFlow、附件扫描、HTTPS 与浏览器 live-stack 验证仅由 DEV-001 在隔离环境执行。
 - 分支：`codex/task-012-p0-frontend-remediation`。
-- Review 与 Merge：开发期不执行 API-002—007 的逐项正式审核、逐项集成或逐项 Merge。全部工作包完成且 PR 转为 Ready 后，DEV-001 对完整候选的当前精确 HEAD 执行一次正式审核；审核通过后，DEV-001 执行最终集成检查并向项目负责人请求 PR/HEAD 绑定的 Merge 授权；获授权后 DEV-001 手动 Merge Commit。不得 auto-merge、merge queue、自批或自合并。
+- Review 与 Merge 记录：开发期未对 API-002—007 逐项审核或合并。DEV-001 已对 PR #75 精确 HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8` 提交正式批准；在项目负责人逐 PR 授权后，DEV-001 以 Merge Commit `9c8a787ba2ba51f4362bf6186b1c7d54cbe3e15c` 合入。PR #76 以 Merge Commit `477cb16e8a1e68d9d9325705d9d7db685fba9d86` 完成纯治理收尾。不得以这些 Stage 5 合并替代 Stage 6 重测、Stage 7 验收或 Stage 8 发布授权。
 - 回滚：按该任务的独立 Merge Commit 选择性 `git revert -m 1 <merge-sha>`，先在隔离环境验证；不得删除卷、数据或其他已接受功能。
 
 #### TASK-012 的 API 工作包

@@ -1,7 +1,7 @@
 {
-  "state": "STAGE5_TASK012_CONSOLIDATED_GOVERNANCE_INTEGRATED_PENDING_START_NOTICE",
-  "updatedBy": "DEV-001 post-merge governance verification for CR-048",
-  "updatedAt": "2026-07-31",
+  "state": "STAGE5_TASK012_POST_MERGE_GOVERNANCE_COMPLETED_STAGE6_REVALIDATION_REQUIRED",
+  "updatedBy": "DEV-002 post-merge governance closeout for TASK-012",
+  "updatedAt": "2026-08-03",
   "task010Delivery": {
     "taskId": "TASK-010",
     "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",
@@ -69,7 +69,7 @@
   "stage7P0FrontendRemediation": {
     "defect": "DEF-STAGE7-001",
     "changeRequest": "CR-047",
-    "status": "CONSOLIDATED_TASK012_GOVERNANCE_INTEGRATED_PENDING_START_NOTICE",
+    "status": "TASK012_CLOSED_POST_MERGE_GOVERNANCE_COMPLETED_STAGE6_REVALIDATION_REQUIRED",
     "api001": {
       "status": "INTEGRATED",
       "branch": "codex/task-012-api-001-workbench",
@@ -97,7 +97,7 @@
     "verification": "Merge parents, source-tree equivalence, merge diff check, workflow JSON and 15 Node static regressions passed.",
     "consolidatedDevelopment": {
       "changeRequest": "CR-048",
-      "status": "INTEGRATED_PENDING_POST_MERGE_GOVERNANCE",
+      "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",
       "taskDeveloper": "DEV-002",
       "reviewer": "DEV-001 after all work packages complete",
       "mergeExecutor": "DEV-001 after project-owner exact PR/HEAD authorization",
@@ -115,7 +115,7 @@
       "developmentStartAcknowledgement": "https://github.com/QI-code1992/Equipment-repair/pull/74#issuecomment-5138470417",
       "implementationHead": "a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8",
       "localVerification": "Frontend and backend focused regressions, production build, compileall and diff-check were reported by DEV-002; exact-HEAD disposable live-stack validation completed with 2 passed and 5 warnings.",
-      "defectInventory": "06-testing/DEFECTS.md DEF-TASK012-001..047; DEF-TASK012-046 and DEF-TASK012-047 are closed on exact HEAD a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8 after complete live-stack, HTTPS and authenticated browser evidence.",
+      "defectInventory": "06-testing/DEFECTS.md DEF-TASK012-001..047; DEV-001 final review closed DEF-TASK012-001..045 on exact HEAD a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8, and live-stack evidence closed DEF-TASK012-046 and DEF-TASK012-047.",
       "formalReview": {
         "reviewer": "ll979053897-arch / DEV-001",
         "state": "APPROVED",
@@ -129,9 +129,13 @@
       "mergeExecutor": "ll979053897-arch / DEV-001 / manual Merge Commit",
       "mergedAt": "2026-08-03T05:10:48Z",
       "postMergeVerification": "Target branch points to merge commit; approved HEAD is an ancestor; merge tree equals approved HEAD tree; diff-check and workflow/state.json parsing passed.",
-      "nextAction": "Complete post-merge governance commit and verify TASK-012 closeout. Stage 6/7/8 remain locked until their separate gates are approved."
+      "postMergeGovernancePullRequest": 76,
+      "postMergeGovernanceApprovedHead": "dd4b24e1369527a98da04c5e34b1e7b193b84c07",
+      "postMergeGovernanceMergeCommit": "477cb16e8a1e68d9d9325705d9d7db685fba9d86",
+      "postMergeGovernanceVerification": "PR #76 was merged after project-owner exact-HEAD confirmation, DEV-001 integration check and separate authorization. Its parents are 9c8a787ba2ba51f4362bf6186b1c7d54cbe3e15c and dd4b24e1369527a98da04c5e34b1e7b193b84c07; the result tree equals the approved governance source, and diff-check and workflow JSON parsing passed.",
+      "nextAction": "TASK-012 code and its post-merge governance are closed. Re-run Stage 6 independent testing against the new integration baseline 477cb16e8a1e68d9d9325705d9d7db685fba9d86; Stage 7 and Stage 8 remain locked until their separate gates are reapproved."
     },
-    "nextAction": "TASK-012 PR #75 was merged as 9c8a787ba2ba51f4362bf6186b1c7d54cbe3e15c with approved HEAD a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8. Complete post-merge governance closeout; Stage 6/7/8 remain locked until separate gates are approved."
+    "nextAction": "TASK-012 is closed through code integration PR #75 and governance closeout PR #76. Re-run independent Stage 6 testing against 477cb16e8a1e68d9d9325705d9d7db685fba9d86 before any new Stage 6 -> Stage 7 decision; Stage 7/8 remain locked."
   },
   "stage6RuntimeValidation": {
     "status": "POST_MERGE_CORE_RUNTIME_VALIDATION_COMPLETED_SUPERSEDED_BY_SIGNED_STAGE6_CONCLUSION",
