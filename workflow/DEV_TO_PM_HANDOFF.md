@@ -567,3 +567,10 @@
 - DEV-002 must fix the applicable items in the same TASK-012 development PR. This governance PR is only the review/evidence handoff and does not fix or close any defect.
 - Until a new exact HEAD is reviewed and integration-checked, PR #75 must not be merged and TASK-012, Stage 6/7/8 remain locked.
 - Second-pass additions are DEF-TASK012-038 through DEF-TASK012-040; DEV-002 must include them in the same remediation cycle.
+
+## TASK-012 third-pass review handoff (2026-08-03)
+
+- DEV-001 reviewed PR #75 exact HEAD `989e23481f071a46ee164c9595434d703d8a3a1f`; result remains `Changes requested`.
+- New open findings are DEF-TASK012-041 through DEF-TASK012-046: operation-guidance idempotency, Global Agent two-step/orphan and in-flight handling, unsafe manual fallback on order-load failure, overly strict page gates, incomplete SSE framing/error parsing, and missing production/live-stack evidence.
+- DEV-002 must remediate these in the same PR #75 and submit a new exact HEAD for whole-candidate review.
+- PR #75 must not be merged; TASK-012 and Stage 6/7/8 remain locked. This governance PR contains no business-code fix.

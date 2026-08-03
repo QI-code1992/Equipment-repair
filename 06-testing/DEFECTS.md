@@ -159,6 +159,15 @@ Review record only. No business-code fix is included in this governance branch. 
 - DEF-TASK012-039 (P1): After an AI preview is generated, the ordinary “提交故障” action remains enabled; a user can create a manual fault and then confirm the preview, producing two contradictory records from one report flow. Evidence: `FaultReportPage.tsx` preview branch and submit button.
 - DEF-TASK012-040 (P1): `readRunEvents()` awaits `response.text()` and parses only after the SSE response closes; Runtime status is not consumed incrementally, so the required live `run_started`/tool/status experience is not delivered. Evidence: `codebase/frontend/src/api.ts`, `App.tsx`, `RepairExecutionPage.tsx`, Runtime SSE contract.
 
+### Third-pass findings against PR #75 HEAD 989e23481f071a46ee164c9595434d703d8a3a1f
+
+- DEF-TASK012-041 (P1): `POST /api/agent/operation-guidance` performs external retrieval and writes a success audit but has no `Idempotency-Key` contract or replay storage; browser retry or double-click can repeat retrieval/audit with no stable response. Evidence: `codebase/backend/app/modules/agents/router.py`, `codebase/frontend/src/api.ts`, TASK-010 protected-write convention.
+- DEF-TASK012-042 (P1): Global Agent creation is a non-atomic thread-create then message-create sequence, each with a new idempotency key; message failure or retry leaves orphan threads, and the submit control has no in-flight disabled state. Evidence: `codebase/frontend/src/api.ts`, `codebase/frontend/src/App.tsx`.
+- DEF-TASK012-043 (P1): Repair execution enables manual fault-id fallback whenever assigned-order loading is `null`, including request failure; this permits bypassing formal work-order context during 403/network errors instead of only when an authoritative empty list is returned. Evidence: `codebase/frontend/src/RepairExecutionPage.tsx`.
+- DEF-TASK012-044 (P1): Page-level permission gates require write permissions for factory modeling, system management, intelligent configuration and repair execution, blocking read-only users from approved read views instead of rendering read data with write controls disabled. Evidence: `codebase/frontend/src/App.tsx`, page API contracts and P0 permission matrix.
+- DEF-TASK012-045 (P2): SSE parser accepts only one single-line `data:` field and silently drops `event:error`, multi-line data, or blocks separated by CRLF; the live Runtime contract is not robustly consumed despite the incremental reader. Evidence: `codebase/frontend/src/api.ts`.
+- DEF-TASK012-046 (P1): Required runtime integration evidence is still absent on HEAD 989e234: Docker Compose/container health, PostgreSQL, RAGFlow, ClamAV/MinIO, HTTPS and browser E2E were not rerun; frontend mocks/static checks cannot establish production readiness.
+
 ### Gate
 
-All items are open findings against PR #75 HEAD `77a54a1587544374ed876e902bc132d58cf8ed9b`. PR #75 must remain unmerged and Stage 6/7/8 locked until DEV-002 fixes the findings in the same development PR, publishes reproducible evidence, and DEV-001 reviews the new exact HEAD.
+All items are open findings against PR #75 HEAD `989e23481f071a46ee164c9595434d703d8a3a1f`. PR #75 must remain unmerged and Stage 6/7/8 locked until DEV-002 fixes the findings in the same development PR, publishes reproducible evidence, and DEV-001 reviews the new exact HEAD.

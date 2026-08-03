@@ -636,3 +636,11 @@
 - Existing frontend evidence: Vitest `55 passed`, production build passed, and Node static regressions `15 passed`; the retry-path coverage is incomplete because the dual-permission test does not click/assert the request.
 - Review conclusion: evidence is insufficient for approval while the two reproducibility failures and the open defect inventory remain unresolved. This record intentionally contains no code fix.
 - Second-pass review added three findings: equipment form dependency permissions, AI preview bypass/double-submit, and non-incremental SSE parsing. No business-code change was made.
+
+## TASK-012 third-pass review evidence (2026-08-03)
+
+- Review target: PR #75 exact HEAD `989e23481f071a46ee164c9595434d703d8a3a1f`.
+- Governance checks: remote HEAD confirmed; review diff inspected; no business-code changes made on this governance branch.
+- New findings: DEF-TASK012-041..046 recorded in `06-testing/DEFECTS.md`.
+- Not verified and still required on the final candidate: Docker Compose/container `/healthz`, PostgreSQL, RAGFlow, ClamAV/MinIO, HTTPS and browser E2E.
+- Gate remains `Changes requested`; no Merge authorization, merge or downstream unlock.

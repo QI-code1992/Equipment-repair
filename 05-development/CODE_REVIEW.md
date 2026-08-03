@@ -427,3 +427,10 @@
 - Boundary: this governance branch contains no business-code fix. DEV-002 must fix all applicable findings in PR #75, rerun the complete frontend/backend/static suites, and submit a new exact HEAD for whole-candidate review.
 - Gate: no Merge authorization, merge, TASK-012 closure, or Stage 6/7/8 unlock is permitted before that review and a fresh integration check.
 - Second-pass additions: DEF-TASK012-038 dependency permission mismatch on equipment forms, DEF-TASK012-039 AI preview/manual-submit double-write path, and DEF-TASK012-040 buffered rather than incremental Runtime SSE consumption.
+
+## TASK-012 third-pass review against HEAD 989e234 (2026-08-03)
+
+- Result: `Changes requested`; new open findings are DEF-TASK012-041 through DEF-TASK012-046.
+- Confirmed remaining risks: operation-guidance idempotency, two-step Global Agent orphaning/in-flight replay, unsafe manual fallback on work-order load failure, write-permission page gates blocking read-only views, incomplete SSE framing/error parsing, and missing Docker/PostgreSQL/RAGFlow/attachment/HTTPS/browser evidence.
+- This is a governance-only review; no business-code fix is included. DEV-002 must remediate in PR #75, publish exact reproducible evidence, and request a new whole-candidate review.
+- Gate: no Merge authorization, merge, TASK-012 closure, or Stage 6/7/8 unlock.
