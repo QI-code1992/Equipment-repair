@@ -169,6 +169,16 @@ Review record only. No business-code fix is included in this governance branch. 
 - DEF-TASK012-046 (P1): Required runtime integration evidence is still absent on HEAD 989e234: Docker Compose/container health, PostgreSQL, RAGFlow, ClamAV/MinIO, HTTPS and browser E2E were not rerun; frontend mocks/static checks cannot establish production readiness.
 - DEF-TASK012-047 (P1): Exact-HEAD live validation now reaches authenticated RAGFlow and the production `operation-guidance` route, but the live lifecycle returns `UNAVAILABLE` instead of the required `QUESTIONING` because the validation fixture creates a local knowledge dataset without creating/binding an `operation_guidance` Agent configuration. The client-supplied `dataset_ids` are correctly ignored by the server, so the test cannot prove the production route until the approved Agent config is provisioned. Evidence: `codebase/backend/tests/integration/test_task005_live_stack.py`, `codebase/backend/app/modules/agents/router.py`.
 
+### DEF-TASK012-046 status update (2026-08-03)
+
+- Exact HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8` completed the disposable live-stack run: PostgreSQL, Redis, MinIO, ClamAV, API, Worker, Validator and Nginx started; authenticated RAGFlow retrieval, temporary Agent binding, operation-guidance success/degradation, attachment scanning and cleanup passed (`2 passed, 5 warnings`).
+- Remaining scope is limited to application HTTPS ingress and authenticated browser E2E on this exact candidate. Existing RAGFlow HTTPS or unauthenticated/container-local checks do not satisfy this requirement.
+- DEF-TASK012-046 remains open until those two checks are executed and recorded.
+
+### DEF-TASK012-047 status update (2026-08-03)
+
+- Closed on exact HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`. The live fixture now creates and binds a temporary `operation_guidance` Agent configuration to the disposable dataset, then removes it during cleanup. The authenticated production route and unavailable degradation path were exercised; client-supplied `dataset_ids` remained ignored.
+
 ### Gate
 
-All items are open findings against PR #75 HEAD `ee149dda2b262f9350bfe58c54d5603bcffa068c`. PR #75 must remain unmerged and Stage 6/7/8 locked until DEV-002 fixes the findings in the same development PR, publishes reproducible evidence, and DEV-001 reviews the new exact HEAD.
+DEF-TASK012-001..045 remain subject to final exact-HEAD review; DEF-TASK012-047 is closed. PR #75 must remain unmerged and Stage 6/7/8 locked while DEF-TASK012-046 remains open. DEV-001 must execute application HTTPS and authenticated browser E2E, then perform the final whole-candidate review and integration check.

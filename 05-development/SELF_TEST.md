@@ -664,3 +664,10 @@
 - Runtime discovery follow-up: Docker has healthy RAGFlow stacks, including an API exposed at `127.0.0.1:19380`; unauthenticated `GET /api/v1/datasets` returned HTTP 401, so service reachability is proven but authenticated retrieval is not. MinIO is running; no ClamAV container is present in the current Docker runtime. Port 443 belongs to the separate RAGFlow stack, not the TASK-012 application ingress.
 - Temporary-key verification: the Key created in the RAGFlow API page authenticated successfully against `127.0.0.1:19380/api/v1/datasets` and returned one dataset. The secret was kept in memory and not written to repository files, logs or this record. The TASK-012 Compose adapter/route probe still needs a safe secret-injection mechanism.
 - Full validation attempt: Compose validation started all PostgreSQL, Redis, MinIO, ClamAV, API, Worker, Validator and Nginx services; authenticated RAGFlow probe passed. The lifecycle test failed at the production operation-guidance assertion (`UNAVAILABLE` vs `QUESTIONING`) because no `operation_guidance` Agent config was seeded/bound. New finding `DEF-TASK012-047` is open.
+## TASK-012 fifth-pass live validation evidence (2026-08-03)
+
+- Exact candidate: PR #75 HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`.
+- Disposable live stack covered PostgreSQL, Redis, MinIO, ClamAV, API, Worker, Validator and Nginx. Authenticated RAGFlow retrieval, temporary `operation_guidance` Agent binding, operation-guidance success/degradation, attachment scanning and cleanup completed: `2 passed, 5 warnings`.
+- Temporary Agent configuration and validation environment were removed after the run; no secret was committed or logged.
+- Not independently executed in this pass: application HTTPS ingress and authenticated browser E2E. DEF-TASK012-046 remains open for those checks.
+- DEV-001 probe of `https://127.0.0.1/healthz` and `/` failed TLS handshake; the active port 443 belongs to the separate RAGFlow stack, so no application HTTPS result is claimed.

@@ -590,3 +590,10 @@
 - The host does contain healthy RAGFlow and MinIO containers. RAGFlow API reachability is confirmed by HTTP 401 from `127.0.0.1:19380/api/v1/datasets` without credentials; no ClamAV container is currently running, and port 443 is the separate RAGFlow stack. DEV-002/project owner must provide a safe credential-injection path and the application-specific ClamAV/HTTPS/browser environment.
 - The temporary Key created in the RAGFlow UI now authenticates successfully and lists one dataset. It was used only in memory and was not committed or logged. A safe runtime injection path is still required to validate the TASK-012 container adapter and production route.
 - Full live attempt reached the production route but returned `UNAVAILABLE` because the fixture lacked a bound `operation_guidance` Agent configuration; client dataset IDs were correctly ignored. DEV-002 must provision the approved config in the validation contract and rerun, recorded as DEF-TASK012-047.
+## TASK-012 fifth-pass live evidence handoff (2026-08-03)
+
+- PR #75 exact HEAD: `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`.
+- DEV-002 corrected the disposable fixture. Authenticated RAGFlow, temporary `operation_guidance` Agent binding, production operation-guidance success/degradation, attachment scanning and cleanup passed in the isolated live stack: `2 passed, 5 warnings`.
+- DEF-TASK012-047 is closed. DEF-TASK012-046 remains open only for application HTTPS ingress and authenticated browser E2E on this exact HEAD.
+- DEV-001 must execute those two checks, update the final review, and perform integration verification. Until then PR #75 remains unmerged and TASK-012/Stage 6/7/8 remain locked.
+- DEV-001 attempted the application HTTPS endpoint at `https://127.0.0.1/healthz` and `/`; both failed TLS handshake because the available HTTPS listener is not the TASK-012 application. A designated application HTTPS/browser environment is still required.
