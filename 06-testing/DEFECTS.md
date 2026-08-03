@@ -182,3 +182,4 @@ Review record only. No business-code fix is included in this governance branch. 
 ### Gate
 
 DEF-TASK012-001..045 remain subject to final exact-HEAD review; DEF-TASK012-047 is closed. PR #75 must remain unmerged and Stage 6/7/8 locked while DEF-TASK012-046 remains open. DEV-001 must execute application HTTPS and authenticated browser E2E, then perform the final whole-candidate review and integration check.
+- DEF-TASK012-046 (P1, closed 2026-08-03): Exact HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8` now has reproducible Compose, PostgreSQL, RAGFlow, ClamAV/MinIO, application HTTPS, static MIME and authenticated browser E2E evidence. The browser run verified login, workbench load, `/intelligent-config`, `/fault-report`, and logout redirect to `/login`.

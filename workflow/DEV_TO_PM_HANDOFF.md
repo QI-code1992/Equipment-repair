@@ -609,3 +609,8 @@
 - The run covered real ClamAV/MinIO, Worker synchronization, RAGFlow document lifecycle, temporary Agent configuration, operation-guidance success/degradation, citations and cleanup. HTTPS ingress and health/MIME checks also passed.
 - Remaining action: authenticated browser login and protected-route E2E on exact HEAD `a0bbfdbe`; until then DEF-TASK012-046 remains open and PR #75 cannot be approved or merged.
 - Browser E2E remains blocked only by certificate trust: the browser rejected the disposable self-signed HTTPS certificate before login. Provide a trusted temporary certificate or approved browser trust profile; do not weaken production TLS configuration.
+## TASK-012 final DEV-001 review handoff (2026-08-03)
+
+- DEV-001 approves PR #75 exact HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8` for integration based on complete runtime and browser evidence.
+- `DEF-TASK012-046` and `DEF-TASK012-047` are closed. This approval is not Merge authorization and does not unlock Stage 6/7/8 by itself.
+- Next: DEV-002/project owner must grant separate exact-HEAD Merge authorization. DEV-001 then verifies target/祖先关系/差异 and the assigned non-author executor performs manual Merge Commit.

@@ -683,3 +683,8 @@
 - After MinIO bucket initialization and sequential migration/lifecycle execution: `test_task005_live_stack.py` `1 passed, 2 warnings`; PostgreSQL migration test passed separately. ClamAV, MinIO, Worker, RAGFlow Agent binding, operation-guidance success/degradation and cleanup were exercised.
 - HTTPS ingress `/healthz`, JS/CSS MIME and HTTPS health E2E passed. Authenticated browser login/protected-route E2E remains outstanding.
 - Browser E2E follow-up: browser navigation was blocked by `ERR_CERT_AUTHORITY_INVALID` for the disposable certificate. HTTPS command-line checks remain valid; authenticated browser E2E is still open.
+## TASK-012 final acceptance evidence (2026-08-03)
+
+- Exact HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`: RAGFlow, PostgreSQL/live lifecycle, ClamAV/MinIO, HTTPS health/MIME and authenticated browser E2E passed.
+- Browser flow: login, workbench, protected intelligent configuration and fault-report routes, logout redirect to `/login`.
+- Temporary validation resources and credentials were removed. No production code or configuration was changed during governance verification.
