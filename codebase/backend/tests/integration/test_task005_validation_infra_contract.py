@@ -66,7 +66,7 @@ def test_task005_validation_scripts_use_host_api_url_and_cleanup() -> None:
     assert "Invoke-ValidationComposeCleanup" in stream_contract
     assert "Compose cleanup must run after dataset failure" in stream_contract
     assert "empty dataset id must still run Compose cleanup" in stream_contract
-    assert "validation failed:" in invoke
+    assert "Throw-ValidationOutcome" in invoke
     assert "ComposeCleanup" in cleanup_orchestration
     assert "TASK-005 validation stream contract: PASS" in stream_contract
     assert "run --rm --no-deps worker python -c" in invoke

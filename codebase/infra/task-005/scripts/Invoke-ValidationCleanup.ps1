@@ -14,3 +14,14 @@ function Invoke-ValidationCleanup {
     catch { $failures.Add("Compose cleanup failed: $($_.Exception.Message)") }
     if ($failures.Count -gt 0) { throw ($failures -join '; ') }
 }
+
+function Throw-ValidationOutcome {
+    param([object]$ValidationFailure, [object]$CleanupFailure)
+    if ($ValidationFailure -and $CleanupFailure) {
+        $validationMessage = if ($ValidationFailure.Exception) { $ValidationFailure.Exception.Message } else { $ValidationFailure.Message }
+        $cleanupMessage = if ($CleanupFailure.Exception) { $CleanupFailure.Exception.Message } else { $CleanupFailure.Message }
+        throw [Exception]::new("validation failed: $validationMessage; cleanup failed: $cleanupMessage")
+    }
+    if ($ValidationFailure) { throw $ValidationFailure }
+    if ($CleanupFailure) { throw $CleanupFailure }
+}

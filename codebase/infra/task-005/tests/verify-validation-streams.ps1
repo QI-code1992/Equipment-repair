@@ -33,8 +33,6 @@ try {
     Remove-Item -LiteralPath $fakeBin -Recurse -Force -ErrorAction SilentlyContinue
 }
 
-Write-Output 'TASK-005 validation stream contract: PASS'
-
 $composeCalls = 0
 Invoke-ValidationCleanup -DatasetId '' -DeleteDataset { throw 'must not run' } -ComposeCleanup { $script:composeCalls++ }
 Assert-Contract ($composeCalls -eq 1) 'empty dataset id must still run Compose cleanup'
@@ -47,3 +45,13 @@ try {
     Assert-Contract ($_.Exception.Message -match 'compose sentinel') 'Compose failure must be retained'
     Assert-Contract ($composeCalls -eq 1) 'Compose cleanup must run after dataset failure'
 }
+
+try {
+    Throw-ValidationOutcome -ValidationFailure ([Exception]::new('validation sentinel')) -CleanupFailure ([Exception]::new('compose stderr sentinel'))
+    throw 'expected combined validation outcome failure'
+} catch {
+    Assert-Contract ($_.Exception.Message -match 'validation sentinel') 'validation failure must remain visible'
+    Assert-Contract ($_.Exception.Message -match 'compose stderr sentinel') 'cleanup stderr must remain visible'
+}
+
+Write-Output 'TASK-005 validation stream contract: PASS'

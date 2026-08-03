@@ -90,11 +90,7 @@ finally {
             if ($deleted.code -ne 0) { throw 'RAGFlow dataset cleanup failed' }
         } -ComposeCleanup { Invoke-ValidationComposeCleanup -ComposeArguments $compose }
     } catch { $cleanupFailure = $_ }
-    if ($validationFailure -and $cleanupFailure) {
-        throw [Exception]::new("validation failed: $($validationFailure.Exception.Message); cleanup failed: $($cleanupFailure.Exception.Message)")
-    }
-    if ($validationFailure) { throw $validationFailure }
-    if ($cleanupFailure) { throw $cleanupFailure }
+    Throw-ValidationOutcome -ValidationFailure $validationFailure -CleanupFailure $cleanupFailure
 }
 
 Write-Output 'TASK-005 live validation: PASS'
