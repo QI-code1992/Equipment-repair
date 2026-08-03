@@ -44,6 +44,9 @@ def test_task005_validation_scripts_use_host_api_url_and_cleanup() -> None:
     cleanup_helper = (
         INFRA_ROOT / "task-005" / "scripts" / "Invoke-ValidationComposeCleanup.ps1"
     ).read_text(encoding="utf-8")
+    cleanup_orchestration = (
+        INFRA_ROOT / "task-005" / "scripts" / "Invoke-ValidationCleanup.ps1"
+    ).read_text(encoding="utf-8")
     create_environment = (
         INFRA_ROOT / "task-005" / "scripts" / "New-ValidationEnvironment.ps1"
     ).read_text(encoding="utf-8")
@@ -61,6 +64,8 @@ def test_task005_validation_scripts_use_host_api_url_and_cleanup() -> None:
     assert "down --volumes --remove-orphans" in cleanup_helper
     assert "Invoke-ValidationComposeCleanup" in invoke
     assert "Invoke-ValidationComposeCleanup" in stream_contract
+    assert "Compose cleanup must run after dataset failure" in stream_contract
+    assert "ComposeCleanup" in cleanup_orchestration
     assert "TASK-005 validation stream contract: PASS" in stream_contract
     assert "run --rm --no-deps worker python -c" in invoke
     assert "make_bucket" in invoke

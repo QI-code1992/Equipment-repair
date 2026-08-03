@@ -5,6 +5,7 @@ function Assert-Contract([bool]$Condition, [string]$Message) {
 }
 
 . (Join-Path $PSScriptRoot '..\scripts\Invoke-ValidationComposeCleanup.ps1')
+. (Join-Path $PSScriptRoot '..\scripts\Invoke-ValidationCleanup.ps1')
 $fakeBin = Join-Path ([IO.Path]::GetTempPath()) ("task005-fake-docker-$PID")
 New-Item -ItemType Directory -Path $fakeBin | Out-Null
 $fakeDocker = Join-Path $fakeBin 'docker.cmd'
@@ -33,3 +34,13 @@ try {
 }
 
 Write-Output 'TASK-005 validation stream contract: PASS'
+
+$composeCalls = 0
+try {
+    Invoke-ValidationCleanup -DatasetId 'dataset-1' -DeleteDataset { throw 'dataset sentinel' } -ComposeCleanup { $script:composeCalls++ ; throw 'compose sentinel' }
+    throw 'expected combined cleanup failure'
+} catch {
+    Assert-Contract ($_.Exception.Message -match 'dataset sentinel') 'dataset failure must be retained'
+    Assert-Contract ($_.Exception.Message -match 'compose sentinel') 'Compose failure must be retained'
+    Assert-Contract ($composeCalls -eq 1) 'Compose cleanup must run after dataset failure'
+}
