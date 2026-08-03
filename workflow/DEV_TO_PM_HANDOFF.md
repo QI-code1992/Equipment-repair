@@ -574,3 +574,10 @@
 - New open findings are DEF-TASK012-041 through DEF-TASK012-046: operation-guidance idempotency, Global Agent two-step/orphan and in-flight handling, unsafe manual fallback on order-load failure, overly strict page gates, incomplete SSE framing/error parsing, and missing production/live-stack evidence.
 - DEV-002 must remediate these in the same PR #75 and submit a new exact HEAD for whole-candidate review.
 - PR #75 must not be merged; TASK-012 and Stage 6/7/8 remain locked. This governance PR contains no business-code fix.
+
+## TASK-012 fourth-pass review handoff (2026-08-03)
+
+- PR #75 exact HEAD is now `ee149dda2b262f9350bfe58c54d5603bcffa068c`.
+- DEV-001 inspection finds the code-level remediation direction for DEF-TASK012-041, 042, 043 and 045, plus page-level write guards; this is not final approval.
+- DEF-TASK012-046 remains open because Docker/live-stack, PostgreSQL, RAGFlow, ClamAV/MinIO, HTTPS and browser E2E evidence has not been executed on the new exact HEAD.
+- DEV-001 must perform the isolated environment verification and final whole-candidate review. Until then PR #75 is not mergeable by governance decision; TASK-012 and Stage 6/7/8 remain locked.

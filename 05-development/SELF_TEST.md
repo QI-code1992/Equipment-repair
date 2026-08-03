@@ -644,3 +644,10 @@
 - New findings: DEF-TASK012-041..046 recorded in `06-testing/DEFECTS.md`.
 - Not verified and still required on the final candidate: Docker Compose/container `/healthz`, PostgreSQL, RAGFlow, ClamAV/MinIO, HTTPS and browser E2E.
 - Gate remains `Changes requested`; no Merge authorization, merge or downstream unlock.
+
+## TASK-012 fourth-pass review evidence (2026-08-03)
+
+- Review target: PR #75 exact HEAD `ee149dda2b262f9350bfe58c54d5603bcffa068c`.
+- Inspection result: operation-guidance idempotency, atomic Agent start, in-flight guards, authoritative manual fallback and incremental SSE framing are present in the candidate diff.
+- DEV-002 reported frontend `65 passed`, backend focused `17 passed, 2 warnings`, production build, Node static regressions `15 passed`, compileall and diff-check.
+- Still not independently verified: Docker Compose/container health and `/healthz`, PostgreSQL, RAGFlow, ClamAV/MinIO, HTTPS and browser E2E/live-stack. These remain DEF-TASK012-046 and block approval.

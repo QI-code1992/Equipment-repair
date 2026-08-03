@@ -434,3 +434,10 @@
 - Confirmed remaining risks: operation-guidance idempotency, two-step Global Agent orphaning/in-flight replay, unsafe manual fallback on work-order load failure, write-permission page gates blocking read-only views, incomplete SSE framing/error parsing, and missing Docker/PostgreSQL/RAGFlow/attachment/HTTPS/browser evidence.
 - This is a governance-only review; no business-code fix is included. DEV-002 must remediate in PR #75, publish exact reproducible evidence, and request a new whole-candidate review.
 - Gate: no Merge authorization, merge, TASK-012 closure, or Stage 6/7/8 unlock.
+
+## TASK-012 fourth-pass review against HEAD ee149dda (2026-08-03)
+
+- DEV-002 supplied a new exact HEAD `ee149dda2b262f9350bfe58c54d5603bcffa068c`.
+- Code inspection confirms remediation direction for DEF-TASK012-041 (operation-guidance idempotency), DEF-TASK012-042 (atomic Global Agent start and in-flight guard), DEF-TASK012-043 (manual fallback only after authoritative empty order result), and DEF-TASK012-045 (incremental SSE framing with multi-line data/CRLF and stream failure handling). Page write controls were also separated from read-page access for the affected areas.
+- Review status remains `Changes requested` pending reproducible execution of DEF-TASK012-046 on this exact HEAD. The reported frontend/backend unit results are not a substitute for Docker Compose, container health and `/healthz`, PostgreSQL, RAGFlow, ClamAV/MinIO, HTTPS and browser live-stack evidence.
+- No Merge authorization, merge, TASK-012 closure or Stage 6/7/8 unlock is permitted before DEV-001 completes that environment verification and a final whole-candidate review.
