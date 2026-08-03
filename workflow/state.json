@@ -1,6 +1,6 @@
 {
-  "state": "STAGE5_TASK012_POST_MERGE_GOVERNANCE_COMPLETED_STAGE6_REVALIDATION_REQUIRED",
-  "updatedBy": "DEV-002 post-merge governance closeout for TASK-012",
+  "state": "STAGE6_TASK012_REVALIDATION_NOT_PASSED_STAGE5_REMEDIATION_REQUIRED",
+  "updatedBy": "Stage 6 independent retest evidence for TASK-012",
   "updatedAt": "2026-08-03",
   "task010Delivery": {
     "taskId": "TASK-010",
@@ -56,6 +56,15 @@
     "automatedChecks": "06-testing/tests/"
   },
   "lastApprovedStage": "Stage 6 — Test Verification",
+  "stage6Task012Revalidation": {
+    "status": "NOT_PASSED",
+    "sutCommit": "6fbb9e5be6267851482fda425c704acdada92c50",
+    "evidencePullRequest": 79,
+    "evidenceHead": "3764a0a9a2020711225f88e69edc9e15920d10e2",
+    "blockingDefects": ["DEF-STAGE6-003", "DEF-STAGE6-004", "DEF-STAGE6-005", "DEF-STAGE6-006", "DEF-STAGE6-007"],
+    "stage7Locked": true,
+    "nextAction": "Complete root-cause investigation and the applicable Stage 5 remediation for code, test, infrastructure or runtime defects; then rerun all affected independent Stage 6 cases against the resulting exact integration SHA."
+  },
   "pendingStageApproval": {
     "gate": "Stage 6 -> Stage 7",
     "candidateIntegrationHead": "89fbd2129169fb6ece42094b17907885637f3c48",
