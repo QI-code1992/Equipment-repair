@@ -32,6 +32,47 @@
 - 处置与复验：建立新的隔离 Compose 项目，仅由 API 写入 1 个受控附件对象；备份耗时 3.578 秒，随机恢复耗时 10.584 秒。恢复期间执行 60 秒、10 并发认证只读负载，12,443 次请求零错误、P95 76.64 ms。两个门槛均通过，详见 `TEST_REPORT.md` 与 `06-testing/performance/results-backup-restore-readonly.json`。
 - 结论限制：15,525 个小对象恢复约 194.7 秒仍是容量边界信息，不得外推为生产容量结论；Stage 6 Gate 仍由 DEV-002 单独决定。
 
+### DEF-STAGE6-003：TASK-012 新集成基线的真实知识生命周期未在时限内完成
+
+- 严重程度：Stage 6 P1 测试阻断。
+- 状态：Open / 根因调查中；回流 Stage 5 的范围尚未确认。
+- 发现基线：`6fbb9e5be6267851482fda425c704acdada92c50`。
+- 证据：Windows 隔离环境中 `tests/integration/test_task005_live_stack.py` 在专用数据库初始化和 MinIO bucket 初始化后仍在 180 秒执行上限内未产生终态结果。不得将此前候选或容器健康结果替代为本基线的生命周期通过证据。
+- 当前已知事实：Compose、迁移、PostgreSQL、Redis、MinIO、ClamAV、API、Worker、Validator、Nginx 和 RAGFlow 认证探针均已通过；超时边界在文档上传后等待知识文档 `READY`、检索或清理链路中的哪一段尚未由带时间戳的分段日志确认。
+- 关闭条件：在隔离环境追加不含秘密的分段时序证据，定位唯一阻塞组件；如需代码、Worker、RAGFlow、基础设施或运行时配置修复，按 Stage 5 任务书建立修复任务、测试、审核和集成，再以新的精确集成 SHA 重跑。
+
+### DEF-STAGE6-004：浏览器 E2E 的临时本地 HTTPS 信任链未建立
+
+- 严重程度：Stage 6 P1 测试阻断。
+- 状态：Open / 测试环境配置待修复。
+- 发现基线：`6fbb9e5be6267851482fda425c704acdada92c50`。
+- 证据：隔离环境浏览器拒绝已清理的临时证书，返回 `ERR_CERT_AUTHORITY_INVALID`；命令行 HTTPS 200 与 MIME 结果不能替代浏览器 E2E。
+- 关闭条件：使用仅隔离测试环境的临时信任根或受浏览器信任的本地证书，完成并归档未认证跳转、登录、Workbench、智能配置、故障上报、权限受限写操作和退出跳转；不得使用生产证书、生产域名或公网暴露。
+
+### DEF-STAGE6-005：性能、备份恢复与恢复期只读负载未在当前 SUT 重跑
+
+- 严重程度：Stage 6 P1 测试阻断。
+- 状态：Open / 证据缺失。
+- 发现基线：`6fbb9e5be6267851482fda425c704acdada92c50`。
+- 缺口：认证、附件、真实 RAGFlow 成功、`UNAVAILABLE` 降级的 1/2/5/10 并发结果，以及受控附件备份、随机隔离恢复和恢复期间 10 并发只读负载均未在本基线完成。
+- 关闭条件：每项结果均绑定本次 SUT、harness、evidence subject、隔离环境、夹具与 UTC 时间，并满足测试计划阈值；旧候选的 JSON 只能保留历史追溯。
+
+### DEF-STAGE6-006：后端生产容器未声明非 root 运行用户
+
+- 严重程度：Stage 6 P2 静态扫描待核验项；尚未确认代码缺陷或 Stage 5 回流。
+- 状态：Open / 等待容器 UID 运行证据。
+- 发现基线：`6fbb9e5be6267851482fda425c704acdada92c50`。
+- 根因调查：Semgrep 未识别 Docker 多阶段构建的最终 `production` stage。该 stage 继承 `runtime` 后创建 `appuser` 并声明 `USER appuser`；Compose 未指定 build target，按 Docker 语义会构建最终 stage。因此“当前 Dockerfile 未设置最终 USER”的结论不成立。
+- 关闭条件：在 Windows 隔离 Compose 中对 `api` 和 `worker` 执行不含敏感信息的 `id -u`，确认均非 `0`；若实际为 root，才以最小 Dockerfile/挂载权限修复回流 Stage 5。
+
+### DEF-STAGE6-007：性能 harness 的不校验证书分支缺少受控边界验证
+
+- 严重程度：Stage 6 P2 安全/测试治理问题。
+- 状态：Open / 待边界复核。
+- 发现基线：`6fbb9e5be6267851482fda425c704acdada92c50`。
+- 证据：Semgrep `python.lang.security.unverified-ssl-context.unverified-ssl-context` 命中 `06-testing/performance/stage6_performance.py` 的 `--insecure-tls` 分支。该开关仅应允许显式隔离自签名测试，绝不可成为默认或生产路径。
+- 关闭条件：增加失败用例证明无显式隔离标识时拒绝不校验证书；记录临时证书环境边界。若修改测试代码，按 Stage 5 修复范围处理。
+
 ### TASK-002 合并后治理台账修正（2026-07-17）
 
 - 严重程度：交付治理 Important；不构成新的 `codebase/` 实现缺陷。
