@@ -672,3 +672,7 @@
 - Not independently executed in this pass: application HTTPS ingress and authenticated browser E2E. DEF-TASK012-046 remains open for those checks.
 - DEV-001 probe of `https://127.0.0.1/healthz` and `/` failed TLS handshake; the active port 443 belongs to the separate RAGFlow stack, so no application HTTPS result is claimed.
 - Exact-HEAD follow-up: `npm ci` and `npm run build` passed in the temporary worktree. Nginx TLS files are still unavailable, so the isolated application HTTPS/browser run remains blocked.
+## TASK-012 HTTPS follow-up verification (2026-08-03)
+
+- Temporary HTTPS stack on exact HEAD `a0bbfdbe`: Nginx `127.0.0.1:8443`, `/healthz` HTTP 200, JavaScript/CSS MIME checks passed, HTTPS health E2E `1 passed`.
+- The temporary RAGFlow Key candidate from the desktop file returned 401; validator result was `1 passed, 1 skipped`. Authenticated RAGFlow route and browser login E2E remain unverified.

@@ -598,3 +598,7 @@
 - DEV-001 must execute those two checks, update the final review, and perform integration verification. Until then PR #75 remains unmerged and TASK-012/Stage 6/7/8 remain locked.
 - DEV-001 attempted the application HTTPS endpoint at `https://127.0.0.1/healthz` and `/`; both failed TLS handshake because the available HTTPS listener is not the TASK-012 application. A designated application HTTPS/browser environment is still required.
 - The exact-HEAD worktree now has a verified `npm ci` and production build. Temporary certificate injection is still required before application Nginx HTTPS/browser validation; generated assets and certificates must not be committed.
+## TASK-012 HTTPS follow-up handoff (2026-08-03)
+
+- Application HTTPS ingress is now verified on exact HEAD `a0bbfdbe`: `https://127.0.0.1:8443/healthz` returned 200, static JS/CSS MIME checks passed, and HTTPS health E2E passed.
+- The supplied desktop-file RAGFlow Key candidate returned HTTP 401 and the validator skipped the live route. A valid dedicated Key and authenticated browser session are still required before closing DEF-TASK012-046.

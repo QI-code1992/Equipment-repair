@@ -116,9 +116,9 @@
       "implementationHead": "a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8",
       "localVerification": "Frontend and backend focused regressions, production build, compileall and diff-check were reported by DEV-002; exact-HEAD disposable live-stack validation completed with 2 passed and 5 warnings.",
       "defectInventory": "06-testing/DEFECTS.md DEF-TASK012-001..047; DEF-TASK012-047 is closed after exact-HEAD live Agent configuration binding and route success/degradation validation. DEF-TASK012-046 remains open only for application HTTPS ingress and authenticated browser E2E.",
-      "nextAction": "DEV-001 must execute application HTTPS ingress and authenticated browser E2E against exact HEAD a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8, then perform final whole-candidate review and integration check. No Merge authorization, merge or stage unlock before that."
+      "nextAction": "Application HTTPS ingress and MIME/health E2E passed on exact HEAD a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8. DEV-001 must still execute authenticated browser login/protected-route E2E and final whole-candidate review/integration check. No Merge authorization, merge or stage unlock before that."
     },
-    "nextAction": "TASK-012 remains blocked at PR #75 exact HEAD a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8 by DEF-TASK012-046 (application HTTPS ingress and authenticated browser E2E). DEF-TASK012-047 is closed. DEV-001 must complete the remaining checks and final review; TASK-012 and Stage 7 acceptance remain locked until authorization and integration."
+    "nextAction": "TASK-012 remains blocked at PR #75 exact HEAD a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8 by DEF-TASK012-046 (authenticated browser login/protected-route E2E). Application HTTPS ingress is verified and DEF-TASK012-047 is closed. DEV-001 must complete browser E2E and final review; TASK-012 and Stage 7 acceptance remain locked until authorization and integration."
   },
   "stage6RuntimeValidation": {
     "status": "POST_MERGE_CORE_RUNTIME_VALIDATION_COMPLETED_SUPERSEDED_BY_SIGNED_STAGE6_CONCLUSION",

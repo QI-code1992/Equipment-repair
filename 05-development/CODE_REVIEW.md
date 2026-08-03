@@ -458,3 +458,7 @@
 - Remaining review gate: application HTTPS ingress and authenticated browser E2E on this exact candidate. Result remains `Changes requested`; no Merge authorization, merge or Stage 6/7/8 unlock is permitted until those checks and the final whole-candidate review pass.
 - DEV-001 environment probe: `https://127.0.0.1/healthz` and `/` both failed TLS handshake; Docker listed only the separate RAGFlow stack and no TASK-012 application ingress. This is an environment blocker, not passing application HTTPS evidence.
 - Follow-up on exact HEAD: after installing the locked frontend dependencies, `npm ci` and `npm run build` passed. TLS certificate injection remains unavailable in the current shell, so Nginx HTTPS and browser evidence are still not collected; certificates must remain outside Git.
+## TASK-012 HTTPS follow-up verification (2026-08-03)
+
+- Temporary isolated application stack on exact HEAD `a0bbfdbe`: Nginx bound `127.0.0.1:8443`; `/healthz` returned HTTP 200; JavaScript and CSS returned `application/javascript` and `text/css`; HTTPS health E2E passed (`1 passed`).
+- The supplied desktop-file Key candidate did not authenticate to RAGFlow (container probe HTTP 401); validator output was `1 passed, 1 skipped`. Authenticated RAGFlow production route and browser login E2E remain open.
