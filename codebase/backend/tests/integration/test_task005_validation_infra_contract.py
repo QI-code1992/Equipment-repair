@@ -38,6 +38,9 @@ def test_task005_validation_scripts_use_host_api_url_and_cleanup() -> None:
     invoke = (INFRA_ROOT / "task-005" / "scripts" / "Invoke-Validation.ps1").read_text(
         encoding="utf-8"
     )
+    stream_contract = (
+        INFRA_ROOT / "task-005" / "tests" / "verify-validation-streams.ps1"
+    ).read_text(encoding="utf-8")
     create_environment = (
         INFRA_ROOT / "task-005" / "scripts" / "New-ValidationEnvironment.ps1"
     ).read_text(encoding="utf-8")
@@ -53,7 +56,10 @@ def test_task005_validation_scripts_use_host_api_url_and_cleanup() -> None:
     assert "docker @compose exec -T api python -m app.modules.knowledge.ragflow_probe" in invoke
     assert "run --rm --no-deps --build" in invoke
     assert "down --volumes --remove-orphans" in invoke
-    assert "down --volumes --remove-orphans 2>$null" in invoke
+    assert "cleanupStderr" in invoke
+    assert "Compose cleanup failed: $details" in invoke
+    assert "Remove-Item -LiteralPath $cleanupStderr" in invoke
+    assert "TASK-005 validation stream contract: PASS" in stream_contract
     assert "run --rm --no-deps worker python -c" in invoke
     assert "make_bucket" in invoke
     assert "New-RandomHex" in create_environment
