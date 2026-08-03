@@ -462,3 +462,4 @@
 
 - Temporary isolated application stack on exact HEAD `a0bbfdbe`: Nginx bound `127.0.0.1:8443`; `/healthz` returned HTTP 200; JavaScript and CSS returned `application/javascript` and `text/css`; HTTPS health E2E passed (`1 passed`).
 - The supplied desktop-file Key candidate did not authenticate to RAGFlow (container probe HTTP 401); validator output was `1 passed, 1 skipped`. Authenticated RAGFlow production route and browser login E2E remain open.
+- RAGFlow credential follow-up: both long ASCII candidates extracted from the designated desktop file returned HTTP 401 for `GET /api/v1/datasets`; no valid Bearer credential was available for the exact-HEAD container adapter rerun.

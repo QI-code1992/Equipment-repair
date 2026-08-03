@@ -602,3 +602,4 @@
 
 - Application HTTPS ingress is now verified on exact HEAD `a0bbfdbe`: `https://127.0.0.1:8443/healthz` returned 200, static JS/CSS MIME checks passed, and HTTPS health E2E passed.
 - The supplied desktop-file RAGFlow Key candidate returned HTTP 401 and the validator skipped the live route. A valid dedicated Key and authenticated browser session are still required before closing DEF-TASK012-046.
+- Both candidate strings extracted from the temporary desktop file returned HTTP 401 against RAGFlow. DEV-002/project owner must provide a newly generated raw Key through a temporary out-of-repository file before the adapter/production route and authenticated browser E2E can be completed.

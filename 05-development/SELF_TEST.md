@@ -676,3 +676,4 @@
 
 - Temporary HTTPS stack on exact HEAD `a0bbfdbe`: Nginx `127.0.0.1:8443`, `/healthz` HTTP 200, JavaScript/CSS MIME checks passed, HTTPS health E2E `1 passed`.
 - The temporary RAGFlow Key candidate from the desktop file returned 401; validator result was `1 passed, 1 skipped`. Authenticated RAGFlow route and browser login E2E remain unverified.
+- Credential follow-up: two non-secret candidate positions were tested against the local RAGFlow API; both returned HTTP 401. No credential value is recorded here.
