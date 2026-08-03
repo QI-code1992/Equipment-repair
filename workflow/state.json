@@ -116,7 +116,15 @@
       "implementationHead": "a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8",
       "localVerification": "Frontend and backend focused regressions, production build, compileall and diff-check were reported by DEV-002; exact-HEAD disposable live-stack validation completed with 2 passed and 5 warnings.",
       "defectInventory": "06-testing/DEFECTS.md DEF-TASK012-001..047; DEF-TASK012-046 and DEF-TASK012-047 are closed on exact HEAD a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8 after complete live-stack, HTTPS and authenticated browser evidence.",
-      "nextAction": "DEV-001 review result is APPROVED for integration at exact HEAD a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8. Await separate project-owner Merge authorization; then perform final target/ancestor/diff check and manual merge by a non-author executor."
+      "formalReview": {
+        "reviewer": "ll979053897-arch / DEV-001",
+        "state": "APPROVED",
+        "reviewId": 4840904555,
+        "reviewUrl": "https://github.com/QI-code1992/Equipment-repair/pull/75#pullrequestreview-4840904555",
+        "commit": "a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8",
+        "submittedAt": "2026-08-03T05:01:17Z"
+      },
+      "nextAction": "DEV-001 formal review APPROVED at exact HEAD a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8. Await separate project-owner Merge authorization; then perform final target/ancestor/diff check and manual merge by a non-author executor."
     },
     "nextAction": "TASK-012 PR #75 exact HEAD a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8 is approved for integration by DEV-001; DEF-TASK012-046 and 047 are closed. Await separate project-owner Merge authorization, then manual merge and post-merge governance verification. Stage 6/7/8 remain locked until those steps complete."
   },
