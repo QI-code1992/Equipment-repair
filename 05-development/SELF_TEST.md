@@ -671,3 +671,4 @@
 - Temporary Agent configuration and validation environment were removed after the run; no secret was committed or logged.
 - Not independently executed in this pass: application HTTPS ingress and authenticated browser E2E. DEF-TASK012-046 remains open for those checks.
 - DEV-001 probe of `https://127.0.0.1/healthz` and `/` failed TLS handshake; the active port 443 belongs to the separate RAGFlow stack, so no application HTTPS result is claimed.
+- Exact-HEAD setup also lacks `frontend/node_modules`, generated `frontend/dist`, and Nginx TLS files; `npm run build` stopped at missing `tsc`. These are prerequisites for the isolated application HTTPS/browser run.
