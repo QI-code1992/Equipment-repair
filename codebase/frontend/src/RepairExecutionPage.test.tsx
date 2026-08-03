@@ -38,7 +38,7 @@ it("shows staged loading before displaying the server diagnosis question", async
 
     fireEvent.change(screen.getByLabelText("故障单 ID"), { target: { value: "fault-1" } });
     fireEvent.click(screen.getByRole("button", { name: "开始 AI 诊断" }));
-    expect(await screen.findByText("证据仍不足，可补充信息或直接开始维修。")).toBeInTheDocument();
+    expect(await screen.findByText("请补充报警码")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "采纳 AI 建议并开始维修" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "直接开始维修" }));
     expect(await screen.findByText("维修工单已创建：wo-1")).toBeInTheDocument();

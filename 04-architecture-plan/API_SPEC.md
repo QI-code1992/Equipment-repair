@@ -77,7 +77,7 @@
 
 ## 诊断状态与错误契约
 
-诊断运行状态：`QUEUED`、`OPEN_LOADING`、`QUESTIONING`、`EVIDENCE_PENDING`、`DIAGNOSIS_READY`、`ADOPTED`、`DIRECT_START`、`UNAVAILABLE`。仅 `DIAGNOSIS_READY` 可以返回“采纳 AI 建议并开始维修”。
+诊断运行状态：`QUEUED`、`OPEN_LOADING`、`QUESTIONING`、`EVIDENCE_PENDING`、`DIAGNOSIS_READY`、`ADOPTED`、`DIRECT_START`、`UNAVAILABLE`。仅 `DIAGNOSIS_READY` 可以返回“采纳 AI 建议并开始维修”。当相似案例与知识检索均无可引用结果时，即使现场证据已达最小数量，接口仍返回 `EVIDENCE_PENDING`、空 `prefill/summary` 和人工维修提示；不得生成固定根因或建议。
 
 `POST /api/agent/fault-diagnosis` 的客户端状态不是事实源。服务端以 `DiagnosisDraft` 保存诊断会话、创建者、故障绑定、知识数据集和证据进度；客户端后续步骤只提交 `diagnosis_draft_id`、回答或证据字段。READY 后重复提交必须幂等返回既有结果，不重复创建草稿或成功审计。缺少 `fault:repair`、草稿不存在、草稿不属于当前用户、故障/设备不存在或客户端提交服务端拥有的诊断上下文字段时，接口必须拒绝且不返回受保护业务详情。
 

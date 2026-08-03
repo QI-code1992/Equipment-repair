@@ -1,3 +1,4 @@
+from dataclasses import replace
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Header
@@ -380,6 +381,15 @@ def fault_diagnosis(
             session = agent.answer(session, payload.answer or "")
         else:
             session = agent.add_evidence(session, payload.category or "", payload.detail or "")
+
+    if session.state is DiagnosisState.DIAGNOSIS_READY and not case_items and not knowledge_items:
+        session = replace(
+            session,
+            state=DiagnosisState.EVIDENCE_PENDING,
+            question="未检索到可引用的案例或知识依据，不能生成根因建议；请补充现场证据或直接开始维修。",
+            prefill=None,
+            summary=None,
+        )
 
     draft_id = draft.id
     if session.state == DiagnosisState.DIAGNOSIS_READY and session.prefill and session.summary:

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { ApiError, completeRepair, getOperationGuidance, getWorkOrder, getWorkOrders, readRunEvents, runFaultDiagnosis, startAgentRun, startRepair, type DiagnosisResponse, type GuidanceResponse, type RepairStart, type RepairResult, type RuntimeEvent, type WorkOrder } from "./api";
 
 function diagnosisMessage(diagnosis: DiagnosisResponse) {
-  if (diagnosis.state === "EVIDENCE_PENDING") return "证据仍不足，可补充信息或直接开始维修。";
+  if (diagnosis.state === "EVIDENCE_PENDING") return diagnosis.question ?? "证据仍不足，可补充信息或直接开始维修。";
   if (diagnosis.state === "UNAVAILABLE") return "AI 诊断暂不可用，可直接开始维修。";
   return diagnosis.question ?? "诊断已启动。";
 }
