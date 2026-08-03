@@ -603,3 +603,8 @@
 - Application HTTPS ingress is now verified on exact HEAD `a0bbfdbe`: `https://127.0.0.1:8443/healthz` returned 200, static JS/CSS MIME checks passed, and HTTPS health E2E passed.
 - The supplied desktop-file RAGFlow Key candidate returned HTTP 401 and the validator skipped the live route. A valid dedicated Key and authenticated browser session are still required before closing DEF-TASK012-046.
 - Both candidate strings extracted from the temporary desktop file returned HTTP 401 against RAGFlow. DEV-002/project owner must provide a newly generated raw Key through a temporary out-of-repository file before the adapter/production route and authenticated browser E2E can be completed.
+## TASK-012 final live-stack rerun handoff (2026-08-03)
+
+- The newly supplied dedicated RAGFlow Token authenticated successfully. With the disposable MinIO bucket initialized and destructive schema testing sequenced before Worker lifecycle execution, `test_task005_live_stack.py` passed (`1 passed, 2 warnings`); PostgreSQL migration passed separately.
+- The run covered real ClamAV/MinIO, Worker synchronization, RAGFlow document lifecycle, temporary Agent configuration, operation-guidance success/degradation, citations and cleanup. HTTPS ingress and health/MIME checks also passed.
+- Remaining action: authenticated browser login and protected-route E2E on exact HEAD `a0bbfdbe`; until then DEF-TASK012-046 remains open and PR #75 cannot be approved or merged.

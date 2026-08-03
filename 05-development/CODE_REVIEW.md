@@ -463,3 +463,9 @@
 - Temporary isolated application stack on exact HEAD `a0bbfdbe`: Nginx bound `127.0.0.1:8443`; `/healthz` returned HTTP 200; JavaScript and CSS returned `application/javascript` and `text/css`; HTTPS health E2E passed (`1 passed`).
 - The supplied desktop-file Key candidate did not authenticate to RAGFlow (container probe HTTP 401); validator output was `1 passed, 1 skipped`. Authenticated RAGFlow production route and browser login E2E remain open.
 - RAGFlow credential follow-up: both long ASCII candidates extracted from the designated desktop file returned HTTP 401 for `GET /api/v1/datasets`; no valid Bearer credential was available for the exact-HEAD container adapter rerun.
+## TASK-012 final live-stack rerun against HEAD a0bbfdbe (2026-08-03)
+
+- Dedicated RAGFlow Token authenticated successfully (`GET /api/v1/datasets` HTTP 200); the value was kept out of records.
+- After initializing the disposable MinIO bucket and separating schema migration testing from the Worker lifecycle, `test_task005_live_stack.py` passed: `1 passed, 2 warnings`. This covered ClamAV rejection, MinIO upload, Worker synchronization, RAGFlow document lifecycle, temporary `operation_guidance` Agent binding, production operation-guidance success/degradation, citations and cleanup.
+- The earlier `UPLOADING` failure was caused by running the destructive PostgreSQL downgrade/upgrade test concurrently with the Worker, which temporarily removed `knowledge_documents`; it was a validation orchestration failure and was not reproduced after sequencing the tests.
+- HTTPS ingress, MIME checks and HTTPS health E2E passed. Remaining gate is authenticated browser login/protected-route E2E; result remains `Changes requested` until that evidence and final review are complete.
