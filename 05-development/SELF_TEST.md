@@ -660,3 +660,4 @@
 - API container startup: passed; container logs show Uvicorn listening on `0.0.0.0:8000`.
 - Container-local `GET /healthz`: HTTP 200, `{"status":"ok","service":"equipment-operations-platform"}`.
 - Not executed: real RAGFlow authenticated retrieval (example key is not a dedicated credential), ClamAV/MinIO attachment flow, HTTPS ingress and authenticated browser E2E. DEF-TASK012-046 remains open for those paths.
+- Follow-up environment check: no `RAGFLOW_*`, `MINIO_*`, `CLAMAV_*`, `TASK011_*` or browser E2E credentials are present in the DEV-001 host environment, and no `codebase/infra/.env` file exists; only `.env.example` is available. No secret or placeholder value was used as production evidence.

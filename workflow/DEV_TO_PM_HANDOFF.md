@@ -586,3 +586,4 @@
 
 - Exact HEAD `ee149dda2b262f9350bfe58c54d5603bcffa068c` passed Compose config, API build, PostgreSQL/Redis health, API startup and container-local `/healthz` HTTP 200 on Windows Docker.
 - Real RAGFlow credentials/service, ClamAV/MinIO attachment scanning, HTTPS and authenticated browser E2E remain unverified. DEF-TASK012-046 remains open; no Merge authorization or stage unlock.
+- The DEV-001 host has no dedicated `RAGFLOW_*`, attachment, HTTPS or browser-E2E variables and no `codebase/infra/.env`; the project owner/DEV-002 must provide or designate the isolated validation environment without placing secrets in the repository.
