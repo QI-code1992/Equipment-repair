@@ -179,7 +179,14 @@ Review record only. No business-code fix is included in this governance branch. 
 
 - Closed on exact HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`. The live fixture now creates and binds a temporary `operation_guidance` Agent configuration to the disposable dataset, then removes it during cleanup. The authenticated production route and unavailable degradation path were exercised; client-supplied `dataset_ids` remained ignored.
 
-### Gate
+### Historical gate (superseded by final review and integration)
 
 DEF-TASK012-001..045 remain subject to final exact-HEAD review; DEF-TASK012-047 is closed. PR #75 must remain unmerged and Stage 6/7/8 locked while DEF-TASK012-046 remains open. DEV-001 must execute application HTTPS and authenticated browser E2E, then perform the final whole-candidate review and integration check.
 - DEF-TASK012-046 (P1, closed 2026-08-03): Exact HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8` now has reproducible Compose, PostgreSQL, RAGFlow, ClamAV/MinIO, application HTTPS, static MIME and authenticated browser E2E evidence. The browser run verified login, workbench load, `/intelligent-config`, `/fault-report`, and logout redirect to `/login`.
+
+### Final resolution (2026-08-03)
+
+- DEV-001 final review `4840904555` approved exact HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`; this closes DEF-TASK012-001 through DEF-TASK012-045 after the consolidated remediation and final regression review.
+- DEF-TASK012-046 and DEF-TASK012-047 are closed by the recorded isolated live-stack, HTTPS and authenticated-browser evidence on the same HEAD.
+- PR #75 was merged as `9c8a787ba2ba51f4362bf6186b1c7d54cbe3e15c`; PR #76 merged the post-merge governance record as `477cb16e8a1e68d9d9325705d9d7db685fba9d86`.
+- No TASK-012 defect remains open. This closes the Stage 5 remediation task only; Stage 6 independent testing must be rerun against the new integration baseline before Stage 7 can be reconsidered.

@@ -616,3 +616,10 @@
 - `DEF-TASK012-046` and `DEF-TASK012-047` are closed. This approval is not Merge authorization and does not unlock Stage 6/7/8 by itself.
 - Post-merge update: PR #75 was manually merged by DEV-001 after separate exact-HEAD authorization. Merge Commit `9c8a787ba2ba51f4362bf6186b1c7d54cbe3e15c` has parents `86d620480382524737140d449b08aafdb4d6fd6b` and approved HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`. Target ref, ancestor relation, merge-tree equivalence, `git diff --check` and workflow JSON parsing passed. Post-merge governance closeout remains pending; Stage 6/7/8 remain locked.
 - Next: DEV-002/project owner must grant separate exact-HEAD Merge authorization. DEV-001 then verifies target/祖先关系/差异 and the assigned non-author executor performs manual Merge Commit.
+
+## TASK-012 post-merge governance closeout (2026-08-03)
+
+- PR #75 已由 DEV-001 合入 `codex/stage-05-integration`：Merge Commit `9c8a787ba2ba51f4362bf6186b1c7d54cbe3e15c` 的双亲为 `86d620480382524737140d449b08aafdb4d6fd6b` 与获批 HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`。
+- PR #76 已在项目负责人确认、DEV-001 集成检查和单独授权后由 DEV-002 合入：Merge Commit `477cb16e8a1e68d9d9325705d9d7db685fba9d86` 的双亲为 `9c8a787…` 与获批治理 HEAD `dd4b24e…`；结果树等价性、目标指针、`git diff --check` 和状态 JSON 均通过。
+- TASK-012 及 DEF-TASK012-001—047 已完成 Stage 5 治理闭环。新集成基线为 `477cb16e8a1e68d9d9325705d9d7db685fba9d86`；此前 Stage 6 结论和 Stage 6→7 Gate 仅保留历史，不可沿用。
+- 下一步：DEV-001 按 `06-testing/TEST_PLAN.md` 针对新基线重新开展 Stage 6 独立测试并形成新结论；项目负责人另行决定是否批准新的 Stage 6→7 Gate。Stage 7/8 继续锁定。

@@ -541,3 +541,11 @@
 - 回退：当前未提交；稳定单元仍可按文件/提交选择性回退。不得把本检查点 SHA 当成最终候选，最终 SHA 需在提交后重新记录。
 - 未验证：macOS 无 Docker/PowerShell，未执行 Windows 隔离 live-stack、RAGFlow、ClamAV/MinIO、HTTPS、浏览器逐页 E2E。
 - 下一步：完成完整 diff 和文档审计后提交同一 Draft PR，才可一次性请求 DEV-001 对完整候选审核。
+
+## FCP-012：TASK-012 合并后治理闭环（2026-08-03）
+
+- 状态：`CLOSED_POST_MERGE_GOVERNANCE_COMPLETED`；不构成 Stage 6 重测结论、Stage 7 验收或 Stage 8 发布授权。
+- 代码集成：PR #75 获批 HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8` 已由 DEV-001 以 Merge Commit `9c8a787ba2ba51f4362bf6186b1c7d54cbe3e15c` 合入；双亲分别为 `86d620480382524737140d449b08aafdb4d6fd6b` 与获批 HEAD。
+- 治理收尾：PR #76 获批治理 HEAD `dd4b24e1369527a98da04c5e34b1e7b193b84c07` 已由非作者 DEV-002 以 Merge Commit `477cb16e8a1e68d9d9325705d9d7db685fba9d86` 合入；其结果树等价于获批治理源。
+- 证据：DEV-001 正式审核 `4840904555`、完整 live-stack、HTTPS MIME/health 和认证浏览器 E2E 均绑定 PR #75 的获批 HEAD；两次合并后的目标分支指针、祖先关系、Merge Tree、`git diff --check` 与 `workflow/state.json` 解析均通过。
+- 下一步：以 `477cb16e8a1e68d9d9325705d9d7db685fba9d86` 作为新测试基线重启 Stage 6 独立验证；此前 Stage 7 和 Stage 8 保持锁定。
