@@ -20,7 +20,7 @@ from app.modules.identity.dependencies import require_permission
 from app.modules.identity.models import User
 
 from .models import AgentConfirmation, AgentRun, AgentThread
-from .schemas import MessageCreate, ResumeCreate, ThreadCreate
+from .schemas import MessageCreate, ResumeCreate, ThreadCreate, ThreadStartCreate
 from .gateway import build_model_request
 from .langgraph_runtime import run_checkpoint
 
@@ -124,6 +124,119 @@ def create_thread(
     )
     db.commit()
     return response
+
+
+@router.post("/threads/start", status_code=202)
+def start_thread(
+    payload: ThreadStartCreate,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permission("intelligence:agent")),
+    idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
+) -> dict[str, object]:
+    """Create a public Agent thread and its first run in one database transaction."""
+    if payload.agent_id not in _PUBLIC_AGENT_IDS:
+        raise HTTPException(status_code=422, detail={"code": "AGENT_NOT_AVAILABLE"})
+    request_body = payload.model_dump()
+    try:
+        replay = find_idempotent_response(
+            db, user_id=user.id, method="POST", path="/api/agent/threads/start",
+            key=idempotency_key, request_body=request_body,
+        )
+    except IdempotencyKeyReused:
+        raise HTTPException(status_code=409, detail={"code": "IDEMPOTENCY_KEY_REUSED"}) from None
+    if replay is not None:
+        return replay[1]
+
+    config = db.scalar(select(AgentConfigModel).where(AgentConfigModel.agent_id == payload.agent_id))
+    if config is None or not config.enabled or config.model_binding_id is None:
+        raise HTTPException(status_code=503, detail={"code": "AGENT_CONFIG_INVALID"})
+
+    try:
+        thread = AgentThread(
+            agent_id=payload.agent_id,
+            creator_user_id=user.id,
+            business_context_json=sanitize_audit_metadata(payload.business_context),
+            messages_json=[],
+            status="OPEN",
+        )
+        db.add(thread)
+        db.flush()
+        message = {
+            "role": "user",
+            "text": _safe_text(payload.text),
+            "attachment_refs": sanitize_audit_metadata(payload.attachment_refs),
+        }
+        model_request = build_model_request(config)
+        thread.messages_json = [*thread.messages_json, message]
+        run = AgentRun(
+            thread_id=thread.id,
+            config_snapshot_json=_snapshot(config),
+            model_binding_id=config.model_binding_id,
+            status="RUNNING",
+            started_at=_now(),
+            state_json=sanitize_audit_metadata({"step": "waiting_for_model", "events": [
+                _event("run_started", {"run_id": "pending", "status": "RUNNING"}),
+                _event("reasoning_status", {"status": "not_exposed", "level": config.deep_thinking_level}),
+                _event("model_request", {
+                    "stream": model_request.stream,
+                    "max_tokens": model_request.max_tokens,
+                    "reasoning_effort": model_request.reasoning_effort,
+                }),
+            ]}),
+        )
+        db.add(run)
+        db.flush()
+        events = list(run.state_json["events"])
+        events[0]["data"]["run_id"] = run.id
+        events.append(_event("run_waiting", {"status": "WAITING_FOR_MODEL"}))
+        run.state_json = run_checkpoint(
+            run_id=run.id,
+            initial_state={"step": "waiting_for_model", "status": "RUNNING", "events": events},
+            database_url=_database_url(db),
+        )
+        thread.checkpoint_ref = run.id
+        thread.updated_at = _now()
+        response = {"run_id": run.id, "thread_id": thread.id, "status": run.status}
+        write_audit_event(
+            db, actor_user_id=user.id, action="agent.thread.create", resource_type="agent_thread",
+            resource_id=thread.id, result="success", metadata={"agent_id": thread.agent_id, "business_context": payload.business_context},
+        )
+        write_audit_event(
+            db, actor_user_id=user.id, action="agent.run.create", resource_type="agent_run",
+            resource_id=run.id, result="success", metadata={"thread_id": thread.id, "agent_id": thread.agent_id},
+        )
+        save_idempotent_response(
+            db, user_id=user.id, method="POST", path="/api/agent/threads/start", key=idempotency_key,
+            request_body=request_body, status=202, body=response,
+        )
+        db.commit()
+        return response
+    except Exception:
+        db.rollback()
+        raise
+
+
+@router.get("/threads")
+def list_threads(
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permission("intelligence:agent")),
+) -> dict[str, object]:
+    rows = db.scalars(
+        select(AgentThread)
+        .where(AgentThread.creator_user_id == user.id)
+        .order_by(AgentThread.updated_at.desc(), AgentThread.id.asc())
+    ).all()
+    items = [
+        {
+            "thread_id": thread.id,
+            "agent_id": thread.agent_id,
+            "status": thread.status,
+            "created_at": thread.created_at.isoformat(),
+            "updated_at": thread.updated_at.isoformat(),
+        }
+        for thread in rows
+    ]
+    return {"items": items, "count": len(items)}
 
 
 @router.post("/threads/{thread_id}/messages", status_code=202)

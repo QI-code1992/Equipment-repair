@@ -97,7 +97,7 @@
     "verification": "Merge parents, source-tree equivalence, merge diff check, workflow JSON and 15 Node static regressions passed.",
     "consolidatedDevelopment": {
       "changeRequest": "CR-048",
-      "status": "INTEGRATED_PENDING_START_NOTICE",
+      "status": "DEVELOPMENT_COMPLETE_PENDING_DEV001_REVIEW",
       "taskDeveloper": "DEV-002",
       "reviewer": "DEV-001 after all work packages complete",
       "mergeExecutor": "DEV-001 after project-owner exact PR/HEAD authorization",
@@ -111,9 +111,13 @@
       "governanceIntegratedAt": "2026-07-31T01:28:39Z",
       "governanceVerification": "PR state MERGED; target branch points to the merge commit; merge parents are 274673b72d5201986ffee77b038f516022cd174d and b4e28368c1294f30b80f4dd72187660eba06fc10; git diff --check and workflow/state.json parsing passed; Python 3.13 backend 319 passed, 13 skipped, 2 warnings.",
       "startCondition": "CR-048 governance candidate must be integrated and the project owner must receive a formal development-start notice.",
-      "nextAction": "DEV-001 must send the formal TASK-012 development-start notice to the project owner. After the project owner confirms receipt, DEV-002 may create the single Draft PR and begin API-002—007 and P0 frontend implementation. Do not unlock Stage 6/7/8."
+      "developmentStartNotice": "https://github.com/QI-code1992/Equipment-repair/pull/74#issuecomment-5138434725",
+      "developmentStartAcknowledgement": "https://github.com/QI-code1992/Equipment-repair/pull/74#issuecomment-5138470417",
+      "implementationHead": "46bf6e7ad804fe77beb609904a8f3c9abe3a449f",
+      "localVerification": "Frontend 55 passed and production build passed; backend 328 passed, 13 skipped, 2 warnings; compileall, 15 Node static regressions, JSON parsing and git diff --check passed.",
+      "nextAction": "All API-002—007 and P0 frontend work packages are locally complete in the single PR. DEV-001 must perform one whole-candidate re-review against exact HEAD 46bf6e7ad804fe77beb609904a8f3c9abe3a449f after the P1 permission remediation. Do not request Merge, merge, or enter Stage 6/7/8 before re-review, integration check and project-owner authorization."
     },
-    "nextAction": "CR-048 is integrated by PR #73 Merge Commit 8d9beaefe01baef38e54baecbe3426d9ab816623. DEV-001 must send the formal development-start notice to the project owner; only after confirmation may DEV-002 start the unified TASK-012 Draft PR. TASK-012 and Stage 7 acceptance remain locked until the unified PR is reviewed, authorized, and integrated."
+    "nextAction": "TASK-012 local development is complete at 46bf6e7ad804fe77beb609904a8f3c9abe3a449f and awaits one whole-candidate DEV-001 re-review. TASK-012 and Stage 7 acceptance remain locked until re-review, authorization and integration; live-stack/browser evidence remains outstanding."
   },
   "stage6RuntimeValidation": {
     "status": "POST_MERGE_CORE_RUNTIME_VALIDATION_COMPLETED_SUPERSEDED_BY_SIGNED_STAGE6_CONCLUSION",

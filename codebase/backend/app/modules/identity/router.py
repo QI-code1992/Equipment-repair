@@ -15,6 +15,7 @@ from app.modules.identity.service import (
     active_user_for_session,
     create_login_session,
     login_session_for_token,
+    permission_codes_for_user,
 )
 
 
@@ -37,8 +38,16 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> dict[str, str
 
 
 @router.get("/me")
-def read_current_user(user: User = Depends(get_current_user)) -> dict[str, object]:
-    return {"id": user.id, "username": user.username, "enabled": user.enabled}
+def read_current_user(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> dict[str, object]:
+    return {
+        "id": user.id,
+        "username": user.username,
+        "enabled": user.enabled,
+        "permission_codes": sorted(permission_codes_for_user(db, user.id)),
+    }
 
 
 @router.delete("/session", response_model=None, name="session.logout")

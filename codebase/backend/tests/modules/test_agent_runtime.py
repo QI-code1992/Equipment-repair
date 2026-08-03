@@ -80,6 +80,68 @@ def test_thread_message_persists_snapshot_and_sse_hides_input(client) -> None:
     assert "reasoning_status" in events.text
 
 
+def test_atomic_thread_start_does_not_leave_a_thread_when_config_is_invalid(client) -> None:
+    _, token = create_user_token(
+        client, username="runtime-atomic-invalid", role_code="REPAIR_WORKER", permission_codes=["intelligence:agent"]
+    )
+    response = client.post(
+        "/api/agent/threads/start",
+        headers={**auth(token), "Idempotency-Key": "atomic-invalid"},
+        json={"agent_id": "fault_reporting", "business_context": {}, "text": "describe the fault"},
+    )
+    assert response.status_code == 503
+    with client.app.state.session_factory() as db:
+        assert db.scalars(select(AgentThread)).all() == []
+
+
+def test_atomic_thread_start_replays_one_thread_and_one_run(client) -> None:
+    owner_id, token = create_user_token(
+        client, username="runtime-atomic-replay", role_code="REPAIR_WORKER", permission_codes=["intelligence:agent"]
+    )
+    enabled_config(client)
+    headers = {**auth(token), "Idempotency-Key": "atomic-replay"}
+    payload = {"agent_id": "fault_reporting", "business_context": {"equipment_id": "eq-1"}, "text": "describe the fault"}
+    first = client.post("/api/agent/threads/start", headers=headers, json=payload)
+    replay = client.post("/api/agent/threads/start", headers=headers, json=payload)
+    conflict = client.post("/api/agent/threads/start", headers=headers, json={**payload, "text": "different"})
+    assert first.status_code == replay.status_code == 202
+    assert first.json() == replay.json()
+    assert conflict.status_code == 409
+    with client.app.state.session_factory() as db:
+        assert len(db.scalars(select(AgentThread)).all()) == 1
+        assert len(db.scalars(select(AgentRun)).all()) == 1
+        assert len(db.scalars(select(AuditEvent).where(AuditEvent.action == "agent.thread.create")).all()) == 1
+        assert db.scalar(select(IdempotencyRecord).where(IdempotencyRecord.user_id == owner_id)) is not None
+
+
+def test_thread_history_lists_only_current_users_threads(client) -> None:
+    _, token = create_user_token(
+        client,
+        username="runtime-history-owner",
+        role_code="REPAIR_WORKER",
+        permission_codes=["intelligence:agent"],
+    )
+    _, other_token = create_user_token(
+        client,
+        username="runtime-history-other",
+        role_code="REPAIR_WORKER",
+        permission_codes=["intelligence:agent"],
+    )
+    for current_token, key in ((token, "history-1"), (other_token, "history-2")):
+        response = client.post(
+            "/api/agent/threads",
+            headers={**auth(current_token), "Idempotency-Key": key},
+            json={"agent_id": "fault_reporting", "business_context": {}},
+        )
+        assert response.status_code == 201
+
+    history = client.get("/api/agent/threads", headers=auth(token))
+
+    assert history.status_code == 200
+    assert history.json()["count"] == 1
+    assert set(history.json()["items"][0]) == {"thread_id", "agent_id", "status", "created_at", "updated_at"}
+
+
 def test_thread_isolation_and_checkpoint_resume(client) -> None:
     _, owner_token = create_user_token(
         client,

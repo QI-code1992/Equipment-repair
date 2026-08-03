@@ -5,6 +5,7 @@ import {
   createFaultReport,
   getHealthScore,
   login,
+  logout,
   readRunEvents,
   startAgentRun,
   getAgentConfig,
@@ -13,6 +14,12 @@ import {
   saveAgentConfig,
   submitAgentFaultReport,
   startRepair,
+  getBiDashboard,
+  getKnowledgeDocuments,
+  getAgentThreads,
+  getAgentThread,
+  resumeAgentThread,
+  retryKnowledgeDocument,
 } from "./api";
 
 afterEach(() => window.sessionStorage.clear());
@@ -53,6 +60,19 @@ describe("requestJson", () => {
     expect(fetchMock).toHaveBeenCalledWith("/api/auth/login", expect.objectContaining({
       method: "POST", body: JSON.stringify({ username: "repairer", password: "correct-password" }),
     }));
+  });
+
+  it("clears the browser session after requesting logout", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response("null", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    window.sessionStorage.setItem("access_token", "session-token");
+
+    await logout();
+
+    expect(window.sessionStorage.getItem("access_token")).toBeNull();
+    expect(fetchMock).toHaveBeenCalledWith("/api/auth/session", expect.objectContaining({ method: "DELETE" }));
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(new Headers(init.headers).get("Idempotency-Key")).toBeTruthy();
   });
 });
 
@@ -97,6 +117,31 @@ describe("agent configuration API", () => {
 });
 
 describe("maintenance API", () => {
+  it("reads dashboard and knowledge status through the authenticated API boundary", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ summary: {} }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    window.sessionStorage.setItem("access_token", "active-login-token");
+
+    await getBiDashboard();
+    await getKnowledgeDocuments();
+
+    expect(fetchMock.mock.calls.map(([path]) => path)).toEqual(["/api/bi/dashboard", "/api/intelligence/knowledge-documents"]);
+    expect(new Headers((fetchMock.mock.calls[0][1] as RequestInit).headers).get("Authorization")).toBe("Bearer active-login-token");
+  });
+
+  it("sends a knowledge retry with an idempotency key", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "doc-1", status: "UPLOADING" }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await retryKnowledgeDocument("doc-1");
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/knowledge/documents/doc-1/retry", expect.objectContaining({
+      method: "POST", headers: expect.objectContaining({ "Idempotency-Key": expect.any(String) }),
+    }));
+  });
+
   it("sends adopted repair start with an idempotency key", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ work_order_id: "wo-1" }), { status: 200 }),
@@ -153,6 +198,18 @@ describe("maintenance API", () => {
 });
 
 describe("Agent Runtime SSE API", () => {
+  it("loads thread history and resumes with the boolean contract", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ thread_id: "thread-1", agent_id: "operation_guidance", status: "OPEN", messages: [], runs: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ run_id: "run-2", thread_id: "thread-1", status: "RESUMED" }), { status: 202 }));
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(getAgentThreads()).resolves.toEqual({ items: [], count: 0 });
+    await expect(getAgentThread("thread-1")).resolves.toMatchObject({ thread_id: "thread-1" });
+    await resumeAgentThread("thread-1", { resume: true, confirmation: { source: "user" } });
+    expect(JSON.parse(String((fetchMock.mock.calls[2][1] as RequestInit).body))).toEqual({ resume: true, confirmation: { source: "user" } });
+  });
+
   it("parses only real SSE event names and JSON data", async () => {
     const encoder = new TextEncoder();
     const body = new ReadableStream({
@@ -174,13 +231,58 @@ describe("Agent Runtime SSE API", () => {
     expect(new Headers(init.headers).get("Authorization")).toBe("Bearer active-login-token");
   });
 
-  it("creates an operation-guidance thread before starting its run", async () => {
+  it("parses CRLF and multiline SSE data, including error events and a final incomplete block", async () => {
+    const encoder = new TextEncoder();
+    const body = new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode('event: run_started\r\ndata: {"status":\r\ndata: "RUNNING"}\r\n\r\nevent: error\r\ndata: {"status":"FAILED"}\r\n\r\nevent: run_waiting\r\ndata: {"status":"WAITING"}'));
+        controller.close();
+      },
+    });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(body, { status: 200 })));
+
+    await expect(readRunEvents("run-crlf")).resolves.toEqual([
+      { event: "run_started", data: { status: "RUNNING" } },
+      { event: "error", data: { status: "FAILED" } },
+      { event: "run_waiting", data: { status: "WAITING" } },
+    ]);
+  });
+
+  it("emits SSE events as chunks arrive before the stream closes", async () => {
+    const encoder = new TextEncoder();
+    let controller!: ReadableStreamDefaultController<Uint8Array>;
+    const body = new ReadableStream<Uint8Array>({
+      start(activeController) {
+        controller = activeController;
+        controller.enqueue(encoder.encode('event: run_started\ndata: {"status":"RUNNING"}\n\n'));
+      },
+    });
+    const fetchMock = vi.fn().mockResolvedValue(new Response(body, { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const seen: Array<{ event: string; data: Record<string, unknown> }> = [];
+
+    const pending = readRunEvents("run-1", (event) => seen.push(event));
+    for (let index = 0; index < 10 && seen.length === 0; index += 1) await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(seen).toEqual([{ event: "run_started", data: { status: "RUNNING" } }]);
+    controller.enqueue(encoder.encode('event: run_completed\ndata: {"status":"COMPLETED"}\n\n'));
+    controller.close();
+    await expect(pending).resolves.toEqual([
+      { event: "run_started", data: { status: "RUNNING" } },
+      { event: "run_completed", data: { status: "COMPLETED" } },
+    ]);
+  });
+
+  it("atomically starts an operation-guidance thread and run", async () => {
     const fetchMock = vi.fn()
-      .mockResolvedValueOnce(new Response(JSON.stringify({ thread_id: "thread-1" }), { status: 201 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ run_id: "run-1" }), { status: 202 }));
+      .mockResolvedValueOnce(new Response(JSON.stringify({ thread_id: "thread-1", run_id: "run-1" }), { status: 202 }));
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(startAgentRun("operation_guidance", { equipment_id: "eq-1" }, "如何安全检查？")).resolves.toEqual({ thread_id: "thread-1", run_id: "run-1" });
-    expect(fetchMock.mock.calls.map(([path]) => path)).toEqual(["/api/agent/threads", "/api/agent/threads/thread-1/messages"]);
+    expect(fetchMock.mock.calls.map(([path]) => path)).toEqual(["/api/agent/threads/start"]);
+    expect(new Headers((fetchMock.mock.calls[0][1] as RequestInit).headers).get("Idempotency-Key")).toBeTruthy();
+    expect(JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string)).toEqual({
+      agent_id: "operation_guidance", business_context: { equipment_id: "eq-1" }, text: "如何安全检查？", attachment_refs: [],
+    });
   });
 });

@@ -81,7 +81,7 @@ def test_confirmed_fault_submission_uses_existing_business_api(client) -> None:
     assert response.json()["audit_event_id"]
 
 
-def test_fault_submission_without_confirmation_does_not_write_business_record(client) -> None:
+def test_fault_submission_without_confirmation_returns_reviewable_preview_without_writing_business_record(client) -> None:
     equipment_id = create_equipment(client)
     _, token = fault_reporter(client)
     response = client.post(
@@ -93,8 +93,19 @@ def test_fault_submission_without_confirmation_does_not_write_business_record(cl
         },
     )
 
-    assert response.status_code == 409
-    assert response.json()["detail"]["code"] == "CONFIRMATION_REQUIRED"
+    assert response.status_code == 200
+    assert response.json() == {
+        "agent_status": "PREVIEW",
+        "draft": valid_draft(equipment_id=equipment_id).model_dump(mode="json"),
+        "missing_fields": [],
+    }
+    with client.app.state.session_factory() as db:
+        assert db.scalar(select(func.count()).select_from(FaultReport)) == 0
+        assert db.scalar(
+            select(func.count()).select_from(AuditEvent).where(
+                AuditEvent.action == "agent.fault_report.submit"
+            )
+        ) == 0
 
 
 def test_fault_submission_replays_and_rejects_idempotency_conflict_without_duplicates(client) -> None:

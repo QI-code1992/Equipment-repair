@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ApiError, completeRepair, getOperationGuidance, readRunEvents, runFaultDiagnosis, startAgentRun, startRepair } from "./api";
+import { ApiError, completeRepair, getOperationGuidance, getWorkOrders, readRunEvents, runFaultDiagnosis, startAgentRun, startRepair } from "./api";
 import { RepairExecutionPage } from "./RepairExecutionPage";
 
 vi.mock("./api", async (importOriginal) => ({
@@ -12,14 +12,16 @@ vi.mock("./api", async (importOriginal) => ({
   getOperationGuidance: vi.fn(),
   startAgentRun: vi.fn(),
   readRunEvents: vi.fn(),
+  getWorkOrders: vi.fn(),
 }));
 
-beforeEach(() => vi.resetAllMocks());
+beforeEach(() => { vi.resetAllMocks(); vi.mocked(getWorkOrders).mockResolvedValue({ items: [], count: 0, page: 1, page_size: 20 }); });
 
 describe("RepairExecutionPage", () => {
-  it("shows staged loading before displaying the server diagnosis question", async () => {
+it("shows staged loading before displaying the server diagnosis question", async () => {
     vi.mocked(runFaultDiagnosis).mockResolvedValue({ state: "QUESTIONING", question: "请描述故障复现工况。", evidence: [], prefill: null, summary: null, steps: 0, questions: 0, diagnosis_draft_id: "draft-loading" });
     render(<RepairExecutionPage />);
+    await screen.findByText("暂无已分配工单。");
     fireEvent.change(screen.getByLabelText("故障单 ID"), { target: { value: "fault-loading" } });
     fireEvent.click(screen.getByRole("button", { name: "开始 AI 诊断" }));
     expect(screen.getByText("理解故障")).toBeInTheDocument();
@@ -32,15 +34,39 @@ describe("RepairExecutionPage", () => {
     });
     vi.mocked(startRepair).mockResolvedValue({ work_order_id: "wo-1", maintenance_record_id: "mr-1", start_mode: "DIRECT", diagnosis_draft_id: null });
     render(<RepairExecutionPage />);
+    await screen.findByText("暂无已分配工单。");
 
     fireEvent.change(screen.getByLabelText("故障单 ID"), { target: { value: "fault-1" } });
     fireEvent.click(screen.getByRole("button", { name: "开始 AI 诊断" }));
-    expect(await screen.findByText("证据仍不足，可补充信息或直接开始维修。")).toBeInTheDocument();
+    expect(await screen.findByText("请补充报警码")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "采纳 AI 建议并开始维修" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "直接开始维修" }));
     expect(await screen.findByText("维修工单已创建：wo-1")).toBeInTheDocument();
     expect(startRepair).toHaveBeenCalledWith("fault-1", { mode: "DIRECT" });
   });
+
+  it("disables direct repair while the formal work-order request is pending", async () => {
+    let resolveStart: (value: { work_order_id: string; maintenance_record_id: string; start_mode: "DIRECT"; diagnosis_draft_id: null }) => void;
+    vi.mocked(startRepair).mockImplementation(() => new Promise((resolve) => { resolveStart = resolve; }));
+    render(<RepairExecutionPage />);
+    await screen.findByText("暂无已分配工单。");
+    fireEvent.change(screen.getByLabelText("故障单 ID"), { target: { value: "fault-pending" } });
+    fireEvent.click(screen.getByRole("button", { name: "直接开始维修" }));
+    expect(screen.getByRole("button", { name: "直接开始维修" })).toBeDisabled();
+    resolveStart!({ work_order_id: "wo-pending", maintenance_record_id: "mr-pending", start_mode: "DIRECT", diagnosis_draft_id: null });
+    expect(await screen.findByText("维修工单已创建：wo-pending")).toBeInTheDocument();
+  });
+});
+
+it("reloads assigned work orders with the selected status", async () => {
+  vi.mocked(getWorkOrders)
+    .mockResolvedValueOnce({ items: [], count: 0, page: 1, page_size: 20 })
+    .mockResolvedValueOnce({ items: [{ id: "wo-1", number: "WO-1", fault_report_id: "fault-1", equipment_id: "eq-1", status: "IN_REPAIR", repairer_user_id: "user-1", symptom: "异响", started_at: null, completed_at: null }], count: 1, page: 1, page_size: 20 });
+  render(<RepairExecutionPage />);
+  await screen.findByText("暂无已分配工单。");
+  fireEvent.change(await screen.findByLabelText("维修执行工单状态筛选"), { target: { value: "IN_REPAIR" } });
+  expect(await screen.findByText(/WO-1/)).toBeInTheDocument();
+  expect(getWorkOrders).toHaveBeenLastCalledWith({ status: "IN_REPAIR" });
 });
 
 it("sends only the server draft id and user evidence when advancing diagnosis", async () => {
@@ -48,6 +74,7 @@ it("sends only the server draft id and user evidence when advancing diagnosis", 
     .mockResolvedValueOnce({ state: "QUESTIONING", question: "请提供复现工况", evidence: [], prefill: null, summary: null, steps: 1, questions: 1, diagnosis_draft_id: "draft-3" })
     .mockResolvedValueOnce({ state: "EVIDENCE_PENDING", question: "请补充另一类证据", evidence: [{ category: "reproduction", detail: "热机后复现" }], prefill: null, summary: null, steps: 2, questions: 1, diagnosis_draft_id: "draft-3" });
   render(<RepairExecutionPage />);
+  await screen.findByText("暂无已分配工单。");
   fireEvent.change(screen.getByLabelText("故障单 ID"), { target: { value: "fault-3" } });
   fireEvent.click(screen.getByRole("button", { name: "开始 AI 诊断" }));
   await screen.findByText("请提供复现工况");
@@ -61,12 +88,28 @@ it("renders real guidance citations and runtime SSE statuses", async () => {
   vi.mocked(startAgentRun).mockResolvedValue({ thread_id: "thread-1", run_id: "run-1" });
   vi.mocked(readRunEvents).mockResolvedValue([{ event: "run_waiting", data: { status: "WAITING_FOR_MODEL" } }]);
   render(<RepairExecutionPage />);
+  await screen.findByText("暂无已分配工单。");
   fireEvent.change(screen.getByLabelText("指引设备 ID"), { target: { value: "eq-9" } });
   fireEvent.change(screen.getByLabelText("设备型号"), { target: { value: "L956" } });
   fireEvent.change(screen.getByLabelText("指引故障现象"), { target: { value: "压力不足" } });
   fireEvent.click(screen.getByRole("button", { name: "获取操作指引" }));
   expect(await screen.findByText("查看 1 条引用")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "发送操作问题" }));
+  expect(await screen.findByText("运行状态：WAITING_FOR_MODEL")).toBeInTheDocument();
+});
+
+it("disables the operation-question action while an Agent run is starting", async () => {
+  let resolveRun: (value: { thread_id: string; run_id: string }) => void;
+  vi.mocked(startAgentRun).mockImplementation(() => new Promise((resolve) => { resolveRun = resolve; }));
+  vi.mocked(readRunEvents).mockResolvedValue([{ event: "run_waiting", data: { status: "WAITING_FOR_MODEL" } }]);
+  render(<RepairExecutionPage />);
+  await screen.findByText("暂无已分配工单。");
+  fireEvent.change(screen.getByLabelText("指引设备 ID"), { target: { value: "eq-1" } });
+  fireEvent.change(screen.getByLabelText("设备型号"), { target: { value: "L-900" } });
+  fireEvent.change(screen.getByLabelText("指引故障现象"), { target: { value: "液压异响" } });
+  fireEvent.click(screen.getByRole("button", { name: "发送操作问题" }));
+  expect(screen.getByRole("button", { name: "发送中…" })).toBeDisabled();
+  resolveRun!({ thread_id: "thread-pending", run_id: "run-pending" });
   expect(await screen.findByText("运行状态：WAITING_FOR_MODEL")).toBeInTheDocument();
 });
 
@@ -91,6 +134,7 @@ it("shows the manual guidance prompt when retrieval has no citable evidence", as
 it("keeps direct repair available when operation guidance is unavailable", async () => {
   vi.mocked(getOperationGuidance).mockRejectedValue(new ApiError(503, "RAGFLOW_TIMEOUT"));
   render(<RepairExecutionPage />);
+  await screen.findByText("暂无已分配工单。");
   fireEvent.change(screen.getByLabelText("故障单 ID"), { target: { value: "fault-manual" } });
   fireEvent.change(screen.getByLabelText("指引设备 ID"), { target: { value: "eq-manual" } });
   fireEvent.change(screen.getByLabelText("设备型号"), { target: { value: "L956" } });
@@ -109,6 +153,7 @@ it("adopts a ready diagnosis and shows its summary after repair parts notes", as
   vi.mocked(startRepair).mockResolvedValue({ work_order_id: "wo-2", maintenance_record_id: "mr-2", start_mode: "ADOPTED", diagnosis_draft_id: "draft-1" });
   vi.mocked(completeRepair).mockResolvedValue({ actual_cause: "压力阀卡滞", actual_solution: "检查压力阀", repair_result: "已恢复", parts_replacement_notes: "更换压力传感器" });
   render(<RepairExecutionPage />);
+  await screen.findByText("暂无已分配工单。");
 
   fireEvent.change(screen.getByLabelText("故障单 ID"), { target: { value: "fault-2" } });
   fireEvent.click(screen.getByRole("button", { name: "开始 AI 诊断" }));
@@ -124,6 +169,7 @@ it("adopts a ready diagnosis and shows its summary after repair parts notes", as
 it("shows a permission state without removing the manual repair path", async () => {
   vi.mocked(getOperationGuidance).mockRejectedValue(new ApiError(403, "PERMISSION_DENIED"));
   render(<RepairExecutionPage />);
+  await screen.findByText("暂无已分配工单。");
   fireEvent.change(screen.getByLabelText("故障单 ID"), { target: { value: "fault-permission" } });
   fireEvent.change(screen.getByLabelText("指引设备 ID"), { target: { value: "eq-permission" } });
   fireEvent.change(screen.getByLabelText("设备型号"), { target: { value: "L956" } });

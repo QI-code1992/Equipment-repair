@@ -1,5 +1,14 @@
 # 自测
 
+## TASK-012 整体开发候选本地回归（2026-07-31）
+
+- 当前开发分支：`codex/task-012-p0-frontend-remediation`；主体提交 `9986475`，本轮测试回归随后纳入最终候选。
+- 前端：`npm test -- --run` 为 `7 files / 53 passed`；`npm run build` 通过。
+- 后端：`.venv/bin/python -m pytest tests -q` 为 `328 passed, 13 skipped, 2 warnings`；`.venv/bin/python -m compileall -q app tests` 通过。
+- 静态回归：`node --test 06-testing/tests/*.test.js` 为 `15 passed`；`workflow/state.json` JSON 解析和 `git diff --check` 通过。
+- 本轮补充回归覆盖安全附件引用、知识文档上传前置 Dataset、维修执行工单状态筛选；未新增生产依赖、兼容层或抽象层。
+- 未验证：Windows Docker Desktop/WSL2、真实 ClamAV/MinIO、真实 RAGFlow、HTTPS、浏览器逐页 E2E、重启/备份恢复和生产部署；这些必须由具备环境的最终审核者在最终精确候选上验证。
+
 - 状态：Stage 5 开发自测与真实 PostgreSQL/Compose 验证已执行；Stage 6 独立测试和生产环境验收尚未执行
 - 原型证据：Node 静态检查位于 `06-testing/tests/`，不属于生产测试。
 - 必要生产检查：单元、API 契约、权限、健康分、Agent/RAGFlow 集成、安全、性能和端到端测试。
@@ -601,3 +610,22 @@
 - 合并后验证：目标分支指针、双亲关系、`git diff --check`、`workflow/state.json` JSON 解析通过；Python 3.13 后端全量 `319 passed, 13 skipped, 2 warnings`。
 - 变更边界：仅治理文档；未修改业务代码、测试逻辑、迁移、生产依赖、Compose 或运行配置。
 - 门禁：仅完成 CR-048 治理集成；正式开发启动通知尚未完成，API-002—007、TASK-012 前端和 Stage 6/7/8 不解锁。
+
+## TASK-012 API-002—007 与 P0 前端阶段性自测（2026-07-31）
+
+- 开发启动：DEV-001 已通知、DEV-002 已确认；本记录只描述同一 Draft PR 中的实现证据，不触发中途审核。
+- 后端：新增 BI 聚合、设备维修历史、维修记录/工单读取、审计事件字段白名单、智能调用空统计、知识状态与失败重试。`python -m pytest tests/modules/test_task012_read_apis.py -q` 为 `4 passed, 2 warnings`；`python -m pytest tests/modules -q` 为 `265 passed, 2 warnings`；`compileall` 通过。
+- 前端：新增 BI、工厂建模、设备台账/新增/编辑/详情、维修记录、系统管理、智能审计、全局 Agent 路由和真实 API 客户端；`npm test -- --run` 为 `29 passed`，`npm run build` 通过。
+- 静态：`node --test 06-testing/tests/*.test.js` 为 `15 passed`；`git diff --check` 通过。
+- 未验证：DEV-002 未执行 Docker Compose、真实 RAGFlow、附件扫描、HTTPS 或浏览器 live-stack；这些不能用 mock 结果替代，必须由 DEV-001 在完整候选上执行。TASK-012 尚未完成，不请求审核或 Merge。
+
+## TASK-012 API-002—007 与 P0 前端完整候选自测（2026-07-31）
+
+- 当前分支：`codex/task-012-p0-frontend-remediation`；仍为唯一 Draft PR 开发分支。本记录不构成正式审核、Ready、Merge 或 Stage 6/7/8 放行。
+- 代码范围：API-002—007 的 BI 时间窗/组织校验、设备维修历史趋势、维修记录知识状态筛选、工单状态/详情、审计字段筛选分页、智能调用/知识文档只读边界；P0 页面新增真实筛选、历史趋势、附件安全流程、Agent 线程历史/详情/resume/SSE 状态和配置入口。
+- TDD 回归：新增线程历史测试先因 `GET /api/agent/threads` 返回 `405` 失败，增加按创建者隔离的正式只读路由后转绿；恢复 payload 回归确认 `resume` 为布尔值，避免真实 API `422`。
+- 前端验证：`npm test -- --run` 为 `49 passed`；`npm run build` 通过。
+- 后端验证：`python -m pytest tests -q` 为 `328 passed, 13 skipped, 2 warnings`；`python -m compileall -q app tests` 通过。
+- 静态验证：`node --test 06-testing/tests/*.test.js` 为 `15 passed`；`python3 -m json.tool workflow/state.json`、`git diff --check` 通过。
+- 未验证：当前 macOS 环境没有 Docker/PowerShell/真实 RAGFlow；未执行 Windows 隔离 live-stack、ClamAV/MinIO 附件扫描、HTTPS、浏览器逐页 E2E、真实 RAGFlow 引用/降级或生产部署。上述必须由 DEV-001 在最终精确候选上独立验证。
+- 未完成事项：最终候选尚未提交、PR 尚未转 Ready、DEV-001 尚未整体审核；页面矩阵全部仍标记“实现中候选”，`DEF-STAGE7-001` 不得关闭。

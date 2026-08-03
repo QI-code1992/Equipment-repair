@@ -1,5 +1,21 @@
 # 测试报告
 
+## TASK-012 P1 权限修复（2026-07-31）
+
+- 问题：`/intelligence-audit` 原先对仅有 `intelligence:audit` 的账号显示可点击知识文档重试按钮，但后端重试接口要求 `intelligence:knowledge`，会产生必然 403。
+- 修复提交：`46bf6e7ad804fe77beb609904a8f3c9abe3a449f`；页面现在按当前会话权限禁用写操作，并对审计-only 用户显示明确不可用状态；同时保留审计+知识双权限的可用路径。
+- 回归：修复前新增审计-only 用例按预期失败；修复后定向 `17 passed`，前端全量 `55 passed`，生产构建、15 项 Node 静态回归及 `git diff --check` 通过。
+- 门禁：该修复仍在同一 Draft PR #75，未申请合并授权；新 HEAD 必须由 DEV-001 重新整体审核。
+
+## TASK-012 整体开发候选本地验证（2026-07-31）
+
+- 候选分支：`codex/task-012-p0-frontend-remediation`；开发提交：`08e1576`。
+- 前端：`npm test -- --run`，7 个测试文件、`53 passed`；`npm run build` 通过。
+- 后端：`.venv/bin/python -m pytest tests -q`，`328 passed, 13 skipped, 2 warnings`；`.venv/bin/python -m compileall -q app tests` 通过。
+- 静态与治理：`node --test 06-testing/tests/*.test.js` 为 `15 passed`；`workflow/state.json` JSON 解析和 `git diff --check` 通过。
+- 本轮新增回归覆盖安全附件引用、知识文档 Dataset 前置、维修执行工单状态筛选。未新增生产依赖、兼容层或抽象层。
+- 结论边界：本地开发目标与可执行回归已完成，但本段不宣布 TASK-012 正式闭环、Stage 6/7 通过或发布。Windows Docker Desktop/WSL2、真实 ClamAV/MinIO/RAGFlow、HTTPS、浏览器逐页 E2E、重启/备份恢复和生产部署仍待具备环境的最终独立验证。
+
 - 状态：Stage 6 独立测试结论已签发，绑定 PR #63 approved HEAD `46bd5b7f6579016d9ce9bb3f0d1d7226ccd503d1` 与 Merge Commit `a5e4f6abec98f0df4c04f18a0cbf849e423624be`；项目负责人已批准候选 `89fbd2129169fb6ece42094b17907885637f3c48` 进入 Stage 7。Stage 7 验收及生产发布均未完成或获批。
 
 ## Stage 6 当前候选证据更新（2026-07-29，SUT/harness `ed0250cad87c8d814a5a2cc5cca8fb5217783064`）

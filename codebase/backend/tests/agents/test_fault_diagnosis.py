@@ -3,7 +3,7 @@ from app.modules.agents.fault_diagnosis import (
     DiagnosisState,
     FaultDiagnosisAgent,
 )
-from app.integrations.ragflow.adapter import RetrievalResult
+from app.integrations.ragflow.adapter import KnowledgeCitation, RetrievalResult
 from tests.modules.maintenance_support import auth_headers, create_equipment, create_fault, repairer
 from tests.modules.support import create_user_token
 from app.core.database import Base
@@ -287,7 +287,7 @@ def test_fault_diagnosis_api_creates_existing_business_diagnosis_draft(client, m
 
     def retrieve(db, question, dataset_ids, adapter):
         retrieval_calls.append({"question": question, "dataset_ids": dataset_ids})
-        return RetrievalResult()
+        return RetrievalResult(citations=[KnowledgeCitation("doc-1", "chunk-1", "inspect the relief valve", 0.91)])
 
     monkeypatch.setattr(
         "app.modules.agents.router.knowledge_service.retrieve_knowledge",
@@ -404,3 +404,38 @@ def test_fault_diagnosis_api_creates_existing_business_diagnosis_draft(client, m
                 IdempotencyRecord.path == "/api/agent/fault-diagnosis"
             )
         ) == idempotency_count + 1
+
+
+def test_fault_diagnosis_does_not_generate_a_ready_summary_without_retrieved_sources(client, monkeypatch):
+    client.app.state.knowledge_adapter = object()
+    configure_fault_diagnosis_dataset(client)
+    equipment_id = create_equipment(client, model="NO-SOURCE-MODEL")
+    fault_id = create_fault(client, equipment_id, symptom="pressure drops")
+    _, token = create_user_token(
+        client, username="diagnosis-no-source", role_code="REPAIR_WORKER", permission_codes=["intelligence:agent", "fault:repair"]
+    )
+    monkeypatch.setattr(
+        "app.modules.agents.router.knowledge_service.retrieve_knowledge",
+        lambda db, question, dataset_ids, adapter: RetrievalResult(),
+    )
+    headers = {"Authorization": f"Bearer {token}"}
+    started = client.post(
+        "/api/agent/fault-diagnosis",
+        headers={**headers, "Idempotency-Key": "no-source-start"},
+        json={"action": "start", "fault_report_id": fault_id},
+    )
+    draft_id = started.json()["diagnosis_draft_id"]
+    client.post(
+        "/api/agent/fault-diagnosis",
+        headers={**headers, "Idempotency-Key": "no-source-reproduction"},
+        json={"action": "evidence", "diagnosis_draft_id": draft_id, "category": "reproduction", "detail": "drops under load"},
+    )
+    response = client.post(
+        "/api/agent/fault-diagnosis",
+        headers={**headers, "Idempotency-Key": "no-source-measurement"},
+        json={"action": "evidence", "diagnosis_draft_id": draft_id, "category": "measurement", "detail": "12 bar"},
+    )
+    assert response.status_code == 200
+    assert response.json()["state"] == "EVIDENCE_PENDING"
+    assert response.json()["prefill"] is None
+    assert response.json()["summary"] is None

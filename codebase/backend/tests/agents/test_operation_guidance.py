@@ -5,6 +5,7 @@ from app.modules.agents.operation_guidance import (
 )
 from app.core.database import Base
 from app.integrations.ragflow.adapter import KnowledgeCitation, RetrievalResult
+from app.modules.agent_config.models import AgentConfigModel
 from app.modules.knowledge.models import FileObject, FileScanStatus, KnowledgeDataset, KnowledgeDocument, KnowledgeDocumentStatus
 from app.main import create_app
 from tests.modules.support import create_user_token
@@ -12,6 +13,28 @@ from fastapi.testclient import TestClient
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import threading
+
+
+def _configure_guidance(client, dataset_ids: list[str]) -> None:
+    with client.app.state.session_factory() as db:
+        db.add(
+            AgentConfigModel(
+                agent_id="operation_guidance",
+                enabled=True,
+                model_binding_id=None,
+                knowledge_dataset_ids=dataset_ids,
+                streaming_enabled=True,
+                suggestions_enabled=True,
+                sources_enabled=True,
+                context_turns=3,
+                retrieval_limit=6,
+                similarity_threshold=0.62,
+                deep_thinking_enabled=False,
+                deep_thinking_level="medium",
+                max_reply_tokens=4096,
+            )
+        )
+        db.commit()
 
 
 def test_operation_guidance_prioritizes_page_capability_and_limits_directional_retrievals():
@@ -102,6 +125,7 @@ def test_operation_guidance_transient_retry_never_exceeds_two_total_retrievals()
 
 def test_operation_guidance_api_uses_task005_retrieval_boundary(client, monkeypatch):
     client.app.state.knowledge_adapter = object()
+    _configure_guidance(client, ["dataset-1"])
     _, token = create_user_token(
         client,
         username="guidance-api-user",
@@ -119,7 +143,7 @@ def test_operation_guidance_api_uses_task005_retrieval_boundary(client, monkeypa
     )
     response = client.post(
         "/api/agent/operation-guidance",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {token}", "Idempotency-Key": "guidance-api-key"},
         json={
             "equipment_id": "equipment-1",
             "equipment_model": "MODEL-1",
@@ -140,8 +164,63 @@ def test_operation_guidance_api_uses_task005_retrieval_boundary(client, monkeypa
     ]
 
 
+def test_operation_guidance_api_ignores_client_dataset_ids_and_uses_agent_config(client, monkeypatch):
+    client.app.state.knowledge_adapter = object()
+    _, token = create_user_token(
+        client,
+        username="guidance-config-user",
+        role_code="LINE_OPERATOR",
+        permission_codes=["intelligence:agent"],
+    )
+    with client.app.state.session_factory() as db:
+        db.add(
+            AgentConfigModel(
+                agent_id="operation_guidance",
+                enabled=True,
+                model_binding_id=None,
+                knowledge_dataset_ids=["server-dataset"],
+                streaming_enabled=True,
+                suggestions_enabled=True,
+                sources_enabled=True,
+                context_turns=3,
+                retrieval_limit=6,
+                similarity_threshold=0.62,
+                deep_thinking_enabled=False,
+                deep_thinking_level="medium",
+                max_reply_tokens=4096,
+            )
+        )
+        db.commit()
+    retrieval_calls: list[dict[str, object]] = []
+
+    def retrieve(db, question, dataset_ids, adapter):
+        retrieval_calls.append({"question": question, "dataset_ids": dataset_ids})
+        return RetrievalResult(
+            citations=[KnowledgeCitation("doc-1", "chunk-1", "inspect the pump", 0.9)]
+        )
+
+    monkeypatch.setattr(
+        "app.modules.agents.router.knowledge_service.retrieve_knowledge", retrieve
+    )
+    response = client.post(
+        "/api/agent/operation-guidance",
+        headers={"Authorization": f"Bearer {token}", "Idempotency-Key": "guidance-config-key"},
+        json={
+            "equipment_id": "equipment-1",
+            "equipment_model": "MODEL-1",
+            "symptom": "pressure loss",
+            "description": "drops under load",
+            "dataset_ids": ["client-controlled-dataset"],
+        },
+    )
+
+    assert response.status_code == 200
+    assert retrieval_calls[0]["dataset_ids"] == ["server-dataset"]
+
+
 def test_operation_guidance_api_returns_no_citable_evidence_for_an_empty_retrieval(client, monkeypatch):
     client.app.state.knowledge_adapter = object()
+    _configure_guidance(client, ["dataset-1"])
     _, token = create_user_token(
         client,
         username="guidance-empty-user",
@@ -155,7 +234,7 @@ def test_operation_guidance_api_returns_no_citable_evidence_for_an_empty_retriev
 
     response = client.post(
         "/api/agent/operation-guidance",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {token}", "Idempotency-Key": "guidance-empty-key"},
         json={
             "equipment_id": "equipment-1",
             "equipment_model": "MODEL-1",
@@ -169,6 +248,28 @@ def test_operation_guidance_api_returns_no_citable_evidence_for_an_empty_retriev
     assert response.json()["state"] == "NO_EVIDENCE"
     assert response.json()["evidence"] == []
     assert response.json()["question"] == "未检索到可引用依据，请补充工况或直接按人工流程处理。"
+
+
+def test_operation_guidance_replays_idempotent_response_without_second_retrieval(client, monkeypatch):
+    client.app.state.knowledge_adapter = object()
+    _configure_guidance(client, ["dataset-1"])
+    _, token = create_user_token(client, username="guidance-replay-user", role_code="LINE_OPERATOR", permission_codes=["intelligence:agent"])
+    calls = 0
+
+    def retrieve(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        return RetrievalResult(citations=[KnowledgeCitation("doc-1", "chunk-1", "inspect", 0.9)])
+
+    monkeypatch.setattr("app.modules.agents.router.knowledge_service.retrieve_knowledge", retrieve)
+    payload = {"equipment_id": "equipment-1", "equipment_model": "MODEL-1", "symptom": "pressure loss", "description": "drops under load"}
+    headers = {"Authorization": f"Bearer {token}", "Idempotency-Key": "guidance-replay-key"}
+    first = client.post("/api/agent/operation-guidance", headers=headers, json=payload)
+    second = client.post("/api/agent/operation-guidance", headers=headers, json=payload)
+
+    assert first.status_code == second.status_code == 200
+    assert second.json() == first.json()
+    assert calls == 1
 
 
 def test_operation_guidance_api_uses_app_factory_ragflow_adapter(monkeypatch):
@@ -246,12 +347,29 @@ def test_operation_guidance_api_uses_app_factory_ragflow_adapter(monkeypatch):
                 created_by=user_id,
             )
             db.add(document)
+            db.add(
+                AgentConfigModel(
+                    agent_id="operation_guidance",
+                    enabled=True,
+                    model_binding_id=None,
+                    knowledge_dataset_ids=[dataset.id],
+                    streaming_enabled=True,
+                    suggestions_enabled=True,
+                    sources_enabled=True,
+                    context_turns=3,
+                    retrieval_limit=6,
+                    similarity_threshold=0.62,
+                    deep_thinking_enabled=False,
+                    deep_thinking_level="medium",
+                    max_reply_tokens=4096,
+                )
+            )
             db.commit()
             dataset_id = dataset.id
 
         response = client.post(
             "/api/agent/operation-guidance",
-            headers={"Authorization": f"Bearer {token}"},
+            headers={"Authorization": f"Bearer {token}", "Idempotency-Key": "guidance-live-key"},
             json={
                 "equipment_id": "equipment-1",
                 "equipment_model": "MODEL-1",

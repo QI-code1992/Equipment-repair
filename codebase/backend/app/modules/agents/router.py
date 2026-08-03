@@ -1,3 +1,4 @@
+from dataclasses import replace
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Header
@@ -189,12 +190,16 @@ def _restore_diagnosis_session(raw: dict[str, Any]) -> DiagnosisSession:
 
 
 def _fault_diagnosis_dataset_ids(db: Session) -> list[str]:
+    return _configured_dataset_ids(db, AgentId.FAULT_DIAGNOSIS)
+
+
+def _configured_dataset_ids(db: Session, agent_id: AgentId) -> list[str]:
     config = db.scalar(
-        select(AgentConfigModel).where(
-            AgentConfigModel.agent_id == AgentId.FAULT_DIAGNOSIS.value
-        )
+        select(AgentConfigModel).where(AgentConfigModel.agent_id == agent_id.value)
     )
-    return [] if config is None else list(config.knowledge_dataset_ids)
+    if config is None or not config.enabled:
+        return []
+    return list(config.knowledge_dataset_ids)
 
 
 def _server_diagnosis_context(
@@ -215,16 +220,29 @@ def operation_guidance(
     request: Request,
     db: Session = Depends(get_db),
     actor: User = Depends(require_permission("intelligence:agent")),
+    idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
 ) -> dict[str, Any]:
+    path = "/api/agent/operation-guidance"
+    request_body = payload.model_dump(mode="json")
+    try:
+        replay = find_idempotent_response(
+            db, user_id=actor.id, method="POST", path=path,
+            key=idempotency_key, request_body=request_body,
+        )
+    except IdempotencyKeyReused:
+        raise HTTPException(status_code=409, detail={"code": "IDEMPOTENCY_KEY_REUSED"}) from None
+    if replay is not None:
+        return replay[1]
     context = GuidanceContext(
         equipment_id=payload.equipment_id,
         equipment_model=payload.equipment_model,
         symptom=payload.symptom,
         description=payload.description,
     )
+    dataset_ids = _configured_dataset_ids(db, AgentId.OPERATION_GUIDANCE)
     agent = OperationGuidanceAgent(
         lambda query: _guidance_references(
-            db, request, context, payload.dataset_ids
+            db, request, context, dataset_ids
         )
     )
     session = agent.start(context)
@@ -234,8 +252,13 @@ def operation_guidance(
         result="success" if session.state.value != "UNAVAILABLE" else "unavailable",
         metadata={"retrieval_count": session.retrieval_count, "state": session.state.value},
     )
+    response = _guidance_body(session)
+    save_idempotent_response(
+        db, user_id=actor.id, method="POST", path=path,
+        key=idempotency_key, request_body=request_body, status=200, body=response,
+    )
     db.commit()
-    return _guidance_body(session)
+    return response
 
 
 @router.post("/api/agent/fault-diagnosis", response_model=None)
@@ -359,6 +382,15 @@ def fault_diagnosis(
         else:
             session = agent.add_evidence(session, payload.category or "", payload.detail or "")
 
+    if session.state is DiagnosisState.DIAGNOSIS_READY and not case_items and not knowledge_items:
+        session = replace(
+            session,
+            state=DiagnosisState.EVIDENCE_PENDING,
+            question="未检索到可引用的案例或知识依据，不能生成根因建议；请补充现场证据或直接开始维修。",
+            prefill=None,
+            summary=None,
+        )
+
     draft_id = draft.id
     if session.state == DiagnosisState.DIAGNOSIS_READY and session.prefill and session.summary:
         draft.status = DiagnosisDraftStatus.DIAGNOSIS_READY
@@ -457,6 +489,12 @@ def submit_fault_report(
     agent = FaultReportingAgent(submitter)
     try:
         preview = agent.preview(payload.draft)
+        if not payload.confirmed:
+            return JSONResponse(status_code=200, content={
+                "agent_status": "PREVIEW",
+                "draft": preview.draft.model_dump(mode="json"),
+                "missing_fields": list(preview.missing_fields),
+            })
         result = agent.submit(preview, confirmed=payload.confirmed)
     except MissingFaultFieldsError as error:
         raise HTTPException(

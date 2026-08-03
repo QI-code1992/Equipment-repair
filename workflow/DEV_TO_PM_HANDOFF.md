@@ -1,5 +1,21 @@
 # 开发到产品交接
 
+## TASK-012 P1 权限修复复审交接（2026-07-31）
+
+- PR：#75；最新精确 HEAD：`46bf6e7ad804fe77beb609904a8f3c9abe3a449f`；目标 `codex/stage-05-integration`；PR 继续保持 Ready，未申请 Merge 授权。
+- 根因：仅 `intelligence:audit` 用户可见知识重试按钮，但后端写入接口要求 `intelligence:knowledge`，点击必然 403。
+- 修复：`IntelligentAuditPage` 接收当前会话权限；无知识写权限时禁用“重新同步”并显示明确提示；审计+知识双权限仍可执行重试。
+- 验证：修复前审计-only 回归失败；修复后定向 17 passed，前端全量 55 passed，生产构建、15 项 Node 静态回归和 diff-check 通过。
+- 下一步：请 DEV-001 基于新精确 HEAD 重新进行 TASK-012 完整整体审核；不申请合并授权、不合并，Stage 6/7/8 继续锁定。
+
+## TASK-012 整体开发候选交接（2026-07-31）
+
+- 开发分支：`codex/task-012-p0-frontend-remediation`；最新精确提交：`08e1576`；PR 继续保持 Draft。
+- 已完成：API-002—007 正式读接口、全部除 Data import 外的 P0 页面、Bearer/权限/状态、附件安全引用、Agent 线程历史/详情/resume/SSE、前后端回归和测试治理材料。
+- 本地证据：前端 `53 passed`、生产构建通过；后端 `328 passed, 13 skipped, 2 warnings`；compileall、15 项 Node 静态回归、JSON、diff-check 通过。
+- 未完成证据：DEV-001 对完整候选的一次性审核；Windows Docker Desktop/WSL2 live-stack；真实 ClamAV/MinIO/RAGFlow、HTTPS、浏览器逐页 E2E、重启/备份恢复和最终 Stage 6/7 门禁。
+- 请求动作：由 DEV-001 基于该精确 HEAD 进行整体审核；在审核、集成检查和项目负责人授权前，不转 Ready、不申请 Merge、不合并、不进入 Stage 6/7/8。
+
 ## TASK-012-API-001 合并后治理收尾候选（2026-07-30）
 
 - 集成：PR #71 的获批 HEAD `c1273fd01e5ec91b2de3af59aab371844d228cd6` 已由 DEV-002 在项目负责人授权后以 Merge Commit `274673b72d5201986ffee77b038f516022cd174d` 合入 `codex/stage-05-integration`；双亲和结果树已核验。
