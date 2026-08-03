@@ -41,6 +41,9 @@ def test_task005_validation_scripts_use_host_api_url_and_cleanup() -> None:
     stream_contract = (
         INFRA_ROOT / "task-005" / "tests" / "verify-validation-streams.ps1"
     ).read_text(encoding="utf-8")
+    cleanup_helper = (
+        INFRA_ROOT / "task-005" / "scripts" / "Invoke-ValidationComposeCleanup.ps1"
+    ).read_text(encoding="utf-8")
     create_environment = (
         INFRA_ROOT / "task-005" / "scripts" / "New-ValidationEnvironment.ps1"
     ).read_text(encoding="utf-8")
@@ -55,10 +58,9 @@ def test_task005_validation_scripts_use_host_api_url_and_cleanup() -> None:
     assert "$apiRagflowProbe" not in invoke
     assert "docker @compose exec -T api python -m app.modules.knowledge.ragflow_probe" in invoke
     assert "run --rm --no-deps --build" in invoke
-    assert "down --volumes --remove-orphans" in invoke
-    assert "cleanupStderr" in invoke
-    assert "Compose cleanup failed: $details" in invoke
-    assert "Remove-Item -LiteralPath $cleanupStderr" in invoke
+    assert "down --volumes --remove-orphans" in cleanup_helper
+    assert "Invoke-ValidationComposeCleanup" in invoke
+    assert "Invoke-ValidationComposeCleanup" in stream_contract
     assert "TASK-005 validation stream contract: PASS" in stream_contract
     assert "run --rm --no-deps worker python -c" in invoke
     assert "make_bucket" in invoke

@@ -4,6 +4,7 @@ param([Parameter(Mandatory = $true)][string]$EnvFile)
 $ErrorActionPreference = 'Stop'
 $project = 'equipment-task-005-validation'
 $composeFile = 'codebase/infra/docker-compose.yml'
+. (Join-Path $PSScriptRoot 'Invoke-ValidationComposeCleanup.ps1')
 
 function Read-EnvironmentFile([string]$Path) {
     $values = @{}
@@ -88,13 +89,10 @@ finally {
         }
         catch { $cleanupFailure = $_ }
     }
-    $cleanupStderr = Join-Path ([IO.Path]::GetTempPath()) ("task005-cleanup-$PID.stderr")
-    docker @compose down --volumes --remove-orphans 2> $cleanupStderr
-    if ($LASTEXITCODE -ne 0 -and !$cleanupFailure) {
-        $details = if (Test-Path -LiteralPath $cleanupStderr) { (Get-Content -Raw -LiteralPath $cleanupStderr).Trim() } else { '' }
-        $cleanupFailure = [Exception]::new("TASK-005 Compose cleanup failed: $details")
+    if (!$cleanupFailure) {
+        try { Invoke-ValidationComposeCleanup -ComposeArguments $compose }
+        catch { $cleanupFailure = $_ }
     }
-    if ($LASTEXITCODE -eq 0) { Remove-Item -LiteralPath $cleanupStderr -Force -ErrorAction SilentlyContinue }
     if ($validationFailure) { throw $validationFailure }
     if ($cleanupFailure) { throw $cleanupFailure }
 }
