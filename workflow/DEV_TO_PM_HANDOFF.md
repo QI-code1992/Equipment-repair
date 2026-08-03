@@ -597,4 +597,4 @@
 - DEF-TASK012-047 is closed. DEF-TASK012-046 remains open only for application HTTPS ingress and authenticated browser E2E on this exact HEAD.
 - DEV-001 must execute those two checks, update the final review, and perform integration verification. Until then PR #75 remains unmerged and TASK-012/Stage 6/7/8 remain locked.
 - DEV-001 attempted the application HTTPS endpoint at `https://127.0.0.1/healthz` and `/`; both failed TLS handshake because the available HTTPS listener is not the TASK-012 application. A designated application HTTPS/browser environment is still required.
-- The exact-HEAD worktree also requires a fresh frontend dependency install/build and temporary certificate injection before the application Nginx service can be started; neither generated assets nor certificates may be committed.
+- The exact-HEAD worktree now has a verified `npm ci` and production build. Temporary certificate injection is still required before application Nginx HTTPS/browser validation; generated assets and certificates must not be committed.
