@@ -53,6 +53,7 @@ def test_task005_validation_scripts_use_host_api_url_and_cleanup() -> None:
     assert "docker @compose exec -T api python -m app.modules.knowledge.ragflow_probe" in invoke
     assert "run --rm --no-deps --build" in invoke
     assert "down --volumes --remove-orphans" in invoke
+    assert "down --volumes --remove-orphans 2>$null" in invoke
     assert "run --rm --no-deps worker python -c" in invoke
     assert "make_bucket" in invoke
     assert "New-RandomHex" in create_environment

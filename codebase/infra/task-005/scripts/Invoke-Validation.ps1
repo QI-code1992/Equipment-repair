@@ -88,7 +88,7 @@ finally {
         }
         catch { $cleanupFailure = $_ }
     }
-    docker @compose down --volumes --remove-orphans
+    docker @compose down --volumes --remove-orphans 2>$null
     if ($LASTEXITCODE -ne 0 -and !$cleanupFailure) { $cleanupFailure = [Exception]::new('TASK-005 Compose cleanup failed') }
     if ($validationFailure) { throw $validationFailure }
     if ($cleanupFailure) { throw $cleanupFailure }
