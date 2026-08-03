@@ -115,10 +115,10 @@
       "developmentStartAcknowledgement": "https://github.com/QI-code1992/Equipment-repair/pull/74#issuecomment-5138470417",
       "implementationHead": "77a54a1587544374ed876e902bc132d58cf8ed9b",
       "localVerification": "Frontend 55 passed and production build passed; Node static regressions 15 passed; repository-root backend run 339 passed, 13 skipped, 2 failed, 2 warnings because two performance tests use working-directory-relative JSON paths.",
-      "defectInventory": "06-testing/DEFECTS.md DEF-TASK012-001..046; exact HEAD ee149dda2b262f9350bfe58c54d5603bcffa068c passed Compose/API/PostgreSQL/Redis/health verification, but DEF-TASK012-046 remains open for RAGFlow, attachment, HTTPS and browser evidence.",
-      "nextAction": "DEV-001 must complete real authenticated RAGFlow retrieval/degradation, ClamAV/MinIO attachment scanning, HTTPS and authenticated browser E2E on exact HEAD ee149dda2b262f9350bfe58c54d5603bcffa068c, then perform final whole-candidate review and integration check. Do not request Merge, merge, or enter Stage 6/7/8 before DEF-TASK012-046 is closed and project-owner authorization is obtained."
+      "defectInventory": "06-testing/DEFECTS.md DEF-TASK012-001..047; exact HEAD ee149dda2b262f9350bfe58c54d5603bcffa068c passed infrastructure and authenticated RAGFlow probe, but live operation-guidance returned UNAVAILABLE due to missing Agent config binding; DEF-TASK012-046 and 047 remain open.",
+      "nextAction": "DEV-002 must provision the approved operation_guidance Agent config in the live validation contract, rerun the authenticated route/lifecycle, and complete remaining attachment, HTTPS and browser evidence. DEV-001 then performs final whole-candidate review and integration check."
     },
-    "nextAction": "TASK-012 remains blocked at PR #75 HEAD ee149dda2b262f9350bfe58c54d5603bcffa068c by DEF-TASK012-046 and pending final whole-candidate review. DEV-001 must complete authenticated RAGFlow, attachment, HTTPS and browser E2E verification, then integration check; TASK-012 and Stage 7 acceptance remain locked until review, authorization and integration."
+    "nextAction": "TASK-012 remains blocked at PR #75 HEAD ee149dda2b262f9350bfe58c54d5603bcffa068c by DEF-TASK012-046 and DEF-TASK012-047. DEV-002 must correct the live Agent configuration fixture and rerun the route, then complete remaining attachment, HTTPS and browser E2E evidence; TASK-012 and Stage 7 acceptance remain locked until final review, authorization and integration."
   },
   "stage6RuntimeValidation": {
     "status": "POST_MERGE_CORE_RUNTIME_VALIDATION_COMPLETED_SUPERSEDED_BY_SIGNED_STAGE6_CONCLUSION",
