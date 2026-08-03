@@ -219,7 +219,19 @@ def operation_guidance(
     request: Request,
     db: Session = Depends(get_db),
     actor: User = Depends(require_permission("intelligence:agent")),
+    idempotency_key: str = Header(alias="Idempotency-Key", min_length=1),
 ) -> dict[str, Any]:
+    path = "/api/agent/operation-guidance"
+    request_body = payload.model_dump(mode="json")
+    try:
+        replay = find_idempotent_response(
+            db, user_id=actor.id, method="POST", path=path,
+            key=idempotency_key, request_body=request_body,
+        )
+    except IdempotencyKeyReused:
+        raise HTTPException(status_code=409, detail={"code": "IDEMPOTENCY_KEY_REUSED"}) from None
+    if replay is not None:
+        return replay[1]
     context = GuidanceContext(
         equipment_id=payload.equipment_id,
         equipment_model=payload.equipment_model,
@@ -239,8 +251,13 @@ def operation_guidance(
         result="success" if session.state.value != "UNAVAILABLE" else "unavailable",
         metadata={"retrieval_count": session.retrieval_count, "state": session.state.value},
     )
+    response = _guidance_body(session)
+    save_idempotent_response(
+        db, user_id=actor.id, method="POST", path=path,
+        key=idempotency_key, request_body=request_body, status=200, body=response,
+    )
     db.commit()
-    return _guidance_body(session)
+    return response
 
 
 @router.post("/api/agent/fault-diagnosis", response_model=None)

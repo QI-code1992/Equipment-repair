@@ -8,7 +8,7 @@ function diagnosisMessage(diagnosis: DiagnosisResponse) {
   return diagnosis.question ?? "诊断已启动。";
 }
 
-export function RepairExecutionPage() {
+export function RepairExecutionPage({ permissionCodes: _permissionCodes = [] }: { permissionCodes?: string[] } = {}) {
   const [faultId, setFaultId] = useState("");
   const [diagnosis, setDiagnosis] = useState<DiagnosisResponse | null>(null);
   const [repair, setRepair] = useState<RepairStart | null>(null);
@@ -128,7 +128,7 @@ export function RepairExecutionPage() {
     : [];
 
   const canAdopt = diagnosis?.state === "DIAGNOSIS_READY" && Boolean(diagnosis.diagnosis_draft_id);
-  const manualFallback = assignedOrders === null || assignedOrders.length === 0;
+  const manualFallback = assignedOrders !== null && !ordersError && assignedOrders.length === 0;
   return (
     <section className="page-shell" aria-labelledby="page-heading">
       <div className="page-shell__eyebrow">现场作业</div>

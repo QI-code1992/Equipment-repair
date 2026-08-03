@@ -134,10 +134,10 @@ export async function uploadAttachment(file: File): Promise<AttachmentRef> {
   return response.json() as Promise<AttachmentRef>;
 }
 
-function postJson<T>(path: string, body: unknown): Promise<T> {
+function postJson<T>(path: string, body: unknown, idempotencyKey = crypto.randomUUID()): Promise<T> {
   return requestJson<T>(path, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() },
+    headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
     body: JSON.stringify(body),
   });
 }
@@ -192,8 +192,10 @@ export async function readRunEvents(runId: string, onEvent?: (event: RuntimeEven
   const events: RuntimeEvent[] = [];
   let buffered = "";
   const emit = (block: string) => {
-    const event = block.match(/^event: (.+)$/m)?.[1];
-    const data = block.match(/^data: (.+)$/m)?.[1];
+    const lines = block.split(/\r?\n/);
+    const event = lines.find((line) => line.startsWith("event:"))?.slice(6).trim();
+    const dataLines = lines.filter((line) => line.startsWith("data:")).map((line) => line.slice(5).replace(/^ /, ""));
+    const data = dataLines.length ? dataLines.join("\n") : undefined;
     if (!event || !data) return;
     try {
       const parsed = { event, data: JSON.parse(data) as Record<string, unknown> };
@@ -204,10 +206,16 @@ export async function readRunEvents(runId: string, onEvent?: (event: RuntimeEven
     }
   };
   while (true) {
-    const { done, value } = await reader.read();
+    let chunk: ReadableStreamReadResult<Uint8Array>;
+    try {
+      chunk = await reader.read();
+    } catch {
+      throw new ApiError(502, "AGENT_STREAM_FAILED");
+    }
+    const { done, value } = chunk;
     if (done) break;
     buffered += decoder.decode(value, { stream: true });
-    const blocks = buffered.split("\n\n");
+    const blocks = buffered.split(/\r?\n\r?\n/);
     buffered = blocks.pop() ?? "";
     blocks.forEach(emit);
   }
@@ -217,11 +225,12 @@ export async function readRunEvents(runId: string, onEvent?: (event: RuntimeEven
 }
 
 export async function startAgentRun(agentId: string, businessContext: Record<string, unknown>, text: string) {
+  const idempotencyKey = crypto.randomUUID();
   const thread = await postJson<{ thread_id: string }>("/api/agent/threads", {
     agent_id: agentId,
     business_context: businessContext,
-  });
-  const run = await postJson<{ run_id: string }>(`/api/agent/threads/${thread.thread_id}/messages`, { text, attachment_refs: [] });
+  }, idempotencyKey);
+  const run = await postJson<{ run_id: string }>(`/api/agent/threads/${thread.thread_id}/messages`, { text, attachment_refs: [] }, idempotencyKey);
   return { thread_id: thread.thread_id, run_id: run.run_id };
 }
 

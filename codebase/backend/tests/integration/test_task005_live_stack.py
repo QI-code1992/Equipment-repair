@@ -167,7 +167,7 @@ def test_task005_live_document_lifecycle() -> None:
         app.state.knowledge_adapter = adapter
         guidance = client.post(
             "/api/agent/operation-guidance",
-            headers=headers,
+            headers={**headers, "Idempotency-Key": "task005-guidance-success"},
             json={
                 "equipment_id": f"task005-live-equipment-{suffix}",
                 "equipment_model": marker,
@@ -197,7 +197,7 @@ def test_task005_live_document_lifecycle() -> None:
         )
         unavailable = client.post(
             "/api/agent/operation-guidance",
-            headers=headers,
+            headers={**headers, "Idempotency-Key": "task005-guidance-unavailable"},
             json={
                 "equipment_id": f"task005-live-equipment-{suffix}",
                 "equipment_model": marker,

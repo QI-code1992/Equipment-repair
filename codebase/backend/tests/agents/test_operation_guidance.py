@@ -143,7 +143,7 @@ def test_operation_guidance_api_uses_task005_retrieval_boundary(client, monkeypa
     )
     response = client.post(
         "/api/agent/operation-guidance",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {token}", "Idempotency-Key": "guidance-api-key"},
         json={
             "equipment_id": "equipment-1",
             "equipment_model": "MODEL-1",
@@ -204,7 +204,7 @@ def test_operation_guidance_api_ignores_client_dataset_ids_and_uses_agent_config
     )
     response = client.post(
         "/api/agent/operation-guidance",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {token}", "Idempotency-Key": "guidance-config-key"},
         json={
             "equipment_id": "equipment-1",
             "equipment_model": "MODEL-1",
@@ -234,7 +234,7 @@ def test_operation_guidance_api_returns_no_citable_evidence_for_an_empty_retriev
 
     response = client.post(
         "/api/agent/operation-guidance",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={"Authorization": f"Bearer {token}", "Idempotency-Key": "guidance-empty-key"},
         json={
             "equipment_id": "equipment-1",
             "equipment_model": "MODEL-1",
@@ -248,6 +248,28 @@ def test_operation_guidance_api_returns_no_citable_evidence_for_an_empty_retriev
     assert response.json()["state"] == "NO_EVIDENCE"
     assert response.json()["evidence"] == []
     assert response.json()["question"] == "未检索到可引用依据，请补充工况或直接按人工流程处理。"
+
+
+def test_operation_guidance_replays_idempotent_response_without_second_retrieval(client, monkeypatch):
+    client.app.state.knowledge_adapter = object()
+    _configure_guidance(client, ["dataset-1"])
+    _, token = create_user_token(client, username="guidance-replay-user", role_code="LINE_OPERATOR", permission_codes=["intelligence:agent"])
+    calls = 0
+
+    def retrieve(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        return RetrievalResult(citations=[KnowledgeCitation("doc-1", "chunk-1", "inspect", 0.9)])
+
+    monkeypatch.setattr("app.modules.agents.router.knowledge_service.retrieve_knowledge", retrieve)
+    payload = {"equipment_id": "equipment-1", "equipment_model": "MODEL-1", "symptom": "pressure loss", "description": "drops under load"}
+    headers = {"Authorization": f"Bearer {token}", "Idempotency-Key": "guidance-replay-key"}
+    first = client.post("/api/agent/operation-guidance", headers=headers, json=payload)
+    second = client.post("/api/agent/operation-guidance", headers=headers, json=payload)
+
+    assert first.status_code == second.status_code == 200
+    assert second.json() == first.json()
+    assert calls == 1
 
 
 def test_operation_guidance_api_uses_app_factory_ragflow_adapter(monkeypatch):
@@ -347,7 +369,7 @@ def test_operation_guidance_api_uses_app_factory_ragflow_adapter(monkeypatch):
 
         response = client.post(
             "/api/agent/operation-guidance",
-            headers={"Authorization": f"Bearer {token}"},
+            headers={"Authorization": f"Bearer {token}", "Idempotency-Key": "guidance-live-key"},
             json={
                 "equipment_id": "equipment-1",
                 "equipment_model": "MODEL-1",

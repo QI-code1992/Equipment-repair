@@ -115,7 +115,7 @@ export function MaintenanceRecordsPage() {
 export function MaintenanceRecordDetailPage() { const { id = "" } = useParams(); const state = useData(() => getMaintenanceRecord(id), [id]); return <Page title="维修记录详情"><State state={state}>{(item) => <dl className="detail-list"><dt>工单</dt><dd>{item.work_order_number}</dd><dt>故障现象</dt><dd>{item.symptom}</dd><dt>实际原因</dt><dd>{item.actual_cause ?? "未填写"}</dd><dt>解决方案</dt><dd>{item.actual_solution ?? "未填写"}</dd><dt>维修结果</dt><dd>{item.repair_result ?? "未完成"}</dd><dt>更换部件</dt><dd>{item.parts_replacement_notes ?? "无"}</dd><dt>知识状态</dt><dd>{item.knowledge_status}</dd></dl>}</State></Page>; }
 export function WorkOrdersPage() { const [status, setStatus] = useState(""); const [page, setPage] = useState(1); const state = useData(() => getWorkOrders({ status: status || undefined, page }), [status, page]); return <Page title="维修执行"><label>工单状态<select aria-label="工单状态筛选" value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }}><option value="">全部</option><option value="PENDING_ACCEPT">待接单</option><option value="IN_REPAIR">维修中</option><option value="PENDING_INSPECTION">待验收</option><option value="COMPLETED">已完成</option></select></label><State state={state} empty={(data) => !data.count}>{(data) => <><table><thead><tr><th>工单</th><th>设备</th><th>状态</th><th>故障</th></tr></thead><tbody>{data.items.map((item: WorkOrder) => <tr key={item.id}><td>{item.number}</td><td>{item.equipment_id}</td><td>{item.status}</td><td>{item.symptom}</td></tr>)}</tbody></table><div className="pager"><button type="button" disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>上一页</button><span>第 {page} 页</span><button type="button" disabled={data.items.length < data.page_size} onClick={() => setPage((current) => current + 1)}>下一页</button></div></>}</State></Page>; }
 
-export function SystemManagementPage() { return <SystemManagementContent />; }
+export function SystemManagementPage({ permissionCodes: _permissionCodes = [] }: { permissionCodes?: string[] } = {}) { return <SystemManagementContent />; }
 
 function SystemManagementContent() {
   const [refresh, setRefresh] = useState(0);
@@ -193,7 +193,7 @@ export function IntelligentAuditPage({ permissionCodes = [] }: { permissionCodes
 
 type OrganizationItem = { id: string; type: string; code: string; name: string; parent_id: string | null; enabled: boolean; sort_order?: number; remark?: string };
 
-export function FactoryModelingPage() {
+export function FactoryModelingPage({ permissionCodes: _permissionCodes = [] }: { permissionCodes?: string[] } = {}) {
   const [refresh, setRefresh] = useState(0);
   const [saving, setSaving] = useState(false);
   const state = useData(getOrganizations, [refresh]);

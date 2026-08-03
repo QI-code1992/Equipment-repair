@@ -112,7 +112,7 @@ function ApplicationShell() {
         {permissionCodes === null && !permissionError ? <section className="page-shell" aria-live="polite"><p role="status">正在加载会话权限…</p></section> : <Routes>
           <Route path="/" element={guarded("/", <WorkbenchPage />)} />
           <Route path="/bi-dashboard" element={guarded("/bi-dashboard", <BiDashboardPage />)} />
-          <Route path="/factory-modeling" element={guarded("/factory-modeling", <FactoryModelingPage />)} />
+          <Route path="/factory-modeling" element={guarded("/factory-modeling", <FactoryModelingPage permissionCodes={permissionCodes ?? []} />)} />
           <Route path="/equipment" element={guarded("/equipment", <EquipmentLedgerPage />)} />
           <Route path="/equipment/new" element={guarded("/equipment/new", <EquipmentAddPage />)} />
           <Route path="/equipment/:id" element={guarded("/equipment/:id", <EquipmentDetailPage />)} />
@@ -123,8 +123,8 @@ function ApplicationShell() {
           <Route path="/agent-report" element={guarded("/agent-report", <AgentReportPage />)} />
           <Route path="/maintenance-records" element={guarded("/maintenance-records", <MaintenanceRecordsPage />)} />
           <Route path="/maintenance-records/:id" element={guarded("/maintenance-records/:id", <MaintenanceRecordDetailPage />)} />
-          <Route path="/repair-execution" element={guarded("/repair-execution", <RepairExecutionPage />)} />
-          <Route path="/system-management" element={guarded("/system-management", <SystemManagementPage />)} />
+          <Route path="/repair-execution" element={guarded("/repair-execution", <RepairExecutionPage permissionCodes={permissionCodes ?? []} />)} />
+          <Route path="/system-management" element={guarded("/system-management", <SystemManagementPage permissionCodes={permissionCodes ?? []} />)} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>}
         {agentOpen && permissionCodes?.includes("intelligence:agent") && <GlobalAgentDrawer onClose={() => setAgentOpen(false)} />}
@@ -137,7 +137,7 @@ function pagePermission(path: string, codes: string[]) {
   const required: Record<string, string[]> = {
     "/": ["workbench:view"],
     "/bi-dashboard": ["bi:view"],
-    "/factory-modeling": ["organization:read", "organization:write"],
+    "/factory-modeling": ["organization:read"],
     "/equipment": ["equipment:read"],
     "/equipment/new": ["equipment:read", "equipment:write", "organization:read", "identity:read"],
     "/equipment/:id": ["equipment:read"],
@@ -148,8 +148,8 @@ function pagePermission(path: string, codes: string[]) {
     "/agent-report": ["intelligence:agent", "fault:create"],
     "/maintenance-records": ["maintenance:view"],
     "/maintenance-records/:id": ["maintenance:view", "maintenance:detail"],
-    "/repair-execution": ["maintenance:view", "fault:repair", "fault:close", "intelligence:agent"],
-    "/system-management": ["identity:read", "identity:write", "system:audit"],
+    "/repair-execution": ["maintenance:view"],
+    "/system-management": ["identity:read", "system:audit"],
   };
   return (required[path] ?? []).every((code) => codes.includes(code));
 }
@@ -163,14 +163,16 @@ function GlobalAgentDrawer({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<"compose" | "history">("compose");
   const [history, setHistory] = useState<AgentThreadSummary[] | null>(null);
   const [historyError, setHistoryError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   useEffect(() => {
     if (tab !== "history") return;
     getAgentThreads().then((value) => { setHistory(value.items); setHistoryError(null); }).catch((error) => setHistoryError(error instanceof ApiError ? error.code ?? "REQUEST_FAILED" : "REQUEST_FAILED"));
   }, [tab]);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!text.trim()) return;
+    if (!text.trim() || submitting) return;
     setMessage("正在创建正式 Agent 任务…");
+    setSubmitting(true);
     try {
       const run = await startAgentRun(agentId, {}, text.trim());
       setMessage(`已创建任务：${run.run_id}`);
@@ -178,7 +180,7 @@ function GlobalAgentDrawer({ onClose }: { onClose: () => void }) {
       setThread(await getAgentThread(run.thread_id));
     } catch (error) {
       setMessage(`请求失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`);
-    }
+    } finally { setSubmitting(false); }
   }
   async function resume() {
     if (!thread) return;

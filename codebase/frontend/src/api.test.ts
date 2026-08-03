@@ -231,6 +231,23 @@ describe("Agent Runtime SSE API", () => {
     expect(new Headers(init.headers).get("Authorization")).toBe("Bearer active-login-token");
   });
 
+  it("parses CRLF and multiline SSE data, including error events and a final incomplete block", async () => {
+    const encoder = new TextEncoder();
+    const body = new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode('event: run_started\r\ndata: {"status":\r\ndata: "RUNNING"}\r\n\r\nevent: error\r\ndata: {"status":"FAILED"}\r\n\r\nevent: run_waiting\r\ndata: {"status":"WAITING"}'));
+        controller.close();
+      },
+    });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(body, { status: 200 })));
+
+    await expect(readRunEvents("run-crlf")).resolves.toEqual([
+      { event: "run_started", data: { status: "RUNNING" } },
+      { event: "error", data: { status: "FAILED" } },
+      { event: "run_waiting", data: { status: "WAITING" } },
+    ]);
+  });
+
   it("emits SSE events as chunks arrive before the stream closes", async () => {
     const encoder = new TextEncoder();
     let controller!: ReadableStreamDefaultController<Uint8Array>;
@@ -264,5 +281,6 @@ describe("Agent Runtime SSE API", () => {
 
     await expect(startAgentRun("operation_guidance", { equipment_id: "eq-1" }, "如何安全检查？")).resolves.toEqual({ thread_id: "thread-1", run_id: "run-1" });
     expect(fetchMock.mock.calls.map(([path]) => path)).toEqual(["/api/agent/threads", "/api/agent/threads/thread-1/messages"]);
+    expect(new Headers((fetchMock.mock.calls[0][1] as RequestInit).headers).get("Idempotency-Key")).toBe(new Headers((fetchMock.mock.calls[1][1] as RequestInit).headers).get("Idempotency-Key"));
   });
 });
