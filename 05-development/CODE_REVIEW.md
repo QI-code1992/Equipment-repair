@@ -419,3 +419,62 @@
 - 检查结论：PR 状态为 `MERGED`；双亲为 `274673b72d5201986ffee77b038f516022cd174d` 与获批 HEAD；`git diff --check`、工作流 JSON 解析和 Python 3.13 后端全量回归 `319 passed, 13 skipped, 2 warnings` 通过。
 - 范围结论：差异仅为治理台账；无业务代码、测试、数据库、基础设施或部署变更。
 - 剩余门禁：等待 DEV-001 向项目负责人 DEV-002 发送并获得正式 TASK-012 开发启动确认；不提前解锁 API-002—007、P0 前端或 Stage 6/7/8。
+## TASK-012 DEV-001 complete defect review (2026-07-31)
+
+- Review target: PR #75, exact HEAD `77a54a1587544374ed876e902bc132d58cf8ed9b`, branch `codex/task-012-p0-frontend-remediation`.
+- Result: `Changes requested`; 37 open findings are consolidated in `06-testing/DEFECTS.md` as DEF-TASK012-001 through DEF-TASK012-037.
+- Scope: fail-closed authentication, composite permission gates, API contract alignment, server-fact binding, field preservation, idempotency/in-flight state, BI filtering, Agent thread UX, and evidence reproducibility.
+- Boundary: this governance branch contains no business-code fix. DEV-002 must fix all applicable findings in PR #75, rerun the complete frontend/backend/static suites, and submit a new exact HEAD for whole-candidate review.
+- Gate: no Merge authorization, merge, TASK-012 closure, or Stage 6/7/8 unlock is permitted before that review and a fresh integration check.
+- Second-pass additions: DEF-TASK012-038 dependency permission mismatch on equipment forms, DEF-TASK012-039 AI preview/manual-submit double-write path, and DEF-TASK012-040 buffered rather than incremental Runtime SSE consumption.
+
+## TASK-012 third-pass review against HEAD 989e234 (2026-08-03)
+
+- Result: `Changes requested`; new open findings are DEF-TASK012-041 through DEF-TASK012-046.
+- Confirmed remaining risks: operation-guidance idempotency, two-step Global Agent orphaning/in-flight replay, unsafe manual fallback on work-order load failure, write-permission page gates blocking read-only views, incomplete SSE framing/error parsing, and missing Docker/PostgreSQL/RAGFlow/attachment/HTTPS/browser evidence.
+- This is a governance-only review; no business-code fix is included. DEV-002 must remediate in PR #75, publish exact reproducible evidence, and request a new whole-candidate review.
+- Gate: no Merge authorization, merge, TASK-012 closure, or Stage 6/7/8 unlock.
+
+## TASK-012 fourth-pass review against HEAD ee149dda (2026-08-03)
+
+- DEV-002 supplied a new exact HEAD `ee149dda2b262f9350bfe58c54d5603bcffa068c`.
+- Code inspection confirms remediation direction for DEF-TASK012-041 (operation-guidance idempotency), DEF-TASK012-042 (atomic Global Agent start and in-flight guard), DEF-TASK012-043 (manual fallback only after authoritative empty order result), and DEF-TASK012-045 (incremental SSE framing with multi-line data/CRLF and stream failure handling). Page write controls were also separated from read-page access for the affected areas.
+- Review status remains `Changes requested` pending reproducible execution of DEF-TASK012-046 on this exact HEAD. The reported frontend/backend unit results are not a substitute for Docker Compose, container health and `/healthz`, PostgreSQL, RAGFlow, ClamAV/MinIO, HTTPS and browser live-stack evidence.
+- No Merge authorization, merge, TASK-012 closure or Stage 6/7/8 unlock is permitted before DEV-001 completes that environment verification and a final whole-candidate review.
+
+### Environment verification update
+
+- On exact HEAD `ee149dda2b262f9350bfe58c54d5603bcffa068c`, Windows Docker verification passed Compose config, API image build, PostgreSQL/Redis health, API startup and container-local `/healthz` HTTP 200.
+- The remaining DEF-TASK012-046 scope is real authenticated RAGFlow retrieval/degradation, ClamAV/MinIO attachment scanning, HTTPS and authenticated browser E2E. Until those are executed, this is not an approval or merge authorization.
+- Follow-up check found no dedicated RAGFlow, attachment, HTTPS or browser-E2E variables on the DEV-001 host and no `.env` file; only the template exists. The remaining evidence therefore requires an explicitly provisioned isolated validation environment.
+- Runtime discovery corrected the boundary: healthy RAGFlow and MinIO containers are present; `127.0.0.1:19380/api/v1/datasets` responds 401 without a bearer key. No ClamAV container is running, and the available HTTPS listener belongs to the separate RAGFlow stack. Authenticated TASK-012 RAGFlow, attachment scanning and application HTTPS/browser evidence remain open.
+- A temporary Key from the RAGFlow API page was then verified successfully against `127.0.0.1:19380/api/v1/datasets` (one dataset returned). This proves credential validity for the RAGFlow service only; it does not yet prove the TASK-012 API container's adapter path because the key was not persisted or exposed through repository configuration.
+- Full live-stack attempt on exact HEAD `ee149dda` reached authenticated RAGFlow, PostgreSQL, Redis, MinIO, ClamAV, Nginx and the production operation-guidance route. The route returned `UNAVAILABLE` because the fixture did not provision/bind an `operation_guidance` Agent configuration; client `dataset_ids` were correctly ignored. This is recorded as DEF-TASK012-047 and remains a P1 blocker until the fixture/configuration contract is corrected and rerun.
+## TASK-012 fifth-pass live evidence against HEAD a0bbfdbe (2026-08-03)
+
+- DEV-002 supplied exact HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`.
+- The corrected disposable fixture provisions and binds a temporary `operation_guidance` Agent configuration, executes authenticated RAGFlow retrieval, operation-guidance success/degradation, attachment scanning and cleanup, then removes the temporary Agent configuration.
+- Live-stack result: `2 passed, 5 warnings`; Python compilation and `git diff --check` passed. DEF-TASK012-047 is closed.
+- Remaining review gate: application HTTPS ingress and authenticated browser E2E on this exact candidate. Result remains `Changes requested`; no Merge authorization, merge or Stage 6/7/8 unlock is permitted until those checks and the final whole-candidate review pass.
+- DEV-001 environment probe: `https://127.0.0.1/healthz` and `/` both failed TLS handshake; Docker listed only the separate RAGFlow stack and no TASK-012 application ingress. This is an environment blocker, not passing application HTTPS evidence.
+- Follow-up on exact HEAD: after installing the locked frontend dependencies, `npm ci` and `npm run build` passed. TLS certificate injection remains unavailable in the current shell, so Nginx HTTPS and browser evidence are still not collected; certificates must remain outside Git.
+## TASK-012 HTTPS follow-up verification (2026-08-03)
+
+- Temporary isolated application stack on exact HEAD `a0bbfdbe`: Nginx bound `127.0.0.1:8443`; `/healthz` returned HTTP 200; JavaScript and CSS returned `application/javascript` and `text/css`; HTTPS health E2E passed (`1 passed`).
+- The supplied desktop-file Key candidate did not authenticate to RAGFlow (container probe HTTP 401); validator output was `1 passed, 1 skipped`. Authenticated RAGFlow production route and browser login E2E remain open.
+- RAGFlow credential follow-up: both long ASCII candidates extracted from the designated desktop file returned HTTP 401 for `GET /api/v1/datasets`; no valid Bearer credential was available for the exact-HEAD container adapter rerun.
+## TASK-012 final live-stack rerun against HEAD a0bbfdbe (2026-08-03)
+
+- Dedicated RAGFlow Token authenticated successfully (`GET /api/v1/datasets` HTTP 200); the value was kept out of records.
+- After initializing the disposable MinIO bucket and separating schema migration testing from the Worker lifecycle, `test_task005_live_stack.py` passed: `1 passed, 2 warnings`. This covered ClamAV rejection, MinIO upload, Worker synchronization, RAGFlow document lifecycle, temporary `operation_guidance` Agent binding, production operation-guidance success/degradation, citations and cleanup.
+- The earlier `UPLOADING` failure was caused by running the destructive PostgreSQL downgrade/upgrade test concurrently with the Worker, which temporarily removed `knowledge_documents`; it was a validation orchestration failure and was not reproduced after sequencing the tests.
+- HTTPS ingress, MIME checks and HTTPS health E2E passed. Remaining gate is authenticated browser login/protected-route E2E; result remains `Changes requested` until that evidence and final review are complete.
+- Browser E2E follow-up: the temporary HTTPS stack was reachable by command-line health checks, but the browser refused to open `https://127.0.0.1:8443` because the disposable self-signed certificate was not trusted. No authenticated browser result is claimed; a trusted temporary certificate/browser trust setup is required.
+## TASK-012 final DEV-001 review against HEAD a0bbfdbe (2026-08-03)
+
+- Exact remote HEAD verified unchanged: `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`; parent and full diff check passed.
+- Runtime evidence is complete: dedicated RAGFlow authentication, sequential PostgreSQL/live lifecycle, ClamAV/MinIO, operation-guidance success/degradation, HTTPS `/healthz`, JS/CSS MIME, and authenticated browser E2E all passed.
+- Browser E2E verified login, workbench rendering, protected `/intelligent-config` and `/fault-report`, and logout redirect to `/login`. Temporary credentials, certificate, data, containers and volumes were removed.
+- Review conclusion: `APPROVED` for integration at this exact HEAD. This is a review result only, not Merge authorization. DEV-002/project owner must issue separate exact-HEAD Merge authorization; after authorization, DEV-001 performs final integration check and the assigned non-author merge executor merges PR #75.
+- GitHub formal review: `APPROVED`, review `4840904555`, submitted by `ll979053897-arch` at `2026-08-03T05:01:17Z`; [review](https://github.com/QI-code1992/Equipment-repair/pull/75#pullrequestreview-4840904555). The review is anchored to `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`.
+- Post-merge verification: PR #75 was manually merged by DEV-001 at `9c8a787ba2ba51f4362bf6186b1c7d54cbe3e15c`; parents are `86d620480382524737140d449b08aafdb4d6fd6b` and approved HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`. Target ref, ancestor relation, merge-tree equivalence, `git diff --check` and workflow JSON parsing passed. Governance closeout remains pending.

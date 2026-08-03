@@ -97,7 +97,7 @@
     "verification": "Merge parents, source-tree equivalence, merge diff check, workflow JSON and 15 Node static regressions passed.",
     "consolidatedDevelopment": {
       "changeRequest": "CR-048",
-      "status": "DEVELOPMENT_COMPLETE_PENDING_DEV001_REVIEW",
+      "status": "INTEGRATED_PENDING_POST_MERGE_GOVERNANCE",
       "taskDeveloper": "DEV-002",
       "reviewer": "DEV-001 after all work packages complete",
       "mergeExecutor": "DEV-001 after project-owner exact PR/HEAD authorization",
@@ -113,11 +113,25 @@
       "startCondition": "CR-048 governance candidate must be integrated and the project owner must receive a formal development-start notice.",
       "developmentStartNotice": "https://github.com/QI-code1992/Equipment-repair/pull/74#issuecomment-5138434725",
       "developmentStartAcknowledgement": "https://github.com/QI-code1992/Equipment-repair/pull/74#issuecomment-5138470417",
-      "implementationHead": "46bf6e7ad804fe77beb609904a8f3c9abe3a449f",
-      "localVerification": "Frontend 55 passed and production build passed; backend 328 passed, 13 skipped, 2 warnings; compileall, 15 Node static regressions, JSON parsing and git diff --check passed.",
-      "nextAction": "All API-002—007 and P0 frontend work packages are locally complete in the single PR. DEV-001 must perform one whole-candidate re-review against exact HEAD 46bf6e7ad804fe77beb609904a8f3c9abe3a449f after the P1 permission remediation. Do not request Merge, merge, or enter Stage 6/7/8 before re-review, integration check and project-owner authorization."
+      "implementationHead": "a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8",
+      "localVerification": "Frontend and backend focused regressions, production build, compileall and diff-check were reported by DEV-002; exact-HEAD disposable live-stack validation completed with 2 passed and 5 warnings.",
+      "defectInventory": "06-testing/DEFECTS.md DEF-TASK012-001..047; DEF-TASK012-046 and DEF-TASK012-047 are closed on exact HEAD a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8 after complete live-stack, HTTPS and authenticated browser evidence.",
+      "formalReview": {
+        "reviewer": "ll979053897-arch / DEV-001",
+        "state": "APPROVED",
+        "reviewId": 4840904555,
+        "reviewUrl": "https://github.com/QI-code1992/Equipment-repair/pull/75#pullrequestreview-4840904555",
+        "commit": "a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8",
+        "submittedAt": "2026-08-03T05:01:17Z"
+      },
+      "mergeCommit": "9c8a787ba2ba51f4362bf6186b1c7d54cbe3e15c",
+      "mergeParents": ["86d620480382524737140d449b08aafdb4d6fd6b", "a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8"],
+      "mergeExecutor": "ll979053897-arch / DEV-001 / manual Merge Commit",
+      "mergedAt": "2026-08-03T05:10:48Z",
+      "postMergeVerification": "Target branch points to merge commit; approved HEAD is an ancestor; merge tree equals approved HEAD tree; diff-check and workflow/state.json parsing passed.",
+      "nextAction": "Complete post-merge governance commit and verify TASK-012 closeout. Stage 6/7/8 remain locked until their separate gates are approved."
     },
-    "nextAction": "TASK-012 local development is complete at 46bf6e7ad804fe77beb609904a8f3c9abe3a449f and awaits one whole-candidate DEV-001 re-review. TASK-012 and Stage 7 acceptance remain locked until re-review, authorization and integration; live-stack/browser evidence remains outstanding."
+    "nextAction": "TASK-012 PR #75 was merged as 9c8a787ba2ba51f4362bf6186b1c7d54cbe3e15c with approved HEAD a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8. Complete post-merge governance closeout; Stage 6/7/8 remain locked until separate gates are approved."
   },
   "stage6RuntimeValidation": {
     "status": "POST_MERGE_CORE_RUNTIME_VALIDATION_COMPLETED_SUPERSEDED_BY_SIGNED_STAGE6_CONCLUSION",

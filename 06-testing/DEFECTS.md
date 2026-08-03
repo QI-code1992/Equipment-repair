@@ -108,3 +108,78 @@
 - 根因和修复见 `CODE_REVIEW.md` R11；代码候选 `ea4338bad15f16048226a329801d3144b367909e`，新增直接和落库反例测试。
 - 残余风险：无敏感语义的未知字段默认脱敏未实施，须作为独立安全强化项评估；不得把 R11 结论表述为可识别任意秘密。
 - 当前状态：DEV-001 内部复核未见 Critical/Important；真实 PostgreSQL 17、Compose 与 `/healthz` 已复测。外部审核仍未通过，TASK-002 不得视为完成或解除依赖。
+-
+## TASK-012 consolidated defect inventory (DEV-001 review, 2026-07-31)
+
+Review record only. No business-code fix is included in this governance branch. DEV-002 must address these findings in the single TASK-012 development PR and submit a new exact HEAD.
+
+### Previously reported findings
+
+- DEF-TASK012-001 (P1): `/api/auth/me` failure leaves the protected shell mounted; permission loading is not fail-closed (`codebase/frontend/src/App.tsx`).
+- DEF-TASK012-002 (P1): Pages check one permission while their API calls require combinations, causing predictable 403 responses (`App.tsx`, `PortalPages.tsx`, `api.ts`).
+- DEF-TASK012-003 (P1): Logout omits the required `Idempotency-Key` (`codebase/frontend/src/api.ts`).
+- DEF-TASK012-004 (P1): Operation guidance trusts client `dataset_ids`, while the normal page does not provide required dataset context.
+- DEF-TASK012-005 (P1): Fault diagnosis does not validate enabled Agent configuration and model binding.
+- DEF-TASK012-006 (P1): Diagnosis can emit a fixed root cause/recommendation without real case or knowledge evidence.
+- DEF-TASK012-007 (P1): Diagnosis form cannot submit alarm-code and second-evidence fields needed for `DIAGNOSIS_READY`.
+- DEF-TASK012-008 (P1): Diagnosis rejected promises are not consistently handled, leaving stale UI and unhandled errors.
+- DEF-TASK012-009 (P1): Diagnosis questions remain a fixed template instead of using the dynamic contract.
+- DEF-TASK012-010 (P1): Repair execution context is client-controlled instead of bound to formal work order, fault and equipment facts.
+- DEF-TASK012-011 (P1): Maintenance records show fixed `NOT_LINKED`, and invalid filter values are not surfaced as 422.
+- DEF-TASK012-012 (P1): Manual fault submission and AI draft generation remain available while attachment scanning is pending.
+- DEF-TASK012-013 (P1): AI confirmation submits the old preview and ignores edits made after preview generation.
+- DEF-TASK012-014 (P1): AI reporting always sends `duration_minutes: 0` instead of collecting actual duration.
+- DEF-TASK012-015 (P1): Agent reporting starts Runtime but does not consume thread, SSE, result state or missing-field flow.
+
+### Additional findings from the complete candidate
+
+- DEF-TASK012-016 (P1): BI `period` changes trend length only; summary, efficiency and organization ranking still use all history (`PortalPages.tsx`, `api.ts`).
+- DEF-TASK012-017 (P1): Equipment edit sends `manufactured_at: null`, `commissioned_at: null` and `image_refs: []`, silently clearing existing fields.
+- DEF-TASK012-018 (P1): Equipment page is gated by `equipment:read`, but create/edit require `equipment:write`; read-only users see unusable actions.
+- DEF-TASK012-019 (P1): Factory modeling is gated by `organization:read`, but create/edit/enable/delete require `organization:write` and are not disabled.
+- DEF-TASK012-020 (P1): Maintenance list requires `maintenance:view`, while detail requires `maintenance:detail`; the detail link predictably fails for ordinary viewers.
+- DEF-TASK012-021 (P1): Repair execution is gated by `fault:repair`, while loading work orders needs `maintenance:view` and submitting results needs `fault:close`.
+- DEF-TASK012-022 (P1): Fault report page is gated by `fault:create`, but AI pre-diagnosis needs `intelligence:agent`; the AI button is not permission-aware.
+- DEF-TASK012-023 (P1): Agent report page is gated by `intelligence:agent`, but final submission also requires `fault:create`.
+- DEF-TASK012-024 (P1): System management is gated by `identity:read`, while user and role writes require `identity:write`.
+- DEF-TASK012-025 (P1): Global Agent drawer is visible to every authenticated user although Runtime endpoints require `intelligence:agent`.
+- DEF-TASK012-026 (P1): Intelligent configuration route checks `intelligence:model`, but `/api/agent-configs` requires `intelligence:agent`.
+- DEF-TASK012-027 (P1): Root workbench route has no `workbench:view` gate and exposes requests that fail for users without it.
+- DEF-TASK012-028 (P1): Equipment edit has no date or image controls, compounding the field-clearing payload defect.
+- DEF-TASK012-029 (P1): BI page provides list-only output and omits the approved chart-switching interaction.
+- DEF-TASK012-030 (P1): Workbench health score requires manually typing an equipment ID instead of selecting from the formal equipment list.
+- DEF-TASK012-031 (P2): Successful writes often show only “refresh to confirm” and do not reconcile local data, leaving stale UI and repeat-submit risk.
+- DEF-TASK012-032 (P2): Organization, equipment, user and role writes lack consistent post-write refresh or state reconciliation.
+- DEF-TASK012-033 (P1): Create/submit controls lack consistent in-flight guards; repeated clicks can create duplicate Runtime runs and records.
+- DEF-TASK012-034 (P1): Root pytest has two real failures because `06-testing/performance/*.py` opens JSON through a working-directory-relative path.
+- DEF-TASK012-035 (P1): PR #75 claims the backend suite passed, but the reproducible root run is `339 passed, 13 skipped, 2 failed, 2 warnings`; evidence boundary is inaccurate.
+- DEF-TASK012-036 (P1): Knowledge retry tests do not click/assert the dual-permission request; the path is unverified (`PortalPages.test.tsx`).
+- DEF-TASK012-037 (P1): The existing retry test blockage remains unresolved while candidate evidence reports green.
+- DEF-TASK012-038 (P1): Equipment add/edit is gated only by `equipment:read`, but the form also loads `/api/organizations` and `/api/users`; users with equipment permission but without organization/identity read receive a blank/error form before they can save. Evidence: `App.tsx`, `PortalPages.tsx`, P0 API availability matrix.
+- DEF-TASK012-039 (P1): After an AI preview is generated, the ordinary “提交故障” action remains enabled; a user can create a manual fault and then confirm the preview, producing two contradictory records from one report flow. Evidence: `FaultReportPage.tsx` preview branch and submit button.
+- DEF-TASK012-040 (P1): `readRunEvents()` awaits `response.text()` and parses only after the SSE response closes; Runtime status is not consumed incrementally, so the required live `run_started`/tool/status experience is not delivered. Evidence: `codebase/frontend/src/api.ts`, `App.tsx`, `RepairExecutionPage.tsx`, Runtime SSE contract.
+
+### Third-pass findings against PR #75 HEAD 989e23481f071a46ee164c9595434d703d8a3a1f
+
+- DEF-TASK012-041 (P1): `POST /api/agent/operation-guidance` performs external retrieval and writes a success audit but has no `Idempotency-Key` contract or replay storage; browser retry or double-click can repeat retrieval/audit with no stable response. Evidence: `codebase/backend/app/modules/agents/router.py`, `codebase/frontend/src/api.ts`, TASK-010 protected-write convention.
+- DEF-TASK012-042 (P1): Global Agent creation is a non-atomic thread-create then message-create sequence, each with a new idempotency key; message failure or retry leaves orphan threads, and the submit control has no in-flight disabled state. Evidence: `codebase/frontend/src/api.ts`, `codebase/frontend/src/App.tsx`.
+- DEF-TASK012-043 (P1): Repair execution enables manual fault-id fallback whenever assigned-order loading is `null`, including request failure; this permits bypassing formal work-order context during 403/network errors instead of only when an authoritative empty list is returned. Evidence: `codebase/frontend/src/RepairExecutionPage.tsx`.
+- DEF-TASK012-044 (P1): Page-level permission gates require write permissions for factory modeling, system management, intelligent configuration and repair execution, blocking read-only users from approved read views instead of rendering read data with write controls disabled. Evidence: `codebase/frontend/src/App.tsx`, page API contracts and P0 permission matrix.
+- DEF-TASK012-045 (P2): SSE parser accepts only one single-line `data:` field and silently drops `event:error`, multi-line data, or blocks separated by CRLF; the live Runtime contract is not robustly consumed despite the incremental reader. Evidence: `codebase/frontend/src/api.ts`.
+- DEF-TASK012-046 (P1): Required runtime integration evidence is still absent on HEAD 989e234: Docker Compose/container health, PostgreSQL, RAGFlow, ClamAV/MinIO, HTTPS and browser E2E were not rerun; frontend mocks/static checks cannot establish production readiness.
+- DEF-TASK012-047 (P1): Exact-HEAD live validation now reaches authenticated RAGFlow and the production `operation-guidance` route, but the live lifecycle returns `UNAVAILABLE` instead of the required `QUESTIONING` because the validation fixture creates a local knowledge dataset without creating/binding an `operation_guidance` Agent configuration. The client-supplied `dataset_ids` are correctly ignored by the server, so the test cannot prove the production route until the approved Agent config is provisioned. Evidence: `codebase/backend/tests/integration/test_task005_live_stack.py`, `codebase/backend/app/modules/agents/router.py`.
+
+### DEF-TASK012-046 status update (2026-08-03)
+
+- Exact HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8` completed the disposable live-stack run: PostgreSQL, Redis, MinIO, ClamAV, API, Worker, Validator and Nginx started; authenticated RAGFlow retrieval, temporary Agent binding, operation-guidance success/degradation, attachment scanning and cleanup passed (`2 passed, 5 warnings`).
+- Remaining scope is limited to application HTTPS ingress and authenticated browser E2E on this exact candidate. Existing RAGFlow HTTPS or unauthenticated/container-local checks do not satisfy this requirement.
+- DEF-TASK012-046 remains open until those two checks are executed and recorded.
+
+### DEF-TASK012-047 status update (2026-08-03)
+
+- Closed on exact HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`. The live fixture now creates and binds a temporary `operation_guidance` Agent configuration to the disposable dataset, then removes it during cleanup. The authenticated production route and unavailable degradation path were exercised; client-supplied `dataset_ids` remained ignored.
+
+### Gate
+
+DEF-TASK012-001..045 remain subject to final exact-HEAD review; DEF-TASK012-047 is closed. PR #75 must remain unmerged and Stage 6/7/8 locked while DEF-TASK012-046 remains open. DEV-001 must execute application HTTPS and authenticated browser E2E, then perform the final whole-candidate review and integration check.
+- DEF-TASK012-046 (P1, closed 2026-08-03): Exact HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8` now has reproducible Compose, PostgreSQL, RAGFlow, ClamAV/MinIO, application HTTPS, static MIME and authenticated browser E2E evidence. The browser run verified login, workbench load, `/intelligent-config`, `/fault-report`, and logout redirect to `/login`.

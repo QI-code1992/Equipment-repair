@@ -629,3 +629,62 @@
 - 静态验证：`node --test 06-testing/tests/*.test.js` 为 `15 passed`；`python3 -m json.tool workflow/state.json`、`git diff --check` 通过。
 - 未验证：当前 macOS 环境没有 Docker/PowerShell/真实 RAGFlow；未执行 Windows 隔离 live-stack、ClamAV/MinIO 附件扫描、HTTPS、浏览器逐页 E2E、真实 RAGFlow 引用/降级或生产部署。上述必须由 DEV-001 在最终精确候选上独立验证。
 - 未完成事项：最终候选尚未提交、PR 尚未转 Ready、DEV-001 尚未整体审核；页面矩阵全部仍标记“实现中候选”，`DEF-STAGE7-001` 不得关闭。
+## TASK-012 DEV-001 complete defect review evidence (2026-07-31)
+
+- Review baseline: PR #75 HEAD `77a54a1587544374ed876e902bc132d58cf8ed9b`.
+- Reproducible backend command from repository root: `339 passed, 13 skipped, 2 failed, 2 warnings`. The two failures are `06-testing/performance/test_stage6_performance.py` cases that use a working-directory-relative JSON path.
+- Existing frontend evidence: Vitest `55 passed`, production build passed, and Node static regressions `15 passed`; the retry-path coverage is incomplete because the dual-permission test does not click/assert the request.
+- Review conclusion: evidence is insufficient for approval while the two reproducibility failures and the open defect inventory remain unresolved. This record intentionally contains no code fix.
+- Second-pass review added three findings: equipment form dependency permissions, AI preview bypass/double-submit, and non-incremental SSE parsing. No business-code change was made.
+
+## TASK-012 third-pass review evidence (2026-08-03)
+
+- Review target: PR #75 exact HEAD `989e23481f071a46ee164c9595434d703d8a3a1f`.
+- Governance checks: remote HEAD confirmed; review diff inspected; no business-code changes made on this governance branch.
+- New findings: DEF-TASK012-041..046 recorded in `06-testing/DEFECTS.md`.
+- Not verified and still required on the final candidate: Docker Compose/container `/healthz`, PostgreSQL, RAGFlow, ClamAV/MinIO, HTTPS and browser E2E.
+- Gate remains `Changes requested`; no Merge authorization, merge or downstream unlock.
+
+## TASK-012 fourth-pass review evidence (2026-08-03)
+
+- Review target: PR #75 exact HEAD `ee149dda2b262f9350bfe58c54d5603bcffa068c`.
+- Inspection result: operation-guidance idempotency, atomic Agent start, in-flight guards, authoritative manual fallback and incremental SSE framing are present in the candidate diff.
+- DEV-002 reported frontend `65 passed`, backend focused `17 passed, 2 warnings`, production build, Node static regressions `15 passed`, compileall and diff-check.
+- Still not independently verified: Docker Compose/container health and `/healthz`, PostgreSQL, RAGFlow, ClamAV/MinIO, HTTPS and browser E2E/live-stack. These remain DEF-TASK012-046 and block approval.
+
+### DEV-001 Windows Docker verification (exact HEAD ee149dda, 2026-08-03)
+
+- `docker compose --env-file .env.example -f codebase/infra/docker-compose.yml config --quiet`: passed.
+- API image build from exact HEAD: passed.
+- PostgreSQL 17 and Redis 7 containers: healthy.
+- API container startup: passed; container logs show Uvicorn listening on `0.0.0.0:8000`.
+- Container-local `GET /healthz`: HTTP 200, `{"status":"ok","service":"equipment-operations-platform"}`.
+- Not executed: real RAGFlow authenticated retrieval (example key is not a dedicated credential), ClamAV/MinIO attachment flow, HTTPS ingress and authenticated browser E2E. DEF-TASK012-046 remains open for those paths.
+- Follow-up environment check: no `RAGFLOW_*`, `MINIO_*`, `CLAMAV_*`, `TASK011_*` or browser E2E credentials are present in the DEV-001 host environment, and no `codebase/infra/.env` file exists; only `.env.example` is available. No secret or placeholder value was used as production evidence.
+- Runtime discovery follow-up: Docker has healthy RAGFlow stacks, including an API exposed at `127.0.0.1:19380`; unauthenticated `GET /api/v1/datasets` returned HTTP 401, so service reachability is proven but authenticated retrieval is not. MinIO is running; no ClamAV container is present in the current Docker runtime. Port 443 belongs to the separate RAGFlow stack, not the TASK-012 application ingress.
+- Temporary-key verification: the Key created in the RAGFlow API page authenticated successfully against `127.0.0.1:19380/api/v1/datasets` and returned one dataset. The secret was kept in memory and not written to repository files, logs or this record. The TASK-012 Compose adapter/route probe still needs a safe secret-injection mechanism.
+- Full validation attempt: Compose validation started all PostgreSQL, Redis, MinIO, ClamAV, API, Worker, Validator and Nginx services; authenticated RAGFlow probe passed. The lifecycle test failed at the production operation-guidance assertion (`UNAVAILABLE` vs `QUESTIONING`) because no `operation_guidance` Agent config was seeded/bound. New finding `DEF-TASK012-047` is open.
+## TASK-012 fifth-pass live validation evidence (2026-08-03)
+
+- Exact candidate: PR #75 HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`.
+- Disposable live stack covered PostgreSQL, Redis, MinIO, ClamAV, API, Worker, Validator and Nginx. Authenticated RAGFlow retrieval, temporary `operation_guidance` Agent binding, operation-guidance success/degradation, attachment scanning and cleanup completed: `2 passed, 5 warnings`.
+- Temporary Agent configuration and validation environment were removed after the run; no secret was committed or logged.
+- Not independently executed in this pass: application HTTPS ingress and authenticated browser E2E. DEF-TASK012-046 remains open for those checks.
+- DEV-001 probe of `https://127.0.0.1/healthz` and `/` failed TLS handshake; the active port 443 belongs to the separate RAGFlow stack, so no application HTTPS result is claimed.
+- Exact-HEAD follow-up: `npm ci` and `npm run build` passed in the temporary worktree. Nginx TLS files are still unavailable, so the isolated application HTTPS/browser run remains blocked.
+## TASK-012 HTTPS follow-up verification (2026-08-03)
+
+- Temporary HTTPS stack on exact HEAD `a0bbfdbe`: Nginx `127.0.0.1:8443`, `/healthz` HTTP 200, JavaScript/CSS MIME checks passed, HTTPS health E2E `1 passed`.
+- The temporary RAGFlow Key candidate from the desktop file returned 401; validator result was `1 passed, 1 skipped`. Authenticated RAGFlow route and browser login E2E remain unverified.
+- Credential follow-up: two non-secret candidate positions were tested against the local RAGFlow API; both returned HTTP 401. No credential value is recorded here.
+## TASK-012 final live-stack rerun evidence (2026-08-03)
+
+- Dedicated RAGFlow Token probe: HTTP 200.
+- After MinIO bucket initialization and sequential migration/lifecycle execution: `test_task005_live_stack.py` `1 passed, 2 warnings`; PostgreSQL migration test passed separately. ClamAV, MinIO, Worker, RAGFlow Agent binding, operation-guidance success/degradation and cleanup were exercised.
+- HTTPS ingress `/healthz`, JS/CSS MIME and HTTPS health E2E passed. Authenticated browser login/protected-route E2E remains outstanding.
+- Browser E2E follow-up: browser navigation was blocked by `ERR_CERT_AUTHORITY_INVALID` for the disposable certificate. HTTPS command-line checks remain valid; authenticated browser E2E is still open.
+## TASK-012 final acceptance evidence (2026-08-03)
+
+- Exact HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`: RAGFlow, PostgreSQL/live lifecycle, ClamAV/MinIO, HTTPS health/MIME and authenticated browser E2E passed.
+- Browser flow: login, workbench, protected intelligent configuration and fault-report routes, logout redirect to `/login`.
+- Temporary validation resources and credentials were removed. No production code or configuration was changed during governance verification.

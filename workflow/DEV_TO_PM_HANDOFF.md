@@ -2,7 +2,7 @@
 
 ## TASK-012 P1 权限修复复审交接（2026-07-31）
 
-- PR：#75；最新精确 HEAD：`46bf6e7ad804fe77beb609904a8f3c9abe3a449f`；目标 `codex/stage-05-integration`；PR 继续保持 Ready，未申请 Merge 授权。
+- PR：#75；最新精确 HEAD：`77a54a1587544374ed876e902bc132d58cf8ed9b`；目标 `codex/stage-05-integration`；PR 继续保持 Ready，未申请 Merge 授权。
 - 根因：仅 `intelligence:audit` 用户可见知识重试按钮，但后端写入接口要求 `intelligence:knowledge`，点击必然 403。
 - 修复：`IntelligentAuditPage` 接收当前会话权限；无知识写权限时禁用“重新同步”并显示明确提示；审计+知识双权限仍可执行重试。
 - 验证：修复前审计-only 回归失败；修复后定向 17 passed，前端全量 55 passed，生产构建、15 项 Node 静态回归和 diff-check 通过。
@@ -560,3 +560,59 @@
 - 获批 HEAD：`b4e28368c1294f30b80f4dd72187660eba06fc10`；Merge Commit：`8d9beaefe01baef38e54baecbe3426d9ab816623`。
 - 合并后验证：双亲、目标分支、`git diff --check`、`workflow/state.json` 解析通过；Python 3.13 后端 `319 passed, 13 skipped, 2 warnings`。
 - 正式请求：请项目负责人 DEV-002 确认已收到 TASK-012 开发启动通知。确认后 DEV-002 才可创建唯一 Draft PR `codex/task-012-p0-frontend-remediation`；API-002—007、P0 前端和 Stage 6/7/8 在确认前继续锁定。
+## TASK-012 complete defect inventory handoff (2026-07-31)
+
+- DEV-001 reviewed PR #75 exact HEAD `77a54a1587544374ed876e902bc132d58cf8ed9b` and recorded `Changes requested`.
+- The complete inventory is `06-testing/DEFECTS.md`, DEF-TASK012-001 through DEF-TASK012-037. It includes prior P1 findings and additional permission, data-loss, filtering, interaction, duplicate-submit, and test-evidence findings.
+- DEV-002 must fix the applicable items in the same TASK-012 development PR. This governance PR is only the review/evidence handoff and does not fix or close any defect.
+- Until a new exact HEAD is reviewed and integration-checked, PR #75 must not be merged and TASK-012, Stage 6/7/8 remain locked.
+- Second-pass additions are DEF-TASK012-038 through DEF-TASK012-040; DEV-002 must include them in the same remediation cycle.
+
+## TASK-012 third-pass review handoff (2026-08-03)
+
+- DEV-001 reviewed PR #75 exact HEAD `989e23481f071a46ee164c9595434d703d8a3a1f`; result remains `Changes requested`.
+- New open findings are DEF-TASK012-041 through DEF-TASK012-046: operation-guidance idempotency, Global Agent two-step/orphan and in-flight handling, unsafe manual fallback on order-load failure, overly strict page gates, incomplete SSE framing/error parsing, and missing production/live-stack evidence.
+- DEV-002 must remediate these in the same PR #75 and submit a new exact HEAD for whole-candidate review.
+- PR #75 must not be merged; TASK-012 and Stage 6/7/8 remain locked. This governance PR contains no business-code fix.
+
+## TASK-012 fourth-pass review handoff (2026-08-03)
+
+- PR #75 exact HEAD is now `ee149dda2b262f9350bfe58c54d5603bcffa068c`.
+- DEV-001 inspection finds the code-level remediation direction for DEF-TASK012-041, 042, 043 and 045, plus page-level write guards; this is not final approval.
+- DEF-TASK012-046 remains open because Docker/live-stack, PostgreSQL, RAGFlow, ClamAV/MinIO, HTTPS and browser E2E evidence has not been executed on the new exact HEAD.
+- DEV-001 must perform the isolated environment verification and final whole-candidate review. Until then PR #75 is not mergeable by governance decision; TASK-012 and Stage 6/7/8 remain locked.
+
+### DEV-001 environment result
+
+- Exact HEAD `ee149dda2b262f9350bfe58c54d5603bcffa068c` passed Compose config, API build, PostgreSQL/Redis health, API startup and container-local `/healthz` HTTP 200 on Windows Docker.
+- Real RAGFlow credentials/service, ClamAV/MinIO attachment scanning, HTTPS and authenticated browser E2E remain unverified. DEF-TASK012-046 remains open; no Merge authorization or stage unlock.
+- The DEV-001 host has no dedicated `RAGFLOW_*`, attachment, HTTPS or browser-E2E variables and no `codebase/infra/.env`; the project owner/DEV-002 must provide or designate the isolated validation environment without placing secrets in the repository.
+- The host does contain healthy RAGFlow and MinIO containers. RAGFlow API reachability is confirmed by HTTP 401 from `127.0.0.1:19380/api/v1/datasets` without credentials; no ClamAV container is currently running, and port 443 is the separate RAGFlow stack. DEV-002/project owner must provide a safe credential-injection path and the application-specific ClamAV/HTTPS/browser environment.
+- The temporary Key created in the RAGFlow UI now authenticates successfully and lists one dataset. It was used only in memory and was not committed or logged. A safe runtime injection path is still required to validate the TASK-012 container adapter and production route.
+- Full live attempt reached the production route but returned `UNAVAILABLE` because the fixture lacked a bound `operation_guidance` Agent configuration; client dataset IDs were correctly ignored. DEV-002 must provision the approved config in the validation contract and rerun, recorded as DEF-TASK012-047.
+## TASK-012 fifth-pass live evidence handoff (2026-08-03)
+
+- PR #75 exact HEAD: `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`.
+- DEV-002 corrected the disposable fixture. Authenticated RAGFlow, temporary `operation_guidance` Agent binding, production operation-guidance success/degradation, attachment scanning and cleanup passed in the isolated live stack: `2 passed, 5 warnings`.
+- DEF-TASK012-047 is closed. DEF-TASK012-046 remains open only for application HTTPS ingress and authenticated browser E2E on this exact HEAD.
+- DEV-001 must execute those two checks, update the final review, and perform integration verification. Until then PR #75 remains unmerged and TASK-012/Stage 6/7/8 remain locked.
+- DEV-001 attempted the application HTTPS endpoint at `https://127.0.0.1/healthz` and `/`; both failed TLS handshake because the available HTTPS listener is not the TASK-012 application. A designated application HTTPS/browser environment is still required.
+- The exact-HEAD worktree now has a verified `npm ci` and production build. Temporary certificate injection is still required before application Nginx HTTPS/browser validation; generated assets and certificates must not be committed.
+## TASK-012 HTTPS follow-up handoff (2026-08-03)
+
+- Application HTTPS ingress is now verified on exact HEAD `a0bbfdbe`: `https://127.0.0.1:8443/healthz` returned 200, static JS/CSS MIME checks passed, and HTTPS health E2E passed.
+- The supplied desktop-file RAGFlow Key candidate returned HTTP 401 and the validator skipped the live route. A valid dedicated Key and authenticated browser session are still required before closing DEF-TASK012-046.
+- Both candidate strings extracted from the temporary desktop file returned HTTP 401 against RAGFlow. DEV-002/project owner must provide a newly generated raw Key through a temporary out-of-repository file before the adapter/production route and authenticated browser E2E can be completed.
+## TASK-012 final live-stack rerun handoff (2026-08-03)
+
+- The newly supplied dedicated RAGFlow Token authenticated successfully. With the disposable MinIO bucket initialized and destructive schema testing sequenced before Worker lifecycle execution, `test_task005_live_stack.py` passed (`1 passed, 2 warnings`); PostgreSQL migration passed separately.
+- The run covered real ClamAV/MinIO, Worker synchronization, RAGFlow document lifecycle, temporary Agent configuration, operation-guidance success/degradation, citations and cleanup. HTTPS ingress and health/MIME checks also passed.
+- Remaining action: authenticated browser login and protected-route E2E on exact HEAD `a0bbfdbe`; until then DEF-TASK012-046 remains open and PR #75 cannot be approved or merged.
+- Browser E2E remains blocked only by certificate trust: the browser rejected the disposable self-signed HTTPS certificate before login. Provide a trusted temporary certificate or approved browser trust profile; do not weaken production TLS configuration.
+## TASK-012 final DEV-001 review handoff (2026-08-03)
+
+- DEV-001 approves PR #75 exact HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8` for integration based on complete runtime and browser evidence.
+- Formal GitHub review `APPROVED` by `ll979053897-arch` was submitted at `2026-08-03T05:01:17Z`: [review 4840904555](https://github.com/QI-code1992/Equipment-repair/pull/75#pullrequestreview-4840904555).
+- `DEF-TASK012-046` and `DEF-TASK012-047` are closed. This approval is not Merge authorization and does not unlock Stage 6/7/8 by itself.
+- Post-merge update: PR #75 was manually merged by DEV-001 after separate exact-HEAD authorization. Merge Commit `9c8a787ba2ba51f4362bf6186b1c7d54cbe3e15c` has parents `86d620480382524737140d449b08aafdb4d6fd6b` and approved HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`. Target ref, ancestor relation, merge-tree equivalence, `git diff --check` and workflow JSON parsing passed. Post-merge governance closeout remains pending; Stage 6/7/8 remain locked.
+- Next: DEV-002/project owner must grant separate exact-HEAD Merge authorization. DEV-001 then verifies target/祖先关系/差异 and the assigned non-author executor performs manual Merge Commit.
