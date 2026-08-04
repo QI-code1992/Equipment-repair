@@ -592,3 +592,10 @@
 - 范围：设备台账增加正式资产汇总、状态筛选和列表工具栏；设备详情、新增/编辑及维修记录/详情改为资产、参数、历史和检索分区；智能配置分离模型与绑定、知识入口、Agent 控制面；故障上报及维修执行形成现场上下文与 AI 辅助区。所有内容仍来自既有正式 API 与权限状态。
 - 验证：`npm test -- --run src/PortalPages.test.tsx src/IntelligentConfigPage.test.tsx src/FaultReportPage.test.tsx src/RepairExecutionPage.test.tsx` 为 `43 passed`；`npm run build` 与 `git diff --check` 通过。
 - 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未提交既有 `codebase/frontend/.vscode/` 文件。AI 故障上报和逐页浏览器原型对照仍待本 PR 后续切片完成。
+
+## FCP-013-07：智能审计与 AI 上报工作区整改（2026-08-04）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：智能审计页调整为“受控调用概览”和“知识文档状态”两个真实数据区，保留知识写权限对重试操作的禁用边界；AI 故障上报页调整为 AI 受控收集、实时运行状态、正式写入边界与人工确认四个连续区域。未改动既有 API、权限、提交或 SSE 逻辑。
+- 验证：`npm test -- --run` 为 `74 passed`；`npm run build` 通过；仓库根目录 15 项 Node 静态回归全部通过；`git diff --check` 通过。
+- 边界：已启动当前工作树的本地预览，仅确认 `/login` 的实际页面结构与当前源码一致。其余 15 条受保护路由仍需使用真实隔离测试账号进行固定桌面视口的浏览器对照；不得通过伪造会话或静态数据绕过认证。未新增生产依赖、兼容层或抽象层，既有未跟踪 `codebase/frontend/.vscode/` 文件未触碰。

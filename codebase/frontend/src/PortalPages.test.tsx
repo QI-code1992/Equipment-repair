@@ -330,6 +330,8 @@ describe("TASK-012 portal pages", () => {
     render(<IntelligentAuditPage />);
 
     expect(await screen.findByText("operation_guidance")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "受控调用概览" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "知识文档状态" })).toBeInTheDocument();
     expect(screen.getByText(/配置 Token 预算统计，不代表模型实际消耗/)).toBeInTheDocument();
     expect(screen.getByText("512")).toBeInTheDocument();
   });
@@ -375,12 +377,14 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter><AgentReportPage /></MemoryRouter>);
 
+    expect(screen.getByRole("heading", { name: "AI 受控收集" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "确认并提交正式故障单" })).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("设备 ID"), { target: { value: "eq-1" } });
     fireEvent.change(screen.getByLabelText("故障描述"), { target: { value: "液压异响" } });
     fireEvent.click(screen.getByRole("button", { name: "开始 AI 收集" }));
     expect(screen.getByRole("button", { name: "AI 收集中…" })).toBeDisabled();
     await screen.findByText("AI 收集任务已创建，请补全并确认正式上报字段。");
+    expect(screen.getByRole("heading", { name: "正式字段确认" })).toBeInTheDocument();
     expect(await screen.findByText("运行状态：RUNNING")).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("发生时间"), { target: { value: "2026-07-31T10:00" } });
     fireEvent.change(screen.getByLabelText("持续时间（分钟）"), { target: { value: "25" } });
