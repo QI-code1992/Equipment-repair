@@ -6,7 +6,7 @@
 
 **Architecture:** MySQL、Redis、MinIO、Elasticsearch 只加入 `equipment-ragflow-internal` 内部网络；RAGFlow 同时加入内部网络和 `equipment-ragflow-access` 访问网络。宿主机仅以 `127.0.0.1` 暴露 RAGFlow Web/API，TASK-005 后续只通过访问网络的 `http://ragflow:9380` 调用 RAGFlow，不能直接连接其依赖。
 
-**Tech Stack:** Docker 29.6.1、Docker Compose 5.1.4、PowerShell 7/Windows PowerShell、RAGFlow v0.25.6、Elasticsearch 8.11.3、MySQL 8.0.39、Redis 7.4.2、MinIO、Python 3.13（平台回归）。
+**Tech Stack:** Docker 29.6.1、Docker Compose 5.1.4、PowerShell 7/Windows PowerShell、RAGFlow v0.26.3、Elasticsearch 8.11.3、MySQL 8.0.39、Redis 7.4.2、MinIO、Python 3.13（平台回归）。
 
 ## Global Constraints
 
@@ -20,7 +20,7 @@
 - 不执行 `docker compose down -v`、`docker volume rm` 或其他卷删除命令。
 - 内部依赖不得发布宿主机端口；RAGFlow 端口只能绑定 `127.0.0.1`。
 - Elasticsearch 镜像固定为 `elasticsearch:8.11.3`，运行时版本必须报告 `8.11.x`。
-- RAGFlow 镜像固定为 `infiniflow/ragflow:v0.25.6`；不得使用 `latest` 或 `nightly`。
+- RAGFlow 镜像固定为 `infiniflow/ragflow:v0.26.3`；不得使用 `latest` 或 `nightly`。
 - 每个实现切片先产生可解释的 RED，再做最小 GREEN；每个稳定切片独立提交。
 - Docker Desktop 未启动、资源不足或镜像拉取失败必须如实记录，不得写成验证通过。
 - Stage 6 仍禁止进入；TASK-005 只有在 TASK-004 审核、授权、正式合入并完成合并后验证后才解锁。
@@ -82,7 +82,7 @@ if ($LASTEXITCODE -ne 0) { throw "docker compose config failed" }
 $config = $raw | ConvertFrom-Json
 
 $expectedImages = @{
-    ragflow                 = "infiniflow/ragflow:v0.25.6"
+    ragflow                 = "infiniflow/ragflow:v0.26.3"
     "ragflow-elasticsearch" = "elasticsearch:8.11.3"
     "ragflow-mysql"         = "mysql:8.0.39"
     "ragflow-minio"         = "pgsty/minio:RELEASE.2026-03-25T00-00-00Z"
@@ -162,7 +162,7 @@ git commit -m "test(task-004): define ragflow compose contract"
 ```dotenv
 
 # TASK-004 isolated RAGFlow stack; replace every change-me value outside Git.
-RAGFLOW_IMAGE=infiniflow/ragflow:v0.25.6
+RAGFLOW_IMAGE=infiniflow/ragflow:v0.26.3
 RAGFLOW_HTTP_PORT=8080
 RAGFLOW_API_PORT=9380
 RAGFLOW_TIMEZONE=Asia/Shanghai
@@ -417,7 +417,7 @@ do {
 } while ((Get-Date) -lt $apiDeadline)
 if ($null -eq $api) { throw "RAGFlow API endpoint did not become healthy before timeout" }
 $apiContract = $api.Content | ConvertFrom-Json
-if ($api.StatusCode -ne 200 -or $apiContract.code -ne 0 -or $apiContract.data -ne "v0.25.6") {
+if ($api.StatusCode -ne 200 -or $apiContract.code -ne 0 -or $apiContract.data -ne "v0.26.3") {
     throw "RAGFlow API version contract drift"
 }
 
@@ -425,7 +425,7 @@ $versionJson = & docker @compose exec -T ragflow-elasticsearch sh -lc 'curl -fsS
 $version = ($versionJson | ConvertFrom-Json).version.number
 if ($version -notlike "8.11.*") { throw "Unexpected Elasticsearch version: $version" }
 
-Write-Output "TASK-004 health: PASS; services=5; elasticsearch=$version; web_status=200; api_status=200; ragflow=v0.25.6"
+Write-Output "TASK-004 health: PASS; services=5; elasticsearch=$version; web_status=200; api_status=200; ragflow=v0.26.3"
 ```
 
 实现时不得把环境变量实际值写到输出；镜像校验必须同时完成三层绑定：展开 Compose 配置中的镜像标签等于获批标签、固定标签的 `RepoDigests` 包含获批 SHA-256、运行容器的镜像 ID 等于获批标签解析出的本地镜像 ID。任一缺失或不一致均返回非零，不输出 Registry 凭据。健康验证还必须扫描 RAGFlow 日志中的依赖连接失败，并以运行时秘密值进行精确泄漏扫描；输出只允许包含开始/结束时间、命令退出码和命中计数等脱敏摘要。
@@ -439,7 +439,7 @@ powershell -NoProfile -File codebase/infra/ragflow/scripts/verify.ps1 -EnvFile $
 docker compose -p equipment-ragflow --env-file $RagflowEnvFile -f codebase/infra/ragflow/docker-compose.yml ps
 ```
 
-Expected: 五个服务均为 `healthy`；RAGFlow Web 返回 HTTP 200；RAGFlow API 版本契约返回 `v0.25.6`；Elasticsearch 为 `8.11.x`；Compose 展开镜像、运行容器镜像 ID 和五个镜像摘要均与获批值完全一致；依赖连接失败和秘密值命中均为 0；证据包含执行时间和各 Docker 命令退出码。
+Expected: 五个服务均为 `healthy`；RAGFlow Web 返回 HTTP 200；RAGFlow API 版本契约返回 `v0.26.3`；Elasticsearch 为 `8.11.x`；Compose 展开镜像、运行容器镜像 ID 和五个镜像摘要均与获批值完全一致；依赖连接失败和秘密值命中均为 0；证据包含执行时间和各 Docker 命令退出码。
 
 - [ ] **Step 4: 提交健康验证**
 
