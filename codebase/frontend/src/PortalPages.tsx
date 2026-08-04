@@ -125,6 +125,7 @@ export function SystemManagementPage({ permissionCodes }: { permissionCodes?: st
 function SystemManagementContent({ canWrite }: { canWrite: boolean }) {
   const [refresh, setRefresh] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [section, setSection] = useState<"users" | "roles" | "permissions" | "audit">("users");
   const [auditAction, setAuditAction] = useState("");
   const [auditPage, setAuditPage] = useState(1);
   const audits = useData(() => getAuditEvents({ action: auditAction || undefined, page: auditPage }), [auditAction, auditPage, refresh]);
@@ -164,16 +165,21 @@ function SystemManagementContent({ canWrite }: { canWrite: boolean }) {
   }
 
   return <Page title="系统管理">
+    <p className="page-description">账号、角色、权限与审计分区使用同一正式身份 API；只读账号不会显示可执行的写操作。</p>
     {notice && <p role="status">{notice}</p>}
-    <h3>账号</h3>
+    <div className="section-tabs" role="tablist" aria-label="系统管理分区">
+      {[ ["users", "账号管理"], ["roles", "角色权限"], ["permissions", "权限目录"], ["audit", "审计事件"] ].map(([id, label]) => <button key={id} type="button" role="tab" aria-selected={section === id} onClick={() => setSection(id as typeof section)}>{label}</button>)}
+    </div>
+    <section className="section-tab-panel" role="tabpanel">
+    {section === "users" && <><div className="panel-heading"><div><h3>账号管理</h3><p>仅身份写入权限可新增或调整账号状态。</p></div><span className={`status-chip ${canWrite ? "status-chip--success" : "status-chip--neutral"}`}>{canWrite ? "可管理" : "只读"}</span></div>
     <State state={users} empty={(items) => !items.length}>{(items) => <>
-      <table><thead><tr><th>账号</th><th>状态</th><th>角色</th><th>操作</th></tr></thead><tbody>{items.map((item) => <tr key={item.id}><td>{item.username}</td><td>{item.enabled ? "启用" : "停用"}</td><td>{item.role_ids.join(", ") || "未分配"}</td><td><button type="button" disabled={!canWrite || saving} onClick={() => void toggle(item)}>{item.enabled ? "停用" : "启用"}</button></td></tr>)}</tbody></table>
-      <form className="portal-form" onSubmit={create}><label>用户名<input name="username" disabled={!canWrite} required /></label><label>初始密码<input name="password" disabled={!canWrite} type="password" minLength={8} required /></label><label>角色<select name="role_id" disabled={!canWrite}>{roles.value?.map((role) => <option key={role.id} value={role.id}>{role.name}</option>)}</select></label><button type="submit" disabled={!canWrite || saving}>创建账号</button></form>
-    </>}</State>
-    <h3>角色</h3>
-    <State state={roles} empty={(items) => !items.length}>{(items) => <div>{items.map((item) => <RolePermissionEditor key={item.id} role={item} permissions={permissions.value ?? []} canWrite={canWrite} onSaved={() => { setRefresh((value) => value + 1); setNotice("角色权限已更新。"); }} onFailed={() => setNotice("角色更新失败，请检查权限后重试。")} />)}</div>}</State>
-    <h3>权限目录</h3><State state={permissions} empty={(items) => !items.length}>{(items) => <p>{items.map((item) => item.code).join("、")}</p>}</State>
-    <h3>审计事件</h3><label>动作筛选<input aria-label="审计动作筛选" value={auditAction} onChange={(event) => { setAuditAction(event.target.value); setAuditPage(1); }} placeholder="输入正式动作" /></label><State state={audits} empty={(data) => !data.count}>{(data) => <><table><thead><tr><th>时间</th><th>动作</th><th>资源</th><th>结果</th></tr></thead><tbody>{data.items.map((item: AuditEvent) => <tr key={item.id}><td>{item.created_at}</td><td>{item.action}</td><td>{item.resource_type}</td><td>{item.result}</td></tr>)}</tbody></table><div className="pager"><button type="button" disabled={auditPage <= 1} onClick={() => setAuditPage((current) => current - 1)}>上一页</button><span>第 {auditPage} 页</span><button type="button" disabled={data.items.length < data.page_size} onClick={() => setAuditPage((current) => current + 1)}>下一页</button></div></>}</State>
+      <table><thead><tr><th>账号</th><th>状态</th><th>角色</th><th>操作</th></tr></thead><tbody>{items.map((item) => <tr key={item.id}><td>{item.username}</td><td>{item.enabled ? "启用" : "停用"}</td><td>{item.role_ids.join(", ") || "未分配"}</td><td>{canWrite ? <button type="button" disabled={saving} onClick={() => void toggle(item)}>{item.enabled ? "停用" : "启用"}</button> : "只读"}</td></tr>)}</tbody></table>
+      {canWrite && <form className="portal-form" onSubmit={create}><label>用户名<input name="username" required /></label><label>初始密码<input name="password" type="password" minLength={8} required /></label><label>角色<select name="role_id">{roles.value?.map((role) => <option key={role.id} value={role.id}>{role.name}</option>)}</select></label><button type="submit" disabled={saving}>创建账号</button></form>}
+    </>}</State></>}
+    {section === "roles" && <><div className="panel-heading"><div><h3>角色权限</h3><p>修改会立即刷新正式角色数据。</p></div></div><State state={roles} empty={(items) => !items.length}>{(items) => <div>{items.map((item) => <RolePermissionEditor key={item.id} role={item} permissions={permissions.value ?? []} canWrite={canWrite} onSaved={() => { setRefresh((value) => value + 1); setNotice("角色权限已更新。"); }} onFailed={() => setNotice("角色更新失败，请检查权限后重试。")} />)}</div>}</State></>}
+    {section === "permissions" && <><div className="panel-heading"><div><h3>权限目录</h3><p>权限编码由服务端目录返回，不在页面推断或补造。</p></div></div><State state={permissions} empty={(items) => !items.length}>{(items) => <div className="permission-catalogue">{items.map((item) => <code key={item.code}>{item.code}</code>)}</div>}</State></>}
+    {section === "audit" && <><div className="panel-heading"><div><h3>审计事件</h3><p>只展示服务端已保留的审计记录。</p></div></div><label>动作筛选<input aria-label="审计动作筛选" value={auditAction} onChange={(event) => { setAuditAction(event.target.value); setAuditPage(1); }} placeholder="输入正式动作" /></label><State state={audits} empty={(data) => !data.count}>{(data) => <><table><thead><tr><th>时间</th><th>动作</th><th>资源</th><th>结果</th></tr></thead><tbody>{data.items.map((item: AuditEvent) => <tr key={item.id}><td>{item.created_at}</td><td>{item.action}</td><td>{item.resource_type}</td><td>{item.result}</td></tr>)}</tbody></table><div className="pager"><button type="button" disabled={auditPage <= 1} onClick={() => setAuditPage((current) => current - 1)}>上一页</button><span>第 {auditPage} 页</span><button type="button" disabled={data.items.length < data.page_size} onClick={() => setAuditPage((current) => current + 1)}>下一页</button></div></>}</State></>}
+    </section>
   </Page>;
 }
 

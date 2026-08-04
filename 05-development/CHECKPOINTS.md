@@ -571,3 +571,10 @@
 - 范围：登录页改为品牌说明与受控访问表单的双栏布局；BI 趋势视图以正式 API 的实际序列生成语义化柱形趋势，不再使用纯文本列表替代图表。
 - 验证：`npm test -- --run src/App.test.tsx src/LoginPage.test.tsx src/PortalPages.test.tsx` 为 `32 passed`；`npm run build` 与 `git diff --check` 通过。
 - 边界：未新增生产依赖、模拟数据、兼容层或抽象层；排行、设备、现场作业、智能配置与系统管理页面仍待继续整改。
+
+## FCP-013-04：系统管理分区与权限呈现整改（2026-08-04）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；仅为 TASK-013 的可恢复开发检查点，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：系统管理改为账号、角色权限、权限目录、审计事件四个正式数据分区；身份只读用户不再看见账号创建或状态切换入口，角色与审计仍使用既有正式 API。
+- 验证：`npm test -- --run src/PortalPages.test.tsx` 为 `21 passed`；`npm run build` 与 `git diff --check` 通过。
+- 边界：未新增生产依赖、模拟数据、兼容层或抽象层；现场作业、维修执行、全局 Agent 与智能配置页面仍待继续整改。

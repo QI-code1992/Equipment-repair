@@ -218,10 +218,24 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
 
-    expect(await screen.findAllByText("暂无可展示的正式业务数据。")).toHaveLength(4);
+    expect(await screen.findByText("暂无可展示的正式业务数据。")).toBeInTheDocument();
     expect(fetchMock.mock.calls.map(([path]) => path)).toEqual([
       "/api/audit-events", "/api/users", "/api/roles", "/api/permissions",
     ]);
+  });
+
+  it("organizes system management into permission-aware tabs", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 })));
+
+    render(<MemoryRouter><SystemManagementPage permissionCodes={["identity:read"]} /></MemoryRouter>);
+
+    expect(await screen.findByRole("tab", { name: "账号管理" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "审计事件" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "创建账号" })).not.toBeInTheDocument();
   });
 
   it("submits a role permission update with an idempotency key", async () => {
@@ -235,6 +249,7 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
 
+    fireEvent.click(await screen.findByRole("tab", { name: "角色权限" }));
     (await screen.findByRole("button", { name: "保存角色权限" })).click();
 
     await screen.findByText("角色权限已更新。");
@@ -255,6 +270,7 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
 
+    fireEvent.click(await screen.findByRole("tab", { name: "角色权限" }));
     const checkbox = await screen.findByRole("checkbox", { name: "fault:create" });
     fireEvent.click(checkbox);
     fireEvent.click(screen.getByRole("button", { name: "保存角色权限" }));
