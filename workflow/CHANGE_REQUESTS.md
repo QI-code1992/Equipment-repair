@@ -883,6 +883,15 @@
 - Verification: Python contract `3 passed`; executable PowerShell stream contract passed; `git diff --check` passed.
 - Gate: after PR #80 review and integration, rerun TASK-005 live lifecycle against the exact integrated SHA. Stage 6 remains not approved.
 
+### CR-049 post-merge evidence record: PR #81 (2026-08-04)
+
+- Status: Integrated evidence recorded; Stage 6 blockers remain open.
+- PR #81 approved HEAD: `f82aa64a03c8aba882a6f79c8bb16605afb2475f`.
+- Merge Commit: `3472349f0ffd2f884c5ee9fae5a141a453c79c63`; parents `eca714a6477028c47c5b020b93f96838e266cb03` and `f82aa64a03c8aba882a6f79c8bb16605afb2475f`.
+- Verification: target pointer, parent order, merge-tree/result-tree equivalence, workflow JSON parsing and relative `git diff --check` passed.
+- Boundary: governance/evidence only; no production code, test logic, database, dependency, infrastructure or runtime configuration changes.
+- Gate: TASK-005 live lifecycle evidence is recorded as `2 passed, 5 warnings`, but `DEF-STAGE6-003`, `DEF-STAGE6-004` and `DEF-STAGE6-005` remain open. Stage 6 is not passed and Stage 7/8 remain locked.
+
 ### CR-048 Post-Merge Governance Record (2026-07-31)
 
 - Status: `INTEGRATED_PENDING_FORMAL_START_NOTICE`.

@@ -623,3 +623,11 @@
 - PR #76 已在项目负责人确认、DEV-001 集成检查和单独授权后由 DEV-002 合入：Merge Commit `477cb16e8a1e68d9d9325705d9d7db685fba9d86` 的双亲为 `9c8a787…` 与获批治理 HEAD `dd4b24e…`；结果树等价性、目标指针、`git diff --check` 和状态 JSON 均通过。
 - TASK-012 及 DEF-TASK012-001—047 已完成 Stage 5 治理闭环。新集成基线为 `477cb16e8a1e68d9d9325705d9d7db685fba9d86`；此前 Stage 6 结论和 Stage 6→7 Gate 仅保留历史，不可沿用。
 - 下一步：DEV-001 按 `06-testing/TEST_PLAN.md` 针对新基线重新开展 Stage 6 独立测试并形成新结论；项目负责人另行决定是否批准新的 Stage 6→7 Gate。Stage 7/8 继续锁定。
+
+## PR #81 TASK-005 live retest post-merge governance (2026-08-04)
+
+- PR #81 的获批治理 HEAD 为 `f82aa64a03c8aba882a6f79c8bb16605afb2475f`，已由非作者 DEV-002 合入 `codex/stage-05-integration`，Merge Commit 为 `3472349f0ffd2f884c5ee9fae5a141a453c79c63`。
+- Merge 双亲正确：第一父 `eca714a6477028c47c5b020b93f96838e266cb03`，第二父为获批 HEAD `f82aa64a03c8aba882a6f79c8bb16605afb2475f`；结果树与第二父一致，目标分支指针已更新。
+- 合并后核验：祖先关系、Merge Tree、`workflow/state.json` JSON 解析及相对第一父的 `git diff --check` 均通过。PR #81 仅含 Stage 6 TASK-005 live retest 证据和状态台账更新。
+- 证据结论保持不变：live lifecycle `2 passed, 5 warnings`，但 `DEF-STAGE6-003` 的分段时序与唯一阻塞组件定位仍缺失；`DEF-STAGE6-004`、`DEF-STAGE6-005` 亦仍开放。该合入不构成 Stage 6 总体通过或 Stage 7/8 解锁。
+- 下一步：继续独立补齐剩余 Stage 6 证据并形成新的精确测试结论；在此之前 Stage 6/7/8 继续锁定。
