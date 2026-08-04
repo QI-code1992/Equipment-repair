@@ -13,7 +13,7 @@ The document lifecycle reached `READY`; the success path verified real RAGFlow c
 
 ## Prior timeout disposition
 
-The earlier `UPLOADING` timeout on the same merged baseline was not reproduced. No code change was made during this retest, so the prior transient root cause remains unproven. This evidence closes the reproducibility portion of `DEF-STAGE6-003`, but does not by itself approve Stage 6 or replace the remaining browser, performance, backup/restore, and security evidence.
+The earlier `UPLOADING` timeout on the same merged baseline was not reproduced. No code change was made during this retest, so the prior transient root cause remains unproven. This evidence narrows the reproducibility observation for `DEF-STAGE6-003`, but does not close that defect: the required timestamped segmented trace and unique blocker attribution are still absent. It does not by itself approve Stage 6 or replace the remaining browser, performance, backup/restore, and security evidence.
 
 ## Limitations
 

@@ -61,9 +61,9 @@
     "sutCommit": "6fbb9e5be6267851482fda425c704acdada92c50",
     "evidencePullRequest": 79,
     "evidenceHead": "3764a0a9a2020711225f88e69edc9e15920d10e2",
-    "blockingDefects": ["DEF-STAGE6-004", "DEF-STAGE6-005"],
+    "blockingDefects": ["DEF-STAGE6-003", "DEF-STAGE6-004", "DEF-STAGE6-005"],
     "stage7Locked": true,
-    "nextAction": "TASK-005 live lifecycle retest passed on eca714a6477028c47c5b020b93f96838e266cb03; retain the prior UPLOADING timeout as an unproven historical incident. Complete HTTPS/browser E2E, performance, backup/restore and security evidence for DEF-STAGE6-004/005 before a Stage 6 conclusion."
+    "nextAction": "TASK-005 live lifecycle retest passed on eca714a6477028c47c5b020b93f96838e266cb03, but DEF-STAGE6-003 remains open because its required segmented timing evidence and unique blocker attribution are not yet complete. Complete that evidence together with HTTPS/browser E2E, performance, backup/restore and security evidence for DEF-STAGE6-004/005 before a Stage 6 conclusion."
   },
   "pendingStageApproval": {
     "gate": "Stage 6 -> Stage 7",
