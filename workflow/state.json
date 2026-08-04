@@ -1,7 +1,22 @@
 {
-  "state": "STAGE6_TASK012_REVALIDATION_NOT_PASSED_STAGE5_REMEDIATION_REQUIRED",
-  "updatedBy": "Post-merge governance verification for PR #81 TASK-005 live retest",
+  "state": "STAGE6_NOT_PASSED_STAGE5_P0_PROTOTYPE_FIDELITY_REMEDIATION_GOVERNANCE_IN_PREPARATION",
+  "updatedBy": "Project-owner-confirmed DEF-STAGE7-001 reopening for TASK-013",
   "updatedAt": "2026-08-04",
+  "stage5PrototypeFidelityRemediation": {
+    "taskId": "TASK-013",
+    "defect": "DEF-STAGE7-001",
+    "changeRequest": "CR-047",
+    "status": "GOVERNANCE_IN_PREPARATION",
+    "findingBaseline": "e8a28cee7515ad58e025ec81c65b460284919d75",
+    "finding": "Project owner confirmed that the current formal UI visibly deviates from the approved Stage 3 prototype; factory modeling is a direct representative case.",
+    "plan": "05-development/TASK-013_P0_PROTOTYPE_FIDELITY_REMEDIATION_PLAN.md",
+    "developer": "DEV-002",
+    "reviewer": "DEV-001",
+    "branch": "codex/task-013-prototype-fidelity-remediation",
+    "codeStartCondition": "Governance candidate is integrated and project owner separately authorizes TASK-013 business-page code changes.",
+    "stage6Stage7Stage8Locked": true,
+    "nextAction": "Confirm and integrate the TASK-013 governance candidate. Do not modify business pages until the project owner gives the separate coding-start confirmation."
+  },
   "task010Delivery": {
     "taskId": "TASK-010",
     "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",
