@@ -36,26 +36,26 @@
 
 ## 3. 上游兼容基线与镜像策略
 
-采用 RAGFlow 官方稳定发布 `v0.25.6` 的 Docker 配置作为兼容基线，并按任务书继续使用 Elasticsearch 8.11：
+采用 RAGFlow 官方稳定发布 `v0.26.3` 的 Docker 配置作为兼容基线，并按任务书继续使用 Elasticsearch 8.11：
 
 | 服务 | 固定镜像标签 | 设计理由 |
 |---|---|---|
-| RAGFlow | `infiniflow/ragflow:v0.25.6` | 2026-05-26 官方稳定发布；不使用 `nightly` 或 `latest` |
-| Elasticsearch | `elasticsearch:8.11.3` | RAGFlow v0.25.6 官方默认 `STACK_VERSION`，满足 Elasticsearch 8.11 约束 |
-| MySQL | `mysql:8.0.39` | RAGFlow v0.25.6 官方 Compose 固定版本 |
-| MinIO | `pgsty/minio:RELEASE.2026-03-25T00-00-00Z` | RAGFlow v0.25.6 官方 Compose 使用的固定 MinIO 发布镜像 |
+| RAGFlow | `infiniflow/ragflow:v0.26.3` | 官方稳定 tag；不使用 `nightly` 或 `latest` |
+| Elasticsearch | `elasticsearch:8.11.3` | 项目既定 Elasticsearch 8.11 约束；须由隔离真实启动验证与 RAGFlow v0.26.3 的兼容性 |
+| MySQL | `mysql:8.0.39` | 项目固定版本；须由隔离真实启动验证与 RAGFlow v0.26.3 的兼容性 |
+| MinIO | `pgsty/minio:RELEASE.2026-03-25T00-00-00Z` | 项目固定版本；须由隔离真实启动验证与 RAGFlow v0.26.3 的兼容性 |
 | Redis | `redis:7.4.2-alpine` | 满足任务书明确的 Redis 依赖；不复用平台 Redis，也不使用浮动标签 |
 
-RAGFlow 官方 v0.25.6 已将默认缓存容器改为 Valkey 8，但 TASK-004 获批任务书明确要求 Redis，因此本任务保持 Redis，并通过真实启动和 RAGFlow 连接健康验证兼容性。若 Redis 兼容验证失败，不静默替换为 Valkey；先记录阻断并按变更流程处理。
+项目继续使用 Redis 7.4.2，而非未经批准地替换为其他缓存组件；其与 RAGFlow v0.26.3 的兼容性必须通过真实启动、连接健康和生命周期验证确认。若失败，不静默替换组件；先记录阻断并按变更流程处理。
 
 首次成功拉取后记录每个镜像的本地 RepoDigest，后续验证同时核对固定标签与 digest。中国大陆镜像源只可作为显式的拉取替代，不可改写运行时镜像身份或把镜像站凭据写入仓库。
 
 官方参考：
 
-- `https://github.com/infiniflow/ragflow/releases/tag/v0.25.6`
-- `https://github.com/infiniflow/ragflow/blob/v0.25.6/docker/README.md`
-- `https://github.com/infiniflow/ragflow/blob/v0.25.6/docker/docker-compose-base.yml`
-- `https://github.com/infiniflow/ragflow/blob/v0.25.6/docker/docker-compose.yml`
+- `https://github.com/infiniflow/ragflow/releases/tag/v0.26.3`
+- `https://github.com/infiniflow/ragflow/blob/v0.26.3/docker/README.md`
+- `https://github.com/infiniflow/ragflow/blob/v0.26.3/docker/docker-compose-base.yml`
+- `https://github.com/infiniflow/ragflow/blob/v0.26.3/docker/docker-compose.yml`
 
 ## 4. 目录与配置单一事实源
 
@@ -211,8 +211,8 @@ git diff --check
 - Docker Desktop 未启动、WSL2 内核参数不足、内存或磁盘不足时立即失败，并给出具体前置条件，不自动修改系统全局配置。
 - 镜像拉取失败时区分 DNS/TLS、仓库限流和镜像不存在；不把镜像下载失败写成服务验证通过。
 - Elasticsearch 首次启动可能需要较长时间；达到有限重试上限后保留日志并停止后续持久化测试。
-- Redis 7 与 RAGFlow v0.25.6 的兼容性必须以真实 RAGFlow 连接健康为准，这是本设计的首要验证风险。
-- RAGFlow v0.25.6 后续可能发布安全修复；本任务先保证可重复基线，不在未批准情况下追随新版本。升级需独立变更、兼容验证和回滚方案。
+- Redis 7、MySQL 8.0.39、MinIO 与 Elasticsearch 8.11.3 同 RAGFlow v0.26.3 的兼容性必须以真实 RAGFlow 连接健康和完整知识生命周期为准，这是本设计的首要验证风险。
+- 本次版本升级由 CR-050 管理；在隔离兼容验证、镜像身份校验和 Stage 6 重测完成前，不得把 v0.26.3 视为已验证基线。
 - 仅绑定 `127.0.0.1` 解决本机开发暴露面，不等于生产网络安全；公网入口与 HTTPS 属于 TASK-011。
 
 ## 12. 完成判定

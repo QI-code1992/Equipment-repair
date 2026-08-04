@@ -892,6 +892,18 @@
 - Boundary: governance/evidence only; no production code, test logic, database, dependency, infrastructure or runtime configuration changes.
 - Gate: TASK-005 live lifecycle evidence is recorded as `2 passed, 5 warnings`, but `DEF-STAGE6-003`, `DEF-STAGE6-004` and `DEF-STAGE6-005` remain open. Stage 6 is not passed and Stage 7/8 remain locked.
 
+### CR-050：RAGFlow 统一升级至 v0.26.3（2026-08-04）
+
+- Level：L3（基础设施与外部集成基线变更）。
+- Status：In Development / awaiting isolated compatibility verification.
+- Raised by：项目负责人。
+- Original request：全项目 RAGFlow 统一改为固定版本 `v0.26.3`，不使用 `latest` 或 `nightly`。
+- Decision：采用官方 tag `infiniflow/ragflow:v0.26.3`；官方 Git tag 存在，镜像清单摘要绑定为 `sha256:8b9a311a86e0f4a38117ca8c354bfe7884e7eafb7ffcea5b3e83a9485ecba28d`。
+- Impact：更新隔离 RAGFlow Compose 环境模板、镜像身份/版本契约、TASK-004 设计与实施基线、运行手册；不变更业务 API、数据库模型、前端、权限、生产域名或公网暴露。
+- Verification required：在 Windows Docker Desktop/WSL2 隔离环境重新完成镜像摘要、五服务健康、RAGFlow API `v0.26.3`、Redis/MySQL/MinIO/Elasticsearch 8.11.3 兼容、网络隔离、持久化、真实知识生命周期、真实 Agent 成功/降级、HTTPS、浏览器 E2E、性能与备份/恢复证据。
+- Rollback：若兼容验证失败，停止受影响的 Stage 6 重测，保留脱敏日志和失败证据；以新的恢复提交将镜像/契约回退到已集成的 `v0.25.6` 基线，不覆盖历史证据。
+- Gate：在本 CR 的 Stage 5 修复候选完成审核、集成并对新的精确 SHA 重跑前，`DEF-STAGE6-003/004/005` 继续开放，Stage 6/7/8 继续锁定。
+
 ### CR-048 Post-Merge Governance Record (2026-07-31)
 
 - Status: `INTEGRATED_PENDING_FORMAL_START_NOTICE`.

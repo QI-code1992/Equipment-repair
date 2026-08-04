@@ -83,6 +83,15 @@
     "verification": "Post-merge target pointer, parent order, merge-tree/result-tree equivalence, workflow JSON parsing and relative git diff --check passed. TASK-005 live lifecycle evidence recorded 2 passed/5 warnings, but the independent Stage 6 conclusion remains not passed.",
     "nextAction": "Complete segmented lifecycle attribution, browser/HTTPS, performance, backup/restore and security evidence for the remaining blocking defects; obtain a new exact Stage 6 conclusion before any Stage 6 to Stage 7 decision."
   },
+  "ragflowV0263Upgrade": {
+    "changeRequest": "CR-050",
+    "status": "STAGE5_INFRASTRUCTURE_CHANGE_IN_DEVELOPMENT",
+    "requestedVersion": "v0.26.3",
+    "image": "infiniflow/ragflow:v0.26.3",
+    "manifestDigest": "sha256:8b9a311a86e0f4a38117ca8c354bfe7884e7eafb7ffcea5b3e83a9485ecba28d",
+    "impact": "RAGFlow runtime and verification baseline change; existing Stage 6 evidence does not validate the new image.",
+    "nextAction": "Run isolated Docker compatibility and complete Stage 6 revalidation against the resulting exact integration SHA. Stage 6/7/8 remain locked."
+  },
   "pendingStageApproval": {
     "gate": "Stage 6 -> Stage 7",
     "candidateIntegrationHead": "89fbd2129169fb6ece42094b17907885637f3c48",
