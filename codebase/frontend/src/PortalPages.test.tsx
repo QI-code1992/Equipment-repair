@@ -17,6 +17,21 @@ describe("TASK-012 portal pages", () => {
     expect(screen.getByText("暂无趋势数据。")).toBeInTheDocument();
   });
 
+  it("renders a semantic BI trend chart from formal API series values", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        summary: { fault_count: 3, active_fault_count: 1, completed_work_order_count: 2, completion_rate: 0.67 },
+        trend: [{ date: "2026-08-01", fault_count: 3, completed_work_order_count: 1 }, { date: "2026-08-02", fault_count: 1, completed_work_order_count: 2 }],
+        efficiency: { completed_work_order_count: 2, average_completion_hours: 3 }, organization_ranking: [], history_comparison: { current_fault_count: 3, previous_fault_count: 2 },
+      }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 })));
+
+    render(<BiDashboardPage />);
+
+    expect(await screen.findByRole("img", { name: "故障与完成工单趋势" })).toBeInTheDocument();
+    expect(screen.getByText("2026-08-01：故障 3，完成 1")).toBeInTheDocument();
+  });
+
   it("reloads the BI dashboard with a selected formal organization filter", async () => {
     const dashboard = { summary: { fault_count: 2, active_fault_count: 1, completed_work_order_count: 1, completion_rate: 0.5 }, trend: [], efficiency: { completed_work_order_count: 1, average_completion_hours: 3 }, organization_ranking: [], history_comparison: { current_fault_count: 1, previous_fault_count: 0 } };
     const fetchMock = vi.fn()

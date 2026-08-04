@@ -564,3 +564,10 @@
 - 范围：统一正式业务导航、页面标题与面包屑、产品品牌、受控会话状态、真实登录用户名和退出入口；保留现有 fail-closed 会话与路由权限边界。
 - 验证：`npm test -- --run src/App.test.tsx` 为 `11 passed`；`npm run build` 与 `git diff --check` 通过。
 - 边界：全局 Agent 的流式呈现与其余页面域仍在整改；未新增生产依赖、兼容层或抽象层，PR #85 保持 Draft。
+
+## FCP-013-03：登录与 BI 视觉层级整改（2026-08-04）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；仅为 TASK-013 的可恢复开发检查点，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：登录页改为品牌说明与受控访问表单的双栏布局；BI 趋势视图以正式 API 的实际序列生成语义化柱形趋势，不再使用纯文本列表替代图表。
+- 验证：`npm test -- --run src/App.test.tsx src/LoginPage.test.tsx src/PortalPages.test.tsx` 为 `32 passed`；`npm run build` 与 `git diff --check` 通过。
+- 边界：未新增生产依赖、模拟数据、兼容层或抽象层；排行、设备、现场作业、智能配置与系统管理页面仍待继续整改。
