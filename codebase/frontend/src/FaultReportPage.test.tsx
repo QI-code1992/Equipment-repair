@@ -23,6 +23,9 @@ describe("FaultReportPage", () => {
       .mockResolvedValueOnce({ id: "fault-1", number: "FR-001", status: "PENDING_ACCEPT", ...draft, agent_status: "AI_DRAFT" });
     render(<FaultReportPage />);
 
+    expect(screen.getByRole("heading", { name: "现场故障信息" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "AI 辅助与人工确认" })).toBeInTheDocument();
+
     fireEvent.change(screen.getByLabelText("设备 ID"), { target: { value: "eq-1" } });
     fireEvent.change(screen.getByLabelText("故障现象"), { target: { value: "液压压力异常" } });
     fireEvent.change(screen.getByLabelText("发生时间"), { target: { value: "2026-07-27T10:00" } });

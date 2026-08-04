@@ -99,7 +99,7 @@ export function FaultReportPage() {
 
   return <section className="page-shell" aria-labelledby="page-heading">
     <div className="page-shell__eyebrow">现场作业</div><h2 id="page-heading">故障上报</h2><p>AI 只生成可编辑草稿；只有人工确认才会写入正式故障单。</p>
-    <form className="fault-form" onSubmit={(event) => void submit(event)}>
+    <div className="fault-workspace"><section className="fault-workspace__form"><h3>现场故障信息</h3><p>先核对设备、故障现象、发生时间和受控附件。</p><form className="fault-form" onSubmit={(event) => void submit(event)}>
       <label>设备 ID<input aria-label="设备 ID" required value={form.equipment_id} onChange={(event) => setForm({ ...form, equipment_id: event.target.value })} /></label>
       <label>紧急程度<select value={form.urgency} onChange={(event) => setForm({ ...form, urgency: event.target.value })}><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></label>
       <label>故障现象<textarea aria-label="故障现象" required value={form.symptom} onChange={(event) => setForm({ ...form, symptom: event.target.value })} /></label>
@@ -112,6 +112,6 @@ export function FaultReportPage() {
       {preview && <section className="data-card" aria-label="AI 草稿预览"><h3>AI 草稿预览</h3><p>设备：{preview.draft.equipment_id}；紧急程度：{preview.draft.urgency}</p><p>故障现象：{preview.draft.symptom}</p><button type="button" disabled={submitting || uploading} onClick={() => void confirmPreview()}>确认并提交 AI 草稿</button></section>}
       {error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}
       <div className="form-actions"><button type="button" disabled={submitting || uploading || Boolean(preview)} onClick={() => void generatePreview()}>生成 AI 草稿</button><button type="submit" disabled={submitting || uploading || Boolean(preview)}>{submitting ? "提交中…" : "提交故障"}</button></div>
-    </form>
+    </form></section><aside className="fault-workspace__assistant"><h3>AI 辅助与人工确认</h3><p>AI 仅生成可编辑预览；没有人工确认，不会写入正式故障单。</p><span className="status-chip status-chip--neutral">{preview ? "待人工确认" : "等待现场信息"}</span></aside></div>
   </section>;
 }

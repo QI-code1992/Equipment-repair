@@ -585,3 +585,10 @@
 - 范围：全局 Agent、操作指引和 AI 故障上报改为在 SSE 回调到达时立即追加运行事件，不再等待流结束后才一次性显示状态；流读取失败仍沿用既有可见错误路径。
 - 验证：`npm test -- --run src/App.test.tsx src/RepairExecutionPage.test.tsx src/PortalPages.test.tsx src/api.test.ts` 为 `60 passed`；`npm run build` 与 `git diff --check` 通过。
 - 边界：未新增生产依赖、模拟数据、兼容层或抽象层；剩余页面的视觉与交互对照仍在本 PR 中继续。
+
+## FCP-013-06：资产、维修、智能与现场作业工作区整改（2026-08-04）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：设备台账增加正式资产汇总、状态筛选和列表工具栏；设备详情、新增/编辑及维修记录/详情改为资产、参数、历史和检索分区；智能配置分离模型与绑定、知识入口、Agent 控制面；故障上报及维修执行形成现场上下文与 AI 辅助区。所有内容仍来自既有正式 API 与权限状态。
+- 验证：`npm test -- --run src/PortalPages.test.tsx src/IntelligentConfigPage.test.tsx src/FaultReportPage.test.tsx src/RepairExecutionPage.test.tsx` 为 `43 passed`；`npm run build` 与 `git diff --check` 通过。
+- 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未提交既有 `codebase/frontend/.vscode/` 文件。AI 故障上报和逐页浏览器原型对照仍待本 PR 后续切片完成。

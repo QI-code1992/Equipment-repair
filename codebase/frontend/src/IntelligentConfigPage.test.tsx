@@ -37,6 +37,8 @@ describe("IntelligentConfigPage", () => {
     render(<IntelligentConfigPage />);
 
     expect(await screen.findByText("内部模型服务")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "模型与绑定" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Agent 控制面" })).toBeInTheDocument();
     expect(screen.getByText("运维模型（ops-1）")).toBeInTheDocument();
     expect(screen.queryByText(/secret-ref-value/)).not.toBeInTheDocument();
 

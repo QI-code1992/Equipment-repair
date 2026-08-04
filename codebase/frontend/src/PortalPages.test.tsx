@@ -127,6 +127,19 @@ describe("TASK-012 portal pages", () => {
     expect(await screen.findByText(/2026-07-30：完成 2 次/)).toBeInTheDocument();
   });
 
+  it("groups equipment detail into formal asset, operating and maintenance areas", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "eq-1", code: "EQ-1", name: "设备", model: "M", type: "LOADER", manufacturer: "厂", status: "NORMAL", organization_id: "line", owner_user_id: null, operating_hours: 1, manufactured_at: "2026-01-01", commissioned_at: "2026-02-01", image_refs: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20, trend: [] }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<MemoryRouter initialEntries={["/equipment/eq-1"]}><Routes><Route path="/equipment/:id" element={<EquipmentDetailPage />} /></Routes></MemoryRouter>);
+
+    expect(await screen.findByRole("heading", { name: "资产身份" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "运行与关键参数" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "维修历史" })).toBeInTheDocument();
+  });
+
   it("sends the selected knowledge status to the maintenance-record API", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ items: [{ maintenance_record_id: "r-1", work_order_number: "WO-1", status: "COMPLETED", symptom: "异响", repair_result: "通过", knowledge_status: "NOT_LINKED" }], count: 1, page: 1, page_size: 20 }), { status: 200 }))
@@ -138,6 +151,15 @@ describe("TASK-012 portal pages", () => {
     expect(fetchMock.mock.calls[1][0]).toBe("/api/maintenance-records?knowledge_status=LINKED");
   });
 
+  it("presents maintenance records inside a searchable formal workspace", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ items: [{ maintenance_record_id: "r-1", work_order_number: "WO-1", equipment_id: "eq-1", status: "COMPLETED", symptom: "异响", repair_result: "通过", knowledge_status: "LINKED" }], count: 1, page: 1, page_size: 20 }), { status: 200 })));
+
+    render(<MemoryRouter><MaintenanceRecordsPage /></MemoryRouter>);
+
+    expect(await screen.findByRole("heading", { name: "维修记录检索" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "维修记录列表" })).toBeInTheDocument();
+  });
+
   it("filters the equipment ledger with real loaded equipment", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify([
       { id: "eq-1", code: "EQ-01", name: "液压装载机", model: "L-1", type: "LOADER", manufacturer: "M", status: "NORMAL", organization_id: "line-1", owner_user_id: null, operating_hours: 4 },
@@ -147,6 +169,21 @@ describe("TASK-012 portal pages", () => {
     render(<MemoryRouter><EquipmentLedgerPage /></MemoryRouter>);
 
     fireEvent.change(await screen.findByLabelText("筛选设备"), { target: { value: "电驱" } });
+    expect(screen.getByText("电驱装载机")).toBeInTheDocument();
+    expect(screen.queryByText("液压装载机")).not.toBeInTheDocument();
+  });
+
+  it("uses formal equipment fields for ledger summary and status filtering", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify([
+      { id: "eq-1", code: "EQ-01", name: "液压装载机", model: "L-1", type: "LOADER", manufacturer: "M", status: "NORMAL", organization_id: "line-1", owner_user_id: null, operating_hours: 4 },
+      { id: "eq-2", code: "EQ-02", name: "电驱装载机", model: "L-2", type: "LOADER", manufacturer: "M", status: "FAULT", organization_id: "line-2", owner_user_id: null, operating_hours: 5 },
+    ]), { status: 200 })));
+
+    render(<MemoryRouter><EquipmentLedgerPage /></MemoryRouter>);
+
+    expect(await screen.findByText("设备总览")).toBeInTheDocument();
+    expect(screen.getByText("已加载 2 台正式设备")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("设备状态筛选"), { target: { value: "FAULT" } });
     expect(screen.getByText("电驱装载机")).toBeInTheDocument();
     expect(screen.queryByText("液压装载机")).not.toBeInTheDocument();
   });

@@ -22,6 +22,8 @@ it("shows staged loading before displaying the server diagnosis question", async
     vi.mocked(runFaultDiagnosis).mockResolvedValue({ state: "QUESTIONING", question: "请描述故障复现工况。", evidence: [], prefill: null, summary: null, steps: 0, questions: 0, diagnosis_draft_id: "draft-loading" });
     render(<RepairExecutionPage />);
     await screen.findByText("暂无已分配工单。");
+    expect(screen.getByRole("heading", { name: "工单与诊断" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "操作指引" })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("故障单 ID"), { target: { value: "fault-loading" } });
     fireEvent.click(screen.getByRole("button", { name: "开始 AI 诊断" }));
     expect(screen.getByText("理解故障")).toBeInTheDocument();
