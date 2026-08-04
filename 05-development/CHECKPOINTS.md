@@ -549,3 +549,11 @@
 - 治理收尾：PR #76 获批治理 HEAD `dd4b24e1369527a98da04c5e34b1e7b193b84c07` 已由非作者 DEV-002 以 Merge Commit `477cb16e8a1e68d9d9325705d9d7db685fba9d86` 合入；其结果树等价于获批治理源。
 - 证据：DEV-001 正式审核 `4840904555`、完整 live-stack、HTTPS MIME/health 和认证浏览器 E2E 均绑定 PR #75 的获批 HEAD；两次合并后的目标分支指针、祖先关系、Merge Tree、`git diff --check` 与 `workflow/state.json` 解析均通过。
 - 下一步：以 `477cb16e8a1e68d9d9325705d9d7db685fba9d86` 作为新测试基线重启 Stage 6 独立验证；此前 Stage 7 和 Stage 8 保持锁定。
+
+## FCP-013-01：工厂建模与工作台原型一致性整改（2026-08-04）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；仅为 TASK-013 的可恢复开发检查点，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 分支/提交：`codex/task-013-prototype-fidelity-remediation` / `5e1b56a165eb5b392284a47a26bb1dfc5e60b715`。
+- 范围：工厂建模从常驻新建表单改为组织树与节点详情双栏工作区；工作台改为风险总览、待办处置、快捷事项与已授权设备健康查询的工业操作台结构。所有业务内容仍来自正式 API，未引入原型运行源码或静态业务数据。
+- 验证：`npm test -- --run src/WorkbenchPage.test.tsx src/PortalPages.test.tsx` 为 `21 passed`；`npm run build`、`git diff --check` 均通过。
+- 边界：其余 TASK-013 页面和全局 Agent 尚未完成；PR #85 继续保持 Draft，完成全部整改后才统一提交 DEV-001 审核；Stage 6/7/8 继续锁定。
