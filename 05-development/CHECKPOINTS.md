@@ -557,3 +557,10 @@
 - 范围：工厂建模从常驻新建表单改为组织树与节点详情双栏工作区；工作台改为风险总览、待办处置、快捷事项与已授权设备健康查询的工业操作台结构。所有业务内容仍来自正式 API，未引入原型运行源码或静态业务数据。
 - 验证：`npm test -- --run src/WorkbenchPage.test.tsx src/PortalPages.test.tsx` 为 `21 passed`；`npm run build`、`git diff --check` 均通过。
 - 边界：其余 TASK-013 页面和全局 Agent 尚未完成；PR #85 继续保持 Draft，完成全部整改后才统一提交 DEV-001 审核；Stage 6/7/8 继续锁定。
+
+## FCP-013-02：共享应用壳原型一致性整改（2026-08-04）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；仅为 TASK-013 的可恢复开发检查点，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：统一正式业务导航、页面标题与面包屑、产品品牌、受控会话状态、真实登录用户名和退出入口；保留现有 fail-closed 会话与路由权限边界。
+- 验证：`npm test -- --run src/App.test.tsx` 为 `11 passed`；`npm run build` 与 `git diff --check` 通过。
+- 边界：全局 Agent 的流式呈现与其余页面域仍在整改；未新增生产依赖、兼容层或抽象层，PR #85 保持 Draft。

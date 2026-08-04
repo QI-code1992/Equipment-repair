@@ -51,10 +51,11 @@ function ApplicationShell() {
   const navigate = useNavigate();
   const [agentOpen, setAgentOpen] = useState(false);
   const [permissionCodes, setPermissionCodes] = useState<string[] | null>(null);
+  const [currentUser, setCurrentUser] = useState<Awaited<ReturnType<typeof getCurrentUser>> | null>(null);
   const [permissionError, setPermissionError] = useState<string | null>(null);
   const [authFailed, setAuthFailed] = useState(false);
   useEffect(() => {
-    getCurrentUser().then((user) => setPermissionCodes(user.permission_codes)).catch(() => {
+    getCurrentUser().then((user) => { setPermissionCodes(user.permission_codes); setCurrentUser(user); }).catch(() => {
       clearActiveSession();
       setPermissionError("当前会话权限加载失败，请重新登录。");
       setAuthFailed(true);
@@ -73,14 +74,14 @@ function ApplicationShell() {
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand__mark" aria-hidden="true">运</div>
+          <div className="brand__mark" aria-hidden="true">智</div>
           <div>
-            <strong>设备智能运维平台</strong>
-            <span>新能源装载机</span>
+            <strong>新能源装载机智能运维平台</strong>
+            <span>Fault Ops Console</span>
           </div>
         </div>
 
-        <nav aria-label="主导航">
+        <nav aria-label="业务导航">
           {permissionError && <p role="alert">{permissionError}</p>}
           {groups.map((group) => (
             <div className="nav-group" key={group}>
@@ -96,18 +97,18 @@ function ApplicationShell() {
         </nav>
 
         <div className="sidebar__footer">
-          <strong>平台状态</strong>
-          <span>前端基础工程已启用</span>
+          <strong>受控运维会话</strong>
+          <span>{permissionCodes === null ? "正在校验权限" : "权限已识别"}</span>
         </div>
       </aside>
 
       <main className="main-area">
         <header className="topbar">
           <div>
-            <p>设备智能运维平台 / {activePage.group}</p>
-            <h1>设备智能运维平台</h1>
+            <p>{activePage.group} / {activePage.label}</p>
+            <h1>{activePage.label}</h1>
           </div>
-          <div className="topbar__actions">{permissionCodes?.includes("intelligence:agent") && <button type="button" className="agent-trigger" onClick={() => setAgentOpen(true)}>全局 Agent</button>}<button type="button" className="agent-trigger" onClick={() => void logout().finally(() => navigate("/login", { replace: true }))}>退出</button><div className="topbar__avatar" aria-label="当前用户">管</div></div>
+          <div className="topbar__actions">{permissionCodes?.includes("intelligence:agent") && <button type="button" className="agent-trigger" onClick={() => setAgentOpen(true)}>全局 Agent</button>}<button type="button" className="topbar__logout" onClick={() => void logout().finally(() => navigate("/login", { replace: true }))}>退出</button><div className="user-chip" aria-label={`当前用户：${currentUser?.username ?? "已登录用户"}`}><span className="topbar__avatar">{currentUser?.username.slice(0, 1).toUpperCase() ?? "用"}</span><span>{currentUser?.username ?? "正在加载"}</span></div></div>
         </header>
         {permissionCodes === null && !permissionError ? <section className="page-shell" aria-live="polite"><p role="status">正在加载会话权限…</p></section> : <Routes>
           <Route path="/" element={guarded("/", <WorkbenchPage />)} />

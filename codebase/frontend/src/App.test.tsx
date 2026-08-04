@@ -36,6 +36,22 @@ describe("App", () => {
     expect(screen.queryByRole("button", { name: "全局 Agent" })).not.toBeInTheDocument();
   });
 
+  it("uses the approved operations-console navigation shell for an authorized page", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["workbench:view"] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ active_fault_count: 0, status_counts: [], urgency_counts: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+
+    expect(await screen.findByRole("navigation", { name: "业务导航" })).toBeInTheDocument();
+    expect(screen.getByText("新能源装载机智能运维平台")).toBeInTheDocument();
+    expect(screen.getByText("工作台 / 运维工作台")).toBeInTheDocument();
+  });
+
   it("requires every formal dependency permission before opening equipment creation", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "user-1", username: "reader", enabled: true, permission_codes: ["equipment:read"] }), { status: 200 })));
 
@@ -60,9 +76,9 @@ describe("App", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole("navigation", { name: "主导航" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "业务导航" })).toBeInTheDocument();
     expect(await screen.findByRole("heading", { name: "AI 故障上报" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "智能配置" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "智能配置", level: 1 })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "AI 故障上报" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByLabelText("启用深度思考"));
