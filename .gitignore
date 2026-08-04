@@ -17,6 +17,7 @@ __pycache__/
 .env
 .env.*
 !.env.example
+codebase/infra/nginx/certs/
 
 # Dependency and build output (when production code is added)
 node_modules/
