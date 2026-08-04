@@ -15,19 +15,26 @@ Set-Content -LiteralPath $fakeDocker -Encoding ASCII -Value @(
     'exit /b %TASK005_FAKE_DOCKER_EXIT%'
 )
 $oldPath = $env:PATH
+$knownTrace = Join-Path ([IO.Path]::GetTempPath()) "task005-stream-contract-$PID.stderr"
 try {
     $env:PATH = "$fakeBin;$oldPath"
     $env:TASK005_FAKE_DOCKER_EXIT = '0'
-    Invoke-ValidationComposeCleanup -ComposeArguments @('compose', '-p', 'task005-contract')
+    Invoke-ValidationComposeCleanup -ComposeArguments @('compose', '-p', 'task005-contract') -TracePath $knownTrace
+    Assert-Contract (-not (Test-Path $knownTrace)) 'successful cleanup must remove stderr trace'
 
     $env:TASK005_FAKE_DOCKER_EXIT = '7'
     try {
-        Invoke-ValidationComposeCleanup -ComposeArguments @('compose', '-p', 'task005-contract')
+        Invoke-ValidationComposeCleanup -ComposeArguments @('compose', '-p', 'task005-contract') -TracePath $knownTrace
         throw 'expected non-zero cleanup to fail'
     } catch {
         Assert-Contract ($_.Exception.Message -match 'fake compose stderr') 'stderr must remain traceable'
         Assert-Contract ($_.Exception.Message -match 'Compose cleanup failed') 'failure must identify cleanup'
+        Assert-Contract (-not (Test-Path $knownTrace)) 'failed cleanup must remove stderr trace'
     }
+    try {
+        Invoke-ValidationComposeCleanup -ComposeArguments @('compose', '-p', 'task005-contract') -TracePath $knownTrace -TraceCleanup { throw 'remove sentinel' }
+        throw 'expected trace cleanup failure'
+    } catch { Assert-Contract ($_.Exception.Message -match 'remove sentinel') 'trace cleanup failure must be diagnosed' }
 } finally {
     $env:PATH = $oldPath
     Remove-Item -LiteralPath $fakeBin -Recurse -Force -ErrorAction SilentlyContinue
