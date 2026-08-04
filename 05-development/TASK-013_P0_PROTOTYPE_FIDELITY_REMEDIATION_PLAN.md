@@ -92,8 +92,8 @@
 
 - 开发分支：`codex/task-013-prototype-fidelity-remediation`。
 - 开发者：DEV-002；指定审核者和集成负责人：DEV-001；获批后的 Merge 执行者：DEV-001（非任务开发者）。
-- 开始条件：本任务书和状态台账的治理候选先被确认并合入，且项目负责人单独确认“允许启动 TASK-013 业务页面代码修改”。本次对治理文档的确认不等于该编码启动确认。
-- PR：单一 Draft PR，目标 `codex/stage-05-integration`；所有页面与共享组件修订都在同一 PR，页面域之间以检查点提交保持可回退。
+- 开始条件：项目负责人于 2026-08-04 明确指示不再建立独立治理 PR，直接开始整改并在全部工作完成后统一提交审批；该指示即为 TASK-013 的业务页面代码启动授权。
+- PR：当前 `codex/task-013-prototype-fidelity-remediation` 是唯一 Draft 开发 PR，目标 `codex/stage-05-integration`；既有治理记录与所有页面、测试和交接均在同一 PR 完成，页面域之间以检查点提交保持可回退。
 - 审核：DEV-001 仅对完整候选精确 HEAD 进行正式审核；审核批准不等于 Merge 授权。
 - 回退：只允许针对 TASK-013 的独立 Merge Commit 执行经隔离验证的 `git revert -m 1 <merge-sha>`；不得回退 TASK-012、删除数据或覆盖环境。
 

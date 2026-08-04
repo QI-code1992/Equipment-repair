@@ -1,21 +1,21 @@
 {
-  "state": "STAGE6_NOT_PASSED_STAGE5_P0_PROTOTYPE_FIDELITY_REMEDIATION_GOVERNANCE_IN_PREPARATION",
-  "updatedBy": "Project-owner-confirmed DEF-STAGE7-001 reopening for TASK-013",
+  "state": "STAGE6_NOT_PASSED_STAGE5_TASK013_P0_PROTOTYPE_FIDELITY_REMEDIATION_IN_DEVELOPMENT",
+  "updatedBy": "Project-owner direct TASK-013 development authorization",
   "updatedAt": "2026-08-04",
   "stage5PrototypeFidelityRemediation": {
     "taskId": "TASK-013",
     "defect": "DEF-STAGE7-001",
     "changeRequest": "CR-047",
-    "status": "GOVERNANCE_IN_PREPARATION",
+    "status": "IN_DEVELOPMENT_SINGLE_DRAFT_PR",
     "findingBaseline": "e8a28cee7515ad58e025ec81c65b460284919d75",
     "finding": "Project owner confirmed that the current formal UI visibly deviates from the approved Stage 3 prototype; factory modeling is a direct representative case.",
     "plan": "05-development/TASK-013_P0_PROTOTYPE_FIDELITY_REMEDIATION_PLAN.md",
     "developer": "DEV-002",
     "reviewer": "DEV-001",
     "branch": "codex/task-013-prototype-fidelity-remediation",
-    "codeStartCondition": "Governance candidate is integrated and project owner separately authorizes TASK-013 business-page code changes.",
+    "codeStartCondition": "Satisfied: project owner directly authorized TASK-013 remediation on 2026-08-04 without a separate governance PR.",
     "stage6Stage7Stage8Locked": true,
-    "nextAction": "Confirm and integrate the TASK-013 governance candidate. Do not modify business pages until the project owner gives the separate coding-start confirmation."
+    "nextAction": "Implement all TASK-013 remediation in the single Draft PR, then request one DEV-001 review of the final exact HEAD."
   },
   "task010Delivery": {
     "taskId": "TASK-010",

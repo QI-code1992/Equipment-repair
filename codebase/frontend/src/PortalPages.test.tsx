@@ -39,8 +39,23 @@ describe("TASK-012 portal pages", () => {
 
     render(<FactoryModelingPage />);
 
-    expect(await screen.findByText("装配线")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "创建节点" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "装配线 LINE-01" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "新增下级节点" })).not.toBeInTheDocument();
+  });
+
+  it("uses the approved factory-modeling workspace instead of a permanent create form", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify([
+      { id: "factory-1", type: "FACTORY", code: "FAC-01", name: "新能源一厂", parent_id: null, enabled: true, sort_order: 1, remark: "总装基地" },
+      { id: "line-1", type: "LINE", code: "LINE-01", name: "总装一线", parent_id: "factory-1", enabled: true, sort_order: 1, remark: "主产线" },
+    ]), { status: 200 })));
+
+    render(<FactoryModelingPage permissionCodes={["organization:read", "organization:write"]} />);
+
+    expect(await screen.findByRole("heading", { name: "组织结构树" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "节点详情" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "新能源一厂 FAC-01" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "新增下级节点" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "新增组织节点" })).not.toBeInTheDocument();
   });
 
   it("filters an organization tree and sends an idempotent disable update", async () => {
@@ -56,8 +71,9 @@ describe("TASK-012 portal pages", () => {
     render(<FactoryModelingPage />);
 
     fireEvent.change(await screen.findByLabelText("搜索组织"), { target: { value: "装配" } });
-    expect(screen.getByText("装配线")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "停用 装配线" }));
+    expect(screen.getByRole("button", { name: "装配线" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "装配线" }));
+    fireEvent.click(screen.getByRole("button", { name: "停用" }));
 
     await screen.findByText("组织状态已更新。");
     expect(fetchMock.mock.calls[1][0]).toBe("/api/organizations/line-1");

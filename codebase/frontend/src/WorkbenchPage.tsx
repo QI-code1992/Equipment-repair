@@ -31,15 +31,18 @@ export function WorkbenchPage() {
     }
   }
 
-  return <section className="page-shell" aria-labelledby="page-heading">
-    <div className="page-shell__eyebrow">工作台</div><h2 id="page-heading">运维工作台</h2>
-    <p>工作台只展示正式业务服务返回的待办、告警与快捷入口。</p>
-    {summary && <p role="status">活动故障：{summary.active_fault_count}</p>}
-    {todos === null ? <p>正在加载待办…</p> : todos.length === 0 ? <p>暂无活动待办。</p> : <section aria-label="当前待办"><h3>当前待办</h3><ul>{todos.map((todo) => <li key={todo.id}>{todo.number} · {todo.equipment_name} · {todo.urgency} · {todo.symptom}</li>)}</ul></section>}
-    {shortcuts && <section aria-label="快捷事项">{shortcuts.map((item) => <Link key={item.id} to={item.path}>{item.label}</Link>)}</section>}
-    <label>设备 ID<select aria-label="设备 ID" value={equipmentId} onChange={(event) => setEquipmentId(event.target.value)}><option value="">请选择正式设备</option>{equipment.map((item) => <option key={item.id} value={item.id}>{item.code} · {item.name}</option>)}</select></label>
-    <button type="button" disabled={!equipmentId} onClick={() => void loadHealth()}>查询健康分</button>
-    {health && <p role="status">当前健康分：{health.score}</p>}
+  return <section className="portal-page workbench-page" aria-labelledby="page-heading">
+    <header className="workbench-head"><div><p className="page-shell__eyebrow">今日运维态势</p><h2 id="page-heading">运维工作台</h2><p>聚焦当前风险、待办和快速处置；业务事实均来自正式 API。</p></div></header>
     {message && <p role="alert">{message}</p>}
+    <div className="workbench-layout">
+      <section className="data-card queue-card" aria-label="当前待办"><div className="panel-heading"><div><h3>待办处置</h3><p>按紧急程度优先处理正式工单</p></div>{todos && <span className="status-chip status-chip--neutral">{todos.length} 项</span>}</div>
+        {todos === null ? <p role="status">正在加载待办…</p> : todos.length === 0 ? <p className="empty-panel">暂无活动待办。</p> : <ul className="todo-list">{todos.map((todo) => <li key={todo.id}><div><strong>{todo.number}</strong><span>{todo.equipment_name} · {todo.symptom}</span></div><span className={`status-chip ${todo.urgency === "HIGH" ? "status-chip--danger" : "status-chip--warning"}`}>{todo.urgency}</span></li>)}</ul>}
+      </section>
+      <div className="workbench-side-stack">
+        <section className="data-card risk-card"><div><h3>风险总览</h3><strong>{summary?.active_fault_count ?? "—"}</strong><span>活动故障</span></div><p>风险计数来自正式告警汇总，不展示推测值。</p></section>
+        <section className="data-card quick-card" aria-label="快捷事项"><h3>快捷事项</h3>{shortcuts === null ? <p role="status">正在加载快捷入口…</p> : shortcuts.length === 0 ? <p className="empty-panel">暂无可用快捷入口。</p> : <div className="shortcut-list">{shortcuts.map((item) => <Link key={item.id} to={item.path}>{item.label}<span>→</span></Link>)}</div>}</section>
+      </div>
+    </div>
+    <section className="data-card health-card" aria-label="设备健康查询"><div className="panel-heading"><div><h3>设备健康查询</h3><p>选择已授权设备后获取实时健康状态</p></div></div><div className="health-query"><label>设备<select aria-label="设备 ID" value={equipmentId} onChange={(event) => setEquipmentId(event.target.value)}><option value="">请选择正式设备</option>{equipment.map((item) => <option key={item.id} value={item.id}>{item.code} · {item.name}</option>)}</select></label><button type="button" className="button-primary" disabled={!equipmentId} onClick={() => void loadHealth()}>查询健康分</button>{health && <p role="status">当前健康分：<strong>{health.score}</strong></p>}</div></section>
   </section>;
 }

@@ -879,7 +879,7 @@
 - 发现：项目负责人针对当前集成 HEAD `e8a28cee7515ad58e025ec81c65b460284919d75` 的本地静态 UI 演示复核，确认现有正式页面仍以通用壳、文本表格和常驻表单替代批准原型的工业操作台布局、信息层级与关键交互。`/factory-modeling` 的实际页面是直接证据。
 - 决策：保留原型与历史 TASK-012 记录；重新打开 `DEF-STAGE7-001`，以 `TASK-013` 回流 Stage 5。任务范围、逐页差异和完成条件固定在 `05-development/TASK-013_P0_PROTOTYPE_FIDELITY_REMEDIATION_PLAN.md`。
 - 影响：受影响范围为全部 16 个 P0 路由和全局 Agent 抽屉的正式实现、前端测试、原型对照证据、任务书、状态与交接台账。若实施中发现正式 API 无法支撑已批准页面，须单独登记缺口；不得由 mock、静态数值或原型源码替代。
-- 当前门禁：本记录和任务书只建立回流治理候选；未授权业务页面代码修改，未关闭 `DEF-STAGE7-001`，不改变 `DEF-STAGE6-003`—`005`，不解锁 Stage 6、Stage 7 或 Stage 8。
+- 执行授权（2026-08-04）：项目负责人明确要求不再建立独立治理 PR，直接开展 TASK-013 整改，完成后统一提交审批。因此 `codex/task-013-prototype-fidelity-remediation` 作为唯一 Draft 开发 PR 同时承载本记录与整改代码；不进行中途审核或合并。该授权不关闭 `DEF-STAGE7-001`，不改变 `DEF-STAGE6-003`—`005`，不解锁 Stage 6、Stage 7 或 Stage 8。
 
 ### CR-049 Stage 5 return: TASK-005 validation stream handling (2026-08-03)
 

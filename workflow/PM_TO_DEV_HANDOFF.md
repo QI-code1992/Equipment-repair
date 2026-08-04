@@ -6,7 +6,7 @@
 - 基线：`e8a28cee7515ad58e025ec81c65b460284919d75`。代表性证据为 `/factory-modeling` 的树表/常驻表单与原型双栏组织工作区不一致。
 - 任务：`TASK-013`；逐页范围、完成定义与验证边界见 `05-development/TASK-013_P0_PROTOTYPE_FIDELITY_REMEDIATION_PLAN.md`。
 - 约束：所有 16 个路由及全局 Agent 只可消费真实 API 和真实权限；禁止复制或运行原型、mock 业务数据、静态仪表盘数值、新增生产依赖或擅自扩展 API/迁移/权限/部署。
-- 当前门禁：仅建立治理候选，尚未授权业务页面代码修改。治理候选合入后，仍须项目负责人单独确认“允许启动 TASK-013 业务页面代码修改”。Stage 6/7/8 保持锁定。
+- 执行授权（2026-08-04）：项目负责人明确要求不另建治理 PR，直接开始整改并在全部任务完成后统一提交审批。`codex/task-013-prototype-fidelity-remediation` 为唯一 Draft 开发 PR；不进行中途审核或合并。Stage 6/7/8 保持锁定。
 
 ## Stage 7 P0 正式前端偏离回流 Stage 5（2026-07-30）
 

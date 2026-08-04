@@ -501,7 +501,7 @@
 - Merge 执行者：DEV-001；仅在 DEV-001 批准完整精确 HEAD、完成集成检查且项目负责人单独授权后执行手动 Merge Commit。
 - 范围：以 `05-development/TASK-013_P0_PROTOTYPE_FIDELITY_REMEDIATION_PLAN.md` 的 16 条路由和全局 Agent 差异矩阵为准，恢复批准原型的布局、信息层级、关键交互和可见状态，并继续接入真实 API、权限、加载、空、错误和禁用状态。
 - 不包含：修改 Stage 1—3 基线、复制/运行原型源码、伪造业务数据、新增生产依赖、公开 API/迁移/权限/部署变更，以及 Stage 6/7/8 结论。
-- 前置条件：本任务书与状态台账候选完成正式确认和集成；项目负责人随后针对代码范围单独确认“允许启动 TASK-013 业务页面代码修改”。
+- 前置条件：项目负责人于 2026-08-04 明确授权直接开始 TASK-013 整改，不另建治理 PR；治理记录和业务代码均在本任务唯一 Draft PR 中完成，全部完成后统一提交 DEV-001 审核。
 - 分支：`codex/task-013-prototype-fidelity-remediation`。
 - PR：DEV-002 创建并维护一个目标为 `codex/stage-05-integration` 的 Draft PR；所有页面、测试和交接均在同一 PR 完成，页面域以独立检查点提交保持回退边界。
 - 验收标准：16 个路由和全局 Agent 都有原型—路由—真实 API—权限/关键状态—自动化测试—浏览器对照证据；不得以通用壳、静态业务数值、mock 或原型运行时代替批准页面；`DEF-STAGE7-001` 只能在新的精确候选完成 Stage 6/7 重测后关闭。
@@ -533,7 +533,7 @@
 | TASK-011 | DEV-001 | DEV-002 | DEV-002，需项目负责人逐 PR 授权 | P0 | Blocked By TASK-003—010 | 所有模块 PR 已 Review、合入集成分支并完成回归 |
 | TASK-012 | DEV-002 | DEV-001（完整候选一次审核） | DEV-001，需项目负责人对完整 PR 逐 PR 授权 | P0 | Sequential After CR-048 governance integration | `CR-047` 与 `CR-048` 均已生效；API-001 已集成；API-002—007 公开范围已获确认；唯一 Draft PR 已创建并已通知项目负责人正式开发开始 |
 | TASK-012-API-001—007 | DEV-002（同一 TASK-012 Draft PR 内工作包） | DEV-001（仅最终完整候选） | DEV-001，需项目负责人对完整 PR 授权 | P0 | API-001 Integrated; API-002—007 Sequential Within TASK-012 | 每项资源、权限、字段、错误、分页/聚合和迁移影响均获确认；全部 API 规格、测试和实现完成后统一审核、集成与合并 |
-| TASK-013 | DEV-002 | DEV-001（完整候选一次审核） | DEV-001，需项目负责人对完整 PR 授权 | P0 | Sequential After governance integration and explicit coding-start confirmation | `DEF-STAGE7-001` 已复开；本任务书、状态台账和逐页计划已集成；项目负责人已单独确认启动业务页面代码修改 |
+| TASK-013 | DEV-002 | DEV-001（完整候选一次审核） | DEV-001，需项目负责人对完整 PR 授权 | P0 | Direct start by project-owner instruction; one Draft PR, one final review | `DEF-STAGE7-001` 已复开；项目负责人已授权直接整改；全部页面、测试和交接在同一 Draft PR 完成后统一审核 |
 
 ## 9. 集成计划
 
