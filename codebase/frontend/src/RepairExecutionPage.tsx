@@ -127,7 +127,8 @@ export function RepairExecutionPage({ permissionCodes }: { permissionCodes?: str
     setGuidanceStarting(true);
     try {
       const run = await startAgentRun("operation_guidance", guidanceContext, guidanceContext.symptom);
-      setRuntimeEvents(await readRunEvents(run.run_id));
+      setRuntimeEvents([]);
+      await readRunEvents(run.run_id, (runtimeEvent) => setRuntimeEvents((current) => [...current, runtimeEvent]));
     } catch (caught) {
       setGuidanceError(caught instanceof ApiError && caught.status === 403 ? "无权发送操作问题。" : "流式对话暂不可用，请按人工流程继续。");
     } finally { setGuidanceStarting(false); }

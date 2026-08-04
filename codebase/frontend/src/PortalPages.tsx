@@ -322,7 +322,8 @@ export function AgentReportPage() {
     setCollecting(true);
     try {
       const run = await startAgentRun("fault_reporting", { equipment_id: equipmentId }, symptom);
-      setRuntimeEvents(await readRunEvents(run.run_id));
+      setRuntimeEvents([]);
+      await readRunEvents(run.run_id, (runtimeEvent) => setRuntimeEvents((current) => [...current, runtimeEvent]));
       setCollected(true);
       setNotice("AI 收集任务已创建，请补全并确认正式上报字段。");
     } catch (caught) { setError(`创建 AI 收集任务失败：${caught instanceof ApiError ? caught.code : "REQUEST_FAILED"}`); } finally { setCollecting(false); }

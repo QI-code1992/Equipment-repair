@@ -177,7 +177,8 @@ function GlobalAgentDrawer({ onClose }: { onClose: () => void }) {
     try {
       const run = await startAgentRun(agentId, {}, text.trim());
       setMessage(`已创建任务：${run.run_id}`);
-      setEvents(await readRunEvents(run.run_id));
+      setEvents([]);
+      await readRunEvents(run.run_id, (runtimeEvent) => setEvents((current) => [...current, runtimeEvent]));
       setThread(await getAgentThread(run.thread_id));
     } catch (error) {
       setMessage(`请求失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`);

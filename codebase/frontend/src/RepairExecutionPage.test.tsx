@@ -86,7 +86,11 @@ it("sends only the server draft id and user evidence when advancing diagnosis", 
 it("renders real guidance citations and runtime SSE statuses", async () => {
   vi.mocked(getOperationGuidance).mockResolvedValue({ state: "QUESTIONING", question: "检查压力", evidence: [{ document_id: "document-1", chunk_id: "chunk-1", citation: "chunk-1", text: "检查溢流阀" }], manual_fallback: false, loading_seconds: 3 });
   vi.mocked(startAgentRun).mockResolvedValue({ thread_id: "thread-1", run_id: "run-1" });
-  vi.mocked(readRunEvents).mockResolvedValue([{ event: "run_waiting", data: { status: "WAITING_FOR_MODEL" } }]);
+  vi.mocked(readRunEvents).mockImplementation(async (_runId, onEvent) => {
+    const event = { event: "run_waiting", data: { status: "WAITING_FOR_MODEL" } };
+    onEvent?.(event);
+    return [event];
+  });
   render(<RepairExecutionPage />);
   await screen.findByText("暂无已分配工单。");
   fireEvent.change(screen.getByLabelText("指引设备 ID"), { target: { value: "eq-9" } });
@@ -101,7 +105,11 @@ it("renders real guidance citations and runtime SSE statuses", async () => {
 it("disables the operation-question action while an Agent run is starting", async () => {
   let resolveRun: (value: { thread_id: string; run_id: string }) => void;
   vi.mocked(startAgentRun).mockImplementation(() => new Promise((resolve) => { resolveRun = resolve; }));
-  vi.mocked(readRunEvents).mockResolvedValue([{ event: "run_waiting", data: { status: "WAITING_FOR_MODEL" } }]);
+  vi.mocked(readRunEvents).mockImplementation(async (_runId, onEvent) => {
+    const event = { event: "run_waiting", data: { status: "WAITING_FOR_MODEL" } };
+    onEvent?.(event);
+    return [event];
+  });
   render(<RepairExecutionPage />);
   await screen.findByText("暂无已分配工单。");
   fireEvent.change(screen.getByLabelText("指引设备 ID"), { target: { value: "eq-1" } });
