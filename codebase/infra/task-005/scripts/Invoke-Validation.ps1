@@ -4,6 +4,8 @@ param([Parameter(Mandatory = $true)][string]$EnvFile)
 $ErrorActionPreference = 'Stop'
 $project = 'equipment-task-005-validation'
 $composeFile = 'codebase/infra/docker-compose.yml'
+. (Join-Path $PSScriptRoot 'Invoke-ValidationComposeCleanup.ps1')
+. (Join-Path $PSScriptRoot 'Invoke-ValidationCleanup.ps1')
 
 function Read-EnvironmentFile([string]$Path) {
     $values = @{}
@@ -81,17 +83,14 @@ catch {
 }
 finally {
     $cleanupFailure = $null
-    if ($datasetId) {
-        try {
-            $deleted = Invoke-RestMethod -Method Delete -Uri "$hostRagflowUrl/api/v1/datasets" -Headers $headers -ContentType 'application/json' -Body (@{ ids = @($datasetId) } | ConvertTo-Json -Compress)
+    try {
+        Invoke-ValidationCleanup -DatasetId $datasetId -DeleteDataset {
+            param($id)
+            $deleted = Invoke-RestMethod -Method Delete -Uri "$hostRagflowUrl/api/v1/datasets" -Headers $headers -ContentType 'application/json' -Body (@{ ids = @($id) } | ConvertTo-Json -Compress)
             if ($deleted.code -ne 0) { throw 'RAGFlow dataset cleanup failed' }
-        }
-        catch { $cleanupFailure = $_ }
-    }
-    docker @compose down --volumes --remove-orphans
-    if ($LASTEXITCODE -ne 0 -and !$cleanupFailure) { $cleanupFailure = [Exception]::new('TASK-005 Compose cleanup failed') }
-    if ($validationFailure) { throw $validationFailure }
-    if ($cleanupFailure) { throw $cleanupFailure }
+        } -ComposeCleanup { Invoke-ValidationComposeCleanup -ComposeArguments $compose }
+    } catch { $cleanupFailure = $_ }
+    Throw-ValidationOutcome -ValidationFailure $validationFailure -CleanupFailure $cleanupFailure
 }
 
 Write-Output 'TASK-005 live validation: PASS'

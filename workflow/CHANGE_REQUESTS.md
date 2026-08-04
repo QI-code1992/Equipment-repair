@@ -872,6 +872,17 @@
   - 开始门槛：本治理候选已合入 `codex/stage-05-integration`，且 DEV-002 已向项目负责人发出正式开发开始通知。
 - 验证：JSON 解析、任务书/状态一致性、剩余 API 依赖扫描、`git diff --check` 与适用 Markdown/规则检查。该治理候选不运行或变更业务代码、测试逻辑、数据库、基础设施、依赖或运行配置。
 - 阶段边界：本 CR 不构成 TASK-012 完成、DEV-001 最终审核批准、Merge 授权、Stage 6 重测通过、Stage 7 验收通过或 Stage 8 发布授权。
+### CR-049 Stage 5 return: TASK-005 validation stream handling (2026-08-03)
+
+- Level: L2 validation infrastructure correction.
+- Status: In Development; PR #80.
+- Scope: TASK-005 PowerShell cleanup handling and executable stream contract regression.
+- Finding: Windows PowerShell treated Docker Compose cleanup stderr as a terminating `NativeCommandError`, preventing a reliable live-stack exit code.
+- Required behavior: successful cleanup suppresses progress noise; non-zero exit remains a failure; stderr is retained in the failure message for traceability.
+- Boundary: no production business code, API contract, database, dependency, or deployment behavior changes.
+- Verification: Python contract `3 passed`; executable PowerShell stream contract passed; `git diff --check` passed.
+- Gate: after PR #80 review and integration, rerun TASK-005 live lifecycle against the exact integrated SHA. Stage 6 remains not approved.
+
 ### CR-048 Post-Merge Governance Record (2026-07-31)
 
 - Status: `INTEGRATED_PENDING_FORMAL_START_NOTICE`.

@@ -38,6 +38,15 @@ def test_task005_validation_scripts_use_host_api_url_and_cleanup() -> None:
     invoke = (INFRA_ROOT / "task-005" / "scripts" / "Invoke-Validation.ps1").read_text(
         encoding="utf-8"
     )
+    stream_contract = (
+        INFRA_ROOT / "task-005" / "tests" / "verify-validation-streams.ps1"
+    ).read_text(encoding="utf-8")
+    cleanup_helper = (
+        INFRA_ROOT / "task-005" / "scripts" / "Invoke-ValidationComposeCleanup.ps1"
+    ).read_text(encoding="utf-8")
+    cleanup_orchestration = (
+        INFRA_ROOT / "task-005" / "scripts" / "Invoke-ValidationCleanup.ps1"
+    ).read_text(encoding="utf-8")
     create_environment = (
         INFRA_ROOT / "task-005" / "scripts" / "New-ValidationEnvironment.ps1"
     ).read_text(encoding="utf-8")
@@ -52,7 +61,14 @@ def test_task005_validation_scripts_use_host_api_url_and_cleanup() -> None:
     assert "$apiRagflowProbe" not in invoke
     assert "docker @compose exec -T api python -m app.modules.knowledge.ragflow_probe" in invoke
     assert "run --rm --no-deps --build" in invoke
-    assert "down --volumes --remove-orphans" in invoke
+    assert "down --volumes --remove-orphans" in cleanup_helper
+    assert "Invoke-ValidationComposeCleanup" in invoke
+    assert "Invoke-ValidationComposeCleanup" in stream_contract
+    assert "Compose cleanup must run after dataset failure" in stream_contract
+    assert "empty dataset id must still run Compose cleanup" in stream_contract
+    assert "Throw-ValidationOutcome" in invoke
+    assert "ComposeCleanup" in cleanup_orchestration
+    assert "TASK-005 validation stream contract: PASS" in stream_contract
     assert "run --rm --no-deps worker python -c" in invoke
     assert "make_bucket" in invoke
     assert "New-RandomHex" in create_environment
