@@ -1,7 +1,7 @@
 {
   "state": "STAGE6_TASK012_REVALIDATION_NOT_PASSED_STAGE5_REMEDIATION_REQUIRED",
-  "updatedBy": "Stage 6 independent retest evidence for TASK-012",
-  "updatedAt": "2026-08-03",
+  "updatedBy": "Post-merge governance verification for PR #81 TASK-005 live retest",
+  "updatedAt": "2026-08-04",
   "task010Delivery": {
     "taskId": "TASK-010",
     "status": "CLOSED_POST_MERGE_GOVERNANCE_COMPLETED",
@@ -64,6 +64,24 @@
     "blockingDefects": ["DEF-STAGE6-003", "DEF-STAGE6-004", "DEF-STAGE6-005"],
     "stage7Locked": true,
     "nextAction": "TASK-005 live lifecycle retest passed on eca714a6477028c47c5b020b93f96838e266cb03, but DEF-STAGE6-003 remains open because its required segmented timing evidence and unique blocker attribution are not yet complete. Complete that evidence together with HTTPS/browser E2E, performance, backup/restore and security evidence for DEF-STAGE6-004/005 before a Stage 6 conclusion."
+  },
+  "stage6Task005Retest": {
+    "status": "INTEGRATED_RETEST_EVIDENCE_RECORDED_BLOCKING_DEFECTS_OPEN",
+    "evidencePullRequest": 81,
+    "approvedHead": "f82aa64a03c8aba882a6f79c8bb16605afb2475f",
+    "mergeCommit": "3472349f0ffd2f884c5ee9fae5a141a453c79c63",
+    "mergeParents": [
+      "eca714a6477028c47c5b020b93f96838e266cb03",
+      "f82aa64a03c8aba882a6f79c8bb16605afb2475f"
+    ],
+    "targetBranch": "codex/stage-05-integration",
+    "blockingDefects": [
+      "DEF-STAGE6-003",
+      "DEF-STAGE6-004",
+      "DEF-STAGE6-005"
+    ],
+    "verification": "Post-merge target pointer, parent order, merge-tree/result-tree equivalence, workflow JSON parsing and relative git diff --check passed. TASK-005 live lifecycle evidence recorded 2 passed/5 warnings, but the independent Stage 6 conclusion remains not passed.",
+    "nextAction": "Complete segmented lifecycle attribution, browser/HTTPS, performance, backup/restore and security evidence for the remaining blocking defects; obtain a new exact Stage 6 conclusion before any Stage 6 to Stage 7 decision."
   },
   "pendingStageApproval": {
     "gate": "Stage 6 -> Stage 7",
