@@ -232,7 +232,7 @@ export function SystemManagementPage({ permissionCodes }: { permissionCodes?: st
 function SystemManagementContent({ canWrite }: { canWrite: boolean }) {
   const [refresh, setRefresh] = useState(0);
   const [saving, setSaving] = useState(false);
-  const [section, setSection] = useState<"users" | "roles" | "permissions" | "audit" | "organization" | "profile" | "loginLogs" | "operationLogs">("roles");
+  const [section, setSection] = useState<"users" | "roles" | "loginLogs" | "operationLogs">("roles");
   const [auditAction, setAuditAction] = useState("");
   const [auditPage, setAuditPage] = useState(1);
   const audits = useData(() => getAuditEvents({ action: auditAction || undefined, page: auditPage }), [auditAction, auditPage, refresh]);
@@ -272,11 +272,10 @@ function SystemManagementContent({ canWrite }: { canWrite: boolean }) {
   }
 
   return <Page title="系统管理">
-    <p className="page-description">账号、角色、权限与审计分区使用同一正式身份 API；只读账号不会显示可执行的写操作。</p>
-    <section className="system-module-index" aria-label="系统管理模块"><h3>角色列表</h3><h3>组织树</h3><h3>用户列表</h3><h3>我的账号</h3><h3>登录日志</h3><h3>操作日志</h3><h3>新增角色</h3><h3>角色基础信息</h3><h3>权限配置</h3><h3>新增用户</h3><h3>用户详情</h3><h3>确认操作</h3><h3>新增组织</h3><h3>权限上下文</h3><p className="prototype-unavailable">当前页面仅展示正式身份与审计 API 已提供的数据；未提供的原型模块保留位置并明确不可用。</p></section>
+    <section className="system-hero"><div><span className="status-chip status-chip--info">RBAC 权限中心</span><h2>系统角色、组织与用户统一维护</h2><p>角色负责菜单和按钮权限，用户绑定组织与授权角色。系统管理员为唯一内置角色，不允许删除；自定义角色删除前会校验是否仍被用户绑定。</p></div><div className="system-stats"><div><span>角色总数</span><strong>{roles.value?.length ?? "—"}</strong></div><div><span>系统用户</span><strong>{users.value?.length ?? "—"}</strong></div><div><span>启用账号</span><strong>{users.value?.filter((item) => item.enabled).length ?? "—"}</strong></div></div></section>
     {notice && <p role="status">{notice}</p>}
     <div className="section-tabs" role="tablist" aria-label="系统管理分区">
-      {[ ["users", "用户管理"], ["roles", "角色管理"], ["organization", "组织树"], ["permissions", "权限配置"], ["audit", "审计事件"], ["profile", "我的账号"], ["loginLogs", "登录日志"], ["operationLogs", "操作日志"] ].map(([id, label]) => <button key={id} type="button" role="tab" aria-label={id === "users" ? "用户管理" : id === "roles" ? "角色管理" : undefined} aria-selected={section === id} onClick={() => setSection(id as typeof section)}>{label}</button>)}
+      {[ ["roles", "角色管理"], ["users", "用户管理"], ["loginLogs", "登录日志"], ["operationLogs", "操作日志"] ].map(([id, label]) => <button key={id} type="button" role="tab" aria-label={label} aria-selected={section === id} onClick={() => setSection(id as typeof section)}>{label}</button>)}
     </div>
     <section className="section-tab-panel" role="tabpanel">
     {section === "users" && <><div className="panel-heading"><div><h3>账号管理</h3><p>仅身份写入权限可新增或调整账号状态。</p></div><span className={`status-chip ${canWrite ? "status-chip--success" : "status-chip--neutral"}`}>{canWrite ? "可管理" : "只读"}</span></div>
@@ -285,10 +284,7 @@ function SystemManagementContent({ canWrite }: { canWrite: boolean }) {
       {canWrite && <form className="portal-form" onSubmit={create}><label>用户名<input name="username" required /></label><label>初始密码<input name="password" type="password" minLength={8} required /></label><label>角色<select name="role_id">{roles.value?.map((role) => <option key={role.id} value={role.id}>{role.name}</option>)}</select></label><button type="submit" disabled={saving}>创建账号</button></form>}
     </>}</State></>}
     {section === "roles" && <><div className="panel-heading"><div><h3>角色列表</h3><p>修改会立即刷新正式角色数据。</p></div><button type="button" className="button-primary" disabled title="当前 API 未提供角色创建接口">新增角色</button></div><State state={roles} empty={(items) => !items.length}>{(items) => <div>{items.map((item) => <RolePermissionEditor key={item.id} role={item} permissions={permissions.value ?? []} canWrite={canWrite} onSaved={() => { setRefresh((value) => value + 1); setNotice("角色权限已更新。"); }} onFailed={() => setNotice("角色更新失败，请检查权限后重试。")} />)}</div>}</State></>}
-    {section === "organization" && <section className="prototype-unavailable-panel"><h3>组织树</h3><p>组织树维护请使用工厂建模页面；当前系统管理 API 未提供重复组织编辑入口。</p><Link className="button-secondary" to="/factory-modeling">前往工厂建模</Link></section>}
-    {section === "profile" && <section className="prototype-unavailable-panel"><h3>我的账号</h3><p>当前 API 未提供账号资料与修改密码接口，保留原型模块位置。</p></section>}
-    {section === "permissions" && <><div className="panel-heading"><div><h3>权限目录</h3><p>权限编码由服务端目录返回，不在页面推断或补造。</p></div></div><State state={permissions} empty={(items) => !items.length}>{(items) => <div className="permission-catalogue">{items.map((item) => <code key={item.code}>{item.code}</code>)}</div>}</State></>}
-    {(section === "audit" || section === "loginLogs" || section === "operationLogs") && <><div className="panel-heading"><div><h3>{section === "loginLogs" ? "登录日志" : section === "operationLogs" ? "操作日志" : "审计事件"}</h3><p>只展示服务端已保留的审计记录。</p></div></div><label>动作筛选<input aria-label="审计动作筛选" value={auditAction} onChange={(event) => { setAuditAction(event.target.value); setAuditPage(1); }} placeholder="输入正式动作" /></label><State state={audits} empty={(data) => !data.count}>{(data) => <><table><thead><tr><th>时间</th><th>动作</th><th>资源</th><th>结果</th></tr></thead><tbody>{data.items.map((item: AuditEvent) => <tr key={item.id}><td>{item.created_at}</td><td>{item.action}</td><td>{item.resource_type}</td><td>{item.result}</td></tr>)}</tbody></table><div className="pager"><button type="button" disabled={auditPage <= 1} onClick={() => setAuditPage((current) => current - 1)}>上一页</button><span>第 {auditPage} 页</span><button type="button" disabled={data.items.length < data.page_size} onClick={() => setAuditPage((current) => current + 1)}>下一页</button></div></>}</State></>}
+    {(section === "loginLogs" || section === "operationLogs") && <><div className="panel-heading"><div><h3>{section === "loginLogs" ? "登录日志" : "操作日志"}</h3><p>只展示服务端已保留的审计记录。</p></div></div><label>动作筛选<input aria-label="审计动作筛选" value={auditAction} onChange={(event) => { setAuditAction(event.target.value); setAuditPage(1); }} placeholder="输入正式动作" /></label><State state={audits} empty={(data) => !data.count}>{(data) => <><table><thead><tr><th>时间</th><th>动作</th><th>资源</th><th>结果</th></tr></thead><tbody>{data.items.map((item: AuditEvent) => <tr key={item.id}><td>{item.created_at}</td><td>{item.action}</td><td>{item.resource_type}</td><td>{item.result}</td></tr>)}</tbody></table><div className="pager"><button type="button" disabled={auditPage <= 1} onClick={() => setAuditPage((current) => current - 1)}>上一页</button><span>第 {auditPage} 页</span><button type="button" disabled={data.items.length < data.page_size} onClick={() => setAuditPage((current) => current + 1)}>下一页</button></div></>}</State></>}
     </section>
   </Page>;
 }

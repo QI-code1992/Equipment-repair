@@ -381,7 +381,12 @@ describe("TASK-012 portal pages", () => {
     render(<MemoryRouter><SystemManagementPage permissionCodes={["identity:read"]} /></MemoryRouter>);
 
     expect(await screen.findByRole("tab", { name: "角色管理" })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByRole("tab", { name: "审计事件" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "用户管理" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "登录日志" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "操作日志" })).toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "审计事件" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "组织树" })).not.toBeInTheDocument();
+    expect(screen.getByText("RBAC 权限中心")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "创建账号" })).not.toBeInTheDocument();
   });
 
