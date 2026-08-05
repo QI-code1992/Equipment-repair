@@ -367,7 +367,8 @@ export function AgentReportPage() {
 
   return <Page title="AI 故障上报">
     <p className="page-description">AI 只负责受控收集；它不会直接写入故障事实。正式上报必须由用户完成结构化确认。</p>
-    <div className="agent-report-workspace"><section className="agent-report-workspace__collect"><h3>AI 受控收集</h3><p>提交现场设备与故障描述后，页面会实时显示运行状态。</p><form className="portal-form" onSubmit={collect}>
+    <section className="agent-summary-panel"><header className="panel-heading"><h3>结构化上报摘要</h3><span className="status-chip status-chip--warning">{collected ? "待确认" : "未完成"}</span></header><div className="summary-box"><p><strong>当前用户</strong><br />当前登录用户</p><p><strong>已选设备</strong><br />{equipmentId || "未选择"}</p><p><strong>必填完成度</strong><br /><span className="progress-bar"><span style={{ width: `${collected ? 72 : 24}%` }} /></span></p><p><strong>缺失字段</strong><br />{collected ? "发生时间、持续时长、现场附件" : "设备、故障现象、发生时间、持续时长"}</p></div></section>
+    <div className="agent-report-workspace"><section className="agent-chat-panel"><header className="panel-heading"><h3>对话主区域</h3><span className="status-chip status-chip--warning">{collected ? "已收集" : "缺 2 项"}</span></header><div className="agent-chat__messages"><p>请描述故障现象，我会先校验设备权限，再整理为结构化上报单。</p>{equipmentId && <p className="agent-chat__user">{equipmentId}：{symptom || "等待故障描述"}</p>}<p>正式提交前仍需补齐发生时间、持续时长和现场附件。</p></div></section><section className="agent-report-workspace__collect"><h3>AI 受控收集</h3><p>提交现场设备与故障描述后，页面会实时显示运行状态。</p><form className="portal-form" onSubmit={collect}>
       <fieldset disabled={collecting || submitting}>
         <label>设备 ID<input aria-label="设备 ID" value={equipmentId} onChange={(event) => setEquipmentId(event.target.value)} required /></label>
         <label>故障描述<textarea aria-label="故障描述" value={symptom} onChange={(event) => setSymptom(event.target.value)} required /></label>

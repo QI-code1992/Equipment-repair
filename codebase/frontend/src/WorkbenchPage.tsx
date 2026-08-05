@@ -8,16 +8,17 @@ export function WorkbenchPage() {
   const [health, setHealth] = useState<HealthScore | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [todos, setTodos] = useState<Array<{ id: string; number: string; equipment_name: string; urgency: string; symptom: string; status: string }> | null>(null);
-  const [summary, setSummary] = useState<{ active_fault_count: number } | null>(null);
+  const [summary, setSummary] = useState<{ active_fault_count: number; status_counts: Array<{ status: string; count: number }>; urgency_counts: Array<{ urgency: string; count: number }> } | null>(null);
   const [shortcuts, setShortcuts] = useState<Array<{ id: string; label: string; path: string }> | null>(null);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [todoFilter, setTodoFilter] = useState("all");
+  const [refreshToken, setRefreshToken] = useState(0);
 
   useEffect(() => {
     Promise.all([getWorkbenchTodos(), getWorkbenchAlertSummary(), getWorkbenchShortcuts(), getEquipment()])
       .then(([todoData, summaryData, shortcutData, equipmentData]) => { setTodos(todoData.items); setSummary(summaryData); setShortcuts(shortcutData.items); setEquipment(Array.isArray(equipmentData) ? equipmentData : (equipmentData && typeof equipmentData === "object" && Array.isArray((equipmentData as { items?: unknown }).items) ? (equipmentData as { items: Equipment[] }).items : [])); })
       .catch((error: unknown) => setMessage(error instanceof ApiError && error.status === 403 ? "无权查看工作台数据。" : "工作台数据加载失败，请稍后重试。"));
-  }, []);
+  }, [refreshToken]);
 
   async function loadHealth() {
     setMessage(null);
@@ -41,7 +42,8 @@ export function WorkbenchPage() {
   });
 
   return <section className="portal-page workbench-page" aria-labelledby="page-heading">
-    <header className="workbench-head"><div><p className="page-shell__eyebrow">今日运维态势</p><h2 id="page-heading">运维工作台</h2><p>聚焦当前风险、待办和快速处置；业务事实均来自正式 API。</p></div></header>
+    <header className="workbench-head"><div><p className="page-shell__eyebrow">今日运维态势</p><h2 id="page-heading">运维工作台</h2><p>聚焦当前风险、待办和快速处置；业务事实均来自正式 API。</p></div><button type="button" className="button-secondary" onClick={() => setRefreshToken((value) => value + 1)}>刷新</button></header>
+    <section className="workbench-metrics" aria-label="实时处置指标"><article><strong>{(summary?.status_counts ?? []).find((item) => item.status === "PENDING_ACCEPT")?.count ?? 0}</strong><span>待接单</span><small>等待设备管理员接单</small></article><article><strong>{(summary?.status_counts ?? []).find((item) => item.status === "IN_REPAIR")?.count ?? 0}</strong><span>维修中</span><small>正在现场处置</small></article><article><strong>{(summary?.urgency_counts ?? []).find((item) => item.urgency === "VERY_HIGH")?.count ?? 0}</strong><span>非常紧急</span><small>需优先响应</small></article><article><strong>{summary?.active_fault_count ?? 0}</strong><span>高风险关联</span><small>当前健康分快照</small></article></section>
     {message && <p role="alert">{message}</p>}
     <div className="workbench-layout">
       <section className="data-card queue-card" aria-label="当前待办"><div className="panel-heading"><div><h3>待办处置</h3><p>按紧急程度优先处理正式工单</p></div>{todos && <span className="status-chip status-chip--neutral">{filteredTodos?.length ?? 0} 项</span>}</div>

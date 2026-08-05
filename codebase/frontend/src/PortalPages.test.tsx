@@ -387,6 +387,10 @@ describe("TASK-012 portal pages", () => {
     render(<MemoryRouter><AgentReportPage /></MemoryRouter>);
 
     expect(screen.getByRole("heading", { name: "AI 受控收集" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "对话主区域" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "结构化上报摘要" })).toBeInTheDocument();
+    expect(screen.getByText("必填完成度")).toBeInTheDocument();
+    expect(screen.getByText("缺失字段")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "确认并提交正式故障单" })).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("设备 ID"), { target: { value: "eq-1" } });
     fireEvent.change(screen.getByLabelText("故障描述"), { target: { value: "液压异响" } });

@@ -246,6 +246,8 @@ describe("App", () => {
     fireEvent.click(await screen.findByRole("button", { name: "全局 Agent" }));
 
     expect(screen.getByRole("dialog", { name: "全局 Agent" })).toHaveAttribute("aria-modal", "true");
+    expect(screen.getByRole("button", { name: "故障上报" })).toBeInTheDocument();
+    expect(screen.getByText("上报预收集")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "关闭" }));
     expect(screen.queryByRole("dialog", { name: "全局 Agent" })).not.toBeInTheDocument();
   });

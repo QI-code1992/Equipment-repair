@@ -22,6 +22,8 @@ describe("WorkbenchPage", () => {
     expect(screen.getByRole("link", { name: /故障上报/ })).toBeInTheDocument();
     expect(screen.getByRole("tablist", { name: "故障待办筛选" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "全部" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "刷新" })).toBeInTheDocument();
+    expect(screen.getByText("正在现场处置")).toBeInTheDocument();
   });
 
   it("shows permission denial without static health data", async () => {

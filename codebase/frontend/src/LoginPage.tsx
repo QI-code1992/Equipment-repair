@@ -37,6 +37,7 @@ export function LoginPage() {
       <p className="page-shell__eyebrow">现场运维 · 受控访问</p>
       <h1>新能源装载机智能运维平台</h1>
       <p>统一查看设备状态、处置故障、执行维修，并在权限范围内使用智能运维能力。</p>
+      <div className="login-feature-grid"><article><strong>24h</strong><span>故障追踪</span></article><article><strong>AI</strong><span>诊断辅助</span></article><article><strong>RAG</strong><span>知识检索</span></article><article><strong>KG</strong><span>知识图谱</span></article><article><strong>BI</strong><span>驾驶舱分析</span></article><article><strong>闭环</strong><span>工单协同</span></article></div>
       <ul><li>设备与组织数据由正式业务接口提供</li><li>智能任务、附件与维修结果均保留受控边界</li><li>请使用已分配的平台账号登录</li></ul>
     </section>
     <form className="login-form" onSubmit={(event) => void submit(event)}>
@@ -56,6 +57,7 @@ export function LoginPage() {
       </div>
       {error && <p role="alert">{error}</p>}
       <button type="submit" disabled={submitting}>{submitting ? "登录中…" : "登录系统"}</button>
+      <p className="login-lock-hint">连续失败 3 次后临时锁定，锁定 30 秒。</p>
       {forgotOpen && <div className="login-dialog-scrim" role="presentation" onMouseDown={() => setForgotOpen(false)}>
         <section className="login-dialog" role="dialog" aria-modal="true" aria-labelledby="forgot-password-title" onMouseDown={(event) => event.stopPropagation()}>
           <h3 id="forgot-password-title">忘记密码</h3>
