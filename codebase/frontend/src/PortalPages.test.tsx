@@ -188,6 +188,29 @@ describe("TASK-012 portal pages", () => {
     expect(screen.queryByText("液压装载机")).not.toBeInTheDocument();
   });
 
+  it("filters the equipment ledger by the real organization hierarchy", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify([
+        { id: "eq-1", code: "EQ-01", name: "一号装载机", model: "L-1", type: "LOADER", manufacturer: "M", status: "NORMAL", organization_id: "line-a", owner_user_id: null, operating_hours: 4 },
+        { id: "eq-2", code: "EQ-02", name: "二号装载机", model: "L-2", type: "LOADER", manufacturer: "M", status: "FAULT", organization_id: "line-b", owner_user_id: null, operating_hours: 5 },
+      ]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([
+        { id: "factory-a", type: "FACTORY", code: "FAC-A", name: "华东总装厂", parent_id: null, enabled: true },
+        { id: "workshop-a", type: "WORKSHOP", code: "WS-A", name: "总装车间", parent_id: "factory-a", enabled: true },
+        { id: "line-a", type: "LINE", code: "LINE-A", name: "A1 产线", parent_id: "workshop-a", enabled: true },
+        { id: "factory-b", type: "FACTORY", code: "FAC-B", name: "西南保障中心", parent_id: null, enabled: true },
+        { id: "line-b", type: "LINE", code: "LINE-B", name: "B1 产线", parent_id: "factory-b", enabled: true },
+      ]), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<MemoryRouter><EquipmentLedgerPage /></MemoryRouter>);
+
+    fireEvent.change(await screen.findByLabelText("设备所属工厂"), { target: { value: "factory-a" } });
+    expect(screen.getByText("一号装载机")).toBeInTheDocument();
+    expect(screen.queryByText("二号装载机")).not.toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "设备所属车间" })).not.toBeDisabled();
+  });
+
   it("keeps the equipment creation action available when the ledger is empty", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify([]), { status: 200 })));
 

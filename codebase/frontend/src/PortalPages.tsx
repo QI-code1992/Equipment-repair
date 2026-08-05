@@ -45,20 +45,47 @@ function TrendChart({ trend }: { trend: BiDashboard["trend"] }) {
 
 export function EquipmentLedgerPage() {
   const state = useData<Equipment[]>(getEquipment, []);
+  const organizations = useData(getOrganizations, []);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
+  const [factoryId, setFactoryId] = useState("");
+  const [workshopId, setWorkshopId] = useState("");
+  const [lineId, setLineId] = useState("");
   if (state.loading) return <Page title="设备台账"><p role="status">正在加载…</p></Page>;
   if (state.error) return <Page title="设备台账"><p role="alert">请求失败：{state.error}</p></Page>;
   const items = state.value ?? [];
+  const organizationItems = organizations.value ?? [];
+  const factories = organizationItems.filter((item) => item.type === "FACTORY" && item.enabled);
+  const workshops = organizationItems.filter((item) => item.type === "WORKSHOP" && item.enabled && item.parent_id === factoryId);
+  const lines = organizationItems.filter((item) => item.type === "LINE" && item.enabled && item.parent_id === workshopId);
+  const descendantIds = (rootId: string): Set<string> => {
+    const ids = new Set([rootId]);
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const item of organizationItems) {
+        if (item.parent_id && ids.has(item.parent_id) && !ids.has(item.id)) {
+          ids.add(item.id);
+          changed = true;
+        }
+      }
+    }
+    return ids;
+  };
+  const selectedOrganization = lineId || workshopId || factoryId;
+  const selectedOrganizationIds = selectedOrganization ? descendantIds(selectedOrganization) : null;
   return <Page title="设备台账">{(() => {
-    const filtered = items.filter((item) => (!query || [item.code, item.name, item.model, item.status].some((value) => value.includes(query))) && (!status || item.status === status));
+    const filtered = items.filter((item) => (!query || [item.code, item.name, item.model, item.status].some((value) => value.includes(query))) && (!status || item.status === status) && (!selectedOrganizationIds || selectedOrganizationIds.has(item.organization_id)));
     const statusCounts = items.reduce<Record<string, number>>((counts, item) => ({ ...counts, [item.status]: (counts[item.status] ?? 0) + 1 }), {});
     return <>
       <section className="ledger-overview" aria-label="设备总览">
         <div><p className="page-shell__eyebrow">设备总览</p><strong>已加载 {items.length} 台正式设备</strong><span>仅展示设备台账 API 返回的资产、状态和运行字段。</span></div>
         <div className="ledger-overview__statuses" aria-label="设备状态分布">{Object.entries(statusCounts).map(([name, count]) => <span key={name} className={`status-chip ${name === "FAULT" ? "status-chip--danger" : name === "NORMAL" ? "status-chip--success" : "status-chip--neutral"}`}>{name} {count}</span>)}</div>
       </section>
-      <section className="ledger-toolbar" aria-label="设备筛选工具栏">
+      <section className="ledger-toolbar ledger-toolbar--hierarchy" aria-label="设备筛选工具栏">
+        <label>工厂<select aria-label="设备所属工厂" value={factoryId} onChange={(event) => { setFactoryId(event.target.value); setWorkshopId(""); setLineId(""); }} disabled={organizations.loading || !!organizations.error}><option value="">全部工厂</option>{factories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+        <label>车间<select aria-label="设备所属车间" value={workshopId} onChange={(event) => { setWorkshopId(event.target.value); setLineId(""); }} disabled={!factoryId || organizations.loading || !!organizations.error}><option value="">全部车间</option>{workshops.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+        <label>产线<select aria-label="设备所属产线" value={lineId} onChange={(event) => setLineId(event.target.value)} disabled={!workshopId || organizations.loading || !!organizations.error}><option value="">全部产线</option>{lines.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
         <label>筛选设备<input aria-label="筛选设备" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="按编码、名称、型号或状态筛选" /></label>
         <label>设备状态<select aria-label="设备状态筛选" value={status} onChange={(event) => setStatus(event.target.value)}><option value="">全部状态</option>{Object.keys(statusCounts).sort().map((name) => <option key={name} value={name}>{name}</option>)}</select></label>
         <Link className="button-primary ledger-toolbar__create" to="/equipment/new">新增设备</Link>
