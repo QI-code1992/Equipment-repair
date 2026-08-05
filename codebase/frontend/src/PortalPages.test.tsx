@@ -518,6 +518,8 @@ describe("TASK-012 portal pages", () => {
 
   it("preserves the approved Agent report module structure", () => {
     render(<MemoryRouter><AgentReportPage /></MemoryRouter>);
+    expect(screen.getByRole("region", { name: "对话主区域" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "结构化上报摘要" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "对话主区域" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "结构化上报摘要" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "上报预收集" })).toBeInTheDocument();

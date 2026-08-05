@@ -36,6 +36,19 @@ describe("RepairExecutionPage", () => {
     expect(screen.getByRole("heading", { name: "维修记录填写" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "建议与引用" })).toBeInTheDocument();
   });
+
+  it("keeps the prototype repair form fields and evidence module visible", async () => {
+    render(<RepairExecutionPage />);
+    await screen.findByText("暂无已分配工单。");
+    expect(screen.getByRole("region", { name: "维修记录填写" })).toBeInTheDocument();
+    expect(screen.getByLabelText("实际原因")) .toBeInTheDocument();
+    expect(screen.getByLabelText("维修方案")) .toBeInTheDocument();
+    expect(screen.getByLabelText("备件成本")) .toBeInTheDocument();
+    expect(screen.getByLabelText("工时")) .toBeInTheDocument();
+    expect(screen.getByLabelText("现场处理记录")) .toBeInTheDocument();
+    expect(screen.getByLabelText("维修附件")) .toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "建议与引用" })).toBeInTheDocument();
+  });
   it("keeps direct start available when evidence is insufficient", async () => {
     vi.mocked(runFaultDiagnosis).mockResolvedValue({
       state: "EVIDENCE_PENDING", question: "请补充报警码", evidence: [], prefill: null,
