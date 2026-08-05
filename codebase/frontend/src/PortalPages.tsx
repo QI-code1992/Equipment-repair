@@ -19,7 +19,7 @@ function useData<T>(load: () => Promise<T>, dependencies: unknown[] = []): LoadS
 }
 
 function Page({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="portal-page"><header><p className="page-shell__eyebrow">正式业务数据</p><h2>{title}</h2></header>{children}</section>;
+  return <section className="portal-page" aria-labelledby={`portal-page-title-${title}`}><h2 id={`portal-page-title-${title}`} className="sr-only">{title}</h2>{children}</section>;
 }
 
 function State<T>({ state, children, empty }: { state: LoadState<T>; children: (value: T) => React.ReactNode; empty?: (value: T) => boolean }) {

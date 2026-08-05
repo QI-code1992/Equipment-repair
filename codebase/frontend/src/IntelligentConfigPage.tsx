@@ -213,7 +213,7 @@ export function IntelligentConfigPage({ permissionCodes = [] }: { permissionCode
   const canWriteKnowledge = permissionCodes.includes("intelligence:knowledge");
 
   return <section className="config-page" aria-labelledby="page-heading">
-    <div className="config-page__intro"><div><div className="page-shell__eyebrow">智能运维</div><h2 id="page-heading">智能配置</h2><p>模型密钥仅以安全引用写入；页面不会读取、显示或保存密钥正文。</p></div></div>
+    <h2 id="page-heading" className="sr-only">智能配置</h2>
     <section className="config-module-index" aria-label="智能配置模块"><h3>默认 LLM</h3><h3>默认 Embedding</h3><h3>默认 Rerank</h3><h3>智能体配置</h3><h3>知识库配置</h3><p className="prototype-unavailable">具体模型、Agent 与知识库状态仅展示正式配置 API 返回内容。</p></section>
     <section className="config-prototype-catalogue" aria-label="智能配置原型模块"><header><h3>原型配置模块</h3><p>以下模块位置与原型保持一致；当前 API 未覆盖的模块明确显示不可用，不生成演示业务数据。</p></header><div className="config-prototype-catalogue__grid">{prototypeConfigModules.map((module) => <article key={module}><h4>{module}</h4><p className="prototype-unavailable">当前 API 未提供该模块数据。</p></article>)}</div></section>
     {error && <p role="alert">{error}</p>}

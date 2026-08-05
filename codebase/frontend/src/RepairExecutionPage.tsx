@@ -148,9 +148,8 @@ export function RepairExecutionPage({ permissionCodes }: { permissionCodes?: str
   const canClose = permissionCodes === undefined || permissionCodes.includes("fault:close");
   const canUseAgent = permissionCodes === undefined || permissionCodes.includes("intelligence:agent");
   return (
-    <section className="page-shell" aria-labelledby="page-heading">
-      <div className="page-shell__eyebrow">现场作业</div>
-      <h2 id="page-heading">维修执行详情</h2>
+    <section className="page-shell" aria-labelledby="repair-execution-page-title">
+      <h2 id="repair-execution-page-title" className="sr-only">维修执行详情</h2>
       <section className="prototype-module-note" aria-label="工单摘要"><h3>工单摘要</h3><p>工单身份、设备和当前状态均来自正式工单 API。</p></section>
       <section className="prototype-module-note" aria-label="上报预收集"><h3>上报预收集</h3><p>当前上下文来自正式工单与故障接口；未提供的发生时间、持续时长和现场附件保持不可用状态。</p><p className="prototype-unavailable">当前 API 未提供完整上报预收集数据。</p></section>
       <section className="repair-workspace" aria-label="工单与诊断"><h3>工单与诊断</h3><section aria-label="已分配工单"><h4>已分配工单</h4><label>工单状态<select aria-label="维修执行工单状态筛选" value={orderStatus} onChange={(event) => { setOrderStatus(event.target.value); setAssignedOrders(null); setSelectedOrder(null); }}><option value="">全部</option><option value="PENDING_ACCEPT">待接单</option><option value="IN_REPAIR">维修中</option><option value="PENDING_INSPECTION">待验收</option><option value="COMPLETED">已完成</option></select></label>{assignedOrders === null ? <p>正在加载工单…</p> : assignedOrders.length === 0 ? <p>暂无已分配工单。</p> : <ul>{assignedOrders.map((order) => <li key={order.id}><button type="button" onClick={() => void selectOrder(order)}>{order.number} · {order.status} · {order.symptom}</button></li>)}</ul>}{selectedOrder && <dl className="detail-list"><dt>当前工单</dt><dd>{selectedOrder.number}</dd><dt>状态</dt><dd>{selectedOrder.status}</dd><dt>设备</dt><dd>{selectedOrder.equipment_id}</dd></dl>}{ordersError && <p role="alert">{ordersError}</p>}</section>
