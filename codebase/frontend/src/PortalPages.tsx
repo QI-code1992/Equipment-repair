@@ -229,7 +229,7 @@ function SystemManagementContent({ canWrite }: { canWrite: boolean }) {
 
   return <Page title="系统管理">
     <p className="page-description">账号、角色、权限与审计分区使用同一正式身份 API；只读账号不会显示可执行的写操作。</p>
-    <section className="system-module-index" aria-label="系统管理模块"><h3>角色列表</h3><h3>组织树</h3><h3>用户列表</h3><h3>我的账号</h3><h3>登录日志</h3><h3>操作日志</h3><p className="prototype-unavailable">当前页面仅展示正式身份与审计 API 已提供的数据。</p></section>
+    <section className="system-module-index" aria-label="系统管理模块"><h3>角色列表</h3><h3>组织树</h3><h3>用户列表</h3><h3>我的账号</h3><h3>登录日志</h3><h3>操作日志</h3><h3>新增角色</h3><h3>角色基础信息</h3><h3>权限配置</h3><h3>新增用户</h3><h3>用户详情</h3><h3>确认操作</h3><h3>新增组织</h3><h3>权限上下文</h3><p className="prototype-unavailable">当前页面仅展示正式身份与审计 API 已提供的数据；未提供的原型模块保留位置并明确不可用。</p></section>
     {notice && <p role="status">{notice}</p>}
     <div className="section-tabs" role="tablist" aria-label="系统管理分区">
       {[ ["users", "账号管理"], ["roles", "角色权限"], ["permissions", "权限目录"], ["audit", "审计事件"] ].map(([id, label]) => <button key={id} type="button" role="tab" aria-selected={section === id} onClick={() => setSection(id as typeof section)}>{label}</button>)}
