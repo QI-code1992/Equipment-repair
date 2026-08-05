@@ -93,6 +93,17 @@ a { color: inherit; text-decoration: none; }
 .login-form h2 { margin: 0; color: #172f54; font-size: 28px; }.login-form__hint { margin: -4px 0 6px; color: #64748b; font-size: 14px; line-height: 1.6; }
 .login-form label { display: grid; gap: 7px; color: #36506f; }
 .login-form input { padding: 9px 10px; border: 1px solid #b8c9dd; border-radius: 8px; font: inherit; }
+.login-password-field { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+.login-password-toggle { padding: 8px 10px; color: #31577f; background: #eef5fc; border: 1px solid #b8c9dd; border-radius: 8px; cursor: pointer; }
+.login-form__options { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.login-remember { display: inline-flex !important; grid-template-columns: none !important; align-items: center; gap: 8px !important; color: #526b86 !important; font-size: 14px; }
+.login-remember input { width: 16px; height: 16px; margin: 0; }
+.login-forgot { padding: 0; color: #2864b5 !important; background: transparent !important; border: 0 !important; font-size: 14px; cursor: pointer; }
+.login-dialog-scrim { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px; background: #081b3288; }
+.login-dialog { width: min(100%, 380px); padding: 26px; background: #fff; border: 1px solid #d5e0ec; border-radius: 14px; box-shadow: 0 24px 60px #06193352; }
+.login-dialog h3 { margin: 0 0 10px; color: #172f54; font-size: 22px; }
+.login-dialog p { margin: 0 0 20px; color: #526b86; line-height: 1.6; }
+.login-dialog button { width: 100%; }
 .login-form button { padding: 10px 16px; color: #fff; background: #3173dd; border: 0; border-radius: 9px; cursor: pointer; }
 .portal-page { max-width: 1280px; margin: 26px auto; padding: 0 24px 40px; }
 .portal-page h2 { margin: 7px 0 22px; font-size: clamp(26px, 4vw, 34px); }

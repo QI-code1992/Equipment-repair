@@ -10,6 +10,9 @@ export function LoginPage() {
   const location = useLocation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberPassword, setRememberPassword] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -41,9 +44,25 @@ export function LoginPage() {
       <h2>欢迎回来</h2>
       <p className="login-form__hint">登录后将按账号权限展示可用业务页面。</p>
       <label>用户名<input aria-label="用户名" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} required /></label>
-      <label>密码<input aria-label="密码" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>
+      <label>密码
+        <span className="login-password-field">
+          <input aria-label="密码" type={passwordVisible ? "text" : "password"} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required />
+          <button type="button" className="login-password-toggle" aria-label={passwordVisible ? "隐藏密码" : "显示密码"} onClick={() => setPasswordVisible((visible) => !visible)}>{passwordVisible ? "隐藏" : "显示"}</button>
+        </span>
+      </label>
+      <div className="login-form__options">
+        <label className="login-remember"><input type="checkbox" checked={rememberPassword} onChange={(event) => setRememberPassword(event.target.checked)} />记住密码</label>
+        <button type="button" className="login-forgot" onClick={() => setForgotOpen(true)}>忘记密码</button>
+      </div>
       {error && <p role="alert">{error}</p>}
       <button type="submit" disabled={submitting}>{submitting ? "登录中…" : "登录系统"}</button>
+      {forgotOpen && <div className="login-dialog-scrim" role="presentation" onMouseDown={() => setForgotOpen(false)}>
+        <section className="login-dialog" role="dialog" aria-modal="true" aria-labelledby="forgot-password-title" onMouseDown={(event) => event.stopPropagation()}>
+          <h3 id="forgot-password-title">忘记密码</h3>
+          <p>请联系系统管理员重置密码，平台不会通过此页面收集或保存凭据。</p>
+          <button type="button" onClick={() => setForgotOpen(false)}>知道了</button>
+        </section>
+      </div>}
     </form>
   </main>;
 }
