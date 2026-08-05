@@ -19,6 +19,7 @@ from app.modules.knowledge.router import router as knowledge_router
 from app.modules.agent_runtime.router import router as agent_runtime_router
 from app.modules.agents.router import router as agents_router
 from app.modules.attachments.router import router as attachments_router
+from app.modules.notifications.router import router as notifications_router
 
 
 def create_app(
@@ -102,6 +103,7 @@ def create_app(
     app.include_router(agent_runtime_router)
     app.include_router(agents_router)
     app.include_router(attachments_router)
+    app.include_router(notifications_router)
     register_audit_exception_handlers(app)
 
     @app.get("/healthz")
