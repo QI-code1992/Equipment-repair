@@ -139,7 +139,8 @@ function ApplicationShell() {
           <div className="topbar__heading">
             <button type="button" className="menu-button" aria-label="打开导航" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen((open) => !open)}>菜单</button>
             <div>
-            <p>{activePage.group} / {activePage.label}</p>
+            <nav className="breadcrumb" aria-label="面包屑"><ol><li><span>{activePage.group}</span></li><li aria-current="page"><span>{activePage.label}</span></li></ol></nav>
+            <p className="breadcrumb-legacy" aria-hidden="true">{activePage.group} / {activePage.label}</p>
             <h1>{activePage.label}</h1>
             </div>
           </div>
@@ -247,7 +248,7 @@ function GlobalAgentDrawer({ onClose }: { onClose: () => void }) {
       setMessage(`恢复失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`);
     }
   }
-  return <aside className="agent-drawer" aria-label="全局 Agent">
+  return <aside className="agent-drawer" role="dialog" aria-modal="true" aria-label="全局 Agent" tabIndex={-1}>
     <header><strong>全局 Agent</strong><button type="button" onClick={onClose}>关闭</button></header>
     <div className="tab-list"><button type="button" aria-pressed={tab === "compose"} onClick={() => setTab("compose")}>新建任务</button><button type="button" aria-pressed={tab === "history"} onClick={() => setTab("history")}>线程历史</button></div>
     {tab === "compose" ? <><p>仅可创建故障上报、智能问数和操作指引任务。</p><form onSubmit={submit}><fieldset disabled={submitting}><label>类型<select value={agentId} onChange={(event) => setAgentId(event.target.value)}><option value="fault_reporting">AI 故障上报</option><option value="metric_query">智能问数</option><option value="operation_guidance">操作指引</option></select></label><label>问题<textarea value={text} onChange={(event) => setText(event.target.value)} required /></label><button type="submit">{submitting ? "创建中…" : "发起任务"}</button></fieldset></form></> : <section aria-label="Agent 历史">{historyError && <p role="alert">线程历史加载失败：{historyError}</p>}{history === null && !historyError ? <p role="status">正在加载线程历史…</p> : history?.length === 0 ? <p>暂无线程历史。</p> : <ul>{history?.map((item) => <li key={item.thread_id}><button type="button" onClick={() => void getAgentThread(item.thread_id).then(setThread).catch((error) => setHistoryError(error instanceof ApiError ? error.code ?? "REQUEST_FAILED" : "REQUEST_FAILED"))}>{item.agent_id} · {item.status}</button></li>)}</ul>}{thread && <div><p>线程：{thread.thread_id}</p><p>状态：{thread.status}</p>{thread.messages.map((item, index) => <p key={index}>消息已记录（内容受保护）</p>)}{thread.runs.length > 0 && <button type="button" onClick={() => void resume()}>恢复最近任务</button>}</div>}</section>}

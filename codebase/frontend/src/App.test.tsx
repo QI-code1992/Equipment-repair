@@ -226,6 +226,27 @@ describe("App", () => {
     fireEvent.click(await screen.findByRole("button", { name: "打开导航" }));
     expect(screen.getByRole("button", { name: "关闭导航" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "全局 Agent" }));
-    expect(screen.getByRole("complementary", { name: "全局 Agent" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "全局 Agent" })).toBeInTheDocument();
+  });
+
+  it("renders a semantic breadcrumb for the active route", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["workbench:view"] }), { status: 200 })));
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+
+    const breadcrumb = await screen.findByRole("navigation", { name: "面包屑" });
+    expect(breadcrumb).toHaveTextContent("工作台");
+    expect(breadcrumb).toHaveTextContent("运维工作台");
+  });
+
+  it("exposes the Agent drawer as a modal with an accessible close action", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["workbench:view", "intelligence:agent"] }), { status: 200 })));
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: "全局 Agent" }));
+
+    expect(screen.getByRole("dialog", { name: "全局 Agent" })).toHaveAttribute("aria-modal", "true");
+    fireEvent.click(screen.getByRole("button", { name: "关闭" }));
+    expect(screen.queryByRole("dialog", { name: "全局 Agent" })).not.toBeInTheDocument();
   });
 });
