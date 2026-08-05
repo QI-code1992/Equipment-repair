@@ -1,6 +1,7 @@
-# TASK-012 正式前端与原型差异矩阵
+# TASK-013 正式前端与原型差异矩阵
 
-- 候选分支：`codex/task-012-p0-frontend-remediation`。
+- 候选分支：`codex/task-013-prototype-fidelity-remediation`。
+- 最新增量候选：`5695716`；本次修复覆盖深层路由上下文、移动端导航折叠和设备台账空态入口。
 - 范围：除明确排除的数据导入外，覆盖 `PAGE_FUNCTION_MATRIX.md` 的全部 P0 页面。
 - 判定：本表不替代最终审核或浏览器 live-stack 验证；`实现中候选` 表示已在 Draft PR 中接入正式契约，尚未可宣布完成。当前所有页面仍保留该状态，原因是最终浏览器/live-stack 和统一 DEV-001 审核尚未执行。
 
