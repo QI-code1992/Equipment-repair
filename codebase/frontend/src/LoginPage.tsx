@@ -33,7 +33,8 @@ export function LoginPage() {
     <section className="login-intro" aria-label="平台说明">
       <div className="login-intro__mark" aria-hidden="true">智</div>
       <p className="page-shell__eyebrow">现场运维 · 受控访问</p>
-      <h1>新能源装载机智能运维平台</h1>
+      <h1>设备AI智能运维平台</h1>
+      <p className="login-product-name">新能源装载机智能运维平台</p>
       <p>统一查看设备状态、处置故障、执行维修，并在权限范围内使用智能运维能力。</p>
       <ul><li>设备与组织数据由正式业务接口提供</li><li>智能任务、附件与维修结果均保留受控边界</li><li>请使用已分配的平台账号登录</li></ul>
     </section>
