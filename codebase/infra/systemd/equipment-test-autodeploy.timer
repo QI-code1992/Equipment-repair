@@ -1,0 +1,11 @@
+[Unit]
+Description=Check TASK-013 test branch for ECS preview updates
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=30s
+Persistent=true
+Unit=equipment-test-autodeploy.service
+
+[Install]
+WantedBy=timers.target

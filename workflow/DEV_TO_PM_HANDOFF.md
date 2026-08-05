@@ -8,7 +8,9 @@
 - 已验证：ECS 上 Compose、迁移、PostgreSQL、Redis、MinIO、ClamAV、API、Worker、Validator、Nginx、HTTPS `/healthz` 和 HTTP→HTTPS 跳转。
 - 未验证：ECS 当前未配置运行时 `RAGFLOW_API_KEY`，真实 RAGFlow 成功检索路径尚未验证；不得以环境可访问替代 Stage 6 重测、Stage 7 验收或生产发布证据。
 - 凭据：测试管理员仅由环境负责人经安全渠道分发；不得在 Git、PR、台账、日志或交接文档中记录明文密码、Token、私钥、连接串、Cookie 或 `.env`。进入验收或交接前须轮换测试管理员凭据。
-- 下一步：项目负责人可使用当前测试环境开展页面确认；发现的 UI/交互偏离继续进入 TASK-013 同一 Draft PR，全部整改完成后统一请求 DEV-001 审核。
+- 自动同步：项目负责人已确认当前 TASK-013 分支每次推送后自动部署 ECS；只部署已推送 Commit，不同步未提交本地保存。部署必须串行、记录 SHA、健康检查失败不切换且保留最近一个可回退版本。
+- 自动同步验证：ECS 部署公钥授权后，systemd timer 已启用，每 30 秒检查并同步当前分支的已推送 Commit。首次成功部署为 `e226695635784296d4aa13597fe7d39690bdef37`，候选构建、API/Web 重建、当前版本切换和外层 HTTPS `/healthz` 均通过；切换窗口有两次短暂 502，随后恢复。
+- 下一步：项目负责人可继续使用当前测试环境开展页面确认；推送 TASK-013 前端提交后最多约 30 秒可见。发现的 UI/交互偏离继续进入 TASK-013 同一 Draft PR，全部整改完成后统一请求 DEV-001 审核。
 
 ## TASK-013 治理候选交接（2026-08-04）
 

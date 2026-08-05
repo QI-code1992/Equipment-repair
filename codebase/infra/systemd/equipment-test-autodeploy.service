@@ -1,0 +1,9 @@
+[Unit]
+Description=Deploy the latest TASK-013 test branch revision to the ECS preview
+Wants=network-online.target
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/etc/equipment-test-autodeploy.env
+ExecStart=/usr/local/sbin/equipment-test-autodeploy

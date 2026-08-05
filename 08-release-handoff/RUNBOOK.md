@@ -13,6 +13,13 @@
 - 测试公网入口、短期自签名证书、已验证范围和未验证 RAGFlow 成功链路见 `07-acceptance/ACCEPTANCE_ENVIRONMENT_DEPLOYMENT.md`。不得把管理员凭据、RAGFlow API Key、隧道参数、证书私钥或 `.env` 内容写入本手册。
 - 当前 ECS 未配置运行时 `RAGFLOW_API_KEY`，因此真实 RAGFlow 检索成功路径尚未验证；不得以服务健康或不可用降级替代成功链路证据。
 
+### TASK-013 推送自动同步
+
+- `codebase/infra/scripts/ecs-test-autodeploy.sh` 由 `equipment-test-autodeploy.timer` 每 30 秒检查 `codex/task-013-prototype-fidelity-remediation` 的已推送 Commit；未提交的本地保存永不进入 ECS。
+- 每个新 SHA 先在新的预览目录构建 API/Web 镜像，再重建 API/Web 并检查外层入口 `https://127.0.0.1/healthz`。构建、启动或健康检查失败时，脚本恢复预先保留标签的上一 API/Web 镜像和原预览目录；不执行数据库 downgrade，不删除 PostgreSQL、Redis、MinIO、ClamAV 或 RAGFlow 数据。
+- 自动部署拒绝包含 Alembic 迁移变化的 Commit，要求人工执行并单独验证，避免测试数据库前向迁移后无法安全回退。
+- ECS 上的 `/etc/equipment-test-autodeploy.env` 只保存非秘密路径、分支和项目名；不得放入 SSH 私钥、账号密码、RAGFlow Token 或 `.env` 内容。服务日志通过 `journalctl -u equipment-test-autodeploy.service` 查看，只应包含时间、SHA 和脱敏错误。
+
 ## TASK-004 RAGFlow 运行前置条件
 
 - Docker Desktop 使用 Linux containers；Docker Engine `>=24`，Docker Compose `>=2.26.1`。

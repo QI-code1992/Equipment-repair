@@ -23,12 +23,13 @@
 - 原因：项目负责人需要在真实可访问的测试环境中组织页面确认；此前 CR-046 的“单机 Windows、回环 HTTPS、禁止公开入口”方案不再满足当前测试部署需求。
 - 影响：
   - 部署/验收文档：以 ECS 业务平台 + Windows RAGFlow 的测试拓扑替代 CR-046 中已被取代的部署方案；保留 CR-046 历史记录，不倒改历史事实。
-  - 基础设施模板与验证：将 Git 忽略环境模板、RAGFlow 固定镜像契约与验证脚本从 `v0.25.6` 更新为 `v0.26.3`，并更新固定 Docker Registry 摘要；不修改业务代码、数据库迁移、业务 API 或运行中的远程 Compose 配置。
+  - 基础设施模板与验证：将 Git 忽略环境模板、RAGFlow 固定镜像契约与验证脚本从 `v0.25.6` 更新为 `v0.26.3`，并更新固定 Docker Registry 摘要；新增 ECS 自动部署脚本、systemd 定时器模板与其 shell 契约测试，不修改业务代码、数据库迁移、业务 API 或运行中的远程 Compose 配置。
   - 运行验证：已确认 ECS Compose 启动、迁移、PostgreSQL、Redis、MinIO、ClamAV、API、Worker、Validator、Nginx、`/healthz`、HTTPS 入口与 HTTP→HTTPS 跳转；当前未配置运行时 `RAGFLOW_API_KEY`，不得将真实 RAGFlow 成功检索链路表述为已通过。
   - 阶段门禁：测试环境可访问不构成 Stage 6 通过、Stage 7 验收通过、Stage 8 发布、`main` 合并或生产授权。TASK-013 前端整改仍在同一 Draft PR 中开发，完成后统一接受 DEV-001 审核。
+  - 自动同步：项目负责人已确认采用“当前 `codex/task-013-prototype-fidelity-remediation` 分支每次推送后自动部署 ECS”的方式。自动部署只处理已推送 Commit，不同步未提交的本地保存；部署须记录目标 SHA、串行执行、构建成功后再切换、健康检查失败保留上一可访问版本，并保留最近一个可回退版本。
 - 决策：项目负责人明确确认 ECS 为当前项目业务平台测试部署环境，并明确确认 RAGFlow 继续部署在本地 Windows；ECS 与 Windows 的加密私网隧道不属于本仓库配置范围。
-- 更新基线：`07-acceptance/ACCEPTANCE_ENVIRONMENT_DEPLOYMENT.md`、`07-acceptance/ACCEPTANCE_REPORT.md`、`08-release-handoff/RUNBOOK.md`、`08-release-handoff/DEPLOYMENT_CHECKLIST.md`、`codebase/infra/.env.example`、`codebase/infra/ragflow/scripts/verify.ps1`、`codebase/infra/ragflow/tests/verify-compose-contract.ps1`、`workflow/state.json`、`workflow/DEV_TO_PM_HANDOFF.md` 与本台账。
-- 验证：仅记录已执行环境的脱敏验证边界；本次更新执行 JSON 解析、文档/版本一致性检查、适用静态回归与 `git diff --check`。本机未安装 Docker Desktop/Compose，Compose 展开和真实 RAGFlow `v0.26.3` 启动验证留给 Windows 环境执行。不提交任何远程运行配置或秘密。
+- 更新基线：`07-acceptance/ACCEPTANCE_ENVIRONMENT_DEPLOYMENT.md`、`07-acceptance/ACCEPTANCE_REPORT.md`、`08-release-handoff/RUNBOOK.md`、`08-release-handoff/DEPLOYMENT_CHECKLIST.md`、`codebase/infra/.env.example`、`codebase/infra/ragflow/scripts/verify.ps1`、`codebase/infra/ragflow/tests/verify-compose-contract.ps1`、`codebase/infra/scripts/ecs-test-autodeploy.sh`、`codebase/infra/systemd/equipment-test-autodeploy.*`、`codebase/infra/tests/verify-ecs-test-autodeploy-contract.sh`、`workflow/state.json`、`workflow/DEV_TO_PM_HANDOFF.md` 与本台账。
+- 验证：ECS 自动同步已由专用 SSH 部署密钥配置完成，首次成功部署 SHA `e226695635784296d4aa13597fe7d39690bdef37`；候选构建、API/Web 重建、外层 HTTPS `/healthz` 和 `current` 版本切换均通过。切换窗口出现两次短暂 502，健康检查重试后恢复；不将该窗口表述为零中断。服务通过 systemd timer 每 30 秒检查一次已推送 Commit。此次更新同时执行 shell 契约、JSON 解析、前端回归/构建与 `git diff --check`。本机未安装 Docker Desktop/Compose，Compose 展开和真实 RAGFlow `v0.26.3` 启动验证留给 Windows 环境执行。不提交任何远程运行配置或秘密。
 
 ### CR-043：明确 TASK-009 诊断与指引的设备对象级授权契约
 
