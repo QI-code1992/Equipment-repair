@@ -32,6 +32,25 @@ describe("TASK-012 portal pages", () => {
     expect(screen.getByText("2026-08-01：故障 3，完成 1")).toBeInTheDocument();
   });
 
+  it("keeps the approved BI module order and labels while using only formal response data", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        summary: { fault_count: 3, active_fault_count: 1, completed_work_order_count: 2, completion_rate: 0.67 },
+        trend: [], efficiency: { completed_work_order_count: 2, average_completion_hours: 4 }, organization_ranking: [], history_comparison: { current_fault_count: 3, previous_fault_count: 2 },
+      }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 })));
+
+    render(<BiDashboardPage />);
+
+    expect(await screen.findByRole("heading", { name: "管理摘要" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "趋势分析" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "效率分析" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "设备健康列表" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "指标历史对比" })).toBeInTheDocument();
+    expect(screen.getAllByText("当前 API 未提供设备健康列表数据。")).toHaveLength(2);
+    expect(screen.getByText("当前 API 未提供指标历史对比数据。")).toBeInTheDocument();
+  });
+
   it("reloads the BI dashboard with a selected formal organization filter", async () => {
     const dashboard = { summary: { fault_count: 2, active_fault_count: 1, completed_work_order_count: 1, completion_rate: 0.5 }, trend: [], efficiency: { completed_work_order_count: 1, average_completion_hours: 3 }, organization_ranking: [], history_comparison: { current_fault_count: 1, previous_fault_count: 0 } };
     const fetchMock = vi.fn()
@@ -140,6 +159,50 @@ describe("TASK-012 portal pages", () => {
     expect(screen.getByRole("heading", { name: "维修历史" })).toBeInTheDocument();
   });
 
+  it("renders the prototype equipment detail tab structure without inventing unavailable data", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "eq-1", code: "EQ-1", name: "设备", model: "M", type: "LOADER", manufacturer: "厂", status: "NORMAL", organization_id: "line", owner_user_id: null, operating_hours: 1, manufactured_at: null, commissioned_at: null, image_refs: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20, trend: [] }), { status: 200 })));
+
+    render(<MemoryRouter initialEntries={["/equipment/eq-1"]}><Routes><Route path="/equipment/:id" element={<EquipmentDetailPage />} /></Routes></MemoryRouter>);
+
+    expect(await screen.findByRole("tab", { name: "图谱关系" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "BOM 组成" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "额定参数" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "知识文档" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "知识文档" }));
+    expect(screen.getByText("知识文档接口尚未提供，当前仅展示正式字段状态。" )).toBeInTheDocument();
+  });
+
+  it("keeps the approved equipment detail overview modules visible", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "eq-1", code: "EQ-1", name: "设备", model: "M", type: "LOADER", manufacturer: "厂", status: "NORMAL", organization_id: "line", owner_user_id: null, operating_hours: 1, image_refs: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20, trend: [] }), { status: 200 })));
+    render(<MemoryRouter initialEntries={["/equipment/eq-1"]}><Routes><Route path="/equipment/:id" element={<EquipmentDetailPage />} /></Routes></MemoryRouter>);
+    expect(await screen.findByRole("heading", { name: "当前评分构成" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "风险恢复记录" })).toBeInTheDocument();
+  });
+
+  it("keeps the approved maintenance detail modules visible", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ maintenance_record_id: "record-1", work_order_id: "order-1", fault_report_id: "fault-1", equipment_id: "eq-1", work_order_number: "WO-1", status: "COMPLETED", symptom: "异响", actual_cause: null, actual_solution: null, repair_result: "通过", completed_at: null, knowledge_status: "NOT_LINKED", start_mode: "DIRECT", parts_replacement_notes: null, created_at: "2026-08-01T00:00:00Z", updated_at: "2026-08-01T00:00:00Z" }), { status: 200 })));
+    render(<MemoryRouter initialEntries={["/maintenance-records/record-1"]}><Routes><Route path="/maintenance-records/:id" element={<MaintenanceRecordDetailPage />} /></Routes></MemoryRouter>);
+    expect(await screen.findByRole("heading", { name: "故障摘要" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "附件证据" })).toBeInTheDocument();
+  });
+
+  it("keeps prototype equipment form sections visible when APIs are unavailable", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "line-1", type: "LINE", code: "LINE", name: "一线", parent_id: "factory", enabled: true }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 })));
+
+    render(<MemoryRouter><EquipmentAddPage /></MemoryRouter>);
+
+    expect(await screen.findByRole("heading", { name: "设备 BOM 组成" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "设备额定参数" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "知识资料" })).toBeInTheDocument();
+    expect(screen.getAllByText("当前 API 未提供该模块数据，未生成演示内容。")).toHaveLength(3);
+  });
+
   it("sends the selected knowledge status to the maintenance-record API", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ items: [{ maintenance_record_id: "r-1", work_order_number: "WO-1", status: "COMPLETED", symptom: "异响", repair_result: "通过", knowledge_status: "NOT_LINKED" }], count: 1, page: 1, page_size: 20 }), { status: 200 }))
@@ -158,6 +221,18 @@ describe("TASK-012 portal pages", () => {
 
     expect(await screen.findByRole("heading", { name: "维修记录检索" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "维修记录列表" })).toBeInTheDocument();
+  });
+
+  it("keeps the approved maintenance overview modules without fabricating analytics", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ items: [{ maintenance_record_id: "r-1", work_order_number: "WO-1", equipment_id: "eq-1", status: "COMPLETED", symptom: "异响", repair_result: "通过", knowledge_status: "LINKED" }], count: 1, page: 1, page_size: 20 }), { status: 200 })));
+
+    render(<MemoryRouter><MaintenanceRecordsPage /></MemoryRouter>);
+
+    expect(await screen.findByRole("heading", { name: "故障类型分布" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "维修时长分布" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "设备状态分布" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "故障次数趋势" })).toBeInTheDocument();
+    expect(screen.getByText("当前 API 未提供故障类型分布数据。")).toBeInTheDocument();
   });
 
   it("filters the equipment ledger with real loaded equipment", async () => {
@@ -425,5 +500,12 @@ describe("TASK-012 portal pages", () => {
     await screen.findByText("故障已正式提交：FR-1");
     expect(fetchMock.mock.calls[2][0]).toBe("/api/agent/fault-reports/submit");
     expect(JSON.parse(String((fetchMock.mock.calls[2][1] as RequestInit).body))).toMatchObject({ confirmed: true, draft: { equipment_id: "eq-1", symptom: "液压异响", duration_minutes: 25 } });
+  });
+
+  it("preserves the approved Agent report module structure", () => {
+    render(<MemoryRouter><AgentReportPage /></MemoryRouter>);
+    expect(screen.getByRole("heading", { name: "对话主区域" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "结构化上报摘要" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "上报预收集" })).toBeInTheDocument();
   });
 });

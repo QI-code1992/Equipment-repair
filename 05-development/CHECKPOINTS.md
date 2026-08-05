@@ -1,5 +1,13 @@
 # 功能/页面检查点
 
+## FCP-013-PROTOTYPE-FIDELITY-CANDIDATE（2026-08-05）
+
+- 分支：`codex/task013-assets-admin`；基线：`93901ecddbcd969c5e2d324ee9b1c7fda3f2f672`；工作包完成后统一汇入 `codex/task-013-prototype-fidelity-remediation`。
+- 范围：正式 React 页面按批准原型保留模块、组件、卡片、标题与交互位置；正式 API 缺失处显示不可用状态，不复制原型运行时代码、不使用静态业务数据。
+- 验证：前端 `94 passed`、生产构建通过、`git diff --check` 通过。
+- 状态：本地实现候选；尚未进行 DEV-001 整体审核、ECS 页面同步核验、浏览器 E2E 或 Stage 6/7/8 门禁。
+- 回退：保留当前稳定集成基线；如候选被拒，仅选择性回退 TASK-013 提交，不删除运行数据或覆盖测试环境。
+
 ## FCP-013-UI-ROUTE-CONTEXT：TASK-013 前端增量修复（2026-08-05）
 
 - 分支：`codex/task-013-prototype-fidelity-remediation`；提交：`5695716`。

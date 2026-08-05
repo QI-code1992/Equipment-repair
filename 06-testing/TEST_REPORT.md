@@ -111,3 +111,11 @@
 - 真实 RAGFlow Agent：先创建一次性专用数据集，再运行 `docker compose --profile validation --env-file <redacted> -p equipment-task011-live-b7c91d2e -f codebase/infra/docker-compose.yml run --rm -e TASK005_RAGFLOW_DATASET_ID=<temporary-id> validator python -m pytest tests/integration/test_task005_live_stack.py -q -rs`，结果 `1 passed, 2 warnings`。覆盖真实文档写入、RAGFlow 检索、`POST /api/agent/operation-guidance` 成功引用与 `UNAVAILABLE` / `manual_fallback=true` 降级路径；测试文档与临时数据集均已删除并复核不存在。
 - 完整 live-stack：运行 `powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/scripts/verify-platform-readiness.ps1 -EnvFile <redacted> -ProjectName equipment-task011-live-b7c91d2e -LiveHttpsUrl https://127.0.0.1:18444 -RagflowDatasetId <temporary-id> -BackupOutputDirectory <temporary-dir>`，结果 `TASK-011 platform readiness: PASS`。其中 PostgreSQL 迁移回归 `1 passed, 3 warnings`、真实 Agent/RAGFlow `1 passed, 2 warnings`、HTTPS E2E `1 passed`；API 重启后 HTTPS 健康检查恢复；备份及隔离恢复项目 `equipment-task011-restore-92603b700b09` 通过。
 - 本地回归：`python -m pytest codebase/backend/tests/modules/test_attachment_api.py -q` 为 `12 passed, 2 warnings`；`python -m pytest -q`（在 `codebase/backend`）为 `309 passed, 13 skipped, 2 warnings`；`python -m compileall -q codebase/backend/app`、`codebase/infra/tests/verify-backup-contract.ps1` 与 `git diff --check` 均通过。13 个跳过项为未配置的 opt-in/live 环境测试；最终 RAGFlow 证据不在跳过项中。
+## TASK-013 原型一致性整改本地验证（2026-08-05）
+
+- 测试对象：`codex/task013-assets-admin`，基线 `93901ecddbcd969c5e2d324ee9b1c7fda3f2f672`；该记录不构成 Stage 6 结论。
+- 前端全量：`npm test -- --run`，8 个测试文件、94 passed。
+- 生产构建：`npm run build`，通过。
+- 差异检查：`git diff --check`，通过。
+- 覆盖：设备详情与表单、工作台、BI、维修记录、维修执行、故障上报、AI 故障上报、智能配置和系统管理原型模块结构；API 缺失场景均保留模块并显示明确不可用状态。
+- 未执行：真实 API、登录后浏览器 E2E、ECS 自动部署同步、Windows Docker/RAGFlow/live-stack。当前结果只能证明本地前端候选回归通过，不能宣称 TASK-013、Stage 6、Stage 7 或 Stage 8 完成。

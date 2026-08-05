@@ -1,5 +1,15 @@
 # 测试用例
 
+## TASK-013 原型一致性回归（2026-08-05）
+
+| ID | 用例与通过条件 | 当前证据 |
+|---|---|---|
+| TC-T013-UI-001 | 设备详情、设备新增/编辑、工作台、BI、维修记录、维修执行、故障上报、AI 故障上报、智能配置、系统管理均保留批准原型模块标题与结构；缺失 API 显示不可用状态。 | `codebase/frontend/src/PortalPages.test.tsx`、`WorkbenchPage.test.tsx`、`FaultReportPage.test.tsx`、`IntelligentConfigPage.test.tsx`、`RepairExecutionPage.test.tsx`。 |
+| TC-T013-UI-002 | 本地前端全量 Vitest 和生产构建通过；不得使用 mock 业务数据替代正式 API。 | `npm test -- --run`、`npm run build`。 |
+| TC-T013-UI-003 | 设备详情评分/风险、维修详情摘要/现场/进度/闭环/附件模块保持原型位置，并在 API 缺失时明确提示。 | `PortalPages.test.tsx` 定向回归。 |
+
+动态 API、浏览器 E2E、ECS 同步与 Windows live-stack 仍属于后续独立环境验证，不由本组静态前端回归替代。
+
 | ID 范围 | 覆盖内容 | 来源 |
 |---|---|---|
 | TC-EQ-* | equipment CRUD, duplicate, owner, deactivation | AC-006–008 |

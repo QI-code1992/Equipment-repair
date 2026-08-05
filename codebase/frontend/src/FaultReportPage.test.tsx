@@ -13,6 +13,11 @@ vi.mock("./api", async (importOriginal) => ({
 
 describe("FaultReportPage", () => {
   beforeEach(() => vi.clearAllMocks());
+  it("preserves the approved fault-report module structure", () => {
+    render(<FaultReportPage />);
+    expect(screen.getByRole("heading", { name: "查询筛选" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "故障上报列表" })).toBeInTheDocument();
+  });
   it("shows an AI draft first and writes a formal fault only after explicit confirmation", async () => {
     const draft = {
       equipment_id: "eq-1", urgency: "HIGH", symptom: "液压压力异常", occurred_at: "2026-07-27T10:00:00+08:00",

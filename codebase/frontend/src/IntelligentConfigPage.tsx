@@ -201,6 +201,7 @@ export function IntelligentConfigPage({ permissionCodes = [] }: { permissionCode
 
   return <section className="config-page" aria-labelledby="page-heading">
     <div className="config-page__intro"><div><div className="page-shell__eyebrow">智能运维</div><h2 id="page-heading">智能配置</h2><p>模型密钥仅以安全引用写入；页面不会读取、显示或保存密钥正文。</p></div></div>
+    <section className="config-module-index" aria-label="智能配置模块"><h3>默认 LLM</h3><h3>默认 Embedding</h3><h3>默认 Rerank</h3><h3>智能体配置</h3><h3>知识库配置</h3><p className="prototype-unavailable">具体模型、Agent 与知识库状态仅展示正式配置 API 返回内容。</p></section>
     {error && <p role="alert">{error}</p>}
     {notice && <p role="status">{notice}</p>}
     <section className="config-catalogue" aria-labelledby="catalogue-heading"><header><h3 id="catalogue-heading">模型与绑定</h3><p>提供商、模型绑定和 Agent 配置保持独立的正式管理边界。</p></header><div className="config-catalogue__grid"><section className="data-card" aria-labelledby="provider-heading"><h3 id="provider-heading">模型提供商</h3>

@@ -151,6 +151,7 @@ export function RepairExecutionPage({ permissionCodes }: { permissionCodes?: str
     <section className="page-shell" aria-labelledby="page-heading">
       <div className="page-shell__eyebrow">现场作业</div>
       <h2 id="page-heading">维修执行</h2>
+      <section className="prototype-module-note" aria-label="工单摘要"><h3>工单摘要</h3><p>工单身份、设备和当前状态均来自正式工单 API。</p></section>
       <section className="repair-workspace" aria-label="工单与诊断"><h3>工单与诊断</h3><section aria-label="已分配工单"><h4>已分配工单</h4><label>工单状态<select aria-label="维修执行工单状态筛选" value={orderStatus} onChange={(event) => { setOrderStatus(event.target.value); setAssignedOrders(null); setSelectedOrder(null); }}><option value="">全部</option><option value="PENDING_ACCEPT">待接单</option><option value="IN_REPAIR">维修中</option><option value="PENDING_INSPECTION">待验收</option><option value="COMPLETED">已完成</option></select></label>{assignedOrders === null ? <p>正在加载工单…</p> : assignedOrders.length === 0 ? <p>暂无已分配工单。</p> : <ul>{assignedOrders.map((order) => <li key={order.id}><button type="button" onClick={() => void selectOrder(order)}>{order.number} · {order.status} · {order.symptom}</button></li>)}</ul>}{selectedOrder && <dl className="detail-list"><dt>当前工单</dt><dd>{selectedOrder.number}</dd><dt>状态</dt><dd>{selectedOrder.status}</dd><dt>设备</dt><dd>{selectedOrder.equipment_id}</dd></dl>}{ordersError && <p role="alert">{ordersError}</p>}</section>
       <label>故障单 ID<input aria-label="故障单 ID" value={faultId} readOnly={!manualFallback} aria-readonly={!manualFallback ? "true" : undefined} onChange={(event) => manualFallback && setFaultId(event.target.value)} placeholder={manualFallback ? "可输入故障单 ID" : "请先从已分配工单中选择"} /></label>
       <label>报警码（可选）<input aria-label="报警码" value={alarmCode} onChange={(event) => setAlarmCode(event.target.value)} /></label>
@@ -159,7 +160,9 @@ export function RepairExecutionPage({ permissionCodes }: { permissionCodes?: str
       {diagnosis && <section aria-label="故障诊断"><p>{diagnosisMessage(diagnosis)}</p>{diagnosis.evidence.length > 0 && <details><summary>查看 {diagnosis.evidence.length} 条诊断证据</summary>{diagnosis.evidence.map((item) => <p key={`${item.category}-${item.detail}`}>{item.category}：{item.detail}</p>)}</details>}{!canAdopt && diagnosis.state !== "UNAVAILABLE" && <><label>证据类型<select aria-label="证据类型" value={evidenceCategory} onChange={(event) => setEvidenceCategory(event.target.value)}><option value="reproduction">复现工况</option><option value="measurement">测量值</option><option value="alarm_code">报警码/报码</option></select></label><label>证据内容<input aria-label="证据内容" value={evidence} onChange={(event) => setEvidence(event.target.value)} /></label><button type="button" disabled={!canUseAgent || !canRepair || evidenceSubmitting || repairStarting} onClick={() => void submitEvidence()}>提交诊断证据</button></>}{canAdopt && <button type="button" disabled={!canRepair || repairStarting} onClick={() => void adoptStart()}>采纳 AI 建议并开始维修</button>}</section>}</section>
       {error && <p role="alert">{error}</p>}
       {repair && <p role="status">维修工单已创建：{repair.work_order_id}</p>}
+      {!repair && <section className="prototype-module-note" aria-label="维修记录填写"><h3>维修记录填写</h3><p>开始维修后在此填写实际原因、处理方案与维修结果。</p></section>}
       {repair && <section aria-label="维修结果">
+        <h3>维修记录填写</h3>
         <h3>结束维修</h3>
         <label>实际原因<textarea value={result.actual_cause} onChange={(event) => setResult({ ...result, actual_cause: event.target.value })} /></label>
         <label>处理方案<textarea value={result.actual_solution} onChange={(event) => setResult({ ...result, actual_solution: event.target.value })} /></label>
@@ -168,7 +171,7 @@ export function RepairExecutionPage({ permissionCodes }: { permissionCodes?: str
         <button type="button" disabled={!canClose || resultSubmitting} onClick={() => void submitResult()}>{resultSubmitting ? "提交中…" : "提交维修结果"}</button>
       </section>}
       {completed && <section aria-label="维修完成结果"><p>{completed.parts_replacement_notes}</p>{repair?.start_mode === "ADOPTED" && summaryText && <><p>AI 对话摘要：{summaryText}</p>{keyEvidence.length > 0 && <p>关键证据：{keyEvidence.join("；")}</p>}</>}</section>}
-      <section className="agent-chat" aria-label="操作指引"><h3>操作指引</h3>
+      <section className="agent-chat" aria-label="操作指引"><h3>建议与引用</h3><h3>操作指引</h3>
         <div className="agent-chat__messages">
           {guidance?.question && <p role="status">{guidance.question}</p>}
           {guidance?.evidence.length ? <details><summary>查看 {guidance.evidence.length} 条引用</summary>{guidance.evidence.map((item) => <p key={item.citation}><code>{item.citation}</code> {item.text}</p>)}</details> : null}

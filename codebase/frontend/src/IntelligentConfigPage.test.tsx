@@ -26,6 +26,17 @@ const config = {
 };
 
 describe("IntelligentConfigPage", () => {
+  it("preserves the approved intelligent-config module structure", async () => {
+    vi.mocked(getAgentConfigs).mockResolvedValue([config]);
+    vi.mocked(getModelProviders).mockResolvedValue([]);
+    vi.mocked(getModelBindings).mockResolvedValue([]);
+    render(<IntelligentConfigPage />);
+    expect(await screen.findByRole("heading", { name: "默认 LLM" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "默认 Embedding" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "默认 Rerank" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "智能体配置" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "知识库配置" })).toBeInTheDocument();
+  });
   it("manages providers and bindings with the formal model catalog APIs without exposing a provider secret", async () => {
     vi.mocked(getAgentConfigs).mockResolvedValue([config]);
     vi.mocked(getModelProviders).mockResolvedValue([{ id: "provider-1", name: "内部模型服务", enabled: true }]);

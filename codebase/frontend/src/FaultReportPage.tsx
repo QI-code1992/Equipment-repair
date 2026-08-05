@@ -99,6 +99,7 @@ export function FaultReportPage() {
 
   return <section className="page-shell" aria-labelledby="page-heading">
     <div className="page-shell__eyebrow">现场作业</div><h2 id="page-heading">故障上报</h2><p>AI 只生成可编辑草稿；只有人工确认才会写入正式故障单。</p>
+    <section className="fault-module-index" aria-label="故障上报模块"><h3>查询筛选</h3><h3>故障上报列表</h3><p className="prototype-unavailable">当前 API 未提供故障列表查询接口；正式创建仍通过故障上报 API。</p></section>
     <div className="fault-workspace"><section className="fault-workspace__form"><h3>现场故障信息</h3><p>先核对设备、故障现象、发生时间和受控附件。</p><form className="fault-form" onSubmit={(event) => void submit(event)}>
       <label>设备 ID<input aria-label="设备 ID" required value={form.equipment_id} onChange={(event) => setForm({ ...form, equipment_id: event.target.value })} /></label>
       <label>紧急程度<select value={form.urgency} onChange={(event) => setForm({ ...form, urgency: event.target.value })}><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></label>

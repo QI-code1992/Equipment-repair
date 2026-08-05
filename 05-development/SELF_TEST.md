@@ -1,5 +1,14 @@
 # 自测
 
+## TASK-013 原型一致性整改本地候选（2026-08-05）
+
+- 分支：`codex/task013-assets-admin`；基线：`93901ecddbcd969c5e2d324ee9b1c7fda3f2f672`；最终代码将统一交由 `codex/task-013-prototype-fidelity-remediation` 集成，不创建额外业务 PR。
+- 范围：按已批准 `03-ui-prototype/prototype/` 补齐正式前端设备详情、工作台、BI、维修记录、维修执行、故障上报、AI 故障上报、智能配置、系统管理等原型模块结构；缺失 API 仅展示明确不可用状态，不生成 mock 或静态业务数据。
+- 前端：`npm test -- --run` 为 `8 个测试文件、94 passed`；`npm run build` 通过；`git diff --check` 通过。
+- 新增回归覆盖设备详情“当前评分构成/风险恢复记录”和维修详情“故障摘要/现场描述/维修进度/处理闭环/附件证据”模块；智能配置、工作台、BI、设备、维修、故障和 Agent 上报模块回归均通过。
+- 未验证：真实业务 API、登录后浏览器逐页 E2E、ECS 自动同步和 Windows Docker/RAGFlow/live-stack；这些不由本地前端单测替代。
+- 依赖、兼容和抽象：未新增生产依赖、兼容层或抽象层；无数据库、API、权限和部署配置变更。
+
 ## TASK-012 整体开发候选本地回归（2026-07-31）
 
 - 当前开发分支：`codex/task-012-p0-frontend-remediation`；主体提交 `9986475`，本轮测试回归随后纳入最终候选。

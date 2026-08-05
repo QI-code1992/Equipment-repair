@@ -22,6 +22,20 @@ describe("WorkbenchPage", () => {
     expect(screen.getByRole("link", { name: /故障上报/ })).toBeInTheDocument();
   });
 
+  it("renders prototype metric cards from formal alert aggregates and preserves unavailable modules", async () => {
+    vi.mocked(getWorkbenchTodos).mockResolvedValue({ items: [], count: 0 });
+    vi.mocked(getWorkbenchAlertSummary).mockResolvedValue({ active_fault_count: 6, status_counts: [{ status: "PENDING_ACCEPT", count: 2 }, { status: "IN_REPAIR", count: 3 }], urgency_counts: [{ status: "VERY_HIGH", count: 1 }, { status: "HIGH", count: 2 }] });
+    vi.mocked(getWorkbenchShortcuts).mockResolvedValue({ items: [] });
+    vi.mocked(getEquipment).mockResolvedValue([]);
+
+    render(<MemoryRouter><WorkbenchPage /></MemoryRouter>);
+
+    expect(await screen.findByText("待接单故障")).toBeInTheDocument();
+    expect(screen.getByText("待接单故障").parentElement).toHaveTextContent("2");
+    expect(screen.getByText("维修中故障")).toBeInTheDocument();
+    expect(screen.getByText("当前 API 未提供故障趋势数据。")).toBeInTheDocument();
+  });
+
   it("shows permission denial without static health data", async () => {
     vi.mocked(getHealthScore).mockRejectedValue(new ApiError(403, "FORBIDDEN"));
     vi.mocked(getWorkbenchTodos).mockResolvedValue({ items: [], count: 0 });

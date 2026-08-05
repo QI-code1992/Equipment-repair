@@ -354,7 +354,7 @@ export const getBiDashboard = (organizationId?: string, period?: "day" | "week" 
   return requestJson<BiDashboard>(`/api/bi/dashboard${query.size ? `?${query}` : ""}`);
 };
 export const getWorkbenchTodos = () => requestJson<{ items: Array<{ id: string; number: string; equipment_name: string; urgency: string; symptom: string; status: string }>; count: number }>("/api/workbench/todos");
-export const getWorkbenchAlertSummary = () => requestJson<{ active_fault_count: number; status_counts: Array<{ status: string; count: number }>; urgency_counts: Array<{ urgency: string; count: number }> }>("/api/workbench/alert-summary");
+export const getWorkbenchAlertSummary = () => requestJson<{ active_fault_count: number; status_counts: Array<{ status: string; count: number }>; urgency_counts: Array<{ status: string; count: number }> }>("/api/workbench/alert-summary");
 export const getWorkbenchShortcuts = () => requestJson<{ items: Array<{ id: string; label: string; path: string }> }>("/api/workbench/shortcuts");
 export const getEquipment = () => requestJson<Equipment[]>("/api/equipment");
 export const getEquipmentDetail = (id: string) => requestJson<Equipment>(`/api/equipment/${id}`);

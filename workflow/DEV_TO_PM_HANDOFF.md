@@ -651,3 +651,10 @@
 - 合并后核验：祖先关系、Merge Tree、`workflow/state.json` JSON 解析及相对第一父的 `git diff --check` 均通过。PR #81 仅含 Stage 6 TASK-005 live retest 证据和状态台账更新。
 - 证据结论保持不变：live lifecycle `2 passed, 5 warnings`，但 `DEF-STAGE6-003` 的分段时序与唯一阻塞组件定位仍缺失；`DEF-STAGE6-004`、`DEF-STAGE6-005` 亦仍开放。该合入不构成 Stage 6 总体通过或 Stage 7/8 解锁。
 - 下一步：继续独立补齐剩余 Stage 6 证据并形成新的精确测试结论；在此之前 Stage 6/7/8 继续锁定。
+## TASK-013 原型一致性整改本地候选（2026-08-05）
+
+- 当前工作分支：`codex/task013-assets-admin`；基线 `93901ecddbcd969c5e2d324ee9b1c7fda3f2f672`；唯一集成分支为 `codex/task-013-prototype-fidelity-remediation`。
+- 已完成本地页面结构切片：设备详情/新增/编辑、工作台、BI、维修记录、维修执行、故障上报、AI 故障上报、智能配置和系统管理；原型缺失 API 处保留位置并展示不可用状态，不生成 mock 业务数据。
+- 本地证据：前端 `94 passed`、生产构建通过、`git diff --check` 通过。
+- 未验证：真实业务 API、登录后浏览器 E2E、ECS 自动同步和 Windows Docker/RAGFlow/live-stack；这些必须在后续独立环境完成。
+- 当前门禁：不创建额外业务 PR、不提前审核或合并；待 TASK-013 全部页面完成后统一提交 DEV-001 对最终精确 HEAD 的整体审核。Stage 6/7/8 继续锁定。
