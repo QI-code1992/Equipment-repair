@@ -29,7 +29,7 @@
   - 自动同步：项目负责人已确认采用“当前 `codex/task-013-prototype-fidelity-remediation` 分支每次推送后自动部署 ECS”的方式。自动部署只处理已推送 Commit，不同步未提交的本地保存；部署须记录目标 SHA、串行执行、构建成功后再切换、健康检查失败保留上一可访问版本，并保留最近一个可回退版本。
 - 决策：项目负责人明确确认 ECS 为当前项目业务平台测试部署环境，并明确确认 RAGFlow 继续部署在本地 Windows；ECS 与 Windows 的加密私网隧道不属于本仓库配置范围。
 - 更新基线：`07-acceptance/ACCEPTANCE_ENVIRONMENT_DEPLOYMENT.md`、`07-acceptance/ACCEPTANCE_REPORT.md`、`08-release-handoff/RUNBOOK.md`、`08-release-handoff/DEPLOYMENT_CHECKLIST.md`、`codebase/infra/.env.example`、`codebase/infra/ragflow/scripts/verify.ps1`、`codebase/infra/ragflow/tests/verify-compose-contract.ps1`、`codebase/infra/scripts/ecs-test-autodeploy.sh`、`codebase/infra/systemd/equipment-test-autodeploy.*`、`codebase/infra/tests/verify-ecs-test-autodeploy-contract.sh`、`workflow/state.json`、`workflow/DEV_TO_PM_HANDOFF.md` 与本台账。
-- 验证：仅记录已执行环境的脱敏验证边界；本次更新执行 JSON 解析、文档/版本一致性检查、适用静态回归与 `git diff --check`。本机未安装 Docker Desktop/Compose，Compose 展开和真实 RAGFlow `v0.26.3` 启动验证留给 Windows 环境执行。自动同步当前被 ECS SSH 公钥授权阻断：现有本机密钥均未获 `root@101.37.16.206` 接受；授权后配置并验证。不提交任何远程运行配置或秘密。
+- 验证：ECS 自动同步已由专用 SSH 部署密钥配置完成，首次成功部署 SHA `e226695635784296d4aa13597fe7d39690bdef37`；候选构建、API/Web 重建、外层 HTTPS `/healthz` 和 `current` 版本切换均通过。切换窗口出现两次短暂 502，健康检查重试后恢复；不将该窗口表述为零中断。服务通过 systemd timer 每 30 秒检查一次已推送 Commit。此次更新同时执行 shell 契约、JSON 解析、前端回归/构建与 `git diff --check`。本机未安装 Docker Desktop/Compose，Compose 展开和真实 RAGFlow `v0.26.3` 启动验证留给 Windows 环境执行。不提交任何远程运行配置或秘密。
 
 ### CR-043：明确 TASK-009 诊断与指引的设备对象级授权契约
 

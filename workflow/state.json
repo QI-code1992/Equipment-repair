@@ -15,13 +15,15 @@
     "unverified": "No runtime RAGFLOW_API_KEY is configured in the ECS test environment; real RAGFlow retrieval success remains unverified. This deployment does not pass Stage 6, Stage 7 or Stage 8.",
     "secretsPolicy": "Do not commit or record administrator credentials, tokens, private keys, connection strings, cookies, runtime volumes or .env contents. Rotate test credentials before acceptance or handoff.",
     "autoDeploy": {
-      "status": "APPROVED_BLOCKED_BY_ECS_SSH_AUTHORIZATION",
+      "status": "ACTIVE_PUSH_SYNC_EVERY_30_SECONDS",
       "sourceBranch": "codex/task-013-prototype-fidelity-remediation",
       "trigger": "Each pushed commit only; uncommitted local changes are excluded.",
       "requiredBehavior": "Serialize deployments, record the deployed SHA, build before switching, health-check the candidate, preserve the prior working version on failure, and retain one rollback version.",
-      "blocker": "Existing local SSH keys are not accepted by root@101.37.16.206; environment owner must authorize a deployment public key before ECS configuration can proceed."
+      "firstSuccessfulDeployment": "e226695635784296d4aa13597fe7d39690bdef37",
+      "verification": "Candidate API/Web build, Compose recreation, preview current-link switch and external HTTPS health check passed. The switch window emitted two transient 502 responses before health recovered.",
+      "remainingBoundary": "A source commit containing Alembic migrations is rejected for manual deployment and validation; this service does not test the Windows RAGFlow success path."
     },
-    "nextAction": "Authorize the ECS deployment SSH public key, then configure and verify automatic deployment while TASK-013 continues; record page findings as implementation defects or approved changes."
+    "nextAction": "Push TASK-013 commits to synchronize them to ECS within the 30-second timer interval; use the deployed environment for project-owner page review."
   },
   "stage5PrototypeFidelityRemediation": {
     "taskId": "TASK-013",
