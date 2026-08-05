@@ -20,6 +20,10 @@ import {
   getAgentThread,
   resumeAgentThread,
   retryKnowledgeDocument,
+  getNotifications,
+  getNotificationUnreadCount,
+  markNotificationRead,
+  markAllNotificationsRead,
 } from "./api";
 
 afterEach(() => window.sessionStorage.clear());
@@ -73,6 +77,37 @@ describe("requestJson", () => {
     expect(fetchMock).toHaveBeenCalledWith("/api/auth/session", expect.objectContaining({ method: "DELETE" }));
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(new Headers(init.headers).get("Idempotency-Key")).toBeTruthy();
+  });
+});
+
+describe("notifications API", () => {
+  it("loads paged notifications with unread filtering", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ items: [], total: 0, unread_count: 0 }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await getNotifications({ page: 2, pageSize: 10, unreadOnly: true });
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/notifications?page=2&page_size=10&unread_only=true", undefined);
+  });
+
+  it("reads the unread count and marks one or all notifications read", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ unread_count: 3 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "notice-1", is_read: true }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ updated_count: 3 }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(getNotificationUnreadCount()).resolves.toEqual({ unread_count: 3 });
+    await markNotificationRead("notice-1");
+    await markAllNotificationsRead();
+
+    expect(fetchMock.mock.calls.map(([path]) => path)).toEqual([
+      "/api/notifications/unread-count",
+      "/api/notifications/notice-1/read",
+      "/api/notifications/read-all",
+    ]);
+    expect((fetchMock.mock.calls[1][1] as RequestInit).method).toBe("PATCH");
+    expect((fetchMock.mock.calls[2][1] as RequestInit).method).toBe("POST");
   });
 });
 

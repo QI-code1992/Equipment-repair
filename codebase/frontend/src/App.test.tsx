@@ -187,4 +187,45 @@ describe("App", () => {
     expect(await screen.findByText("消息已记录（内容受保护）")).toBeInTheDocument();
     expect(screen.queryByText("secret internal text")).not.toBeInTheDocument();
   });
+
+  it("opens the notification panel, filters unread items, and marks an item read", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["workbench:view"] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ active_fault_count: 0, status_counts: [], urgency_counts: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ unread_count: 2 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [{ id: "notice-1", type: "FAULT", title: "Fault submitted", body: "Pump alarm", level: "WARNING", action_url: "/fault-report", related_object_id: "fault-1", created_at: "2026-08-01T00:00:00Z", is_read: false }], total: 1, unread_count: 2 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ unread_count: 2 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [{ id: "notice-1", type: "FAULT", title: "Fault submitted", body: "Pump alarm", level: "WARNING", action_url: "/fault-report", related_object_id: "fault-1", created_at: "2026-08-01T00:00:00Z", is_read: false }], total: 1, unread_count: 2 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "notice-1", is_read: true }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: "Notifications" }));
+
+    expect(await screen.findByRole("dialog", { name: "Notifications" })).toBeInTheDocument();
+    expect(screen.getByText("2")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "未读" }));
+    expect(await screen.findByText("Fault submitted")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Fault submitted/ }));
+    await waitFor(() => expect(fetchMock.mock.calls.some(([path]) => path === "/api/notifications/notice-1/read")).toBe(true));
+  });
+
+  it("keeps the mobile navigation and Agent drawer mutually layered", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["workbench:view", "intelligence:agent"] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ active_fault_count: 0, status_counts: [], urgency_counts: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0 }), { status: 200 })));
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: "打开导航" }));
+    expect(screen.getByRole("button", { name: "关闭导航" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "全局 Agent" }));
+    expect(screen.getByRole("complementary", { name: "全局 Agent" })).toBeInTheDocument();
+  });
 });

@@ -5,7 +5,7 @@ import { IntelligentConfigPage } from "./IntelligentConfigPage";
 import { FaultReportPage } from "./FaultReportPage";
 import { RepairExecutionPage } from "./RepairExecutionPage";
 import { WorkbenchPage } from "./WorkbenchPage";
-import { ApiError, clearActiveSession, getAgentThread, getAgentThreads, getCurrentUser, hasActiveSession, logout, readRunEvents, resumeAgentThread, startAgentRun, type AgentThread, type AgentThreadSummary, type RuntimeEvent } from "./api";
+import { ApiError, clearActiveSession, getAgentThread, getAgentThreads, getCurrentUser, getNotificationUnreadCount, getNotifications, hasActiveSession, logout, markAllNotificationsRead, markNotificationRead, readRunEvents, resumeAgentThread, startAgentRun, type AgentThread, type AgentThreadSummary, type Notification, type RuntimeEvent } from "./api";
 import { LoginPage } from "./LoginPage";
 import { AgentReportPage, BiDashboardPage, EquipmentAddPage, EquipmentDetailPage, EquipmentEditPage, EquipmentLedgerPage, FactoryModelingPage, IntelligentAuditPage, MaintenanceRecordDetailPage, MaintenanceRecordsPage, SystemManagementPage } from "./PortalPages";
 
@@ -45,6 +45,12 @@ function ApplicationShell() {
   const [currentUser, setCurrentUser] = useState<Awaited<ReturnType<typeof getCurrentUser>> | null>(null);
   const [permissionError, setPermissionError] = useState<string | null>(null);
   const [authFailed, setAuthFailed] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationTab, setNotificationTab] = useState<"all" | "unread">("all");
+  const [notifications, setNotifications] = useState<Notification[] | null>(null);
+  const [notificationUnreadCount, setNotificationUnreadCount] = useState(0);
+  const [notificationError, setNotificationError] = useState<string | null>(null);
+  const [notificationLoading, setNotificationLoading] = useState(false);
   useEffect(() => {
     getCurrentUser().then((user) => { setPermissionCodes(user.permission_codes); setCurrentUser(user); }).catch(() => {
       clearActiveSession();
@@ -55,6 +61,40 @@ function ApplicationShell() {
   const activePage = pageForRoute(location.pathname);
   const visiblePages = useMemo(() => permissionCodes === null ? [] : pages.filter((page) => pagePermission(page.path, permissionCodes)), [permissionCodes]);
   const groups = [...new Set(visiblePages.map((page) => page.group))];
+  useEffect(() => {
+    if (!notificationsOpen) return;
+    setNotificationLoading(true);
+    setNotificationError(null);
+    getNotificationUnreadCount()
+      .then(({ unread_count }) => { setNotificationUnreadCount(unread_count); return getNotifications({ page: 1, pageSize: 10, unreadOnly: notificationTab === "unread" }); })
+      .then((result) => { setNotifications(result.items); setNotificationUnreadCount(result.unread_count); })
+      .catch(() => setNotificationError("通知加载失败，请重试。"))
+      .finally(() => setNotificationLoading(false));
+  }, [notificationsOpen, notificationTab]);
+  useEffect(() => {
+    if (!notificationsOpen && !agentOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") { setNotificationsOpen(false); setAgentOpen(false); } };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [notificationsOpen, agentOpen]);
+  useEffect(() => {
+    if (!notificationsOpen && !agentOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = previous; };
+  }, [notificationsOpen, agentOpen]);
+  async function openNotification(item: Notification) {
+    if (!item.is_read) {
+      try { await markNotificationRead(item.id); } catch { /* navigation remains available if acknowledgement fails */ }
+      setNotifications((current) => current?.map((entry) => entry.id === item.id ? { ...entry, is_read: true } : entry) ?? current);
+      setNotificationUnreadCount((count) => Math.max(0, count - 1));
+    }
+    setNotificationsOpen(false);
+    if (item.action_url) navigate(item.action_url);
+  }
+  async function markAllRead() {
+    try { await markAllNotificationsRead(); setNotifications((current) => current?.map((item) => ({ ...item, is_read: true })) ?? current); setNotificationUnreadCount(0); } catch { setNotificationError("通知操作失败，请重试。"); }
+  }
   function guarded(path: string, element: React.ReactNode) {
     if (permissionCodes === null || permissionError) return element;
     return pagePermission(path, permissionCodes) ? element : <section className="page-shell"><p role="alert">你没有访问此页面的权限。</p></section>;
@@ -95,6 +135,7 @@ function ApplicationShell() {
 
       <main className="main-area">
         <header className="topbar">
+          <button type="button" className="notification-trigger" aria-label="Notifications" aria-expanded={notificationsOpen} onClick={() => { setAgentOpen(false); setNotificationsOpen((open) => !open); }}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg>{notificationUnreadCount > 0 && <span className="notification-badge">{notificationUnreadCount > 99 ? "99+" : notificationUnreadCount}</span>}</button>
           <div className="topbar__heading">
             <button type="button" className="menu-button" aria-label="打开导航" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen((open) => !open)}>菜单</button>
             <div>
@@ -123,7 +164,15 @@ function ApplicationShell() {
           <Route path="/system-management" element={guarded("/system-management", <SystemManagementPage permissionCodes={permissionCodes ?? []} />)} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>}
-        {agentOpen && permissionCodes?.includes("intelligence:agent") && <GlobalAgentDrawer onClose={() => setAgentOpen(false)} />}
+        {notificationsOpen && <>
+          <button type="button" className="notification-scrim" aria-label="Close notifications" onClick={() => setNotificationsOpen(false)} />
+          <section className="notification-panel" role="dialog" aria-label="Notifications">
+            <header><div><strong>消息通知</strong><span>{notificationUnreadCount} 条未读</span></div><button type="button" onClick={() => void markAllRead()}>全部已读</button></header>
+            <div className="notification-tabs"><button type="button" aria-pressed={notificationTab === "all"} onClick={() => setNotificationTab("all")}>全部</button><button type="button" aria-pressed={notificationTab === "unread"} onClick={() => setNotificationTab("unread")}>未读</button></div>
+            <div className="notification-list">{notificationLoading ? <p role="status">正在加载通知…</p> : notificationError ? <div><p role="alert">{notificationError}</p><button type="button" onClick={() => setNotificationsOpen(false)}>关闭后重试</button></div> : notifications?.length ? notifications.map((item) => <button type="button" className={`notification-item ${item.is_read ? "is-read" : ""}`} key={item.id} onClick={() => void openNotification(item)}><span className="notification-item__dot" aria-hidden="true" /><span><strong>{item.title}</strong><small>{item.body}</small><small>关联对象 ID：{item.related_object_id ?? "-"} · {new Date(item.created_at).toLocaleString()}</small></span></button>) : <p>{notificationTab === "unread" ? "暂无未读消息" : "暂无消息通知"}</p>}</div>
+          </section>
+        </>}
+        {agentOpen && permissionCodes?.includes("intelligence:agent") && <><button type="button" className="agent-scrim" aria-label="Close Agent" onClick={() => setAgentOpen(false)} /><GlobalAgentDrawer onClose={() => setAgentOpen(false)} /></>}
       </main>
     </div>
   );

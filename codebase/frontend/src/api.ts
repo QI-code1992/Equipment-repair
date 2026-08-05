@@ -39,6 +39,30 @@ export function clearActiveSession() {
 export type CurrentUser = { id: string; username: string; enabled: boolean; permission_codes: string[] };
 export const getCurrentUser = () => requestJson<CurrentUser>("/api/auth/me");
 
+export type Notification = {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  level: string;
+  action_url: string | null;
+  related_object_id: string | null;
+  created_at: string;
+  is_read: boolean;
+};
+export type NotificationList = { items: Notification[]; total: number; unread_count: number };
+export type NotificationUnreadCount = { unread_count: number };
+export const getNotifications = (params?: { page?: number; pageSize?: number; unreadOnly?: boolean }) => {
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.pageSize) query.set("page_size", String(params.pageSize));
+  if (params?.unreadOnly) query.set("unread_only", "true");
+  return requestJson<NotificationList>(`/api/notifications${query.size ? `?${query}` : ""}`);
+};
+export const getNotificationUnreadCount = () => requestJson<NotificationUnreadCount>("/api/notifications/unread-count");
+export const markNotificationRead = (id: string) => requestJson<{ id: string; is_read: boolean }>(`/api/notifications/${id}/read`, { method: "PATCH" });
+export const markAllNotificationsRead = () => postJson<{ updated_count: number }>("/api/notifications/read-all", {});
+
 export async function login(username: string, password: string) {
   const response = await requestJson<{ access_token: string }>("/api/auth/login", {
     method: "POST",
