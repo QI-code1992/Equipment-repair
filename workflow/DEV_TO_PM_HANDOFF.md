@@ -1,5 +1,15 @@
 # 开发到产品交接
 
+## ECS 业务平台测试部署交接（2026-08-05）
+
+- 当前部署定位：阿里云 ECS 是本项目业务平台的测试部署环境，不是生产环境、Stage 7 验收结论或 Stage 8 发布。
+- 绑定代码：`77fbc4205b46885a5762cd8f9a92da455cf35e67`；ECS Compose 项目 `equipment-preview-77fbc42`。平台服务运行于 ECS；RAGFlow 固定在本地 Windows Docker Desktop/WSL2，统一目标版本 `v0.26.3`。
+- 网络：ECS 到 Windows RAGFlow 仅使用项目负责人管理的加密私网隧道；隧道端点、Token、Windows 防火墙和访问控制不进入仓库或台账。测试入口与证书边界见 `07-acceptance/ACCEPTANCE_ENVIRONMENT_DEPLOYMENT.md`。
+- 已验证：ECS 上 Compose、迁移、PostgreSQL、Redis、MinIO、ClamAV、API、Worker、Validator、Nginx、HTTPS `/healthz` 和 HTTP→HTTPS 跳转。
+- 未验证：ECS 当前未配置运行时 `RAGFLOW_API_KEY`，真实 RAGFlow 成功检索路径尚未验证；不得以环境可访问替代 Stage 6 重测、Stage 7 验收或生产发布证据。
+- 凭据：测试管理员仅由环境负责人经安全渠道分发；不得在 Git、PR、台账、日志或交接文档中记录明文密码、Token、私钥、连接串、Cookie 或 `.env`。进入验收或交接前须轮换测试管理员凭据。
+- 下一步：项目负责人可使用当前测试环境开展页面确认；发现的 UI/交互偏离继续进入 TASK-013 同一 Draft PR，全部整改完成后统一请求 DEV-001 审核。
+
 ## TASK-013 治理候选交接（2026-08-04）
 
 - 发现复核：本地静态 UI 演示仅用于视觉查看，不构成测试证据；它确认当前 `e8a28cee7515ad58e025ec81c65b460284919d75` 的正式 UI 与 Stage 3 原型存在实质偏离。

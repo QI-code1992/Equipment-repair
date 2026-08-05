@@ -1,18 +1,14 @@
 # 验收报告
 
-- 状态：进行中
-- 精确版本 / Commit SHA：`89fbd2129169fb6ece42094b17907885637f3c48`
-- 产品基线：Stage 1—4 已批准文档
-- 测试结论：Stage 6 独立测试结论已签发；其详细证据见 `06-testing/TEST_REPORT.md` 与 `workflow/DEV_TO_PM_HANDOFF.md`。
-- 最终结论：待独立产品验收完成后确定
-- 启动依据：项目负责人于 2026-07-29 明确批准该精确 HEAD 通过 Stage 6 → Stage 7 Gate。
-- 当前边界：本报告不提前宣布验收通过，不授权 Stage 8、生产发布或直接合入 `main`。
+- 状态：Blocked / 等待 TASK-013 完成与新的 Stage 6 独立结论。
+- 当前测试部署代码：`77fbc4205b46885a5762cd8f9a92da455cf35e67`；这不是当前验收候选或已批准的 Stage 6→7 Gate。
+- 产品基线：Stage 1—4 已批准文档；当前正式 UI 的原型一致性偏离由 `DEF-STAGE7-001` / TASK-013 回流 Stage 5 整改。
+- 最终结论：尚未作出；不授权 Stage 8、生产发布或直接合入 `main`。
 
-## 隔离验收环境部署
+## 当前业务平台测试部署
 
-- 状态：部署方案待项目负责人确认；尚未启动环境或执行任何验收项。
-- 目的：在项目负责人作出最终验收结论前，以隔离环境实际操作系统。
-- 部署候选：仍为 `89fbd2129169fb6ece42094b17907885637f3c48`；后续环境、镜像/构建身份、配置来源、测试数据边界和执行证据必须逐项记录在 `ACCEPTANCE_EVIDENCE.md`。
-- 执行门槛：项目负责人须先确认具体部署方案；“确认先进行测试部署”仅授权编制方案，不授权在未确认方案时启动环境。
-- 方案边界：不采用外部 ECS、FRP 或 PostgreSQL 16 环境；继续使用已批准的单机 Docker Desktop/WSL2、PostgreSQL 17、独立 RAGFlow 栈和本机回环 HTTPS 方案。
-- 退出边界：成功启动或完成观察均不等于 `ACCEPTED`、Stage 8 发布或 `main` 合并授权。
+- 状态：已部署，供项目负责人和同事进行页面/流程确认；不属于 Stage 7 验收通过证据。
+- 拓扑：阿里云 ECS 承载业务平台服务；RAGFlow 部署于本地 Windows Docker Desktop/WSL2，目标版本 `v0.26.3`。ECS 与 Windows 的加密私网隧道由项目负责人管理。
+- 已验证：ECS Compose 服务、迁移、HTTPS `/healthz`、静态资源和 HTTP→HTTPS 跳转；详细边界见 `ACCEPTANCE_ENVIRONMENT_DEPLOYMENT.md`。
+- 未验证：ECS 尚未配置运行时 `RAGFLOW_API_KEY`，真实 RAGFlow 成功检索及完整 Agent 成功路径尚未在该环境验证。
+- 退出边界：成功启动、页面可访问或人工观察均不等于 `ACCEPTED`、Stage 8 发布或 `main` 合并授权。TASK-013 集成后仍须以新的精确 SHA 执行 Stage 6 独立重测，并经项目负责人另行批准才可恢复 Stage 7。

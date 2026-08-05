@@ -2,6 +2,20 @@
   "state": "STAGE6_NOT_PASSED_STAGE5_TASK013_P0_PROTOTYPE_FIDELITY_REMEDIATION_IN_DEVELOPMENT",
   "updatedBy": "Project-owner direct TASK-013 development authorization",
   "updatedAt": "2026-08-04",
+  "testDeployment": {
+    "changeRequest": "CR-050",
+    "status": "ACTIVE_TEST_DEPLOYMENT_NOT_A_STAGE_GATE_RESULT",
+    "platformCommit": "77fbc4205b46885a5762cd8f9a92da455cf35e67",
+    "platformEnvironment": "Alibaba Cloud ECS business-platform test deployment",
+    "platformComposeProject": "equipment-preview-77fbc42",
+    "ragflowEnvironment": "Local Windows Docker Desktop/WSL2 via project-owner managed encrypted private tunnel",
+    "ragflowTargetVersion": "v0.26.3",
+    "publicAccess": "HTTPS test endpoint recorded in ACCEPTANCE_ENVIRONMENT_DEPLOYMENT.md; short-lived self-signed test certificate only",
+    "verified": "ECS Compose services, migrations, PostgreSQL, Redis, MinIO, ClamAV, API, Worker, Validator, Nginx, HTTPS health endpoint and HTTP-to-HTTPS redirect were verified in the test deployment.",
+    "unverified": "No runtime RAGFLOW_API_KEY is configured in the ECS test environment; real RAGFlow retrieval success remains unverified. This deployment does not pass Stage 6, Stage 7 or Stage 8.",
+    "secretsPolicy": "Do not commit or record administrator credentials, tokens, private keys, connection strings, cookies, runtime volumes or .env contents. Rotate test credentials before acceptance or handoff.",
+    "nextAction": "Use the deployed test environment for project-owner page review while TASK-013 continues; record page findings as implementation defects or approved changes."
+  },
   "stage5PrototypeFidelityRemediation": {
     "taskId": "TASK-013",
     "defect": "DEF-STAGE7-001",
