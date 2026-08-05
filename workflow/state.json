@@ -14,7 +14,14 @@
     "verified": "ECS Compose services, migrations, PostgreSQL, Redis, MinIO, ClamAV, API, Worker, Validator, Nginx, HTTPS health endpoint and HTTP-to-HTTPS redirect were verified in the test deployment.",
     "unverified": "No runtime RAGFLOW_API_KEY is configured in the ECS test environment; real RAGFlow retrieval success remains unverified. This deployment does not pass Stage 6, Stage 7 or Stage 8.",
     "secretsPolicy": "Do not commit or record administrator credentials, tokens, private keys, connection strings, cookies, runtime volumes or .env contents. Rotate test credentials before acceptance or handoff.",
-    "nextAction": "Use the deployed test environment for project-owner page review while TASK-013 continues; record page findings as implementation defects or approved changes."
+    "autoDeploy": {
+      "status": "APPROVED_BLOCKED_BY_ECS_SSH_AUTHORIZATION",
+      "sourceBranch": "codex/task-013-prototype-fidelity-remediation",
+      "trigger": "Each pushed commit only; uncommitted local changes are excluded.",
+      "requiredBehavior": "Serialize deployments, record the deployed SHA, build before switching, health-check the candidate, preserve the prior working version on failure, and retain one rollback version.",
+      "blocker": "Existing local SSH keys are not accepted by root@101.37.16.206; environment owner must authorize a deployment public key before ECS configuration can proceed."
+    },
+    "nextAction": "Authorize the ECS deployment SSH public key, then configure and verify automatic deployment while TASK-013 continues; record page findings as implementation defects or approved changes."
   },
   "stage5PrototypeFidelityRemediation": {
     "taskId": "TASK-013",
