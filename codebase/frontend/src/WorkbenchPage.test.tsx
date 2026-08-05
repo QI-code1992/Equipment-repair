@@ -17,7 +17,7 @@ describe("WorkbenchPage", () => {
     render(<MemoryRouter><WorkbenchPage /></MemoryRouter>);
 
     expect(await screen.findByRole("heading", { name: "待办处置" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "风险总览" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "当前健康风险概览" })).toBeInTheDocument();
     expect(screen.getByText("WO-001")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /故障上报/ })).toBeInTheDocument();
   });
@@ -42,7 +42,7 @@ describe("WorkbenchPage", () => {
     vi.mocked(getWorkbenchAlertSummary).mockResolvedValue({ active_fault_count: 0, status_counts: [], urgency_counts: [] });
     vi.mocked(getWorkbenchShortcuts).mockResolvedValue({ items: [] });
     vi.mocked(getEquipment).mockResolvedValue([{ id: "eq-1", code: "EQ-01", name: "装载机", model: "L-1", type: "LOADER", manufacturer: "M", manufactured_at: null, commissioned_at: null, status: "NORMAL", organization_id: "line-1", owner_user_id: null, operating_hours: 0, image_refs: [] }]);
-    render(<WorkbenchPage />);
+    render(<MemoryRouter><WorkbenchPage /></MemoryRouter>);
     await screen.findByRole("option", { name: "EQ-01 · 装载机" });
     fireEvent.change(screen.getByLabelText("设备 ID"), { target: { value: "eq-1" } });
     fireEvent.click(screen.getByRole("button", { name: "查询健康分" }));
