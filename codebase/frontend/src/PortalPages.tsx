@@ -58,7 +58,15 @@ function TrendChart({ trend }: { trend: BiDashboard["trend"] }) {
 
 function TrendSeriesChart({ label, values, dates }: { label: string; values: number[]; dates: string[] }) {
   const maximum = Math.max(1, ...values);
-  return <div className="bi-series-chart" role="img" aria-label={`${label}趋势图`}><div className="bi-series-chart__bars" aria-hidden="true">{values.map((value, index) => <span key={`${dates[index]}-${value}`} style={{ height: `${value / maximum * 100}%` }} />)}</div><ul>{values.map((value, index) => <li key={`${dates[index]}-label`}>{dates[index]}：{value}</li>)}</ul></div>;
+  const width = 320;
+  const height = 120;
+  const padding = 12;
+  const points = values.map((value, index) => {
+    const x = values.length <= 1 ? width / 2 : padding + (index / (values.length - 1)) * (width - padding * 2);
+    const y = height - padding - (value / maximum) * (height - padding * 2);
+    return `${x},${y}`;
+  }).join(" ");
+  return <div className="bi-series-chart" role="img" aria-label={`${label}趋势图`}><svg className="bi-series-chart__line" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" aria-hidden="true"><line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} /><polyline points={points} /><g>{values.map((value, index) => { const [x, y] = points.split(" ")[index].split(","); return <circle key={`${dates[index]}-${value}`} cx={x} cy={y} r="3" />; })}</g></svg><ul>{values.map((value, index) => <li key={`${dates[index]}-label`}>{dates[index]}：{value}</li>)}</ul></div>;
 }
 
 export function EquipmentLedgerPage() {
