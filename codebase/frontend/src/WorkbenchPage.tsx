@@ -14,11 +14,12 @@ export function WorkbenchPage() {
   const [todoFilter, setTodoFilter] = useState<"ALL" | "PENDING_ACCEPT" | "IN_REPAIR" | "VERY_HIGH" | "HIGH">("ALL");
   const [refreshing, setRefreshing] = useState(false);
   const [refresh, setRefresh] = useState(0);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
 
   useEffect(() => {
     setRefreshing(true);
     Promise.all([getWorkbenchTodos(), getWorkbenchAlertSummary(), getWorkbenchShortcuts(), getEquipment()])
-      .then(([todoData, summaryData, shortcutData, equipmentData]) => { setTodos(todoData.items); setSummary(summaryData); setShortcuts(shortcutData.items); setEquipment(Array.isArray(equipmentData) ? equipmentData : (equipmentData && typeof equipmentData === "object" && Array.isArray((equipmentData as { items?: unknown }).items) ? (equipmentData as { items: Equipment[] }).items : [])); })
+      .then(([todoData, summaryData, shortcutData, equipmentData]) => { setTodos(todoData.items); setSummary(summaryData); setShortcuts(shortcutData.items); setEquipment(Array.isArray(equipmentData) ? equipmentData : (equipmentData && typeof equipmentData === "object" && Array.isArray((equipmentData as { items?: unknown }).items) ? (equipmentData as { items: Equipment[] }).items : [])); setUpdatedAt(new Date().toLocaleString()); })
       .catch((error: unknown) => setMessage(error instanceof ApiError && error.status === 403 ? "无权查看工作台数据。" : "工作台数据加载失败，请稍后重试。"))
       .finally(() => setRefreshing(false));
   }, [refresh]);
@@ -41,7 +42,7 @@ export function WorkbenchPage() {
   const visibleTodos = todos?.filter((todo) => todoFilter === "ALL" ? true : todoFilter === "PENDING_ACCEPT" || todoFilter === "IN_REPAIR" ? todo.status === todoFilter : todo.urgency === todoFilter) ?? null;
 
   return <section className="portal-page workbench-page" aria-labelledby="page-heading">
-    <header className="workbench-head"><div><p className="page-shell__eyebrow">今日运维态势</p><h2 id="page-heading">运维工作台</h2><p>聚焦当前风险、待办和快速处置；业务事实均来自正式 API。</p></div><button type="button" className="button-secondary" disabled={refreshing} onClick={() => setRefresh((value) => value + 1)}>{refreshing ? "刷新中…" : "↻ 刷新"}</button></header>
+    <header className="workbench-head"><div><p className="page-shell__eyebrow">今日运维态势</p><h2 id="page-heading">运维工作台</h2><p>聚焦当前风险、待办和快速处置；业务事实均来自正式 API。</p></div><div className="workbench-actions"><span className="workbench-updated">数据更新时间：{updatedAt ?? "—"}</span><button type="button" className="button-secondary" disabled={refreshing} onClick={() => setRefresh((value) => value + 1)}>{refreshing ? "刷新中…" : "↻ 刷新"}</button><a aria-label="创建新故障记录" className="button-primary" href="/fault-report">＋ 故障上报</a></div></header>
     <form className="workbench-scope-card" aria-label="组织范围筛选" onSubmit={(event) => event.preventDefault()}><label>组织范围<select disabled aria-label="组织范围"><option>当前 API 未提供组织范围筛选</option></select></label><label>区域<select disabled aria-label="区域"><option>当前 API 未提供区域筛选</option></select></label><label>设备类型<select disabled aria-label="设备类型"><option>当前 API 未提供设备类型筛选</option></select></label></form>
     {message && <p role="alert">{message}</p>}
     {summary?.active_fault_count ? <div className="workbench-attention" role="status"><span className="workbench-attention__icon" aria-hidden="true">!</span><span>当前有 {summary.active_fault_count} 项活动风险，需要优先处理。</span><Link to="/fault-report">进入故障上报</Link></div> : null}
