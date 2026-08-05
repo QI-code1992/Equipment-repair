@@ -380,7 +380,7 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter><SystemManagementPage permissionCodes={["identity:read"]} /></MemoryRouter>);
 
-    expect(await screen.findByRole("tab", { name: "账号管理" })).toHaveAttribute("aria-selected", "true");
+    expect(await screen.findByRole("tab", { name: "角色管理" })).toHaveAttribute("aria-selected", "true");
     expect(screen.getByRole("tab", { name: "审计事件" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "创建账号" })).not.toBeInTheDocument();
   });
@@ -396,7 +396,7 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
 
-    fireEvent.click(await screen.findByRole("tab", { name: "角色权限" }));
+    fireEvent.click(await screen.findByRole("tab", { name: "角色管理" }));
     (await screen.findByRole("button", { name: "保存角色权限" })).click();
 
     await screen.findByText("角色权限已更新。");
@@ -417,7 +417,7 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
 
-    fireEvent.click(await screen.findByRole("tab", { name: "角色权限" }));
+    fireEvent.click(await screen.findByRole("tab", { name: "角色管理" }));
     const checkbox = await screen.findByRole("checkbox", { name: "fault:create" });
     fireEvent.click(checkbox);
     fireEvent.click(screen.getByRole("button", { name: "保存角色权限" }));

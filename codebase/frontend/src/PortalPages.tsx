@@ -232,7 +232,7 @@ export function SystemManagementPage({ permissionCodes }: { permissionCodes?: st
 function SystemManagementContent({ canWrite }: { canWrite: boolean }) {
   const [refresh, setRefresh] = useState(0);
   const [saving, setSaving] = useState(false);
-  const [section, setSection] = useState<"users" | "roles" | "permissions" | "audit" | "organization" | "profile" | "loginLogs" | "operationLogs">("users");
+  const [section, setSection] = useState<"users" | "roles" | "permissions" | "audit" | "organization" | "profile" | "loginLogs" | "operationLogs">("roles");
   const [auditAction, setAuditAction] = useState("");
   const [auditPage, setAuditPage] = useState(1);
   const audits = useData(() => getAuditEvents({ action: auditAction || undefined, page: auditPage }), [auditAction, auditPage, refresh]);
@@ -276,7 +276,7 @@ function SystemManagementContent({ canWrite }: { canWrite: boolean }) {
     <section className="system-module-index" aria-label="系统管理模块"><h3>角色列表</h3><h3>组织树</h3><h3>用户列表</h3><h3>我的账号</h3><h3>登录日志</h3><h3>操作日志</h3><h3>新增角色</h3><h3>角色基础信息</h3><h3>权限配置</h3><h3>新增用户</h3><h3>用户详情</h3><h3>确认操作</h3><h3>新增组织</h3><h3>权限上下文</h3><p className="prototype-unavailable">当前页面仅展示正式身份与审计 API 已提供的数据；未提供的原型模块保留位置并明确不可用。</p></section>
     {notice && <p role="status">{notice}</p>}
     <div className="section-tabs" role="tablist" aria-label="系统管理分区">
-      {[ ["users", "用户列表"], ["roles", "角色列表"], ["organization", "组织树"], ["permissions", "权限配置"], ["audit", "审计事件"], ["profile", "我的账号"], ["loginLogs", "登录日志"], ["operationLogs", "操作日志"] ].map(([id, label]) => <button key={id} type="button" role="tab" aria-label={id === "users" ? "账号管理" : id === "roles" ? "角色权限" : undefined} aria-selected={section === id} onClick={() => setSection(id as typeof section)}>{label}</button>)}
+      {[ ["users", "用户管理"], ["roles", "角色管理"], ["organization", "组织树"], ["permissions", "权限配置"], ["audit", "审计事件"], ["profile", "我的账号"], ["loginLogs", "登录日志"], ["operationLogs", "操作日志"] ].map(([id, label]) => <button key={id} type="button" role="tab" aria-label={id === "users" ? "用户管理" : id === "roles" ? "角色管理" : undefined} aria-selected={section === id} onClick={() => setSection(id as typeof section)}>{label}</button>)}
     </div>
     <section className="section-tab-panel" role="tabpanel">
     {section === "users" && <><div className="panel-heading"><div><h3>账号管理</h3><p>仅身份写入权限可新增或调整账号状态。</p></div><span className={`status-chip ${canWrite ? "status-chip--success" : "status-chip--neutral"}`}>{canWrite ? "可管理" : "只读"}</span></div>
