@@ -49,7 +49,6 @@ describe("IntelligentConfigPage", () => {
 
     expect(await screen.findByText("内部模型服务")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "模型与绑定" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Agent 控制面" })).toBeInTheDocument();
     expect(screen.getByText("运维模型（ops-1）")).toBeInTheDocument();
     expect(screen.queryByText(/secret-ref-value/)).not.toBeInTheDocument();
 
@@ -63,6 +62,8 @@ describe("IntelligentConfigPage", () => {
     fireEvent.change(screen.getByLabelText("模型名称"), { target: { value: "ops-2" } });
     fireEvent.click(screen.getByRole("button", { name: "新增模型绑定" }));
     await waitFor(() => expect(createModelBinding).toHaveBeenCalledWith(expect.objectContaining({ name: "备用模型", model_name: "ops-2" })));
+    fireEvent.click(screen.getByRole("tab", { name: "智能体配置" }));
+    expect(screen.getByRole("heading", { name: "Agent 控制面" })).toBeInTheDocument();
   });
 
   it("edits a provider and binding through the formal APIs without displaying its secret reference", async () => {
@@ -101,6 +102,7 @@ describe("IntelligentConfigPage", () => {
     vi.mocked(uploadKnowledgeDocument).mockResolvedValue({ id: "doc-1", filename: "manual.pdf", status: "UPLOADING" });
     render(<IntelligentConfigPage />);
     await screen.findByText("暂无模型提供商。");
+    fireEvent.click(screen.getByRole("tab", { name: "知识库配置" }));
     fireEvent.change(screen.getByLabelText("正式 Dataset ID"), { target: { value: "dataset-1" } });
     fireEvent.change(screen.getByLabelText("上传知识文档"), { target: { files: [new File(["manual"], "manual.pdf", { type: "application/pdf" })] } });
     await waitFor(() => expect(uploadKnowledgeDocument).toHaveBeenCalledWith("dataset-1", expect.any(File)));
