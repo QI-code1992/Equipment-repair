@@ -47,6 +47,8 @@ describe("TASK-012 portal pages", () => {
     expect(screen.getByRole("heading", { name: "效率分析" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "设备健康列表" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "指标历史对比" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "趋势粒度" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("图表视图")).not.toBeInTheDocument();
     expect(screen.getAllByText("当前 API 未提供设备健康列表数据。")).toHaveLength(2);
     expect(screen.getByText("当前 API 未提供指标历史对比数据。")).toBeInTheDocument();
   });
