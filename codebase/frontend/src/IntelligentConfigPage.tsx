@@ -25,17 +25,12 @@ const agentLabels: Record<string, string> = {
   fault_diagnosis: "故障诊断",
 };
 
-const prototypeConfigModules = [
-  "模型配置", "知识文件列表",
-  "Agent 调用记录", "Token 趋势", "异常消耗提醒", "模型消耗分析", "Agent 消耗分析", "Token 明细",
-  "资源绑定", "检索与改写", "生成多样性", "输入及输出设置", "深度思考", "体验配置", "系统提示词",
-  "基础信息", "模型", "解析与切片", "混合检索配置", "Agent 调用详情", "知识文件详情", "上传知识文件",
-  "创建设置", "数据处理", "准备提交处理", "删除知识文件", "提示词历史版本", "添加知识库", "Agent 测试运行",
-  "测试输入", "测试结果", "智能问数指标管理", "模型详情", "测试连接结果", "删除模型", "数据查询配置",
-  "调试摘要", "故障诊断 Agent 检索知识库", "故障诊断 Agent 执行链路", "故障诊断 Agent 检索明细",
-  "AI 故障上报 Agent 生成摘要", "AI 故障上报 Agent 执行链路", "AI 故障上报 Agent 执行结果",
-  "故障诊断 Agent 调用模型", "故障诊断 Agent 模型调用明细", "故障诊断 Agent 异常原因与处理建议",
-  "智能问数 Agent 调用模型", "智能问数 Agent 超时", "智能问数 Agent 异常原因与处理建议",
+const prototypeConfigGroups = [
+  { title: "模型配置", modules: ["默认 LLM", "默认 Embedding", "默认 Rerank", "模型详情", "测试连接结果", "删除模型"] },
+  { title: "智能体配置", modules: ["AI故障上报 Agent", "智能问数 Agent", "操作指引 Agent", "故障诊断 Agent", "资源绑定", "检索与改写", "生成多样性", "输入及输出设置", "深度思考", "体验配置", "系统提示词", "Agent 测试运行", "测试输入", "测试结果", "智能问数指标管理", "数据查询配置", "调试摘要"] },
+  { title: "知识库配置", modules: ["设备类知识库", "故障案例知识库", "安全规范知识库", "系统操作知识库", "业务流程知识库", "指标口径知识库", "企业制度/项目资料知识库", "知识文件列表", "知识文件详情", "上传知识文件", "创建设置", "数据处理", "准备提交处理", "删除知识文件", "提示词历史版本", "添加知识库", "基础信息", "模型", "解析与切片", "混合检索配置"] },
+  { title: "调用记录", modules: ["Agent 调用记录", "Agent 调用详情", "故障诊断 Agent 检索知识库", "故障诊断 Agent 执行链路", "故障诊断 Agent 检索明细", "AI 故障上报 Agent 生成摘要", "AI 故障上报 Agent 执行链路", "AI 故障上报 Agent 执行结果", "故障诊断 Agent 调用模型", "故障诊断 Agent 模型调用明细", "故障诊断 Agent 异常原因与处理建议", "智能问数 Agent 调用模型", "智能问数 Agent 超时", "智能问数 Agent 异常原因与处理建议"] },
+  { title: "Token 消耗统计", modules: ["Token 趋势", "异常消耗提醒", "模型消耗分析", "Agent 消耗分析", "Token 明细"] },
 ];
 
 function agentLabel(agentId: string) {
@@ -215,7 +210,7 @@ export function IntelligentConfigPage({ permissionCodes = [] }: { permissionCode
   return <section className="config-page" aria-labelledby="page-heading">
     <h2 id="page-heading" className="sr-only">智能配置</h2>
     <section className="config-module-index" aria-label="智能配置模块"><h3>默认 LLM</h3><h3>默认 Embedding</h3><h3>默认 Rerank</h3><h3>智能体配置</h3><h3>知识库配置</h3><p className="prototype-unavailable">具体模型、Agent 与知识库状态仅展示正式配置 API 返回内容。</p></section>
-    <section className="config-prototype-catalogue" aria-label="智能配置原型模块"><header><h3>原型配置模块</h3><p>以下模块位置与原型保持一致；当前 API 未覆盖的模块明确显示不可用，不生成演示业务数据。</p></header><div className="config-prototype-catalogue__grid">{prototypeConfigModules.map((module) => <article key={module}><h4>{module}</h4><p className="prototype-unavailable">当前 API 未提供该模块数据。</p></article>)}</div></section>
+    <section className="config-prototype-catalogue" aria-label="智能配置原型模块"><header><h3>配置中心模块</h3><p>以下分区与批准原型一致；当前 API 未覆盖的模块保留位置并明确显示不可用，不生成演示业务数据。</p></header><div className="config-prototype-groups">{prototypeConfigGroups.map((group) => <section className="config-prototype-group" key={group.title} aria-label={group.title}><p className="config-prototype-group-title">{group.title}</p><div className="config-prototype-catalogue__grid">{group.modules.map((module) => <article key={module}><p className="config-prototype-module-name">{module}</p><p className="prototype-unavailable">当前 API 未提供该模块数据。</p></article>)}</div></section>)}</div></section>
     {error && <p role="alert">{error}</p>}
     {notice && <p role="status">{notice}</p>}
     <section className="config-catalogue" aria-labelledby="catalogue-heading"><header><h3 id="catalogue-heading">模型与绑定</h3><p>提供商、模型绑定和 Agent 配置保持独立的正式管理边界。</p></header><div className="config-catalogue__grid"><section className="data-card" aria-labelledby="provider-heading"><h3 id="provider-heading">模型提供商</h3>
