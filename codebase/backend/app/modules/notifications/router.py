@@ -28,6 +28,7 @@ def _notification_body(notification: Notification, *, is_read: bool) -> dict[str
         "body": notification.body,
         "level": notification.level,
         "action_url": notification.action_url,
+        "related_object_id": notification.related_object_id,
         "created_at": notification.created_at.isoformat(),
         "is_read": is_read,
     }

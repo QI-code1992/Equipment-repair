@@ -24,6 +24,7 @@ class Notification(Base):
     body: Mapped[str] = mapped_column(Text, nullable=False)
     level: Mapped[str] = mapped_column(String(20), nullable=False)
     action_url: Mapped[str | None] = mapped_column(String(500))
+    related_object_id: Mapped[str | None] = mapped_column(String(100))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=utc_now
     )

@@ -16,7 +16,7 @@ def test_task013_upgrade_and_downgrade_notification_schema(tmp_path, monkeypatch
     engine = create_engine(database_url)
     config.attributes["connection"] = engine.connect()
     try:
-        command.upgrade(config, "0007_task013_notifications")
+        command.upgrade(config, "0008_task013_notification_metadata")
         inspector = inspect(engine)
         assert {"notifications", "notification_reads"} <= set(inspector.get_table_names())
         assert {
@@ -25,6 +25,9 @@ def test_task013_upgrade_and_downgrade_notification_schema(tmp_path, monkeypatch
         assert {
             "id", "notification_id", "user_id", "read_at"
         } <= {column["name"] for column in inspector.get_columns("notification_reads")}
+        assert "related_object_id" in {
+            column["name"] for column in inspector.get_columns("notifications")
+        }
         assert {
             tuple(constraint["column_names"])
             for constraint in inspector.get_unique_constraints("notification_reads")

@@ -9,6 +9,7 @@ from app.core.idempotency import find_idempotent_response, save_idempotent_respo
 from app.modules.audit.service import write_audit_event
 from app.modules.identity.dependencies import require_permission
 from app.modules.identity.models import User
+from app.modules.notifications.service import add_notification
 from app.modules.maintenance import service
 from app.modules.maintenance.models import (
     FaultReport,
@@ -134,6 +135,15 @@ def create_fault_report(
         result="success",
         metadata=request_body,
     )
+    add_notification(
+        db,
+        notification_type="FAULT",
+        title="故障单待处理",
+        body=f"{item.number} 已提交，等待维修负责人处理。",
+        level="CRITICAL" if item.urgency.upper() in {"CRITICAL", "VERY_HIGH", "URGENT"} else "INFO",
+        related_object_id=item.id,
+        action_url=f"/fault-reports/{item.id}",
+    )
     body = {**fault_report_body(item), "audit_event_id": event.id}
     save_idempotent_response(
         db,
@@ -217,6 +227,15 @@ def complete_repair(
         db, actor_user_id=actor.id, action="repair.complete",
         resource_type="work_order", resource_id=order.id,
         result="success", metadata=request_body,
+    )
+    add_notification(
+        db,
+        notification_type="REPAIR",
+        title="维修记录已提交",
+        body=f"{record.id} 已提交维修结果，请查看维修记录。",
+        level="SUCCESS",
+        related_object_id=record.id,
+        action_url=f"/maintenance-records/{record.id}",
     )
     body = {**repair_result_body(order, fault, record, case), "audit_event_id": event.id}
     save_idempotent_response(
