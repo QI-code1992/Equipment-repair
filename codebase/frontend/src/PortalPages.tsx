@@ -47,7 +47,10 @@ export function EquipmentLedgerPage() {
   const state = useData<Equipment[]>(getEquipment, []);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
-  return <Page title="设备台账"><State state={state} empty={(items) => !items.length}>{(items) => {
+  if (state.loading) return <Page title="设备台账"><p role="status">正在加载…</p></Page>;
+  if (state.error) return <Page title="设备台账"><p role="alert">请求失败：{state.error}</p></Page>;
+  const items = state.value ?? [];
+  return <Page title="设备台账">{(() => {
     const filtered = items.filter((item) => (!query || [item.code, item.name, item.model, item.status].some((value) => value.includes(query))) && (!status || item.status === status));
     const statusCounts = items.reduce<Record<string, number>>((counts, item) => ({ ...counts, [item.status]: (counts[item.status] ?? 0) + 1 }), {});
     return <>
@@ -62,10 +65,10 @@ export function EquipmentLedgerPage() {
       </section>
       <section className="ledger-table-panel">
         <header><div><h3>资产列表</h3><p>{filtered.length === items.length ? "当前显示全部已加载设备。" : `当前显示 ${filtered.length} 台符合筛选条件的设备。`}</p></div></header>
-        {filtered.length ? <table><thead><tr><th>设备身份</th><th>型号与制造商</th><th>所属组织</th><th>运行工时</th><th>状态</th><th>操作</th></tr></thead><tbody>{filtered.map((item) => <tr key={item.id}><td><strong>{item.name}</strong><small>{item.code}</small></td><td><strong>{item.model}</strong><small>{item.manufacturer}</small></td><td>{item.organization_id}</td><td>{item.operating_hours}</td><td><span className={`status-chip ${item.status === "FAULT" ? "status-chip--danger" : item.status === "NORMAL" ? "status-chip--success" : "status-chip--neutral"}`}>{item.status}</span></td><td className="table-actions"><Link to={`/equipment/${item.id}`}>详情</Link><Link to={`/equipment/${item.id}/edit`}>编辑</Link></td></tr>)}</tbody></table> : <p className="empty-panel" role="status">没有符合筛选条件的正式设备数据。</p>}
+        {filtered.length ? <table><thead><tr><th>设备身份</th><th>型号与制造商</th><th>所属组织</th><th>运行工时</th><th>状态</th><th>操作</th></tr></thead><tbody>{filtered.map((item) => <tr key={item.id}><td><strong>{item.name}</strong><small>{item.code}</small></td><td><strong>{item.model}</strong><small>{item.manufacturer}</small></td><td>{item.organization_id}</td><td>{item.operating_hours}</td><td><span className={`status-chip ${item.status === "FAULT" ? "status-chip--danger" : item.status === "NORMAL" ? "status-chip--success" : "status-chip--neutral"}`}>{item.status}</span></td><td className="table-actions"><Link to={`/equipment/${item.id}`}>详情</Link><Link to={`/equipment/${item.id}/edit`}>编辑</Link></td></tr>)}</tbody></table> : <p className="empty-panel" role="status">{items.length ? "没有符合筛选条件的正式设备数据。" : "尚未登记正式设备。"}</p>}
       </section>
     </>;
-  }}</State></Page>;
+  })()}</Page>;
 }
 
 export function EquipmentDetailPage() {

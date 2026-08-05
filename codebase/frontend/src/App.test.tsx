@@ -61,6 +61,18 @@ describe("App", () => {
     expect(screen.queryByLabelText("设备编码")).not.toBeInTheDocument();
   });
 
+  it("keeps the contextual topbar title on nested equipment routes", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["equipment:read", "equipment:write", "organization:read", "identity:read"] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "line-1", type: "LINE", code: "LINE-01", name: "一线", parent_id: "factory-1", enabled: true }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "user-2", username: "owner", enabled: true, role_ids: [] }]), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<MemoryRouter initialEntries={["/equipment/new"]}><App /></MemoryRouter>);
+
+    expect(await screen.findByText("资产管理 / 新增设备")).toBeInTheDocument();
+  });
+
   it("loads an Agent configuration and saves only the selected Agent", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "admin", enabled: true, permission_codes: ["bi:view", "organization:read", "organization:write", "equipment:read", "equipment:write", "intelligence:model", "intelligence:audit", "intelligence:agent", "intelligence:knowledge", "fault:create", "maintenance:view", "maintenance:detail", "fault:repair", "fault:close", "identity:read", "identity:write", "system:audit", "workbench:view"] }), { status: 200 }))

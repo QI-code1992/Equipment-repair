@@ -1,5 +1,13 @@
 # 功能/页面检查点
 
+## FCP-013-UI-ROUTE-CONTEXT：TASK-013 前端增量修复（2026-08-05）
+
+- 分支：`codex/task-013-prototype-fidelity-remediation`；提交：`5695716`。
+- 范围：深层设备/维修路由保持正确的顶部导航上下文；移动端应用壳增加可关闭的侧栏与遮罩；设备台账空数组保留“新增设备”入口并显示真实空态；移除未使用的前端基础占位组件。
+- 自动化验证：前端 Vitest `8 个测试文件、76 passed`；`npm run build` 通过；`node --test 06-testing/tests/*.test.js` 为 `15 passed`；`git diff --check` 通过。
+- 未验证：本机未连接真实业务 API，未执行登录后的浏览器业务流程、Windows Docker/RAGFlow/HTTPS/live-stack 验证；本检查点不关闭 `DEF-STAGE7-001`，不解锁 Stage 6、Stage 7 或 Stage 8。
+- 依赖与兼容：未新增生产依赖、兼容层或抽象层；未修改 API、数据库、权限、部署配置。
+
 ## FCP-012 整体开发候选本地完成（2026-07-31）
 
 - 分支：`codex/task-012-p0-frontend-remediation`；最新精确开发提交：`08e1576`。
