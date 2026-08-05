@@ -150,7 +150,7 @@ export function RepairExecutionPage({ permissionCodes }: { permissionCodes?: str
   return (
     <section className="page-shell" aria-labelledby="page-heading">
       <div className="page-shell__eyebrow">现场作业</div>
-      <h2 id="page-heading">维修执行</h2>
+      <h2 id="page-heading">维修执行详情</h2>
       <section className="prototype-module-note" aria-label="工单摘要"><h3>工单摘要</h3><p>工单身份、设备和当前状态均来自正式工单 API。</p></section>
       <section className="repair-workspace" aria-label="工单与诊断"><h3>工单与诊断</h3><section aria-label="已分配工单"><h4>已分配工单</h4><label>工单状态<select aria-label="维修执行工单状态筛选" value={orderStatus} onChange={(event) => { setOrderStatus(event.target.value); setAssignedOrders(null); setSelectedOrder(null); }}><option value="">全部</option><option value="PENDING_ACCEPT">待接单</option><option value="IN_REPAIR">维修中</option><option value="PENDING_INSPECTION">待验收</option><option value="COMPLETED">已完成</option></select></label>{assignedOrders === null ? <p>正在加载工单…</p> : assignedOrders.length === 0 ? <p>暂无已分配工单。</p> : <ul>{assignedOrders.map((order) => <li key={order.id}><button type="button" onClick={() => void selectOrder(order)}>{order.number} · {order.status} · {order.symptom}</button></li>)}</ul>}{selectedOrder && <dl className="detail-list"><dt>当前工单</dt><dd>{selectedOrder.number}</dd><dt>状态</dt><dd>{selectedOrder.status}</dd><dt>设备</dt><dd>{selectedOrder.equipment_id}</dd></dl>}{ordersError && <p role="alert">{ordersError}</p>}</section>
       <label>故障单 ID<input aria-label="故障单 ID" value={faultId} readOnly={!manualFallback} aria-readonly={!manualFallback ? "true" : undefined} onChange={(event) => manualFallback && setFaultId(event.target.value)} placeholder={manualFallback ? "可输入故障单 ID" : "请先从已分配工单中选择"} /></label>
@@ -168,7 +168,7 @@ export function RepairExecutionPage({ permissionCodes }: { permissionCodes?: str
         <label>处理方案<textarea value={result.actual_solution} onChange={(event) => setResult({ ...result, actual_solution: event.target.value })} /></label>
         <label>维修结果<textarea value={result.repair_result} onChange={(event) => setResult({ ...result, repair_result: event.target.value })} /></label>
         <label>备件更换说明<textarea aria-label="备件更换说明" value={result.parts_replacement_notes} onChange={(event) => setResult({ ...result, parts_replacement_notes: event.target.value })} /></label>
-        <button type="button" disabled={!canClose || resultSubmitting} onClick={() => void submitResult()}>{resultSubmitting ? "提交中…" : "提交维修结果"}</button>
+        <div className="form-actions"><button type="button" className="button-secondary" disabled title="当前 API 未提供草稿保存接口">保存草稿</button><button type="button" className="button-secondary" disabled title="当前 API 未提供复制接口">复制维修摘要</button><button type="button" aria-label="提交维修结果" disabled={!canClose || resultSubmitting} onClick={() => void submitResult()}>{resultSubmitting ? "提交中…" : "提交验收"}</button></div>
       </section>}
       {completed && <section aria-label="维修完成结果"><p>{completed.parts_replacement_notes}</p>{repair?.start_mode === "ADOPTED" && summaryText && <><p>AI 对话摘要：{summaryText}</p>{keyEvidence.length > 0 && <p>关键证据：{keyEvidence.join("；")}</p>}</>}</section>}
       <section className="agent-chat" aria-label="操作指引"><h3>建议与引用</h3><h3>操作指引</h3>

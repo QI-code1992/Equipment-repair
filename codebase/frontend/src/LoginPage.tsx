@@ -12,6 +12,7 @@ export function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -44,6 +45,8 @@ export function LoginPage() {
       <label>密码<input aria-label="密码" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label>
       {error && <p role="alert">{error}</p>}
       <button type="submit" disabled={submitting}>{submitting ? "登录中…" : "登录系统"}</button>
+      <button type="button" className="login-forgot" onClick={() => setForgotOpen(true)}>忘记密码</button>
     </form>
+    {forgotOpen && <div className="modal-scrim" role="presentation"><section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="forgot-password-heading"><header><h2 id="forgot-password-heading">忘记密码</h2><button type="button" aria-label="关闭" onClick={() => setForgotOpen(false)}>×</button></header><p>请联系平台管理员重置账号密码，平台不会通过页面回显或发送密码。</p><button type="button" className="button-primary" onClick={() => setForgotOpen(false)}>知道了</button></section></div>}
   </main>;
 }
