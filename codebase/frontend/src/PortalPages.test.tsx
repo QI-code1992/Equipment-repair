@@ -121,7 +121,8 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter><MaintenanceRecordsPage /></MemoryRouter>);
 
-    expect(await screen.findByText("暂无可展示的正式业务数据。")).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("tab", { name: "维修记录列表" }));
+    expect(await screen.findByText("暂无可展示的正式维修记录。")).toBeInTheDocument();
   });
 
   it("loads a maintenance-record detail only through its formal detail endpoint", async () => {
@@ -210,7 +211,8 @@ describe("TASK-012 portal pages", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<MemoryRouter><MaintenanceRecordsPage /></MemoryRouter>);
     fireEvent.change(await screen.findByLabelText("维修记录知识状态筛选"), { target: { value: "LINKED" } });
-    await screen.findByText("暂无可展示的正式业务数据。");
+    fireEvent.click(screen.getByRole("tab", { name: "维修记录列表" }));
+    await screen.findByText("暂无可展示的正式维修记录。");
     expect(fetchMock.mock.calls[1][0]).toBe("/api/maintenance-records?knowledge_status=LINKED");
   });
 
@@ -220,6 +222,7 @@ describe("TASK-012 portal pages", () => {
     render(<MemoryRouter><MaintenanceRecordsPage /></MemoryRouter>);
 
     expect(await screen.findByRole("heading", { name: "维修记录检索" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "维修记录列表" }));
     expect(screen.getByRole("heading", { name: "维修记录列表" })).toBeInTheDocument();
   });
 
