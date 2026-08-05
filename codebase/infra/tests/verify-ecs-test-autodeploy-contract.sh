@@ -14,12 +14,15 @@ done
 grep -Fq 'codex/task-013-prototype-fidelity-remediation' "$script"
 grep -Fq 'flock' "$script"
 grep -Fq 'fetch --prune origin' "$script"
+grep -Fq 'compose.yml .env preview-api.Dockerfile' "$script"
 grep -Fq 'docker compose' "$script"
+grep -Fq -- '--project-directory "$candidate_dir"' "$script"
 grep -Fq '/healthz' "$script"
 grep -Fq 'rollback' "$script"
+grep -Fq 'rollback_api_tag' "$script"
 grep -Fq 'OnUnitActiveSec=30s' "$timer"
 grep -Fq 'ExecStart=/usr/local/sbin/equipment-test-autodeploy' "$service"
 grep -Fq 'BRANCH=codex/task-013-prototype-fidelity-remediation' "$environment"
-grep -Fq 'HEALTH_URL=https://127.0.0.1:18443/healthz' "$environment"
+grep -Fq 'HEALTH_URL=https://127.0.0.1/healthz' "$environment"
 
 echo 'ECS test auto-deploy contract: PASS'

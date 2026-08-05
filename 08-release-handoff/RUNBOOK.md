@@ -16,7 +16,7 @@
 ### TASK-013 推送自动同步
 
 - `codebase/infra/scripts/ecs-test-autodeploy.sh` 由 `equipment-test-autodeploy.timer` 每 30 秒检查 `codex/task-013-prototype-fidelity-remediation` 的已推送 Commit；未提交的本地保存永不进入 ECS。
-- 每个新 SHA 先在新的预览目录构建 API/Web 镜像，再重建 API/Web 并检查 `https://127.0.0.1:18443/healthz`。构建、启动或健康检查失败时，脚本恢复上一 API/Web 镜像和原预览目录；不执行数据库 downgrade，不删除 PostgreSQL、Redis、MinIO、ClamAV 或 RAGFlow 数据。
+- 每个新 SHA 先在新的预览目录构建 API/Web 镜像，再重建 API/Web 并检查外层入口 `https://127.0.0.1/healthz`。构建、启动或健康检查失败时，脚本恢复预先保留标签的上一 API/Web 镜像和原预览目录；不执行数据库 downgrade，不删除 PostgreSQL、Redis、MinIO、ClamAV 或 RAGFlow 数据。
 - 自动部署拒绝包含 Alembic 迁移变化的 Commit，要求人工执行并单独验证，避免测试数据库前向迁移后无法安全回退。
 - ECS 上的 `/etc/equipment-test-autodeploy.env` 只保存非秘密路径、分支和项目名；不得放入 SSH 私钥、账号密码、RAGFlow Token 或 `.env` 内容。服务日志通过 `journalctl -u equipment-test-autodeploy.service` 查看，只应包含时间、SHA 和脱敏错误。
 
