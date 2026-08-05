@@ -188,6 +188,15 @@ describe("TASK-012 portal pages", () => {
     expect(screen.queryByText("液压装载机")).not.toBeInTheDocument();
   });
 
+  it("keeps the equipment creation action available when the ledger is empty", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify([]), { status: 200 })));
+
+    render(<MemoryRouter><EquipmentLedgerPage /></MemoryRouter>);
+
+    expect(await screen.findByRole("link", { name: "新增设备" })).toHaveAttribute("href", "/equipment/new");
+    expect(screen.getByText("尚未登记正式设备。")) .toBeInTheDocument();
+  });
+
   it("creates equipment with enabled line and user options from formal APIs", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify([

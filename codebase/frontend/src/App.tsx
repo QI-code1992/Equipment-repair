@@ -30,16 +30,6 @@ const pages: Page[] = [
   { path: "/system-management", label: "系统管理", group: "系统管理", mark: "管" },
 ];
 
-function PageShell({ label }: { label: string }) {
-  return (
-    <section className="page-shell" aria-labelledby="page-heading">
-      <div className="page-shell__eyebrow">正式前端基础</div>
-      <h2 id="page-heading">{label}</h2>
-      <p>业务内容将在对应任务中接入</p>
-    </section>
-  );
-}
-
 function RequireAuthentication({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   if (!hasActiveSession()) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
@@ -50,6 +40,7 @@ function ApplicationShell() {
   const location = useLocation();
   const navigate = useNavigate();
   const [agentOpen, setAgentOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [permissionCodes, setPermissionCodes] = useState<string[] | null>(null);
   const [currentUser, setCurrentUser] = useState<Awaited<ReturnType<typeof getCurrentUser>> | null>(null);
   const [permissionError, setPermissionError] = useState<string | null>(null);
@@ -61,7 +52,7 @@ function ApplicationShell() {
       setAuthFailed(true);
     });
   }, []);
-  const activePage = pages.find((page) => page.path === location.pathname) ?? pages[0];
+  const activePage = pageForRoute(location.pathname);
   const visiblePages = useMemo(() => permissionCodes === null ? [] : pages.filter((page) => pagePermission(page.path, permissionCodes)), [permissionCodes]);
   const groups = [...new Set(visiblePages.map((page) => page.group))];
   function guarded(path: string, element: React.ReactNode) {
@@ -72,7 +63,7 @@ function ApplicationShell() {
 
   return (
     <div className="app-shell">
-      <aside className="sidebar">
+      <aside className={`sidebar ${sidebarOpen ? "sidebar--open" : ""}`}>
         <div className="brand">
           <div className="brand__mark" aria-hidden="true">智</div>
           <div>
@@ -87,7 +78,7 @@ function ApplicationShell() {
             <div className="nav-group" key={group}>
               <div className="nav-group__label">{group}</div>
               {visiblePages.filter((page) => page.group === group).map((page) => (
-                <NavLink className="nav-item" key={page.path} to={page.path} end={page.path === "/"}>
+                <NavLink className="nav-item" key={page.path} to={page.path} end={page.path === "/"} onClick={() => setSidebarOpen(false)}>
                   <span aria-hidden="true">{page.mark}</span>
                   {page.label}
                 </NavLink>
@@ -104,12 +95,16 @@ function ApplicationShell() {
 
       <main className="main-area">
         <header className="topbar">
-          <div>
+          <div className="topbar__heading">
+            <button type="button" className="menu-button" aria-label="打开导航" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen((open) => !open)}>菜单</button>
+            <div>
             <p>{activePage.group} / {activePage.label}</p>
             <h1>{activePage.label}</h1>
+            </div>
           </div>
           <div className="topbar__actions">{permissionCodes?.includes("intelligence:agent") && <button type="button" className="agent-trigger" onClick={() => setAgentOpen(true)}>全局 Agent</button>}<button type="button" className="topbar__logout" onClick={() => void logout().finally(() => navigate("/login", { replace: true }))}>退出</button><div className="user-chip" aria-label={`当前用户：${currentUser?.username ?? "已登录用户"}`}><span className="topbar__avatar">{currentUser?.username.slice(0, 1).toUpperCase() ?? "用"}</span><span>{currentUser?.username ?? "正在加载"}</span></div></div>
         </header>
+        {sidebarOpen && <button type="button" className="sidebar-backdrop" aria-label="关闭导航" onClick={() => setSidebarOpen(false)} />}
         {permissionCodes === null && !permissionError ? <section className="page-shell" aria-live="polite"><p role="status">正在加载会话权限…</p></section> : <Routes>
           <Route path="/" element={guarded("/", <WorkbenchPage />)} />
           <Route path="/bi-dashboard" element={guarded("/bi-dashboard", <BiDashboardPage />)} />
@@ -132,6 +127,14 @@ function ApplicationShell() {
       </main>
     </div>
   );
+}
+
+function pageForRoute(pathname: string): Page {
+  if (pathname === "/equipment/new") return pages.find((page) => page.path === "/equipment") ? { ...pages.find((page) => page.path === "/equipment")!, label: "新增设备" } : pages[0];
+  if (/^\/equipment\/[^/]+\/edit$/.test(pathname)) return pages.find((page) => page.path === "/equipment") ? { ...pages.find((page) => page.path === "/equipment")!, label: "编辑设备" } : pages[0];
+  if (/^\/equipment\/[^/]+$/.test(pathname)) return pages.find((page) => page.path === "/equipment") ? { ...pages.find((page) => page.path === "/equipment")!, label: "设备详情" } : pages[0];
+  if (/^\/maintenance-records\/[^/]+$/.test(pathname)) return pages.find((page) => page.path === "/maintenance-records") ? { ...pages.find((page) => page.path === "/maintenance-records")!, label: "维修记录详情" } : pages[0];
+  return pages.find((page) => page.path === pathname) ?? pages[0];
 }
 
 function pagePermission(path: string, codes: string[]) {
