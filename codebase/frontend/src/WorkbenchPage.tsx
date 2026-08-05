@@ -11,6 +11,7 @@ export function WorkbenchPage() {
   const [summary, setSummary] = useState<{ active_fault_count: number } | null>(null);
   const [shortcuts, setShortcuts] = useState<Array<{ id: string; label: string; path: string }> | null>(null);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [todoFilter, setTodoFilter] = useState("all");
 
   useEffect(() => {
     Promise.all([getWorkbenchTodos(), getWorkbenchAlertSummary(), getWorkbenchShortcuts(), getEquipment()])
@@ -31,12 +32,21 @@ export function WorkbenchPage() {
     }
   }
 
+  const filteredTodos = todos?.filter((todo) => {
+    if (todoFilter === "pending") return todo.status === "PENDING_ACCEPT";
+    if (todoFilter === "repairing") return todo.status === "IN_REPAIR";
+    if (todoFilter === "veryUrgent") return todo.urgency === "VERY_HIGH";
+    if (todoFilter === "urgent") return todo.urgency === "HIGH";
+    return true;
+  });
+
   return <section className="portal-page workbench-page" aria-labelledby="page-heading">
     <header className="workbench-head"><div><p className="page-shell__eyebrow">今日运维态势</p><h2 id="page-heading">运维工作台</h2><p>聚焦当前风险、待办和快速处置；业务事实均来自正式 API。</p></div></header>
     {message && <p role="alert">{message}</p>}
     <div className="workbench-layout">
-      <section className="data-card queue-card" aria-label="当前待办"><div className="panel-heading"><div><h3>待办处置</h3><p>按紧急程度优先处理正式工单</p></div>{todos && <span className="status-chip status-chip--neutral">{todos.length} 项</span>}</div>
-        {todos === null ? <p role="status">正在加载待办…</p> : todos.length === 0 ? <p className="empty-panel">暂无活动待办。</p> : <ul className="todo-list">{todos.map((todo) => <li key={todo.id}><div><strong>{todo.number}</strong><span>{todo.equipment_name} · {todo.symptom}</span></div><span className={`status-chip ${todo.urgency === "HIGH" ? "status-chip--danger" : "status-chip--warning"}`}>{todo.urgency}</span></li>)}</ul>}
+      <section className="data-card queue-card" aria-label="当前待办"><div className="panel-heading"><div><h3>待办处置</h3><p>按紧急程度优先处理正式工单</p></div>{todos && <span className="status-chip status-chip--neutral">{filteredTodos?.length ?? 0} 项</span>}</div>
+        <div className="queue-tabs" role="tablist" aria-label="故障待办筛选">{[["all", "全部"], ["pending", "待接单"], ["repairing", "维修中"], ["veryUrgent", "非常紧急"], ["urgent", "紧急"]].map(([value, label]) => <button key={value} type="button" role="tab" aria-selected={todoFilter === value} className={`queue-tab ${todoFilter === value ? "queue-tab--active" : ""}`} onClick={() => setTodoFilter(value)}>{label}</button>)}</div>
+        {todos === null ? <p role="status">正在加载待办…</p> : filteredTodos?.length === 0 ? <p className="empty-panel">当前筛选条件下暂无需要处理的故障任务</p> : <ul className="todo-list">{filteredTodos?.map((todo) => <li key={todo.id}><div><strong>{todo.number}</strong><span>{todo.equipment_name} · {todo.symptom}</span></div><span className={`status-chip ${todo.urgency === "HIGH" ? "status-chip--danger" : "status-chip--warning"}`}>{todo.urgency}</span></li>)}</ul>}
       </section>
       <div className="workbench-side-stack">
         <section className="data-card risk-card"><div><h3>风险总览</h3><strong>{summary?.active_fault_count ?? "—"}</strong><span>活动故障</span></div><p>风险计数来自正式告警汇总，不展示推测值。</p></section>
