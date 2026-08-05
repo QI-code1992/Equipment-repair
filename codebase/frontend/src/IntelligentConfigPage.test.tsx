@@ -31,11 +31,11 @@ describe("IntelligentConfigPage", () => {
     vi.mocked(getModelProviders).mockResolvedValue([]);
     vi.mocked(getModelBindings).mockResolvedValue([]);
     render(<IntelligentConfigPage />);
-    expect(await screen.findByRole("heading", { name: "默认 LLM" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "默认 Embedding" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "默认 Rerank" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "智能体配置" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "知识库配置" })).toBeInTheDocument();
+    expect(await screen.findByText("默认 LLM")).toBeInTheDocument();
+    expect(screen.getByText("默认 Embedding")).toBeInTheDocument();
+    expect(screen.getByText("默认 Rerank")).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "智能体配置" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "知识库配置" })).toBeInTheDocument();
   });
   it("manages providers and bindings with the formal model catalog APIs without exposing a provider secret", async () => {
     vi.mocked(getAgentConfigs).mockResolvedValue([config]);
