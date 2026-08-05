@@ -27,7 +27,7 @@
   - 运行验证：已确认 ECS Compose 启动、迁移、PostgreSQL、Redis、MinIO、ClamAV、API、Worker、Validator、Nginx、`/healthz`、HTTPS 入口与 HTTP→HTTPS 跳转；当前未配置运行时 `RAGFLOW_API_KEY`，不得将真实 RAGFlow 成功检索链路表述为已通过。
   - 阶段门禁：测试环境可访问不构成 Stage 6 通过、Stage 7 验收通过、Stage 8 发布、`main` 合并或生产授权。TASK-013 前端整改仍在同一 Draft PR 中开发，完成后统一接受 DEV-001 审核。
 - 决策：项目负责人明确确认 ECS 为当前项目业务平台测试部署环境，并明确确认 RAGFlow 继续部署在本地 Windows；ECS 与 Windows 的加密私网隧道不属于本仓库配置范围。
-- 更新基线：`07-acceptance/ACCEPTANCE_ENVIRONMENT_DEPLOYMENT.md`、`07-acceptance/ACCEPTANCE_REPORT.md`、`08-release-handoff/RUNBOOK.md`、`codebase/infra/.env.example`、`codebase/infra/ragflow/scripts/verify.ps1`、`codebase/infra/ragflow/tests/verify-compose-contract.ps1`、`workflow/state.json`、`workflow/DEV_TO_PM_HANDOFF.md` 与本台账。
+- 更新基线：`07-acceptance/ACCEPTANCE_ENVIRONMENT_DEPLOYMENT.md`、`07-acceptance/ACCEPTANCE_REPORT.md`、`08-release-handoff/RUNBOOK.md`、`08-release-handoff/DEPLOYMENT_CHECKLIST.md`、`codebase/infra/.env.example`、`codebase/infra/ragflow/scripts/verify.ps1`、`codebase/infra/ragflow/tests/verify-compose-contract.ps1`、`workflow/state.json`、`workflow/DEV_TO_PM_HANDOFF.md` 与本台账。
 - 验证：仅记录已执行环境的脱敏验证边界；本次更新执行 JSON 解析、文档/版本一致性检查、适用静态回归与 `git diff --check`。本机未安装 Docker Desktop/Compose，Compose 展开和真实 RAGFlow `v0.26.3` 启动验证留给 Windows 环境执行。不提交任何远程运行配置或秘密。
 
 ### CR-043：明确 TASK-009 诊断与指引的设备对象级授权契约
