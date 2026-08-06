@@ -5,7 +5,7 @@
   "testDeployment": {
     "changeRequest": "CR-050",
     "status": "ACTIVE_TEST_DEPLOYMENT_NOT_A_STAGE_GATE_RESULT",
-    "platformCommit": "77fbc4205b46885a5762cd8f9a92da455cf35e67",
+    "platformCommit": "780748cbc6b988feda66f2ebd02a6829bdafd1c1",
     "platformEnvironment": "Alibaba Cloud ECS business-platform test deployment",
     "platformComposeProject": "equipment-preview-77fbc42",
     "ragflowEnvironment": "Local Windows Docker Desktop/WSL2 via project-owner managed encrypted private tunnel",
@@ -21,9 +21,19 @@
       "requiredBehavior": "Serialize deployments, record the deployed SHA, build before switching, health-check the candidate, preserve the prior working version on failure, and retain one rollback version.",
       "firstSuccessfulDeployment": "e226695635784296d4aa13597fe7d39690bdef37",
       "verification": "Candidate API/Web build, Compose recreation, preview current-link switch and external HTTPS health check passed. The switch window emitted two transient 502 responses before health recovered.",
+      "lastDeployment": {
+        "sourceSha": "780748cbc6b988feda66f2ebd02a6829bdafd1c1",
+        "releasePath": "/opt/equipment-platform/previews/780748cbc6b988feda66f2ebd02a6829bdafd1c1",
+        "verifiedAt": "2026-08-07",
+        "timer": "active",
+        "compose": "api, web, postgres, redis, minio, clamav running; postgres/redis/minio/clamav healthy",
+        "httpsHealth": "https://101.37.16.206/healthz returned HTTP 200",
+        "publicRoot": "https://101.37.16.206/ returned HTTP 200; HTTP redirected to HTTPS",
+        "staticAssets": "JavaScript application/javascript and CSS text/css returned HTTP 200"
+      },
       "remainingBoundary": "A source commit containing Alembic migrations is rejected for manual deployment and validation; this service does not test the Windows RAGFlow success path."
     },
-    "nextAction": "Push TASK-013 commits to synchronize them to ECS within the 30-second timer interval; use the deployed environment for project-owner page review."
+    "nextAction": "ECS is synchronized to 780748cbc6b988feda66f2ebd02a6829bdafd1c1; project owner may review the pages at the test endpoint."
   },
   "stage5PrototypeFidelityRemediation": {
     "taskId": "TASK-013",

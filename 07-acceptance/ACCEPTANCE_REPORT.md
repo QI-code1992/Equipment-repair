@@ -1,7 +1,7 @@
 # 验收报告
 
 - 状态：Blocked / 等待 TASK-013 完成与新的 Stage 6 独立结论。
-- 当前测试部署代码：`77fbc4205b46885a5762cd8f9a92da455cf35e67`；这不是当前验收候选或已批准的 Stage 6→7 Gate。
+- 当前测试部署代码：`780748cbc6b988feda66f2ebd02a6829bdafd1c1`；这不是当前验收候选或已批准的 Stage 6→7 Gate。
 - 产品基线：Stage 1—4 已批准文档；当前正式 UI 的原型一致性偏离由 `DEF-STAGE7-001` / TASK-013 回流 Stage 5 整改。
 - 最终结论：尚未作出；不授权 Stage 8、生产发布或直接合入 `main`。
 

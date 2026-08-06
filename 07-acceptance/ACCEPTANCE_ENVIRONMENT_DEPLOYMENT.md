@@ -3,19 +3,21 @@
 ## 状态、目的与阶段边界
 
 - 状态：已部署的业务平台测试环境；不是生产环境，也不表示 Stage 6 已通过、Stage 7 已验收或 Stage 8 已发布。
-- 代码绑定：`77fbc4205b46885a5762cd8f9a92da455cf35e67`。
+- 代码绑定：`780748cbc6b988feda66f2ebd02a6829bdafd1c1`。
 - 目的：供项目负责人和同事实际查看并确认页面与业务流程，发现的问题回流当前 `TASK-013` 整改工作。
 - 当前门禁：`DEF-STAGE7-001` 与 Stage 6 阻断仍未关闭；不得因页面可访问、登录成功或单项服务健康而签发验收/发布结论。
 
 ## 已批准测试部署拓扑
 
 - 阿里云 ECS：只部署业务平台服务，使用 Compose 项目 `equipment-preview-77fbc42`；运行 PostgreSQL、Redis、MinIO、ClamAV、API、Worker、Validator、Nginx 与 Web。
-- ECS 运行目录：`/opt/equipment-platform/previews/77fbc4205b46885a5762cd8f9a92da455cf35e67`。
+- ECS 运行目录：`/opt/equipment-platform/previews/780748cbc6b988feda66f2ebd02a6829bdafd1c1`。
 - RAGFlow：固定部署在本地 Windows Docker Desktop/WSL2，目标版本 `v0.26.3`；不得迁入 ECS，也不得把 RAGFlow 数据库、对象存储、卷或运行配置提交到本仓库。
 - 连通性：ECS 仅经项目负责人管理的加密私网隧道调用 Windows RAGFlow API。隧道地址、认证、RAGFlow API Key、Windows 防火墙规则和私有证书均是环境秘密，不得写入 Git、PR 或测试报告。
 - 测试入口：`https://101.37.16.206/`。HTTP 80 仅跳转至 HTTPS 443。当前 HTTPS 使用短期、带 IP SAN 的自签名测试证书；浏览器证书告警仅能作为测试环境告警处理，不能视作正式 PKI 方案。
 
 ## 已验证与未验证边界
+
+本轮部署验证（2026-08-07）：systemd timer active；当前 release 和 `deployed-sha` 均绑定上述 Commit；API/Web、PostgreSQL、Redis、MinIO、ClamAV 容器运行，其中 PostgreSQL/Redis/MinIO/ClamAV healthy；公网 HTTPS `/healthz` 和根页面 HTTP 200，HTTP 入口跳转 HTTPS，JS/CSS MIME 正确。
 
 已验证：ECS API 镜像构建、Compose 启动、数据库迁移、PostgreSQL、Redis、MinIO、ClamAV、API、Worker、Validator、Nginx、HTTPS `/healthz`、静态资源访问及 HTTP→HTTPS 跳转。
 

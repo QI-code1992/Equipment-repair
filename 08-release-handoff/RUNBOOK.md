@@ -8,7 +8,7 @@
 
 ## 当前业务平台测试部署边界（2026-08-05）
 
-- 当前平台测试环境位于阿里云 ECS，运行代码绑定 `77fbc4205b46885a5762cd8f9a92da455cf35e67`，Compose 项目为 `equipment-preview-77fbc42`。该环境只用于业务平台测试，不是生产发布，也不代表 Stage 6/7/8 已通过。
+- 当前平台测试环境位于阿里云 ECS，运行代码绑定 `780748cbc6b988feda66f2ebd02a6829bdafd1c1`，Compose 项目为 `equipment-preview-77fbc42`。该环境只用于业务平台测试，不是生产发布，也不代表 Stage 6/7/8 已通过。
 - ECS 仅运行平台 PostgreSQL、Redis、MinIO、ClamAV、API、Worker、Validator、Nginx 和 Web。RAGFlow 必须留在本地 Windows Docker Desktop/WSL2，统一目标版本为 `v0.26.3`；ECS 仅经项目负责人维护的加密私网隧道访问 RAGFlow API。
 - 测试公网入口、短期自签名证书、已验证范围和未验证 RAGFlow 成功链路见 `07-acceptance/ACCEPTANCE_ENVIRONMENT_DEPLOYMENT.md`。不得把管理员凭据、RAGFlow API Key、隧道参数、证书私钥或 `.env` 内容写入本手册。
 - 当前 ECS 未配置运行时 `RAGFLOW_API_KEY`，因此真实 RAGFlow 检索成功路径尚未验证；不得以服务健康或不可用降级替代成功链路证据。
