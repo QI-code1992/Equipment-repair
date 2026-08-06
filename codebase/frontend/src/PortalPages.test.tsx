@@ -110,6 +110,9 @@ describe("TASK-012 portal pages", () => {
     expect(screen.getByRole("button", { name: "装配线" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "装配线" }));
     fireEvent.click(screen.getByRole("button", { name: "停用" }));
+    expect(screen.getByRole("dialog", { name: "停用确认" })).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "确认" }));
 
     await screen.findByText("组织状态已更新。");
     expect(fetchMock.mock.calls[1][0]).toBe("/api/organizations/line-1");
