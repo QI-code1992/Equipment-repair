@@ -109,6 +109,6 @@ describe("IntelligentConfigPage", () => {
     expect(await screen.findByRole("tablist", { name: "智能配置中心一级页签" })).toBeInTheDocument();
     for (const label of ["模型配置", "智能体配置", "知识库配置", "调用记录", "Token 消耗统计"]) expect(screen.getByRole("tab", { name: label })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("tab", { name: "调用记录" }));
-    expect(screen.getByRole("link", { name: "查看正式调用审计" })).toHaveAttribute("href", "/intelligent-audit");
+    expect(screen.getByRole("link", { name: "查看正式调用审计" })).toHaveAttribute("href", "/intelligence-audit");
   });
 });

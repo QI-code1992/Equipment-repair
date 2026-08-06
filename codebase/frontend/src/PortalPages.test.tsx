@@ -187,6 +187,8 @@ describe("TASK-012 portal pages", () => {
     expect(await screen.findByRole("heading", { name: "维修记录检索" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("tab", { name: "维修记录列表" }));
     expect(screen.getByRole("heading", { name: "维修记录列表" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "导出" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "重置" })).toBeInTheDocument();
   });
 
   it("keeps the approved maintenance overview and records tabs without inventing aggregate facts", async () => {
@@ -209,12 +211,12 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter><EquipmentLedgerPage /></MemoryRouter>);
 
-    fireEvent.change(await screen.findByLabelText("筛选设备"), { target: { value: "电驱" } });
+    fireEvent.change(await screen.findByLabelText("设备名称筛选"), { target: { value: "电驱" } });
     expect(screen.getByText("电驱装载机")).toBeInTheDocument();
     expect(screen.queryByText("液压装载机")).not.toBeInTheDocument();
   });
 
-  it("uses formal equipment fields for ledger summary and status filtering", async () => {
+  it("matches the approved ledger columns and keeps unavailable health scoring explicit", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify([
       { id: "eq-1", code: "EQ-01", name: "液压装载机", model: "L-1", type: "LOADER", manufacturer: "M", status: "NORMAL", organization_id: "line-1", owner_user_id: null, operating_hours: 4 },
       { id: "eq-2", code: "EQ-02", name: "电驱装载机", model: "L-2", type: "LOADER", manufacturer: "M", status: "FAULT", organization_id: "line-2", owner_user_id: null, operating_hours: 5 },
@@ -222,9 +224,10 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter><EquipmentLedgerPage /></MemoryRouter>);
 
-    expect(await screen.findByText("设备总览")).toBeInTheDocument();
-    expect(screen.getByText("已加载 2 台正式设备")).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText("设备状态筛选"), { target: { value: "FAULT" } });
+    expect(await screen.findByRole("heading", { name: "设备列表" })).toBeInTheDocument();
+    for (const column of ["序号", "设备编号", "设备名称", "型号", "负责人", "健康评分", "操作"]) expect(screen.getByRole("columnheader", { name: column })).toBeInTheDocument();
+    expect(screen.getByLabelText("健康评分筛选")).toBeDisabled();
+    fireEvent.change(screen.getByLabelText("设备编号筛选"), { target: { value: "EQ-02" } });
     expect(screen.getByText("电驱装载机")).toBeInTheDocument();
     expect(screen.queryByText("液压装载机")).not.toBeInTheDocument();
   });
@@ -265,7 +268,8 @@ describe("TASK-012 portal pages", () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify([
         { id: "factory", type: "FACTORY", code: "FAC", name: "工厂", parent_id: "root", enabled: true },
-        { id: "line-1", type: "LINE", code: "LINE", name: "一线", parent_id: "factory", enabled: true },
+        { id: "workshop-1", type: "WORKSHOP", code: "WS", name: "车间", parent_id: "factory", enabled: true },
+        { id: "line-1", type: "LINE", code: "LINE", name: "一线", parent_id: "workshop-1", enabled: true },
       ]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "user-1", username: "owner", enabled: true, role_ids: [] }]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({ id: "eq-1" }), { status: 201 }));
@@ -273,14 +277,16 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter><EquipmentAddPage /></MemoryRouter>);
 
-    expect(await screen.findByRole("option", { name: "一线" })).toBeInTheDocument();
+    fireEvent.change(await screen.findByLabelText("所属工厂"), { target: { value: "factory" } });
+    fireEvent.change(screen.getByLabelText("所属车间"), { target: { value: "workshop-1" } });
+    fireEvent.change(screen.getByLabelText("所属产线"), { target: { value: "line-1" } });
     fireEvent.change(screen.getByLabelText("设备编码"), { target: { value: "EQ-01" } });
     fireEvent.change(screen.getByLabelText("设备名称"), { target: { value: "装载机" } });
     fireEvent.change(screen.getByLabelText("型号"), { target: { value: "L-1" } });
     fireEvent.change(screen.getByLabelText("类型"), { target: { value: "LOADER" } });
     fireEvent.change(screen.getByLabelText("制造商"), { target: { value: "M" } });
     fireEvent.change(screen.getByLabelText("负责人"), { target: { value: "user-1" } });
-    fireEvent.click(screen.getByRole("button", { name: "保存" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存设备" }));
 
     await screen.findByText("已保存正式设备数据。");
     expect(fetchMock.mock.calls[2][0]).toBe("/api/equipment");
@@ -297,7 +303,11 @@ describe("TASK-012 portal pages", () => {
         status: "NORMAL", organization_id: "line-1", owner_user_id: "user-1",
         image_refs: [{ object_key: "equipment/eq-1.png", filename: "eq-1.png" }],
       }), { status: 200 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "line-1", type: "LINE", code: "LINE", name: "一线", parent_id: "factory", enabled: true }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([
+        { id: "factory", type: "FACTORY", code: "FAC", name: "工厂", parent_id: "root", enabled: true },
+        { id: "workshop-1", type: "WORKSHOP", code: "WS", name: "车间", parent_id: "factory", enabled: true },
+        { id: "line-1", type: "LINE", code: "LINE", name: "一线", parent_id: "workshop-1", enabled: true },
+      ]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "user-1", username: "owner", enabled: true, role_ids: [] }]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({ id: "eq-1" }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
@@ -307,7 +317,7 @@ describe("TASK-012 portal pages", () => {
     expect(await screen.findByDisplayValue("2026-01-10")).toBeInTheDocument();
     expect(screen.getByDisplayValue("2026-02-01")).toBeInTheDocument();
     expect(screen.getByDisplayValue("equipment/eq-1.png")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "保存" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存设备" }));
 
     await screen.findByText("已保存正式设备数据。");
     const init = fetchMock.mock.calls[3][1] as RequestInit;
@@ -329,7 +339,7 @@ describe("TASK-012 portal pages", () => {
     expect(screen.getByRole("group", { name: "设备额定参数" })).toBeInTheDocument();
     expect(screen.getByRole("group", { name: "知识资料" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "新增分支节点" })).toBeDisabled();
-    expect(screen.getByText("当前接口未提供该设备的 BOM、额定参数或知识资料数据。")) .toBeInTheDocument();
+    expect(screen.getByText("当前接口未提供该设备的 BOM 数据。")) .toBeInTheDocument();
   });
 
   it("keeps management lists behind their formal endpoints", async () => {
@@ -357,8 +367,10 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter><SystemManagementPage permissionCodes={["identity:read"]} /></MemoryRouter>);
 
-    expect(await screen.findByRole("tab", { name: "账号管理" })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByRole("tab", { name: "审计事件" })).toBeInTheDocument();
+    expect(await screen.findByRole("tab", { name: "角色管理" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "用户管理" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "登录日志" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "操作日志" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "创建账号" })).not.toBeInTheDocument();
   });
 
@@ -373,7 +385,8 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
 
-    fireEvent.click(await screen.findByRole("tab", { name: "角色权限" }));
+    fireEvent.click(await screen.findByRole("tab", { name: "角色管理" }));
+    fireEvent.click(await screen.findByRole("button", { name: "编辑权限" }));
     (await screen.findByRole("button", { name: "保存角色权限" })).click();
 
     await screen.findByText("角色权限已更新。");
@@ -394,7 +407,8 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
 
-    fireEvent.click(await screen.findByRole("tab", { name: "角色权限" }));
+    fireEvent.click(await screen.findByRole("tab", { name: "角色管理" }));
+    fireEvent.click(await screen.findByRole("button", { name: "编辑权限" }));
     const checkbox = await screen.findByRole("checkbox", { name: "fault:create" });
     fireEvent.click(checkbox);
     fireEvent.click(screen.getByRole("button", { name: "保存角色权限" }));

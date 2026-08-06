@@ -22,7 +22,7 @@ describe("App", () => {
 
     render(<MemoryRouter initialEntries={["/bi-dashboard"]}><App /></MemoryRouter>);
 
-    expect(await screen.findByRole("heading", { name: "欢迎回来" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "登录" })).toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "主导航" })).not.toBeInTheDocument();
     expect(window.sessionStorage.getItem("access_token")).toBeNull();
   });
@@ -152,7 +152,7 @@ describe("App", () => {
     window.sessionStorage.clear();
     render(<MemoryRouter initialEntries={["/fault-report"]}><App /></MemoryRouter>);
 
-    expect(screen.getByRole("heading", { name: "欢迎回来" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "登录" })).toBeInTheDocument();
   });
 
   it("stores a successful login then sends its Bearer token on the protected page request", async () => {
@@ -168,7 +168,7 @@ describe("App", () => {
 
     fireEvent.change(screen.getByLabelText("用户名"), { target: { value: "repairer" } });
     fireEvent.change(screen.getByLabelText("密码"), { target: { value: "correct-password" } });
-    fireEvent.click(screen.getByRole("button", { name: "登录系统" }));
+    fireEvent.click(screen.getByRole("button", { name: "登录" }));
 
     expect(await screen.findByRole("heading", { name: "智能配置" })).toBeInTheDocument();
     const [, init] = fetchMock.mock.calls[1] as [string, RequestInit];
@@ -252,6 +252,9 @@ describe("App", () => {
     fireEvent.click(await screen.findByRole("button", { name: "全局 Agent" }));
 
     expect(screen.getByRole("dialog", { name: "全局 Agent" })).toHaveAttribute("aria-modal", "true");
+    expect(screen.getByRole("button", { name: "故障上报" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "智能问数" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "操作指引" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "关闭" }));
     expect(screen.queryByRole("dialog", { name: "全局 Agent" })).not.toBeInTheDocument();
   });

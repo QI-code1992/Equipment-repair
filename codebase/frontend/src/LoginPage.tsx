@@ -63,24 +63,22 @@ export function LoginPage() {
 
   return <main className="login-page">
     <section className="login-intro" aria-label="平台说明">
-      <div className="login-intro__mark" aria-hidden="true">智</div>
-      <p className="page-shell__eyebrow">现场运维 · 受控访问</p>
-      <h1>新能源装载机智能运维平台</h1>
-      <p>统一查看设备状态、处置故障、执行维修，并在权限范围内使用智能运维能力。</p>
-      <ul><li>设备与组织数据由正式业务接口提供</li><li>智能任务、附件与维修结果均保留受控边界</li><li>请使用已分配的平台账号登录</li></ul>
+      <p className="login-intro__badge"><span aria-hidden="true">✦</span>新能源装载机设备故障智能运维平台</p>
+      <h1>设备AI智能运维平台</h1>
+      <p>面向工厂、车间、产线的设备故障智能运维系统，融合台账、诊断、工单与 Agent 辅助闭环。</p>
+      <div className="login-feature-grid" aria-label="平台能力"><article><strong>24h</strong><span>故障追踪</span></article><article><strong>AI</strong><span>诊断辅助</span></article><article><strong>RAG</strong><span>知识检索</span></article><article><strong>KG</strong><span>知识图谱</span></article><article><strong>BI</strong><span>驾驶舱分析</span></article><article><strong>闭环</strong><span>工单协同</span></article></div>
     </section>
     <form className="login-form" onSubmit={(event) => void submit(event)}>
-      <div className="page-shell__eyebrow">Fault Ops Console</div>
-      <h2>欢迎回来</h2>
-      <p className="login-form__hint">登录后将按账号权限展示可用业务页面。</p>
-      <label>用户名<input aria-label="用户名" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} aria-invalid={Boolean(usernameError)} />{usernameError && <small>{usernameError}</small>}</label>
+      <h2>登录</h2>
+      <p className="login-form__hint">请输入账号密码进行登录</p>
+      <label>账号<input aria-label="用户名" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} aria-invalid={Boolean(usernameError)} placeholder="请输入账号" />{usernameError && <small>{usernameError}</small>}</label>
       <label>密码<div className="login-form__password"><input aria-label="密码" type={passwordVisible ? "text" : "password"} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} aria-invalid={Boolean(passwordError)} /><button type="button" aria-label={passwordVisible ? "隐藏密码" : "显示密码"} onClick={() => setPasswordVisible((current) => !current)}>{passwordVisible ? "隐藏" : "显示"}</button></div>{passwordError && <small>{passwordError}</small>}</label>
       <div className="login-form__options"><label><input type="checkbox" defaultChecked />记住密码</label><button type="button" onClick={() => setForgotOpen(true)}>忘记密码</button></div>
       {error && <p role="alert">{error}</p>}
       {submitting && <p role="status" aria-label="登录状态">正在验证账号，请稍候…</p>}
-      <button type="submit" disabled={submitting || lockedSeconds > 0}>{submitting ? "登录中…" : "登录系统"}</button>
+      <button type="submit" disabled={submitting || lockedSeconds > 0}>{submitting ? "登录中…" : "登录"}</button>
       <p className="login-form__hint">连续失败 3 次后临时锁定，锁定 30 秒。</p>
     </form>
-    {forgotOpen && <div className="login-modal" role="dialog" aria-modal="true" aria-label="忘记密码"><section><h3>忘记密码</h3><p>请联系系统管理员重置密码。</p><button type="button" onClick={() => setForgotOpen(false)}>知道了</button></section></div>}
+    {forgotOpen && <div className="login-modal" role="dialog" aria-modal="true" aria-label="忘记密码"><section><h3>忘记密码</h3><p>请联系系统管理员重置密码。管理员可在系统管理中启用账号并重置初始密码。</p><button type="button" onClick={() => setForgotOpen(false)}>知道了</button></section></div>}
   </main>;
 }

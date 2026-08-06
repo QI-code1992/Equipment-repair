@@ -154,7 +154,7 @@ export function RepairExecutionPage({ permissionCodes }: { permissionCodes?: str
     void navigator.clipboard.writeText(text).catch(() => setGuidanceError("复制维修摘要失败。"));
   }
   return (
-    <section className="page-shell" aria-labelledby="page-heading">
+    <section className="portal-page repair-execution-page" aria-labelledby="page-heading">
       <div className="page-shell__eyebrow">现场作业</div>
       <h2 id="page-heading">维修执行</h2>
       <div className="repair-execution-layout">
