@@ -38,10 +38,12 @@ describe("IntelligentConfigPage", () => {
 
     expect(await screen.findByText("内部模型服务")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "模型与绑定" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "智能体配置" }));
     expect(screen.getByRole("heading", { name: "Agent 控制面" })).toBeInTheDocument();
     expect(screen.getByText("运维模型（ops-1）")).toBeInTheDocument();
     expect(screen.queryByText(/secret-ref-value/)).not.toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole("tab", { name: "模型配置" }));
     fireEvent.change(screen.getByLabelText("提供商名称"), { target: { value: "备用模型服务" } });
     fireEvent.change(screen.getByLabelText("密钥引用"), { target: { value: "vault://models/backup" } });
     fireEvent.click(screen.getByRole("button", { name: "新增模型提供商" }));
@@ -90,9 +92,23 @@ describe("IntelligentConfigPage", () => {
     vi.mocked(uploadKnowledgeDocument).mockResolvedValue({ id: "doc-1", filename: "manual.pdf", status: "UPLOADING" });
     render(<IntelligentConfigPage />);
     await screen.findByText("暂无模型提供商。");
+    fireEvent.click(screen.getByRole("tab", { name: "知识库配置" }));
     fireEvent.change(screen.getByLabelText("正式 Dataset ID"), { target: { value: "dataset-1" } });
     fireEvent.change(screen.getByLabelText("上传知识文档"), { target: { files: [new File(["manual"], "manual.pdf", { type: "application/pdf" })] } });
     await waitFor(() => expect(uploadKnowledgeDocument).toHaveBeenCalledWith("dataset-1", expect.any(File)));
     expect(await screen.findByText("知识文档已提交，后续状态由正式 Worker 更新。")).toBeInTheDocument();
+  });
+
+  it("keeps the approved intelligent configuration tabs and sends audit views to formal data", async () => {
+    vi.mocked(getAgentConfigs).mockResolvedValue([config]);
+    vi.mocked(getModelProviders).mockResolvedValue([{ id: "provider-1", name: "内部模型服务", enabled: true }]);
+    vi.mocked(getModelBindings).mockResolvedValue([{ id: "binding-1", provider_id: "provider-1", name: "运维模型", model_name: "ops-1", supports_reasoning: true, enabled: true }]);
+
+    render(<IntelligentConfigPage />);
+
+    expect(await screen.findByRole("tablist", { name: "智能配置中心一级页签" })).toBeInTheDocument();
+    for (const label of ["模型配置", "智能体配置", "知识库配置", "调用记录", "Token 消耗统计"]) expect(screen.getByRole("tab", { name: label })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "调用记录" }));
+    expect(screen.getByRole("link", { name: "查看正式调用审计" })).toHaveAttribute("href", "/intelligent-audit");
   });
 });
