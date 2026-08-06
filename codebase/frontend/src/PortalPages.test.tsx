@@ -13,8 +13,8 @@ describe("TASK-012 portal pages", () => {
 
     render(<BiDashboardPage />);
 
-    expect(await screen.findByText("2")).toBeInTheDocument();
-    expect(screen.getByText("暂无趋势数据。")).toBeInTheDocument();
+    expect(await screen.findByText("故障总数")).toBeInTheDocument();
+    expect(screen.getAllByText("暂无趋势数据。")).toHaveLength(2);
   });
 
   it("renders a semantic BI trend chart from formal API series values", async () => {
@@ -43,7 +43,7 @@ describe("TASK-012 portal pages", () => {
     render(<BiDashboardPage />);
 
     fireEvent.change(await screen.findByLabelText("组织筛选"), { target: { value: "line-1" } });
-    await screen.findByText("平均完成 3 小时");
+    expect(await screen.findByText("平均完成时长")).toBeInTheDocument();
     expect(fetchMock.mock.calls[2][0]).toBe("/api/bi/dashboard?organization_id=line-1");
   });
 
@@ -316,6 +316,20 @@ describe("TASK-012 portal pages", () => {
       commissioned_at: "2026-02-01",
       image_refs: [{ object_key: "equipment/eq-1.png", filename: "eq-1.png" }],
     });
+  });
+
+  it("keeps the approved equipment BOM, rated parameters and knowledge sections without inventing unsupported data", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "line-1", type: "LINE", code: "LINE", name: "一线", parent_id: "factory", enabled: true }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 })));
+
+    render(<MemoryRouter><EquipmentAddPage /></MemoryRouter>);
+
+    expect(await screen.findByRole("group", { name: "设备 BOM 组成" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "设备额定参数" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "知识资料" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "新增分支节点" })).toBeDisabled();
+    expect(screen.getByText("当前接口未提供该设备的 BOM、额定参数或知识资料数据。")) .toBeInTheDocument();
   });
 
   it("keeps management lists behind their formal endpoints", async () => {

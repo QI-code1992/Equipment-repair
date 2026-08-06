@@ -639,3 +639,11 @@
 - 数据边界：故障列表、设备健康、图谱/BOM/参数/知识、备件成本、工时、维修附件和草稿保存没有正式接口时均保留原型布局并禁用或呈现明确空状态；不伪造列表、评分、成本、工时或附件业务事实。
 - 验证：`FaultReportPage.test.tsx`、`RepairExecutionPage.test.tsx` 与 `PortalPages.test.tsx` 共 `48 passed`；生产构建和 `git diff --check` 通过。
 - 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未纳入本地 `.vscode/` 文件。
+
+## FCP-013-12：设备新增与编辑分区原型一致性整改（2026-08-06）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：设备新增与编辑表单恢复原型的设备 BOM 组成、设备额定参数和知识资料三个分区，以及对应的新增分支节点、新增参数和上传资料入口。
+- 数据边界：当前正式 API 没有 BOM、额定参数或知识资料的公开读写契约；三个分区均呈现明确无数据说明且入口禁用，未写入 mock 数据、原型示例表格、客户端临时数据或新接口。
+- 验证：设备分区定向 Vitest `1 passed`；`PortalPages.test.tsx` 为 `31 passed`；生产构建和 `git diff --check` 待本切片最终验证。全量前端测试当前为 `93 passed, 4 failed`，失败仅来自工作区中另一组未提交的 `LoginPage.test.tsx` 新增登录行为要求，未纳入本切片。
+- 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；不纳入或删除本地 `.vscode/`，也不纳入同时出现的 `LoginPage.test.tsx` 修改。
