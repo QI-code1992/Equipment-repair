@@ -16,7 +16,10 @@ describe("FaultReportPage", () => {
   it("preserves the approved fault-report module structure", () => {
     render(<FaultReportPage />);
     expect(screen.getByRole("heading", { name: "查询筛选" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "故障上报列表" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "故障上报列表" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "现场故障信息" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "新增故障上报" }));
+    expect(screen.getByRole("heading", { name: "现场故障信息" })).toBeInTheDocument();
   });
   it("keeps the prototype fault list columns and empty-state contract", () => {
     render(<FaultReportPage />);
@@ -42,6 +45,7 @@ describe("FaultReportPage", () => {
       .mockResolvedValueOnce({ id: "fault-1", number: "FR-001", status: "PENDING_ACCEPT", ...draft, agent_status: "AI_DRAFT" });
     render(<FaultReportPage />);
 
+    fireEvent.click(screen.getByRole("button", { name: "新增故障上报" }));
     expect(screen.getByRole("heading", { name: "现场故障信息" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "AI 辅助与人工确认" })).toBeInTheDocument();
 
@@ -66,6 +70,8 @@ describe("FaultReportPage", () => {
     });
     render(<FaultReportPage />);
 
+    fireEvent.click(screen.getByRole("button", { name: "新增故障上报" }));
+
     fireEvent.change(screen.getByLabelText("设备 ID"), { target: { value: "eq-1" } });
     fireEvent.change(screen.getByLabelText("故障现象"), { target: { value: "液压压力异常" } });
     fireEvent.change(screen.getByLabelText("发生时间"), { target: { value: "2026-07-27T10:00" } });
@@ -84,6 +90,7 @@ describe("FaultReportPage", () => {
       id: "fault-2", number: "FR-002", status: "PENDING_ACCEPT", equipment_id: "eq-1", urgency: "HIGH", symptom: "异响", occurred_at: "2026-07-27T10:00:00+08:00", attachment_refs: [{ object_key: "safe/file.pdf", filename: "manual.pdf", size_bytes: 12, content_type: "application/pdf" }],
     });
     render(<FaultReportPage />);
+    fireEvent.click(screen.getByRole("button", { name: "新增故障上报" }));
     fireEvent.change(screen.getByLabelText("设备 ID"), { target: { value: "eq-1" } });
     fireEvent.change(screen.getByLabelText("故障现象"), { target: { value: "异响" } });
     fireEvent.change(screen.getByLabelText("发生时间"), { target: { value: "2026-07-27T10:00" } });
@@ -96,6 +103,7 @@ describe("FaultReportPage", () => {
   it("blocks manual and AI submissions while an attachment scan is pending", async () => {
     vi.mocked(uploadAttachment).mockImplementation(() => new Promise(() => undefined));
     render(<FaultReportPage />);
+    fireEvent.click(screen.getByRole("button", { name: "新增故障上报" }));
     fireEvent.change(screen.getByLabelText("设备 ID"), { target: { value: "eq-1" } });
     fireEvent.change(screen.getByLabelText("故障现象"), { target: { value: "异响" } });
     fireEvent.change(screen.getByLabelText("发生时间"), { target: { value: "2026-07-27T10:00" } });
@@ -118,6 +126,7 @@ describe("FaultReportPage", () => {
       .mockResolvedValueOnce({ agent_status: "PREVIEW", draft, missing_fields: [] })
       .mockResolvedValueOnce({ id: "fault-1", number: "FR-001", status: "PENDING_ACCEPT", ...draft, symptom: "新症状", agent_status: "AI_DRAFT" });
     render(<FaultReportPage />);
+    fireEvent.click(screen.getByRole("button", { name: "新增故障上报" }));
     fireEvent.change(screen.getByLabelText("设备 ID"), { target: { value: "eq-1" } });
     fireEvent.change(screen.getByLabelText("故障现象"), { target: { value: "旧症状" } });
     fireEvent.change(screen.getByLabelText("发生时间"), { target: { value: "2026-07-27T10:00" } });

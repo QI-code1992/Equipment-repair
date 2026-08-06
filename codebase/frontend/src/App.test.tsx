@@ -142,6 +142,7 @@ describe("App", () => {
     render(<MemoryRouter initialEntries={["/fault-report"]}><App /></MemoryRouter>);
 
     expect(await screen.findByRole("heading", { name: "故障上报" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "新增故障上报" }));
     expect(screen.getByRole("button", { name: "提交故障" })).toBeInTheDocument();
     expect(screen.queryByText("业务内容将在对应任务中接入")).not.toBeInTheDocument();
   });
