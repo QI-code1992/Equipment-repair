@@ -269,10 +269,13 @@ describe("TASK-012 portal pages", () => {
     expect(await screen.findByRole("heading", { name: "设备 BOM 组成" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "设备额定参数" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "知识资料" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "上传知识资料" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "新增分支节点" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "新增参数" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "确认上传" })).toBeDisabled();
     expect(screen.getByText("分枝节点编码")).toBeInTheDocument();
     expect(screen.getByText("额定参数值")).toBeInTheDocument();
+    expect(screen.getByText("选择 Word / PDF 文件")).toBeInTheDocument();
     expect(screen.getAllByText("当前 API 未提供该模块数据，未生成演示内容。")).toHaveLength(3);
   });
 
