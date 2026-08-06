@@ -17,6 +17,7 @@ describe("WorkbenchPage", () => {
     render(<MemoryRouter><WorkbenchPage /></MemoryRouter>);
 
     expect(await screen.findByRole("heading", { name: "待办处置" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "实时处置中心" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "当前健康风险概览" })).toBeInTheDocument();
     expect(screen.getByText("WO-001")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /故障上报/ })).toBeInTheDocument();
