@@ -22,7 +22,7 @@ describe("App", () => {
 
     render(<MemoryRouter initialEntries={["/bi-dashboard"]}><App /></MemoryRouter>);
 
-    expect(await screen.findByRole("heading", { name: "欢迎回来" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "登录" })).toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "主导航" })).not.toBeInTheDocument();
     expect(window.sessionStorage.getItem("access_token")).toBeNull();
   });
@@ -148,7 +148,7 @@ describe("App", () => {
     window.sessionStorage.clear();
     render(<MemoryRouter initialEntries={["/fault-report"]}><App /></MemoryRouter>);
 
-    expect(screen.getByRole("heading", { name: "欢迎回来" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "登录" })).toBeInTheDocument();
   });
 
   it("stores a successful login then sends its Bearer token on the protected page request", async () => {
