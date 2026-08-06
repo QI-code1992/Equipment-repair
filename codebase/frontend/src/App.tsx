@@ -22,11 +22,8 @@ const pages: Page[] = [
   { path: "/factory-modeling", label: "工厂建模", group: "资产管理", mark: "厂" },
   { path: "/equipment", label: "设备台账", group: "资产管理", mark: "设" },
   { path: "/intelligent-config", label: "智能配置", group: "智能运维", mark: "智" },
-  { path: "/intelligence-audit", label: "智能审计", group: "智能运维", mark: "审" },
   { path: "/fault-report", label: "故障上报", group: "现场作业", mark: "报" },
-  { path: "/agent-report", label: "AI 故障上报", group: "现场作业", mark: "AI" },
   { path: "/maintenance-records", label: "维修记录", group: "现场作业", mark: "记" },
-  { path: "/repair-execution", label: "维修执行", group: "现场作业", mark: "修" },
   { path: "/system-management", label: "系统管理", group: "系统管理", mark: "管" },
 ];
 
@@ -181,6 +178,9 @@ function ApplicationShell() {
 }
 
 function pageForRoute(pathname: string): Page {
+  if (pathname === "/agent-report") return { path: pathname, label: "Agent 上报", group: "现场作业", mark: "AI" };
+  if (pathname === "/repair-execution") return { path: pathname, label: "维修执行详情", group: "现场作业", mark: "修" };
+  if (pathname === "/intelligence-audit") return { path: pathname, label: "智能审计", group: "智能运维", mark: "审" };
   if (pathname === "/equipment/new") return pages.find((page) => page.path === "/equipment") ? { ...pages.find((page) => page.path === "/equipment")!, label: "新增设备" } : pages[0];
   if (/^\/equipment\/[^/]+\/edit$/.test(pathname)) return pages.find((page) => page.path === "/equipment") ? { ...pages.find((page) => page.path === "/equipment")!, label: "编辑设备" } : pages[0];
   if (/^\/equipment\/[^/]+$/.test(pathname)) return pages.find((page) => page.path === "/equipment") ? { ...pages.find((page) => page.path === "/equipment")!, label: "设备详情" } : pages[0];

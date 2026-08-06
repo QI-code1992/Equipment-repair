@@ -95,6 +95,9 @@ describe("App", () => {
     expect(await screen.findByRole("heading", { name: "AI 故障上报" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "智能配置", level: 1 })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "AI 故障上报" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "AI 故障上报" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "维修执行" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "智能审计" })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByLabelText("启用深度思考"));
     fireEvent.click(screen.getByRole("button", { name: "保存 Agent 配置" }));
