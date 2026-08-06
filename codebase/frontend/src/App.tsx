@@ -58,7 +58,6 @@ function ApplicationShell() {
   const activePage = pageForRoute(location.pathname);
   const sidebarFoot = sidebarFootForRoute(location.pathname);
   const visiblePages = useMemo(() => permissionCodes === null ? [] : pages.filter((page) => pagePermission(page.path, permissionCodes)), [permissionCodes]);
-  const groups = [...new Set(visiblePages.map((page) => page.group))];
   useEffect(() => {
     if (!notificationsOpen) return;
     setNotificationLoading(true);
@@ -112,17 +111,15 @@ function ApplicationShell() {
 
         <nav aria-label="业务导航">
           {permissionError && <p role="alert">{permissionError}</p>}
-          {groups.map((group) => (
-            <div className="nav-group" key={group}>
-              <div className="nav-group__label">{group}</div>
-              {visiblePages.filter((page) => page.group === group).map((page) => (
-                <NavLink className="nav-item" key={page.path} to={page.path} end={page.path === "/"} onClick={() => setSidebarOpen(false)}>
-                  <span aria-hidden="true">{page.mark}</span>
-                  {page.label}
-                </NavLink>
-              ))}
-            </div>
-          ))}
+          <div className="nav-group">
+            <div className="nav-group__label">业务导航</div>
+            {visiblePages.map((page) => (
+              <NavLink className="nav-item" key={page.path} to={page.path} end={page.path === "/"} onClick={() => setSidebarOpen(false)}>
+                <span aria-hidden="true">{page.mark}</span>
+                {page.label}
+              </NavLink>
+            ))}
+          </div>
         </nav>
 
         {sidebarFoot && <div className="sidebar__footer">

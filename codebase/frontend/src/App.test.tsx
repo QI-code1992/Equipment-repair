@@ -49,6 +49,7 @@ describe("App", () => {
 
     expect(await screen.findByRole("navigation", { name: "业务导航" })).toBeInTheDocument();
     expect(screen.getByText("新能源装载机智能运维平台")).toBeInTheDocument();
+    expect(screen.getByText("业务导航", { selector: ".nav-group__label" })).toBeInTheDocument();
     expect(screen.getByText("工作台 / 运维工作台")).toBeInTheDocument();
   });
 
