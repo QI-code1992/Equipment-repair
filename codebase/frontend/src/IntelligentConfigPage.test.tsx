@@ -103,6 +103,9 @@ describe("IntelligentConfigPage", () => {
     render(<IntelligentConfigPage />);
     await screen.findByText("暂无模型提供商。");
     fireEvent.click(screen.getByRole("tab", { name: "知识库配置" }));
+    expect(screen.getByRole("tab", { name: "知识库参数" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "知识上传" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "知识上传" }));
     fireEvent.change(screen.getByLabelText("正式 Dataset ID"), { target: { value: "dataset-1" } });
     fireEvent.change(screen.getByLabelText("上传知识文档"), { target: { files: [new File(["manual"], "manual.pdf", { type: "application/pdf" })] } });
     await waitFor(() => expect(uploadKnowledgeDocument).toHaveBeenCalledWith("dataset-1", expect.any(File)));
