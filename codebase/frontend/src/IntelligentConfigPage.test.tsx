@@ -137,6 +137,18 @@ describe("IntelligentConfigPage", () => {
     await waitFor(() => expect(uploadKnowledgeDocument).toHaveBeenCalledWith("dataset-1", expect.any(File)));
     expect(await screen.findByText("知识文档已提交，后续状态由正式 Worker 更新。")).toBeInTheDocument();
   });
+  it("keeps the prototype knowledge-configuration hierarchy while marking unsupported catalog data unavailable", async () => {
+    vi.mocked(getAgentConfigs).mockResolvedValue([config]);
+    vi.mocked(getModelProviders).mockResolvedValue([]);
+    vi.mocked(getModelBindings).mockResolvedValue([]);
+    render(<IntelligentConfigPage />);
+    await screen.findByText("暂无模型提供商。");
+    fireEvent.click(screen.getByRole("tab", { name: "知识库配置" }));
+    expect(screen.getByRole("heading", { name: "知识库目录" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "知识文件列表" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "配置参数" }).every((button) => (button as HTMLButtonElement).disabled)).toBe(true);
+    expect(screen.getByText("当前 API 未提供知识库目录数据。")).toBeInTheDocument();
+  });
 
   it("preserves call and token reporting table structures when APIs are unavailable", async () => {
     vi.mocked(getAgentConfigs).mockResolvedValue([config]);
