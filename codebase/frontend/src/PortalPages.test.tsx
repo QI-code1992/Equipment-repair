@@ -177,6 +177,23 @@ describe("TASK-012 portal pages", () => {
     expect(screen.getByText("知识文档接口尚未提供，当前仅展示正式字段状态。" )).toBeInTheDocument();
   });
 
+  it("keeps each equipment detail prototype tab's visual structure without fabricated records", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "eq-1", code: "EQ-1", name: "设备", model: "M", type: "LOADER", manufacturer: "厂", status: "NORMAL", organization_id: "line", owner_user_id: null, operating_hours: 1, manufactured_at: null, commissioned_at: null, image_refs: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20, trend: [] }), { status: 200 })));
+    render(<MemoryRouter initialEntries={["/equipment/eq-1"]}><Routes><Route path="/equipment/:id" element={<EquipmentDetailPage />} /></Routes></MemoryRouter>);
+
+    expect(await screen.findByRole("region", { name: "知识图谱" })).toBeInTheDocument();
+    expect(screen.getByText("当前 API 未提供设备知识图谱数据。" )).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "BOM 组成" }));
+    expect(screen.getByRole("tree", { name: "BOM 组成" })).toBeInTheDocument();
+    expect(screen.getByText("当前 API 未提供 BOM 数据。" )).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "额定参数" }));
+    expect(screen.getByRole("table", { name: "额定参数" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "知识文档" }));
+    expect(screen.getByRole("table", { name: "知识文档" })).toBeInTheDocument();
+  });
+
   it("keeps the approved equipment detail overview modules visible", async () => {
     vi.stubGlobal("fetch", vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ id: "eq-1", code: "EQ-1", name: "设备", model: "M", type: "LOADER", manufacturer: "厂", status: "NORMAL", organization_id: "line", owner_user_id: null, operating_hours: 1, image_refs: [] }), { status: 200 }))
