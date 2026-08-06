@@ -297,12 +297,12 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter><EquipmentLedgerPage /></MemoryRouter>);
 
-    fireEvent.change(await screen.findByLabelText("筛选设备"), { target: { value: "电驱" } });
+    fireEvent.change(await screen.findByLabelText("设备名称筛选"), { target: { value: "电驱" } });
     expect(screen.getByText("电驱装载机")).toBeInTheDocument();
     expect(screen.queryByText("液压装载机")).not.toBeInTheDocument();
   });
 
-  it("uses formal equipment fields for ledger summary and status filtering", async () => {
+  it("uses formal equipment fields for ledger rendering without inventing health scores", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify([
       { id: "eq-1", code: "EQ-01", name: "液压装载机", model: "L-1", type: "LOADER", manufacturer: "M", status: "NORMAL", organization_id: "line-1", owner_user_id: null, operating_hours: 4 },
       { id: "eq-2", code: "EQ-02", name: "电驱装载机", model: "L-2", type: "LOADER", manufacturer: "M", status: "FAULT", organization_id: "line-2", owner_user_id: null, operating_hours: 5 },
@@ -310,11 +310,28 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter><EquipmentLedgerPage /></MemoryRouter>);
 
-    expect(await screen.findByText("设备总览")).toBeInTheDocument();
-    expect(screen.getByText("已加载 2 台正式设备")).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText("设备状态筛选"), { target: { value: "FAULT" } });
+    expect(await screen.findByText("液压装载机")).toBeInTheDocument();
     expect(screen.getByText("电驱装载机")).toBeInTheDocument();
-    expect(screen.queryByText("液压装载机")).not.toBeInTheDocument();
+    expect(screen.getAllByText("当前 API 未提供")).toHaveLength(2);
+    expect(screen.getByText("设备总数 2 台；当前显示 2 台。")).toBeInTheDocument();
+  });
+
+  it("keeps the equipment ledger filter and seven-column table aligned with the approved prototype", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify([
+      { id: "eq-1", code: "EQ-01", name: "液压装载机", model: "L-1", type: "LOADER", manufacturer: "M", status: "NORMAL", organization_id: "line-1", owner_user_id: "owner-1", operating_hours: 4 },
+    ]), { status: 200 })));
+
+    render(<MemoryRouter><EquipmentLedgerPage /></MemoryRouter>);
+
+    expect(await screen.findByRole("heading", { name: "设备列表" })).toBeInTheDocument();
+    expect(screen.getByLabelText("健康评分筛选")).toBeInTheDocument();
+    for (const heading of ["序号", "设备编号", "设备名称", "型号", "负责人", "健康评分", "操作"]) {
+      expect(screen.getByRole("columnheader", { name: heading })).toBeInTheDocument();
+    }
+    expect(screen.queryByRole("heading", { name: "资产列表" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "设备身份" })).not.toBeInTheDocument();
+    expect(screen.getByText("owner-1")).toBeInTheDocument();
+    expect(screen.getByText("设备总数 1 台；当前显示 1 台。")).toBeInTheDocument();
   });
 
   it("filters the equipment ledger by the real organization hierarchy", async () => {

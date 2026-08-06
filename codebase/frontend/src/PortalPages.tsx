@@ -73,7 +73,7 @@ export function EquipmentLedgerPage() {
   const organizations = useData(getOrganizations, []);
   const [query, setQuery] = useState("");
   const [nameQuery, setNameQuery] = useState("");
-  const [status, setStatus] = useState("");
+  const [healthScore, setHealthScore] = useState("");
   const [factoryId, setFactoryId] = useState("");
   const [workshopId, setWorkshopId] = useState("");
   const [lineId, setLineId] = useState("");
@@ -101,26 +101,21 @@ export function EquipmentLedgerPage() {
   const selectedOrganization = lineId || workshopId || factoryId;
   const selectedOrganizationIds = selectedOrganization ? descendantIds(selectedOrganization) : null;
   return <Page title="设备台账">{(() => {
-    const filtered = items.filter((item) => (!query || [item.code, item.name, item.model, item.status].some((value) => value.includes(query))) && (!nameQuery || item.name.includes(nameQuery)) && (!status || item.status === status) && (!selectedOrganizationIds || selectedOrganizationIds.has(item.organization_id)));
-    const statusCounts = items.reduce<Record<string, number>>((counts, item) => ({ ...counts, [item.status]: (counts[item.status] ?? 0) + 1 }), {});
+    const filtered = items.filter((item) => (!query || item.code.includes(query)) && (!nameQuery || item.name.includes(nameQuery)) && (!selectedOrganizationIds || selectedOrganizationIds.has(item.organization_id)));
     return <>
-      <section className="ledger-overview" aria-label="设备总览">
-        <div><p className="page-shell__eyebrow">设备总览</p><strong>已加载 {items.length} 台正式设备</strong><span>仅展示设备台账 API 返回的资产、状态和运行字段。</span></div>
-        <div className="ledger-overview__statuses" aria-label="设备状态分布">{Object.entries(statusCounts).map(([name, count]) => <span key={name} className={`status-chip ${name === "FAULT" ? "status-chip--danger" : name === "NORMAL" ? "status-chip--success" : "status-chip--neutral"}`}>{name} {count}</span>)}</div>
-      </section>
       <section className="ledger-toolbar ledger-toolbar--hierarchy" aria-label="设备筛选工具栏">
         <label>工厂<select aria-label="设备所属工厂" value={factoryId} onChange={(event) => { setFactoryId(event.target.value); setWorkshopId(""); setLineId(""); }} disabled={organizations.loading || !!organizations.error}><option value="">全部工厂</option>{factories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
         <label>车间<select aria-label="设备所属车间" value={workshopId} onChange={(event) => { setWorkshopId(event.target.value); setLineId(""); }} disabled={!factoryId || organizations.loading || !!organizations.error}><option value="">全部车间</option>{workshops.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
         <label>产线<select aria-label="设备所属产线" value={lineId} onChange={(event) => setLineId(event.target.value)} disabled={!workshopId || organizations.loading || !!organizations.error}><option value="">全部产线</option>{lines.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
-        <label>设备编号<input aria-label="筛选设备" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="输入设备编号" /></label>
-        <label>设备名称<input aria-label="设备名称筛选" value={nameQuery} onChange={(event) => setNameQuery(event.target.value)} placeholder="输入设备名称" /></label>
-        <label>设备状态<select aria-label="设备状态筛选" value={status} onChange={(event) => setStatus(event.target.value)}><option value="">全部状态</option>{Object.keys(statusCounts).sort().map((name) => <option key={name} value={name}>{name}</option>)}</select></label>
-        <div className="filter-actions"><button type="button" className="button-primary">查询</button><button type="button" className="button-secondary" onClick={() => { setQuery(""); setNameQuery(""); setStatus(""); setFactoryId(""); setWorkshopId(""); setLineId(""); }}>重置</button></div>
+        <label>设备编号<input aria-label="筛选设备" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索设备编号" /></label>
+        <label>设备名称<input aria-label="设备名称筛选" value={nameQuery} onChange={(event) => setNameQuery(event.target.value)} placeholder="搜索设备名称" /></label>
+        <label>健康评分<select aria-label="健康评分筛选" value={healthScore} onChange={(event) => setHealthScore(event.target.value)}><option value="">全部评分</option><option value="normal">正常（100）</option><option value="low-risk">低风险（80–99）</option><option value="medium-risk">中风险（60–79）</option><option value="high-risk">高风险（40–59）</option><option value="severe-risk">严重风险（0–39）</option></select><small className="prototype-unavailable">当前 API 未提供筛选所需健康分。</small></label>
+        <div className="filter-actions"><button type="button" className="button-primary">查询</button><button type="button" className="button-secondary" onClick={() => { setQuery(""); setNameQuery(""); setHealthScore(""); setFactoryId(""); setWorkshopId(""); setLineId(""); }}>重置</button></div>
         <Link className="button-primary ledger-toolbar__create" to="/equipment/new">新增设备</Link>
       </section>
       <section className="ledger-table-panel">
-        <header><div><h3 aria-label="设备列表">资产列表</h3><p>{filtered.length === items.length ? "当前显示全部已加载设备。" : `当前显示 ${filtered.length} 台符合筛选条件的设备。`}</p></div></header>
-        {filtered.length ? <table><thead><tr><th>设备身份</th><th>型号与制造商</th><th>所属组织</th><th>健康评分</th><th>运行工时</th><th>状态</th><th>操作</th></tr></thead><tbody>{filtered.map((item) => <tr key={item.id}><td><strong>{item.name}</strong><small>{item.code}</small></td><td><strong>{item.model}</strong><small>{item.manufacturer}</small></td><td>{item.organization_id}</td><td><span className="prototype-unavailable table-unavailable">当前 API 未提供</span></td><td>{item.operating_hours}</td><td><span className={`status-chip ${item.status === "FAULT" ? "status-chip--danger" : item.status === "NORMAL" ? "status-chip--success" : "status-chip--neutral"}`}>{item.status}</span></td><td className="table-actions"><Link to={`/equipment/${item.id}`}>详情</Link><Link to={`/equipment/${item.id}/edit`}>编辑</Link></td></tr>)}</tbody></table> : <p className="empty-panel" role="status">{items.length ? "没有符合筛选条件的正式设备数据。" : "尚未登记正式设备。"}</p>}
+        <header><div><h3>设备列表</h3><p>每页展示 10 台设备，可查看详情或编辑基础信息。</p></div></header>
+        {filtered.length ? <><table><thead><tr><th>序号</th><th>设备编号</th><th>设备名称</th><th>型号</th><th>负责人</th><th>健康评分</th><th>操作</th></tr></thead><tbody>{filtered.map((item, index) => <tr key={item.id}><td>{index + 1}</td><td>{item.code}</td><td>{item.name}</td><td>{item.model}</td><td>{item.owner_user_id ?? "未分配"}</td><td><span className="prototype-unavailable table-unavailable">当前 API 未提供</span></td><td className="table-actions"><Link to={`/equipment/${item.id}`}>详情</Link><Link to={`/equipment/${item.id}/edit`}>编辑</Link></td></tr>)}</tbody></table><footer className="ledger-list-footer"><div className="result-status">设备总数 {items.length} 台；当前显示 {filtered.length} 台。</div><div className="ledger-pagination" aria-label="设备列表分页"><span className="prototype-unavailable">当前 API 未提供分页数据。</span></div></footer></> : <p className="empty-panel" role="status">{items.length ? "没有符合筛选条件的正式设备数据。" : "尚未登记正式设备。"}</p>}
       </section>
     </>;
   })()}</Page>;
