@@ -41,7 +41,7 @@ describe("IntelligentConfigPage", () => {
     vi.mocked(getModelProviders).mockResolvedValue([]);
     vi.mocked(getModelBindings).mockResolvedValue([]);
     render(<IntelligentConfigPage />);
-    expect(await screen.findByRole("heading", { name: "模型与绑定" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "模型配置" })).toBeInTheDocument();
     expect(screen.queryByLabelText("模型配置原型模块")).not.toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "智能体配置" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "知识库配置" })).toBeInTheDocument();
@@ -57,7 +57,7 @@ describe("IntelligentConfigPage", () => {
     render(<IntelligentConfigPage />);
 
     expect(await screen.findByText("内部模型服务")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "模型与绑定" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "模型配置" })).toBeInTheDocument();
     expect(screen.getByText("运维模型（ops-1）")).toBeInTheDocument();
     expect(screen.queryByText(/secret-ref-value/)).not.toBeInTheDocument();
 
@@ -72,7 +72,7 @@ describe("IntelligentConfigPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "新增模型绑定" }));
     await waitFor(() => expect(createModelBinding).toHaveBeenCalledWith(expect.objectContaining({ name: "备用模型", model_name: "ops-2" })));
     fireEvent.click(screen.getByRole("tab", { name: "智能体配置" }));
-    expect(screen.getByRole("heading", { name: "Agent 控制面" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "智能体配置" })).toBeInTheDocument();
   });
 
   it("edits a provider and binding through the formal APIs without displaying its secret reference", async () => {
