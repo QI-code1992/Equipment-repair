@@ -37,6 +37,11 @@ describe("FaultReportPage", () => {
     expect(screen.getByRole("columnheader", { name: "状态" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "操作" })).toBeInTheDocument();
     expect(screen.getByRole("status", { name: "故障列表状态" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "故障处理动作" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "维修接单" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "维修闭环" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "故障详情" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "删除故障" })).toBeDisabled();
   });
   it("shows an AI draft first and writes a formal fault only after explicit confirmation", async () => {
     const draft = {
