@@ -512,6 +512,26 @@ describe("TASK-012 portal pages", () => {
     expect(await screen.findByRole("button", { name: "保存角色权限" })).toBeInTheDocument();
   });
 
+  it("keeps separate prototype audit-table structures while only rendering formal audit fields", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [{ id: "audit-1", created_at: "2026-08-06T10:00:00Z", action: "LOGIN", resource_type: "session", result: "SUCCESS" }], count: 1, page: 1, page_size: 20 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 })));
+
+    render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
+
+    fireEvent.click(screen.getByRole("tab", { name: "登录日志" }));
+    expect(await screen.findByRole("columnheader", { name: "登录账号" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "来源 IP" })).toBeInTheDocument();
+    expect(screen.getByText("LOGIN")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "操作日志" }));
+    expect(screen.getByRole("columnheader", { name: "操作时间" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "操作对象" })).toBeInTheDocument();
+    expect(screen.getByText("session")).toBeInTheDocument();
+  });
+
   it("labels configured token budgets without claiming actual model consumption", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({
