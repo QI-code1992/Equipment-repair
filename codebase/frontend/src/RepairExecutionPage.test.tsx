@@ -35,6 +35,7 @@ describe("RepairExecutionPage", () => {
     expect(screen.getByRole("heading", { name: "工单摘要" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "维修记录填写" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "建议与引用" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "上报预收集" })).not.toBeInTheDocument();
   });
 
   it("keeps the prototype repair form fields and evidence module visible", async () => {
