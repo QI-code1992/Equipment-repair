@@ -156,7 +156,7 @@ describe("TASK-012 portal pages", () => {
     expect(await screen.findByText(/2026-07-30：完成 2 次/)).toBeInTheDocument();
   });
 
-  it("groups equipment detail into formal asset, operating and maintenance areas", async () => {
+  it("groups the equipment detail header into the approved prototype overview regions", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ id: "eq-1", code: "EQ-1", name: "设备", model: "M", type: "LOADER", manufacturer: "厂", status: "NORMAL", organization_id: "line", owner_user_id: null, operating_hours: 1, manufactured_at: "2026-01-01", commissioned_at: "2026-02-01", image_refs: [] }), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20, trend: [] }), { status: 200 }));
@@ -164,9 +164,28 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter initialEntries={["/equipment/eq-1"]}><Routes><Route path="/equipment/:id" element={<EquipmentDetailPage />} /></Routes></MemoryRouter>);
 
-    expect(await screen.findByRole("heading", { name: "资产身份" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "运行与关键参数" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "EQ-1 · 设备（M）" })).toBeInTheDocument();
+    expect(screen.getByLabelText("设备图片")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "查看健康评分明细" })).toBeInTheDocument();
+    expect(screen.getByText("负责人")).toBeInTheDocument();
+    expect(screen.getByText("最近异常")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "维修历史" })).toBeInTheDocument();
+  });
+
+  it("opens the prototype health-score detail surface using the formal health API", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "eq-1", code: "EQ-1", name: "设备", model: "M", type: "LOADER", manufacturer: "厂", status: "NORMAL", organization_id: "line", owner_user_id: null, operating_hours: 1, image_refs: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20, trend: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ status: "LOW_RISK", score: 82 }), { status: 200 })));
+
+    render(<MemoryRouter initialEntries={["/equipment/eq-1"]}><Routes><Route path="/equipment/:id" element={<EquipmentDetailPage />} /></Routes></MemoryRouter>);
+
+    expect(await screen.findByText("82")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "查看健康评分明细" }));
+    expect(screen.getByRole("dialog", { name: "健康评分明细" })).toBeInTheDocument();
+    expect(screen.getByText("82 分")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "关闭健康评分明细" }));
+    expect(screen.queryByRole("dialog", { name: "健康评分明细" })).not.toBeInTheDocument();
   });
 
   it("renders the prototype equipment detail tab structure without inventing unavailable data", async () => {
@@ -206,8 +225,10 @@ describe("TASK-012 portal pages", () => {
       .mockResolvedValueOnce(new Response(JSON.stringify({ id: "eq-1", code: "EQ-1", name: "设备", model: "M", type: "LOADER", manufacturer: "厂", status: "NORMAL", organization_id: "line", owner_user_id: null, operating_hours: 1, image_refs: [] }), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20, trend: [] }), { status: 200 })));
     render(<MemoryRouter initialEntries={["/equipment/eq-1"]}><Routes><Route path="/equipment/:id" element={<EquipmentDetailPage />} /></Routes></MemoryRouter>);
-    expect(await screen.findByRole("heading", { name: "当前评分构成" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "风险恢复记录" })).toBeInTheDocument();
+    expect(await screen.findByText("最近异常")).toBeInTheDocument();
+    expect(screen.getByText("BOM 节点")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "查看健康评分明细" }));
+    expect(screen.getByText("当前 API 未提供健康评分构成。")).toBeInTheDocument();
   });
 
   it("keeps the approved maintenance detail modules visible", async () => {
