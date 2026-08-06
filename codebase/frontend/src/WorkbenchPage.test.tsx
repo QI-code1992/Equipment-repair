@@ -38,6 +38,7 @@ describe("WorkbenchPage", () => {
     expect(screen.getByText("今日已处理")).toBeInTheDocument();
     expect(screen.getByText("平均处理时长")).toBeInTheDocument();
     expect(screen.getByText("今日处理完成率")).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "趋势时间范围" })).toBeInTheDocument();
     expect(screen.getByText("当前 API 未提供故障趋势数据。")).toBeInTheDocument();
   });
 

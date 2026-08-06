@@ -15,6 +15,7 @@ export function WorkbenchPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [refresh, setRefresh] = useState(0);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [trendRange, setTrendRange] = useState("7");
 
   useEffect(() => {
     setRefreshing(true);
@@ -58,6 +59,6 @@ export function WorkbenchPage() {
         <section className="data-card health-card" aria-label="设备健康查询"><div className="panel-heading"><div><h3>设备健康查询</h3><p>选择已授权设备后获取实时健康状态</p></div></div><div className="health-query"><label>设备<select aria-label="设备 ID" value={equipmentId} onChange={(event) => setEquipmentId(event.target.value)}><option value="">请选择正式设备</option>{equipment.map((item) => <option key={item.id} value={item.id}>{item.code} · {item.name}</option>)}</select></label><button type="button" className="button-primary" disabled={!equipmentId} onClick={() => void loadHealth()}>查询健康分</button>{health && <p role="status">当前健康分：<strong>{health.score}</strong></p>}</div></section>
       </div>
     </div>
-    <section className="workbench-secondary-grid"><article className="data-card trend-card"><div className="panel-heading"><div><h3>故障趋势</h3><p>时间范围只影响历史故障统计。</p></div></div><p className="empty-panel">当前 API 未提供故障趋势数据。</p></article><article className="data-card activity-card"><div className="panel-heading"><div><div><h3>最新维修动态</h3><p>接单、维修与处理结果实时汇总。</p></div><Link className="small muted" to="/maintenance-records">查看全部维修记录 →</Link></div></div><p className="empty-panel">当前 API 未提供维修动态数据。</p></article></section>
+    <section className="workbench-secondary-grid"><article className="data-card trend-card"><div className="panel-heading"><div><h3>故障趋势</h3><p>时间范围只影响历史故障统计，不影响当前健康分。</p></div><label>趋势时间范围<select aria-label="趋势时间范围" value={trendRange} onChange={(event) => setTrendRange(event.target.value)}><option value="7">近 7 天</option><option value="30">近 30 天</option><option value="custom">自定义</option></select></label></div>{trendRange === "custom" && <div className="trend-custom-dates"><label>开始日期<input aria-label="趋势开始日期" type="date" /></label><label>结束日期<input aria-label="趋势结束日期" type="date" /></label></div>}<p className="empty-panel">当前 API 未提供故障趋势数据。</p></article><article className="data-card activity-card"><div className="panel-heading"><div><div><h3>最新维修动态</h3><p>接单、维修与处理结果实时汇总。</p></div><Link className="small muted" to="/maintenance-records">查看全部维修记录 →</Link></div></div><p className="empty-panel">当前 API 未提供维修动态数据。</p></article></section>
   </section>;
 }
