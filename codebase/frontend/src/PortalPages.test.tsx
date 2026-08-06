@@ -244,6 +244,27 @@ describe("TASK-012 portal pages", () => {
     expect(screen.getByText("当前 API 未提供故障类型分布数据。")).toBeInTheDocument();
   });
 
+  it("keeps the complete prototype maintenance overview and record table structure", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 })));
+
+    render(<MemoryRouter><MaintenanceRecordsPage /></MemoryRouter>);
+
+    expect(await screen.findByRole("region", { name: "维修概览指标" })).toBeInTheDocument();
+    for (const label of ["总维修次数", "待处理维修", "平均修复时间 MTTR", "平均故障间隔 MTBF", "平均维修时间", "维修完成率"]) {
+      expect(screen.getByText(label)).toBeInTheDocument();
+    }
+    expect(screen.getByRole("region", { name: "维修概览图表" })).toBeInTheDocument();
+    for (const label of ["故障类型分布图", "维修时长分布图", "设备状态分布图", "故障次数趋势图"]) {
+      expect(screen.getByRole("img", { name: label })).toBeInTheDocument();
+    }
+
+    fireEvent.click(screen.getByRole("tab", { name: "维修记录列表" }));
+    expect(await screen.findByRole("table", { name: "维修记录列表" })).toBeInTheDocument();
+    for (const heading of ["序号", "维修记录编号", "所属车间", "所属产线", "异常信息", "工单状态", "维修负责人", "处理结果", "完成时间"]) {
+      expect(screen.getByRole("columnheader", { name: heading })).toBeInTheDocument();
+    }
+  });
+
   it("filters the equipment ledger with real loaded equipment", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify([
       { id: "eq-1", code: "EQ-01", name: "液压装载机", model: "L-1", type: "LOADER", manufacturer: "M", status: "NORMAL", organization_id: "line-1", owner_user_id: null, operating_hours: 4 },
