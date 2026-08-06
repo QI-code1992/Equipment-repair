@@ -34,6 +34,10 @@ describe("WorkbenchPage", () => {
     expect(await screen.findByText("待接单故障")).toBeInTheDocument();
     expect(screen.getByText("待接单故障").parentElement).toHaveTextContent("2");
     expect(screen.getByText("维修中故障")).toBeInTheDocument();
+    expect(screen.getByText("今日新增故障")).toBeInTheDocument();
+    expect(screen.getByText("今日已处理")).toBeInTheDocument();
+    expect(screen.getByText("平均处理时长")).toBeInTheDocument();
+    expect(screen.getByText("今日处理完成率")).toBeInTheDocument();
     expect(screen.getByText("当前 API 未提供故障趋势数据。")).toBeInTheDocument();
   });
 
