@@ -26,14 +26,13 @@ const config = {
 };
 
 describe("IntelligentConfigPage", () => {
-  it("preserves the approved intelligent-config module structure", async () => {
+  it("keeps prototype configuration regions without rendering a duplicate unavailable-module catalogue", async () => {
     vi.mocked(getAgentConfigs).mockResolvedValue([config]);
     vi.mocked(getModelProviders).mockResolvedValue([]);
     vi.mocked(getModelBindings).mockResolvedValue([]);
     render(<IntelligentConfigPage />);
-    expect(await screen.findByText("默认 LLM")).toBeInTheDocument();
-    expect(screen.getByText("默认 Embedding")).toBeInTheDocument();
-    expect(screen.getByText("默认 Rerank")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "模型与绑定" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("模型配置原型模块")).not.toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "智能体配置" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "知识库配置" })).toBeInTheDocument();
   });
