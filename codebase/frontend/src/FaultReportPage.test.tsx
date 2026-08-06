@@ -13,6 +13,16 @@ vi.mock("./api", async (importOriginal) => ({
 
 describe("FaultReportPage", () => {
   beforeEach(() => vi.clearAllMocks());
+  it("keeps the approved fault-report list and report workspace modules visible", () => {
+    render(<FaultReportPage />);
+    expect(screen.getByRole("heading", { name: "查询筛选" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "故障上报列表" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "新增故障上报" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "基础信息" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "故障描述" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "现场附件" })).toBeInTheDocument();
+    expect(screen.getByText("当前接口未提供故障列表查询。")) .toBeInTheDocument();
+  });
   it("shows an AI draft first and writes a formal fault only after explicit confirmation", async () => {
     const draft = {
       equipment_id: "eq-1", urgency: "HIGH", symptom: "液压压力异常", occurred_at: "2026-07-27T10:00:00+08:00",

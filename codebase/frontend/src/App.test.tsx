@@ -89,6 +89,8 @@ describe("App", () => {
     );
 
     expect(screen.getByRole("navigation", { name: "业务导航" })).toBeInTheDocument();
+    await screen.findByRole("tab", { name: "智能体配置" });
+    fireEvent.click(screen.getByRole("tab", { name: "智能体配置" }));
     expect(await screen.findByRole("heading", { name: "AI 故障上报" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "智能配置", level: 1 })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "AI 故障上报" })).toBeInTheDocument();
@@ -110,6 +112,8 @@ describe("App", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     render(<MemoryRouter initialEntries={["/intelligent-config"]}><App /></MemoryRouter>);
+    await screen.findByRole("tab", { name: "智能体配置" });
+    fireEvent.click(screen.getByRole("tab", { name: "智能体配置" }));
     expect(await screen.findByText("尚无可配置的 Agent。")).toBeInTheDocument();
     expect(fetchMock.mock.calls.map(([path]) => path)).toEqual([
       "/api/auth/me", "/api/agent-configs", "/api/model-providers", "/api/model-bindings",
@@ -126,6 +130,8 @@ describe("App", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     render(<MemoryRouter initialEntries={["/intelligent-config"]}><App /></MemoryRouter>);
+    await screen.findByRole("tab", { name: "智能体配置" });
+    fireEvent.click(screen.getByRole("tab", { name: "智能体配置" }));
     await screen.findByRole("heading", { name: "AI 故障上报" });
     fireEvent.click(screen.getByLabelText("启用深度思考"));
 

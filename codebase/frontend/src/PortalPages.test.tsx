@@ -157,6 +157,16 @@ describe("TASK-012 portal pages", () => {
     expect(screen.getByRole("heading", { name: "维修历史" })).toBeInTheDocument();
   });
 
+  it("keeps the approved equipment detail tabs and health interaction boundary", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "eq-1", code: "EQ-01", name: "装载机", model: "L-1", type: "LOADER", manufacturer: "M", status: "NORMAL", organization_id: "line-1", owner_user_id: null, operating_hours: 4, manufactured_at: null, commissioned_at: null, image_refs: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20, trend: [] }), { status: 200 })));
+    render(<MemoryRouter initialEntries={["/equipment/eq-1"]}><Routes><Route path="/equipment/:id" element={<EquipmentDetailPage />} /></Routes></MemoryRouter>);
+    expect(await screen.findByRole("button", { name: "设备健康评分" })).toBeDisabled();
+    for (const tab of ["图谱关系", "BOM 组成", "额定参数", "知识文档", "维修记录"]) expect(screen.getByRole("tab", { name: tab })).toBeInTheDocument();
+    expect(screen.getByText("当前接口未提供该设备的图谱、BOM、额定参数或知识文档数据。")) .toBeInTheDocument();
+  });
+
   it("sends the selected knowledge status to the maintenance-record API", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ items: [{ maintenance_record_id: "r-1", work_order_number: "WO-1", status: "COMPLETED", symptom: "异响", repair_result: "通过", knowledge_status: "NOT_LINKED" }], count: 1, page: 1, page_size: 20 }), { status: 200 }))

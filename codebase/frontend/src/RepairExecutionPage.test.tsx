@@ -26,6 +26,13 @@ it("maps live repair state into the approved three-rail execution workspace", as
   expect(screen.getByRole("heading", { name: "维修记录填写" })).toBeInTheDocument();
   expect(screen.getByRole("heading", { name: "建议与引用" })).toBeInTheDocument();
   expect(screen.getByText("当前尚未选择正式工单。")).toBeInTheDocument();
+  expect(screen.getByLabelText("备件成本")).toBeDisabled();
+  expect(screen.getByLabelText("工时")).toBeDisabled();
+  expect(screen.getByLabelText("现场处理记录")).toBeDisabled();
+  expect(screen.getByLabelText("维修附件")).toBeDisabled();
+  expect(screen.getByText("提交验收")).toBeDisabled();
+  expect(screen.getByRole("button", { name: "保存草稿" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "复制维修摘要" })).toBeDisabled();
 });
 
 it("shows staged loading before displaying the server diagnosis question", async () => {
