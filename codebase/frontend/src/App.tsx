@@ -59,6 +59,7 @@ function ApplicationShell() {
     });
   }, []);
   const activePage = pageForRoute(location.pathname);
+  const sidebarFoot = sidebarFootForRoute(location.pathname);
   const visiblePages = useMemo(() => permissionCodes === null ? [] : pages.filter((page) => pagePermission(page.path, permissionCodes)), [permissionCodes]);
   const groups = [...new Set(visiblePages.map((page) => page.group))];
   useEffect(() => {
@@ -127,10 +128,10 @@ function ApplicationShell() {
           ))}
         </nav>
 
-        <div className="sidebar__footer">
-          <strong>受控运维会话</strong>
-          <span>{permissionCodes === null ? "正在校验权限" : "权限已识别"}</span>
-        </div>
+        {sidebarFoot && <div className="sidebar__footer">
+          <strong>{sidebarFoot.title}</strong>
+          <span>{sidebarFoot.description}</span>
+        </div>}
       </aside>
 
       <main className="main-area">
@@ -185,6 +186,22 @@ function pageForRoute(pathname: string): Page {
   if (/^\/equipment\/[^/]+$/.test(pathname)) return pages.find((page) => page.path === "/equipment") ? { ...pages.find((page) => page.path === "/equipment")!, label: "设备详情" } : pages[0];
   if (/^\/maintenance-records\/[^/]+$/.test(pathname)) return pages.find((page) => page.path === "/maintenance-records") ? { ...pages.find((page) => page.path === "/maintenance-records")!, label: "维修记录详情" } : pages[0];
   return pages.find((page) => page.path === pathname) ?? pages[0];
+}
+
+function sidebarFootForRoute(pathname: string): { title: string; description: string } | null {
+  if (pathname === "/bi-dashboard") return { title: "管理驾驶舱", description: "聚合设备健康、维修效率和知识图谱覆盖。" };
+  if (pathname === "/factory-modeling") return { title: "组织建模", description: "维护工厂、车间、产线层级，作为设备台账和驾驶舱筛选基础。" };
+  if (pathname === "/equipment") return { title: "台账知识合一", description: "设备资料上传后自动解析图谱，人工只审核异常关系。" };
+  if (pathname === "/equipment/new") return { title: "新增设备", description: "一次性维护基础信息、BOM、额定参数和知识资料。" };
+  if (/^\/equipment\/[^/]+\/edit$/.test(pathname)) return { title: "编辑设备", description: "保留设备现有基础信息、BOM、额定参数和知识资料。" };
+  if (/^\/equipment\/[^/]+$/.test(pathname)) return { title: "设备详情", description: "只读查看设备健康、BOM、参数、知识和维修闭环记录。" };
+  if (pathname === "/intelligent-config") return { title: "智能配置中心", description: "模型、Agent、知识库、调用记录和 Token 统计形成闭环。" };
+  if (pathname === "/fault-report") return { title: "故障闭环", description: "上报、接单、维修、处理结果沉淀到同一张故障记录。" };
+  if (pathname === "/agent-report") return { title: "正式 Agent 上报", description: "悬浮抽屉只做预收集，正式提交在本页完成。" };
+  if (pathname.startsWith("/maintenance-records")) return { title: "知识沉淀", description: "维修完成后进入案例沉淀、新故障模式审核。" };
+  if (pathname === "/repair-execution") return { title: "执行工作台", description: "左侧摘要、中间记录、右侧建议与知识引用。" };
+  if (pathname === "/system-management") return { title: "权限审计", description: "角色、用户、组织和权限变更统一留痕。" };
+  return null;
 }
 
 function pagePermission(path: string, codes: string[]) {

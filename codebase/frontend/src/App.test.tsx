@@ -71,6 +71,8 @@ describe("App", () => {
     render(<MemoryRouter initialEntries={["/equipment/new"]}><App /></MemoryRouter>);
 
     expect(await screen.findByText("资产管理 / 新增设备")).toBeInTheDocument();
+    expect(screen.getByText("一次性维护基础信息、BOM、额定参数和知识资料。")).toBeInTheDocument();
+    expect(screen.queryByText("受控运维会话")).not.toBeInTheDocument();
   });
 
   it("loads an Agent configuration and saves only the selected Agent", async () => {
