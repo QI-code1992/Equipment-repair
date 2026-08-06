@@ -331,12 +331,22 @@ function OrganizationTree({ items, query, collapsed, selectedId, onSelect, onTog
   const matches = (item: OrganizationItem): boolean => !query || item.name.includes(query) || item.code.includes(query) || (byParent.get(item.id) ?? []).some(matches);
   const rows: Array<{ item: OrganizationItem; depth: number }> = [];
   const visited = new Set<string>();
+  const organizationIds = new Set(items.map((item) => item.id));
   function visit(parentId: string | null, depth: number) { for (const item of byParent.get(parentId) ?? []) { if (visited.has(item.id) || !matches(item)) continue; visited.add(item.id); rows.push({ item, depth }); if (!collapsed.includes(item.id) || query) visit(item.id, depth + 1); } }
   visit(null, 0);
-  for (const item of items) if (!visited.has(item.id) && matches(item)) { visited.add(item.id); rows.push({ item, depth: 0 }); }
-  return <div className="organization-tree" role="tree" aria-label="组织结构树">{rows.map(({ item, depth }) => { const hasChildren = (byParent.get(item.id) ?? []).length > 0; const expanded = !collapsed.includes(item.id); return <div className={`organization-tree__row ${selectedId === item.id ? "is-selected" : ""}`} key={item.id} style={{ paddingLeft: `${12 + depth * 18}px` }}><button type="button" className="tree-toggle" aria-label={`${expanded ? "收起" : "展开"} ${item.name}`} disabled={!hasChildren} onClick={() => onToggle(item.id)}>{hasChildren ? (expanded ? "−" : "+") : "·"}</button><button type="button" className="tree-node" onClick={() => onSelect(item.id)}><span>{item.name}</span><small>{item.code}</small></button><span className={item.enabled ? "status-chip status-chip--success" : "status-chip status-chip--muted"}>{item.enabled ? "启用" : "停用"}</span></div>; })}</div>;
+  for (const item of items) if (!visited.has(item.id) && matches(item) && (item.parent_id === null || !organizationIds.has(item.parent_id))) { visited.add(item.id); rows.push({ item, depth: 0 }); }
+  const expandableIds = items.filter((item) => (byParent.get(item.id) ?? []).length > 0).map((item) => item.id);
+  function expandAll() { for (const id of collapsed) onToggle(id); }
+  function collapseAll() { for (const id of expandableIds) if (!collapsed.includes(id)) onToggle(id); }
+  return <>
+    <div className="factory-tree-tools__actions" aria-label="组织树操作">
+      <button type="button" className="button-secondary" onClick={expandAll}>全部展开</button>
+      <button type="button" className="button-secondary" onClick={collapseAll}>全部折叠</button>
+    </div>
+    <div className="organization-tree" role="tree" aria-label="组织结构树">{rows.map(({ item, depth }) => { const hasChildren = (byParent.get(item.id) ?? []).length > 0; const expanded = !collapsed.includes(item.id); return <div className={`organization-tree__row ${selectedId === item.id ? "is-selected" : ""}`} key={item.id} style={{ paddingLeft: `${12 + depth * 18}px` }}><button type="button" className="tree-toggle" aria-label={`${expanded ? "收起" : "展开"} ${item.name}`} disabled={!hasChildren} onClick={() => onToggle(item.id)}>{hasChildren ? (expanded ? "−" : "+") : "·"}</button><button type="button" className="tree-node" onClick={() => onSelect(item.id)}><span>{item.name}</span><small>{item.code}</small></button><span className={item.enabled ? "status-chip status-chip--success" : "status-chip status-chip--muted"}>{item.enabled ? "启用" : "停用"}</span></div>; })}</div>
+  </>;
 }
-export function AgentReportPage() {
+export function AgentReportPage({ currentUsername = "当前登录用户" }: { currentUsername?: string } = {}) {
   const [equipmentId, setEquipmentId] = useState("");
   const [symptom, setSymptom] = useState("");
   const [description, setDescription] = useState("");
@@ -392,16 +402,26 @@ export function AgentReportPage() {
     } catch (caught) { setError(`正式提交失败：${caught instanceof ApiError ? caught.code : "REQUEST_FAILED"}`); } finally { setSubmitting(false); }
   }
 
+  const missingFields = [
+    !equipmentId && "设备",
+    !symptom && "故障现象",
+    !occurredAt && "发生时间",
+    durationMinutes <= 0 && "持续时长",
+  ].filter(Boolean) as string[];
+  const completedFields = 4 - missingFields.length;
+  const completion = Math.round(completedFields / 4 * 100);
   return <Page title="AI 故障上报">
     <p className="page-description">AI 只负责受控收集；它不会直接写入故障事实。正式上报必须由用户完成结构化确认。</p>
-    <div className="agent-report-workspace"><section className="agent-report-workspace__collect"><h3>AI 受控收集</h3><p>提交现场设备与故障描述后，页面会实时显示运行状态。</p><form className="portal-form" onSubmit={collect}>
-      <fieldset disabled={collecting || submitting}>
-        <label>设备 ID<input aria-label="设备 ID" value={equipmentId} onChange={(event) => setEquipmentId(event.target.value)} required /></label>
-        <label>故障描述<textarea aria-label="故障描述" value={symptom} onChange={(event) => setSymptom(event.target.value)} required /></label>
-        <button type="submit">{collecting ? "AI 收集中…" : "开始 AI 收集"}</button>
-      </fieldset>
-    </form>{runtimeEvents.length > 0 && <section className="agent-runtime-panel" aria-label="AI 运行状态">{runtimeEvents.map((item, index) => <p key={`${item.event}-${index}`}>运行状态：{String(item.data.status ?? item.event)}</p>)}</section>}</section><aside className="agent-report-workspace__notice"><h3>正式写入边界</h3><p>AI 线程完成后仍需补全时间、时长与附件，并由人工确认正式上报。</p><span className={`status-chip ${collected ? "status-chip--success" : "status-chip--neutral"}`}>{collected ? "可进行正式确认" : "等待 AI 收集"}</span></aside></div>
-    {collected && <section className="agent-confirmation-panel"><h3>正式字段确认</h3><form className="portal-form" onSubmit={confirm}><label>紧急程度<select value={urgency} onChange={(event) => setUrgency(event.target.value)}><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></label><label>发生时间<input aria-label="发生时间" type="datetime-local" value={occurredAt} onChange={(event) => setOccurredAt(event.target.value)} required /></label><label>持续时间（分钟）<input aria-label="持续时间（分钟）" type="number" min="0" value={durationMinutes} onChange={(event) => setDurationMinutes(Number(event.target.value))} /></label><label>补充说明<textarea value={description} onChange={(event) => setDescription(event.target.value)} /></label><label>附件<input aria-label="AI 故障附件" type="file" disabled={uploading || submitting} onChange={(event) => void addAttachment(event.target.files?.[0])} /></label>{uploading && <p role="status">附件正在上传并进行安全检查…</p>}{attachments.length > 0 && <ul aria-label="AI 草稿附件">{attachments.map((item) => <li key={item.object_key}>{item.filename}</li>)}</ul>}<button type="submit" disabled={submitting || uploading || !occurredAt}>{submitting ? "提交中…" : "确认并提交正式故障单"}</button></form></section>}
+    <div className="agent-statusbar" aria-label="Agent 上报状态"><span className="status-chip status-chip--success">权限已识别</span><span className={`status-chip ${collecting ? "status-chip--neutral" : "status-chip--success"}`}>{collecting ? "Agent 正在收集" : "Agent 服务在线"}</span><span className="status-chip status-chip--neutral">阶段：{collected ? "补齐必填项" : "等待开始"}</span></div>
+    <div className="agent-report-workspace"><section className="agent-report-workspace__collect agent-chat-panel"><header className="section-title"><div><h3>对话主区域</h3><h4 className="agent-section-label">AI 受控收集</h4></div><span className={`status-chip ${missingFields.length ? "status-chip--warning" : "status-chip--success"}`}>{missingFields.length ? `缺 ${missingFields.length} 项` : "已补齐"}</span></header><div className="agent-chat-flow" aria-label="AI 上报对话">
+      <p className="agent-bubble">请描述故障现象，我会先校验设备权限，再整理为结构化上报单。</p>
+      {symptom && <p className="agent-bubble agent-bubble--user">{symptom}</p>}
+      <p className="agent-bubble">{missingFields.length ? `还缺少${missingFields.join("、")}；可继续补充或上传现场附件。` : "必填字段已补齐，请核对右侧结构化摘要并正式确认。"}</p>
+      {runtimeEvents.map((item, index) => <p className="agent-bubble" key={`${item.event}-${index}`}>运行状态：{String(item.data.status ?? item.event)}</p>)}
+    </div><form className="agent-input-row" onSubmit={collect}>
+      <fieldset disabled={collecting || submitting}><button type="button" className="button-secondary" onClick={() => document.getElementById("agent-natural-language-input")?.focus()}>继续补充</button><button type="button" className="button-secondary" onClick={() => document.getElementById("agent-attachment-input")?.click()}>附件</button><input id="agent-attachment-input" className="visually-hidden" aria-label="AI 故障附件" type="file" disabled={uploading} onChange={(event) => void addAttachment(event.target.files?.[0])} /><label className="agent-device-input">设备 ID<input aria-label="设备 ID" value={equipmentId} onChange={(event) => setEquipmentId(event.target.value)} required /></label><label className="agent-natural-input"><span className="visually-hidden">故障描述</span><input id="agent-natural-language-input" aria-label="自然语言输入" placeholder="补充发生时间、工况、持续时间或现场现象" value={symptom} onChange={(event) => setSymptom(event.target.value)} required /></label><button type="submit" className="button-primary" aria-label={collecting ? "AI 收集中…" : "开始 AI 收集"}>{collecting ? "发送中…" : "发送"}</button></fieldset>
+    </form></section><aside className="agent-report-workspace__notice agent-summary-panel"><header className="section-title"><h3>结构化上报摘要</h3><span className={`status-chip ${missingFields.length ? "status-chip--warning" : "status-chip--success"}`}>{missingFields.length ? "未完成" : "可确认"}</span></header><div className="summary-box"><div><strong>当前用户</strong><br />{currentUsername}</div><div><strong>授权设备</strong><br />由服务端按当前账号权限校验</div><div><strong>已选设备</strong><br />{equipmentId || "尚未填写"}</div><div><strong>必填完成度</strong><div className="progress" aria-label={`必填完成度 ${completion}%`}><span style={{ width: `${completion}%` }} /></div><small>{completedFields}/4 项</small></div><div><strong>故障摘要</strong><br />{symptom || "尚未填写故障现象"}</div><div><strong>提交状态</strong><br />{missingFields.length ? <><span>缺少{missingFields.join("、")}</span><small>正式提交暂不可用。</small></> : "字段已齐全，等待人工确认。"}</div></div><div className="drawer-actions"><Link className="button-secondary" to="/fault-report">转人工表单</Link><button type="submit" className="button-primary" form="agent-confirmation-form" aria-label="确认并提交正式故障单" disabled={submitting || uploading || !collected || missingFields.length > 0}>{submitting ? "提交中…" : "提交故障单"}</button></div></aside></div>
+    {collected && <section className="agent-confirmation-panel"><h3>正式字段确认</h3><form id="agent-confirmation-form" className="portal-form" onSubmit={confirm}><label>紧急程度<select value={urgency} onChange={(event) => setUrgency(event.target.value)}><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></label><label>发生时间<input aria-label="发生时间" type="datetime-local" value={occurredAt} onChange={(event) => setOccurredAt(event.target.value)} required /></label><label>持续时间（分钟）<input aria-label="持续时间（分钟）" type="number" min="0" value={durationMinutes} onChange={(event) => setDurationMinutes(Number(event.target.value))} /></label><label>补充说明<textarea value={description} onChange={(event) => setDescription(event.target.value)} /></label>{uploading && <p role="status">附件正在上传并进行安全检查…</p>}{attachments.length > 0 && <ul aria-label="AI 草稿附件">{attachments.map((item) => <li key={item.object_key}>{item.filename}</li>)}</ul>}</form></section>}
     {error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}<p><Link to="/fault-report">转到人工故障上报</Link></p>
   </Page>;
 }

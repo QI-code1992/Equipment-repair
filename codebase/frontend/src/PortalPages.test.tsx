@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 
@@ -71,6 +71,22 @@ describe("TASK-012 portal pages", () => {
     expect(screen.getByRole("button", { name: "新能源一厂 FAC-01" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "新增下级节点" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "新增组织节点" })).not.toBeInTheDocument();
+  });
+
+  it("provides the prototype tree expand and collapse controls", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify([
+      { id: "factory-1", type: "FACTORY", code: "FAC-01", name: "新能源一厂", parent_id: null, enabled: true, sort_order: 1, remark: "总装基地" },
+      { id: "workshop-1", type: "WORKSHOP", code: "WS-01", name: "总装车间", parent_id: "factory-1", enabled: true, sort_order: 1, remark: "" },
+      { id: "line-1", type: "LINE", code: "LINE-01", name: "总装一线", parent_id: "workshop-1", enabled: true, sort_order: 1, remark: "主产线" },
+    ]), { status: 200 })));
+
+    render(<FactoryModelingPage permissionCodes={["organization:read", "organization:write"]} />);
+
+    expect(await screen.findByRole("button", { name: "全部折叠" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "全部折叠" }));
+    await waitFor(() => expect(screen.queryByRole("button", { name: "总装一线 LINE-01" })).not.toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "全部展开" }));
+    expect(screen.getByRole("button", { name: "总装一线 LINE-01" })).toBeInTheDocument();
   });
 
   it("filters an organization tree and sends an idempotent disable update", async () => {
@@ -410,7 +426,7 @@ describe("TASK-012 portal pages", () => {
     render(<MemoryRouter><AgentReportPage /></MemoryRouter>);
 
     expect(screen.getByRole("heading", { name: "AI 受控收集" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "确认并提交正式故障单" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "确认并提交正式故障单" })).toBeDisabled();
     fireEvent.change(screen.getByLabelText("设备 ID"), { target: { value: "eq-1" } });
     fireEvent.change(screen.getByLabelText("故障描述"), { target: { value: "液压异响" } });
     fireEvent.click(screen.getByRole("button", { name: "开始 AI 收集" }));
@@ -425,5 +441,22 @@ describe("TASK-012 portal pages", () => {
     await screen.findByText("故障已正式提交：FR-1");
     expect(fetchMock.mock.calls[2][0]).toBe("/api/agent/fault-reports/submit");
     expect(JSON.parse(String((fetchMock.mock.calls[2][1] as RequestInit).body))).toMatchObject({ confirmed: true, draft: { equipment_id: "eq-1", symptom: "液压异响", duration_minutes: 25 } });
+  });
+
+  it("maps live agent collection into the approved report workspace", () => {
+    render(<MemoryRouter><AgentReportPage /></MemoryRouter>);
+
+    expect(screen.getByText("权限已识别")).toBeInTheDocument();
+    expect(screen.getByText("Agent 服务在线")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "对话主区域" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "结构化上报摘要" })).toBeInTheDocument();
+    expect(screen.getByText("当前用户")).toBeInTheDocument();
+    expect(screen.getByText("授权设备")).toBeInTheDocument();
+    expect(screen.getByText("必填完成度")).toBeInTheDocument();
+    expect(screen.getByText("缺少设备、故障现象、发生时间、持续时长")).toBeInTheDocument();
+    expect(screen.getByText("继续补充")).toBeInTheDocument();
+    expect(screen.getByText("附件")).toBeInTheDocument();
+    expect(screen.getByText("发送")).toBeInTheDocument();
+    expect(screen.getByText("提交故障单")).toBeDisabled();
   });
 });

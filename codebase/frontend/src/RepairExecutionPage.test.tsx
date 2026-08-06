@@ -18,6 +18,16 @@ vi.mock("./api", async (importOriginal) => ({
 beforeEach(() => { vi.resetAllMocks(); vi.mocked(getWorkOrders).mockResolvedValue({ items: [], count: 0, page: 1, page_size: 20 }); });
 
 describe("RepairExecutionPage", () => {
+it("maps live repair state into the approved three-rail execution workspace", async () => {
+  render(<RepairExecutionPage />);
+
+  await screen.findByText("暂无已分配工单。");
+  expect(screen.getByRole("heading", { name: "工单摘要" })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "维修记录填写" })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "建议与引用" })).toBeInTheDocument();
+  expect(screen.getByText("当前尚未选择正式工单。")).toBeInTheDocument();
+});
+
 it("shows staged loading before displaying the server diagnosis question", async () => {
     vi.mocked(runFaultDiagnosis).mockResolvedValue({ state: "QUESTIONING", question: "请描述故障复现工况。", evidence: [], prefill: null, summary: null, steps: 0, questions: 0, diagnosis_draft_id: "draft-loading" });
     render(<RepairExecutionPage />);
