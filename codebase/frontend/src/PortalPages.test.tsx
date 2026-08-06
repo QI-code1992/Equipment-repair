@@ -439,6 +439,8 @@ describe("TASK-012 portal pages", () => {
     expect(screen.queryByRole("tab", { name: "组织树" })).not.toBeInTheDocument();
     expect(screen.getByText("RBAC 权限中心")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "创建账号" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "用户管理" }));
+    expect(await screen.findByRole("heading", { name: "我的账号" })).toBeInTheDocument();
   });
 
   it("submits a role permission update with an idempotency key", async () => {
