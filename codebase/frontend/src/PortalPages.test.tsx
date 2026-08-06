@@ -118,6 +118,7 @@ describe("TASK-012 portal pages", () => {
 
     render(<MemoryRouter><MaintenanceRecordsPage /></MemoryRouter>);
 
+    fireEvent.click(await screen.findByRole("tab", { name: "维修记录列表" }));
     expect(await screen.findByText("暂无可展示的正式业务数据。")).toBeInTheDocument();
   });
 
@@ -163,6 +164,7 @@ describe("TASK-012 portal pages", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<MemoryRouter><MaintenanceRecordsPage /></MemoryRouter>);
     fireEvent.change(await screen.findByLabelText("维修记录知识状态筛选"), { target: { value: "LINKED" } });
+    fireEvent.click(screen.getByRole("tab", { name: "维修记录列表" }));
     await screen.findByText("暂无可展示的正式业务数据。");
     expect(fetchMock.mock.calls[1][0]).toBe("/api/maintenance-records?knowledge_status=LINKED");
   });
@@ -173,7 +175,20 @@ describe("TASK-012 portal pages", () => {
     render(<MemoryRouter><MaintenanceRecordsPage /></MemoryRouter>);
 
     expect(await screen.findByRole("heading", { name: "维修记录检索" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "维修记录列表" }));
     expect(screen.getByRole("heading", { name: "维修记录列表" })).toBeInTheDocument();
+  });
+
+  it("keeps the approved maintenance overview and records tabs without inventing aggregate facts", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 })));
+
+    render(<MemoryRouter><MaintenanceRecordsPage /></MemoryRouter>);
+
+    expect(await screen.findByRole("tablist", { name: "维修记录视图" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "维修概览" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "维修记录列表" })).toHaveAttribute("aria-selected", "false");
+    expect(screen.getByLabelText("维修概览指标")).toBeInTheDocument();
+    expect(screen.getAllByText("当前接口未提供该正式数据。")).toHaveLength(4);
   });
 
   it("filters the equipment ledger with real loaded equipment", async () => {
