@@ -288,6 +288,7 @@ describe("TASK-012 portal pages", () => {
     render(<MemoryRouter><MaintenanceRecordsPage /></MemoryRouter>);
 
     expect(await screen.findByRole("heading", { name: "维修记录检索" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "上报预收集" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("tab", { name: "维修记录列表" }));
     expect(screen.getByRole("heading", { name: "维修记录列表" })).toBeInTheDocument();
   });
