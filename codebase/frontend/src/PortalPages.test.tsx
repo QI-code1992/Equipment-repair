@@ -411,6 +411,7 @@ describe("TASK-012 portal pages", () => {
       .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
 
@@ -418,7 +419,7 @@ describe("TASK-012 portal pages", () => {
 
     expect(await screen.findByText("暂无可展示的正式业务数据。")).toBeInTheDocument();
     expect(fetchMock.mock.calls.map(([path]) => path)).toEqual([
-      "/api/audit-events", "/api/users", "/api/roles", "/api/permissions",
+      "/api/audit-events", "/api/users", "/api/roles", "/api/permissions", "/api/organizations",
     ]);
   });
 
@@ -427,7 +428,8 @@ describe("TASK-012 portal pages", () => {
       .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 })));
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "org-1", type: "FACTORY", code: "FAC-01", name: "新能源一厂", parent_id: null, enabled: true }]), { status: 200 })));
 
     render(<MemoryRouter><SystemManagementPage permissionCodes={["identity:read"]} /></MemoryRouter>);
 
@@ -441,6 +443,8 @@ describe("TASK-012 portal pages", () => {
     expect(screen.queryByRole("button", { name: "创建账号" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("tab", { name: "用户管理" }));
     expect(await screen.findByRole("heading", { name: "我的账号" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "组织树" })).toBeInTheDocument();
+    expect(screen.getByText("新能源一厂 FAC-01")).toBeInTheDocument();
   });
 
   it("submits a role permission update with an idempotency key", async () => {
@@ -449,6 +453,7 @@ describe("TASK-012 portal pages", () => {
       .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "user-1", username: "operator", enabled: true, role_ids: ["role-1"] }]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "role-1", code: "LINE_OPERATOR", name: "操作员", permission_codes: ["workbench:view"] }]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([{ code: "workbench:view" }, { code: "fault:create" }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({ id: "role-1" }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
 
@@ -458,8 +463,8 @@ describe("TASK-012 portal pages", () => {
     (await screen.findByRole("button", { name: "保存角色权限" })).click();
 
     await screen.findByText("角色权限已更新。");
-    expect(fetchMock.mock.calls[4][0]).toBe("/api/roles/role-1/permissions");
-    const init = fetchMock.mock.calls[4][1] as RequestInit;
+    expect(fetchMock.mock.calls[5][0]).toBe("/api/roles/role-1/permissions");
+    const init = fetchMock.mock.calls[5][1] as RequestInit;
     expect(init.method).toBe("PATCH");
     expect(new Headers(init.headers).get("Idempotency-Key")).toBeTruthy();
   });
@@ -470,6 +475,7 @@ describe("TASK-012 portal pages", () => {
       .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "role-1", code: "LINE_OPERATOR", name: "操作员", permission_codes: ["workbench:view"] }]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([{ code: "workbench:view" }, { code: "fault:create" }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({ id: "role-1" }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
 
@@ -481,7 +487,7 @@ describe("TASK-012 portal pages", () => {
     fireEvent.click(screen.getByRole("button", { name: "保存角色权限" }));
 
     await screen.findByText("角色权限已更新。");
-    expect(JSON.parse(String((fetchMock.mock.calls[4][1] as RequestInit).body))).toEqual({
+    expect(JSON.parse(String((fetchMock.mock.calls[5][1] as RequestInit).body))).toEqual({
       permission_codes: ["workbench:view", "fault:create"],
     });
   });
