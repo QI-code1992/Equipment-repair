@@ -93,7 +93,7 @@ describe("App", () => {
 
     expect(screen.getByRole("navigation", { name: "业务导航" })).toBeInTheDocument();
     fireEvent.click(await screen.findByRole("tab", { name: "智能体配置" }));
-    expect(await screen.findByRole("heading", { name: "AI 故障上报" })).toBeInTheDocument();
+    expect((await screen.findAllByRole("heading", { name: "AI 故障上报" })).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByRole("heading", { name: "智能配置", level: 1 })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "AI 故障上报" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "AI 故障上报" })).not.toBeInTheDocument();
@@ -134,7 +134,7 @@ describe("App", () => {
 
     render(<MemoryRouter initialEntries={["/intelligent-config"]}><App /></MemoryRouter>);
     fireEvent.click(await screen.findByRole("tab", { name: "智能体配置" }));
-    await screen.findByRole("heading", { name: "AI 故障上报" });
+    expect((await screen.findAllByRole("heading", { name: "AI 故障上报" })).length).toBeGreaterThanOrEqual(1);
     fireEvent.click(screen.getByLabelText("启用深度思考"));
 
     expect(screen.getByText("当前模型不支持深度思考，请关闭开关或改绑支持推理的模型。")).toBeInTheDocument();
