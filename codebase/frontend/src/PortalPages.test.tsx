@@ -460,6 +460,7 @@ describe("TASK-012 portal pages", () => {
     render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
 
     fireEvent.click(await screen.findByRole("tab", { name: "角色管理" }));
+    fireEvent.click(await screen.findByRole("button", { name: "配置权限" }));
     (await screen.findByRole("button", { name: "保存角色权限" })).click();
 
     await screen.findByText("角色权限已更新。");
@@ -482,6 +483,7 @@ describe("TASK-012 portal pages", () => {
     render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
 
     fireEvent.click(await screen.findByRole("tab", { name: "角色管理" }));
+    fireEvent.click(await screen.findByRole("button", { name: "配置权限" }));
     const checkbox = await screen.findByRole("checkbox", { name: "fault:create" });
     fireEvent.click(checkbox);
     fireEvent.click(screen.getByRole("button", { name: "保存角色权限" }));
@@ -490,6 +492,24 @@ describe("TASK-012 portal pages", () => {
     expect(JSON.parse(String((fetchMock.mock.calls[5][1] as RequestInit).body))).toEqual({
       permission_codes: ["workbench:view", "fault:create"],
     });
+  });
+
+  it("keeps the prototype role-list table and does not fabricate unavailable role metadata", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "role-1", code: "LINE_OPERATOR", name: "操作员", permission_codes: ["workbench:view"] }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ code: "workbench:view" }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 })));
+
+    render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
+
+    expect(await screen.findByRole("columnheader", { name: "角色类型" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "绑定用户" })).toBeInTheDocument();
+    expect(screen.getByText("操作员")).toBeInTheDocument();
+    expect(screen.getAllByText("当前 API 未提供")).toHaveLength(3);
+    fireEvent.click(screen.getByRole("button", { name: "配置权限" }));
+    expect(await screen.findByRole("button", { name: "保存角色权限" })).toBeInTheDocument();
   });
 
   it("labels configured token budgets without claiming actual model consumption", async () => {
