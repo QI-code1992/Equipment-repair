@@ -111,4 +111,19 @@ describe("IntelligentConfigPage", () => {
     await waitFor(() => expect(uploadKnowledgeDocument).toHaveBeenCalledWith("dataset-1", expect.any(File)));
     expect(await screen.findByText("知识文档已提交，后续状态由正式 Worker 更新。")).toBeInTheDocument();
   });
+
+  it("preserves call and token reporting table structures when APIs are unavailable", async () => {
+    vi.mocked(getAgentConfigs).mockResolvedValue([config]);
+    vi.mocked(getModelProviders).mockResolvedValue([]);
+    vi.mocked(getModelBindings).mockResolvedValue([]);
+    render(<IntelligentConfigPage />);
+
+    await screen.findByText("暂无模型提供商。");
+    fireEvent.click(screen.getByRole("tab", { name: "调用记录" }));
+    expect(screen.getByRole("columnheader", { name: "调用时间" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "调用对象" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "Token 消耗统计" }));
+    expect(screen.getByRole("heading", { name: "Token 趋势" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "输入 Token" })).toBeInTheDocument();
+  });
 });
