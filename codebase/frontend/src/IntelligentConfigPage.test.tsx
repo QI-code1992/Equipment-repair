@@ -26,6 +26,16 @@ const config = {
 };
 
 describe("IntelligentConfigPage", () => {
+  it("keeps the three prototype default-model cards without fabricating a default binding", async () => {
+    vi.mocked(getAgentConfigs).mockResolvedValue([]);
+    vi.mocked(getModelProviders).mockResolvedValue([]);
+    vi.mocked(getModelBindings).mockResolvedValue([]);
+    render(<IntelligentConfigPage permissionCodes={["intelligence:knowledge"]} />);
+    expect(await screen.findByRole("heading", { name: "默认 LLM" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "默认 Embedding" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "默认 Rerank" })).toBeInTheDocument();
+    expect(screen.getAllByText("当前 API 未提供默认资源绑定。")).toHaveLength(3);
+  });
   it("keeps prototype configuration regions without rendering a duplicate unavailable-module catalogue", async () => {
     vi.mocked(getAgentConfigs).mockResolvedValue([config]);
     vi.mocked(getModelProviders).mockResolvedValue([]);
