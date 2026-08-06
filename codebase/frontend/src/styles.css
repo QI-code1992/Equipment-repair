@@ -249,3 +249,8 @@ a { color: inherit; text-decoration: none; }
 .equipment-bom-panel { align-items: stretch; }.equipment-bom-tree { min-height: 290px; padding: 14px; border: 1px solid #dce7f5; border-radius: 14px; background: #fff; }.equipment-bom-detail .detail-list { margin: 0; }
 .equipment-tab-table { overflow-x: auto; padding: 16px; }.equipment-tab-table table { min-width: 760px; }.equipment-tab-table .empty-panel { margin: 0; }
 @media (max-width: 900px) { .equipment-graph-panel, .equipment-bom-panel { grid-template-columns: 1fr; }.equipment-graph-legend { grid-column: auto; } }
+
+.equipment-form__header-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.equipment-form .portal-form label > span { display: inline-flex; gap: 3px; }
+.equipment-form .portal-form em { color: #d14343; font-style: normal; }
+.equipment-form .field-hint { color: #64748b; font-size: 12px; font-weight: 400; }

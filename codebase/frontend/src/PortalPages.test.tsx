@@ -255,6 +255,21 @@ describe("TASK-012 portal pages", () => {
     expect(screen.getAllByText("当前 API 未提供该模块数据，未生成演示内容。")).toHaveLength(3);
   });
 
+  it("keeps the equipment form top actions and required-field hierarchy from the prototype", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "line-1", type: "LINE", code: "LINE", name: "一线", parent_id: "factory", enabled: true }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 })));
+
+    render(<MemoryRouter><EquipmentAddPage /></MemoryRouter>);
+
+    expect((await screen.findAllByRole("button", { name: "保存设备" })).length).toBe(2);
+    expect(screen.getAllByText((_, node) => node?.textContent === "设备编号 *")).not.toHaveLength(0);
+    expect(screen.getAllByText((_, node) => node?.textContent === "设备名称 *")).not.toHaveLength(0);
+    expect(screen.getAllByText((_, node) => node?.textContent === "设备型号 *")).not.toHaveLength(0);
+    expect(screen.getAllByText((_, node) => node?.textContent === "所属工厂 *")).not.toHaveLength(0);
+    expect(screen.getAllByText((_, node) => node?.textContent === "负责人（可多选）*")).not.toHaveLength(0);
+  });
+
   it("sends the selected knowledge status to the maintenance-record API", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ items: [{ maintenance_record_id: "r-1", work_order_number: "WO-1", status: "COMPLETED", symptom: "异响", repair_result: "通过", knowledge_status: "NOT_LINKED" }], count: 1, page: 1, page_size: 20 }), { status: 200 }))
@@ -406,7 +421,7 @@ describe("TASK-012 portal pages", () => {
     fireEvent.change(screen.getByLabelText("类型"), { target: { value: "LOADER" } });
     fireEvent.change(screen.getByLabelText("制造商"), { target: { value: "M" } });
     fireEvent.change(screen.getByLabelText("负责人"), { target: { value: "user-1" } });
-    fireEvent.click(screen.getByRole("button", { name: "保存" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "保存设备" })[0]);
 
     await screen.findByText("已保存正式设备数据。");
     expect(fetchMock.mock.calls[2][0]).toBe("/api/equipment");
@@ -433,7 +448,7 @@ describe("TASK-012 portal pages", () => {
     expect(await screen.findByDisplayValue("2026-01-10")).toBeInTheDocument();
     expect(screen.getByDisplayValue("2026-02-01")).toBeInTheDocument();
     expect(screen.getByDisplayValue("equipment/eq-1.png")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "保存" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "保存修改" })[0]);
 
     await screen.findByText("已保存正式设备数据。");
     const init = fetchMock.mock.calls[3][1] as RequestInit;
