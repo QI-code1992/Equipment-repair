@@ -256,4 +256,4 @@ a { color: inherit; text-decoration: none; }
 .equipment-form .field-hint { color: #64748b; font-size: 12px; font-weight: 400; }
 
 /* These two blocks belong to the shared Agent drawer, not the maintenance page. */
-.portal-page > .prototype-module-note[aria-label="上报预收集"], .portal-page > .maintenance-filter > header { display: none; }
+.portal-page > .prototype-module-note, .portal-page > .maintenance-filter > header { display: none; }
