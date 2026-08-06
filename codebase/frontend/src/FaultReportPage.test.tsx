@@ -18,6 +18,20 @@ describe("FaultReportPage", () => {
     expect(screen.getByRole("heading", { name: "查询筛选" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "故障上报列表" })).toBeInTheDocument();
   });
+  it("keeps the prototype fault list columns and empty-state contract", () => {
+    render(<FaultReportPage />);
+    expect(screen.getByRole("region", { name: "故障上报列表" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "故障编号" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "设备名称" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "所属车间" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "所属产线" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "故障现象" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "紧急程度" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "上报时间" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "状态" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "操作" })).toBeInTheDocument();
+    expect(screen.getByRole("status", { name: "故障列表状态" })).toBeInTheDocument();
+  });
   it("shows an AI draft first and writes a formal fault only after explicit confirmation", async () => {
     const draft = {
       equipment_id: "eq-1", urgency: "HIGH", symptom: "液压压力异常", occurred_at: "2026-07-27T10:00:00+08:00",
