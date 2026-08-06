@@ -17,9 +17,12 @@ describe("FaultReportPage", () => {
     render(<FaultReportPage />);
     expect(screen.getByRole("heading", { name: "查询筛选" })).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "故障上报列表" })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "现场故障信息" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "故障上报", level: 3 })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "新增故障上报" }));
-    expect(screen.getByRole("heading", { name: "现场故障信息" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "故障上报", level: 3 })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "基础信息" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "故障描述" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "现场附件" })).toBeInTheDocument();
   });
   it("keeps the prototype fault list columns and empty-state contract", () => {
     render(<FaultReportPage />);
@@ -46,7 +49,7 @@ describe("FaultReportPage", () => {
     render(<FaultReportPage />);
 
     fireEvent.click(screen.getByRole("button", { name: "新增故障上报" }));
-    expect(screen.getByRole("heading", { name: "现场故障信息" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "故障上报", level: 3 })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "AI 辅助与人工确认" })).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("设备 ID"), { target: { value: "eq-1" } });
