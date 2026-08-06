@@ -627,8 +627,18 @@
 - 前端验证：`npm test -- --run` 为 `49 passed`；`npm run build` 通过。
 - 后端验证：`python -m pytest tests -q` 为 `328 passed, 13 skipped, 2 warnings`；`python -m compileall -q app tests` 通过。
 - 静态验证：`node --test 06-testing/tests/*.test.js` 为 `15 passed`；`python3 -m json.tool workflow/state.json`、`git diff --check` 通过。
-- 未验证：当前 macOS 环境没有 Docker/PowerShell/真实 RAGFlow；未执行 Windows 隔离 live-stack、ClamAV/MinIO 附件扫描、HTTPS、浏览器逐页 E2E、真实 RAGFlow 引用/降级或生产部署。上述必须由 DEV-001 在最终精确候选上独立验证。
-- 未完成事项：最终候选尚未提交、PR 尚未转 Ready、DEV-001 尚未整体审核；页面矩阵全部仍标记“实现中候选”，`DEF-STAGE7-001` 不得关闭。
+- 未验证：当时 macOS 环境没有 Docker/PowerShell/真实 RAGFlow；未执行 Windows 隔离 live-stack、ClamAV/MinIO 附件扫描、HTTPS、浏览器逐页 E2E、真实 RAGFlow 引用/降级或生产部署。上述必须由 DEV-001 在最终精确候选上独立验证。
+- 未完成事项：该历史 TASK-012 候选未提交、PR 未转 Ready、DEV-001 未整体审核；页面矩阵当时仍为“实现中候选”，`DEF-STAGE7-001` 不得关闭。
+
+## TASK-013 全部 P0 页面原型一致性候选自测（2026-08-06）
+
+- 精确候选：`aaa55274ef953c3ec6d2fcb9a4bf7cf78b9cda72`，分支 `codex/task-013-prototype-fidelity-remediation`。
+- 范围：登录、工作台、驾驶舱 BI、工厂建模、设备台账/新增/详情/编辑、智能配置、智能审计、故障上报、AI 故障上报、维修记录/详情、维修执行、系统管理共 16 个正式路由，以及全局 Agent 抽屉；Data import 不在范围内。
+- 自动化验证：`npm test -- --run` 为 `8 files passed / 97 tests passed`；覆盖页面结构、真实 API 请求边界、权限禁用、加载/空/错误/提交中状态和 Agent 快捷入口/SSE 增量。
+- 构建与静态：`npm run build` 通过（`tsc -b`、Vite production build）；仓库根目录 `for f in 06-testing/tests/*.test.js; do node "$f"; done` 的 15 项静态脚本全部通过；`git diff --check` 通过。
+- 原型约束：正式前端没有复制或导入 `03-ui-prototype/prototype/` 运行时代码；未新增生产依赖、公开 API、迁移、权限、部署配置、兼容层或抽象层；未触碰未跟踪 `codebase/frontend/.vscode/`。
+- 浏览器与运行态边界：本机只读固定桌面视口检查了 `/login` 的双栏品牌/能力矩阵/登录卡片；15 条受保护路由的认证浏览器逐页对照、Windows Docker/RAGFlow/附件扫描/HTTPS、ECS 自动同步状态未在此自测中虚构为已通过。
+- 门禁：本记录只提供 DEV-001 审核输入，不构成 Stage 6 通过、Stage 7 验收或 Merge 授权。
 ## TASK-012 DEV-001 complete defect review evidence (2026-07-31)
 
 - Review baseline: PR #75 HEAD `77a54a1587544374ed876e902bc132d58cf8ed9b`.

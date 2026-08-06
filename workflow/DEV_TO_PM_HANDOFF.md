@@ -1,5 +1,17 @@
 # 开发到产品交接
 
+## TASK-013 全部 P0 页面整改候选交接（2026-08-06）
+
+- 精确候选：`aaa55274ef953c3ec6d2fcb9a4bf7cf78b9cda72`。
+- 分支：`codex/task-013-prototype-fidelity-remediation`；任务开发者 DEV-002；指定整体审核者 DEV-001；当前仍为 Stage 5 开发候选。
+- 实现范围：16 个正式 React 路由（登录、工作台、驾驶舱 BI、工厂建模、设备台账/新增/详情/编辑、智能配置、智能审计、故障上报、AI 故障上报、维修记录/详情、维修执行、系统管理）及全局 Agent 抽屉，逐页按 `03-ui-prototype/prototype/pages/*.html` 对照结构、信息层级、组件和交互状态。
+- 真实契约边界：只消费既有 API 和权限；正式接口缺失的健康聚合、BOM、额定参数、知识资料、部分 BI 指标等区域保留原型位置并明确禁用/空态；无 mock 业务数据、原型运行源码复制、新 API、迁移、依赖、权限或部署配置变化。
+- 修改文件：`codebase/frontend/src/App.tsx`、`App.test.tsx`、`FaultReportPage.tsx`、`IntelligentConfigPage.tsx` 及其测试、`LoginPage.tsx` 及其测试、`PortalPages.tsx` 及其测试、`RepairExecutionPage.tsx`、`styles.css`；同步更新 `05-development/`、`06-testing/` 和本交接台账。
+- 自动化证据：前端 `8 files passed / 97 tests passed`；`npm --prefix codebase/frontend run build` 通过；15 项 `06-testing/tests/*.test.js` 静态回归通过；`git diff --check` 通过。
+- 浏览器/live-stack 边界：只对 `/login` 做了固定桌面视口只读检查；15 条受保护路由的认证浏览器逐页对照、Windows Docker/RAGFlow/ClamAV/MinIO/HTTPS 和 ECS 自动同步未在本候选中虚构为通过。现有测试部署仍遵循 `RAGFlow v0.26.3` 的本地 Windows 边界。
+- 未跟踪排除：`codebase/frontend/.vscode/` 是工作区既有未跟踪目录，未纳入提交；本候选无其他无关修改。
+- 请求动作：请 DEV-001 对精确 HEAD `aaa55274ef953c3ec6d2fcb9a4bf7cf78b9cda72` 进行一次完整正式审核。审核批准不等于 Merge 授权；在后续集成检查和项目负责人逐 PR/精确 HEAD 授权前，不合并、不关闭 `DEF-STAGE7-001`，Stage 6/7/8 继续锁定。
+
 ## ECS 业务平台测试部署交接（2026-08-05）
 
 - 当前部署定位：阿里云 ECS 是本项目业务平台的测试部署环境，不是生产环境、Stage 7 验收结论或 Stage 8 发布。

@@ -655,3 +655,14 @@
 - 数据边界：认证仍只调用正式登录 API；空字段不发起请求，忘记密码只提示联系系统管理员，未伪造账号、Token、角色或认证成功结果。
 - 验证：登录页 Vitest `5 passed`；Portal 页面 Vitest `31 passed`；全量前端 Vitest `97 passed`；生产构建和 `git diff --check` 通过。
 - 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；不纳入或删除本地 `.vscode/`。
+
+## FCP-013-14：TASK-013 全部 P0 页面候选收口（2026-08-06）
+
+- 状态：`DEVELOPMENT_COMPLETE_PENDING_DEV001_REVIEW`；仅记录 TASK-013 完整候选，不构成审核批准、集成、Merge 或任何 Stage 解锁。
+- 精确候选：`aaa55274ef953c3ec6d2fcb9a4bf7cf78b9cda72`，分支 `codex/task-013-prototype-fidelity-remediation`。
+- 范围：16 个正式 React 路由和跨页全局 Agent 已按 `03-ui-prototype/prototype/pages/*.html` 的页面结构、信息层级、主要组件和状态边界完成代码对照；Data import 明确排除。
+- 数据边界：只消费既有正式 API 和权限；健康聚合、BOM、额定参数、知识资料、BI 部分指标等契约缺失区域保留原型位置并呈现禁用/空态，不填充 mock 业务数据、不复制原型运行源码。
+- 修改范围：前端页面、测试和样式；未新增生产依赖、公开 API、数据库迁移、权限模型、部署配置、兼容层或抽象层；既有 `codebase/frontend/.vscode/` 未跟踪目录未纳入。
+- 验证：前端 `8 files passed / 97 tests passed`；`npm run build`（`tsc -b` 与 Vite production build）通过；15 项 Node 静态回归通过；`git diff --check` 通过。
+- 未验证：除 `/login` 固定桌面视口只读检查外，15 条受保护路由的认证浏览器视觉对照、Windows Docker/RAGFlow/ClamAV/MinIO/HTTPS live-stack 和 ECS 部署同步未在本检查点宣称完成。
+- 下一步：将该精确候选推送到远端后，请 DEV-001 统一进行一次正式整体审核；在审核、集成检查和项目负责人精确授权前，不转入 Stage 6。

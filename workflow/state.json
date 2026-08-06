@@ -1,7 +1,7 @@
 {
   "state": "STAGE6_NOT_PASSED_STAGE5_TASK013_P0_PROTOTYPE_FIDELITY_REMEDIATION_IN_DEVELOPMENT",
-  "updatedBy": "Project-owner direct TASK-013 development authorization",
-  "updatedAt": "2026-08-04",
+  "updatedBy": "DEV-002 TASK-013 complete candidate self-test",
+  "updatedAt": "2026-08-06",
   "testDeployment": {
     "changeRequest": "CR-050",
     "status": "ACTIVE_TEST_DEPLOYMENT_NOT_A_STAGE_GATE_RESULT",
@@ -37,8 +37,12 @@
     "reviewer": "DEV-001",
     "branch": "codex/task-013-prototype-fidelity-remediation",
     "codeStartCondition": "Satisfied: project owner directly authorized TASK-013 remediation on 2026-08-04 without a separate governance PR.",
+    "candidateHead": "aaa55274ef953c3ec6d2fcb9a4bf7cf78b9cda72",
+    "candidateScope": "16 P0 React routes plus cross-page Global Agent; Data import excluded; prototype source remains read-only.",
+    "candidateVerification": "Frontend 8 files / 97 tests passed; production build passed; 15 Node static regressions passed; git diff --check passed.",
+    "candidateUnverified": "Authenticated browser comparison for 15 protected routes, Windows Docker/RAGFlow/ClamAV/MinIO/HTTPS live-stack, and ECS deployment synchronization are not claimed as passed.",
     "stage6Stage7Stage8Locked": true,
-    "nextAction": "Implement all TASK-013 remediation in the single Draft PR, then request one DEV-001 review of the final exact HEAD."
+    "nextAction": "Push the exact candidate, then request one DEV-001 overall review; approval is not Merge authorization and Stage 6/7/8 remain locked."
   },
   "task010Delivery": {
     "taskId": "TASK-010",

@@ -1,5 +1,17 @@
 # 测试报告
 
+## TASK-013 全部 P0 页面原型一致性候选（2026-08-06）
+
+- 测试对象：`aaa55274ef953c3ec6d2fcb9a4bf7cf78b9cda72`，分支 `codex/task-013-prototype-fidelity-remediation`。
+- 范围：16 个正式 React 路由和跨页全局 Agent；Data import 排除。实现对照记录见 `06-testing/FRONTEND_PROTOTYPE_DIFFERENCE_MATRIX.md`。
+- 前端回归：`npm --prefix codebase/frontend test -- --run` → `8 files passed / 97 tests passed`。
+- 生产构建：`npm --prefix codebase/frontend run build` → `tsc -b` 与 Vite production build 通过。
+- 原型静态回归：`for f in 06-testing/tests/*.test.js; do node "$f"; done` → 15 项脚本全部通过。
+- 差异检查：`git diff --check` → 通过。
+- 代码边界：未新增生产依赖、公开 API、数据库迁移、权限模型、部署配置、兼容层或抽象层；未复制原型运行源码、未使用 mock 业务数据；未跟踪的 `codebase/frontend/.vscode/` 未纳入候选。
+- 未验证：除 `/login` 固定桌面视口的只读结构检查外，15 条受保护路由的认证浏览器对照、Windows Docker Desktop/WSL2 的完整 live-stack（PostgreSQL/Redis/MinIO/ClamAV/RAGFlow/HTTPS）、ECS 自动同步结果未在本报告中宣称通过。
+- 结论边界：本报告是 Stage 5 TASK-013 开发自测和 DEV-001 审核输入，不是 Stage 6 独立测试结论、Stage 7 验收或 Stage 8 发布结论。
+
 ## TASK-012 后 Stage 6 独立重测（待执行）
 
 - 测试基线：`codex/stage-05-integration@75276cbf5291dd19932595aadc6daa6a3f782bc6`。

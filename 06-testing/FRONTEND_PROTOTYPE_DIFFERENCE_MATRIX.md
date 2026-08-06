@@ -1,25 +1,40 @@
 # TASK-013 正式前端与原型差异矩阵
 
 - 候选分支：`codex/task-013-prototype-fidelity-remediation`。
-- 最新增量候选：`5695716`；本次修复覆盖深层路由上下文、移动端导航折叠和设备台账空态入口。
-- 范围：除明确排除的数据导入外，覆盖 `PAGE_FUNCTION_MATRIX.md` 的全部 P0 页面。
-- 判定：本表不替代最终审核或浏览器 live-stack 验证；`实现中候选` 表示已在 Draft PR 中接入正式契约，尚未可宣布完成。当前所有页面仍保留该状态，原因是最终浏览器/live-stack 和统一 DEV-001 审核尚未执行。
+- 当前完整候选：`aaa55274ef953c3ec6d2fcb9a4bf7cf78b9cda72`。
+- 原型唯一来源：`03-ui-prototype/prototype/pages/*.html`；正式实现唯一来源：`codebase/frontend/`。
+- 范围：除明确排除的 Data import 外，覆盖全部 16 个 P0 正式路由和跨页全局 Agent 抽屉。
+- 判定口径：表中“代码对照完成”仅表示正式 React 结构、信息层级、交互入口和真实 API/权限边界已按原型逐页核对；不等同于浏览器视觉验收、Windows live-stack 验证、Stage 6 通过或 Stage 7 解锁。
 
-| 页面 | 正式路由 | 原型参考 | 正式数据/操作契约 | 自动化覆盖 | 当前状态 | 后续证据 |
+| 页面 | 正式路由 | 原型参考 | 正式数据/操作契约 | 自动化覆盖 | 当前状态 | 尚未完成的证据 |
 |---|---|---|---|---|---|---|
-| Login | `/login` | `pages/login.html` | `/api/auth/login`、`/me`、`/session` | `App.test.tsx`、`api.test.ts` | 实现中候选 | DEV-001 浏览器登录/登出 |
-| Workbench | `/` | `pages/workbench.html` | `/api/workbench/todos`、`alert-summary`、`shortcuts`、健康分 | `WorkbenchPage.test.tsx` | 实现中候选 | 待办、空态、权限浏览器验证 |
-| 驾驶舱 BI | `/bi-dashboard` | `pages/bi-dashboard.html` | `/api/bi/dashboard?organization_id=&period=day|week|month` | `PortalPages.test.tsx`、`test_task012_read_apis.py` | 实现中候选 | 筛选、日/周/月趋势和图表浏览器对照 |
-| 工厂建模 | `/factory-modeling` | `pages/factory-modeling.html` | `/api/organizations` | `PortalPages.test.tsx` | 实现中候选 | 树、编辑、删除阻断浏览器验证 |
-| 设备台账及表单 | `/equipment*` | 设备原型页面 | `/api/equipment`、`/organizations`、`/users`、`/api/maintenance-history/equipment/{id}` | `PortalPages.test.tsx`、`api.test.ts` | 实现中候选 | 写入幂等/冲突、历史趋势浏览器验证 |
-| 故障上报 | `/fault-report` | `pages/fault-report.html` | 附件、故障、诊断、开始维修 | `FaultReportPage.test.tsx` | 实现中候选 | 附件扫描、诊断 live-stack |
-| AI 故障上报 | `/agent-report` | `pages/agent-report.html` | Agent thread/message、`/api/attachments`、正式上报 | `PortalPages.test.tsx` | 实现中候选 | 收集/附件安全/确认提交浏览器验证 |
-| 全局 Agent | 应用抽屉 | 原型全局脚本 | `GET /api/agent/threads`、详情、message、resume、SSE | `App.test.tsx`、`api.test.ts`、`test_agent_runtime.py` | 实现中候选 | 三类 Agent/SSE/权限浏览器验证 |
-| 维修记录 | `/maintenance-records` | `pages/maintenance-records.html` | `/api/maintenance-records*`（设备/知识状态筛选、分页） | `PortalPages.test.tsx` | 实现中候选 | 详情/知识状态浏览器验证 |
-| 维修执行 | `/repair-execution` | `pages/repair-execution.html` | `/api/work-orders*`（状态筛选/详情）、诊断、完工 | `RepairExecutionPage.test.tsx` | 实现中候选 | 分配范围/状态冲突浏览器验证 |
-| 系统管理 | `/system-management` | `pages/system-management.html` | 用户、角色、权限、`/api/audit-events`（筛选/分页） | `PortalPages.test.tsx` | 实现中候选 | self-only/最后管理员浏览器验证 |
-| 智能配置 | `/intelligent-config`、`/intelligence-audit` | `pages/intelligent-config.html` | Agent 配置、知识重试、调用统计 | `App.test.tsx`、`api.test.ts`、`PortalPages.test.tsx` | 实现中候选 | RAGFlow/重试浏览器验证 |
+| 登录 | `/login` | `pages/login.html` | `/api/auth/login`、`/api/auth/me`、会话存储 | `LoginPage.test.tsx`、`App.test.tsx`、`api.test.ts` | 代码对照完成；固定桌面视口已检查 | 真实测试账号浏览器登录/退出、隔离 live-stack |
+| 工作台 | `/` | `pages/workbench.html` | `/api/workbench/todos`、告警摘要、快捷入口、单设备健康查询 | `WorkbenchPage.test.tsx`、`App.test.tsx` | 代码对照完成；缺失聚合契约保留受控空态 | 认证浏览器对照、真实数据状态 |
+| 驾驶舱 BI | `/bi-dashboard` | `pages/bi-dashboard.html` | `/api/bi/dashboard?organization_id=&period=day\|week\|month` | `PortalPages.test.tsx`、后端 `test_task012_read_apis.py` | 代码对照完成；趋势/排行仅使用正式返回值 | 浏览器筛选、固定视口视觉对照、完整 BI live 数据 |
+| 工厂建模 | `/factory-modeling` | `pages/factory-modeling.html` | `/api/organizations` | `PortalPages.test.tsx` | 代码对照完成；树、详情、编辑和禁用边界已接入 | 认证浏览器树操作、真实写入联调 |
+| 设备台账 | `/equipment` | `pages/equipment-ledger.html` | `/api/equipment`、`/api/organizations` | `PortalPages.test.tsx`、`api.test.ts` | 代码对照完成；筛选、空态、健康分不可用态已接入 | 浏览器视口对照、真实权限/数据联调 |
+| 新增设备 | `/equipment/new` | `pages/equipment-add.html` | `/api/equipment`、`/api/organizations`、`/api/users` | `PortalPages.test.tsx` | 代码对照完成；组织级联、日期、图片引用和保存反馈已接入 | 浏览器表单验证、附件/组织真实联调 |
+| 设备详情 | `/equipment/:id` | `pages/equipment-detail.html` | `/api/equipment/{id}`、维修历史 | `PortalPages.test.tsx`、`api.test.ts` | 代码对照完成；资产摘要、健康边界、五项 tabs 和历史空态已接入 | 认证浏览器 tabs/详情视觉对照、真实历史数据 |
+| 编辑设备 | `/equipment/:id/edit` | `pages/equipment-edit.html` | `/api/equipment/{id}`、`/api/organizations`、`/api/users` | `PortalPages.test.tsx` | 代码对照完成；完整正式字段回填，未编辑字段不被清空 | 浏览器编辑保存、冲突/权限 live 验证 |
+| 智能配置 | `/intelligent-config` | `pages/intelligent-config.html` | 模型、Agent、知识文档正式配置与重试入口 | `IntelligentConfigPage.test.tsx`、`PortalPages.test.tsx`、`api.test.ts` | 代码对照完成；五项一级页签和真实接口边界已接入 | 认证浏览器页签、RAGFlow/知识生命周期 |
+| 智能审计 | `/intelligence-audit` | 智能配置原型审计/知识区 | 智能调用审计、知识文档状态与受控重试 | `PortalPages.test.tsx`、`api.test.ts` | 代码对照完成；审计-only 用户的重试按钮保持禁用 | 双权限点击/请求、浏览器和 live-stack |
+| 故障上报 | `/fault-report` | `pages/fault-report.html` | 附件、故障创建、AI 预览、诊断和开始维修 | `FaultReportPage.test.tsx`、`PortalPages.test.tsx` | 代码对照完成；查询/列表区域和人工/AI 状态边界已接入 | 附件扫描、诊断证据和浏览器 E2E |
+| AI 故障上报 | `/agent-report` | `pages/agent-report.html` | Agent Runtime、附件安全引用、正式故障提交 | `PortalPages.test.tsx`、`api.test.ts` | 代码对照完成；对话、缺失字段、确认卡和运行状态已接入 | 认证浏览器流程、真实 Agent/附件生命周期 |
+| 维修记录 | `/maintenance-records` | `pages/maintenance-records.html` | `/api/maintenance-records` 查询、分页、知识状态筛选 | `PortalPages.test.tsx` | 代码对照完成；概览/列表双视图、重置、禁用导出和分页已接入 | 浏览器筛选/分页、真实数据 |
+| 维修记录详情 | `/maintenance-records/:id` | `pages/maintenance-records.html` 详情状态 | `/api/maintenance-records/{id}` | `PortalPages.test.tsx` | 代码对照完成；工单、故障、根因、方案、结果和知识状态卡已接入 | 认证浏览器详情、真实记录联调 |
+| 维修执行 | `/repair-execution` | `pages/repair-execution.html` | 工单、诊断、操作指引 SSE、维修结果提交 | `RepairExecutionPage.test.tsx`、`PortalPages.test.tsx`、`api.test.ts` | 代码对照完成；三栏工作区、流式状态、空证据和写入保护已接入 | 浏览器 E2E、真实 SSE/RAGFlow/附件 |
+| 系统管理 | `/system-management` | `pages/system-management.html` | 用户、角色、权限目录、登录/操作日志 | `PortalPages.test.tsx`、`api.test.ts` | 代码对照完成；四个原型分区与读写权限边界已接入 | 浏览器双权限、分页与真实审计数据 |
+
+## 跨页全局 Agent
+
+- 入口：应用壳右上角“全局 Agent”，仅在 `intelligence:agent` 权限存在时显示。
+- 原型对照：三类快捷任务（故障上报、智能问数、操作指引）、新建任务/线程历史、运行状态、SSE 增量、错误和关闭/遮罩行为均保留。
+- 证据：`App.test.tsx`、`api.test.ts`、`06-testing/tests/test_agent_runtime.py`；真实浏览器和 live-stack 仍由 DEV-001 在最终候选上独立执行。
 
 ## 明确排除
 
-Data import 保留在历史原型中，不在当前正式产品范围或本次验证范围内。
+Data import 保留在历史原型中，不在当前正式产品范围或本次验证范围内。原型源码、原型 CSS 和原型运行时未复制到正式前端。
+
+## 总体门禁
+
+候选代码已完成本地自动化回归，当前仍为 TASK-013 Stage 5 开发候选。需由 DEV-001 对精确 HEAD `aaa55274ef953c3ec6d2fcb9a4bf7cf78b9cda72` 统一审核；审核前不申请 Merge、不合并、不关闭 `DEF-STAGE7-001`，Stage 6/7/8 继续锁定。

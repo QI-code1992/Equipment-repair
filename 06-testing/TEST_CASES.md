@@ -50,3 +50,14 @@
 | TC-PERF-003 | 受控 RAGFlow 不可用路径在 1/2/5/10 并发下均为 `UNAVAILABLE`、零引用、零意外错误，P95 不超过 15 秒。 | `results-agent-unavailable-v2.json`，含 SUT/harness/环境/夹具。 |
 | TC-AGENT-EMPTY-001 | RAGFlow 正常返回但无 citation 时，响应为 `NO_EVIDENCE`、空 evidence，并给出无可引用依据的人工处理提示；不得返回 `QUESTIONING`。维修执行页面必须呈现该提示，不能显示为空白。 | `tests/agents/test_operation_guidance.py` 单元/API 回归及 `RepairExecutionPage.test.tsx` 交互回归。 |
 | TC-RESTORE-001 | 受控附件备份和随机隔离恢复不超过 180 秒；恢复期间 `/api/auth/me` 固定 10 并发只读 60 秒，零意外错误且 P95 不超过 2 秒。 | `results-backup-restore-readonly.json`，含 SUT/harness/恢复环境/受控附件与恢复项目 fixture。 |
+
+## TASK-013 P0 原型一致性候选用例（2026-08-06）
+
+| ID | 用例与通过条件 | 当前证据 |
+|---|---|---|
+| TC-T013-UI-001 | 16 个正式 React 路由分别绑定对应 Stage 3 原型页面；结构、标题/面包屑、主要区域、关键交互和状态边界均存在；Data import 明确排除。 | `06-testing/FRONTEND_PROTOTYPE_DIFFERENCE_MATRIX.md`，候选 `aaa55274ef953c3ec6d2fcb9a4bf7cf78b9cda72`。 |
+| TC-T013-UI-002 | 正式 API 不支持的原型区域保留原型位置，并显示禁用、空态或明确不可用提示；不得使用固定示例业务数据。 | `PortalPages.test.tsx`、`WorkbenchPage.test.tsx`、`FaultReportPage.test.tsx`、`RepairExecutionPage.test.tsx`。 |
+| TC-T013-UI-003 | 真实权限边界控制导航、页面入口和写操作；审计-only 用户不能点击知识重试，全局 Agent 仅对 `intelligence:agent` 可见。 | `App.test.tsx`、`PortalPages.test.tsx`、`IntelligentConfigPage.test.tsx`。 |
+| TC-T013-UI-004 | 页面提交和 Agent 运行状态提供进行中、成功、失败、空证据和 SSE 增量反馈，不以“请刷新确认”替代本地状态。 | `App.test.tsx`、`RepairExecutionPage.test.tsx`、`PortalPages.test.tsx`、`api.test.ts`。 |
+
+浏览器固定视口、认证 live-stack、附件扫描、真实 RAGFlow、HTTPS 和 ECS 同步仍属于独立运行验证边界，不由以上静态/组件用例替代。
