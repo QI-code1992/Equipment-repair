@@ -41,7 +41,15 @@ describe("FaultReportPage", () => {
     expect(screen.getByRole("button", { name: "维修接单" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "维修闭环" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "故障详情" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "删除故障" })).toBeDisabled();
+    expect(screen.getAllByRole("button", { name: "删除故障" })).toHaveLength(2);
+    screen.getAllByRole("button", { name: "删除故障" }).forEach((button) => expect(button).toBeDisabled());
+    expect(screen.getByRole("heading", { name: "维修接单信息" })).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { name: "故障上报现场附件" })).toHaveLength(2);
+    expect(screen.getByRole("heading", { name: "接单前智能预判" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "AI 诊断对话摘要" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "维修闭环" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "故障详情" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "确认删除" })).toBeInTheDocument();
   });
   it("shows an AI draft first and writes a formal fault only after explicit confirmation", async () => {
     const draft = {
