@@ -493,6 +493,8 @@ describe("TASK-012 portal pages", () => {
 
     expect(await screen.findByRole("columnheader", { name: "角色类型" })).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "绑定用户" })).toBeInTheDocument();
+    expect(screen.getByText("RBAC 权限中心")).toBeInTheDocument();
+    expect(screen.getByText("内置角色仅系统管理员")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "新增角色" })).toBeEnabled();
     fireEvent.click(screen.getByRole("button", { name: "编辑权限" }));
     expect(screen.getByRole("dialog", { name: "编辑角色权限" })).toBeInTheDocument();

@@ -78,14 +78,17 @@ def ensure_identity_catalog(db: Session) -> dict[RoleCode, Role]:
     roles: dict[RoleCode, Role] = {}
     for code in FIXED_ROLE_CODES:
         role = db.scalar(select(Role).where(Role.code == code.value))
+        role_name = {
+            RoleCode.SYSTEM_ADMIN: "系统管理员",
+            RoleCode.EQUIPMENT_ADMIN: "设备管理员",
+            RoleCode.REPAIR_WORKER: "维修工",
+            RoleCode.LINE_OPERATOR: "产线作业员",
+        }[code]
         if role is None:
-            role = Role(code=code.value, name={
-                RoleCode.SYSTEM_ADMIN: "系统管理员",
-                RoleCode.EQUIPMENT_ADMIN: "设备管理员",
-                RoleCode.REPAIR_WORKER: "维修工",
-                RoleCode.LINE_OPERATOR: "产线作业员",
-            }[code], built_in=True)
+            role = Role(code=code.value, name=role_name, built_in=True)
             db.add(role)
+        else:
+            role.name = role_name
         role.built_in = True
         roles[code] = role
     roles[RoleCode.SYSTEM_ADMIN].permissions = list(permissions.values())

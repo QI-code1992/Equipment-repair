@@ -1963,9 +1963,9 @@ function SystemManagementContent({ canWrite }: { canWrite: boolean }) {
     <Page title="系统管理">
       <section className="system-overview" aria-label="系统管理概览">
         <div>
-          <p className="page-shell__eyebrow">统一身份与审计</p>
-          <h3>系统角色、组织与用户统一维护</h3>
-          <p>所有身份、权限和日志数据均来自正式服务端接口。</p>
+            <span className="system-rbac-badge">RBAC 权限中心</span>
+            <h3>系统角色、组织与用户统一维护</h3>
+            <p>角色负责菜单和按钮权限，用户绑定组织与授权角色。系统管理员为内置角色，不允许删除；自定义角色删除前会校验是否仍被用户绑定。</p>
         </div>
         <div className="system-overview__stats">
           <span>
@@ -2005,9 +2005,10 @@ function SystemManagementContent({ canWrite }: { canWrite: boolean }) {
       <section className="section-tab-panel system-tab-panel" role="tabpanel">
         {section === "roles" && (
           <>
-            <div className="system-toolbar">
-              <label>
-                搜索角色
+            <div className="system-toolbar system-role-toolbar">
+              <div className="system-role-toolbar-left">
+              <label className="system-role-search">
+                <span aria-hidden="true">⌕</span>搜索角色
                 <input
                   aria-label="搜索角色名称"
                   value={roleQuery}
@@ -2015,6 +2016,9 @@ function SystemManagementContent({ canWrite }: { canWrite: boolean }) {
                   placeholder="搜索角色名称"
                 />
               </label>
+              <span className="system-tag system-tag--blue">内置角色仅系统管理员</span>
+              <span className="system-tag">自定义角色可自由新增</span>
+              </div>
               <div>
                 <button
                   type="button"
@@ -2033,9 +2037,6 @@ function SystemManagementContent({ canWrite }: { canWrite: boolean }) {
                 </button>
               </div>
             </div>
-            <p className="system-role-rules">
-              系统管理员不可编辑、禁用或删除；已绑定用户的角色不可禁用或删除。
-            </p>
             <div className="panel-heading">
               <div>
                 <h3>角色列表</h3>
@@ -2068,8 +2069,8 @@ function SystemManagementContent({ canWrite }: { canWrite: boolean }) {
                               <small>{role.description}</small>
                             </td>
                             <td>{role.built_in ? "内置角色" : "自定义角色"}</td>
-                            <td>{role.enabled ? "启用" : "禁用"}</td>
-                            <td>{role.user_count} 人</td>
+                            <td><span className={`status-chip ${role.enabled ? "status-chip--success" : "status-chip--muted"}`}>{role.enabled ? "启用" : "禁用"}</span></td>
+                            <td><span className="role-user-count">{role.user_count} 人</span></td>
                             <td>{role.updated_at ? new Date(role.updated_at).toLocaleString("zh-CN") : "—"}</td>
                             <td>
                               {canWrite ? role.code === "SYSTEM_ADMIN" ? (
@@ -2089,14 +2090,12 @@ function SystemManagementContent({ canWrite }: { canWrite: boolean }) {
                   ) : (
                     <p className="empty-panel">没有符合条件的正式角色。</p>
                   )}
-                  {roleItems.length > rolePageSize && (
-                    <nav className="system-role-pagination" aria-label="角色分页">
-                      <span>共 {roleItems.length} 个角色</span>
+                  <nav className="system-role-pagination" aria-label="角色分页">
+                      <span>共 {roleItems.length} 条</span>
                       <button type="button" className="button-secondary" disabled={rolePage === 1} onClick={() => setRolePage((page) => page - 1)}>上一页</button>
                       <span>{rolePage} / {rolePageCount}</span>
                       <button type="button" className="button-secondary" disabled={rolePage === rolePageCount} onClick={() => setRolePage((page) => page + 1)}>下一页</button>
-                    </nav>
-                  )}
+                  </nav>
                   {editingRoleId && (
                       <RolePermissionEditor
                         role={roleItems.find((item) => item.id === editingRoleId) ?? null}
@@ -2423,6 +2422,7 @@ function RolePermissionEditor({
   const [description, setDescription] = useState(role?.description ?? "");
   const [enabled, setEnabled] = useState(role?.enabled ?? true);
   const [saving, setSaving] = useState(false);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   useEffect(
     () => { setSelected(role?.permission_codes ?? []); setName(role?.name ?? ""); setDescription(role?.description ?? ""); setEnabled(role?.enabled ?? true); },
     [role],
@@ -2440,32 +2440,27 @@ function RolePermissionEditor({
       setSaving(false);
     }
   }
+  const permissionGroups = permissions.reduce<Record<string, Array<{ code: string }>>>((groups, permission) => {
+    const group = permission.code.split(":")[0] || "other";
+    (groups[group] ??= []).push(permission);
+    return groups;
+  }, {});
+  const allSelected = permissions.length > 0 && selected.length === permissions.length;
+  function toggleAll() { setSelected(allSelected ? [] : permissions.map((permission) => permission.code)); }
   return (
-    <div className="login-modal" role="dialog" aria-modal="true" aria-label={role ? "编辑角色权限" : "新增角色"}>
-    <fieldset className="portal-form">
-      <legend>{role ? `编辑角色权限：${role.name}` : "新增角色"}</legend>
+    <div className="system-role-editor" role="dialog" aria-modal="true" aria-label={role ? "编辑角色权限" : "新增角色"}>
+    <section className="system-role-editor__panel">
+      <header className="system-role-editor__head"><div><h2>{role ? `编辑角色：${role.name}` : "新增角色"}</h2><p>配置角色基本信息与菜单、按钮权限。</p></div><button type="button" className="system-role-editor__close" aria-label="关闭" onClick={onClose}>×</button></header>
+      <div className="system-role-editor__body">
+      <fieldset className="portal-form system-role-basic">
+      <legend>角色基本信息</legend>
       <label>角色名称<input aria-label="角色名称" value={name} onChange={(event) => setName(event.target.value)} /></label>
       <label>角色说明<input aria-label="角色说明" value={description} onChange={(event) => setDescription(event.target.value)} /></label>
       <label>角色状态<select aria-label="角色状态" value={String(enabled)} onChange={(event) => setEnabled(event.target.value === "true")}><option value="true">启用</option><option value="false">禁用</option></select></label>
-      <p>已选 {selected.length} 项权限。</p>
-      {permissions.map((permission) => (
-        <label key={permission.code}>
-          <input
-            type="checkbox"
-            aria-label={permission.code}
-            disabled={!canWrite}
-            checked={selected.includes(permission.code)}
-            onChange={(event) =>
-              setSelected((current) =>
-                event.target.checked
-                  ? [...current, permission.code]
-                  : current.filter((code) => code !== permission.code),
-              )
-            }
-          />
-          {permission.code}
-        </label>
-      ))}
+      </fieldset>
+      <section className="system-permission-tree" aria-label="权限树"><div className="system-permission-tree__toolbar"><strong>权限配置</strong><label><input type="checkbox" checked={allSelected} onChange={toggleAll} disabled={!canWrite} /> 全选</label><span>已选 {selected.length} 项</span></div>{Object.entries(permissionGroups).map(([group, items]) => { const isExpanded = expanded[group] !== false; return <div className="system-permission-group" key={group}><button type="button" className="system-permission-group__toggle" aria-expanded={isExpanded} onClick={() => setExpanded((current) => ({ ...current, [group]: !isExpanded }))}>▾ {group}</button>{isExpanded && <div className="system-permission-group__items">{items.map((permission) => <label key={permission.code}><input type="checkbox" aria-label={permission.code} disabled={!canWrite} checked={selected.includes(permission.code)} onChange={(event) => setSelected((current) => event.target.checked ? [...current, permission.code] : current.filter((code) => code !== permission.code))} />{permission.code}</label>)}</div>}</div>})}</section>
+      </div>
+      <footer className="system-role-editor__foot">
       <button
         type="button"
         disabled={!canWrite || saving}
@@ -2474,7 +2469,8 @@ function RolePermissionEditor({
         {saving ? "保存中…" : "保存角色权限"}
       </button>
       <button type="button" onClick={onClose}>取消</button>
-    </fieldset>
+      </footer>
+    </section>
     </div>
   );
 }

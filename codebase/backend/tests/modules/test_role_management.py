@@ -44,6 +44,19 @@ def test_role_management_creates_and_lists_custom_roles() -> None:
     assert any(role["id"] == created["id"] for role in listed)
 
 
+def test_builtin_roles_use_product_names() -> None:
+    client = build_client()
+
+    roles = client.get("/api/roles", headers=headers(client)).json()
+
+    assert {role["code"]: role["name"] for role in roles if role["built_in"]} == {
+        "SYSTEM_ADMIN": "系统管理员",
+        "EQUIPMENT_ADMIN": "设备管理员",
+        "REPAIR_WORKER": "维修工",
+        "LINE_OPERATOR": "产线作业员",
+    }
+
+
 def test_system_administrator_cannot_be_changed_or_deleted() -> None:
     client = build_client()
     role = next(item for item in client.get("/api/roles", headers=headers(client)).json() if item["code"] == "SYSTEM_ADMIN")
