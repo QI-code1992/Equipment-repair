@@ -713,3 +713,10 @@
 - 构建：`npm --prefix codebase/frontend run build`：通过。
 - 未验证：Windows Docker/RAGFlow/附件扫描/HTTPS、认证浏览器逐页视觉对照和 ECS 自动部署尚未在本切片执行。
 - 依赖与范围：无新增生产依赖、兼容层、抽象层、后端/API/部署配置或无关文件修改。
+## TASK-013 工作台布局切片（2026-08-07）
+
+- 根因：通用 `.data-card` 跨列规则覆盖工作台 KPI 与主工作区，造成截图中的两列 KPI 和错位布局。
+- 修复：工作台 KPI 卡片明确恢复单列网格项，主工作区队列卡片恢复独立网格列；保留原型五卡横排和队列/健康双栏结构。
+- 测试：工作台 `4 passed`；前端全量 `8 files passed / 99 tests passed`。
+- 构建：生产构建通过。
+- 未验证：ECS 自动部署后的浏览器截图和 Windows live-stack 未在本切片执行。

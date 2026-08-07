@@ -82,13 +82,13 @@ export function WorkbenchPage() {
       <label>产线<select disabled aria-label="产线"><option>当前接口未提供组织范围</option></select></label>
     </form>
 
-    <div className="workbench-metric-grid">{metrics.map((metric) => <button key={metric.id} className={`data-card workbench-metric ${filter === metric.id ? "is-active" : ""}`} type="button" onClick={() => setFilter(metric.id)}>
+    <div className="workbench-metric-grid" data-testid="workbench-metric-grid" data-layout="five-column">{metrics.map((metric) => <button key={metric.id} className={`data-card workbench-metric ${filter === metric.id ? "is-active" : ""}`} type="button" onClick={() => setFilter(metric.id)}>
       <span className="workbench-metric__top"><span>{metric.label}</span><b>{metric.icon}</b></span><strong>{summary ? metric.value : "—"}</strong><small>{metric.detail}</small>
     </button>)}</div>
 
     <div className="workbench-attention"><span>!</span><p>{summary?.active_fault_count ? `当前有 ${summary.active_fault_count} 项活动故障，请优先处置高紧急事项。` : "当前没有需要升级的活动故障。"}</p></div>
 
-    <div className="workbench-primary-grid">
+    <div className="workbench-primary-grid" data-testid="workbench-primary-grid" data-layout="queue-health-sidebar">
       <section className="data-card workbench-queue-card" aria-label="故障待办">
         <div className="workbench-module-heading"><div><span>故</span><div><h3>故障待办</h3><p>按紧急程度和正式提交时间排序</p></div></div><b className="status-chip status-chip--neutral">{visibleTodos.length} 条任务</b></div>
         <div role="tablist" aria-label="故障待办筛选" className="workbench-tabs">{(["all", "pending", "repairing", "veryUrgent", "urgent", "risk"] as QueueFilter[]).map((item) => <button key={item} role="tab" aria-selected={filter === item} className={filter === item ? "is-active" : ""} type="button" onClick={() => setFilter(item)}>{({ all: "全部", pending: "待接单", repairing: "维修中", veryUrgent: "非常紧急", urgent: "紧急", risk: "高风险关联" })[item]}</button>)}</div>

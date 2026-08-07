@@ -20,6 +20,8 @@ describe("WorkbenchPage", () => {
     expect(screen.getByRole("heading", { name: "当前健康风险概览" })).toBeInTheDocument();
     expect(screen.getByText("WO-001")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /故障上报/ })).toBeInTheDocument();
+    expect(screen.getByTestId("workbench-metric-grid")).toHaveAttribute("data-layout", "five-column");
+    expect(screen.getByTestId("workbench-primary-grid")).toHaveAttribute("data-layout", "queue-health-sidebar");
   });
 
   it("keeps the approved realtime-dispatch information architecture when formal data is unavailable", async () => {
@@ -43,6 +45,7 @@ describe("WorkbenchPage", () => {
     expect(screen.getByRole("heading", { name: "故障趋势" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "最新维修动态" })).toBeInTheDocument();
     expect(screen.getAllByText("当前接口未提供该正式数据。")).toHaveLength(3);
+    expect(screen.getByTestId("workbench-metric-grid").querySelectorAll(":scope > .workbench-metric")).toHaveLength(5);
   });
 
   it("shows permission denial without static health data", async () => {
