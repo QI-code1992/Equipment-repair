@@ -1,6 +1,6 @@
 """Add notification related object metadata.
 
-Revision ID: 0008_task013_notification_metadata
+Revision ID: 0008_task013_notif_meta
 Revises: 0007_task013_notifications
 """
 
@@ -8,7 +8,7 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = "0008_task013_notification_metadata"
+revision = "0008_task013_notif_meta"
 down_revision = "0007_task013_notifications"
 branch_labels = None
 depends_on = None

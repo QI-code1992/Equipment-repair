@@ -8,6 +8,14 @@ from sqlalchemy import create_engine, inspect
 BACKEND_DIR = Path(__file__).parents[2]
 
 
+def test_task013_revision_identifiers_fit_the_existing_version_column() -> None:
+    config = Config(str(BACKEND_DIR / "alembic.ini"))
+    config.set_main_option("path_separator", "os")
+    script = ScriptDirectory.from_config(config)
+
+    assert all(len(revision.revision) <= 32 for revision in script.walk_revisions())
+
+
 def test_task013_upgrade_and_downgrade_notification_schema(tmp_path, monkeypatch) -> None:
     database_url = f"sqlite+pysqlite:///{(tmp_path / 'task013.sqlite3').as_posix()}"
     monkeypatch.setenv("POSTGRES_DSN", database_url)
@@ -16,7 +24,7 @@ def test_task013_upgrade_and_downgrade_notification_schema(tmp_path, monkeypatch
     engine = create_engine(database_url)
     config.attributes["connection"] = engine.connect()
     try:
-        command.upgrade(config, "0008_task013_notification_metadata")
+        command.upgrade(config, "0008_task013_notif_meta")
         inspector = inspect(engine)
         assert {"notifications", "notification_reads"} <= set(inspector.get_table_names())
         assert {

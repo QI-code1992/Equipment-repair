@@ -7,7 +7,7 @@ from alembic import op
 
 
 revision = "0009_task013_role_management"
-down_revision: str | Sequence[str] | None = "0008_task013_notification_metadata"
+down_revision: str | Sequence[str] | None = "0008_task013_notif_meta"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
