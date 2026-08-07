@@ -41,17 +41,17 @@ describe("LoginPage", () => {
     expect(screen.getByLabelText("密码")).toHaveAttribute("name", "password");
   });
 
-  it("仅用‘记住密码’切换浏览器说明，登录仍只提交凭证", async () => {
+  it("保留‘记住密码’而不渲染浏览器密码管理说明", async () => {
     const login = vi.spyOn(api, "login").mockResolvedValue(undefined);
     renderLogin();
 
     const rememberPassword = screen.getByRole("checkbox", { name: "记住密码" });
     expect(rememberPassword).toBeChecked();
-    expect(screen.getByText("根据 Chrome 的设置，浏览器可能保存或填充凭证；平台不会保存密码。")).toBeInTheDocument();
+    expect(screen.queryByText("根据 Chrome 的设置，浏览器可能保存或填充凭证；平台不会保存密码。")).not.toBeInTheDocument();
 
     fireEvent.click(rememberPassword);
     expect(rememberPassword).not.toBeChecked();
-    expect(screen.getByText("平台不会保存密码；你可以稍后启用浏览器密码管理。")).toBeInTheDocument();
+    expect(screen.queryByText("平台不会保存密码；你可以稍后启用浏览器密码管理。")).not.toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("用户名"), { target: { value: "operator" } });
     fireEvent.change(screen.getByLabelText("密码"), { target: { value: "correct-password" } });

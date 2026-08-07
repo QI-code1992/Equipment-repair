@@ -75,7 +75,6 @@ export function LoginPage() {
       <label>账号<input aria-label="用户名" name="username" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} aria-invalid={Boolean(usernameError)} placeholder="请输入账号" />{usernameError && <small>{usernameError}</small>}</label>
       <label>密码<div className="login-form__password"><input aria-label="密码" name="password" type={passwordVisible ? "text" : "password"} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} aria-invalid={Boolean(passwordError)} /><button type="button" aria-label={passwordVisible ? "隐藏密码" : "显示密码"} onClick={() => setPasswordVisible((current) => !current)}>{passwordVisible ? "隐藏" : "显示"}</button></div>{passwordError && <small>{passwordError}</small>}</label>
       <div className="login-form__options"><label><input type="checkbox" checked={browserPasswordManagerEnabled} onChange={(event) => setBrowserPasswordManagerEnabled(event.target.checked)} />记住密码</label><button type="button" onClick={() => setForgotOpen(true)}>忘记密码</button></div>
-      <p className="login-form__hint">{browserPasswordManagerEnabled ? "根据 Chrome 的设置，浏览器可能保存或填充凭证；平台不会保存密码。" : "平台不会保存密码；你可以稍后启用浏览器密码管理。"}</p>
       {error && <p role="alert">{error}</p>}
       {submitting && <p role="status" aria-label="登录状态">正在验证账号，请稍候…</p>}
       <button type="submit" disabled={submitting || lockedSeconds > 0}>{submitting ? "登录中…" : "登录"}</button>

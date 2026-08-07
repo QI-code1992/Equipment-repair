@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Keep the “记住密码” login copy while making the browser, rather than the application, the only password manager.
+**Goal:** Keep the “记住密码” login copy while making the browser, rather than the application, the only password manager and without rendering a password-manager helper message.
 
-**Architecture:** `LoginPage` supplies browser-recognizable form-field semantics and an explanatory preference only. The existing `login()` function continues to transmit credentials once and retain only the access token; no password persistence path is introduced.
+**Architecture:** `LoginPage` supplies browser-recognizable form-field semantics and keeps the existing checkbox visual state without helper copy. The existing `login()` function continues to transmit credentials once and retain only the access token; no password persistence path is introduced.
 
 **Tech Stack:** React 19, TypeScript, React Testing Library, Vitest.
 
@@ -35,7 +35,7 @@ it("uses browser password-manager semantics without application password storage
 
   expect(screen.getByLabelText("用户名")).toHaveAttribute("name", "username");
   expect(screen.getByLabelText("密码")).toHaveAttribute("name", "password");
-  expect(screen.getByText(/浏览器密码管理器/)).toBeInTheDocument();
+  expect(screen.queryByText(/浏览器密码管理器/)).not.toBeInTheDocument();
 });
 ```
 
@@ -50,7 +50,6 @@ Expected: FAIL because the inputs have no stable `name` attributes and the brows
 ```tsx
 <input aria-label="用户名" name="username" autoComplete="username" ... />
 <input aria-label="密码" name="password" type={passwordVisible ? "text" : "password"} autoComplete="current-password" ... />
-<small>密码由浏览器密码管理器保存，平台不会保存密码。</small>
 ```
 
 Keep the checkbox out of the login request and do not introduce browser storage calls for the password.
