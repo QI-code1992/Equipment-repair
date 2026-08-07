@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { createModelBinding, createModelProvider, getAgentConfigs, getModelBindings, getModelProviders, saveAgentConfig, updateModelBinding, updateModelProvider, uploadKnowledgeDocument } from "./api";
@@ -86,6 +86,24 @@ describe("IntelligentConfigPage", () => {
     fireEvent.change(screen.getByLabelText("按提供商筛选模型"), { target: { value: "provider-2" } });
     expect(screen.queryByText("运维模型")).not.toBeInTheDocument();
     expect(screen.getByText("备用模型")).toBeInTheDocument();
+  });
+
+  it("uses the approved three-step model drawer while retaining formal provider and binding inputs", async () => {
+    vi.mocked(getAgentConfigs).mockResolvedValue([config]);
+    vi.mocked(getModelProviders).mockResolvedValue([{ id: "provider-1", name: "内部模型服务", enabled: true }]);
+    vi.mocked(getModelBindings).mockResolvedValue([{ id: "binding-1", provider_id: "provider-1", name: "运维模型", model_name: "ops-1", supports_reasoning: true, enabled: true }]);
+
+    render(<IntelligentConfigPage />);
+
+    await screen.findByRole("heading", { name: "模型配置" });
+    fireEvent.click(screen.getByRole("button", { name: "新增模型" }));
+
+    expect(screen.getByRole("heading", { name: "选择模型" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "连接配置" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "使用设置" })).toBeInTheDocument();
+    expect(screen.getByLabelText("绑定提供商")).toBeInTheDocument();
+    expect(screen.getByLabelText("提供商名称")).toBeInTheDocument();
+    expect(within(screen.getByRole("complementary", { name: "模型编辑抽屉" })).getByRole("button", { name: "测试连接" })).toBeDisabled();
   });
 
   it("edits a provider and binding through the formal APIs without displaying its secret reference", async () => {
