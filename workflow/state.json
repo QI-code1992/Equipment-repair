@@ -2,6 +2,20 @@
   "state": "STAGE6_NOT_PASSED_STAGE5_TASK013_P0_PROTOTYPE_FIDELITY_REMEDIATION_IN_DEVELOPMENT",
   "updatedBy": "DEV-002 TASK-013 complete candidate self-test",
   "updatedAt": "2026-08-06",
+  "frontendCollaborationBaseline": {
+    "status": "CONFIRMED_BASELINE_READY_FOR_TASK_ASSIGNMENT",
+    "changeRequest": "CR-052",
+    "commit": "f61348d5613ed8b7221eee4ea9d3207c65db414a",
+    "githubTag": "baseline/frontend-collaboration-f61348d",
+    "ecsDeployment": {
+      "sourceCommit": "f61348d5613ed8b7221eee4ea9d3207c65db414a",
+      "deployedSha": "f61348d5613ed8b7221eee4ea9d3207c65db414a",
+      "health": "HTTPS /healthz HTTP 200"
+    },
+    "handoff": "05-development/前端协作基线与交接.md",
+    "integrationBranch": "codex/frontend-ui-integration-f61348d",
+    "nextAction": "Both developers create isolated task branches from the GitHub tag, acknowledge file ownership, then start FE-001 and FE-002 under the handoff rules."
+  },
   "testDeployment": {
     "changeRequest": "CR-050",
     "status": "ACTIVE_TEST_DEPLOYMENT_NOT_A_STAGE_GATE_RESULT",

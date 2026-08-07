@@ -596,3 +596,13 @@
 - DEV-001 为最终集成负责人和合并执行者；DEV-002 同时承担项目负责人确认与 TASK-012 开发者职责。DEV-002 不得审核或合并自己的统一 Draft PR。
 - 开发启动条件：DEV-001 已向 DEV-002 发送正式启动通知，且 DEV-002 明确确认收到。确认后才可创建 `codex/task-012-p0-frontend-remediation` 唯一 Draft PR。
 - API-002—007、P0 前端和 Stage 6/7/8 在确认前继续锁定。
+
+## 前端协作回退基线与页面任务（CR-052，2026-08-07）
+
+- 唯一开发基线：`f61348d5613ed8b7221eee4ea9d3207c65db414a`；GitHub 标签 `baseline/frontend-collaboration-f61348d`。
+- 集成分支：`codex/frontend-ui-integration-f61348d`；不得直接向 `main` 或 `codex/stage-05-integration` 推送前端页面整改。
+- `FE-001`：DEV-002 开发、DEV-001 审核。独占应用壳、公共样式、登录、工作台、故障上报、维修执行和智能配置页面。
+- `FE-002`：DEV-001 开发、DEV-002 审核。独占 `PortalPages.tsx` 与其测试，负责 BI、工厂建模、设备、维修、系统管理、智能审计和 Agent 上报页面。
+- `FE-003`：DEV-002 集成公共样式请求；DEV-001 不直接修改 `styles.css`。
+- 每项任务仅维护一个 Draft PR，目标为该集成分支；HEAD 变化后重新审核。只有已合并、验证和项目负责人确认的精确集成 Commit 可以部署 ECS。
+- 完整的文件所有权、页面路由、GitHub 操作、PR 模板、冲突处理和交接格式见 `05-development/前端协作基线与交接.md`。
