@@ -18,6 +18,7 @@ export function LoginPage() {
   const [lockedSeconds, setLockedSeconds] = useState(0);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
+  const [browserPasswordManagerEnabled, setBrowserPasswordManagerEnabled] = useState(true);
 
   useEffect(() => {
     if (lockedSeconds <= 0) return;
@@ -73,11 +74,11 @@ export function LoginPage() {
       <p className="login-form__hint">请输入账号密码进行登录</p>
       <label>账号<input aria-label="用户名" name="username" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} aria-invalid={Boolean(usernameError)} placeholder="请输入账号" />{usernameError && <small>{usernameError}</small>}</label>
       <label>密码<div className="login-form__password"><input aria-label="密码" name="password" type={passwordVisible ? "text" : "password"} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} aria-invalid={Boolean(passwordError)} /><button type="button" aria-label={passwordVisible ? "隐藏密码" : "显示密码"} onClick={() => setPasswordVisible((current) => !current)}>{passwordVisible ? "隐藏" : "显示"}</button></div>{passwordError && <small>{passwordError}</small>}</label>
-      <div className="login-form__options"><label><input type="checkbox" defaultChecked />记住密码</label><button type="button" onClick={() => setForgotOpen(true)}>忘记密码</button></div>
+      <div className="login-form__options"><label><input type="checkbox" checked={browserPasswordManagerEnabled} onChange={(event) => setBrowserPasswordManagerEnabled(event.target.checked)} />记住密码</label><button type="button" onClick={() => setForgotOpen(true)}>忘记密码</button></div>
+      <p className="login-form__hint">{browserPasswordManagerEnabled ? "根据 Chrome 的设置，浏览器可能保存或填充凭证；平台不会保存密码。" : "平台不会保存密码；你可以稍后启用浏览器密码管理。"}</p>
       {error && <p role="alert">{error}</p>}
       {submitting && <p role="status" aria-label="登录状态">正在验证账号，请稍候…</p>}
       <button type="submit" disabled={submitting || lockedSeconds > 0}>{submitting ? "登录中…" : "登录"}</button>
-      <p className="login-form__hint">密码由浏览器的密码管理器保存，平台不会存储密码。</p>
       <p className="login-form__hint">连续失败 3 次后临时锁定，锁定 30 秒。</p>
     </form>
     {forgotOpen && <div className="login-modal" role="dialog" aria-modal="true" aria-label="忘记密码"><section><h3>忘记密码</h3><p>请联系系统管理员重置密码。管理员可在系统管理中启用账号并重置初始密码。</p><button type="button" onClick={() => setForgotOpen(false)}>知道了</button></section></div>}
