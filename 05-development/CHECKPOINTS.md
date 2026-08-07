@@ -674,3 +674,12 @@
 - 边界：Agent 上报、智能审计和维修执行继续保留其路由与权限校验，但不显示在原型主导航；未修改 API、权限、后端、部署或运行配置。
 - 验证：新增导航顺序、编号与隐藏项回归；前端全量 `8 files passed / 98 tests passed`、生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 均通过。
 - 依赖与结构：未新增生产依赖、兼容层或抽象层；未触碰既有未跟踪 `codebase/frontend/.vscode/`。
+
+## FCP-013-16：全局 Agent 悬浮入口原型一致性修复（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；仅记录可恢复代码单元，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 代码提交：`d53f894f8728333e34b9dd504b3e8dcb878a40c1`；分支 `codex/task013-navigation-parity`，推送目标为唯一 TASK-013 集成分支。
+- 范围：移除顶栏“全局 Agent”文字入口，恢复原型右下角圆形机器人悬浮入口；仅 `intelligence:agent` 用户可见；闲置 3 秒后半透明，悬停/聚焦恢复；打开抽屉时入口隐藏，关闭后恢复。
+- 原型对照：`03-ui-prototype/prototype/assets/global-agent.js` 与 `03-ui-prototype/prototype/assets/app.css`；入口定位、尺寸、渐变、透明度和机器人图形均按原型参数实现。
+- 验证：`npm test -- --run` 为 `8 files passed / 99 tests passed`；`npm run build` 通过；其余 Node 静态回归、JSON 和差异检查待推送前完成。
+- 边界：未实现原型中的拖拽/边缘吸附（本切片仅修复入口显隐与打开互斥）；未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未触碰 `.vscode/`。

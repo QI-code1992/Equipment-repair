@@ -705,3 +705,11 @@
 - 代码边界：只调整 `App.tsx` 的主导航声明/渲染与对应 CSS；二级页面路由和权限守卫未删除。
 - 实测：新增 `App.test.tsx` 回归先在旧导航失败，再通过；Vitest 全量 `8 files passed / 98 tests passed`，生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 均通过。
 - 未验证：ECS 自动部署完成后的浏览器视觉核对待部署结果可用后执行；本记录不构成审核批准、Merge 授权或 Stage 6/7/8 解锁。
+
+## TASK-013 Agent 悬浮入口切片（2026-08-07）
+
+- 修改：正式前端移除顶栏“全局 Agent”文字按钮，使用原型右下角机器人悬浮按钮；权限、抽屉遮罩/Esc、打开隐藏/关闭恢复和 3 秒闲置显隐均保留。
+- 测试：`npm --prefix codebase/frontend test -- --run`：`8 files passed / 99 tests passed`；测试按文件串行运行，避免既有 jsdom 异步断言在多文件并发下出现资源竞争超时。
+- 构建：`npm --prefix codebase/frontend run build`：通过。
+- 未验证：Windows Docker/RAGFlow/附件扫描/HTTPS、认证浏览器逐页视觉对照和 ECS 自动部署尚未在本切片执行。
+- 依赖与范围：无新增生产依赖、兼容层、抽象层、后端/API/部署配置或无关文件修改。

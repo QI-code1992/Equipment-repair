@@ -670,3 +670,11 @@
 - 修复：主导航固定为原型顺序与 `01`—`08` 编号；二级业务路由未删除，仅不在原型主导航中展示。
 - 本地证据：新增导航契约回归；Vitest `8 files passed / 98 tests passed`、生产构建、15 项 Node 静态回归、JSON 解析和 `git diff --check` 通过。
 - 门禁：本次变更仍属 TASK-013 开发候选。部署同步与浏览器视觉核对完成后，统一交由 DEV-001 整体审核；不申请 Merge、不合并，Stage 6/7/8 继续锁定。
+
+## TASK-013 全局 Agent 悬浮入口修复交接（2026-08-07）
+
+- 代码提交：`d53f894f8728333e34b9dd504b3e8dcb878a40c1`；开发工作树分支 `codex/task013-navigation-parity`，待推送至 `codex/task-013-prototype-fidelity-remediation`。
+- 修复内容：移除顶栏文字入口，恢复原型右下机器人悬浮按钮；按 `intelligence:agent` 权限显隐；3 秒闲置半透明，悬停/聚焦恢复；打开 Agent 抽屉时隐藏，关闭后恢复。
+- 验证：前端 `8 files passed / 99 tests passed`，生产构建通过；测试按文件串行运行以规避既有 jsdom 异步断言的文件并发竞争；完整 Node 静态回归、JSON、ECS 部署验证待推送后执行。
+- 未验证：Windows Docker/RAGFlow/ClamAV/MinIO/HTTPS、认证浏览器逐页对照及 ECS 实际切换尚未完成；原型拖拽/边缘吸附未纳入本切片。
+- 门禁：仅为 TASK-013 开发过程交接，不构成 DEV-001 审核、Merge 授权或 Stage 6/7/8 解锁；待全部前端整改完成后统一提交整体审核。

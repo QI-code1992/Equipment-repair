@@ -27,8 +27,10 @@
 
 ## 跨页全局 Agent
 
-- 入口：应用壳右上角“全局 Agent”，仅在 `intelligence:agent` 权限存在时显示。
-- 原型对照：三类快捷任务（故障上报、智能问数、操作指引）、新建任务/线程历史、运行状态、SSE 增量、错误和关闭/遮罩行为均保留。
+- 入口：应用壳右下角圆形机器人悬浮图标，仅在 `intelligence:agent` 权限存在时显示。
+- 原型对照：入口按原型固定右下位置、3 秒闲置半透明、悬停/聚焦恢复，打开抽屉隐藏、关闭恢复；三类快捷任务（故障上报、智能问数、操作指引）、新建任务/线程历史、运行状态、SSE 增量、错误和关闭/遮罩行为均保留。
+- 当前切片提交：`d53f894f8728333e34b9dd504b3e8dcb878a40c1`；入口源码 `03-ui-prototype/prototype/assets/global-agent.js`，样式基线 `03-ui-prototype/prototype/assets/app.css`。
+- 明确边界：原型拖拽和左右边缘吸附未在本切片实现；当前整改针对用户指出的悬浮入口、显隐和抽屉互斥，不扩展产品范围。
 - 证据：`App.test.tsx`、`api.test.ts`、`06-testing/tests/test_agent_runtime.py`；真实浏览器和 live-stack 仍由 DEV-001 在最终候选上独立执行。
 
 ## 共享导航
