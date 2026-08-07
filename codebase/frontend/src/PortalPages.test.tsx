@@ -73,11 +73,33 @@ describe("TASK-012 portal pages", () => {
     expect(screen.getByText("首次修复率")).toBeInTheDocument();
   });
 
+  it("keeps the prototype health-table structure with only formal equipment fields", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        summary: { fault_count: 3, active_fault_count: 1, completed_work_order_count: 2, completion_rate: 0.67 },
+        trend: [], efficiency: { completed_work_order_count: 2, average_completion_hours: 3 }, organization_ranking: [],
+        history_comparison: { current_fault_count: 3, previous_fault_count: 2 },
+      }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "eq-1", code: "EQ-01", name: "电动装载机", model: "EWL50E", type: "LOADER", manufacturer: "M", status: "NORMAL", organization_id: "line-1", owner_user_id: null, operating_hours: 4, manufactured_at: null, commissioned_at: null, image_refs: [] }]), { status: 200 })));
+
+    render(<MemoryRouter><BiDashboardPage /></MemoryRouter>);
+
+    expect(await screen.findByRole("columnheader", { name: "设备编号 / 名称" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "健康评分" })).toBeInTheDocument();
+    expect(screen.getByText("EQ-01")).toBeInTheDocument();
+    expect(screen.getByText("EWL50E")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "查看分析" })).toHaveAttribute("href", "/equipment/eq-1");
+    expect(screen.getByText("当前显示 1 台正式设备。")).toBeInTheDocument();
+    expect(screen.getByText("数据更新时间：当前接口未提供")).toBeInTheDocument();
+  });
+
   it("reloads the BI dashboard with a selected formal organization filter", async () => {
     const dashboard = { summary: { fault_count: 2, active_fault_count: 1, completed_work_order_count: 1, completion_rate: 0.5 }, trend: [], efficiency: { completed_work_order_count: 1, average_completion_hours: 3 }, organization_ranking: [], history_comparison: { current_fault_count: 1, previous_fault_count: 0 } };
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify(dashboard), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "line-1", type: "LINE", code: "LINE", name: "一线", parent_id: "root", enabled: true }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
       .mockResolvedValueOnce(new Response(JSON.stringify(dashboard), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
 
@@ -85,7 +107,7 @@ describe("TASK-012 portal pages", () => {
 
     fireEvent.change(await screen.findByLabelText("组织筛选"), { target: { value: "line-1" } });
     expect(await screen.findByText("平均维修时长")).toBeInTheDocument();
-    expect(fetchMock.mock.calls[2][0]).toBe("/api/bi/dashboard?organization_id=line-1&period=day");
+    expect(fetchMock.mock.calls[3][0]).toBe("/api/bi/dashboard?organization_id=line-1&period=day");
   });
 
   it("renders actual factory organizations instead of prototype examples", async () => {
