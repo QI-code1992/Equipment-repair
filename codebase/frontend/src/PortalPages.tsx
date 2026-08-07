@@ -2410,7 +2410,7 @@ function RolePermissionEditor({
   onFailed,
   onClose,
 }: {
-  role: { id: string; name: string; description: string; enabled: boolean; permission_codes: string[] } | null;
+  role: { id: string; name: string; description: string; built_in: boolean; enabled: boolean; permission_codes: string[] } | null;
   permissions: Array<{ code: string }>;
   canWrite: boolean;
   onSaved: () => void;
@@ -2455,8 +2455,10 @@ function RolePermissionEditor({
       <fieldset className="portal-form system-role-basic">
       <legend>角色基本信息</legend>
       <label>角色名称<input aria-label="角色名称" value={name} onChange={(event) => setName(event.target.value)} /></label>
-      <label>角色说明<input aria-label="角色说明" value={description} onChange={(event) => setDescription(event.target.value)} /></label>
+      <label>角色类型<input aria-label="角色类型" className="readonly-input" value={role?.built_in ? "内置角色" : "自定义角色"} readOnly /></label>
       <label>角色状态<select aria-label="角色状态" value={String(enabled)} onChange={(event) => setEnabled(event.target.value === "true")}><option value="true">启用</option><option value="false">禁用</option></select></label>
+      <label>角色说明<textarea aria-label="角色说明" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="描述该角色的职责边界" /></label>
+      <p className="system-role-basic__note">系统管理员为内置角色；被用户绑定的角色不可直接禁用或删除。权限变更保存后会立即同步到角色列表。</p>
       </fieldset>
       <section className="system-permission-tree" aria-label="权限树"><div className="system-permission-tree__toolbar"><strong>权限配置</strong><label><input type="checkbox" checked={allSelected} onChange={toggleAll} disabled={!canWrite} /> 全选</label><span>已选 {selected.length} 项</span></div>{Object.entries(permissionGroups).map(([group, items]) => { const isExpanded = expanded[group] !== false; return <div className="system-permission-group" key={group}><button type="button" className="system-permission-group__toggle" aria-expanded={isExpanded} onClick={() => setExpanded((current) => ({ ...current, [group]: !isExpanded }))}>▾ {group}</button>{isExpanded && <div className="system-permission-group__items">{items.map((permission) => <label key={permission.code}><input type="checkbox" aria-label={permission.code} disabled={!canWrite} checked={selected.includes(permission.code)} onChange={(event) => setSelected((current) => event.target.checked ? [...current, permission.code] : current.filter((code) => code !== permission.code))} />{permission.code}</label>)}</div>}</div>})}</section>
       </div>

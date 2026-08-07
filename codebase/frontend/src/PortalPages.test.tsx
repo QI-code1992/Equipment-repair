@@ -498,6 +498,9 @@ describe("TASK-012 portal pages", () => {
     expect(screen.getByRole("button", { name: "新增角色" })).toBeEnabled();
     fireEvent.click(screen.getByRole("button", { name: "编辑权限" }));
     expect(screen.getByRole("dialog", { name: "编辑角色权限" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "角色类型" })).toHaveValue("内置角色");
+    expect(screen.getByRole("textbox", { name: "角色类型" })).toHaveAttribute("readonly");
+    expect(screen.getByRole("textbox", { name: "角色说明" }).tagName).toBe("TEXTAREA");
   });
 
   it("blocks disabling a role that is bound to users", async () => {
