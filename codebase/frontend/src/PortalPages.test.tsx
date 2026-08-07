@@ -56,6 +56,23 @@ describe("TASK-012 portal pages", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/bi/dashboard?period=month", undefined));
   });
 
+  it("keeps the prototype four-metric efficiency analysis without inventing unavailable facts", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        summary: { fault_count: 3, active_fault_count: 1, completed_work_order_count: 2, completion_rate: 0.67 },
+        trend: [], efficiency: { completed_work_order_count: 2, average_completion_hours: 3 }, organization_ranking: [],
+        history_comparison: { current_fault_count: 3, previous_fault_count: 2 },
+      }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 })));
+
+    render(<BiDashboardPage />);
+
+    expect(await screen.findByText("计划工单完成率")).toBeInTheDocument();
+    expect(screen.getByText("平均响应时长")).toBeInTheDocument();
+    expect(screen.getByText("平均维修时长")).toBeInTheDocument();
+    expect(screen.getByText("首次修复率")).toBeInTheDocument();
+  });
+
   it("reloads the BI dashboard with a selected formal organization filter", async () => {
     const dashboard = { summary: { fault_count: 2, active_fault_count: 1, completed_work_order_count: 1, completion_rate: 0.5 }, trend: [], efficiency: { completed_work_order_count: 1, average_completion_hours: 3 }, organization_ranking: [], history_comparison: { current_fault_count: 1, previous_fault_count: 0 } };
     const fetchMock = vi.fn()
@@ -67,7 +84,7 @@ describe("TASK-012 portal pages", () => {
     render(<BiDashboardPage />);
 
     fireEvent.change(await screen.findByLabelText("组织筛选"), { target: { value: "line-1" } });
-    expect(await screen.findByText("平均完成时长")).toBeInTheDocument();
+    expect(await screen.findByText("平均维修时长")).toBeInTheDocument();
     expect(fetchMock.mock.calls[2][0]).toBe("/api/bi/dashboard?organization_id=line-1&period=day");
   });
 

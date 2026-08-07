@@ -155,7 +155,8 @@ a { color: inherit; text-decoration: none; }
 .bi-ranking-panel ol { display: grid; gap: 9px; margin: 0; padding-left: 22px; color: #475569; }
 .bi-ranking-panel li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 10px; border: 1px solid #e2eaf4; border-radius: 8px; background: #fff; }
 .bi-ranking-panel li strong { color: #1b55a8; }
-.bi-efficiency-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.bi-efficiency-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.bi-efficiency-item { min-height: 124px; padding: 16px; border: 1px solid #e2eaf4; border-radius: 10px; background: #fbfdff; text-align: center; }.bi-efficiency-item strong, .bi-efficiency-item span, .bi-efficiency-item em { display: block; }.bi-efficiency-item strong { color: #172033; font-size: 24px; }.bi-efficiency-item strong small { margin-left: 3px; color: #64748b; font-size: 12px; font-weight: 600; }.bi-efficiency-item > span { margin-top: 6px; color: #526987; font-size: 12px; }.bi-efficiency-item em { margin-top: 10px; color: #16a36a; font-size: 11px; font-style: normal; }.bi-efficiency-item.is-unavailable strong, .bi-efficiency-item.is-unavailable em { color: #94a3b8; }
 .bi-health-list { margin-top: 16px; }
 .bi-health-list .button-secondary { display: inline-grid; place-items: center; min-height: 34px; padding: 0 12px; color: #315b91; border: 1px solid #c5d4e8; border-radius: 8px; font-size: 13px; }
 .table-wrap { overflow-x: auto; }

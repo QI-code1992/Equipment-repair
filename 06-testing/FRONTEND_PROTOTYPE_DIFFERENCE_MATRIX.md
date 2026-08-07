@@ -10,7 +10,7 @@
 |---|---|---|---|---|---|---|
 | 登录 | `/login` | `pages/login.html` | `/api/auth/login`、`/api/auth/me`、会话存储 | `LoginPage.test.tsx`、`App.test.tsx`、`api.test.ts` | 代码对照完成；固定桌面视口已检查 | 真实测试账号浏览器登录/退出、隔离 live-stack |
 | 工作台 | `/` | `pages/workbench.html` | `/api/workbench/todos`、告警摘要、快捷入口、单设备健康查询 | `WorkbenchPage.test.tsx`、`App.test.tsx` | 代码对照完成；缺失聚合契约保留受控空态 | 认证浏览器对照、真实数据状态 |
-| 驾驶舱 BI | `/bi-dashboard` | `pages/bi-dashboard.html` | `/api/bi/dashboard?organization_id=&period=day\|week\|month` | `PortalPages.test.tsx`、后端 `test_task012_read_apis.py` | 代码对照完成；趋势粒度恢复为日/周/月，三项趋势只使用正式返回值 | 浏览器筛选、固定视口视觉对照、完整 BI live 数据 |
+| 驾驶舱 BI | `/bi-dashboard` | `pages/bi-dashboard.html` | `/api/bi/dashboard?organization_id=&period=day\|week\|month` | `PortalPages.test.tsx`、后端 `test_task012_read_apis.py` | 代码对照完成；趋势粒度与四项效率模块均恢复为原型结构，三项趋势只使用正式返回值 | 浏览器筛选、固定视口视觉对照、完整 BI live 数据 |
 | 工厂建模 | `/factory-modeling` | `pages/factory-modeling.html` | `/api/organizations` | `PortalPages.test.tsx` | 代码对照完成；树、详情、编辑和禁用边界已接入 | 认证浏览器树操作、真实写入联调 |
 | 设备台账 | `/equipment` | `pages/equipment-ledger.html` | `/api/equipment`、`/api/organizations` | `PortalPages.test.tsx`、`api.test.ts` | 代码对照完成；筛选、空态、健康分不可用态已接入 | 浏览器视口对照、真实权限/数据联调 |
 | 新增设备 | `/equipment/new` | `pages/equipment-add.html` | `/api/equipment`、`/api/organizations`、`/api/users` | `PortalPages.test.tsx` | 代码对照完成；组织级联、日期、图片引用和保存反馈已接入 | 浏览器表单验证、附件/组织真实联调 |
@@ -62,3 +62,9 @@ Data import 保留在历史原型中，不在当前正式产品范围或本次�
 - 发现：正式页面将原型的日/周/月趋势粒度错误替换成“趋势/组织排行”视图切换，导致趋势区缺少原型定义的控制方式。
 - 修复：恢复日、周、月三个趋势粒度按钮；每次选择均以对应 `period` 调用正式 BI API。三项趋势图继续只消费 API 返回序列；健康评分趋势缺少正式序列时保持受控空态。
 - 自动化：新增日/周/月与 API 重载回归；全量前端 `101 passed`、生产构建、15 项 Node 静态回归、JSON 解析和 `git diff --check` 通过。
+
+## 驾驶舱 BI 效率分析复核（2026-08-07）
+
+- 发现：原型的效率分析包含计划工单完成率、平均响应时长、平均维修时长和首次修复率四项；正式页面错误替换为三项不同指标。
+- 修复：恢复四项原型模块及四列布局。平均维修时长仅使用正式 API 的实际值；其余三项缺少契约时显示受控不可用状态。
+- 自动化：新增四项模块回归先失败后通过；完整验证随本切片执行。
