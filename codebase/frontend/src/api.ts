@@ -410,7 +410,9 @@ export async function uploadKnowledgeDocument(datasetId: string, file: File): Pr
 export const getOrganizations = () => requestJson<Array<{ id: string; type: string; code: string; name: string; parent_id: string | null; enabled: boolean }>>("/api/organizations");
 export const getUsers = () => requestJson<Array<{ id: string; username: string; enabled: boolean; role_ids: string[] }>>("/api/users");
 export const retryKnowledgeDocument = (id: string) => postJson<{ id: string; status: string }>(`/api/knowledge/documents/${id}/retry`, { document_id: id });
-export const getRoles = () => requestJson<Array<{ id: string; code: string; name: string; permission_codes: string[] }>>("/api/roles");
+export type ManagedRole = { id: string; code: string; name: string; description: string; built_in: boolean; enabled: boolean; user_count: number; permission_codes: string[]; updated_at: string };
+export type RoleWrite = { name: string; description: string; enabled: boolean; permission_codes: string[] };
+export const getRoles = () => requestJson<ManagedRole[]>("/api/roles");
 export const getPermissions = () => requestJson<Array<{ code: string }>>("/api/permissions");
 export const createOrganization = (body: { type: string; code: string; name: string; parent_id: string; sort_order: number; enabled: boolean; remark: string }) => postJson<{ id: string }>("/api/organizations", body);
 export const updateOrganization = (id: string, body: { code: string; name: string; sort_order: number; enabled: boolean; remark: string }) => requestJson(`/api/organizations/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify(body) });
@@ -418,3 +420,6 @@ export const deleteOrganization = (id: string) => requestJson(`/api/organization
 export const createUser = (body: { username: string; password: string; role_ids: string[] }) => postJson<{ id: string }>("/api/users", body);
 export const updateUser = (id: string, body: { enabled: boolean; role_ids: string[] }) => requestJson(`/api/users/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify(body) });
 export const updateRolePermissions = (id: string, permission_codes: string[]) => requestJson(`/api/roles/${id}/permissions`, { method: "PATCH", headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify({ permission_codes }) });
+export const createRole = (body: RoleWrite) => postJson<ManagedRole>("/api/roles", body);
+export const updateRole = (id: string, body: RoleWrite) => requestJson<ManagedRole>(`/api/roles/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify(body) });
+export const deleteRole = (id: string) => requestJson<{ id: string; deleted: boolean }>(`/api/roles/${id}`, { method: "DELETE", headers: { "Idempotency-Key": crypto.randomUUID() } });

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -30,6 +32,15 @@ class RolePermissionsUpdate(BaseModel):
     permission_codes: list[str]
 
 
+class RoleWrite(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=100)
+    description: str = Field(default="", max_length=500)
+    enabled: bool = True
+    permission_codes: list[str] = Field(min_length=1)
+
+
 class PermissionRead(BaseModel):
     code: str
 
@@ -38,7 +49,12 @@ class RoleRead(BaseModel):
     id: str
     code: str
     name: str
+    description: str
+    built_in: bool
+    enabled: bool
+    user_count: int
     permission_codes: list[str]
+    updated_at: datetime
 
 
 class RoleWriteResponse(RoleRead):

@@ -29,7 +29,7 @@
 | Repair execution | View | View/accept | Execute/submit | View progress |
 | Health score/BI | View | View | View | View related business context |
 
-必须执行服务端账号认证、角色、菜单/操作权限、Agent 线程创建者隔离、诊断草稿创建者隔离和审计。根据 CR-026 与 CR-043，本期不实现 `EquipmentGrant`、设备/工厂行级授权隔离或通用数据权限过滤；设备负责人字段不作为授权来源。
+必须执行服务端账号认证、角色、菜单/操作权限、Agent 线程创建者隔离、诊断草稿创建者隔离和审计。系统管理员为唯一不可编辑、禁用或删除的角色；设备管理员、维修工、产线作业员和自定义角色可编辑或逻辑删除。所有已绑定用户的角色不可禁用或删除。根据 CR-026 与 CR-043，本期不实现 `EquipmentGrant`、设备/工厂行级授权隔离或通用数据权限过滤；设备负责人字段不作为授权来源。
 
 `user_management.view_all` controls user-management visibility; it does not create equipment row-level filtering, factory row-level filtering or general data permissions.
 

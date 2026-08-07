@@ -1,11 +1,14 @@
 from fastapi import HTTPException
+from datetime import UTC, datetime
+from uuid import uuid4
+
 from sqlalchemy import func, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.modules.identity.models import Permission, Role, RoleCode, User, user_roles
 from app.modules.identity.security import hash_password
-from app.modules.identity.schemas import UserCreate, UserUpdate
+from app.modules.identity.schemas import RoleWrite, UserCreate, UserUpdate
 from app.modules.identity.service import permission_codes_for_user
 
 
@@ -20,12 +23,12 @@ def acquire_identity_admin_lock(db: Session) -> None:
         )
 
 
-def fixed_roles(db: Session) -> list[Role]:
+def roles(db: Session) -> list[Role]:
     return list(
         db.scalars(
             select(Role)
-            .where(Role.code.in_([code.value for code in RoleCode]))
-            .order_by(Role.code)
+            .where(Role.deleted_at.is_(None))
+            .order_by(Role.built_in.desc(), Role.name)
         ).unique()
     )
 
@@ -62,7 +65,8 @@ def roles_for_ids(db: Session, role_ids: list[str]) -> list[Role]:
         db.scalars(
             select(Role).where(
                 Role.id.in_(role_ids),
-                Role.code.in_([code.value for code in RoleCode]),
+                Role.deleted_at.is_(None),
+                Role.enabled.is_(True),
             )
         ).unique()
     )
@@ -130,7 +134,7 @@ def update_role_permissions(
     db: Session, role_id: str, permission_codes: list[str]
 ) -> Role:
     role = db.scalar(select(Role).where(Role.id == role_id))
-    if role is None or role.code not in {code.value for code in RoleCode}:
+    if role is None or role.deleted_at is not None:
         raise HTTPException(status_code=404, detail={"code": "ROLE_NOT_FOUND"})
     if role.code == RoleCode.SYSTEM_ADMIN.value:
         raise HTTPException(
@@ -142,5 +146,61 @@ def update_role_permissions(
     if {permission.code for permission in permissions} != set(permission_codes):
         raise HTTPException(status_code=422, detail={"code": "PERMISSION_NOT_FOUND"})
     role.permissions = permissions
+    db.flush()
+    return role
+
+
+def role_detail(db: Session, role_id: str) -> Role:
+    role = db.get(Role, role_id)
+    if role is None or role.deleted_at is not None:
+        raise HTTPException(status_code=404, detail={"code": "ROLE_NOT_FOUND"})
+    return role
+
+
+def role_user_count(db: Session, role: Role) -> int:
+    return int(db.scalar(select(func.count()).select_from(user_roles).where(user_roles.c.role_id == role.id)) or 0)
+
+
+def permissions_for_codes(db: Session, permission_codes: list[str]) -> list[Permission]:
+    permissions = list(db.scalars(select(Permission).where(Permission.code.in_(permission_codes))))
+    if {permission.code for permission in permissions} != set(permission_codes):
+        raise HTTPException(status_code=422, detail={"code": "PERMISSION_NOT_FOUND"})
+    return permissions
+
+
+def create_role(db: Session, payload: RoleWrite) -> Role:
+    if db.scalar(select(Role).where(Role.name == payload.name, Role.deleted_at.is_(None))) is not None:
+        raise HTTPException(status_code=409, detail={"code": "ROLE_NAME_EXISTS"})
+    role = Role(code=f"CUSTOM_{uuid4().hex}", name=payload.name, description=payload.description, enabled=payload.enabled, built_in=False, permissions=permissions_for_codes(db, payload.permission_codes))
+    db.add(role)
+    db.flush()
+    return role
+
+
+def update_role(db: Session, role_id: str, payload: RoleWrite) -> Role:
+    role = role_detail(db, role_id)
+    if role.code == RoleCode.SYSTEM_ADMIN.value:
+        raise HTTPException(status_code=409, detail={"code": "SYSTEM_ADMIN_ROLE_FIXED"})
+    duplicate = db.scalar(select(Role).where(Role.name == payload.name, Role.id != role.id, Role.deleted_at.is_(None)))
+    if duplicate is not None:
+        raise HTTPException(status_code=409, detail={"code": "ROLE_NAME_EXISTS"})
+    if not payload.enabled and role_user_count(db, role):
+        raise HTTPException(status_code=409, detail={"code": "ROLE_BOUND_TO_USERS"})
+    role.name = payload.name
+    role.description = payload.description
+    role.enabled = payload.enabled
+    role.permissions = permissions_for_codes(db, payload.permission_codes)
+    db.flush()
+    return role
+
+
+def delete_role(db: Session, role_id: str) -> Role:
+    role = role_detail(db, role_id)
+    if role.code == RoleCode.SYSTEM_ADMIN.value:
+        raise HTTPException(status_code=409, detail={"code": "SYSTEM_ADMIN_ROLE_FIXED"})
+    if role_user_count(db, role):
+        raise HTTPException(status_code=409, detail={"code": "ROLE_BOUND_TO_USERS"})
+    role.deleted_at = datetime.now(UTC)
+    role.enabled = False
     db.flush()
     return role

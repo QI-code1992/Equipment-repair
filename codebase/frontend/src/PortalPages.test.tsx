@@ -482,6 +482,37 @@ describe("TASK-012 portal pages", () => {
     expect(screen.queryByRole("button", { name: "创建账号" })).not.toBeInTheDocument();
   });
 
+  it("uses the prototype role table and opens the role editor modal", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "role-1", code: "EQUIPMENT_ADMIN", name: "设备管理员", description: "维护设备台账", built_in: true, enabled: true, user_count: 2, permission_codes: ["equipment:read"] }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ code: "equipment:read" }]), { status: 200 })));
+
+    render(<MemoryRouter><SystemManagementPage permissionCodes={["identity:read", "identity:write"]} /></MemoryRouter>);
+
+    expect(await screen.findByRole("columnheader", { name: "角色类型" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "绑定用户" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "新增角色" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "编辑权限" }));
+    expect(screen.getByRole("dialog", { name: "编辑角色权限" })).toBeInTheDocument();
+  });
+
+  it("blocks disabling a role that is bound to users", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "role-1", code: "EQUIPMENT_ADMIN", name: "设备管理员", description: "维护设备台账", built_in: true, enabled: true, user_count: 2, permission_codes: ["equipment:read"] }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ code: "equipment:read" }]), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<MemoryRouter><SystemManagementPage permissionCodes={["identity:read", "identity:write"]} /></MemoryRouter>);
+
+    fireEvent.click(await screen.findByRole("button", { name: "禁用" }));
+    expect(await screen.findByRole("dialog", { name: "角色已绑定用户" })).toHaveTextContent("设备管理员");
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+  });
+
   it("submits a role permission update with an idempotency key", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 }))
@@ -497,8 +528,8 @@ describe("TASK-012 portal pages", () => {
     fireEvent.click(await screen.findByRole("button", { name: "编辑权限" }));
     (await screen.findByRole("button", { name: "保存角色权限" })).click();
 
-    await screen.findByText("角色权限已更新。");
-    expect(fetchMock.mock.calls[4][0]).toBe("/api/roles/role-1/permissions");
+    await screen.findByText("角色已保存。");
+    expect(fetchMock.mock.calls[4][0]).toBe("/api/roles/role-1");
     const init = fetchMock.mock.calls[4][1] as RequestInit;
     expect(init.method).toBe("PATCH");
     expect(new Headers(init.headers).get("Idempotency-Key")).toBeTruthy();
@@ -521,8 +552,11 @@ describe("TASK-012 portal pages", () => {
     fireEvent.click(checkbox);
     fireEvent.click(screen.getByRole("button", { name: "保存角色权限" }));
 
-    await screen.findByText("角色权限已更新。");
+    await screen.findByText("角色已保存。");
     expect(JSON.parse(String((fetchMock.mock.calls[4][1] as RequestInit).body))).toEqual({
+      name: "操作员",
+      description: "",
+      enabled: true,
       permission_codes: ["workbench:view", "fault:create"],
     });
   });
