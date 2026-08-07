@@ -627,8 +627,18 @@
 - 前端验证：`npm test -- --run` 为 `49 passed`；`npm run build` 通过。
 - 后端验证：`python -m pytest tests -q` 为 `328 passed, 13 skipped, 2 warnings`；`python -m compileall -q app tests` 通过。
 - 静态验证：`node --test 06-testing/tests/*.test.js` 为 `15 passed`；`python3 -m json.tool workflow/state.json`、`git diff --check` 通过。
-- 未验证：当前 macOS 环境没有 Docker/PowerShell/真实 RAGFlow；未执行 Windows 隔离 live-stack、ClamAV/MinIO 附件扫描、HTTPS、浏览器逐页 E2E、真实 RAGFlow 引用/降级或生产部署。上述必须由 DEV-001 在最终精确候选上独立验证。
-- 未完成事项：最终候选尚未提交、PR 尚未转 Ready、DEV-001 尚未整体审核；页面矩阵全部仍标记“实现中候选”，`DEF-STAGE7-001` 不得关闭。
+- 未验证：当时 macOS 环境没有 Docker/PowerShell/真实 RAGFlow；未执行 Windows 隔离 live-stack、ClamAV/MinIO 附件扫描、HTTPS、浏览器逐页 E2E、真实 RAGFlow 引用/降级或生产部署。上述必须由 DEV-001 在最终精确候选上独立验证。
+- 未完成事项：该历史 TASK-012 候选未提交、PR 未转 Ready、DEV-001 未整体审核；页面矩阵当时仍为“实现中候选”，`DEF-STAGE7-001` 不得关闭。
+
+## TASK-013 全部 P0 页面原型一致性候选自测（2026-08-06）
+
+- 精确候选：`aaa55274ef953c3ec6d2fcb9a4bf7cf78b9cda72`，分支 `codex/task-013-prototype-fidelity-remediation`。
+- 范围：登录、工作台、驾驶舱 BI、工厂建模、设备台账/新增/详情/编辑、智能配置、智能审计、故障上报、AI 故障上报、维修记录/详情、维修执行、系统管理共 16 个正式路由，以及全局 Agent 抽屉；Data import 不在范围内。
+- 自动化验证：`npm test -- --run` 为 `8 files passed / 97 tests passed`；覆盖页面结构、真实 API 请求边界、权限禁用、加载/空/错误/提交中状态和 Agent 快捷入口/SSE 增量。
+- 构建与静态：`npm run build` 通过（`tsc -b`、Vite production build）；仓库根目录 `for f in 06-testing/tests/*.test.js; do node "$f"; done` 的 15 项静态脚本全部通过；`git diff --check` 通过。
+- 原型约束：正式前端没有复制或导入 `03-ui-prototype/prototype/` 运行时代码；未新增生产依赖、公开 API、迁移、权限、部署配置、兼容层或抽象层；未触碰未跟踪 `codebase/frontend/.vscode/`。
+- 浏览器与运行态边界：本机只读固定桌面视口检查了 `/login` 的双栏品牌/能力矩阵/登录卡片；15 条受保护路由的认证浏览器逐页对照、Windows Docker/RAGFlow/附件扫描/HTTPS、ECS 自动同步状态未在此自测中虚构为已通过。
+- 门禁：本记录只提供 DEV-001 审核输入，不构成 Stage 6 通过、Stage 7 验收或 Merge 授权。
 ## TASK-012 DEV-001 complete defect review evidence (2026-07-31)
 
 - Review baseline: PR #75 HEAD `77a54a1587544374ed876e902bc132d58cf8ed9b`.
@@ -688,3 +698,91 @@
 - Exact HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`: RAGFlow, PostgreSQL/live lifecycle, ClamAV/MinIO, HTTPS health/MIME and authenticated browser E2E passed.
 - Browser flow: login, workbench, protected intelligent configuration and fault-report routes, logout redirect to `/login`.
 - Temporary validation resources and credentials were removed. No production code or configuration was changed during governance verification.
+
+## TASK-013 共享导航原型一致性自测（2026-08-07）
+
+- 原型对照：`03-ui-prototype/prototype/pages/workbench.html` 的单一“业务导航”与 `01`—`08` 顺序。
+- 代码边界：只调整 `App.tsx` 的主导航声明/渲染与对应 CSS；二级页面路由和权限守卫未删除。
+- 实测：新增 `App.test.tsx` 回归先在旧导航失败，再通过；Vitest 全量 `8 files passed / 98 tests passed`，生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 均通过。
+- 未验证：ECS 自动部署完成后的浏览器视觉核对待部署结果可用后执行；本记录不构成审核批准、Merge 授权或 Stage 6/7/8 解锁。
+
+## TASK-013 Agent 悬浮入口切片（2026-08-07）
+
+- 修改：正式前端移除顶栏“全局 Agent”文字按钮，使用原型右下角机器人悬浮按钮；权限、抽屉遮罩/Esc、打开隐藏/关闭恢复和 3 秒闲置显隐均保留。
+- 测试：`npm --prefix codebase/frontend test -- --run`：`8 files passed / 99 tests passed`；测试按文件串行运行，避免既有 jsdom 异步断言在多文件并发下出现资源竞争超时。
+- 构建：`npm --prefix codebase/frontend run build`：通过。
+- 未验证：Windows Docker/RAGFlow/附件扫描/HTTPS、认证浏览器逐页视觉对照和 ECS 自动部署尚未在本切片执行。
+- 依赖与范围：无新增生产依赖、兼容层、抽象层、后端/API/部署配置或无关文件修改。
+## TASK-013 工作台布局切片（2026-08-07）
+
+- 根因：通用 `.data-card` 跨列规则覆盖工作台 KPI 与主工作区，造成截图中的两列 KPI 和错位布局。
+- 修复：工作台 KPI 卡片明确恢复单列网格项，主工作区队列卡片恢复独立网格列；保留原型五卡横排和队列/健康双栏结构。
+- 测试：工作台 `4 passed`；前端全量 `8 files passed / 99 tests passed`。
+- 构建：生产构建通过。
+- 未验证：ECS 自动部署后的浏览器截图和 Windows live-stack 未在本切片执行。
+
+## TASK-013 维修记录概览布局切片（2026-08-07）
+
+- 原型对照：`03-ui-prototype/prototype/pages/maintenance-records.html` 的六列 KPI 与两列图表区。
+- 修复：`maintenance-kpis` 由三列恢复六列，图表卡显式作为两列网格项，避免通用 `.data-card` 跨列规则造成单列堆叠。
+- 验证：布局回归测试先失败后通过；前端 `8 files passed / 100 tests passed`，生产构建、15 项 Node 静态回归和 `git diff --check` 通过。
+- 未验证：认证浏览器固定桌面视口截图与真实维修数据交互仍待完整候选统一验证；不以本地结构测试替代。
+
+## FCP-013-19：驾驶舱 BI 趋势粒度原型一致性修复（2026-08-07）
+
+- 修复内容：趋势区恢复日、周、月三个原型粒度按钮，移除错误的“趋势/组织排行”切换；切换周期会请求对应的正式 `/api/bi/dashboard` `period`。
+- 数据边界：三项趋势图仍仅消费正式 API 数据；当前 API 未提供健康评分趋势时显示明确空态。
+- 验证：新增测试先失败后通过；前端全量 `101 passed`、生产构建、15 项 Node 静态回归、JSON 解析和 `git diff --check` 通过。
+- 边界：没有新增依赖、兼容层、抽象层、API、权限、迁移或部署配置；未触碰 `.vscode/`。
+
+## FCP-013-24：侧栏固定与用户入口原型一致性修复（2026-08-07）
+
+- 修复：桌面端左侧导航固定在全视口并独立滚动，主区域保留侧栏占位；移动端继续使用原有抽屉导航。
+- 修复：右上用户芯片恢复原型下拉箭头、菜单语义、个人资料、安全设置/修改密码、权限控制的用户管理入口和退出确认；菜单支持点击、Enter/Space、外部点击与 Escape。
+- 数据边界：用户名和账号状态来自 `/api/auth/me`；组织、角色、最后登录等未在正式用户契约中提供的字段显示受控空态，未使用原型示例数据。
+- 验证：App Shell 定向 `19 passed`；前端全量 `106 passed`；生产构建通过；Node 静态回归、JSON 解析和 `git diff --check` 通过。
+- 边界：未新增依赖、API、权限规则、迁移、兼容层或抽象层；未触碰 `.vscode/`；ECS 自动同步与浏览器视觉核对待推送后执行。
+
+## FCP-013-25：用户自助密码修改缺口补齐（2026-08-07）
+
+- 修复：新增 `PATCH /api/auth/password`，校验当前密码和确认值，更新现有 scrypt 哈希，撤销用户全部登录会话并写入脱敏审计；前端安全设置接入真实请求，成功后清除本地会话并回到登录入口。
+- 错误边界：旧密码错误和确认不一致返回稳定错误码与字段，不返回或记录任何密码、哈希、Token 或 Cookie。
+- 验证：前端 App Shell `20 passed`，生产构建和 Python `compileall` 通过；后端运行测试未执行，因本机缺少 `sqlalchemy` 与 `pytest` 依赖。
+- 边界：已同步 API 规格与 `CR-051` 变更台账；未新增生产依赖、迁移、兼容层或抽象层；不构成审核、Merge 或 Stage 解锁。
+
+## TASK-013 门户重复标题块修复（2026-08-07）
+
+- 用户截图指出 BI 内容区多出“正式业务数据 / 驾驶舱 BI”重复标题块；该内容不属于原型，顶部 App Shell 已提供同一语义。
+- 修复：共享 `Page` 容器以及故障上报、智能配置的独立页头均仅保留内容承载，所有门户页面的筛选、页签和业务模块位置保持不变。
+- 证据：BI、故障上报和智能配置回归先失败后通过；前端 `105 passed`，生产构建、16 项 Node 静态回归、`workflow/state.json` JSON 解析及 `git diff --check` 通过。
+- 边界：无新增依赖、兼容层、抽象层、API、权限、迁移或部署配置；ECS 部署后等待页面视觉复核。
+
+## TASK-013 工作台网格层叠修复（2026-08-07）
+
+- 原因：通用双列卡片规则在样式表靠后位置覆盖工作台专用网格，造成截图中的 KPI 两列排布。
+- 修复：在通用规则之后对工作台 KPI 与队列直系卡片恢复 `grid-column: auto`；未改变原型内容、业务 API 或数据来源。
+- 证据：新静态层叠回归先失败（缺少覆盖规则）后通过；工作台 `4 passed`；前端全量 `104 passed`；生产构建、16 项 Node 静态回归、`workflow/state.json` JSON 解析与 `git diff --check` 通过。
+- 边界：未新增依赖、兼容层、抽象层、API、权限、迁移或部署配置；未触碰 `.vscode/`；ECS 部署后视觉确认仍待执行。
+
+## FCP-013-20：驾驶舱 BI 效率分析原型一致性修复（2026-08-07）
+
+- 修复内容：效率分析恢复计划工单完成率、平均响应时长、平均维修时长、首次修复率四项原型模块和四列布局。
+- 数据边界：平均维修时长只使用正式 API 返回值；无对应契约的三项显示受控空态，未使用原型示例数字。
+- 验证：新增结构测试先失败后通过；完整前端、构建、静态检查、JSON 与差异检查待本切片提交前执行。
+- 边界：没有新增依赖、兼容层、抽象层、API、权限、迁移或部署配置；未触碰 `.vscode/`。
+
+## FCP-013-21：驾驶舱 BI 设备健康列表原型一致性修复（2026-08-07）
+
+- 修改：恢复原型的八列健康表、普通设备详情链接、结果状态和表尾信息区。
+- 数据边界：只调用现有 `/api/equipment`；真实字段正常呈现，未提供的健康、风险、故障、工单与更新时间均为明确受控空态。
+- 定向验证：新增健康表结构/计数/更新时间测试先失败后通过；`npm test -- --run src/PortalPages.test.tsx` 为 `35 passed`。
+- 完整验证：前端全量 `103 passed`、生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 均通过；ECS 与浏览器视觉尚未在此切片宣称完成。
+- 边界：没有新增依赖、兼容层、抽象层、API、权限、迁移或部署配置；未触碰 `.vscode/`。
+
+## FCP-013-22：驾驶舱 BI 健康分析抽屉原型一致性修复（2026-08-07）
+
+- 修改：恢复“查看分析”的健康抽屉、设备上下文、关闭动作、遮罩和详情入口。
+- 数据边界：抽屉不新增请求，不生成风险、趋势或建议；正式 API 未提供的内容明确显示不可用。
+- 定向验证：新增抽屉交互回归先失败后通过；`npm test -- --run src/PortalPages.test.tsx` 为 `36 passed`。
+- 完整验证：前端全量 `104 passed`、生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 均通过；ECS 与浏览器视觉尚未在此切片宣称完成。
+- 边界：没有新增依赖、兼容层、抽象层、API、权限、迁移或部署配置；未触碰 `.vscode/`。

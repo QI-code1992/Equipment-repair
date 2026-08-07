@@ -6,6 +6,20 @@
 - 原型地址：`http://127.0.0.1:4209/pages/intelligent-config.html`
 - 本节不代表 Stage 6 准入；监控、完整备份恢复演练和生产发布仍未完成。
 
+## 当前业务平台测试部署边界（2026-08-05）
+
+- 当前平台测试环境位于阿里云 ECS，运行代码绑定 `780748cbc6b988feda66f2ebd02a6829bdafd1c1`，Compose 项目为 `equipment-preview-77fbc42`。该环境只用于业务平台测试，不是生产发布，也不代表 Stage 6/7/8 已通过。
+- ECS 仅运行平台 PostgreSQL、Redis、MinIO、ClamAV、API、Worker、Validator、Nginx 和 Web。RAGFlow 必须留在本地 Windows Docker Desktop/WSL2，统一目标版本为 `v0.26.3`；ECS 仅经项目负责人维护的加密私网隧道访问 RAGFlow API。
+- 测试公网入口、短期自签名证书、已验证范围和未验证 RAGFlow 成功链路见 `07-acceptance/ACCEPTANCE_ENVIRONMENT_DEPLOYMENT.md`。不得把管理员凭据、RAGFlow API Key、隧道参数、证书私钥或 `.env` 内容写入本手册。
+- 当前 ECS 未配置运行时 `RAGFLOW_API_KEY`，因此真实 RAGFlow 检索成功路径尚未验证；不得以服务健康或不可用降级替代成功链路证据。
+
+### TASK-013 推送自动同步
+
+- `codebase/infra/scripts/ecs-test-autodeploy.sh` 由 `equipment-test-autodeploy.timer` 每 30 秒检查 `codex/task-013-prototype-fidelity-remediation` 的已推送 Commit；未提交的本地保存永不进入 ECS。
+- 每个新 SHA 先在新的预览目录构建 API/Web 镜像，再重建 API/Web 并检查外层入口 `https://127.0.0.1/healthz`。构建、启动或健康检查失败时，脚本恢复预先保留标签的上一 API/Web 镜像和原预览目录；不执行数据库 downgrade，不删除 PostgreSQL、Redis、MinIO、ClamAV 或 RAGFlow 数据。
+- 自动部署拒绝包含 Alembic 迁移变化的 Commit，要求人工执行并单独验证，避免测试数据库前向迁移后无法安全回退。
+- ECS 上的 `/etc/equipment-test-autodeploy.env` 只保存非秘密路径、分支和项目名；不得放入 SSH 私钥、账号密码、RAGFlow Token 或 `.env` 内容。服务日志通过 `journalctl -u equipment-test-autodeploy.service` 查看，只应包含时间、SHA 和脱敏错误。
+
 ## TASK-004 RAGFlow 运行前置条件
 
 - Docker Desktop 使用 Linux containers；Docker Engine `>=24`，Docker Compose `>=2.26.1`。
@@ -30,7 +44,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File codebase/infra/ragflow/scrip
 docker compose -p equipment-ragflow --env-file $RagflowEnvFile -f codebase/infra/ragflow/docker-compose.yml down
 ```
 
-`verify.ps1` 必须确认 5 个容器均为 healthy、Web 返回 HTTP 200、API `GET /api/v1/system/version` 在有限重试窗口内返回 `code=0` 和 `data=v0.25.6`、Elasticsearch 为 `8.11.3` 系列，并逐一绑定展开 Compose 镜像、固定标签获批 SHA-256 和运行容器镜像 ID；任一漂移必须失败。本次执行窗口内的 RAGFlow 日志还必须没有依赖连接失败或秘密值命中，输出只保留时间、退出码和计数摘要。`verify-isolation.ps1` 必须确认四个依赖仅位于内部网络且没有宿主端口。`verify-persistence.ps1` 会通过各存储的正式接口写入随机探针；其中 MinIO 必须经 S3 API 创建临时 bucket/object，重启整栈后回读比对。只有所有断言成功后才自动清理探针；失败时保留调查证据，并由操作者确认后仅清理 TASK-004 命名空间。不得直接读写 `/data` 目录充当对象持久化证据。
+`verify.ps1` 必须确认 5 个容器均为 healthy、Web 返回 HTTP 200、API `GET /api/v1/system/version` 在有限重试窗口内返回 `code=0` 和 `data=v0.26.3`、Elasticsearch 为 `8.11.3` 系列，并逐一绑定展开 Compose 镜像、固定标签获批 SHA-256 和运行容器镜像 ID；任一漂移必须失败。本次执行窗口内的 RAGFlow 日志还必须没有依赖连接失败或秘密值命中，输出只保留时间、退出码和计数摘要。`verify-isolation.ps1` 必须确认四个依赖仅位于内部网络且没有宿主端口。`verify-persistence.ps1` 会通过各存储的正式接口写入随机探针；其中 MinIO 必须经 S3 API 创建临时 bucket/object，重启整栈后回读比对。只有所有断言成功后才自动清理探针；失败时保留调查证据，并由操作者确认后仅清理 TASK-004 命名空间。不得直接读写 `/data` 目录充当对象持久化证据。
 
 常规停止只允许 `down`，禁止使用 `down -v`；后者会删除 TASK-004 命名卷并破坏持久化数据。
 

@@ -29,6 +29,7 @@ from app.modules.equipment.models import Equipment
 from app.modules.maintenance.schemas import SimilarCaseQuery
 from app.modules.knowledge import service as knowledge_service
 from app.modules.maintenance.router import fault_report_body
+from app.modules.notifications.service import add_health_notification_if_band_changed, add_notification
 from app.modules.maintenance.schemas import FaultReportCreate
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
@@ -405,6 +406,15 @@ def fault_diagnosis(
             resource_type="diagnosis_draft", resource_id=draft.id,
             result="success", metadata={"fault_report_id": fault.id},
         )
+        add_notification(
+            db,
+            notification_type="AGENT",
+            title="诊断建议已生成",
+            body=f"故障 {fault.number} 的诊断 Agent 已完成建议。",
+            level="INFO",
+            related_object_id=fault.id,
+            action_url=f"/fault-reports/{fault.id}",
+        )
     else:
         draft.read_only_summary = {
             "_owner_user_id": actor.id,
@@ -525,10 +535,15 @@ def submit_fault_report(
 def read_health_score(
     equipment_id: str,
     request: Request,
+    db: Session = Depends(get_db),
     _: User = Depends(require_permission("intelligence:agent")),
 ) -> dict[str, Any] | JSONResponse:
     reader = getattr(request.app.state, "health_score_reader", None) or _default_health_reader()
     result = reader.read(equipment_id)
     if result["status"] == "UNAVAILABLE":
         return JSONResponse(status_code=503, content=result)
+    score = result.get("score")
+    if isinstance(score, (int, float)):
+        add_health_notification_if_band_changed(db, equipment_id=equipment_id, score=score)
+        db.commit()
     return result

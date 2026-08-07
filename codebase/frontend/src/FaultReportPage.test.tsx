@@ -13,6 +13,19 @@ vi.mock("./api", async (importOriginal) => ({
 
 describe("FaultReportPage", () => {
   beforeEach(() => vi.clearAllMocks());
+  it("keeps the approved fault-report list and report workspace modules visible", () => {
+    render(<FaultReportPage />);
+    expect(screen.queryByText("现场作业")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "故障上报" })).not.toBeInTheDocument();
+    expect(screen.queryByText("AI 只生成可编辑草稿；只有人工确认才会写入正式故障单。")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "查询筛选" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "故障上报列表" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "新增故障上报" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "基础信息" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "故障描述" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "现场附件" })).toBeInTheDocument();
+    expect(screen.getByText("当前接口未提供故障列表查询。")) .toBeInTheDocument();
+  });
   it("shows an AI draft first and writes a formal fault only after explicit confirmation", async () => {
     const draft = {
       equipment_id: "eq-1", urgency: "HIGH", symptom: "液压压力异常", occurred_at: "2026-07-27T10:00:00+08:00",
@@ -22,6 +35,9 @@ describe("FaultReportPage", () => {
       .mockResolvedValueOnce({ agent_status: "PREVIEW", draft, missing_fields: [] })
       .mockResolvedValueOnce({ id: "fault-1", number: "FR-001", status: "PENDING_ACCEPT", ...draft, agent_status: "AI_DRAFT" });
     render(<FaultReportPage />);
+
+    expect(screen.getByRole("heading", { name: "现场故障信息" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "AI 辅助与人工确认" })).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("设备 ID"), { target: { value: "eq-1" } });
     fireEvent.change(screen.getByLabelText("故障现象"), { target: { value: "液压压力异常" } });

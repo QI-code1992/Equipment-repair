@@ -21,7 +21,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $expectedImages = [ordered]@{
-    "ragflow" = @{ image = "infiniflow/ragflow:v0.25.6"; digest = "sha256:74595f13bb09c51b1c151ce85d9e06e42cf4371b0c8aeaef222e67253d7c7543" }
+    "ragflow" = @{ image = "infiniflow/ragflow:v0.26.3"; digest = "sha256:8b9a311a86e0f4a38117ca8c354bfe7884e7eafb7ffcea5b3e83a9485ecba28d" }
     "ragflow-elasticsearch" = @{ image = "elasticsearch:8.11.3"; digest = "sha256:58a3a280935d830215802322e9a0373faaacdfd646477aa7e718939c2f29292a" }
     "ragflow-mysql" = @{ image = "mysql:8.0.39"; digest = "sha256:ccb8f749bb5e59f9f8f03bf7282c7ef27a93a1814a24f0a8a926fb4e19b7fb97" }
     "ragflow-minio" = @{ image = "pgsty/minio:RELEASE.2026-03-25T00-00-00Z"; digest = "sha256:a72bf37c235a83a73890d2a46c5b36801fed61c335175e0396070bf84a8bbb98" }
@@ -99,7 +99,7 @@ if ($null -eq $api -or $api.StatusCode -ne 200) {
     throw "RAGFlow API endpoint did not become healthy before timeout"
 }
 $apiContract = $api.Content | ConvertFrom-Json
-if ($apiContract.code -ne 0 -or $apiContract.data -ne "v0.25.6" -or $apiContract.message -ne "success") {
+if ($apiContract.code -ne 0 -or $apiContract.data -ne "v0.26.3" -or $apiContract.message -ne "success") {
     throw "RAGFlow API version contract drift"
 }
 

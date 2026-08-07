@@ -101,7 +101,8 @@ def permission_codes_for_user(db: Session, user_id: str) -> set[str]:
         .join(Role, Role.id == user_roles.c.role_id)
         .where(
             user_roles.c.user_id == user_id,
-            Role.code.in_([code.value for code in RoleCode]),
+            Role.enabled.is_(True),
+            Role.deleted_at.is_(None),
         )
     )
     return set(db.scalars(statement))

@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 
 import { ApiError, getEquipment, getHealthScore, getWorkbenchAlertSummary, getWorkbenchShortcuts, getWorkbenchTodos } from "./api";
@@ -7,17 +8,74 @@ import { WorkbenchPage } from "./WorkbenchPage";
 vi.mock("./api", async (importOriginal) => ({ ...await importOriginal<typeof import("./api")>(), getEquipment: vi.fn(), getHealthScore: vi.fn(), getWorkbenchTodos: vi.fn(), getWorkbenchAlertSummary: vi.fn(), getWorkbenchShortcuts: vi.fn() }));
 
 describe("WorkbenchPage", () => {
+  it("presents formal alerts and todo actions in the approved workbench layout", async () => {
+    vi.mocked(getWorkbenchTodos).mockResolvedValue({ items: [{ id: "todo-1", number: "WO-001", equipment_name: "装载机", urgency: "HIGH", symptom: "液压温度过高", status: "PENDING_ACCEPT" }], count: 1 });
+    vi.mocked(getWorkbenchAlertSummary).mockResolvedValue({ active_fault_count: 1, status_counts: [], urgency_counts: [] });
+    vi.mocked(getWorkbenchShortcuts).mockResolvedValue({ items: [{ id: "shortcut-1", label: "故障上报", path: "/fault-report" }] });
+    vi.mocked(getEquipment).mockResolvedValue([]);
+
+    render(<MemoryRouter><WorkbenchPage /></MemoryRouter>);
+
+    expect(await screen.findByRole("heading", { name: "故障待办" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "当前健康风险概览" })).toBeInTheDocument();
+    expect(screen.getByText("WO-001")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /故障上报/ })).toBeInTheDocument();
+    expect(screen.getByTestId("workbench-metric-grid")).toHaveAttribute("data-layout", "five-column");
+    expect(screen.getByTestId("workbench-primary-grid")).toHaveAttribute("data-layout", "queue-health-sidebar");
+  });
+
+  it("keeps the approved realtime-dispatch information architecture when formal data is unavailable", async () => {
+    vi.mocked(getWorkbenchTodos).mockResolvedValue({ items: [], count: 0 });
+    vi.mocked(getWorkbenchAlertSummary).mockResolvedValue({ active_fault_count: 0, status_counts: [], urgency_counts: [] });
+    vi.mocked(getWorkbenchShortcuts).mockResolvedValue({ items: [] });
+    vi.mocked(getEquipment).mockResolvedValue([]);
+
+    render(<MemoryRouter><WorkbenchPage /></MemoryRouter>);
+
+    expect(await screen.findByRole("heading", { name: "实时处置中心" })).toBeInTheDocument();
+    expect(screen.getByLabelText("组织范围筛选")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /待接单故障/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /维修中故障/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^非常紧急故障/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^紧急故障/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /高\/严重风险设备/ })).toBeInTheDocument();
+    expect(screen.getByRole("tablist", { name: "故障待办筛选" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "当前健康风险概览" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "今日处置概览" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "故障趋势" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "最新维修动态" })).toBeInTheDocument();
+    expect(screen.getAllByText("当前接口未提供该正式数据。")).toHaveLength(3);
+    expect(screen.getByTestId("workbench-metric-grid").querySelectorAll(":scope > .workbench-metric")).toHaveLength(5);
+  });
+
   it("shows permission denial without static health data", async () => {
     vi.mocked(getHealthScore).mockRejectedValue(new ApiError(403, "FORBIDDEN"));
     vi.mocked(getWorkbenchTodos).mockResolvedValue({ items: [], count: 0 });
     vi.mocked(getWorkbenchAlertSummary).mockResolvedValue({ active_fault_count: 0, status_counts: [], urgency_counts: [] });
     vi.mocked(getWorkbenchShortcuts).mockResolvedValue({ items: [] });
     vi.mocked(getEquipment).mockResolvedValue([{ id: "eq-1", code: "EQ-01", name: "装载机", model: "L-1", type: "LOADER", manufacturer: "M", manufactured_at: null, commissioned_at: null, status: "NORMAL", organization_id: "line-1", owner_user_id: null, operating_hours: 0, image_refs: [] }]);
-    render(<WorkbenchPage />);
+    render(<MemoryRouter><WorkbenchPage /></MemoryRouter>);
     await screen.findByRole("option", { name: "EQ-01 · 装载机" });
     fireEvent.change(screen.getByLabelText("设备 ID"), { target: { value: "eq-1" } });
     fireEvent.click(screen.getByRole("button", { name: "查询健康分" }));
     expect(await screen.findByText("无权查看工作台数据。")) .toBeInTheDocument();
     expect(screen.queryByText("模拟健康分")).not.toBeInTheDocument();
+  });
+
+  it("filters formal todo facts through the approved repair-state tab", async () => {
+    vi.mocked(getWorkbenchTodos).mockResolvedValue({ items: [
+      { id: "pending", number: "WO-001", equipment_name: "装载机 A", urgency: "LOW", symptom: "温度高", status: "PENDING_ACCEPT" },
+      { id: "repairing", number: "WO-002", equipment_name: "装载机 B", urgency: "HIGH", symptom: "压力波动", status: "IN_REPAIR" },
+    ], count: 2 });
+    vi.mocked(getWorkbenchAlertSummary).mockResolvedValue({ active_fault_count: 2, status_counts: [{ status: "PENDING_ACCEPT", count: 1 }, { status: "IN_REPAIR", count: 1 }], urgency_counts: [{ urgency: "HIGH", count: 1 }, { urgency: "LOW", count: 1 }] });
+    vi.mocked(getWorkbenchShortcuts).mockResolvedValue({ items: [] });
+    vi.mocked(getEquipment).mockResolvedValue([]);
+
+    render(<MemoryRouter><WorkbenchPage /></MemoryRouter>);
+    await screen.findByText("WO-001");
+    fireEvent.click(screen.getByRole("tab", { name: "维修中" }));
+
+    expect(screen.getByText("WO-002")).toBeInTheDocument();
+    expect(screen.queryByText("WO-001")).not.toBeInTheDocument();
   });
 });

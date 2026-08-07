@@ -12,6 +12,8 @@ from app.modules.equipment import models as equipment_models
 from app.modules.identity import models as identity_models
 from app.modules.maintenance import models as maintenance_models
 from app.modules.agent_runtime import models as agent_runtime_models
+from app.modules.knowledge import models as knowledge_models
+from app.modules.notifications import models as notification_models
 
 
 config = context.config

@@ -91,17 +91,23 @@
 
 ## TASK-002 正式契约
 
-本节是 `CR-036` 修复后身份权限、组织和设备主数据 API 的唯一正式契约。所有接口均要求平台 Bearer 会话认证；权限只控制角色、菜单与操作，不增加工厂、组织或设备的行级过滤。动态角色创建接口 `POST /api/roles` 已移除。
+本节是身份权限、组织和设备主数据 API 的正式契约。所有接口均要求平台 Bearer 会话认证；权限只控制角色、菜单与操作，不增加工厂、组织或设备的行级过滤。首次初始化自动生成四个内置角色；系统管理员不可编辑、禁用或删除，其他角色与自定义角色允许编辑或逻辑删除。已绑定用户的角色不可禁用或删除。
 
 会话用户读取接口 `/api/auth/me` 属于认证会话契约，不属于本节冻结的 TASK-002 主数据路由矩阵；其返回的 `permission_codes` 由正式前端用于菜单可见性，服务端权限校验仍以各受保护路由为准。
+
+自助密码修改接口属于认证会话契约：`PATCH /api/auth/password` 要求当前 Bearer 会话，接收 `current_password,new_password,confirm_password`；当前密码错误或确认值不一致返回 422 和稳定错误码，不返回密码或哈希。成功后更新密码哈希、撤销该用户全部登录会话、写入脱敏 `password_change` 审计事件，并返回 `audit_event_id`；客户端必须清除本地会话并重新登录。
 
 ### 路由矩阵
 
 | Method | Endpoint | 权限码 | Idempotency-Key | 请求与成功响应 |
 |---|---|---|---|---|
 | GET | `/api/permissions` | `identity:read` | 不使用 | 返回 `[{code}]` 的固定权限目录。 |
-| GET | `/api/roles` | `identity:read` | 不使用 | 返回四个固定角色的 `id,code,name,permission_codes`。 |
-| PATCH | `/api/roles/{role_id}/permissions` | `identity:write` | 必填 | 请求 `permission_codes`；返回角色字段及 `audit_event_id`。 |
+| GET | `/api/roles` | `identity:read` | 不使用 | 返回未逻辑删除角色的 `id,code,name,description,built_in,enabled,user_count,permission_codes,updated_at`。 |
+| POST | `/api/roles` | `identity:write` | 必填 | 请求 `name,description,enabled,permission_codes`，创建自定义角色并返回角色字段及 `audit_event_id`。 |
+| PATCH | `/api/roles/{role_id}` | `identity:write` | 必填 | 请求 `name,description,enabled,permission_codes`；系统管理员返回 `409 SYSTEM_ADMIN_ROLE_FIXED`，绑定用户角色禁用返回 `409 ROLE_BOUND_TO_USERS`。 |
+| DELETE | `/api/roles/{role_id}` | `identity:write` | 必填 | 逻辑删除角色；系统管理员或已绑定用户角色返回相应 `409`。 |
+| PATCH | `/api/roles/{role_id}/permissions` | `identity:write` | 必填 | 请求 `permission_codes`；系统管理员返回 `409 SYSTEM_ADMIN_PERMISSIONS_FIXED`。 |
+| PATCH | `/api/auth/password` | authenticated self | 不使用 | 请求 `current_password,new_password,confirm_password`；成功更新密码、撤销该用户全部会话并返回 `audit_event_id`。 |
 | GET | `/api/users` | `authenticated:self-or-user_management.view_all` | 不使用 | 有 `user_management.view_all` 时返回全量用户，否则仅返回本人 `id,username,enabled,role_ids`。 |
 | GET | `/api/users/{user_id}` | `authenticated:self-or-user_management.view_all` | 不使用 | 返回本人；有 `user_management.view_all` 时可返回其他用户的 `id,username,enabled,role_ids`。 |
 | POST | `/api/users` | `identity:write` | 必填 | 请求 `username,password,role_ids`；201 返回用户字段及 `audit_event_id`，不返回密码。 |
@@ -122,6 +128,8 @@
 | POST | `/api/users` | `username`,`password`,`role_ids` | 无 |
 | PATCH | `/api/users/{user_id}` | `enabled`,`role_ids` | 无 |
 | PATCH | `/api/roles/{role_id}/permissions` | `permission_codes` | 无 |
+| POST | `/api/roles` | `name`,`permission_codes` | `description`,`enabled` |
+| PATCH | `/api/roles/{role_id}` | `name`,`permission_codes` | `description`,`enabled` |
 | POST | `/api/organizations` | `type`,`code`,`name`,`parent_id`,`sort_order` | `enabled`,`remark` |
 | PATCH | `/api/organizations/{organization_id}` | `code`,`name`,`sort_order`,`enabled` | `remark` |
 | POST | `/api/equipment` | `code`,`name`,`model`,`type`,`manufacturer`,`operating_hours`,`status`,`organization_id` | `manufactured_at`,`commissioned_at`,`owner_user_id`,`image_refs` |
@@ -132,8 +140,10 @@
 | Method | Endpoint | 字段 |
 |---|---|---|
 | GET | `/api/permissions` | `code` |
-| GET | `/api/roles` | `id`,`code`,`name`,`permission_codes` |
-| PATCH | `/api/roles/{role_id}/permissions` | `id`,`code`,`name`,`permission_codes`,`audit_event_id` |
+| GET | `/api/roles` | `id`,`code`,`name`,`description`,`built_in`,`enabled`,`user_count`,`permission_codes`,`updated_at` |
+| POST | `/api/roles` | `id`,`code`,`name`,`description`,`built_in`,`enabled`,`user_count`,`permission_codes`,`updated_at`,`audit_event_id` |
+| PATCH | `/api/roles/{role_id}` | `id`,`code`,`name`,`description`,`built_in`,`enabled`,`user_count`,`permission_codes`,`updated_at`,`audit_event_id` |
+| PATCH | `/api/roles/{role_id}/permissions` | `id`,`code`,`name`,`description`,`built_in`,`enabled`,`user_count`,`permission_codes`,`updated_at`,`audit_event_id` |
 | GET | `/api/users` | `id`,`username`,`enabled`,`role_ids` |
 | GET | `/api/users/{user_id}` | `id`,`username`,`enabled`,`role_ids` |
 | POST | `/api/users` | `id`,`username`,`enabled`,`role_ids`,`audit_event_id` |
@@ -153,7 +163,14 @@
 |---|---|---|---|---|
 | UserCreate | `username` | 否 | 无 | `minLength=1;maxLength=100` |
 | UserCreate | `password` | 否 | 无 | `minLength=8;maxLength=200` |
+| PasswordChangeRequest | `current_password` | 否 | 无 | `minLength=1;maxLength=200` |
+| PasswordChangeRequest | `new_password` | 否 | 无 | `minLength=8;maxLength=200` |
+| PasswordChangeRequest | `confirm_password` | 否 | 无 | `minLength=8;maxLength=200` |
 | UserCreate | `role_ids` | 否 | 无 | `minItems=1` |
+| RoleWrite | `name` | 否 | 无 | `minLength=1;maxLength=100` |
+| RoleWrite | `description` | 否 | `""` | `maxLength=500` |
+| RoleWrite | `enabled` | 否 | `true` | `boolean` |
+| RoleWrite | `permission_codes` | 否 | 无 | `minItems=1` |
 | OrganizationCreate | `code` | 否 | 无 | `minLength=1;maxLength=100` |
 | OrganizationCreate | `name` | 否 | 无 | `minLength=1;maxLength=200` |
 | OrganizationCreate | `sort_order` | 否 | 无 | `minimum=0` |
@@ -178,7 +195,7 @@
 
 ### 请求与响应字段
 
-写请求均拒绝未声明字段。`role_ids` 至少包含一个固定角色 ID；`permission_codes` 只能取固定权限目录。用户创建的 `password` 长度为 8–200，只用于生成密码哈希，不得出现在查询、响应或审计元数据中。用户更新不修改 `username` 或密码，只完整替换 `enabled` 和 `role_ids`。
+写请求均拒绝未声明字段。`role_ids` 至少包含一个固定角色 ID；`permission_codes` 只能取固定权限目录。用户创建和自助修改的密码只用于生成密码哈希，不得出现在查询、响应或审计元数据中。自助修改成功后撤销该用户全部会话；用户管理更新不修改 `username` 或密码，只完整替换 `enabled` 和 `role_ids`。
 
 组织创建请求为 `type,code,name,parent_id,sort_order,enabled,remark`；组织更新请求为 `code,name,sort_order,enabled,remark`，不允许修改 `type` 或 `parent_id`。组织响应为 `id,type,code,name,parent_id,sort_order,enabled,remark`；`type` 只能是 `ROOT,FACTORY,WORKSHOP,LINE`。
 

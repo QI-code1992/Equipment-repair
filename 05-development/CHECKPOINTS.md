@@ -1,5 +1,13 @@
 # 功能/页面检查点
 
+## FCP-013-UI-ROUTE-CONTEXT：TASK-013 前端增量修复（2026-08-05）
+
+- 分支：`codex/task-013-prototype-fidelity-remediation`；提交：`5695716`。
+- 范围：深层设备/维修路由保持正确的顶部导航上下文；移动端应用壳增加可关闭的侧栏与遮罩；设备台账空数组保留“新增设备”入口并显示真实空态；移除未使用的前端基础占位组件。
+- 自动化验证：前端 Vitest `8 个测试文件、76 passed`；`npm run build` 通过；`node --test 06-testing/tests/*.test.js` 为 `15 passed`；`git diff --check` 通过。
+- 未验证：本机未连接真实业务 API，未执行登录后的浏览器业务流程、Windows Docker/RAGFlow/HTTPS/live-stack 验证；本检查点不关闭 `DEF-STAGE7-001`，不解锁 Stage 6、Stage 7 或 Stage 8。
+- 依赖与兼容：未新增生产依赖、兼容层或抽象层；未修改 API、数据库、权限、部署配置。
+
 ## FCP-012 整体开发候选本地完成（2026-07-31）
 
 - 分支：`codex/task-012-p0-frontend-remediation`；最新精确开发提交：`08e1576`。
@@ -549,3 +557,203 @@
 - 治理收尾：PR #76 获批治理 HEAD `dd4b24e1369527a98da04c5e34b1e7b193b84c07` 已由非作者 DEV-002 以 Merge Commit `477cb16e8a1e68d9d9325705d9d7db685fba9d86` 合入；其结果树等价于获批治理源。
 - 证据：DEV-001 正式审核 `4840904555`、完整 live-stack、HTTPS MIME/health 和认证浏览器 E2E 均绑定 PR #75 的获批 HEAD；两次合并后的目标分支指针、祖先关系、Merge Tree、`git diff --check` 与 `workflow/state.json` 解析均通过。
 - 下一步：以 `477cb16e8a1e68d9d9325705d9d7db685fba9d86` 作为新测试基线重启 Stage 6 独立验证；此前 Stage 7 和 Stage 8 保持锁定。
+
+## FCP-013-01：工厂建模与工作台原型一致性整改（2026-08-04）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；仅为 TASK-013 的可恢复开发检查点，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 分支/提交：`codex/task-013-prototype-fidelity-remediation` / `5e1b56a165eb5b392284a47a26bb1dfc5e60b715`。
+- 范围：工厂建模从常驻新建表单改为组织树与节点详情双栏工作区；工作台改为风险总览、待办处置、快捷事项与已授权设备健康查询的工业操作台结构。所有业务内容仍来自正式 API，未引入原型运行源码或静态业务数据。
+- 验证：`npm test -- --run src/WorkbenchPage.test.tsx src/PortalPages.test.tsx` 为 `21 passed`；`npm run build`、`git diff --check` 均通过。
+- 边界：其余 TASK-013 页面和全局 Agent 尚未完成；PR #85 继续保持 Draft，完成全部整改后才统一提交 DEV-001 审核；Stage 6/7/8 继续锁定。
+
+## FCP-013-02：共享应用壳原型一致性整改（2026-08-04）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；仅为 TASK-013 的可恢复开发检查点，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：统一正式业务导航、页面标题与面包屑、产品品牌、受控会话状态、真实登录用户名和退出入口；保留现有 fail-closed 会话与路由权限边界。
+- 验证：`npm test -- --run src/App.test.tsx` 为 `11 passed`；`npm run build` 与 `git diff --check` 通过。
+- 边界：全局 Agent 的流式呈现与其余页面域仍在整改；未新增生产依赖、兼容层或抽象层，PR #85 保持 Draft。
+
+## FCP-013-03：登录与 BI 视觉层级整改（2026-08-04）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；仅为 TASK-013 的可恢复开发检查点，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：登录页改为品牌说明与受控访问表单的双栏布局；BI 趋势视图以正式 API 的实际序列生成语义化柱形趋势，不再使用纯文本列表替代图表。
+- 验证：`npm test -- --run src/App.test.tsx src/LoginPage.test.tsx src/PortalPages.test.tsx` 为 `32 passed`；`npm run build` 与 `git diff --check` 通过。
+- 边界：未新增生产依赖、模拟数据、兼容层或抽象层；排行、设备、现场作业、智能配置与系统管理页面仍待继续整改。
+
+## FCP-013-04：系统管理分区与权限呈现整改（2026-08-04）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；仅为 TASK-013 的可恢复开发检查点，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：系统管理改为账号、角色权限、权限目录、审计事件四个正式数据分区；身份只读用户不再看见账号创建或状态切换入口，角色与审计仍使用既有正式 API。
+- 验证：`npm test -- --run src/PortalPages.test.tsx` 为 `21 passed`；`npm run build` 与 `git diff --check` 通过。
+- 边界：未新增生产依赖、模拟数据、兼容层或抽象层；现场作业、维修执行、全局 Agent 与智能配置页面仍待继续整改。
+
+## FCP-013-05：Agent 流式状态增量呈现整改（2026-08-04）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；仅为 TASK-013 的可恢复开发检查点，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：全局 Agent、操作指引和 AI 故障上报改为在 SSE 回调到达时立即追加运行事件，不再等待流结束后才一次性显示状态；流读取失败仍沿用既有可见错误路径。
+- 验证：`npm test -- --run src/App.test.tsx src/RepairExecutionPage.test.tsx src/PortalPages.test.tsx src/api.test.ts` 为 `60 passed`；`npm run build` 与 `git diff --check` 通过。
+- 边界：未新增生产依赖、模拟数据、兼容层或抽象层；剩余页面的视觉与交互对照仍在本 PR 中继续。
+
+## FCP-013-06：资产、维修、智能与现场作业工作区整改（2026-08-04）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：设备台账增加正式资产汇总、状态筛选和列表工具栏；设备详情、新增/编辑及维修记录/详情改为资产、参数、历史和检索分区；智能配置分离模型与绑定、知识入口、Agent 控制面；故障上报及维修执行形成现场上下文与 AI 辅助区。所有内容仍来自既有正式 API 与权限状态。
+- 验证：`npm test -- --run src/PortalPages.test.tsx src/IntelligentConfigPage.test.tsx src/FaultReportPage.test.tsx src/RepairExecutionPage.test.tsx` 为 `43 passed`；`npm run build` 与 `git diff --check` 通过。
+- 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未提交既有 `codebase/frontend/.vscode/` 文件。AI 故障上报和逐页浏览器原型对照仍待本 PR 后续切片完成。
+
+## FCP-013-07：智能审计与 AI 上报工作区整改（2026-08-04）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：智能审计页调整为“受控调用概览”和“知识文档状态”两个真实数据区，保留知识写权限对重试操作的禁用边界；AI 故障上报页调整为 AI 受控收集、实时运行状态、正式写入边界与人工确认四个连续区域。未改动既有 API、权限、提交或 SSE 逻辑。
+- 验证：`npm test -- --run` 为 `74 passed`；`npm run build` 通过；仓库根目录 15 项 Node 静态回归全部通过；`git diff --check` 通过。
+- 边界：已启动当前工作树的本地预览，仅确认 `/login` 的实际页面结构与当前源码一致。其余 15 条受保护路由仍需使用真实隔离测试账号进行固定桌面视口的浏览器对照；不得通过伪造会话或静态数据绕过认证。未新增生产依赖、兼容层或抽象层，既有未跟踪 `codebase/frontend/.vscode/` 文件未触碰。
+
+## FCP-013-08：工作台实时处置中心原型一致性整改（2026-08-06）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：工作台按已批准原型恢复组织筛选、五项风险指标、处置提醒、故障待办标签、健康概览、今日处置、故障趋势和维修动态的信息架构；待办、指标、快捷入口和单设备健康分继续仅取自正式 API。
+- 数据边界：正式 API 未提供组织范围、全局健康风险聚合、今日效率、趋势和维修动态；页面保留原型对应区域并呈现受控不可用状态，未填充原型示例数据或推测指标。
+- 验证：串行 Vitest 全量 `88 passed`；生产构建通过；`git diff --check` 通过。
+- 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未触碰既有未跟踪 `codebase/frontend/.vscode/`，也未纳入同时进行的 `RepairExecutionPage` 修改。
+
+## FCP-013-09：维修记录双视图原型一致性整改（2026-08-06）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：维修记录页按已批准原型恢复“维修概览”和“维修记录列表”两项视图；概览保留六项维修指标与四个分析图表的版面，列表保留正式设备 ID、知识状态、分页与维修档案查询。
+- 数据边界：总维修次数取正式分页 API 返回的 `count`；全量状态、MTTR、MTBF、平均维修时间、完成率及四项图表没有正式 API 时均呈现受控空状态，未复用原型示例数据或用当前页记录推测汇总事实。
+- 验证：维护记录专属 Vitest `6 passed`；`PortalPages.test.tsx` 全量 `30 passed`；生产构建和 `git diff --check` 通过。
+- 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未纳入同时进行的设备详情、故障上报、维修执行或本地 `.vscode/` 修改。
+
+## FCP-013-10：智能配置一级页签原型一致性整改（2026-08-06）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：智能配置页恢复原型的“模型配置、智能体配置、知识库配置、调用记录、Token 消耗统计”五项一级页签；既有模型提供商/绑定、Agent 配置与知识文档上传均归入对应面板。
+- 数据边界：调用记录和 Token 区域明确跳转至正式智能审计页面；当前正式接口没有实际 Token 消耗明细和图表统计，页面不填充原型示例值。
+- 验证：新增页签契约先失败后转绿；`IntelligentConfigPage.test.tsx` 为 `4 passed`；生产构建和 `git diff --check` 通过。
+- 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未纳入同时进行的设备详情、故障上报、维修执行或本地 `.vscode/` 修改。
+
+## FCP-013-11：故障、设备详情与维修执行原型工作区整改（2026-08-06）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：故障上报补齐查询筛选、列表、新增入口、基础信息、故障描述和现场附件模块；设备详情补齐健康摘要与图谱/BOM/参数/知识/维修记录分区；维修执行补齐执行进度、维修结果、受控草稿/附件/成本/工时边界和摘要复制入口。
+- 数据边界：故障列表、设备健康、图谱/BOM/参数/知识、备件成本、工时、维修附件和草稿保存没有正式接口时均保留原型布局并禁用或呈现明确空状态；不伪造列表、评分、成本、工时或附件业务事实。
+- 验证：`FaultReportPage.test.tsx`、`RepairExecutionPage.test.tsx` 与 `PortalPages.test.tsx` 共 `48 passed`；生产构建和 `git diff --check` 通过。
+- 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未纳入本地 `.vscode/` 文件。
+
+## FCP-013-12：设备新增与编辑分区原型一致性整改（2026-08-06）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：设备新增与编辑表单恢复原型的设备 BOM 组成、设备额定参数和知识资料三个分区，以及对应的新增分支节点、新增参数和上传资料入口。
+- 数据边界：当前正式 API 没有 BOM、额定参数或知识资料的公开读写契约；三个分区均呈现明确无数据说明且入口禁用，未写入 mock 数据、原型示例表格、客户端临时数据或新接口。
+- 验证：设备分区定向 Vitest `1 passed`；`PortalPages.test.tsx` 为 `31 passed`；生产构建和 `git diff --check` 待本切片最终验证。全量前端测试当前为 `93 passed, 4 failed`，失败仅来自工作区中另一组未提交的 `LoginPage.test.tsx` 新增登录行为要求，未纳入本切片。
+- 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；不纳入或删除本地 `.vscode/`，也不纳入同时出现的 `LoginPage.test.tsx` 修改。
+
+## FCP-013-13：登录页受控交互原型一致性整改（2026-08-06）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：登录页恢复原型中的账号/密码字段校验、密码显示切换、记住密码控件、忘记密码弹窗、登录中提示、连续三次凭证失败后 30 秒临时锁定及解除提示。
+- 数据边界：认证仍只调用正式登录 API；空字段不发起请求，忘记密码只提示联系系统管理员，未伪造账号、Token、角色或认证成功结果。
+- 验证：登录页 Vitest `5 passed`；Portal 页面 Vitest `31 passed`；全量前端 Vitest `97 passed`；生产构建和 `git diff --check` 通过。
+- 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；不纳入或删除本地 `.vscode/`。
+
+## FCP-013-14：TASK-013 全部 P0 页面候选收口（2026-08-06）
+
+- 状态：`DEVELOPMENT_COMPLETE_PENDING_DEV001_REVIEW`；仅记录 TASK-013 完整候选，不构成审核批准、集成、Merge 或任何 Stage 解锁。
+- 精确候选：`aaa55274ef953c3ec6d2fcb9a4bf7cf78b9cda72`，分支 `codex/task-013-prototype-fidelity-remediation`。
+- 范围：16 个正式 React 路由和跨页全局 Agent 已按 `03-ui-prototype/prototype/pages/*.html` 的页面结构、信息层级、主要组件和状态边界完成代码对照；Data import 明确排除。
+- 数据边界：只消费既有正式 API 和权限；健康聚合、BOM、额定参数、知识资料、BI 部分指标等契约缺失区域保留原型位置并呈现禁用/空态，不填充 mock 业务数据、不复制原型运行源码。
+- 修改范围：前端页面、测试和样式；未新增生产依赖、公开 API、数据库迁移、权限模型、部署配置、兼容层或抽象层；既有 `codebase/frontend/.vscode/` 未跟踪目录未纳入。
+- 验证：前端 `8 files passed / 97 tests passed`；`npm run build`（`tsc -b` 与 Vite production build）通过；15 项 Node 静态回归通过；`git diff --check` 通过。
+- 未验证：除 `/login` 固定桌面视口只读检查外，15 条受保护路由的认证浏览器视觉对照、Windows Docker/RAGFlow/ClamAV/MinIO/HTTPS live-stack 和 ECS 部署同步未在本检查点宣称完成。
+- 下一步：将该精确候选推送到远端后，请 DEV-001 统一进行一次正式整体审核；在审核、集成检查和项目负责人精确授权前，不转入 Stage 6。
+
+## FCP-013-15：共享业务导航原型一致性修复（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成审核、集成、Merge 或任何 Stage 解锁。
+- 范围：共享侧栏从多分组、11 项收束为批准原型的单一“业务导航”及 8 项固定顺序：工作台、驾驶舱 BI、工厂建模、设备台账、故障上报、维修记录、系统管理、智能配置；编号为 `01` 至 `08`。
+- 边界：Agent 上报、智能审计和维修执行继续保留其路由与权限校验，但不显示在原型主导航；未修改 API、权限、后端、部署或运行配置。
+- 验证：新增导航顺序、编号与隐藏项回归；前端全量 `8 files passed / 98 tests passed`、生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 均通过。
+- 依赖与结构：未新增生产依赖、兼容层或抽象层；未触碰既有未跟踪 `codebase/frontend/.vscode/`。
+
+## FCP-013-16：全局 Agent 悬浮入口原型一致性修复（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；仅记录可恢复代码单元，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 代码提交：`d53f894f8728333e34b9dd504b3e8dcb878a40c1`；分支 `codex/task013-navigation-parity`，推送目标为唯一 TASK-013 集成分支。
+- 范围：移除顶栏“全局 Agent”文字入口，恢复原型右下角圆形机器人悬浮入口；仅 `intelligence:agent` 用户可见；闲置 3 秒后半透明，悬停/聚焦恢复；打开抽屉时入口隐藏，关闭后恢复。
+- 原型对照：`03-ui-prototype/prototype/assets/global-agent.js` 与 `03-ui-prototype/prototype/assets/app.css`；入口定位、尺寸、渐变、透明度和机器人图形均按原型参数实现。
+- 验证：`npm test -- --run` 为 `8 files passed / 99 tests passed`；`npm run build` 通过；其余 Node 静态回归、JSON 和差异检查待推送前完成。
+- 边界：未实现原型中的拖拽/边缘吸附（本切片仅修复入口显隐与打开互斥）；未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未触碰 `.vscode/`。
+## FCP-013-17：工作台 KPI 与主工作区布局修复（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；仅记录可恢复代码单元，不构成中途审核、集成、Merge 或任何 Stage 解锁。
+- 范围：修复通用 `.data-card { grid-column: span 2; }` 对工作台布局的错误覆盖；恢复原型五张 KPI 卡片横向等宽排列，并确保“故障待办 + 健康风险/今日处置”双栏主工作区不被跨列撑开。
+- 数据边界：未改变工作台 API、权限或指标计算；组织范围、健康聚合、今日处置等正式契约缺失区域继续保留原型位置并显示受控空态。
+- 验证：工作台定向 `4 passed`；前端全量 `8 files passed / 99 tests passed`；生产构建通过；静态回归、JSON 和 `git diff --check` 待推送前完成。
+- 边界：未新增生产依赖、公开 API、迁移、部署配置、兼容层或抽象层；未触碰 `.vscode/`。
+
+## FCP-013-18：维修记录概览网格布局修复（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成审核、集成、Merge 或任何 Stage 解锁。
+- 范围：恢复 `pages/maintenance-records.html` 定义的六张横向 KPI 卡片和两列四图表网格；局部解除通用 `.data-card` 跨列规则对图表区的错误覆盖。
+- 验证：新增布局契约先失败后转绿；前端全量 `8 files passed / 100 tests passed`、生产构建、15 项 Node 静态回归和 `git diff --check` 通过。
+- 边界：未改动 API、权限、后端、迁移、部署配置、生产依赖、兼容层或抽象层；未触碰既有未跟踪 `.vscode/`。
+
+## FCP-013-19：驾驶舱 BI 趋势粒度原型一致性修复（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；仅记录可恢复代码单元，不构成审核、集成、Merge 或任何 Stage 解锁。
+- 范围：将趋势区从错误的“趋势/组织排行”切换恢复为原型定义的日、周、月粒度；周期变化以对应 `period` 重新请求既有正式 BI API。
+- 数据边界：不再在趋势区渲染组织排行；健康评分趋势缺少正式 API 序列时继续呈现受控不可用状态，未写入原型示例值或新增 API。
+- 验证：新增回归先失败后通过；前端全量 `8 files passed / 101 tests passed`、生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
+- 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未触碰既有未跟踪 `codebase/frontend/.vscode/`。
+
+## FCP-013-24：侧栏固定与用户入口原型一致性修复（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复开发单元，不构成审核、Merge 或 Stage 解锁。
+- 范围：桌面固定侧栏及主区域偏移；用户芯片菜单、资料/安全弹窗、退出确认与键盘/外部关闭行为。
+- 验证：新增 App Shell 回归与前端全量测试 `106 passed`，生产构建、Node 静态回归、JSON 和差异检查通过。
+- 边界：无新增依赖、API、迁移、部署配置、兼容层或抽象层；未触碰 `codebase/frontend/.vscode/`。
+
+## FCP-013-25：用户自助密码修改缺口补齐（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复开发单元，不构成审核、Merge 或 Stage 解锁。
+- 范围：认证密码修改 API、全会话撤销、脱敏审计、前端安全设置真实提交与重新登录流程。
+- 验证：前端 App Shell `20 passed`、生产构建、Python `compileall` 通过；后端运行测试受本机缺少 `sqlalchemy/pytest` 阻断。
+- 变更：API 规格和 `workflow/CHANGE_REQUESTS.md` 已登记 `CR-051`；无新增依赖、迁移、兼容层或抽象层。
+
+## FCP-013-24：门户页面重复标题块移除（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；只记录 TASK-013 可恢复开发单元，不构成审核、集成、Merge 或 Stage 解锁。
+- 修复：移除共享 `Page` 容器、故障上报页和智能配置页的重复眉题、页面标题与说明；原型已由 App Shell 顶部栏提供面包屑与页面标题，内容区直接从筛选、页签或业务模块开始。
+- 验证：新增 BI、故障上报和智能配置回归均先失败后通过；前端全量 `8 files passed / 105 tests passed`，生产构建、16 项 Node 静态回归、JSON 解析和 `git diff --check` 通过。
+- 边界：未改变页面功能、API、权限、数据来源、依赖、迁移、部署配置、兼容层或抽象层；未触碰 `.vscode/`。
+
+## FCP-013-23：工作台网格层叠规则修复（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点只记录可恢复开发单元，不构成审核、集成、Merge 或任何 Stage 解锁。
+- 根因与修复：通用 `.data-card { grid-column: span 2; }` 位于工作台专用规则之后，覆盖五列 KPI 与队列主列的默认跨列行为。紧随该通用规则增加工作台直系卡片的 `grid-column: auto` 局部覆盖，恢复原型的五张 KPI 横排和“故障待办 + 右侧健康/今日处置”结构。
+- 回归：新增静态层叠契约，验证局部覆盖存在且在通用跨列规则之后；工作台页面定向 `4 passed`，全量前端 `104 passed`，生产构建、16 项 Node 静态回归、JSON 解析和 `git diff --check` 通过。
+- 边界：未改 API、权限、指标事实、后端、迁移、部署配置、生产依赖、兼容层或抽象层；未触碰 `.vscode/`。
+
+## FCP-013-20：驾驶舱 BI 效率分析原型一致性修复（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；仅记录可恢复代码单元，不构成审核、集成、Merge 或任何 Stage 解锁。
+- 范围：恢复原型定义的计划工单完成率、平均响应时长、平均维修时长和首次修复率四项分析，以及对应四列布局。
+- 数据边界：平均维修时长使用正式 API 的值；计划工单、响应时长和首次修复率没有现有公开契约，保留原型位置并明确显示不可用。
+- 验证：新增四项效率模块测试先失败后转绿；完整前端、构建、静态检查、JSON 与差异检查待本切片提交前执行。
+- 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未触碰既有未跟踪 `codebase/frontend/.vscode/`。
+
+## FCP-013-21：驾驶舱 BI 设备健康列表原型一致性修复（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成审核、集成、Merge 或任何 Stage 解锁。
+- 范围：恢复 `pages/bi-dashboard.html` 定义的八列表格、设备详情链接、结果状态和表尾信息区；“查看全部设备”保留原型的普通链接语义。
+- 数据边界：设备编号、名称、型号与负责人仅使用既有 `/api/equipment` 返回；健康评分、风险等级、近 7 天故障和工单状态无公开字段时保持 `—`。设备计数从实际响应长度得出；更新时间无契约时明确为“当前接口未提供”，未复用原型示例数据。
+- 验证：新增结构/数据边界回归先失败后通过；`PortalPages.test.tsx` 为 `35 passed`；前端全量 `103 passed`、生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 均通过。
+- 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未触碰既有未跟踪 `codebase/frontend/.vscode/`。
+
+## FCP-013-22：驾驶舱 BI 健康分析抽屉原型一致性修复（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成审核、集成、Merge 或任何 Stage 解锁。
+- 范围：恢复 `pages/bi-dashboard.html` 中“查看分析”触发的设备健康分析抽屉、当前对象摘要、关闭控件、遮罩和详情入口。
+- 数据边界：抽屉只复用已加载设备的编号、名称、型号和负责人；健康趋势、风险等级、处置建议未有公开 API 时明确显示不可用。点击链接保持原型的 `openHealthScore` 查询意图并阻止跳转以展开抽屉。
+- 验证：新增抽屉回归先失败后通过；`PortalPages.test.tsx` 为 `36 passed`；前端全量 `104 passed`、生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 均通过。
+- 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未触碰既有未跟踪 `codebase/frontend/.vscode/`。

@@ -12,6 +12,7 @@ from app.modules.audit.models import AuditEvent, IdempotencyRecord
 from app.modules.equipment.models import Organization, OrganizationType
 from app.modules.knowledge.models import FileObject, FileScanStatus, KnowledgeDataset, KnowledgeDocument, KnowledgeDocumentStatus
 from app.modules.maintenance.models import DiagnosisDraft
+from app.modules.notifications.models import Notification
 from app.main import create_app
 from fastapi.testclient import TestClient
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -330,6 +331,9 @@ def test_fault_diagnosis_api_creates_existing_business_diagnosis_draft(client, m
             )
         )
         draft_count = db.scalar(select(func.count()).select_from(DiagnosisDraft))
+        ready_notifications = db.scalars(
+            select(Notification).where(Notification.type == "AGENT")
+        ).all()
         idempotency_count = db.scalar(
             select(func.count()).select_from(IdempotencyRecord).where(
                 IdempotencyRecord.path == "/api/agent/fault-diagnosis"
@@ -343,6 +347,12 @@ def test_fault_diagnosis_api_creates_existing_business_diagnosis_draft(client, m
     )
     assert replay.status_code == 200
     assert replay.json() == body
+    with client.app.state.session_factory() as db:
+        ready_notifications = db.scalars(
+            select(Notification).where(Notification.type == "AGENT")
+        ).all()
+        assert len(ready_notifications) == 1
+        assert ready_notifications[0].related_object_id == fault_id
     conflict = client.post(
         "/api/agent/fault-diagnosis",
         headers={**headers, "Idempotency-Key": "diagnosis-evidence-2"},

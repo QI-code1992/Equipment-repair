@@ -1,5 +1,37 @@
 # 开发到产品交接
 
+## TASK-013 全部 P0 页面整改候选交接（2026-08-06）
+
+- 精确候选：`aaa55274ef953c3ec6d2fcb9a4bf7cf78b9cda72`。
+- 分支：`codex/task-013-prototype-fidelity-remediation`；任务开发者 DEV-002；指定整体审核者 DEV-001；当前仍为 Stage 5 开发候选。
+- 实现范围：16 个正式 React 路由（登录、工作台、驾驶舱 BI、工厂建模、设备台账/新增/详情/编辑、智能配置、智能审计、故障上报、AI 故障上报、维修记录/详情、维修执行、系统管理）及全局 Agent 抽屉，逐页按 `03-ui-prototype/prototype/pages/*.html` 对照结构、信息层级、组件和交互状态。
+- 真实契约边界：只消费既有 API 和权限；正式接口缺失的健康聚合、BOM、额定参数、知识资料、部分 BI 指标等区域保留原型位置并明确禁用/空态；无 mock 业务数据、原型运行源码复制、新 API、迁移、依赖、权限或部署配置变化。
+- 修改文件：`codebase/frontend/src/App.tsx`、`App.test.tsx`、`FaultReportPage.tsx`、`IntelligentConfigPage.tsx` 及其测试、`LoginPage.tsx` 及其测试、`PortalPages.tsx` 及其测试、`RepairExecutionPage.tsx`、`styles.css`；同步更新 `05-development/`、`06-testing/` 和本交接台账。
+- 自动化证据：前端 `8 files passed / 97 tests passed`；`npm --prefix codebase/frontend run build` 通过；15 项 `06-testing/tests/*.test.js` 静态回归通过；`git diff --check` 通过。
+- 浏览器/live-stack 边界：只对 `/login` 做了固定桌面视口只读检查；15 条受保护路由的认证浏览器逐页对照、Windows Docker/RAGFlow/ClamAV/MinIO/HTTPS 和 ECS 自动同步未在本候选中虚构为通过。现有测试部署仍遵循 `RAGFlow v0.26.3` 的本地 Windows 边界。
+- 未跟踪排除：`codebase/frontend/.vscode/` 是工作区既有未跟踪目录，未纳入提交；本候选无其他无关修改。
+- 请求动作：请 DEV-001 对精确 HEAD `aaa55274ef953c3ec6d2fcb9a4bf7cf78b9cda72` 进行一次完整正式审核。审核批准不等于 Merge 授权；在后续集成检查和项目负责人逐 PR/精确 HEAD 授权前，不合并、不关闭 `DEF-STAGE7-001`，Stage 6/7/8 继续锁定。
+
+## ECS 业务平台测试部署交接（2026-08-05）
+
+- 当前部署定位：阿里云 ECS 是本项目业务平台的测试部署环境，不是生产环境、Stage 7 验收结论或 Stage 8 发布。
+- 绑定代码：`780748cbc6b988feda66f2ebd02a6829bdafd1c1`；ECS Compose 项目 `equipment-preview-77fbc42`。平台服务运行于 ECS；RAGFlow 固定在本地 Windows Docker Desktop/WSL2，统一目标版本 `v0.26.3`。
+- 网络：ECS 到 Windows RAGFlow 仅使用项目负责人管理的加密私网隧道；隧道端点、Token、Windows 防火墙和访问控制不进入仓库或台账。测试入口与证书边界见 `07-acceptance/ACCEPTANCE_ENVIRONMENT_DEPLOYMENT.md`。
+- 已验证：ECS 上 Compose、迁移、PostgreSQL、Redis、MinIO、ClamAV、API、Worker、Validator、Nginx、HTTPS `/healthz` 和 HTTP→HTTPS 跳转。
+- 未验证：ECS 当前未配置运行时 `RAGFLOW_API_KEY`，真实 RAGFlow 成功检索路径尚未验证；不得以环境可访问替代 Stage 6 重测、Stage 7 验收或生产发布证据。
+- 凭据：测试管理员仅由环境负责人经安全渠道分发；不得在 Git、PR、台账、日志或交接文档中记录明文密码、Token、私钥、连接串、Cookie 或 `.env`。进入验收或交接前须轮换测试管理员凭据。
+- 自动同步：项目负责人已确认当前 TASK-013 分支每次推送后自动部署 ECS；只部署已推送 Commit，不同步未提交本地保存。部署必须串行、记录 SHA、健康检查失败不切换且保留最近一个可回退版本。
+- 自动同步验证：ECS 部署公钥授权后，systemd timer 已启用，每 30 秒检查并同步当前分支的已推送 Commit。首次成功部署为 `e226695635784296d4aa13597fe7d39690bdef37`；本轮已确认 `780748cbc6b988feda66f2ebd02a6829bdafd1c1` 已部署到 `/opt/equipment-platform/previews/780748cbc6b988feda66f2ebd02a6829bdafd1c1`，Compose 服务运行，HTTPS `/healthz`、根页面、JS/CSS MIME 和 HTTP→HTTPS 跳转均通过。
+- 下一步：项目负责人可访问 `https://101.37.16.206/` 进行页面确认。当前证书为短期自签名测试证书，浏览器需接受测试证书告警；页面可访问不代表 Stage 6/7/8 通过。发现的 UI/交互偏离继续进入 TASK-013 同一 Draft PR，统一交由 DEV-001 审核。
+
+## TASK-013 治理候选交接（2026-08-04）
+
+- 发现复核：本地静态 UI 演示仅用于视觉查看，不构成测试证据；它确认当前 `e8a28cee7515ad58e025ec81c65b460284919d75` 的正式 UI 与 Stage 3 原型存在实质偏离。
+- 已登记：`DEF-STAGE7-001` 已复开，`CR-047` 增加复开记录，新增 `TASK-013` 及逐页整改计划。
+- 本候选范围：仅治理、任务和交接文档；未修改 `codebase/`、生产依赖、API、迁移、权限、部署或运行时配置。
+- 未验证：未运行前端、后端、Docker、RAGFlow、HTTPS 或浏览器 E2E，因为本候选无业务代码变更。
+- 后续：项目负责人已授权直接开始整改；同一 Draft PR 将持续累积代码、测试与交接，全部完成后统一提交 DEV-001 审核。不得据此关闭缺陷或解锁 Stage 6/7/8。
+
 ## TASK-012 P1 权限修复复审交接（2026-07-31）
 
 - PR：#75；最新精确 HEAD：`77a54a1587544374ed876e902bc132d58cf8ed9b`；目标 `codex/stage-05-integration`；PR 继续保持 Ready，未申请 Merge 授权。
@@ -631,3 +663,92 @@
 - 合并后核验：祖先关系、Merge Tree、`workflow/state.json` JSON 解析及相对第一父的 `git diff --check` 均通过。PR #81 仅含 Stage 6 TASK-005 live retest 证据和状态台账更新。
 - 证据结论保持不变：live lifecycle `2 passed, 5 warnings`，但 `DEF-STAGE6-003` 的分段时序与唯一阻塞组件定位仍缺失；`DEF-STAGE6-004`、`DEF-STAGE6-005` 亦仍开放。该合入不构成 Stage 6 总体通过或 Stage 7/8 解锁。
 - 下一步：继续独立补齐剩余 Stage 6 证据并形成新的精确测试结论；在此之前 Stage 6/7/8 继续锁定。
+
+## TASK-013 导航原型偏差修复交接（2026-08-07）
+
+- 发现：测试环境共享侧栏仍使用多分组、11 项导航，与已批准原型的单一“业务导航”和 8 项编号菜单不一致。
+- 修复：主导航固定为原型顺序与 `01`—`08` 编号；二级业务路由未删除，仅不在原型主导航中展示。
+- 本地证据：新增导航契约回归；Vitest `8 files passed / 98 tests passed`、生产构建、15 项 Node 静态回归、JSON 解析和 `git diff --check` 通过。
+- 门禁：本次变更仍属 TASK-013 开发候选。部署同步与浏览器视觉核对完成后，统一交由 DEV-001 整体审核；不申请 Merge、不合并，Stage 6/7/8 继续锁定。
+
+## TASK-013 全局 Agent 悬浮入口修复交接（2026-08-07）
+
+- 代码提交：`d53f894f8728333e34b9dd504b3e8dcb878a40c1`；开发工作树分支 `codex/task013-navigation-parity`，待推送至 `codex/task-013-prototype-fidelity-remediation`。
+- 修复内容：移除顶栏文字入口，恢复原型右下机器人悬浮按钮；按 `intelligence:agent` 权限显隐；3 秒闲置半透明，悬停/聚焦恢复；打开 Agent 抽屉时隐藏，关闭后恢复。
+- 验证：前端 `8 files passed / 99 tests passed`，生产构建通过；测试按文件串行运行以规避既有 jsdom 异步断言的文件并发竞争；完整 Node 静态回归、JSON、ECS 部署验证待推送后执行。
+- 未验证：Windows Docker/RAGFlow/ClamAV/MinIO/HTTPS、认证浏览器逐页对照及 ECS 实际切换尚未完成；原型拖拽/边缘吸附未纳入本切片。
+- 门禁：仅为 TASK-013 开发过程交接，不构成 DEV-001 审核、Merge 授权或 Stage 6/7/8 解锁；待全部前端整改完成后统一提交整体审核。
+## TASK-013 工作台布局修复交接（2026-08-07）
+
+- 修复内容：定位并修复通用 `.data-card` 跨列规则导致的工作台 KPI 两列布局；恢复五张 KPI 卡片横排及“故障待办 + 健康风险/今日处置”双栏结构。
+- 数据边界：未修改 API、权限、后端或指标事实；正式接口缺失区域仍为受控空态。
+- 验证：工作台 `4 passed`；前端全量 `8 files passed / 99 tests passed`；生产构建通过；静态回归、JSON、差异检查和 ECS 部署验证待推送后执行。
+- 门禁：仍属于 TASK-013 同一开发候选，待全部整改完成后统一交 DEV-001 审核；不申请 Merge、不合并、不解锁 Stage 6/7/8。
+
+## TASK-013 维修记录概览布局修复交接（2026-08-07）
+
+- 发现：维修记录原型要求 6 张 KPI 同行、4 张图表两列，正式布局分别错误为 3 列和单列堆叠。
+- 修复：将该页恢复为 6 列 KPI、2 列图表，同时保持小视口响应式降列；没有修改业务数据、接口或权限。
+- 本地证据：新增布局契约；前端 `100 passed`、生产构建、15 项 Node 静态回归和 `git diff --check` 通过。
+- 部署：工作台前一切片已部署到 ECS `4f98e98` 并通过 HTTPS `/healthz`；本切片待提交推送后由现有测试环境同步机制部署。
+- 门禁：同一 TASK-013 开发候选，仍待全部整改完成后统一交 DEV-001 审核；不申请 Merge、不合并，不解锁 Stage 6/7/8。
+
+## TASK-013 驾驶舱 BI 效率分析修复交接（2026-08-07）
+
+- 发现：BI 原型效率分析要求四项指标，正式页错误降为三项且更换了指标语义。
+- 修复：恢复计划工单完成率、平均响应时长、平均维修时长和首次修复率四项原型位置；仅平均维修时长使用现有正式 API 值，其他项无契约时明确不可用。
+- 本地证据：新增结构回归先失败后通过；完整验证与 ECS 同步待本提交完成。
+- 门禁：仍是同一 TASK-013 开发候选，不申请 Merge、不合并，不解锁 Stage 6/7/8。
+
+## TASK-013 驾驶舱 BI 趋势粒度修复交接（2026-08-07）
+
+- 发现：BI 趋势区错误显示“趋势 / 组织排行”，与批准原型的“日 / 周 / 月”趋势粒度不一致。
+- 修复：恢复日、周、月按钮；选择周期后显式请求 `/api/bi/dashboard` 的对应 `period`，不新增接口或伪造趋势值。
+- 本地证据：新增粒度/API 重载回归；前端 `101 passed`、生产构建、15 项 Node 静态回归、JSON 解析和 `git diff --check` 全部通过。
+- 部署：待本提交推送后同步 ECS 测试环境，并以 HTTPS 实际页面核对。
+- 门禁：同一 TASK-013 开发候选，仍待全部整改完成后统一交 DEV-001 审核；不申请 Merge、不合并，不解锁 Stage 6/7/8。
+
+## TASK-013 驾驶舱 BI 设备健康列表修复交接（2026-08-07）
+
+- 修复内容：恢复已批准原型的设备健康八列表格、设备详情入口、结果状态和表尾信息；“查看全部设备”与行内入口均保持原型普通链接形式。
+- 数据边界：仅请求既有 `/api/equipment`。设备编号、名称、型号、负责人和设备计数来自正式响应；健康、风险、故障和工单字段没有公开契约时显示 `—`，更新时间明确无可用接口，未写入任何示例值。
+- 本地证据：新增健康表格与受控空态回归先失败后通过；`PortalPages.test.tsx` 为 `35 passed`，前端全量 `103 passed`、生产构建、15 项 Node 静态回归、JSON 和差异检查均通过。ECS 同步待本提交推送后执行。
+- 门禁：仍属于 TASK-013 同一开发候选，待全部原型整改完成后统一交 DEV-001 审核；不申请 Merge、不合并，不解锁 Stage 6/7/8。
+
+## TASK-013 侧栏与用户入口修复交接（2026-08-07）
+
+- 用户反馈：页面滚动时左侧导航未锁定，右上用户信息入口与原型不一致。
+- 已修复：桌面侧栏固定并独立滚动，主区保留 236px 占位；用户芯片恢复原型菜单、下拉箭头、个人资料、安全设置、权限用户管理、退出确认及 Escape/外部关闭。
+- 本地证据：App Shell `19 passed`；前端全量 `106 passed`；生产构建、Node 静态回归、JSON 解析和 `git diff --check` 通过。
+- 数据边界：正式用户 API 未提供的角色、组织和最后登录信息显示受控空态，不填原型示例数据。
+- 下一步：推送唯一 TASK-013 集成分支后由自动部署同步 ECS，项目负责人刷新测试入口进行视觉核对；不申请审核、Merge 或 Stage 解锁。
+
+## TASK-013 用户自助密码修改交接（2026-08-07）
+
+- 缺口：原用户菜单保留了安全设置入口，但后端没有自助改密接口，保存动作不能生效。
+- 已完成：新增 `PATCH /api/auth/password`；验证旧密码、确认新密码，成功后更新 scrypt 哈希、撤销全部会话并写入脱敏审计；前端成功后清除本地会话并回到登录页。
+- 正式契约：已同步 `04-architecture-plan/API_SPEC.md` 和 `CR-051`，不记录密码、哈希、Token 或 Cookie。
+- 本地证据：前端 `20 passed`、生产构建、Python `compileall` 通过；后端运行测试未执行，当前 macOS 工作区缺少 `sqlalchemy` 与 `pytest`。
+- 门禁：本变更仍属于 TASK-013 同一开发候选，待整体整改完成后统一交 DEV-001 审核；不申请 Merge、不合并、不解锁 Stage 6/7/8。
+
+## TASK-013 门户重复标题块修复交接（2026-08-07）
+
+- 用户截图确认 BI 内容区的“正式业务数据 / 驾驶舱 BI”重复标题不属于批准原型。
+- 已修复共享门户容器、故障上报和智能配置：移除全部截图标注的重复眉题、页面标题与说明，仅保留 App Shell 顶部栏中的页面语义；筛选区、页签及后续业务模块未改动。
+- 本地证据：前端 `8 files passed / 105 tests passed`、生产构建、16 项 Node 静态回归、状态 JSON 和 `git diff --check` 通过。
+- 下一步：推送同一 TASK-013 集成分支并同步 ECS 测试环境，供项目负责人刷新 BI 页面确认；不申请审核、Merge 或 Stage 解锁。
+
+## TASK-013 工作台布局实际修复交接（2026-08-07）
+
+- 用户截图确认的问题：工作台 KPI 被显示成两列，未符合 `pages/workbench.html` 的五张横排 KPI 与主列/右侧栏布局。
+- 已定位：后置通用 `.data-card` 双列规则覆盖了较早的工作台局部规则。
+- 已修复：将工作台直系 KPI、队列卡片的 `grid-column: auto` 覆盖置于通用规则之后，并加入静态层叠回归，防止再次回退为两列。
+- 本地证据：工作台 `4 passed`、前端 `104 passed`、生产构建、16 项 Node 静态回归、状态 JSON 和 `git diff --check` 通过。
+- 下一步：推送唯一 TASK-013 集成分支并同步 ECS 测试环境，供项目负责人以固定桌面视口刷新核对；本次仍不申请审核、Merge 或任何 Stage 解锁。
+
+## TASK-013 驾驶舱 BI 健康分析抽屉修复交接（2026-08-07）
+
+- 修复内容：恢复原型的“查看分析”抽屉、当前设备摘要、遮罩/关闭动作和设备详情入口。
+- 数据边界：健康趋势、风险和建议没有正式契约，抽屉不写入原型示例内容；仅复用已加载设备的正式字段。
+- 本地证据：抽屉回归先失败后通过；`PortalPages.test.tsx` 为 `36 passed`，前端全量 `104 passed`、生产构建、15 项 Node 静态回归、JSON 和差异检查均通过。ECS 同步待本提交推送后执行。
+- 门禁：仍属于 TASK-013 同一开发候选，待全部原型整改完成后统一交 DEV-001 审核；不申请 Merge、不合并，不解锁 Stage 6/7/8。

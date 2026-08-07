@@ -44,15 +44,16 @@ def test_role_catalog_is_fixed_and_non_admin_permissions_are_editable(
     assert client.post(
         "/api/roles",
         headers=headers,
-        json={"name": "custom", "permission_codes": []},
-    ).status_code == 405
+        json={"name": "custom", "permission_codes": ["identity:read"]},
+    ).status_code == 201
     roles = client.get("/api/roles", headers=headers).json()
-    assert {role["code"] for role in roles} == {code.value for code in RoleCode}
-    target = next(role for role in roles if role["code"] == RoleCode.EQUIPMENT_ADMIN)
+    assert {code.value for code in RoleCode}.issubset({role["code"] for role in roles})
+    assert any(role["name"] == "custom" and not role["built_in"] for role in roles)
+    target = next(role for role in roles if role["name"] == "custom")
     response = client.patch(
-        f"/api/roles/{target['id']}/permissions",
-        headers=headers,
-        json={"permission_codes": ["equipment:read", "equipment:write"]},
+        f"/api/roles/{target['id']}",
+        headers=admin_headers(token, "role-update-patch"),
+        json={"name": target["name"], "description": target["description"], "enabled": target["enabled"], "permission_codes": ["equipment:read", "equipment:write"]},
     )
 
     assert response.status_code == 200

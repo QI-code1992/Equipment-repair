@@ -6,6 +6,41 @@
 
 ## 进行中
 
+### CR-051：补齐用户自助密码修改 API
+
+- 级别：L3 认证与前端功能补齐。
+- 状态：Approved / 开发中，仍属于 TASK-013 同一开发候选；不构成审核、Merge 或 Stage 解锁。
+- 提出人：项目负责人。
+- 提出时间：2026-08-07。
+- 范围：新增 `PATCH /api/auth/password`，校验当前密码、更新现有 scrypt 哈希、撤销用户全部登录会话、写入脱敏审计事件；前端安全设置接入真实接口并在成功后回到登录页。
+- 约束：不返回或记录密码、Token、Cookie 或哈希；不新增生产依赖；沿用现有认证、会话和审计模型。
+- 验收：旧密码错误、确认值不一致、成功改密、旧会话失效、新密码登录和前端调用均有回归覆盖。
+
+### CR-050：业务平台测试部署拓扑调整为 ECS + Windows RAGFlow
+
+- 级别：L2 部署与验收环境边界变更；不改变产品范围、业务 API、数据模型或权限模型。
+- 状态：Approved / 已执行测试部署，持续受 Stage 6、Stage 7 与 Stage 8 门禁约束。
+- 提出人：项目负责人。
+- 提出时间：2026-08-05。
+- 当前阶段：Stage 5 `TASK-013` 开发中；Stage 6 未通过，Stage 7/Stage 8 锁定。
+- 原始请求：将阿里云 ECS 作为当前业务平台的测试部署环境，RAGFlow 保持部署在本地 Windows 笔记本；ECS 与 Windows 之间的加密私网隧道由项目负责人负责。需要为同事提供可访问的平台测试入口，同时不得把该环境表述为生产发布或 Stage 7 验收通过。
+- 明确需求：
+  - ECS 仅运行业务平台相关服务（PostgreSQL、Redis、MinIO、ClamAV、API、Worker、Validator、Nginx/Web）；不得在 ECS 部署 RAGFlow 或其持久化依赖。
+  - RAGFlow 统一目标版本为 `v0.26.3`，部署在本地 Windows Docker Desktop/WSL2 环境；ECS 仅经受控加密私网隧道访问其 API。隧道、Windows 防火墙、RAGFlow Token 和访问控制由环境负责人管理，不得写入仓库。
+  - 当前测试部署源码绑定 `77fbc4205b46885a5762cd8f9a92da455cf35e67`；ECS 运行目录为 `/opt/equipment-platform/previews/77fbc4205b46885a5762cd8f9a92da455cf35e67`，Compose 项目名为 `equipment-preview-77fbc42`。
+  - 测试访问入口为 `https://101.37.16.206/`；HTTP 80 仅跳转至 HTTPS 443。当前为带 IP SAN 的短期自签名测试证书，仅限测试使用，不得宣称为生产证书或正式域名方案。
+  - 测试管理员由环境负责人通过安全渠道分发，账号、密码、Token、私钥、连接串、证书私钥、Cookie、运行卷和 `.env` 均不得提交 Git 或写入本台账/报告；测试结束或转入验收前必须轮换测试管理员凭据。
+- 原因：项目负责人需要在真实可访问的测试环境中组织页面确认；此前 CR-046 的“单机 Windows、回环 HTTPS、禁止公开入口”方案不再满足当前测试部署需求。
+- 影响：
+  - 部署/验收文档：以 ECS 业务平台 + Windows RAGFlow 的测试拓扑替代 CR-046 中已被取代的部署方案；保留 CR-046 历史记录，不倒改历史事实。
+  - 基础设施模板与验证：将 Git 忽略环境模板、RAGFlow 固定镜像契约与验证脚本从 `v0.25.6` 更新为 `v0.26.3`，并更新固定 Docker Registry 摘要；新增 ECS 自动部署脚本、systemd 定时器模板与其 shell 契约测试，不修改业务代码、数据库迁移、业务 API 或运行中的远程 Compose 配置。
+  - 运行验证：已确认 ECS Compose 启动、迁移、PostgreSQL、Redis、MinIO、ClamAV、API、Worker、Validator、Nginx、`/healthz`、HTTPS 入口与 HTTP→HTTPS 跳转；当前未配置运行时 `RAGFLOW_API_KEY`，不得将真实 RAGFlow 成功检索链路表述为已通过。
+  - 阶段门禁：测试环境可访问不构成 Stage 6 通过、Stage 7 验收通过、Stage 8 发布、`main` 合并或生产授权。TASK-013 前端整改仍在同一 Draft PR 中开发，完成后统一接受 DEV-001 审核。
+  - 自动同步：项目负责人已确认采用“当前 `codex/task-013-prototype-fidelity-remediation` 分支每次推送后自动部署 ECS”的方式。自动部署只处理已推送 Commit，不同步未提交的本地保存；部署须记录目标 SHA、串行执行、构建成功后再切换、健康检查失败保留上一可访问版本，并保留最近一个可回退版本。
+- 决策：项目负责人明确确认 ECS 为当前项目业务平台测试部署环境，并明确确认 RAGFlow 继续部署在本地 Windows；ECS 与 Windows 的加密私网隧道不属于本仓库配置范围。
+- 更新基线：`07-acceptance/ACCEPTANCE_ENVIRONMENT_DEPLOYMENT.md`、`07-acceptance/ACCEPTANCE_REPORT.md`、`08-release-handoff/RUNBOOK.md`、`08-release-handoff/DEPLOYMENT_CHECKLIST.md`、`codebase/infra/.env.example`、`codebase/infra/ragflow/scripts/verify.ps1`、`codebase/infra/ragflow/tests/verify-compose-contract.ps1`、`codebase/infra/scripts/ecs-test-autodeploy.sh`、`codebase/infra/systemd/equipment-test-autodeploy.*`、`codebase/infra/tests/verify-ecs-test-autodeploy-contract.sh`、`workflow/state.json`、`workflow/DEV_TO_PM_HANDOFF.md` 与本台账。
+- 验证：ECS 自动同步已由专用 SSH 部署密钥配置完成，首次成功部署 SHA `e226695635784296d4aa13597fe7d39690bdef37`；候选构建、API/Web 重建、外层 HTTPS `/healthz` 和 `current` 版本切换均通过。切换窗口出现两次短暂 502，健康检查重试后恢复；不将该窗口表述为零中断。服务通过 systemd timer 每 30 秒检查一次已推送 Commit。此次更新同时执行 shell 契约、JSON 解析、前端回归/构建与 `git diff --check`。本机未安装 Docker Desktop/Compose，Compose 展开和真实 RAGFlow `v0.26.3` 启动验证留给 Windows 环境执行。不提交任何远程运行配置或秘密。
+
 ### CR-043：明确 TASK-009 诊断与指引的设备对象级授权契约
 
 - 级别：L3
@@ -872,6 +907,15 @@
   - 开始门槛：本治理候选已合入 `codex/stage-05-integration`，且 DEV-002 已向项目负责人发出正式开发开始通知。
 - 验证：JSON 解析、任务书/状态一致性、剩余 API 依赖扫描、`git diff --check` 与适用 Markdown/规则检查。该治理候选不运行或变更业务代码、测试逻辑、数据库、基础设施、依赖或运行配置。
 - 阶段边界：本 CR 不构成 TASK-012 完成、DEV-001 最终审核批准、Merge 授权、Stage 6 重测通过、Stage 7 验收通过或 Stage 8 发布授权。
+### CR-047 复开记录：TASK-013 P0 原型一致性整改（2026-08-04）
+
+- 状态：`REOPENED / STAGE5_GOVERNANCE_IN_PREPARATION`。
+- 级别：L0 实现偏离修正；不改变已确认 PRD、SPEC、原型、公开 API、权限或验收标准。
+- 发现：项目负责人针对当前集成 HEAD `e8a28cee7515ad58e025ec81c65b460284919d75` 的本地静态 UI 演示复核，确认现有正式页面仍以通用壳、文本表格和常驻表单替代批准原型的工业操作台布局、信息层级与关键交互。`/factory-modeling` 的实际页面是直接证据。
+- 决策：保留原型与历史 TASK-012 记录；重新打开 `DEF-STAGE7-001`，以 `TASK-013` 回流 Stage 5。任务范围、逐页差异和完成条件固定在 `05-development/TASK-013_P0_PROTOTYPE_FIDELITY_REMEDIATION_PLAN.md`。
+- 影响：受影响范围为全部 16 个 P0 路由和全局 Agent 抽屉的正式实现、前端测试、原型对照证据、任务书、状态与交接台账。若实施中发现正式 API 无法支撑已批准页面，须单独登记缺口；不得由 mock、静态数值或原型源码替代。
+- 执行授权（2026-08-04）：项目负责人明确要求不再建立独立治理 PR，直接开展 TASK-013 整改，完成后统一提交审批。因此 `codex/task-013-prototype-fidelity-remediation` 作为唯一 Draft 开发 PR 同时承载本记录与整改代码；不进行中途审核或合并。该授权不关闭 `DEF-STAGE7-001`，不改变 `DEF-STAGE6-003`—`005`，不解锁 Stage 6、Stage 7 或 Stage 8。
+
 ### CR-049 Stage 5 return: TASK-005 validation stream handling (2026-08-03)
 
 - Level: L2 validation infrastructure correction.

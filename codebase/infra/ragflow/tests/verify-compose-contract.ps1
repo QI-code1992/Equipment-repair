@@ -23,7 +23,7 @@ if ($LASTEXITCODE -ne 0) {
 $config = $raw | ConvertFrom-Json
 
 $expectedImages = @{
-    "ragflow" = "infiniflow/ragflow:v0.25.6"
+    "ragflow" = "infiniflow/ragflow:v0.26.3"
     "ragflow-elasticsearch" = "elasticsearch:8.11.3"
     "ragflow-mysql" = "mysql:8.0.39"
     "ragflow-minio" = "pgsty/minio:RELEASE.2026-03-25T00-00-00Z"

@@ -16,6 +16,9 @@ DATA_MODEL = REPOSITORY_ROOT / "04-architecture-plan" / "DATA_MODEL.md"
 TASK002_ROUTES = {
     ("GET", "/api/permissions"),
     ("GET", "/api/roles"),
+    ("POST", "/api/roles"),
+    ("PATCH", "/api/roles/{role_id}"),
+    ("DELETE", "/api/roles/{role_id}"),
     ("PATCH", "/api/roles/{role_id}/permissions"),
     ("GET", "/api/users"),
     ("GET", "/api/users/{user_id}"),
@@ -34,6 +37,9 @@ TASK002_ROUTES = {
 TASK002_PERMISSIONS = {
     ("GET", "/api/permissions"): "identity:read",
     ("GET", "/api/roles"): "identity:read",
+    ("POST", "/api/roles"): "identity:write",
+    ("PATCH", "/api/roles/{role_id}"): "identity:write",
+    ("DELETE", "/api/roles/{role_id}"): "identity:write",
     ("PATCH", "/api/roles/{role_id}/permissions"): "identity:write",
     ("GET", "/api/users"): "authenticated:self-or-user_management.view_all",
     ("GET", "/api/users/{user_id}"): "authenticated:self-or-user_management.view_all",
@@ -58,6 +64,8 @@ WRITE_REQUEST_FIELDS = {
     ("POST", "/api/users"): {"username", "password", "role_ids"},
     ("PATCH", "/api/users/{user_id}"): {"enabled", "role_ids"},
     ("PATCH", "/api/roles/{role_id}/permissions"): {"permission_codes"},
+    ("POST", "/api/roles"): {"name", "description", "enabled", "permission_codes"},
+    ("PATCH", "/api/roles/{role_id}"): {"name", "description", "enabled", "permission_codes"},
     ("POST", "/api/organizations"): {
         "type", "code", "name", "parent_id", "sort_order", "enabled", "remark",
     },
@@ -80,6 +88,8 @@ WRITE_REQUIRED_FIELDS = {
     ("POST", "/api/users"): {"username", "password", "role_ids"},
     ("PATCH", "/api/users/{user_id}"): {"enabled", "role_ids"},
     ("PATCH", "/api/roles/{role_id}/permissions"): {"permission_codes"},
+    ("POST", "/api/roles"): {"name", "permission_codes"},
+    ("PATCH", "/api/roles/{role_id}"): {"name", "permission_codes"},
     ("POST", "/api/organizations"): {
         "type", "code", "name", "parent_id", "sort_order",
     },
@@ -98,9 +108,11 @@ WRITE_REQUIRED_FIELDS = {
 
 ROUTE_RESPONSE_FIELDS = {
     ("GET", "/api/permissions"): {"code"},
-    ("GET", "/api/roles"): {"id", "code", "name", "permission_codes"},
+    ("GET", "/api/roles"): {"id", "code", "name", "description", "built_in", "enabled", "user_count", "permission_codes", "updated_at"},
+    ("POST", "/api/roles"): {"id", "code", "name", "description", "built_in", "enabled", "user_count", "permission_codes", "updated_at", "audit_event_id"},
+    ("PATCH", "/api/roles/{role_id}"): {"id", "code", "name", "description", "built_in", "enabled", "user_count", "permission_codes", "updated_at", "audit_event_id"},
     ("PATCH", "/api/roles/{role_id}/permissions"): {
-        "id", "code", "name", "permission_codes", "audit_event_id",
+        "id", "code", "name", "description", "built_in", "enabled", "user_count", "permission_codes", "updated_at", "audit_event_id",
     },
     ("GET", "/api/users"): {"id", "username", "enabled", "role_ids"},
     ("GET", "/api/users/{user_id}"): {"id", "username", "enabled", "role_ids"},
@@ -174,6 +186,13 @@ SPECIAL_FIELD_CONTRACT = {
     ("EquipmentWrite", "image_refs"): ("否", "[]", "items=ImageRef"),
     ("ImageRef", "object_key"): ("否", "无", "minLength=1;maxLength=500"),
     ("ImageRef", "filename"): ("否", "无", "minLength=1;maxLength=255"),
+    ("PasswordChangeRequest", "current_password"): ("否", "无", "minLength=1;maxLength=200"),
+    ("PasswordChangeRequest", "new_password"): ("否", "无", "minLength=8;maxLength=200"),
+    ("PasswordChangeRequest", "confirm_password"): ("否", "无", "minLength=8;maxLength=200"),
+    ("RoleWrite", "name"): ("否", "无", "minLength=1;maxLength=100"),
+    ("RoleWrite", "description"): ("否", '\"\"', "maxLength=500"),
+    ("RoleWrite", "enabled"): ("否", "true", "boolean"),
+    ("RoleWrite", "permission_codes"): ("否", "无", "minItems=1"),
 }
 
 
@@ -251,7 +270,6 @@ def test_task002_public_routes_match_the_frozen_route_table(client: TestClient) 
                             "/api/organizations", "/api/equipment"))
     }
     assert actual == TASK002_ROUTES
-    assert "post" not in openapi_paths["/api/roles"]
 
 
 def test_task002_write_routes_expose_required_idempotency_headers(client: TestClient) -> None:
@@ -260,6 +278,9 @@ def test_task002_write_routes_expose_required_idempotency_headers(client: TestCl
         ("post", "/api/users"),
         ("patch", "/api/users/{user_id}"),
         ("patch", "/api/roles/{role_id}/permissions"),
+        ("post", "/api/roles"),
+        ("patch", "/api/roles/{role_id}"),
+        ("delete", "/api/roles/{role_id}"),
         ("post", "/api/organizations"),
         ("patch", "/api/organizations/{organization_id}"),
         ("post", "/api/equipment"),
@@ -281,7 +302,11 @@ def test_task002_write_routes_expose_required_idempotency_headers(client: TestCl
 def test_api_spec_structurally_freezes_routes_permissions_and_idempotency() -> None:
     section = _task002_section(API_SPEC.read_text(encoding="utf-8"))
     rows = _markdown_rows(section, "路由矩阵")
-    documented = {(row[0], row[1]) for row in rows}
+    documented = {
+        (row[0], row[1])
+        for row in rows
+        if row[1].startswith(("/api/permissions", "/api/roles", "/api/users", "/api/organizations", "/api/equipment"))
+    }
     assert documented == TASK002_ROUTES
 
     by_route = {(row[0], row[1]): row for row in rows}
@@ -290,6 +315,9 @@ def test_api_spec_structurally_freezes_routes_permissions_and_idempotency() -> N
         ("POST", "/api/users"),
         ("PATCH", "/api/users/{user_id}"),
         ("PATCH", "/api/roles/{role_id}/permissions"),
+        ("POST", "/api/roles"),
+        ("PATCH", "/api/roles/{role_id}"),
+        ("DELETE", "/api/roles/{role_id}"),
         ("POST", "/api/organizations"),
         ("PATCH", "/api/organizations/{organization_id}"),
         ("POST", "/api/equipment"),

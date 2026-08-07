@@ -1,44 +1,32 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
 import { IntelligentConfigPage } from "./IntelligentConfigPage";
 import { FaultReportPage } from "./FaultReportPage";
 import { RepairExecutionPage } from "./RepairExecutionPage";
 import { WorkbenchPage } from "./WorkbenchPage";
-import { ApiError, clearActiveSession, getAgentThread, getAgentThreads, getCurrentUser, hasActiveSession, logout, readRunEvents, resumeAgentThread, startAgentRun, type AgentThread, type AgentThreadSummary, type RuntimeEvent } from "./api";
+import { ApiError, changePassword, clearActiveSession, getAgentThread, getAgentThreads, getCurrentUser, getNotificationUnreadCount, getNotifications, hasActiveSession, logout, markAllNotificationsRead, markNotificationRead, readRunEvents, resumeAgentThread, startAgentRun, type AgentThread, type AgentThreadSummary, type Notification, type RuntimeEvent } from "./api";
 import { LoginPage } from "./LoginPage";
 import { AgentReportPage, BiDashboardPage, EquipmentAddPage, EquipmentDetailPage, EquipmentEditPage, EquipmentLedgerPage, FactoryModelingPage, IntelligentAuditPage, MaintenanceRecordDetailPage, MaintenanceRecordsPage, SystemManagementPage } from "./PortalPages";
 
 type Page = {
   path: string;
   label: string;
+  navLabel?: string;
   group: string;
   mark: string;
 };
 
 const pages: Page[] = [
-  { path: "/", label: "运维工作台", group: "工作台", mark: "台" },
-  { path: "/bi-dashboard", label: "驾驶舱 BI", group: "工作台", mark: "BI" },
-  { path: "/factory-modeling", label: "工厂建模", group: "资产管理", mark: "厂" },
-  { path: "/equipment", label: "设备台账", group: "资产管理", mark: "设" },
-  { path: "/intelligent-config", label: "智能配置", group: "智能运维", mark: "智" },
-  { path: "/intelligence-audit", label: "智能审计", group: "智能运维", mark: "审" },
-  { path: "/fault-report", label: "故障上报", group: "现场作业", mark: "报" },
-  { path: "/agent-report", label: "AI 故障上报", group: "现场作业", mark: "AI" },
-  { path: "/maintenance-records", label: "维修记录", group: "现场作业", mark: "记" },
-  { path: "/repair-execution", label: "维修执行", group: "现场作业", mark: "修" },
-  { path: "/system-management", label: "系统管理", group: "系统管理", mark: "管" },
+  { path: "/", label: "运维工作台", navLabel: "工作台", group: "工作台", mark: "01" },
+  { path: "/bi-dashboard", label: "驾驶舱 BI", group: "工作台", mark: "02" },
+  { path: "/factory-modeling", label: "工厂建模", group: "资产管理", mark: "03" },
+  { path: "/equipment", label: "设备台账", group: "资产管理", mark: "04" },
+  { path: "/fault-report", label: "故障上报", group: "现场作业", mark: "05" },
+  { path: "/maintenance-records", label: "维修记录", group: "现场作业", mark: "06" },
+  { path: "/system-management", label: "系统管理", group: "系统管理", mark: "07" },
+  { path: "/intelligent-config", label: "智能配置", group: "智能运维", mark: "08" },
 ];
-
-function PageShell({ label }: { label: string }) {
-  return (
-    <section className="page-shell" aria-labelledby="page-heading">
-      <div className="page-shell__eyebrow">正式前端基础</div>
-      <h2 id="page-heading">{label}</h2>
-      <p>业务内容将在对应任务中接入</p>
-    </section>
-  );
-}
 
 function RequireAuthentication({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -46,23 +34,97 @@ function RequireAuthentication({ children }: { children: React.ReactNode }) {
   return children;
 }
 
+function AgentRobotIcon() {
+  return <svg className="ops-agent-robot-icon" viewBox="0 0 64 64" aria-hidden="true">
+    <path className="ops-agent-robot-antenna" d="M32 9v7" />
+    <circle className="ops-agent-robot-light" cx="32" cy="7" r="3" />
+    <rect className="ops-agent-robot-head" x="13" y="18" width="38" height="32" rx="13" />
+    <path className="ops-agent-robot-ear" d="M10 31h-4M58 31h-4" />
+    <circle className="ops-agent-robot-eye" cx="25" cy="33" r="5.5" />
+    <circle className="ops-agent-robot-eye" cx="39" cy="33" r="5.5" />
+    <path className="ops-agent-robot-mouth" d="M20 43c6 4 18 4 24 0" />
+    <path className="ops-agent-robot-visor" d="M20 25h24" />
+  </svg>;
+}
+
 function ApplicationShell() {
   const location = useLocation();
   const navigate = useNavigate();
   const [agentOpen, setAgentOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [permissionCodes, setPermissionCodes] = useState<string[] | null>(null);
+  const [currentUser, setCurrentUser] = useState<Awaited<ReturnType<typeof getCurrentUser>> | null>(null);
   const [permissionError, setPermissionError] = useState<string | null>(null);
   const [authFailed, setAuthFailed] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationTab, setNotificationTab] = useState<"all" | "unread">("all");
+  const [notifications, setNotifications] = useState<Notification[] | null>(null);
+  const [notificationUnreadCount, setNotificationUnreadCount] = useState(0);
+  const [notificationError, setNotificationError] = useState<string | null>(null);
+  const [notificationLoading, setNotificationLoading] = useState(false);
+  const [agentIdle, setAgentIdle] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [userModal, setUserModal] = useState<"profile" | "security" | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    getCurrentUser().then((user) => setPermissionCodes(user.permission_codes)).catch(() => {
+    getCurrentUser().then((user) => { setPermissionCodes(user.permission_codes); setCurrentUser(user); }).catch(() => {
       clearActiveSession();
       setPermissionError("当前会话权限加载失败，请重新登录。");
       setAuthFailed(true);
     });
   }, []);
-  const activePage = pages.find((page) => page.path === location.pathname) ?? pages[0];
+  const activePage = pageForRoute(location.pathname);
   const visiblePages = useMemo(() => permissionCodes === null ? [] : pages.filter((page) => pagePermission(page.path, permissionCodes)), [permissionCodes]);
-  const groups = [...new Set(visiblePages.map((page) => page.group))];
+  useEffect(() => {
+    if (!notificationsOpen) return;
+    setNotificationLoading(true);
+    setNotificationError(null);
+    getNotificationUnreadCount()
+      .then(({ unread_count }) => { setNotificationUnreadCount(unread_count); return getNotifications({ page: 1, pageSize: 10, unreadOnly: notificationTab === "unread" }); })
+      .then((result) => { setNotifications(result.items); setNotificationUnreadCount(result.unread_count); })
+      .catch(() => setNotificationError("通知加载失败，请重试。"))
+      .finally(() => setNotificationLoading(false));
+  }, [notificationsOpen, notificationTab]);
+  useEffect(() => {
+    if (!notificationsOpen && !agentOpen && !userMenuOpen && !userModal) return;
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") { setNotificationsOpen(false); setAgentOpen(false); setUserMenuOpen(false); setUserModal(null); } };
+    const onPointerDown = (event: PointerEvent) => {
+      if (userMenuOpen && !userMenuRef.current?.contains(event.target as Node)) setUserMenuOpen(false);
+    };
+    if (userMenuOpen) document.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => { window.removeEventListener("keydown", onKeyDown); document.removeEventListener("pointerdown", onPointerDown); };
+  }, [notificationsOpen, agentOpen, userMenuOpen, userModal]);
+  useEffect(() => {
+    if (!notificationsOpen && !agentOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = previous; };
+  }, [notificationsOpen, agentOpen]);
+  useEffect(() => {
+    if (agentOpen || !permissionCodes?.includes("intelligence:agent")) return;
+    const timer = window.setTimeout(() => setAgentIdle(true), 3000);
+    return () => window.clearTimeout(timer);
+  }, [agentOpen, agentIdle, permissionCodes]);
+  async function openNotification(item: Notification) {
+    if (!item.is_read) {
+      try { await markNotificationRead(item.id); } catch { /* navigation remains available if acknowledgement fails */ }
+      setNotifications((current) => current?.map((entry) => entry.id === item.id ? { ...entry, is_read: true } : entry) ?? current);
+      setNotificationUnreadCount((count) => Math.max(0, count - 1));
+    }
+    setNotificationsOpen(false);
+    if (item.action_url) navigate(item.action_url);
+  }
+  async function markAllRead() {
+    try { await markAllNotificationsRead(); setNotifications((current) => current?.map((item) => ({ ...item, is_read: true })) ?? current); setNotificationUnreadCount(0); } catch { setNotificationError("通知操作失败，请重试。"); }
+  }
+  async function confirmLogout() {
+    setUserMenuOpen(false);
+    if (!window.confirm("确认退出当前账号？")) return;
+    await logout().catch(() => undefined);
+    navigate("/login", { replace: true });
+  }
   function guarded(path: string, element: React.ReactNode) {
     if (permissionCodes === null || permissionError) return element;
     return pagePermission(path, permissionCodes) ? element : <section className="page-shell"><p role="alert">你没有访问此页面的权限。</p></section>;
@@ -71,44 +133,63 @@ function ApplicationShell() {
 
   return (
     <div className="app-shell">
-      <aside className="sidebar">
+      <aside className={`sidebar ${sidebarOpen ? "sidebar--open" : ""}`}>
         <div className="brand">
-          <div className="brand__mark" aria-hidden="true">运</div>
+          <div className="brand__mark" aria-hidden="true">智</div>
           <div>
-            <strong>设备智能运维平台</strong>
-            <span>新能源装载机</span>
+            <strong>新能源装载机智能运维平台</strong>
+            <span>Fault Ops Console</span>
           </div>
         </div>
 
-        <nav aria-label="主导航">
+        <nav className="nav-section" aria-label="业务导航">
           {permissionError && <p role="alert">{permissionError}</p>}
-          {groups.map((group) => (
-            <div className="nav-group" key={group}>
-              <div className="nav-group__label">{group}</div>
-              {visiblePages.filter((page) => page.group === group).map((page) => (
-                <NavLink className="nav-item" key={page.path} to={page.path} end={page.path === "/"}>
-                  <span aria-hidden="true">{page.mark}</span>
-                  {page.label}
-                </NavLink>
-              ))}
-            </div>
-          ))}
+          <div className="nav-label">业务导航</div>
+          <div className="nav-list">
+            {visiblePages.map((page) => (
+              <NavLink className="nav-item" key={page.path} to={page.path} end={page.path === "/"} onClick={() => setSidebarOpen(false)}>
+                <span className="nav-icon" aria-hidden="true">{page.mark}</span>
+                <span>{page.navLabel ?? page.label}</span>
+              </NavLink>
+            ))}
+          </div>
         </nav>
 
         <div className="sidebar__footer">
-          <strong>平台状态</strong>
-          <span>前端基础工程已启用</span>
+          <strong>受控运维会话</strong>
+          <span>{permissionCodes === null ? "正在校验权限" : "权限已识别"}</span>
         </div>
       </aside>
 
       <main className="main-area">
         <header className="topbar">
-          <div>
-            <p>设备智能运维平台 / {activePage.group}</p>
-            <h1>设备智能运维平台</h1>
+          <button type="button" className="notification-trigger" aria-label="Notifications" aria-expanded={notificationsOpen} onClick={() => { setAgentOpen(false); setNotificationsOpen((open) => !open); }}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg>{notificationUnreadCount > 0 && <span className="notification-badge">{notificationUnreadCount > 99 ? "99+" : notificationUnreadCount}</span>}</button>
+          <div className="topbar__heading">
+            <button type="button" className="menu-button" aria-label="打开导航" aria-expanded={sidebarOpen} onClick={() => setSidebarOpen((open) => !open)}>菜单</button>
+            <div>
+            <nav className="breadcrumb" aria-label="面包屑"><ol><li><span>{activePage.group}</span></li><li aria-current="page"><span>{activePage.label}</span></li></ol></nav>
+            <p className="breadcrumb-legacy" aria-hidden="true">{activePage.group} / {activePage.label}</p>
+            <h1>{activePage.label}</h1>
+            </div>
           </div>
-          <div className="topbar__actions">{permissionCodes?.includes("intelligence:agent") && <button type="button" className="agent-trigger" onClick={() => setAgentOpen(true)}>全局 Agent</button>}<button type="button" className="agent-trigger" onClick={() => void logout().finally(() => navigate("/login", { replace: true }))}>退出</button><div className="topbar__avatar" aria-label="当前用户">管</div></div>
+          <div className="topbar__actions">
+            <div className="user-menu-anchor" ref={userMenuRef}>
+              <button type="button" className="user-chip" aria-label={`当前用户：${currentUser?.username ?? "已登录用户"}`} aria-haspopup="menu" aria-expanded={userMenuOpen} onClick={() => setUserMenuOpen((open) => !open)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setUserMenuOpen((open) => !open); } }}>
+                <span className="topbar__avatar">{currentUser?.username.slice(0, 1).toUpperCase() ?? "用"}</span><span>{currentUser?.username ?? "正在加载"}</span><span className="user-menu-chevron" aria-hidden="true">⌄</span>
+              </button>
+              {userMenuOpen && <div className="global-user-menu" role="menu" aria-label="用户菜单">
+                <div className="global-menu-user"><span className="avatar">{currentUser?.username.slice(0, 1).toUpperCase() ?? "用"}</span><div><strong>{currentUser?.username ?? "正在加载"}</strong><span>平台用户 · 正式身份信息未提供</span></div></div>
+                <div className="global-menu-divider" />
+                <button type="button" className="global-menu-item" role="menuitem" onClick={() => { setUserMenuOpen(false); setUserModal("profile"); }}>个人资料</button>
+                <button type="button" className="global-menu-item" role="menuitem" onClick={() => { setUserMenuOpen(false); setPasswordError(null); setUserModal("security"); }}>安全设置 / 修改密码</button>
+                {permissionCodes?.includes("identity:write") && <button type="button" className="global-menu-item" role="menuitem" onClick={() => { setUserMenuOpen(false); navigate("/system-management"); }}>进入用户管理</button>}
+                <div className="global-menu-divider" />
+                <button type="button" className="global-menu-item danger" role="menuitem" onClick={() => void confirmLogout()}>退出登录</button>
+              </div>}
+            </div>
+          </div>
         </header>
+        {sidebarOpen && <button type="button" className="sidebar-backdrop" aria-label="关闭导航" onClick={() => setSidebarOpen(false)} />}
         {permissionCodes === null && !permissionError ? <section className="page-shell" aria-live="polite"><p role="status">正在加载会话权限…</p></section> : <Routes>
           <Route path="/" element={guarded("/", <WorkbenchPage />)} />
           <Route path="/bi-dashboard" element={guarded("/bi-dashboard", <BiDashboardPage />)} />
@@ -120,17 +201,35 @@ function ApplicationShell() {
           <Route path="/intelligent-config" element={guarded("/intelligent-config", <IntelligentConfigPage permissionCodes={permissionCodes ?? []} />)} />
           <Route path="/intelligence-audit" element={guarded("/intelligence-audit", <IntelligentAuditPage permissionCodes={permissionCodes ?? []} />)} />
           <Route path="/fault-report" element={guarded("/fault-report", <FaultReportPage />)} />
-          <Route path="/agent-report" element={guarded("/agent-report", <AgentReportPage />)} />
+          <Route path="/agent-report" element={guarded("/agent-report", <AgentReportPage currentUsername={currentUser?.username} />)} />
           <Route path="/maintenance-records" element={guarded("/maintenance-records", <MaintenanceRecordsPage />)} />
           <Route path="/maintenance-records/:id" element={guarded("/maintenance-records/:id", <MaintenanceRecordDetailPage />)} />
           <Route path="/repair-execution" element={guarded("/repair-execution", <RepairExecutionPage permissionCodes={permissionCodes ?? []} />)} />
           <Route path="/system-management" element={guarded("/system-management", <SystemManagementPage permissionCodes={permissionCodes ?? []} />)} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>}
-        {agentOpen && permissionCodes?.includes("intelligence:agent") && <GlobalAgentDrawer onClose={() => setAgentOpen(false)} />}
+        {notificationsOpen && <>
+          <button type="button" className="notification-scrim" aria-label="Close notifications" onClick={() => setNotificationsOpen(false)} />
+          <section className="notification-panel" role="dialog" aria-label="Notifications">
+            <header><div><strong>消息通知</strong><span>{notificationUnreadCount} 条未读</span></div><button type="button" onClick={() => void markAllRead()}>全部已读</button></header>
+            <div className="notification-tabs"><button type="button" aria-pressed={notificationTab === "all"} onClick={() => setNotificationTab("all")}>全部</button><button type="button" aria-pressed={notificationTab === "unread"} onClick={() => setNotificationTab("unread")}>未读</button></div>
+            <div className="notification-list">{notificationLoading ? <p role="status">正在加载通知…</p> : notificationError ? <div><p role="alert">{notificationError}</p><button type="button" onClick={() => setNotificationsOpen(false)}>关闭后重试</button></div> : notifications?.length ? notifications.map((item) => <button type="button" className={`notification-item ${item.is_read ? "is-read" : ""}`} key={item.id} onClick={() => void openNotification(item)}><span className="notification-item__dot" aria-hidden="true" /><span><strong>{item.title}</strong><small>{item.body}</small><small>关联对象 ID：{item.related_object_id ?? "-"} · {new Date(item.created_at).toLocaleString()}</small></span></button>) : <p>{notificationTab === "unread" ? "暂无未读消息" : "暂无消息通知"}</p>}</div>
+          </section>
+        </>}
+        {agentOpen && permissionCodes?.includes("intelligence:agent") && <><button type="button" className="agent-scrim" aria-label="Close Agent" onClick={() => setAgentOpen(false)} /><GlobalAgentDrawer onClose={() => setAgentOpen(false)} /></>}
+        {!agentOpen && permissionCodes?.includes("intelligence:agent") && <button type="button" className={`ops-agent-fab${agentIdle ? " is-idle" : ""}`} aria-label="打开运维 Agent" onPointerEnter={() => setAgentIdle(false)} onFocus={() => setAgentIdle(false)} onClick={() => setAgentOpen(true)}><span className="ops-agent-fab-icon"><AgentRobotIcon /></span></button>}
+        {userModal && <div className="user-entry-modal" role="dialog" aria-modal="true" aria-labelledby="user-entry-title"><button type="button" className="user-entry-backdrop" aria-label="关闭" onClick={() => setUserModal(null)} /><section className="user-entry-dialog"><button type="button" className="user-entry-close" aria-label="关闭" onClick={() => setUserModal(null)}>×</button><h2 id="user-entry-title">{userModal === "profile" ? "个人资料" : "安全设置"}</h2>{userModal === "profile" ? <><div className="user-entry-profile"><span className="avatar large">{currentUser?.username.slice(0, 1).toUpperCase() ?? "用"}</span><strong>{currentUser?.username ?? "正在加载"}</strong><span>平台用户 · 正式组织信息未提供</span></div><dl className="user-entry-details"><div><dt>用户名</dt><dd>{currentUser?.username ?? "-"}</dd></div><div><dt>所属组织</dt><dd>未提供</dd></div><div><dt>账号状态</dt><dd>{currentUser?.enabled ? "已启用" : "不可用"}</dd></div></dl></> : <form onSubmit={(event) => { event.preventDefault(); const form = new FormData(event.currentTarget); const currentPassword = String(form.get("current_password")); const newPassword = String(form.get("new_password")); const confirmPassword = String(form.get("confirm_password")); if (newPassword !== confirmPassword) { setPasswordError("两次输入的新密码不一致。"); return; } void changePassword({ current_password: currentPassword, new_password: newPassword, confirm_password: confirmPassword }).then(() => { clearActiveSession(); navigate("/login", { replace: true }); }).catch((error) => setPasswordError(error instanceof ApiError && error.code === "CURRENT_PASSWORD_INVALID" ? "当前密码不正确。" : "密码修改失败，请检查输入后重试。")); }}><label>当前密码<input type="password" name="current_password" autoComplete="current-password" required /></label><label>新密码<input type="password" name="new_password" autoComplete="new-password" required minLength={8} /></label><label>确认新密码<input type="password" name="confirm_password" autoComplete="new-password" required minLength={8} /></label>{passwordError && <p className="user-entry-hint" role="alert">{passwordError}</p>}<p className="user-entry-hint">新密码至少 8 位。保存后所有登录会话都会失效，需要重新登录。</p><div className="user-entry-footer"><button type="button" className="button-secondary" onClick={() => setUserModal(null)}>取消</button><button type="submit" className="button-primary">保存密码</button></div></form>}</section></div>}
       </main>
     </div>
   );
+}
+
+function pageForRoute(pathname: string): Page {
+  if (pathname === "/equipment/new") return pages.find((page) => page.path === "/equipment") ? { ...pages.find((page) => page.path === "/equipment")!, label: "新增设备" } : pages[0];
+  if (/^\/equipment\/[^/]+\/edit$/.test(pathname)) return pages.find((page) => page.path === "/equipment") ? { ...pages.find((page) => page.path === "/equipment")!, label: "编辑设备" } : pages[0];
+  if (/^\/equipment\/[^/]+$/.test(pathname)) return pages.find((page) => page.path === "/equipment") ? { ...pages.find((page) => page.path === "/equipment")!, label: "设备详情" } : pages[0];
+  if (/^\/maintenance-records\/[^/]+$/.test(pathname)) return pages.find((page) => page.path === "/maintenance-records") ? { ...pages.find((page) => page.path === "/maintenance-records")!, label: "维修记录详情" } : pages[0];
+  return pages.find((page) => page.path === pathname) ?? pages[0];
 }
 
 function pagePermission(path: string, codes: string[]) {
@@ -176,7 +275,8 @@ function GlobalAgentDrawer({ onClose }: { onClose: () => void }) {
     try {
       const run = await startAgentRun(agentId, {}, text.trim());
       setMessage(`已创建任务：${run.run_id}`);
-      setEvents(await readRunEvents(run.run_id));
+      setEvents([]);
+      await readRunEvents(run.run_id, (runtimeEvent) => setEvents((current) => [...current, runtimeEvent]));
       setThread(await getAgentThread(run.thread_id));
     } catch (error) {
       setMessage(`请求失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`);
@@ -193,10 +293,10 @@ function GlobalAgentDrawer({ onClose }: { onClose: () => void }) {
       setMessage(`恢复失败：${error instanceof ApiError ? error.code : "REQUEST_FAILED"}`);
     }
   }
-  return <aside className="agent-drawer" aria-label="全局 Agent">
-    <header><strong>全局 Agent</strong><button type="button" onClick={onClose}>关闭</button></header>
+  return <aside className="agent-drawer" role="dialog" aria-modal="true" aria-label="全局 Agent" tabIndex={-1}>
+    <header><div><strong>全局 Agent 助手</strong><small>在当前权限范围内创建受控任务</small></div><button type="button" onClick={onClose}>关闭</button></header>
     <div className="tab-list"><button type="button" aria-pressed={tab === "compose"} onClick={() => setTab("compose")}>新建任务</button><button type="button" aria-pressed={tab === "history"} onClick={() => setTab("history")}>线程历史</button></div>
-    {tab === "compose" ? <><p>仅可创建故障上报、智能问数和操作指引任务。</p><form onSubmit={submit}><fieldset disabled={submitting}><label>类型<select value={agentId} onChange={(event) => setAgentId(event.target.value)}><option value="fault_reporting">AI 故障上报</option><option value="metric_query">智能问数</option><option value="operation_guidance">操作指引</option></select></label><label>问题<textarea value={text} onChange={(event) => setText(event.target.value)} required /></label><button type="submit">{submitting ? "创建中…" : "发起任务"}</button></fieldset></form></> : <section aria-label="Agent 历史">{historyError && <p role="alert">线程历史加载失败：{historyError}</p>}{history === null && !historyError ? <p role="status">正在加载线程历史…</p> : history?.length === 0 ? <p>暂无线程历史。</p> : <ul>{history?.map((item) => <li key={item.thread_id}><button type="button" onClick={() => void getAgentThread(item.thread_id).then(setThread).catch((error) => setHistoryError(error instanceof ApiError ? error.code ?? "REQUEST_FAILED" : "REQUEST_FAILED"))}>{item.agent_id} · {item.status}</button></li>)}</ul>}{thread && <div><p>线程：{thread.thread_id}</p><p>状态：{thread.status}</p>{thread.messages.map((item, index) => <p key={index}>消息已记录（内容受保护）</p>)}{thread.runs.length > 0 && <button type="button" onClick={() => void resume()}>恢复最近任务</button>}</div>}</section>}
+    {tab === "compose" ? <><p>仅可创建故障上报、智能问数和操作指引任务。</p><div className="agent-quick-actions" aria-label="Agent 快捷任务"><button type="button" aria-pressed={agentId === "fault_reporting"} onClick={() => setAgentId("fault_reporting")}>故障上报</button><button type="button" aria-pressed={agentId === "metric_query"} onClick={() => setAgentId("metric_query")}>智能问数</button><button type="button" aria-pressed={agentId === "operation_guidance"} onClick={() => setAgentId("operation_guidance")}>操作指引</button></div><form onSubmit={submit}><fieldset disabled={submitting}><label>类型<select value={agentId} onChange={(event) => setAgentId(event.target.value)}><option value="fault_reporting">AI 故障上报</option><option value="metric_query">智能问数</option><option value="operation_guidance">操作指引</option></select></label><label>问题<textarea value={text} onChange={(event) => setText(event.target.value)} required placeholder="描述故障、查询指标或询问操作步骤" /></label><button type="submit">{submitting ? "创建中…" : "发送"}</button></fieldset></form></> : <section aria-label="Agent 历史">{historyError && <p role="alert">线程历史加载失败：{historyError}</p>}{history === null && !historyError ? <p role="status">正在加载线程历史…</p> : history?.length === 0 ? <p>暂无线程历史。</p> : <ul>{history?.map((item) => <li key={item.thread_id}><button type="button" onClick={() => void getAgentThread(item.thread_id).then(setThread).catch((error) => setHistoryError(error instanceof ApiError ? error.code ?? "REQUEST_FAILED" : "REQUEST_FAILED"))}>{item.agent_id} · {item.status}</button></li>)}</ul>}{thread && <div><p>线程：{thread.thread_id}</p><p>状态：{thread.status}</p>{thread.messages.map((item, index) => <p key={index}>消息已记录（内容受保护）</p>)}{thread.runs.length > 0 && <button type="button" onClick={() => void resume()}>恢复最近任务</button>}</div>}</section>}
     {events.length > 0 && <section aria-label="Agent 运行状态">{events.map((item, index) => <p key={`${item.event}-${index}`}>{item.event}：{String(item.data.status ?? "已收到")}</p>)}</section>}
     {message && <p role="status">{message}</p>}
   </aside>;

@@ -36,6 +36,98 @@ describe("App", () => {
     expect(screen.queryByRole("button", { name: "全局 Agent" })).not.toBeInTheDocument();
   });
 
+  it("uses the approved operations-console navigation shell for an authorized page", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["workbench:view"] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ active_fault_count: 0, status_counts: [], urgency_counts: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+
+    expect(await screen.findByRole("navigation", { name: "业务导航" })).toBeInTheDocument();
+    expect(screen.getByText("新能源装载机智能运维平台")).toBeInTheDocument();
+    expect(screen.getByText("工作台 / 运维工作台")).toBeInTheDocument();
+  });
+
+  it("keeps the desktop shell sidebar fixed and exposes the prototype user menu", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["workbench:view"] }), { status: 200 })));
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+
+    expect(await screen.findByRole("complementary")).toHaveClass("sidebar");
+    expect(screen.getByRole("main")).toHaveClass("main-area");
+    const userChip = screen.getByRole("button", { name: "当前用户：operator" });
+    expect(userChip).toHaveAttribute("aria-haspopup", "menu");
+    expect(userChip).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.click(userChip);
+    expect(userChip).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("menu", { name: "用户菜单" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "个人资料" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "安全设置 / 修改密码" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "退出登录" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("menuitem", { name: "个人资料" }));
+    expect(screen.getByRole("dialog", { name: "个人资料" })).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByRole("dialog", { name: "个人资料" })).not.toBeInTheDocument();
+  });
+
+  it("changes the password through the formal endpoint then returns to login", async () => {
+    const fetchMock = vi.fn((input: string, _init?: RequestInit) => {
+      if (input === "/api/auth/me") return Promise.resolve(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["workbench:view"] }), { status: 200 }));
+      if (input === "/api/auth/password") return Promise.resolve(new Response(JSON.stringify({ audit_event_id: "audit-password-change" }), { status: 200 }));
+      return Promise.resolve(new Response(JSON.stringify({ items: [], count: 0, active_fault_count: 0, status_counts: [], urgency_counts: [] }), { status: 200 }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+
+    fireEvent.click(await screen.findByRole("button", { name: "当前用户：operator" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "安全设置 / 修改密码" }));
+    fireEvent.change(screen.getByLabelText("当前密码"), { target: { value: "current-password" } });
+    fireEvent.change(screen.getByLabelText("新密码"), { target: { value: "new-password-123" } });
+    fireEvent.change(screen.getByLabelText("确认新密码"), { target: { value: "new-password-123" } });
+    fireEvent.click(screen.getByRole("button", { name: "保存密码" }));
+
+    await waitFor(() => expect(fetchMock.mock.calls.some(([input]) => input === "/api/auth/password")).toBe(true));
+    const passwordCall = fetchMock.mock.calls.find(([input]) => input === "/api/auth/password");
+    expect(JSON.parse(String((passwordCall?.[1] as RequestInit).body))).toEqual({ current_password: "current-password", new_password: "new-password-123", confirm_password: "new-password-123" });
+    expect(window.sessionStorage.getItem("access_token")).toBeNull();
+  });
+
+  it("renders the eight prototype navigation items in their approved order", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      id: "user-1", username: "admin", enabled: true,
+      permission_codes: [
+        "workbench:view", "bi:view", "organization:read", "equipment:read",
+        "fault:create", "maintenance:view", "identity:read", "system:audit",
+        "intelligence:model", "intelligence:agent", "intelligence:knowledge",
+      ],
+    }), { status: 200 })));
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+
+    const navigation = await screen.findByRole("navigation", { name: "业务导航" });
+    const links = Array.from(navigation.querySelectorAll<HTMLAnchorElement>("a"));
+    expect(links.map((link) => [link.getAttribute("href"), link.firstElementChild?.textContent, link.lastChild?.textContent])).toEqual([
+      ["/", "01", "工作台"],
+      ["/bi-dashboard", "02", "驾驶舱 BI"],
+      ["/factory-modeling", "03", "工厂建模"],
+      ["/equipment", "04", "设备台账"],
+      ["/fault-report", "05", "故障上报"],
+      ["/maintenance-records", "06", "维修记录"],
+      ["/system-management", "07", "系统管理"],
+      ["/intelligent-config", "08", "智能配置"],
+    ]);
+    expect(navigation).not.toHaveTextContent("智能审计");
+    expect(navigation).not.toHaveTextContent("AI 故障上报");
+    expect(navigation).not.toHaveTextContent("维修执行");
+  });
+
   it("requires every formal dependency permission before opening equipment creation", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "user-1", username: "reader", enabled: true, permission_codes: ["equipment:read"] }), { status: 200 })));
 
@@ -43,6 +135,18 @@ describe("App", () => {
 
     expect(await screen.findByText("你没有访问此页面的权限。")).toBeInTheDocument();
     expect(screen.queryByLabelText("设备编码")).not.toBeInTheDocument();
+  });
+
+  it("keeps the contextual topbar title on nested equipment routes", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["equipment:read", "equipment:write", "organization:read", "identity:read"] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "line-1", type: "LINE", code: "LINE-01", name: "一线", parent_id: "factory-1", enabled: true }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "user-2", username: "owner", enabled: true, role_ids: [] }]), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<MemoryRouter initialEntries={["/equipment/new"]}><App /></MemoryRouter>);
+
+    expect(await screen.findByText("资产管理 / 新增设备")).toBeInTheDocument();
   });
 
   it("loads an Agent configuration and saves only the selected Agent", async () => {
@@ -60,9 +164,11 @@ describe("App", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole("navigation", { name: "主导航" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "业务导航" })).toBeInTheDocument();
+    await screen.findByRole("tab", { name: "智能体配置" });
+    fireEvent.click(screen.getByRole("tab", { name: "智能体配置" }));
     expect(await screen.findByRole("heading", { name: "AI 故障上报" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "智能配置" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "智能配置", level: 1 })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "AI 故障上报" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByLabelText("启用深度思考"));
@@ -82,6 +188,8 @@ describe("App", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     render(<MemoryRouter initialEntries={["/intelligent-config"]}><App /></MemoryRouter>);
+    await screen.findByRole("tab", { name: "智能体配置" });
+    fireEvent.click(screen.getByRole("tab", { name: "智能体配置" }));
     expect(await screen.findByText("尚无可配置的 Agent。")).toBeInTheDocument();
     expect(fetchMock.mock.calls.map(([path]) => path)).toEqual([
       "/api/auth/me", "/api/agent-configs", "/api/model-providers", "/api/model-bindings",
@@ -98,6 +206,8 @@ describe("App", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     render(<MemoryRouter initialEntries={["/intelligent-config"]}><App /></MemoryRouter>);
+    await screen.findByRole("tab", { name: "智能体配置" });
+    fireEvent.click(screen.getByRole("tab", { name: "智能体配置" }));
     await screen.findByRole("heading", { name: "AI 故障上报" });
     fireEvent.click(screen.getByLabelText("启用深度思考"));
 
@@ -152,11 +262,96 @@ describe("App", () => {
       .mockResolvedValueOnce(new Response(JSON.stringify({ thread_id: "thread-1", agent_id: "operation_guidance", status: "OPEN", messages: [{ role: "user", text: "secret internal text" }], runs: [] }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
     render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
-    fireEvent.click(await screen.findByRole("button", { name: "全局 Agent" }));
+    fireEvent.click(await screen.findByRole("button", { name: "打开运维 Agent" }));
     fireEvent.click(screen.getByRole("button", { name: "线程历史" }));
     expect(await screen.findByRole("button", { name: /operation_guidance/ })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /operation_guidance/ }));
     expect(await screen.findByText("消息已记录（内容受保护）")).toBeInTheDocument();
     expect(screen.queryByText("secret internal text")).not.toBeInTheDocument();
+  });
+
+  it("uses the prototype floating Agent icon instead of a topbar text entry", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      id: "user-1", username: "operator", enabled: true,
+      permission_codes: ["workbench:view", "intelligence:agent"],
+    }), { status: 200 })));
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+
+    const floatingAgent = await screen.findByRole("button", { name: "打开运维 Agent" });
+    expect(screen.queryByRole("button", { name: "全局 Agent" })).not.toBeInTheDocument();
+    expect(floatingAgent).toHaveClass("ops-agent-fab");
+
+    fireEvent.click(floatingAgent);
+    expect(screen.getByRole("dialog", { name: "全局 Agent" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "打开运维 Agent" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "关闭" }));
+    expect(await screen.findByRole("button", { name: "打开运维 Agent" })).toBeInTheDocument();
+  });
+
+  it("opens the notification panel, filters unread items, and marks an item read", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["workbench:view"] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ active_fault_count: 0, status_counts: [], urgency_counts: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ unread_count: 2 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [{ id: "notice-1", type: "FAULT", title: "Fault submitted", body: "Pump alarm", level: "WARNING", action_url: "/fault-report", related_object_id: "fault-1", created_at: "2026-08-01T00:00:00Z", is_read: false }], total: 1, unread_count: 2 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ unread_count: 2 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [{ id: "notice-1", type: "FAULT", title: "Fault submitted", body: "Pump alarm", level: "WARNING", action_url: "/fault-report", related_object_id: "fault-1", created_at: "2026-08-01T00:00:00Z", is_read: false }], total: 1, unread_count: 2 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "notice-1", is_read: true }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: "Notifications" }));
+
+    expect(await screen.findByRole("dialog", { name: "Notifications" })).toBeInTheDocument();
+    expect(screen.getByText("2")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "未读" }));
+    expect(await screen.findByText("Fault submitted")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Fault submitted/ }));
+    await waitFor(() => expect(fetchMock.mock.calls.some(([path]) => path === "/api/notifications/notice-1/read")).toBe(true));
+  });
+
+  it("keeps the mobile navigation and Agent drawer mutually layered", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["workbench:view", "intelligence:agent"] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ active_fault_count: 0, status_counts: [], urgency_counts: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0 }), { status: 200 })));
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: "打开导航" }));
+    expect(screen.getByRole("button", { name: "关闭导航" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "打开运维 Agent" }));
+    expect(screen.getByRole("dialog", { name: "全局 Agent" })).toBeInTheDocument();
+  });
+
+  it("renders a semantic breadcrumb for the active route", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["workbench:view"] }), { status: 200 })));
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+
+    const breadcrumb = await screen.findByRole("navigation", { name: "面包屑" });
+    expect(breadcrumb).toHaveTextContent("工作台");
+    expect(breadcrumb).toHaveTextContent("运维工作台");
+  });
+
+  it("exposes the Agent drawer as a modal with an accessible close action", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["workbench:view", "intelligence:agent"] }), { status: 200 })));
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button", { name: "打开运维 Agent" }));
+
+    expect(screen.getByRole("dialog", { name: "全局 Agent" })).toHaveAttribute("aria-modal", "true");
+    expect(screen.getByRole("button", { name: "故障上报" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "智能问数" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "操作指引" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "关闭" }));
+    expect(screen.queryByRole("dialog", { name: "全局 Agent" })).not.toBeInTheDocument();
   });
 });
