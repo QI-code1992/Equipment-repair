@@ -698,3 +698,10 @@
 - Exact HEAD `a0bbfdbe7149a6b3a257f7456b9a6d190bec03d8`: RAGFlow, PostgreSQL/live lifecycle, ClamAV/MinIO, HTTPS health/MIME and authenticated browser E2E passed.
 - Browser flow: login, workbench, protected intelligent configuration and fault-report routes, logout redirect to `/login`.
 - Temporary validation resources and credentials were removed. No production code or configuration was changed during governance verification.
+
+## TASK-013 共享导航原型一致性自测（2026-08-07）
+
+- 原型对照：`03-ui-prototype/prototype/pages/workbench.html` 的单一“业务导航”与 `01`—`08` 顺序。
+- 代码边界：只调整 `App.tsx` 的主导航声明/渲染与对应 CSS；二级页面路由和权限守卫未删除。
+- 实测：新增 `App.test.tsx` 回归先在旧导航失败，再通过；Vitest 全量 `8 files passed / 98 tests passed`，生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 均通过。
+- 未验证：ECS 自动部署完成后的浏览器视觉核对待部署结果可用后执行；本记录不构成审核批准、Merge 授权或 Stage 6/7/8 解锁。

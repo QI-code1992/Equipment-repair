@@ -666,3 +666,11 @@
 - 验证：前端 `8 files passed / 97 tests passed`；`npm run build`（`tsc -b` 与 Vite production build）通过；15 项 Node 静态回归通过；`git diff --check` 通过。
 - 未验证：除 `/login` 固定桌面视口只读检查外，15 条受保护路由的认证浏览器视觉对照、Windows Docker/RAGFlow/ClamAV/MinIO/HTTPS live-stack 和 ECS 部署同步未在本检查点宣称完成。
 - 下一步：将该精确候选推送到远端后，请 DEV-001 统一进行一次正式整体审核；在审核、集成检查和项目负责人精确授权前，不转入 Stage 6。
+
+## FCP-013-15：共享业务导航原型一致性修复（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成审核、集成、Merge 或任何 Stage 解锁。
+- 范围：共享侧栏从多分组、11 项收束为批准原型的单一“业务导航”及 8 项固定顺序：工作台、驾驶舱 BI、工厂建模、设备台账、故障上报、维修记录、系统管理、智能配置；编号为 `01` 至 `08`。
+- 边界：Agent 上报、智能审计和维修执行继续保留其路由与权限校验，但不显示在原型主导航；未修改 API、权限、后端、部署或运行配置。
+- 验证：新增导航顺序、编号与隐藏项回归；前端全量 `8 files passed / 98 tests passed`、生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 均通过。
+- 依赖与结构：未新增生产依赖、兼容层或抽象层；未触碰既有未跟踪 `codebase/frontend/.vscode/`。

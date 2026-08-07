@@ -52,6 +52,35 @@ describe("App", () => {
     expect(screen.getByText("工作台 / 运维工作台")).toBeInTheDocument();
   });
 
+  it("renders the eight prototype navigation items in their approved order", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      id: "user-1", username: "admin", enabled: true,
+      permission_codes: [
+        "workbench:view", "bi:view", "organization:read", "equipment:read",
+        "fault:create", "maintenance:view", "identity:read", "system:audit",
+        "intelligence:model", "intelligence:agent", "intelligence:knowledge",
+      ],
+    }), { status: 200 })));
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+
+    const navigation = await screen.findByRole("navigation", { name: "业务导航" });
+    const links = Array.from(navigation.querySelectorAll<HTMLAnchorElement>("a"));
+    expect(links.map((link) => [link.getAttribute("href"), link.firstElementChild?.textContent, link.lastChild?.textContent])).toEqual([
+      ["/", "01", "工作台"],
+      ["/bi-dashboard", "02", "驾驶舱 BI"],
+      ["/factory-modeling", "03", "工厂建模"],
+      ["/equipment", "04", "设备台账"],
+      ["/fault-report", "05", "故障上报"],
+      ["/maintenance-records", "06", "维修记录"],
+      ["/system-management", "07", "系统管理"],
+      ["/intelligent-config", "08", "智能配置"],
+    ]);
+    expect(navigation).not.toHaveTextContent("智能审计");
+    expect(navigation).not.toHaveTextContent("AI 故障上报");
+    expect(navigation).not.toHaveTextContent("维修执行");
+  });
+
   it("requires every formal dependency permission before opening equipment creation", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "user-1", username: "reader", enabled: true, permission_codes: ["equipment:read"] }), { status: 200 })));
 

@@ -663,3 +663,10 @@
 - 合并后核验：祖先关系、Merge Tree、`workflow/state.json` JSON 解析及相对第一父的 `git diff --check` 均通过。PR #81 仅含 Stage 6 TASK-005 live retest 证据和状态台账更新。
 - 证据结论保持不变：live lifecycle `2 passed, 5 warnings`，但 `DEF-STAGE6-003` 的分段时序与唯一阻塞组件定位仍缺失；`DEF-STAGE6-004`、`DEF-STAGE6-005` 亦仍开放。该合入不构成 Stage 6 总体通过或 Stage 7/8 解锁。
 - 下一步：继续独立补齐剩余 Stage 6 证据并形成新的精确测试结论；在此之前 Stage 6/7/8 继续锁定。
+
+## TASK-013 导航原型偏差修复交接（2026-08-07）
+
+- 发现：测试环境共享侧栏仍使用多分组、11 项导航，与已批准原型的单一“业务导航”和 8 项编号菜单不一致。
+- 修复：主导航固定为原型顺序与 `01`—`08` 编号；二级业务路由未删除，仅不在原型主导航中展示。
+- 本地证据：新增导航契约回归；Vitest `8 files passed / 98 tests passed`、生产构建、15 项 Node 静态回归、JSON 解析和 `git diff --check` 通过。
+- 门禁：本次变更仍属 TASK-013 开发候选。部署同步与浏览器视觉核对完成后，统一交由 DEV-001 整体审核；不申请 Merge、不合并，Stage 6/7/8 继续锁定。

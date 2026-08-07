@@ -12,22 +12,20 @@ import { AgentReportPage, BiDashboardPage, EquipmentAddPage, EquipmentDetailPage
 type Page = {
   path: string;
   label: string;
+  navLabel?: string;
   group: string;
   mark: string;
 };
 
 const pages: Page[] = [
-  { path: "/", label: "运维工作台", group: "工作台", mark: "台" },
-  { path: "/bi-dashboard", label: "驾驶舱 BI", group: "工作台", mark: "BI" },
-  { path: "/factory-modeling", label: "工厂建模", group: "资产管理", mark: "厂" },
-  { path: "/equipment", label: "设备台账", group: "资产管理", mark: "设" },
-  { path: "/intelligent-config", label: "智能配置", group: "智能运维", mark: "智" },
-  { path: "/intelligence-audit", label: "智能审计", group: "智能运维", mark: "审" },
-  { path: "/fault-report", label: "故障上报", group: "现场作业", mark: "报" },
-  { path: "/agent-report", label: "AI 故障上报", group: "现场作业", mark: "AI" },
-  { path: "/maintenance-records", label: "维修记录", group: "现场作业", mark: "记" },
-  { path: "/repair-execution", label: "维修执行", group: "现场作业", mark: "修" },
-  { path: "/system-management", label: "系统管理", group: "系统管理", mark: "管" },
+  { path: "/", label: "运维工作台", navLabel: "工作台", group: "工作台", mark: "01" },
+  { path: "/bi-dashboard", label: "驾驶舱 BI", group: "工作台", mark: "02" },
+  { path: "/factory-modeling", label: "工厂建模", group: "资产管理", mark: "03" },
+  { path: "/equipment", label: "设备台账", group: "资产管理", mark: "04" },
+  { path: "/fault-report", label: "故障上报", group: "现场作业", mark: "05" },
+  { path: "/maintenance-records", label: "维修记录", group: "现场作业", mark: "06" },
+  { path: "/system-management", label: "系统管理", group: "系统管理", mark: "07" },
+  { path: "/intelligent-config", label: "智能配置", group: "智能运维", mark: "08" },
 ];
 
 function RequireAuthentication({ children }: { children: React.ReactNode }) {
@@ -60,7 +58,6 @@ function ApplicationShell() {
   }, []);
   const activePage = pageForRoute(location.pathname);
   const visiblePages = useMemo(() => permissionCodes === null ? [] : pages.filter((page) => pagePermission(page.path, permissionCodes)), [permissionCodes]);
-  const groups = [...new Set(visiblePages.map((page) => page.group))];
   useEffect(() => {
     if (!notificationsOpen) return;
     setNotificationLoading(true);
@@ -112,19 +109,17 @@ function ApplicationShell() {
           </div>
         </div>
 
-        <nav aria-label="业务导航">
+        <nav className="nav-section" aria-label="业务导航">
           {permissionError && <p role="alert">{permissionError}</p>}
-          {groups.map((group) => (
-            <div className="nav-group" key={group}>
-              <div className="nav-group__label">{group}</div>
-              {visiblePages.filter((page) => page.group === group).map((page) => (
-                <NavLink className="nav-item" key={page.path} to={page.path} end={page.path === "/"} onClick={() => setSidebarOpen(false)}>
-                  <span aria-hidden="true">{page.mark}</span>
-                  {page.label}
-                </NavLink>
-              ))}
-            </div>
-          ))}
+          <div className="nav-label">业务导航</div>
+          <div className="nav-list">
+            {visiblePages.map((page) => (
+              <NavLink className="nav-item" key={page.path} to={page.path} end={page.path === "/"} onClick={() => setSidebarOpen(false)}>
+                <span className="nav-icon" aria-hidden="true">{page.mark}</span>
+                <span>{page.navLabel ?? page.label}</span>
+              </NavLink>
+            ))}
+          </div>
         </nav>
 
         <div className="sidebar__footer">
