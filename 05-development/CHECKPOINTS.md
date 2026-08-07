@@ -706,6 +706,13 @@
 - 验证：新增回归先失败后通过；前端全量 `8 files passed / 101 tests passed`、生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
 - 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未触碰既有未跟踪 `codebase/frontend/.vscode/`。
 
+## FCP-013-23：工作台网格层叠规则修复（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点只记录可恢复开发单元，不构成审核、集成、Merge 或任何 Stage 解锁。
+- 根因与修复：通用 `.data-card { grid-column: span 2; }` 位于工作台专用规则之后，覆盖五列 KPI 与队列主列的默认跨列行为。紧随该通用规则增加工作台直系卡片的 `grid-column: auto` 局部覆盖，恢复原型的五张 KPI 横排和“故障待办 + 右侧健康/今日处置”结构。
+- 回归：新增静态层叠契约，验证局部覆盖存在且在通用跨列规则之后；工作台页面定向 `4 passed`，全量前端 `104 passed`，生产构建、16 项 Node 静态回归、JSON 解析和 `git diff --check` 通过。
+- 边界：未改 API、权限、指标事实、后端、迁移、部署配置、生产依赖、兼容层或抽象层；未触碰 `.vscode/`。
+
 ## FCP-013-20：驾驶舱 BI 效率分析原型一致性修复（2026-08-07）
 
 - 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；仅记录可恢复代码单元，不构成审核、集成、Merge 或任何 Stage 解锁。

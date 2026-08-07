@@ -9,7 +9,7 @@
 | 页面 | 正式路由 | 原型参考 | 正式数据/操作契约 | 自动化覆盖 | 当前状态 | 尚未完成的证据 |
 |---|---|---|---|---|---|---|
 | 登录 | `/login` | `pages/login.html` | `/api/auth/login`、`/api/auth/me`、会话存储 | `LoginPage.test.tsx`、`App.test.tsx`、`api.test.ts` | 代码对照完成；固定桌面视口已检查 | 真实测试账号浏览器登录/退出、隔离 live-stack |
-| 工作台 | `/` | `pages/workbench.html` | `/api/workbench/todos`、告警摘要、快捷入口、单设备健康查询 | `WorkbenchPage.test.tsx`、`App.test.tsx` | 代码对照完成；缺失聚合契约保留受控空态 | 认证浏览器对照、真实数据状态 |
+| 工作台 | `/` | `pages/workbench.html` | `/api/workbench/todos`、告警摘要、快捷入口、单设备健康查询 | `WorkbenchPage.test.tsx`、`App.test.tsx`、`workbench-grid-cascade.test.js` | 代码对照完成；五张 KPI 横排与故障待办/右侧处置结构已以局部样式层叠规则固定；缺失聚合契约保留受控空态 | 认证浏览器对照、真实数据状态 |
 | 驾驶舱 BI | `/bi-dashboard` | `pages/bi-dashboard.html` | `/api/bi/dashboard?organization_id=&period=day\|week\|month`、`/api/equipment` | `PortalPages.test.tsx`、后端 `test_task012_read_apis.py` | 代码对照完成；趋势粒度、四项效率模块、八列设备健康表与分析抽屉均恢复为原型结构，缺失数据保持受控空态 | 浏览器筛选、固定视口视觉对照、完整 BI live 数据 |
 | 工厂建模 | `/factory-modeling` | `pages/factory-modeling.html` | `/api/organizations` | `PortalPages.test.tsx` | 代码对照完成；树、详情、编辑和禁用边界已接入 | 认证浏览器树操作、真实写入联调 |
 | 设备台账 | `/equipment` | `pages/equipment-ledger.html` | `/api/equipment`、`/api/organizations` | `PortalPages.test.tsx`、`api.test.ts` | 代码对照完成；筛选、空态、健康分不可用态已接入 | 浏览器视口对照、真实权限/数据联调 |
