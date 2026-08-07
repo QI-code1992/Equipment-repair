@@ -706,6 +706,13 @@
 - 验证：新增回归先失败后通过；前端全量 `8 files passed / 101 tests passed`、生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
 - 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未触碰既有未跟踪 `codebase/frontend/.vscode/`。
 
+## FCP-013-24：侧栏固定与用户入口原型一致性修复（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复开发单元，不构成审核、Merge 或 Stage 解锁。
+- 范围：桌面固定侧栏及主区域偏移；用户芯片菜单、资料/安全弹窗、退出确认与键盘/外部关闭行为。
+- 验证：新增 App Shell 回归与前端全量测试 `106 passed`，生产构建、Node 静态回归、JSON 和差异检查通过。
+- 边界：无新增依赖、API、迁移、部署配置、兼容层或抽象层；未触碰 `codebase/frontend/.vscode/`。
+
 ## FCP-013-24：门户页面重复标题块移除（2026-08-07）
 
 - 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；只记录 TASK-013 可恢复开发单元，不构成审核、集成、Merge 或 Stage 解锁。

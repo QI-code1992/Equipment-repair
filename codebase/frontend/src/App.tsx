@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, NavLink, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 
 import { IntelligentConfigPage } from "./IntelligentConfigPage";
@@ -63,6 +63,9 @@ function ApplicationShell() {
   const [notificationError, setNotificationError] = useState<string | null>(null);
   const [notificationLoading, setNotificationLoading] = useState(false);
   const [agentIdle, setAgentIdle] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [userModal, setUserModal] = useState<"profile" | "security" | null>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     getCurrentUser().then((user) => { setPermissionCodes(user.permission_codes); setCurrentUser(user); }).catch(() => {
       clearActiveSession();
@@ -83,11 +86,15 @@ function ApplicationShell() {
       .finally(() => setNotificationLoading(false));
   }, [notificationsOpen, notificationTab]);
   useEffect(() => {
-    if (!notificationsOpen && !agentOpen) return;
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") { setNotificationsOpen(false); setAgentOpen(false); } };
+    if (!notificationsOpen && !agentOpen && !userMenuOpen && !userModal) return;
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") { setNotificationsOpen(false); setAgentOpen(false); setUserMenuOpen(false); setUserModal(null); } };
+    const onPointerDown = (event: PointerEvent) => {
+      if (userMenuOpen && !userMenuRef.current?.contains(event.target as Node)) setUserMenuOpen(false);
+    };
+    if (userMenuOpen) document.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [notificationsOpen, agentOpen]);
+    return () => { window.removeEventListener("keydown", onKeyDown); document.removeEventListener("pointerdown", onPointerDown); };
+  }, [notificationsOpen, agentOpen, userMenuOpen, userModal]);
   useEffect(() => {
     if (!notificationsOpen && !agentOpen) return;
     const previous = document.body.style.overflow;
@@ -110,6 +117,12 @@ function ApplicationShell() {
   }
   async function markAllRead() {
     try { await markAllNotificationsRead(); setNotifications((current) => current?.map((item) => ({ ...item, is_read: true })) ?? current); setNotificationUnreadCount(0); } catch { setNotificationError("通知操作失败，请重试。"); }
+  }
+  async function confirmLogout() {
+    setUserMenuOpen(false);
+    if (!window.confirm("确认退出当前账号？")) return;
+    await logout().catch(() => undefined);
+    navigate("/login", { replace: true });
   }
   function guarded(path: string, element: React.ReactNode) {
     if (permissionCodes === null || permissionError) return element;
@@ -158,7 +171,22 @@ function ApplicationShell() {
             <h1>{activePage.label}</h1>
             </div>
           </div>
-          <div className="topbar__actions"><button type="button" className="topbar__logout" onClick={() => void logout().finally(() => navigate("/login", { replace: true }))}>退出</button><div className="user-chip" aria-label={`当前用户：${currentUser?.username ?? "已登录用户"}`}><span className="topbar__avatar">{currentUser?.username.slice(0, 1).toUpperCase() ?? "用"}</span><span>{currentUser?.username ?? "正在加载"}</span></div></div>
+          <div className="topbar__actions">
+            <div className="user-menu-anchor" ref={userMenuRef}>
+              <button type="button" className="user-chip" aria-label={`当前用户：${currentUser?.username ?? "已登录用户"}`} aria-haspopup="menu" aria-expanded={userMenuOpen} onClick={() => setUserMenuOpen((open) => !open)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setUserMenuOpen((open) => !open); } }}>
+                <span className="topbar__avatar">{currentUser?.username.slice(0, 1).toUpperCase() ?? "用"}</span><span>{currentUser?.username ?? "正在加载"}</span><span className="user-menu-chevron" aria-hidden="true">⌄</span>
+              </button>
+              {userMenuOpen && <div className="global-user-menu" role="menu" aria-label="用户菜单">
+                <div className="global-menu-user"><span className="avatar">{currentUser?.username.slice(0, 1).toUpperCase() ?? "用"}</span><div><strong>{currentUser?.username ?? "正在加载"}</strong><span>平台用户 · 正式身份信息未提供</span></div></div>
+                <div className="global-menu-divider" />
+                <button type="button" className="global-menu-item" role="menuitem" onClick={() => { setUserMenuOpen(false); setUserModal("profile"); }}>个人资料</button>
+                <button type="button" className="global-menu-item" role="menuitem" onClick={() => { setUserMenuOpen(false); setUserModal("security"); }}>安全设置 / 修改密码</button>
+                {permissionCodes?.includes("identity:write") && <button type="button" className="global-menu-item" role="menuitem" onClick={() => { setUserMenuOpen(false); navigate("/system-management"); }}>进入用户管理</button>}
+                <div className="global-menu-divider" />
+                <button type="button" className="global-menu-item danger" role="menuitem" onClick={() => void confirmLogout()}>退出登录</button>
+              </div>}
+            </div>
+          </div>
         </header>
         {sidebarOpen && <button type="button" className="sidebar-backdrop" aria-label="关闭导航" onClick={() => setSidebarOpen(false)} />}
         {permissionCodes === null && !permissionError ? <section className="page-shell" aria-live="polite"><p role="status">正在加载会话权限…</p></section> : <Routes>
@@ -189,6 +217,7 @@ function ApplicationShell() {
         </>}
         {agentOpen && permissionCodes?.includes("intelligence:agent") && <><button type="button" className="agent-scrim" aria-label="Close Agent" onClick={() => setAgentOpen(false)} /><GlobalAgentDrawer onClose={() => setAgentOpen(false)} /></>}
         {!agentOpen && permissionCodes?.includes("intelligence:agent") && <button type="button" className={`ops-agent-fab${agentIdle ? " is-idle" : ""}`} aria-label="打开运维 Agent" onPointerEnter={() => setAgentIdle(false)} onFocus={() => setAgentIdle(false)} onClick={() => setAgentOpen(true)}><span className="ops-agent-fab-icon"><AgentRobotIcon /></span></button>}
+        {userModal && <div className="user-entry-modal" role="dialog" aria-modal="true" aria-labelledby="user-entry-title"><button type="button" className="user-entry-backdrop" aria-label="关闭" onClick={() => setUserModal(null)} /><section className="user-entry-dialog"><button type="button" className="user-entry-close" aria-label="关闭" onClick={() => setUserModal(null)}>×</button><h2 id="user-entry-title">{userModal === "profile" ? "个人资料" : "安全设置"}</h2>{userModal === "profile" ? <><div className="user-entry-profile"><span className="avatar large">{currentUser?.username.slice(0, 1).toUpperCase() ?? "用"}</span><strong>{currentUser?.username ?? "正在加载"}</strong><span>平台用户 · 正式组织信息未提供</span></div><dl className="user-entry-details"><div><dt>用户名</dt><dd>{currentUser?.username ?? "-"}</dd></div><div><dt>所属组织</dt><dd>未提供</dd></div><div><dt>账号状态</dt><dd>{currentUser?.enabled ? "已启用" : "不可用"}</dd></div></dl></> : <form onSubmit={(event) => { event.preventDefault(); }}><label>当前密码<input type="password" name="current" required /></label><label>新密码<input type="password" name="next" required minLength={8} /></label><label>确认新密码<input type="password" name="confirm" required minLength={8} /></label><p className="user-entry-hint">密码修改接口尚未提供，当前仅展示原型交互。</p><div className="user-entry-footer"><button type="button" className="button-secondary" onClick={() => setUserModal(null)}>取消</button><button type="submit" className="button-primary">保存密码</button></div></form>}</section></div>}
       </main>
     </div>
   );

@@ -52,6 +52,30 @@ describe("App", () => {
     expect(screen.getByText("工作台 / 运维工作台")).toBeInTheDocument();
   });
 
+  it("keeps the desktop shell sidebar fixed and exposes the prototype user menu", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["workbench:view"] }), { status: 200 })));
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+
+    expect(await screen.findByRole("complementary")).toHaveClass("sidebar");
+    expect(screen.getByRole("main")).toHaveClass("main-area");
+    const userChip = screen.getByRole("button", { name: "当前用户：operator" });
+    expect(userChip).toHaveAttribute("aria-haspopup", "menu");
+    expect(userChip).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.click(userChip);
+    expect(userChip).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("menu", { name: "用户菜单" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "个人资料" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "安全设置 / 修改密码" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "退出登录" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("menuitem", { name: "个人资料" }));
+    expect(screen.getByRole("dialog", { name: "个人资料" })).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByRole("dialog", { name: "个人资料" })).not.toBeInTheDocument();
+  });
+
   it("renders the eight prototype navigation items in their approved order", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
       id: "user-1", username: "admin", enabled: true,
