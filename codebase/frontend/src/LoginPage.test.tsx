@@ -34,6 +34,14 @@ describe("LoginPage", () => {
     for (const label of ["故障追踪", "诊断辅助", "知识检索", "知识图谱", "驾驶舱分析", "工单协同"]) expect(screen.getByText(label)).toBeInTheDocument();
   });
 
+  it("identifies credentials for the browser password manager without platform-side storage", () => {
+    renderLogin();
+
+    expect(screen.getByLabelText("用户名")).toHaveAttribute("name", "username");
+    expect(screen.getByLabelText("密码")).toHaveAttribute("name", "password");
+    expect(screen.getByText("密码由浏览器的密码管理器保存，平台不会存储密码。")).toBeInTheDocument();
+  });
+
   it("shows field-level errors and does not call the authentication API for blank credentials", () => {
     const login = vi.spyOn(api, "login");
     renderLogin();
