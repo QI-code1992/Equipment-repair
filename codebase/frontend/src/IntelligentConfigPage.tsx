@@ -200,8 +200,7 @@ export function IntelligentConfigPage({ permissionCodes = [] }: { permissionCode
   const reasoningUnsupported = Boolean(draft?.deep_thinking_enabled && selectedBinding && !selectedBinding.supports_reasoning);
   const canWriteKnowledge = permissionCodes.includes("intelligence:knowledge");
 
-  return <section className="config-page" aria-labelledby="page-heading">
-    <div className="config-page__intro"><div><div className="page-shell__eyebrow">智能运维</div><h2 id="page-heading">智能配置</h2><p>模型密钥仅以安全引用写入；页面不会读取、显示或保存密钥正文。</p></div></div>
+  return <section className="config-page">
     {error && <p role="alert">{error}</p>}
     {notice && <p role="status">{notice}</p>}
     <nav className="config-tabs" role="tablist" aria-label="智能配置中心一级页签">{[["models", "模型配置"], ["agents", "智能体配置"], ["knowledge", "知识库配置"], ["calls", "调用记录"], ["tokens", "Token 消耗统计"]].map(([id, label]) => <button key={id} className={activePanel === id ? "config-tab is-active" : "config-tab"} type="button" role="tab" aria-selected={activePanel === id} onClick={() => setActivePanel(id as typeof activePanel)}>{label}</button>)}</nav>

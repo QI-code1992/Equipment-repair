@@ -15,6 +15,9 @@ describe("FaultReportPage", () => {
   beforeEach(() => vi.clearAllMocks());
   it("keeps the approved fault-report list and report workspace modules visible", () => {
     render(<FaultReportPage />);
+    expect(screen.queryByText("现场作业")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "故障上报" })).not.toBeInTheDocument();
+    expect(screen.queryByText("AI 只生成可编辑草稿；只有人工确认才会写入正式故障单。")).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "查询筛选" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "故障上报列表" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "新增故障上报" })).toBeInTheDocument();

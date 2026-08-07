@@ -105,8 +105,7 @@ export function FaultReportPage() {
     setError(null);
   }
 
-  return <section className="portal-page fault-report-page" aria-labelledby="page-heading">
-    <div className="page-shell__eyebrow">现场作业</div><h2 id="page-heading">故障上报</h2><p>AI 只生成可编辑草稿；只有人工确认才会写入正式故障单。</p>
+  return <section className="portal-page fault-report-page">
     <section className="fault-query-panel" aria-label="故障查询筛选"><header><h3>查询筛选</h3><p>当前公开契约只提供创建与 AI 预览，不提供故障列表查询。</p></header><div className="fault-query-fields"><label>故障编号<input disabled placeholder="接口暂未提供" /></label><label>设备名称<input disabled placeholder="接口暂未提供" /></label><label>故障状态<select disabled><option>全部状态</option></select></label><button type="button" className="button-primary" disabled title="接口暂未提供故障列表查询">查询</button><button type="button" className="button-secondary" onClick={startNewReport}>重置</button></div></section>
     <section className="fault-list-panel"><header><div><h3>故障上报列表</h3><p>正式故障列表查询接口尚未提供。</p></div><button type="button" className="button-primary" onClick={startNewReport}>新增故障上报</button></header><p className="empty-panel">当前接口未提供故障列表查询。</p></section>
     <div className="fault-workspace"><section className="fault-workspace__form"><h3>现场故障信息</h3><p>先核对设备、故障现象、发生时间和受控附件。</p><form className="fault-form" onSubmit={(event) => void submit(event)}>

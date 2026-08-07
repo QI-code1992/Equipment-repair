@@ -37,6 +37,9 @@ describe("IntelligentConfigPage", () => {
     render(<IntelligentConfigPage />);
 
     expect(await screen.findByText("内部模型服务")).toBeInTheDocument();
+    expect(screen.queryByText("智能运维")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "智能配置" })).not.toBeInTheDocument();
+    expect(screen.queryByText("模型密钥仅以安全引用写入；页面不会读取、显示或保存密钥正文。")).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "模型与绑定" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("tab", { name: "智能体配置" }));
     expect(screen.getByRole("heading", { name: "Agent 控制面" })).toBeInTheDocument();
