@@ -706,6 +706,13 @@
 - 验证：新增回归先失败后通过；前端全量 `8 files passed / 101 tests passed`、生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
 - 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未触碰既有未跟踪 `codebase/frontend/.vscode/`。
 
+## FCP-013-24：门户页面重复标题块移除（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；只记录 TASK-013 可恢复开发单元，不构成审核、集成、Merge 或 Stage 解锁。
+- 修复：移除共享 `Page` 容器中的“正式业务数据”眉题和重复页面标题；原型已由 App Shell 顶部栏提供面包屑与页面标题，内容区直接从筛选/业务模块开始。
+- 验证：新增 BI 回归先失败后通过；前端全量 `8 files passed / 105 tests passed`，生产构建、16 项 Node 静态回归、JSON 解析和 `git diff --check` 通过。
+- 边界：未改变页面功能、API、权限、数据来源、依赖、迁移、部署配置、兼容层或抽象层；未触碰 `.vscode/`。
+
 ## FCP-013-23：工作台网格层叠规则修复（2026-08-07）
 
 - 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点只记录可恢复开发单元，不构成审核、集成、Merge 或任何 Stage 解锁。

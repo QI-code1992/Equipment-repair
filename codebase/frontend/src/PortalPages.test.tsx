@@ -17,6 +17,19 @@ describe("TASK-012 portal pages", () => {
     expect(screen.getAllByText("暂无趋势数据。")).toHaveLength(2);
   });
 
+  it("keeps the BI content area free of the redundant page-title block", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      summary: { fault_count: 0, active_fault_count: 0, completed_work_order_count: 0, completion_rate: 0 },
+      trend: [], efficiency: { completed_work_order_count: 0, average_completion_hours: null }, organization_ranking: [], history_comparison: { current_fault_count: 0, previous_fault_count: 0 },
+    }), { status: 200 })));
+
+    render(<BiDashboardPage />);
+
+    await screen.findByText("故障总数");
+    expect(screen.queryByText("正式业务数据")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "驾驶舱 BI" })).not.toBeInTheDocument();
+  });
+
   it("renders a semantic BI trend chart from formal API series values", async () => {
     vi.stubGlobal("fetch", vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({
