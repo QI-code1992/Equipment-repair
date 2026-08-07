@@ -39,7 +39,26 @@ describe("LoginPage", () => {
 
     expect(screen.getByLabelText("用户名")).toHaveAttribute("name", "username");
     expect(screen.getByLabelText("密码")).toHaveAttribute("name", "password");
-    expect(screen.getByText("密码由浏览器的密码管理器保存，平台不会存储密码。")).toBeInTheDocument();
+  });
+
+  it("仅用‘记住密码’切换浏览器说明，登录仍只提交凭证", async () => {
+    const login = vi.spyOn(api, "login").mockResolvedValue(undefined);
+    renderLogin();
+
+    const rememberPassword = screen.getByRole("checkbox", { name: "记住密码" });
+    expect(rememberPassword).toBeChecked();
+    expect(screen.getByText("根据 Chrome 的设置，浏览器可能保存或填充凭证；平台不会保存密码。")).toBeInTheDocument();
+
+    fireEvent.click(rememberPassword);
+    expect(rememberPassword).not.toBeChecked();
+    expect(screen.getByText("平台不会保存密码；你可以稍后启用浏览器密码管理。")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("用户名"), { target: { value: "operator" } });
+    fireEvent.change(screen.getByLabelText("密码"), { target: { value: "correct-password" } });
+    fireEvent.click(screen.getByRole("button", { name: "登录" }));
+
+    await waitFor(() => expect(login).toHaveBeenCalledWith("operator", "correct-password"));
+    expect(login).toHaveBeenCalledTimes(1);
   });
 
   it("shows field-level errors and does not call the authentication API for blank credentials", () => {
