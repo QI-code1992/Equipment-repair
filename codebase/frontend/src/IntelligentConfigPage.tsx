@@ -41,6 +41,7 @@ export function IntelligentConfigPage({ permissionCodes = [] }: { permissionCode
   const [draft, setDraft] = useState<AgentConfig | null>(null);
   const [editingProvider, setEditingProvider] = useState<ModelProvider | null>(null);
   const [editingBinding, setEditingBinding] = useState<ModelBinding | null>(null);
+  const [modelDrawerOpen, setModelDrawerOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,6 +64,20 @@ export function IntelligentConfigPage({ permissionCodes = [] }: { permissionCode
       .catch(() => setError("智能配置加载失败，请稍后重试。"))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>("button")).filter((button) => button.textContent?.trim() === "新增模型");
+    const open = (event: Event) => { event.preventDefault(); event.stopPropagation(); openNewModelDrawer(); };
+    buttons.forEach((button) => button.addEventListener("click", open, true));
+    return () => buttons.forEach((button) => button.removeEventListener("click", open, true));
+  });
+
+  useEffect(() => {
+    if (!modelDrawerOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setModelDrawerOpen(false); };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [modelDrawerOpen]);
 
   function select(agentId: string) {
     const selected = configs.find((item) => item.agent_id === agentId) ?? null;
@@ -95,32 +110,65 @@ export function IntelligentConfigPage({ permissionCodes = [] }: { permissionCode
     }
   }
 
-  async function addProvider(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
+  function openNewModelDrawer() {
+    setEditingProvider(null);
+    setEditingBinding(null);
+    setModelDrawerOpen(true);
     setError(null);
-    try {
-      const created = await createModelProvider({ name: String(form.get("provider_name")), secret_ref: String(form.get("secret_ref")), enabled: true });
-      setProviders((items) => [...items, created]);
-      event.currentTarget.reset();
-      setNotice("模型提供商已创建；密钥引用不会在页面回显。");
-    } catch (caught) { setError(`创建模型提供商失败：${errorText(caught)}`); }
+    setNotice(null);
   }
 
-  async function addBinding(event: FormEvent<HTMLFormElement>) {
+  function openEditModelDrawer(binding: ModelBinding) {
+    setEditingProvider(providers.find((provider) => provider.id === binding.provider_id) ?? null);
+    setEditingBinding(binding);
+    setModelDrawerOpen(true);
+    setError(null);
+    setNotice(null);
+  }
+
+  async function submitModelDrawer(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     setError(null);
     try {
-      const created = await createModelBinding({
-        provider_id: String(form.get("provider_id")), name: String(form.get("binding_name")),
-        model_name: String(form.get("model_name")), supports_reasoning: form.get("supports_reasoning") === "on", enabled: true,
-      });
-      setBindings((items) => [...items, created]);
-      event.currentTarget.reset();
-      setNotice("模型绑定已创建。");
+      const providerId = String(form.get("provider_id") ?? "");
+      let resolvedProviderId = providerId;
+      if (!editingBinding && !resolvedProviderId) {
+        const provider = await createModelProvider({
+          name: String(form.get("provider_name") ?? "").trim(),
+          secret_ref: String(form.get("secret_ref") ?? "").trim(),
+          enabled: true,
+        });
+        setProviders((items) => [...items, provider]);
+        resolvedProviderId = provider.id;
+      }
+      if (editingBinding) {
+        const updated = await updateModelBinding(editingBinding.id, {
+          provider_id: resolvedProviderId,
+          name: String(form.get("binding_name")),
+          model_name: String(form.get("model_name")),
+          supports_reasoning: form.get("supports_reasoning") === "on",
+          enabled: form.get("enabled") === "on",
+        });
+        setBindings((items) => items.map((item) => item.id === updated.id ? updated : item));
+        setNotice("模型已更新。");
+      } else {
+        const created = await createModelBinding({
+          provider_id: resolvedProviderId,
+          name: String(form.get("binding_name")),
+          model_name: String(form.get("model_name")),
+          supports_reasoning: form.get("supports_reasoning") === "on",
+          enabled: true,
+        });
+        setBindings((items) => [...items, created]);
+        setNotice("模型已创建。");
+      }
+      setModelDrawerOpen(false);
     } catch (caught) { setError(`创建模型绑定失败：${errorText(caught)}`); }
   }
+
+  const addProvider = submitModelDrawer;
+  const addBinding = submitModelDrawer;
 
   async function removeProvider(id: string) {
     setError(null);
@@ -205,6 +253,7 @@ export function IntelligentConfigPage({ permissionCodes = [] }: { permissionCode
     <h2 id="page-heading" className="sr-only">智能配置</h2>
     {error && <p role="alert">{error}</p>}
     {notice && <p role="status">{notice}</p>}
+    {modelDrawerOpen && <div className="model-drawer-layer" role="presentation"><button className="model-drawer-scrim" type="button" aria-label="关闭新增模型抽屉" onClick={() => setModelDrawerOpen(false)} /><aside className="model-drawer" role="dialog" aria-modal="true" aria-labelledby="model-drawer-title"><header><div><h3 id="model-drawer-title">{editingBinding ? `编辑模型：${editingBinding.name}` : "新增模型"}</h3><p>维护模型类型、供应商、接口和启用状态。</p></div><button type="button" className="icon-button" aria-label="关闭新增模型抽屉" onClick={() => setModelDrawerOpen(false)}>×</button></header><form className="model-drawer-form" onSubmit={submitModelDrawer}><label>模型类型<select name="model_type" defaultValue="LLM"><option>LLM</option><option>Embedding</option><option>Rerank</option></select></label>{editingBinding ? <label>供应商<select name="provider_id" defaultValue={editingBinding.provider_id} required>{providers.filter((provider) => provider.enabled).map((provider) => <option key={provider.id} value={provider.id}>{provider.name}</option>)}</select></label> : <><label>供应商名称<input name="provider_name" required placeholder="请输入供应商名称" /></label><label>密钥引用<input name="secret_ref" required autoComplete="off" placeholder="请输入密钥引用" /></label></>}<label>模型名称<input name="binding_name" defaultValue={editingBinding?.name ?? ""} required placeholder="请输入模型名称" /></label><label>调用模型<input name="model_name" defaultValue={editingBinding?.model_name ?? ""} required placeholder="请输入模型标识" /></label><label>API 地址<input name="api_base_url" placeholder="请输入 API 地址" /></label><label className="model-drawer-check"><input name="supports_reasoning" type="checkbox" defaultChecked={editingBinding?.supports_reasoning ?? false} /> 支持深度思考</label>{editingBinding && <label className="model-drawer-check"><input name="enabled" type="checkbox" defaultChecked={editingBinding.enabled} /> 启用模型</label>}<div className="model-drawer-actions"><button type="button" className="button-secondary" onClick={() => setModelDrawerOpen(false)}>取消</button><button type="submit" className="button-primary">{editingBinding ? "保存模型" : "保存并启用"}</button></div></form></aside></div>}
     <div className="config-tabs" role="tablist" aria-label="智能配置中心一级页签">{[["models", "模型配置"], ["agents", "智能体配置"], ["knowledge", "知识库配置"], ["calls", "调用记录"], ["tokens", "Token 消耗统计"]].map(([id, label]) => <button key={id} type="button" role="tab" aria-selected={activeTab === id} aria-controls={`config-panel-${id}`} className={`config-tab ${activeTab === id ? "active" : ""}`} onClick={() => setActiveTab(id as typeof activeTab)}>{label}</button>)}</div>
     <section id="config-panel-models" className="config-panel" role="tabpanel" hidden={activeTab !== "models"} aria-label="模型配置"><section className="config-catalogue" aria-labelledby="catalogue-heading"><header className="config-toolbar"><div><h3 id="catalogue-heading">模型配置</h3><p>提供商、模型绑定和 Agent 配置保持独立的正式管理边界。</p></div><button type="button" className="button-primary" onClick={() => setNotice("当前接口将模型拆分为提供商和模型绑定；请在下方按该正式边界新增。")} >新增模型</button></header><section className="config-default-models" aria-label="默认模型资源"><article className="data-card config-default-model"><h3>默认 LLM</h3><p className="prototype-unavailable">当前 API 未提供默认资源绑定。</p></article><article className="data-card config-default-model"><h3>默认 Embedding</h3><p className="prototype-unavailable">当前 API 未提供默认资源绑定。</p></article><article className="data-card config-default-model"><h3>默认 Rerank</h3><p className="prototype-unavailable">当前 API 未提供默认资源绑定。</p></article></section><section className="config-model-catalogue" aria-labelledby="model-catalogue-heading"><header><div><h3 id="model-catalogue-heading">模型目录</h3><p>目录只展示已由正式接口返回的模型绑定；模型类型与默认标记尚无接口字段。</p></div><div className="config-model-filter" role="group" aria-label="模型类型筛选"><button type="button" aria-pressed>全部</button><button type="button" disabled title="当前 API 未提供模型类型字段">LLM</button><button type="button" disabled title="当前 API 未提供模型类型字段">Embedding</button><button type="button" disabled title="当前 API 未提供模型类型字段">Rerank</button></div></header>{bindings.length ? <div className="config-model-grid">{bindings.map((binding) => { const provider = providers.find((item) => item.id === binding.provider_id); return <article key={binding.id} className="model-card"><header><div><h4>{binding.name}</h4><p>{binding.model_name}</p></div><span className={`status-chip ${binding.enabled ? "status-chip--success" : "status-chip--warning"}`}>{binding.enabled ? "启用" : "停用"}</span></header><dl><div><dt>供应商</dt><dd>{provider?.name ?? "提供商信息不可用"}</dd></div><div><dt>模型类型</dt><dd>当前 API 未提供</dd></div><div><dt>推理能力</dt><dd>{binding.supports_reasoning ? "支持" : "不支持"}</dd></div></dl><div className="model-card__actions"><button type="button" onClick={() => setEditingBinding(binding)}>编辑</button><button type="button" onClick={() => void removeBinding(binding.id)}>删除</button></div></article>; })}</div> : <p className="prototype-unavailable">暂无正式模型绑定；模型目录将在创建绑定后显示。</p>}</section><div className="config-catalogue__grid"><section className="data-card" aria-labelledby="provider-heading"><h3 id="provider-heading">模型提供商</h3>
       {providers.length ? <ul>{providers.map((provider) => <li key={provider.id}>{provider.name}（{provider.enabled ? "启用" : "停用"}） <button type="button" aria-label={`编辑模型提供商：${provider.name}`} onClick={() => setEditingProvider(provider)}>编辑</button> <button type="button" onClick={() => void removeProvider(provider.id)}>删除</button></li>)}</ul> : <p>暂无模型提供商。</p>}

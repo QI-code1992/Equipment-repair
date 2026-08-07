@@ -63,6 +63,21 @@ describe("IntelligentConfigPage", () => {
     expect(screen.getByRole("button", { name: "配置 Agent：AI 故障上报" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "测试 Agent：AI 故障上报" })).toBeDisabled();
   });
+  it("opens the prototype-style right drawer for adding a model", async () => {
+    vi.mocked(getAgentConfigs).mockResolvedValue([config]);
+    vi.mocked(getModelProviders).mockResolvedValue([]);
+    vi.mocked(getModelBindings).mockResolvedValue([]);
+    render(<IntelligentConfigPage />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "新增模型" }));
+    expect(screen.getByRole("dialog", { name: "新增模型" })).toBeInTheDocument();
+    expect(screen.getByLabelText("模型类型")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("请输入 API 地址")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "新增模型提供商" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole("button", { name: "关闭新增模型抽屉" })[1]);
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "新增模型" })).not.toBeInTheDocument());
+  });
   it("manages providers and bindings with the formal model catalog APIs without exposing a provider secret", async () => {
     vi.mocked(getAgentConfigs).mockResolvedValue([config]);
     vi.mocked(getModelProviders).mockResolvedValue([{ id: "provider-1", name: "内部模型服务", enabled: true }]);
