@@ -122,6 +122,20 @@ describe("TASK-012 portal pages", () => {
     expect(await screen.findByText("暂无可展示的正式业务数据。")).toBeInTheDocument();
   });
 
+  it("keeps the maintenance overview KPI and chart grids aligned to the prototype", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 })));
+
+    render(<MemoryRouter><MaintenanceRecordsPage /></MemoryRouter>);
+
+    const kpis = await screen.findByTestId("maintenance-kpi-grid");
+    expect(kpis).toHaveAttribute("data-layout", "six-column");
+    expect(kpis.children).toHaveLength(6);
+
+    const charts = screen.getByTestId("maintenance-chart-grid");
+    expect(charts).toHaveAttribute("data-layout", "two-column");
+    expect(charts.children).toHaveLength(4);
+  });
+
   it("loads a maintenance-record detail only through its formal detail endpoint", async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({
       maintenance_record_id: "record-1", work_order_id: "order-1", fault_report_id: "fault-1", equipment_id: "eq-1", work_order_number: "WO-1", status: "COMPLETED", symptom: "异响", actual_cause: "轴承磨损", actual_solution: "更换轴承", repair_result: "通过", completed_at: "2026-07-31T00:00:00Z", knowledge_status: "NOT_LINKED", start_mode: "DIRECT", parts_replacement_notes: "轴承", created_at: "2026-07-31T00:00:00Z", updated_at: "2026-07-31T00:00:00Z",

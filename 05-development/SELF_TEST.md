@@ -720,3 +720,10 @@
 - 测试：工作台 `4 passed`；前端全量 `8 files passed / 99 tests passed`。
 - 构建：生产构建通过。
 - 未验证：ECS 自动部署后的浏览器截图和 Windows live-stack 未在本切片执行。
+
+## TASK-013 维修记录概览布局切片（2026-08-07）
+
+- 原型对照：`03-ui-prototype/prototype/pages/maintenance-records.html` 的六列 KPI 与两列图表区。
+- 修复：`maintenance-kpis` 由三列恢复六列，图表卡显式作为两列网格项，避免通用 `.data-card` 跨列规则造成单列堆叠。
+- 验证：布局回归测试先失败后通过；前端 `8 files passed / 100 tests passed`，生产构建、15 项 Node 静态回归和 `git diff --check` 通过。
+- 未验证：认证浏览器固定桌面视口截图与真实维修数据交互仍待完整候选统一验证；不以本地结构测试替代。

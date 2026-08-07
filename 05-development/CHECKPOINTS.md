@@ -690,3 +690,10 @@
 - 数据边界：未改变工作台 API、权限或指标计算；组织范围、健康聚合、今日处置等正式契约缺失区域继续保留原型位置并显示受控空态。
 - 验证：工作台定向 `4 passed`；前端全量 `8 files passed / 99 tests passed`；生产构建通过；静态回归、JSON 和 `git diff --check` 待推送前完成。
 - 边界：未新增生产依赖、公开 API、迁移、部署配置、兼容层或抽象层；未触碰 `.vscode/`。
+
+## FCP-013-18：维修记录概览网格布局修复（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成审核、集成、Merge 或任何 Stage 解锁。
+- 范围：恢复 `pages/maintenance-records.html` 定义的六张横向 KPI 卡片和两列四图表网格；局部解除通用 `.data-card` 跨列规则对图表区的错误覆盖。
+- 验证：新增布局契约先失败后转绿；前端全量 `8 files passed / 100 tests passed`、生产构建、15 项 Node 静态回归和 `git diff --check` 通过。
+- 边界：未改动 API、权限、后端、迁移、部署配置、生产依赖、兼容层或抽象层；未触碰既有未跟踪 `.vscode/`。
