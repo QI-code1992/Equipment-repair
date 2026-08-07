@@ -76,6 +76,29 @@ describe("App", () => {
     expect(screen.queryByRole("dialog", { name: "个人资料" })).not.toBeInTheDocument();
   });
 
+  it("changes the password through the formal endpoint then returns to login", async () => {
+    const fetchMock = vi.fn((input: string, _init?: RequestInit) => {
+      if (input === "/api/auth/me") return Promise.resolve(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["workbench:view"] }), { status: 200 }));
+      if (input === "/api/auth/password") return Promise.resolve(new Response(JSON.stringify({ audit_event_id: "audit-password-change" }), { status: 200 }));
+      return Promise.resolve(new Response(JSON.stringify({ items: [], count: 0, active_fault_count: 0, status_counts: [], urgency_counts: [] }), { status: 200 }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+
+    fireEvent.click(await screen.findByRole("button", { name: "当前用户：operator" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "安全设置 / 修改密码" }));
+    fireEvent.change(screen.getByLabelText("当前密码"), { target: { value: "current-password" } });
+    fireEvent.change(screen.getByLabelText("新密码"), { target: { value: "new-password-123" } });
+    fireEvent.change(screen.getByLabelText("确认新密码"), { target: { value: "new-password-123" } });
+    fireEvent.click(screen.getByRole("button", { name: "保存密码" }));
+
+    await waitFor(() => expect(fetchMock.mock.calls.some(([input]) => input === "/api/auth/password")).toBe(true));
+    const passwordCall = fetchMock.mock.calls.find(([input]) => input === "/api/auth/password");
+    expect(JSON.parse(String((passwordCall?.[1] as RequestInit).body))).toEqual({ current_password: "current-password", new_password: "new-password-123", confirm_password: "new-password-123" });
+    expect(window.sessionStorage.getItem("access_token")).toBeNull();
+  });
+
   it("renders the eight prototype navigation items in their approved order", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
       id: "user-1", username: "admin", enabled: true,

@@ -713,6 +713,13 @@
 - 验证：新增 App Shell 回归与前端全量测试 `106 passed`，生产构建、Node 静态回归、JSON 和差异检查通过。
 - 边界：无新增依赖、API、迁移、部署配置、兼容层或抽象层；未触碰 `codebase/frontend/.vscode/`。
 
+## FCP-013-25：用户自助密码修改缺口补齐（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复开发单元，不构成审核、Merge 或 Stage 解锁。
+- 范围：认证密码修改 API、全会话撤销、脱敏审计、前端安全设置真实提交与重新登录流程。
+- 验证：前端 App Shell `20 passed`、生产构建、Python `compileall` 通过；后端运行测试受本机缺少 `sqlalchemy/pytest` 阻断。
+- 变更：API 规格和 `workflow/CHANGE_REQUESTS.md` 已登记 `CR-051`；无新增依赖、迁移、兼容层或抽象层。
+
 ## FCP-013-24：门户页面重复标题块移除（2026-08-07）
 
 - 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；只记录 TASK-013 可恢复开发单元，不构成审核、集成、Merge 或 Stage 解锁。

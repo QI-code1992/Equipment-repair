@@ -38,6 +38,7 @@ export function clearActiveSession() {
 
 export type CurrentUser = { id: string; username: string; enabled: boolean; permission_codes: string[] };
 export const getCurrentUser = () => requestJson<CurrentUser>("/api/auth/me");
+export const changePassword = (body: { current_password: string; new_password: string; confirm_password: string }) => requestJson<{ audit_event_id: string }>("/api/auth/password", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
 
 export type Notification = {
   id: string;
