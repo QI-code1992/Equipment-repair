@@ -26,6 +26,58 @@ const config = {
 };
 
 describe("IntelligentConfigPage", () => {
+  it("keeps the three prototype default-model cards without fabricating a default binding", async () => {
+    vi.mocked(getAgentConfigs).mockResolvedValue([]);
+    vi.mocked(getModelProviders).mockResolvedValue([]);
+    vi.mocked(getModelBindings).mockResolvedValue([]);
+    render(<IntelligentConfigPage permissionCodes={["intelligence:knowledge"]} />);
+    expect(await screen.findByRole("heading", { name: "默认 LLM" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "默认 Embedding" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "默认 Rerank" })).toBeInTheDocument();
+    expect(screen.getAllByText("当前 API 未提供默认资源绑定。")).toHaveLength(3);
+  });
+  it("keeps prototype configuration regions without rendering a duplicate unavailable-module catalogue", async () => {
+    vi.mocked(getAgentConfigs).mockResolvedValue([config]);
+    vi.mocked(getModelProviders).mockResolvedValue([]);
+    vi.mocked(getModelBindings).mockResolvedValue([]);
+    render(<IntelligentConfigPage />);
+    expect(await screen.findByRole("heading", { name: "模型配置" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("模型配置原型模块")).not.toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "智能体配置" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "知识库配置" })).toBeInTheDocument();
+  });
+  it("keeps the prototype model filter, catalog and agent-card hierarchy without inventing unsupported data", async () => {
+    vi.mocked(getAgentConfigs).mockResolvedValue([config]);
+    vi.mocked(getModelProviders).mockResolvedValue([{ id: "provider-1", name: "内部模型服务", enabled: true }]);
+    vi.mocked(getModelBindings).mockResolvedValue([{ id: "binding-1", provider_id: "provider-1", name: "运维模型", model_name: "ops-1", supports_reasoning: true, enabled: true }]);
+    render(<IntelligentConfigPage />);
+
+    await screen.findByRole("button", { name: "编辑模型提供商：内部模型服务" });
+    expect(screen.getByRole("group", { name: "模型类型筛选" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "新增模型" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "模型目录" })).toBeInTheDocument();
+    expect(screen.getAllByText("运维模型").length).toBeGreaterThanOrEqual(1);
+
+    fireEvent.click(screen.getByRole("tab", { name: "智能体配置" }));
+    expect(screen.getAllByRole("heading", { name: "AI 故障上报" }).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByRole("button", { name: "配置 Agent：AI 故障上报" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "测试 Agent：AI 故障上报" })).toBeDisabled();
+  });
+  it("opens the prototype-style right drawer for adding a model", async () => {
+    vi.mocked(getAgentConfigs).mockResolvedValue([config]);
+    vi.mocked(getModelProviders).mockResolvedValue([]);
+    vi.mocked(getModelBindings).mockResolvedValue([]);
+    render(<IntelligentConfigPage />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "新增模型" }));
+    expect(screen.getByRole("dialog", { name: "新增模型" })).toBeInTheDocument();
+    expect(screen.getByLabelText("模型类型")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("请输入 API 地址")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "新增模型提供商" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole("button", { name: "关闭新增模型抽屉" })[1]);
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "新增模型" })).not.toBeInTheDocument());
+  });
   it("manages providers and bindings with the formal model catalog APIs without exposing a provider secret", async () => {
     vi.mocked(getAgentConfigs).mockResolvedValue([config]);
     vi.mocked(getModelProviders).mockResolvedValue([{ id: "provider-1", name: "内部模型服务", enabled: true }]);
@@ -36,17 +88,11 @@ describe("IntelligentConfigPage", () => {
 
     render(<IntelligentConfigPage />);
 
-    expect(await screen.findByText("内部模型服务")).toBeInTheDocument();
-    expect(screen.queryByText("智能运维")).not.toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "智能配置" })).not.toBeInTheDocument();
-    expect(screen.queryByText("模型密钥仅以安全引用写入；页面不会读取、显示或保存密钥正文。")).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "模型与绑定" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("tab", { name: "智能体配置" }));
-    expect(screen.getByRole("heading", { name: "Agent 控制面" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "编辑模型提供商：内部模型服务" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "模型配置" })).toBeInTheDocument();
     expect(screen.getByText("运维模型（ops-1）")).toBeInTheDocument();
     expect(screen.queryByText(/secret-ref-value/)).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("tab", { name: "模型配置" }));
     fireEvent.change(screen.getByLabelText("提供商名称"), { target: { value: "备用模型服务" } });
     fireEvent.change(screen.getByLabelText("密钥引用"), { target: { value: "vault://models/backup" } });
     fireEvent.click(screen.getByRole("button", { name: "新增模型提供商" }));
@@ -57,6 +103,8 @@ describe("IntelligentConfigPage", () => {
     fireEvent.change(screen.getByLabelText("模型名称"), { target: { value: "ops-2" } });
     fireEvent.click(screen.getByRole("button", { name: "新增模型绑定" }));
     await waitFor(() => expect(createModelBinding).toHaveBeenCalledWith(expect.objectContaining({ name: "备用模型", model_name: "ops-2" })));
+    fireEvent.click(screen.getByRole("tab", { name: "智能体配置" }));
+    expect(screen.getByRole("heading", { name: "智能体配置" })).toBeInTheDocument();
   });
 
   it("edits a provider and binding through the formal APIs without displaying its secret reference", async () => {
@@ -68,7 +116,7 @@ describe("IntelligentConfigPage", () => {
 
     render(<IntelligentConfigPage />);
 
-    await screen.findByText("内部模型服务");
+    await screen.findByRole("button", { name: "编辑模型提供商：内部模型服务" });
     fireEvent.click(screen.getByRole("button", { name: "编辑模型提供商：内部模型服务" }));
     fireEvent.change(screen.getByLabelText("编辑提供商名称"), { target: { value: "已更新模型服务" } });
     fireEvent.change(screen.getByLabelText("新的密钥引用"), { target: { value: "vault://models/replacement" } });
@@ -96,22 +144,39 @@ describe("IntelligentConfigPage", () => {
     render(<IntelligentConfigPage />);
     await screen.findByText("暂无模型提供商。");
     fireEvent.click(screen.getByRole("tab", { name: "知识库配置" }));
+    expect(screen.getByRole("tab", { name: "知识库参数" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "知识上传" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "知识上传" }));
     fireEvent.change(screen.getByLabelText("正式 Dataset ID"), { target: { value: "dataset-1" } });
     fireEvent.change(screen.getByLabelText("上传知识文档"), { target: { files: [new File(["manual"], "manual.pdf", { type: "application/pdf" })] } });
     await waitFor(() => expect(uploadKnowledgeDocument).toHaveBeenCalledWith("dataset-1", expect.any(File)));
     expect(await screen.findByText("知识文档已提交，后续状态由正式 Worker 更新。")).toBeInTheDocument();
   });
-
-  it("keeps the approved intelligent configuration tabs and sends audit views to formal data", async () => {
+  it("keeps the prototype knowledge-configuration hierarchy while marking unsupported catalog data unavailable", async () => {
     vi.mocked(getAgentConfigs).mockResolvedValue([config]);
-    vi.mocked(getModelProviders).mockResolvedValue([{ id: "provider-1", name: "内部模型服务", enabled: true }]);
-    vi.mocked(getModelBindings).mockResolvedValue([{ id: "binding-1", provider_id: "provider-1", name: "运维模型", model_name: "ops-1", supports_reasoning: true, enabled: true }]);
+    vi.mocked(getModelProviders).mockResolvedValue([]);
+    vi.mocked(getModelBindings).mockResolvedValue([]);
+    render(<IntelligentConfigPage />);
+    await screen.findByText("暂无模型提供商。");
+    fireEvent.click(screen.getByRole("tab", { name: "知识库配置" }));
+    expect(screen.getByRole("heading", { name: "知识库目录" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "知识文件列表" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "配置参数" }).every((button) => (button as HTMLButtonElement).disabled)).toBe(true);
+    expect(screen.getByText("当前 API 未提供知识库目录数据。")).toBeInTheDocument();
+  });
 
+  it("preserves call and token reporting table structures when APIs are unavailable", async () => {
+    vi.mocked(getAgentConfigs).mockResolvedValue([config]);
+    vi.mocked(getModelProviders).mockResolvedValue([]);
+    vi.mocked(getModelBindings).mockResolvedValue([]);
     render(<IntelligentConfigPage />);
 
-    expect(await screen.findByRole("tablist", { name: "智能配置中心一级页签" })).toBeInTheDocument();
-    for (const label of ["模型配置", "智能体配置", "知识库配置", "调用记录", "Token 消耗统计"]) expect(screen.getByRole("tab", { name: label })).toBeInTheDocument();
+    await screen.findByText("暂无模型提供商。");
     fireEvent.click(screen.getByRole("tab", { name: "调用记录" }));
-    expect(screen.getByRole("link", { name: "查看正式调用审计" })).toHaveAttribute("href", "/intelligence-audit");
+    expect(screen.getByRole("columnheader", { name: "调用时间" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "调用对象" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "Token 消耗统计" }));
+    expect(screen.getByRole("heading", { name: "Token 趋势" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "输入 Token" })).toBeInTheDocument();
   });
 });
