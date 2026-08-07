@@ -215,12 +215,32 @@ describe("App", () => {
       .mockResolvedValueOnce(new Response(JSON.stringify({ thread_id: "thread-1", agent_id: "operation_guidance", status: "OPEN", messages: [{ role: "user", text: "secret internal text" }], runs: [] }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
     render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
-    fireEvent.click(await screen.findByRole("button", { name: "全局 Agent" }));
+    fireEvent.click(await screen.findByRole("button", { name: "打开运维 Agent" }));
     fireEvent.click(screen.getByRole("button", { name: "线程历史" }));
     expect(await screen.findByRole("button", { name: /operation_guidance/ })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /operation_guidance/ }));
     expect(await screen.findByText("消息已记录（内容受保护）")).toBeInTheDocument();
     expect(screen.queryByText("secret internal text")).not.toBeInTheDocument();
+  });
+
+  it("uses the prototype floating Agent icon instead of a topbar text entry", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      id: "user-1", username: "operator", enabled: true,
+      permission_codes: ["workbench:view", "intelligence:agent"],
+    }), { status: 200 })));
+
+    render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
+
+    const floatingAgent = await screen.findByRole("button", { name: "打开运维 Agent" });
+    expect(screen.queryByRole("button", { name: "全局 Agent" })).not.toBeInTheDocument();
+    expect(floatingAgent).toHaveClass("ops-agent-fab");
+
+    fireEvent.click(floatingAgent);
+    expect(screen.getByRole("dialog", { name: "全局 Agent" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "打开运维 Agent" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "关闭" }));
+    expect(await screen.findByRole("button", { name: "打开运维 Agent" })).toBeInTheDocument();
   });
 
   it("opens the notification panel, filters unread items, and marks an item read", async () => {
@@ -260,7 +280,7 @@ describe("App", () => {
     render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
     fireEvent.click(await screen.findByRole("button", { name: "打开导航" }));
     expect(screen.getByRole("button", { name: "关闭导航" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "全局 Agent" }));
+    fireEvent.click(screen.getByRole("button", { name: "打开运维 Agent" }));
     expect(screen.getByRole("dialog", { name: "全局 Agent" })).toBeInTheDocument();
   });
 
@@ -278,7 +298,7 @@ describe("App", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["workbench:view", "intelligence:agent"] }), { status: 200 })));
 
     render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
-    fireEvent.click(await screen.findByRole("button", { name: "全局 Agent" }));
+    fireEvent.click(await screen.findByRole("button", { name: "打开运维 Agent" }));
 
     expect(screen.getByRole("dialog", { name: "全局 Agent" })).toHaveAttribute("aria-modal", "true");
     expect(screen.getByRole("button", { name: "故障上报" })).toBeInTheDocument();

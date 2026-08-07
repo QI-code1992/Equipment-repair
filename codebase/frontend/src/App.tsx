@@ -34,6 +34,19 @@ function RequireAuthentication({ children }: { children: React.ReactNode }) {
   return children;
 }
 
+function AgentRobotIcon() {
+  return <svg className="ops-agent-robot-icon" viewBox="0 0 64 64" aria-hidden="true">
+    <path className="ops-agent-robot-antenna" d="M32 9v7" />
+    <circle className="ops-agent-robot-light" cx="32" cy="7" r="3" />
+    <rect className="ops-agent-robot-head" x="13" y="18" width="38" height="32" rx="13" />
+    <path className="ops-agent-robot-ear" d="M10 31h-4M58 31h-4" />
+    <circle className="ops-agent-robot-eye" cx="25" cy="33" r="5.5" />
+    <circle className="ops-agent-robot-eye" cx="39" cy="33" r="5.5" />
+    <path className="ops-agent-robot-mouth" d="M20 43c6 4 18 4 24 0" />
+    <path className="ops-agent-robot-visor" d="M20 25h24" />
+  </svg>;
+}
+
 function ApplicationShell() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -49,6 +62,7 @@ function ApplicationShell() {
   const [notificationUnreadCount, setNotificationUnreadCount] = useState(0);
   const [notificationError, setNotificationError] = useState<string | null>(null);
   const [notificationLoading, setNotificationLoading] = useState(false);
+  const [agentIdle, setAgentIdle] = useState(false);
   useEffect(() => {
     getCurrentUser().then((user) => { setPermissionCodes(user.permission_codes); setCurrentUser(user); }).catch(() => {
       clearActiveSession();
@@ -80,6 +94,11 @@ function ApplicationShell() {
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = previous; };
   }, [notificationsOpen, agentOpen]);
+  useEffect(() => {
+    if (agentOpen || !permissionCodes?.includes("intelligence:agent")) return;
+    const timer = window.setTimeout(() => setAgentIdle(true), 3000);
+    return () => window.clearTimeout(timer);
+  }, [agentOpen, agentIdle, permissionCodes]);
   async function openNotification(item: Notification) {
     if (!item.is_read) {
       try { await markNotificationRead(item.id); } catch { /* navigation remains available if acknowledgement fails */ }
@@ -139,7 +158,7 @@ function ApplicationShell() {
             <h1>{activePage.label}</h1>
             </div>
           </div>
-          <div className="topbar__actions">{permissionCodes?.includes("intelligence:agent") && <button type="button" className="agent-trigger" onClick={() => setAgentOpen(true)}>全局 Agent</button>}<button type="button" className="topbar__logout" onClick={() => void logout().finally(() => navigate("/login", { replace: true }))}>退出</button><div className="user-chip" aria-label={`当前用户：${currentUser?.username ?? "已登录用户"}`}><span className="topbar__avatar">{currentUser?.username.slice(0, 1).toUpperCase() ?? "用"}</span><span>{currentUser?.username ?? "正在加载"}</span></div></div>
+          <div className="topbar__actions"><button type="button" className="topbar__logout" onClick={() => void logout().finally(() => navigate("/login", { replace: true }))}>退出</button><div className="user-chip" aria-label={`当前用户：${currentUser?.username ?? "已登录用户"}`}><span className="topbar__avatar">{currentUser?.username.slice(0, 1).toUpperCase() ?? "用"}</span><span>{currentUser?.username ?? "正在加载"}</span></div></div>
         </header>
         {sidebarOpen && <button type="button" className="sidebar-backdrop" aria-label="关闭导航" onClick={() => setSidebarOpen(false)} />}
         {permissionCodes === null && !permissionError ? <section className="page-shell" aria-live="polite"><p role="status">正在加载会话权限…</p></section> : <Routes>
@@ -169,6 +188,7 @@ function ApplicationShell() {
           </section>
         </>}
         {agentOpen && permissionCodes?.includes("intelligence:agent") && <><button type="button" className="agent-scrim" aria-label="Close Agent" onClick={() => setAgentOpen(false)} /><GlobalAgentDrawer onClose={() => setAgentOpen(false)} /></>}
+        {!agentOpen && permissionCodes?.includes("intelligence:agent") && <button type="button" className={`ops-agent-fab${agentIdle ? " is-idle" : ""}`} aria-label="打开运维 Agent" onPointerEnter={() => setAgentIdle(false)} onFocus={() => setAgentIdle(false)} onClick={() => setAgentOpen(true)}><span className="ops-agent-fab-icon"><AgentRobotIcon /></span></button>}
       </main>
     </div>
   );
