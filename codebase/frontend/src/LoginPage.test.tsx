@@ -34,11 +34,15 @@ describe("LoginPage", () => {
     for (const label of ["故障追踪", "诊断辅助", "知识检索", "知识图谱", "驾驶舱分析", "工单协同"]) expect(screen.getByText(label)).toBeInTheDocument();
   });
 
-  it("identifies credentials for the browser password manager without platform-side storage", () => {
-    renderLogin();
+  it("matches the login prototype field affordances without platform-side storage", () => {
+    const { container } = renderLogin();
 
     expect(screen.getByLabelText("用户名")).toHaveAttribute("name", "username");
     expect(screen.getByLabelText("密码")).toHaveAttribute("name", "password");
+    expect(container.querySelector(".login-page__gridline")).toBeInTheDocument();
+    expect(container.querySelector(".login-page__beam")).toBeInTheDocument();
+    expect(container.querySelectorAll(".login-form__field-icon")).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "显示密码" })).toHaveClass("login-form__password-toggle");
   });
 
   it("保留‘记住密码’而不渲染浏览器密码管理说明", async () => {
@@ -121,6 +125,7 @@ describe("LoginPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "忘记密码" }));
     expect(screen.getByRole("dialog", { name: "忘记密码" })).toBeInTheDocument();
     expect(screen.getByText(/请联系系统管理员重置密码/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "知道了" })).toHaveClass("login-modal__confirm");
 
     fireEvent.click(screen.getByRole("button", { name: "知道了" }));
     expect(screen.queryByRole("dialog", { name: "忘记密码" })).not.toBeInTheDocument();

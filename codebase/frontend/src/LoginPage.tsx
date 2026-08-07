@@ -63,6 +63,8 @@ export function LoginPage() {
   }
 
   return <main className="login-page">
+    <div className="login-page__gridline" aria-hidden="true" />
+    <div className="login-page__beam" aria-hidden="true" />
     <section className="login-intro" aria-label="平台说明">
       <p className="login-intro__badge"><span aria-hidden="true">✦</span>新能源装载机设备故障智能运维平台</p>
       <h1>设备AI智能运维平台</h1>
@@ -72,14 +74,14 @@ export function LoginPage() {
     <form className="login-form" onSubmit={(event) => void submit(event)}>
       <h2>登录</h2>
       <p className="login-form__hint">请输入账号密码进行登录</p>
-      <label>账号<input aria-label="用户名" name="username" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} aria-invalid={Boolean(usernameError)} placeholder="请输入账号" />{usernameError && <small>{usernameError}</small>}</label>
-      <label>密码<div className="login-form__password"><input aria-label="密码" name="password" type={passwordVisible ? "text" : "password"} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} aria-invalid={Boolean(passwordError)} /><button type="button" aria-label={passwordVisible ? "隐藏密码" : "显示密码"} onClick={() => setPasswordVisible((current) => !current)}>{passwordVisible ? "隐藏" : "显示"}</button></div>{passwordError && <small>{passwordError}</small>}</label>
+      <label>账号<div className="login-form__field"><span className="login-form__field-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5" /><path d="M4.5 20c.8-4 3.3-6 7.5-6s6.7 2 7.5 6" /></svg></span><input aria-label="用户名" name="username" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} aria-invalid={Boolean(usernameError)} placeholder="请输入账号" /></div>{usernameError && <small>{usernameError}</small>}</label>
+      <label>密码<div className="login-form__field login-form__password"><span className="login-form__field-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg></span><input aria-label="密码" name="password" type={passwordVisible ? "text" : "password"} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} aria-invalid={Boolean(passwordError)} /><button type="button" className="login-form__password-toggle" aria-label={passwordVisible ? "隐藏密码" : "显示密码"} onClick={() => setPasswordVisible((current) => !current)}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" /><circle cx="12" cy="12" r="2.8" />{passwordVisible && <path d="m4 4 16 16" />}</svg></button></div>{passwordError && <small>{passwordError}</small>}</label>
       <div className="login-form__options"><label><input type="checkbox" checked={browserPasswordManagerEnabled} onChange={(event) => setBrowserPasswordManagerEnabled(event.target.checked)} />记住密码</label><button type="button" onClick={() => setForgotOpen(true)}>忘记密码</button></div>
       {error && <p role="alert">{error}</p>}
       {submitting && <p role="status" aria-label="登录状态">正在验证账号，请稍候…</p>}
       <button type="submit" disabled={submitting || lockedSeconds > 0}>{submitting ? "登录中…" : "登录"}</button>
       <p className="login-form__hint">连续失败 3 次后临时锁定，锁定 30 秒。</p>
     </form>
-    {forgotOpen && <div className="login-modal" role="dialog" aria-modal="true" aria-label="忘记密码"><section><h3>忘记密码</h3><p>请联系系统管理员重置密码。管理员可在系统管理中启用账号并重置初始密码。</p><button type="button" onClick={() => setForgotOpen(false)}>知道了</button></section></div>}
+    {forgotOpen && <div className="login-modal" role="dialog" aria-modal="true" aria-label="忘记密码"><section><h3>忘记密码</h3><p>请联系系统管理员重置密码。管理员可在系统管理中启用账号并重置初始密码。</p><button type="button" className="login-modal__confirm" onClick={() => setForgotOpen(false)}>知道了</button></section></div>}
   </main>;
 }
