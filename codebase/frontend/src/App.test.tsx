@@ -53,7 +53,7 @@ describe("App", () => {
   });
 
   it("keeps the desktop shell sidebar fixed and exposes the prototype user menu", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["workbench:view"] }), { status: 200 })));
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "user-1", username: "operator", enabled: true, permission_codes: ["workbench:view", "identity:write"] }), { status: 200 })));
 
     render(<MemoryRouter initialEntries={["/"]}><App /></MemoryRouter>);
 
@@ -66,6 +66,7 @@ describe("App", () => {
     fireEvent.click(userChip);
     expect(userChip).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByRole("menu", { name: "用户菜单" })).toBeInTheDocument();
+    expect(screen.getByRole("menu", { name: "用户菜单" })).toHaveTextContent("系统管理员 · operator");
     expect(screen.getByRole("menuitem", { name: "个人资料" })).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: "安全设置 / 修改密码" })).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: "退出登录" })).toBeInTheDocument();

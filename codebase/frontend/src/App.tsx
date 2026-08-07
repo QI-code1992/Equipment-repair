@@ -75,6 +75,8 @@ function ApplicationShell() {
     });
   }, []);
   const activePage = pageForRoute(location.pathname);
+  const userName = currentUser?.username ?? "正在加载";
+  const userRole = permissionCodes?.includes("identity:write") ? "系统管理员" : "平台用户";
   const visiblePages = useMemo(() => permissionCodes === null ? [] : pages.filter((page) => pagePermission(page.path, permissionCodes)), [permissionCodes]);
   useEffect(() => {
     if (!notificationsOpen) return;
@@ -175,10 +177,10 @@ function ApplicationShell() {
           <div className="topbar__actions">
             <div className="user-menu-anchor" ref={userMenuRef}>
               <button type="button" className="user-chip" aria-label={`当前用户：${currentUser?.username ?? "已登录用户"}`} aria-haspopup="menu" aria-expanded={userMenuOpen} onClick={() => setUserMenuOpen((open) => !open)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setUserMenuOpen((open) => !open); } }}>
-                <span className="topbar__avatar">{currentUser?.username.slice(0, 1).toUpperCase() ?? "用"}</span><span>{currentUser?.username ?? "正在加载"}</span><span className="user-menu-chevron" aria-hidden="true">⌄</span>
+                <span className="topbar__avatar">{userName.slice(0, 1).toUpperCase()}</span><span>{userName} · {userRole}</span><span className="user-menu-chevron" aria-hidden="true">⌄</span>
               </button>
               {userMenuOpen && <div className="global-user-menu" role="menu" aria-label="用户菜单">
-                <div className="global-menu-user"><span className="avatar">{currentUser?.username.slice(0, 1).toUpperCase() ?? "用"}</span><div><strong>{currentUser?.username ?? "正在加载"}</strong><span>平台用户 · 正式身份信息未提供</span></div></div>
+                <div className="global-menu-user"><span className="avatar">{userName.slice(0, 1).toUpperCase()}</span><div><strong>{userName}</strong><span>{userRole} · {userName}</span></div></div>
                 <div className="global-menu-divider" />
                 <button type="button" className="global-menu-item" role="menuitem" onClick={() => { setUserMenuOpen(false); setUserModal("profile"); }}>个人资料</button>
                 <button type="button" className="global-menu-item" role="menuitem" onClick={() => { setUserMenuOpen(false); setPasswordError(null); setUserModal("security"); }}>安全设置 / 修改密码</button>
