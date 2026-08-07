@@ -697,3 +697,11 @@
 - 范围：恢复 `pages/maintenance-records.html` 定义的六张横向 KPI 卡片和两列四图表网格；局部解除通用 `.data-card` 跨列规则对图表区的错误覆盖。
 - 验证：新增布局契约先失败后转绿；前端全量 `8 files passed / 100 tests passed`、生产构建、15 项 Node 静态回归和 `git diff --check` 通过。
 - 边界：未改动 API、权限、后端、迁移、部署配置、生产依赖、兼容层或抽象层；未触碰既有未跟踪 `.vscode/`。
+
+## FCP-013-19：驾驶舱 BI 趋势粒度原型一致性修复（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；仅记录可恢复代码单元，不构成审核、集成、Merge 或任何 Stage 解锁。
+- 范围：将趋势区从错误的“趋势/组织排行”切换恢复为原型定义的日、周、月粒度；周期变化以对应 `period` 重新请求既有正式 BI API。
+- 数据边界：不再在趋势区渲染组织排行；健康评分趋势缺少正式 API 序列时继续呈现受控不可用状态，未写入原型示例值或新增 API。
+- 验证：新增回归先失败后通过；前端全量 `8 files passed / 101 tests passed`、生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 通过。
+- 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未触碰既有未跟踪 `codebase/frontend/.vscode/`。

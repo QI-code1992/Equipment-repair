@@ -32,6 +32,30 @@ describe("TASK-012 portal pages", () => {
     expect(screen.getByText("2026-08-01：故障 3，完成 1")).toBeInTheDocument();
   });
 
+  it("uses the prototype day-week-month trend granularity with formal BI reloads", async () => {
+    const dashboard = {
+      summary: { fault_count: 3, active_fault_count: 1, completed_work_order_count: 2, completion_rate: 0.67 },
+      trend: [], efficiency: { completed_work_order_count: 2, average_completion_hours: 3 }, organization_ranking: [],
+      history_comparison: { current_fault_count: 3, previous_fault_count: 2 },
+    };
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify(dashboard), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(dashboard), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<BiDashboardPage />);
+
+    const granularity = await screen.findByRole("group", { name: "趋势粒度" });
+    expect(granularity).toHaveTextContent("日");
+    expect(granularity).toHaveTextContent("周");
+    expect(granularity).toHaveTextContent("月");
+    expect(granularity).not.toHaveTextContent("组织排行");
+
+    fireEvent.click(screen.getByRole("button", { name: "月" }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/bi/dashboard?period=month", undefined));
+  });
+
   it("reloads the BI dashboard with a selected formal organization filter", async () => {
     const dashboard = { summary: { fault_count: 2, active_fault_count: 1, completed_work_order_count: 1, completion_rate: 0.5 }, trend: [], efficiency: { completed_work_order_count: 1, average_completion_hours: 3 }, organization_ranking: [], history_comparison: { current_fault_count: 1, previous_fault_count: 0 } };
     const fetchMock = vi.fn()
@@ -44,7 +68,7 @@ describe("TASK-012 portal pages", () => {
 
     fireEvent.change(await screen.findByLabelText("组织筛选"), { target: { value: "line-1" } });
     expect(await screen.findByText("平均完成时长")).toBeInTheDocument();
-    expect(fetchMock.mock.calls[2][0]).toBe("/api/bi/dashboard?organization_id=line-1");
+    expect(fetchMock.mock.calls[2][0]).toBe("/api/bi/dashboard?organization_id=line-1&period=day");
   });
 
   it("renders actual factory organizations instead of prototype examples", async () => {
