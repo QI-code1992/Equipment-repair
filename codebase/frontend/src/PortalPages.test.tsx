@@ -89,9 +89,27 @@ describe("TASK-012 portal pages", () => {
     expect(screen.getByRole("columnheader", { name: "健康评分" })).toBeInTheDocument();
     expect(screen.getByText("EQ-01")).toBeInTheDocument();
     expect(screen.getByText("EWL50E")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "查看分析" })).toHaveAttribute("href", "/equipment/eq-1");
+    expect(screen.getByRole("link", { name: "查看分析" })).toHaveAttribute("href", "/equipment/eq-1?openHealthScore=1");
     expect(screen.getByText("当前显示 1 台正式设备。")).toBeInTheDocument();
     expect(screen.getByText("数据更新时间：当前接口未提供")).toBeInTheDocument();
+  });
+
+  it("opens the prototype health-analysis drawer without inventing unavailable health facts", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        summary: { fault_count: 3, active_fault_count: 1, completed_work_order_count: 2, completion_rate: 0.67 },
+        trend: [], efficiency: { completed_work_order_count: 2, average_completion_hours: 3 }, organization_ranking: [],
+        history_comparison: { current_fault_count: 3, previous_fault_count: 2 },
+      }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "eq-1", code: "EQ-01", name: "电动装载机", model: "EWL50E", type: "LOADER", manufacturer: "M", status: "NORMAL", organization_id: "line-1", owner_user_id: null, operating_hours: 4, manufactured_at: null, commissioned_at: null, image_refs: [] }]), { status: 200 })));
+
+    render(<MemoryRouter><BiDashboardPage /></MemoryRouter>);
+
+    fireEvent.click(await screen.findByRole("link", { name: "查看分析" }));
+    expect(screen.getByRole("dialog", { name: "设备健康分析" })).toBeInTheDocument();
+    expect(screen.getByText("EQ-01 · 电动装载机")).toBeInTheDocument();
+    expect(screen.getByText("当前接口未提供健康趋势、风险等级和处置建议。")).toBeInTheDocument();
   });
 
   it("reloads the BI dashboard with a selected formal organization filter", async () => {

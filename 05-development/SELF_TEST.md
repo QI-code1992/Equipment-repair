@@ -749,3 +749,11 @@
 - 定向验证：新增健康表结构/计数/更新时间测试先失败后通过；`npm test -- --run src/PortalPages.test.tsx` 为 `35 passed`。
 - 完整验证：前端全量 `103 passed`、生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 均通过；ECS 与浏览器视觉尚未在此切片宣称完成。
 - 边界：没有新增依赖、兼容层、抽象层、API、权限、迁移或部署配置；未触碰 `.vscode/`。
+
+## FCP-013-22：驾驶舱 BI 健康分析抽屉原型一致性修复（2026-08-07）
+
+- 修改：恢复“查看分析”的健康抽屉、设备上下文、关闭动作、遮罩和详情入口。
+- 数据边界：抽屉不新增请求，不生成风险、趋势或建议；正式 API 未提供的内容明确显示不可用。
+- 定向验证：新增抽屉交互回归先失败后通过；`npm test -- --run src/PortalPages.test.tsx` 为 `36 passed`。
+- 完整验证：前端全量 `104 passed`、生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 均通过；ECS 与浏览器视觉尚未在此切片宣称完成。
+- 边界：没有新增依赖、兼容层、抽象层、API、权限、迁移或部署配置；未触碰 `.vscode/`。

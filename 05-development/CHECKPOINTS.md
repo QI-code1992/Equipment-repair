@@ -721,3 +721,11 @@
 - 数据边界：设备编号、名称、型号与负责人仅使用既有 `/api/equipment` 返回；健康评分、风险等级、近 7 天故障和工单状态无公开字段时保持 `—`。设备计数从实际响应长度得出；更新时间无契约时明确为“当前接口未提供”，未复用原型示例数据。
 - 验证：新增结构/数据边界回归先失败后通过；`PortalPages.test.tsx` 为 `35 passed`；前端全量 `103 passed`、生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 均通过。
 - 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未触碰既有未跟踪 `codebase/frontend/.vscode/`。
+
+## FCP-013-22：驾驶舱 BI 健康分析抽屉原型一致性修复（2026-08-07）
+
+- 状态：`DEVELOPMENT_IN_PROGRESS_SINGLE_DRAFT_PR`；本检查点仅记录可恢复代码单元，不构成审核、集成、Merge 或任何 Stage 解锁。
+- 范围：恢复 `pages/bi-dashboard.html` 中“查看分析”触发的设备健康分析抽屉、当前对象摘要、关闭控件、遮罩和详情入口。
+- 数据边界：抽屉只复用已加载设备的编号、名称、型号和负责人；健康趋势、风险等级、处置建议未有公开 API 时明确显示不可用。点击链接保持原型的 `openHealthScore` 查询意图并阻止跳转以展开抽屉。
+- 验证：新增抽屉回归先失败后通过；`PortalPages.test.tsx` 为 `36 passed`；前端全量 `104 passed`、生产构建、15 项 Node 静态回归、`workflow/state.json` JSON 解析和 `git diff --check` 均通过。
+- 边界：未新增生产依赖、公开 API、权限规则、迁移、部署配置、兼容层或抽象层；未触碰既有未跟踪 `codebase/frontend/.vscode/`。
