@@ -23,7 +23,7 @@
 | 维修记录 | `/maintenance-records` | `pages/maintenance-records.html` | `/api/maintenance-records` 查询、分页、知识状态筛选 | `PortalPages.test.tsx` | 代码对照完成；概览/列表双视图、重置、禁用导出和分页已接入 | 浏览器筛选/分页、真实数据 |
 | 维修记录详情 | `/maintenance-records/:id` | `pages/maintenance-records.html` 详情状态 | `/api/maintenance-records/{id}` | `PortalPages.test.tsx` | 代码对照完成；工单、故障、根因、方案、结果和知识状态卡已接入 | 认证浏览器详情、真实记录联调 |
 | 维修执行 | `/repair-execution` | `pages/repair-execution.html` | 工单、诊断、操作指引 SSE、维修结果提交 | `RepairExecutionPage.test.tsx`、`PortalPages.test.tsx`、`api.test.ts` | 代码对照完成；三栏工作区、流式状态、空证据和写入保护已接入 | 浏览器 E2E、真实 SSE/RAGFlow/附件 |
-| 系统管理 | `/system-management` | `pages/system-management.html` | 用户、角色、权限目录、登录/操作日志 | `PortalPages.test.tsx`、`api.test.ts` | 代码对照完成；四个原型分区与读写权限边界已接入 | 浏览器双权限、分页与真实审计数据 |
+| 系统管理 | `/system-management` | `pages/system-management.html` | 用户、角色、权限目录、登录/操作日志 | `PortalPages.test.tsx`、`api.test.ts` | 四标签页整改候选：原型工具栏、表格、分页和弹窗结构已接入；缺失 API 字段/写操作保持受控不可用，不等同于视觉完成 | `1440 x 900` 同状态原型/正式截图、认证双权限、真实审计数据、人工视觉验收 |
 
 ## 跨页全局 Agent
 
