@@ -549,6 +549,63 @@ describe("TASK-012 portal pages", () => {
     });
   });
 
+  it("keeps the prototype role table, counter and pagination without creating unsupported role writes", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "user-1", username: "admin", enabled: true, role_ids: ["role-1"] }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "role-1", code: "SYSTEM_ADMIN", name: "系统管理员", permission_codes: ["identity:write"] }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ code: "identity:write" }]), { status: 200 })));
+
+    render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
+
+    expect(await screen.findByText("1 个角色")).toBeInTheDocument();
+    expect(screen.getByText("共 1 条")).toBeInTheDocument();
+    expect(screen.getByText("1 / 1")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "新增角色" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "新增角色" })).toHaveAttribute("title", "当前公开 API 未提供新增角色");
+  });
+
+  it("keeps the prototype user table and dialogs while exposing unsupported fields as unavailable", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "user-1", username: "zhangsan", enabled: true, role_ids: ["role-1"] }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "role-1", code: "LINE_OPERATOR", name: "操作员", permission_codes: [] }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 })));
+
+    render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("tab", { name: "用户管理" }));
+
+    expect(screen.getByRole("heading", { name: "组织树" })).toBeInTheDocument();
+    for (const column of ["用户名", "姓名", "手机号", "账号状态", "授权角色", "所属组织", "操作"]) expect(screen.getByRole("columnheader", { name: column })).toBeInTheDocument();
+    expect(screen.getByText("当前接口未提供用户组织关联，不能按组织筛选。")) .toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "新增用户" }));
+    expect(screen.getByRole("dialog", { name: "新增用户" })).toBeInTheDocument();
+    expect(screen.getByLabelText("姓名")).toBeDisabled();
+    expect(screen.getByText("共 1 条")).toBeInTheDocument();
+  });
+
+  it("keeps prototype login and operation log filters, seven-column tables and controlled field gaps", async () => {
+    const auditResponse = { items: [{ id: "audit-1", actor_user_id: "user-1", action: "auth.login", resource_type: "auth", resource_id: null, result: "success", created_at: "2026-08-13T09:00:00Z" }], count: 1, page: 1, page_size: 20 };
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify(auditResponse), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 })));
+
+    render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("tab", { name: "登录日志" }));
+    expect(screen.getByLabelText("按登录结果筛选")).toBeInTheDocument();
+    expect(screen.getByLabelText("按时间范围筛选")).toBeInTheDocument();
+    for (const column of ["登录账号", "姓名", "登录时间", "来源 IP", "登录终端", "结果", "说明"]) expect(screen.getByRole("columnheader", { name: column })).toBeInTheDocument();
+    expect(screen.getByText("当前接口未提供姓名、来源 IP、登录终端和说明。")) .toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "操作日志" }));
+    expect(screen.getByLabelText("按模块筛选")).toBeInTheDocument();
+    expect(screen.getByLabelText("按操作结果筛选")).toBeInTheDocument();
+    for (const column of ["操作时间", "操作人", "模块", "操作类型", "操作对象", "结果", "说明"]) expect(screen.getByRole("columnheader", { name: column })).toBeInTheDocument();
+    expect(screen.getByText("当前接口未提供操作人名称和审计说明。")) .toBeInTheDocument();
+  });
+
   it("labels configured token budgets without claiming actual model consumption", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({
