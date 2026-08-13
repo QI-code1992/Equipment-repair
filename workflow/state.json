@@ -1,7 +1,7 @@
 {
   "state": "READY_FOR_DEVELOPMENT",
   "updatedBy": "formal-software-delivery-workflow",
-  "updatedAt": "2026-07-15T15:10:00+08:00",
+  "updatedAt": "2026-08-13T09:30:00+08:00",
   "productBaseline": {
     "status": "requirements-interaction-and-prototype-approved",
     "canonicalCandidate": [
@@ -42,6 +42,7 @@
     "On 2026-07-15, the project owner confirmed two Stage 5 developers: DEV-001 is the final integration owner with Docker/Compose validation capability; DEV-002 has no Docker environment.",
     "On 2026-07-15, the project owner explicitly approved DEVELOPMENT_TASK_BOOK.md v1.0 at candidate commit 8272a8ed161b787098660f61ebb86fa5ccada564. This approved the two-person task allocation baseline only.",
     "On 2026-07-15, the project owner corrected the gate sequence: TASK-001 is a Stage 5 task and may start only after the refreshed Stage 4 -> Stage 5 gate is explicitly approved for an exact Commit SHA. DEF-003 and DEF-004 are Stage 5 TASK-001 risks, not pre-gate code-remediation requirements.",
-    "On 2026-07-15, the project owner explicitly approved commit 25e15709a3f1d92f661d37acdb8aa3e1e0e41346 as the refreshed Stage 4 baseline and passed Gate-007 into Stage 5. The immutable milestone tag is baseline/stage-04-development-v1.1. DEV-001 may start TASK-001; downstream tasks remain blocked until TASK-001 passes."
+    "On 2026-07-15, the project owner explicitly approved commit 25e15709a3f1d92f661d37acdb8aa3e1e0e41346 as the refreshed Stage 4 baseline and passed Gate-007 into Stage 5. The immutable milestone tag is baseline/stage-04-development-v1.1. DEV-001 may start TASK-001; downstream tasks remain blocked until TASK-001 passes.",
+    "On 2026-08-13, the project owner approved CR-053: formal workbench route is /workbench; formal password recovery and password-change security rules are required; maintenance detail is an in-page modal; standalone intelligence-audit is canceled; Global Agent is available to all authenticated users while business writes retain endpoint permissions. Product/API/task documents were updated; implementation must use the resulting exact baseline."
   ]
 }

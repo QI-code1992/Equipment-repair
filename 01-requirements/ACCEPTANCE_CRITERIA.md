@@ -12,8 +12,8 @@ Given an active user with valid credentials, when they submit login, then the sy
 ### AC-002 Disabled account
 Given a disabled account, when it submits login, then access is denied and no session is created.
 
-### AC-003 Agent permission
-Given a user without AI floating-Agent permission, when any business page loads, then no Agent entry is shown or callable.
+### AC-003 Global Agent availability
+Given any authenticated user, when any business page loads, then the Global Agent entry is shown and callable; business write actions still enforce their own server-side permissions.
 
 ### AC-004 Fault permission
 Given a user with Agent permission but without fault-report permission, when they request an AI draft, then the Agent explains the restriction and creates no draft.
@@ -134,6 +134,12 @@ Given an Agent call completes or fails, when its audit event is stored, then too
 
 ### AC-039 Logout navigation
 Given a signed-in user opens the global user menu, when the user confirms “退出登录”, then the session is ended for the prototype flow and the browser returns to `login.html`; cancelling keeps the current page and menu state closed.
+
+### AC-045 Password recovery
+Given a user requests password recovery, when the request is accepted, then the system returns a non-enumerating response and sends/records only a one-time, expiring recovery path; the credential is not exposed in logs or API responses and cannot be reused after success or expiry.
+
+### AC-046 Password change
+Given an authenticated active user submits current password, new password and confirmation, when validation succeeds, then the password changes, all existing sessions for that account are invalidated, an audit event is recorded and the user must log in again. Invalid current password, disabled account, weak password or mismatch leaves the password and session unchanged.
 
 ## 接单前诊断 Agent
 

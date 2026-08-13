@@ -31,6 +31,8 @@
 
 必须执行服务端授权。设备授予仅约束 Agent 的设备查询和上报，不扩展为通用数据过滤。
 
+Global Agent 入口对所有已登录用户可见并可调用，暂不按权限码隐藏或阻止入口；其业务写操作仍执行各自 API 的服务端权限校验。
+
 `user_management.view_all` controls user-management visibility; it does not expand Agent device grants or create general data permissions.
 
 ## 3. 页面与路由契约
@@ -46,12 +48,20 @@
 | Equipment knowledge/config | `/intelligent-config` | tab, upload states, failed index, readonly metrics |
 | Fault report | `/fault-report` | draft, validation, AI pending, submitted |
 | Agent report | `/agent-report` | permission identified, missing fields, handoff, submit gate |
-| Maintenance records | `/maintenance-records` | list, detail, empty, error |
+| Maintenance records | `/maintenance-records` | list, detail modal, empty, error |
 | Repair execution | `/repair-execution` | assigned, editing, submitted, forbidden |
 | System management | `/system-management` | user/role/menu/audit tabs, readonly/permission |
-| Global Agent | drawer on authorized pages | closed, open, tab history, collecting, preview, error |
+| Global Agent | drawer on every authenticated page | closed, open, tab history, collecting, preview, error |
 
 历史数据导入页面不是当前路由、菜单、权限或 API 需求。
+独立 `/intelligence-audit` 页面不是当前路由、菜单或原型需求；调用记录与知识文档状态由 `/intelligent-config` 承载。根路径 `/` 仅作为登录后的默认跳转入口。
+
+### 3.1 账户安全契约
+
+- `POST /api/auth/password-reset/request`：提交账号标识，始终返回不泄露账号是否存在的统一结果；服务端生成一次性、限时找回凭证，凭证不得写入日志。
+- `POST /api/auth/password-reset/confirm`：提交一次性凭证、新密码、确认新密码；校验凭证未过期且未使用、密码策略和两次新密码一致，成功后凭证立即失效并要求重新登录。
+- `PATCH /api/auth/password`：提交 `current_password`、`new_password`、`confirm_password`；校验当前密码、账号状态、密码策略和一致性。成功后撤销该账号现有会话并写入审计事件；失败不得撤销会话。
+- 密码、凭证、Cookie、Token 不得出现在日志、URL、错误响应或审计明文中。
 
 ## 4. 数据契约
 

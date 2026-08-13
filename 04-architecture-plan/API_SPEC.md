@@ -24,6 +24,16 @@
 | POST | `/api/agent/threads/{thread_id}/resume` | 确认、补充信息或恢复标记 | 只能恢复创建者的线程或管理员线程。 |
 | GET | `/api/agent/threads/{thread_id}` | 消息、已展示引用、确认状态、摘要 | 线程创建者或系统管理员可读。 |
 
+Global Agent 的入口对所有已登录用户可见并可调用；故障正式提交、知识文档重试及其他业务写操作仍按各自接口权限校验。
+
+## 账户安全 API
+
+| Method | Endpoint | 请求/响应要点 | 约束 |
+|---|---|---|---|
+| POST | `/api/auth/password-reset/request` | 账号标识；返回统一不枚举结果 | 生成一次性限时凭证；密码和凭证不得写入日志、响应或持久 URL。 |
+| POST | `/api/auth/password-reset/confirm` | 一次性凭证、新密码、确认新密码 | 校验未过期/未使用、密码策略和一致性；成功后凭证失效并要求重新登录。 |
+| PATCH | `/api/auth/password` | `current_password`、`new_password`、`confirm_password` | 校验当前密码、账号状态、密码策略和一致性；成功撤销该账号所有会话并记录审计，失败不改变会话。 |
+
 ## 业务与知识工具 API
 
 | Method | Endpoint | 用途 |
