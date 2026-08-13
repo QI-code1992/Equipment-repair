@@ -220,6 +220,8 @@ def work_order_detail(
 @router.get("/api/audit-events", response_model=None)
 def audit_events(
     action: str | None = None,
+    resource_type: str | None = None,
+    result: str | None = None,
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -228,8 +230,36 @@ def audit_events(
     statement = select(AuditEvent)
     if action is not None:
         statement = statement.where(AuditEvent.action == action)
+    if resource_type is not None:
+        statement = statement.where(AuditEvent.resource_type == resource_type)
+    if result is not None:
+        statement = statement.where(AuditEvent.result == result)
     records = db.scalars(statement.order_by(AuditEvent.created_at.desc(), AuditEvent.id.asc())).all()
-    items = [{"id": item.id, "actor_user_id": item.actor_user_id, "action": item.action, "resource_type": item.resource_type, "resource_id": item.resource_id, "result": item.result, "created_at": item.created_at.isoformat()} for item in records]
+    users = {item.id: item for item in db.scalars(select(User).where(User.id.in_([event.actor_user_id for event in records if event.actor_user_id is not None])))}
+    items = [{"id": item.id, "occurred_at": item.created_at.isoformat(), "actor_user_id": item.actor_user_id, "actor_display_name": users[item.actor_user_id].display_name or users[item.actor_user_id].username if item.actor_user_id in users else None, "module": item.resource_type, "action": item.action, "target_type": item.resource_type, "target_id": item.resource_id, "target_display_name": item.resource_id, "result": item.result, "summary": item.action} for item in records]
+    return _page(items, page, page_size)
+
+
+@router.get("/api/login-events", response_model=None)
+def login_events(
+    username: str | None = None,
+    result: str | None = None,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    db: Session = Depends(get_db),
+    _: User = Depends(require_permission("system:audit")),
+) -> dict[str, object]:
+    records = db.scalars(select(AuditEvent).where(AuditEvent.action == "login").order_by(AuditEvent.created_at.desc(), AuditEvent.id.asc())).all()
+    users = {item.id: item for item in db.scalars(select(User))}
+    items = []
+    for item in records:
+        login_name = str(item.metadata_json.get("username", ""))
+        if username is not None and login_name != username:
+            continue
+        if result is not None and item.result != result:
+            continue
+        user = users.get(item.actor_user_id) if item.actor_user_id else None
+        items.append({"id": item.id, "username": login_name, "display_name": user.display_name if user else None, "logged_at": item.created_at.isoformat(), "source_ip": None, "client_summary": None, "result": item.result, "reason": None if item.result == "success" else "INVALID_CREDENTIALS"})
     return _page(items, page, page_size)
 
 

@@ -89,6 +89,10 @@
 | `RAGFLOW_TIMEOUT`、`LLM_TIMEOUT` | 外部依赖超时 | 不伪造结果；诊断降级为不可用或继续人工。 |
 | `EVIDENCE_INSUFFICIENT` | 证据未满足根因门槛 | 继续追问、上传附件或直接开始维修。 |
 
+## 系统管理后端补齐（2026-08-13）
+
+正式扩展契约见 `04-architecture-plan/SYSTEM_MANAGEMENT_COMPLETION_CONTRACT.md`。新增 `POST/PATCH/DELETE /api/roles`、`POST /api/users/{user_id}/password-reset` 和 `GET /api/login-events`；所有新增写接口要求 `identity:write`、`Idempotency-Key`、成功/失败审计，日志读取要求 `system:audit`。自定义角色可授予固定权限目录；内置系统管理员继续不可削弱或删除。
+
 ## TASK-002 正式契约
 
 本节是 `CR-036` 修复后身份权限、组织和设备主数据 API 的唯一正式契约。所有接口均要求平台 Bearer 会话认证；权限只控制角色、菜单与操作，不增加工厂、组织或设备的行级过滤。动态角色创建接口 `POST /api/roles` 已移除。

@@ -39,15 +39,15 @@ def test_role_catalog_is_fixed_and_non_admin_permissions_are_editable(
     client: TestClient,
 ) -> None:
     _, token = seeded_system_admin(client)
-    headers = admin_headers(token, "role-update")
+    headers = admin_headers(token, "role-create")
 
     assert client.post(
         "/api/roles",
-        headers=headers,
-        json={"name": "custom", "permission_codes": []},
-    ).status_code == 405
+        headers=admin_headers(token, "role-update"),
+        json={"code": "CUSTOM", "name": "custom", "permission_codes": []},
+    ).status_code == 201
     roles = client.get("/api/roles", headers=headers).json()
-    assert {role["code"] for role in roles} == {code.value for code in RoleCode}
+    assert {code.value for code in RoleCode} <= {role["code"] for role in roles}
     target = next(role for role in roles if role["code"] == RoleCode.EQUIPMENT_ADMIN)
     response = client.patch(
         f"/api/roles/{target['id']}/permissions",

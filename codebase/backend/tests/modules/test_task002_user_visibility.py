@@ -59,14 +59,14 @@ def test_user_management_view_all_returns_every_user(client: TestClient) -> None
     assert detail.json()["id"] == other_id
 
 
-def test_non_fixed_role_cannot_grant_view_all(client: TestClient) -> None:
+def test_enabled_custom_role_can_grant_view_all(client: TestClient) -> None:
     actor_id, actor_token = create_user_token(
         client,
         username="legacy-viewer",
         role_code="LEGACY_CUSTOM_ROLE",
         permission_codes=["user_management.view_all"],
     )
-    create_user_token(
+    hidden_user_id, _ = create_user_token(
         client,
         username="hidden-user",
         role_code=RoleCode.LINE_OPERATOR.value,
@@ -75,4 +75,4 @@ def test_non_fixed_role_cannot_grant_view_all(client: TestClient) -> None:
 
     response = client.get("/api/users", headers=authorization(actor_token))
     assert response.status_code == 200
-    assert [item["id"] for item in response.json()] == [actor_id]
+    assert {item["id"] for item in response.json()} == {actor_id, hidden_user_id}

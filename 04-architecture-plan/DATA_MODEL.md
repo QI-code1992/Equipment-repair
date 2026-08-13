@@ -47,6 +47,10 @@ MaintenanceRecord -> HistoricalRepairCase
 
 `DiagnosisDraft` 是可丢弃的 AI 草稿。只有用户点击“采纳 AI 建议并开始维修”才将允许预填的内容与只读对话摘要关联到维修记录；直接开始维修不保留 AI 摘要。结束维修页面显示的摘要放在“备件更换说明”之后，且包含故障现象、关键故障码/现场证据、验证结果、根因与建议，不包含操作过程流水账或思维链。
 
+## 系统管理后端补齐（2026-08-13）
+
+迁移 `0009_system_management_completion` 为 `Role` 增加 `description,enabled,created_at,updated_at`，为 `User` 增加 `display_name,gender,email,phone,remark,organization_id`。内置角色以 `built_in=true` 保护；自定义角色在未绑定用户时可变更或删除。用户不会物理删除，密码重置撤销全部未撤销会话。完整字段和约束见 `04-architecture-plan/SYSTEM_MANAGEMENT_COMPLETION_CONTRACT.md`。
+
 ## TASK-002 正式契约
 
 本节冻结 `CR-036` 修复后的身份权限、组织和设备主数据模型。数据库迁移以 Alembic `0002` 为准；运行时不保留旧 `Equipment.enabled` 双事实来源。
