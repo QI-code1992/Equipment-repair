@@ -482,6 +482,28 @@ describe("TASK-012 portal pages", () => {
     expect(screen.queryByRole("button", { name: "创建账号" })).not.toBeInTheDocument();
   });
 
+  it("matches the prototype RBAC role workspace structure", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "user-1", username: "admin", enabled: true, role_ids: ["role-admin"] }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([
+        { id: "role-admin", code: "ADMIN", name: "系统管理员", permission_codes: ["system:user"], built_in: true, enabled: true, user_count: 1, updated_at: "2026-08-13T00:00:00Z", description: null },
+        { id: "role-device", code: "DEVICE_ADMIN", name: "设备管理员", permission_codes: ["equipment:view"], built_in: false, enabled: true, user_count: 0, updated_at: "2026-08-13T00:00:00Z", description: null },
+      ]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 })));
+
+    render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
+
+    expect(await screen.findByText("● RBAC 权限中心")).toBeInTheDocument();
+    expect(screen.getByText("角色负责菜单和按钮权限，用户绑定组织与授权角色。系统管理员为唯一内置角色，不允许删除；自定义角色删除前会校验是否被用户绑定。")).toBeInTheDocument();
+    expect(screen.getByText("内置角色仅系统管理员")).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "角色类型" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "绑定用户" })).toBeInTheDocument();
+    expect(screen.getByText("内置角色")).toBeInTheDocument();
+    expect(screen.getByText("1 人")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "删除" })[0]).toBeDisabled();
+  });
+
   it("submits a role permission update with an idempotency key", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 }))
@@ -498,7 +520,7 @@ describe("TASK-012 portal pages", () => {
     (await screen.findByRole("button", { name: "保存角色权限" })).click();
 
     await screen.findByText("角色权限已更新。");
-    expect(fetchMock.mock.calls[4][0]).toBe("/api/roles/role-1/permissions");
+    expect(fetchMock.mock.calls[4][0]).toBe("/api/roles/role-1");
     const init = fetchMock.mock.calls[4][1] as RequestInit;
     expect(init.method).toBe("PATCH");
     expect(new Headers(init.headers).get("Idempotency-Key")).toBeTruthy();
@@ -522,9 +544,72 @@ describe("TASK-012 portal pages", () => {
     fireEvent.click(screen.getByRole("button", { name: "保存角色权限" }));
 
     await screen.findByText("角色权限已更新。");
-    expect(JSON.parse(String((fetchMock.mock.calls[4][1] as RequestInit).body))).toEqual({
-      permission_codes: ["workbench:view", "fault:create"],
+    expect(JSON.parse(String((fetchMock.mock.calls[4][1] as RequestInit).body))).toMatchObject({
+      code: "LINE_OPERATOR", permission_codes: ["workbench:view", "fault:create"],
     });
+  });
+
+  it("creates a custom role from the prototype editor with the formal API", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "user-1", username: "admin", enabled: true, role_ids: ["role-1"] }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "role-1", code: "SYSTEM_ADMIN", name: "系统管理员", permission_codes: ["identity:write"] }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ code: "identity:write" }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: "role-2", code: "PRODUCTION_SCHEDULER", name: "生产调度员", permission_codes: ["identity:write"] }), { status: 201 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
+
+    expect(await screen.findByText("1 个角色")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "新增角色" }));
+    fireEvent.change(screen.getByPlaceholderText("例如：生产调度员"), { target: { value: "生产调度员" } });
+    fireEvent.click(screen.getByRole("checkbox", { name: "identity:write" }));
+    await waitFor(() => expect(screen.getByRole("checkbox", { name: "identity:write" })).toBeChecked());
+    fireEvent.click(screen.getByRole("button", { name: "保存角色" }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/roles", expect.objectContaining({ method: "POST" })));
+  });
+
+  it("keeps the prototype user table and binds the formal profile fields", async () => {
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [], count: 0, page: 1, page_size: 20 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "user-1", username: "zhangsan", enabled: true, role_ids: ["role-1"] }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ id: "role-1", code: "LINE_OPERATOR", name: "操作员", permission_codes: [] }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 })));
+
+    render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("tab", { name: "用户管理" }));
+
+    expect(screen.getByRole("heading", { name: "组织树" })).toBeInTheDocument();
+    for (const column of ["用户名", "姓名", "手机号", "账号状态", "授权角色", "所属组织", "操作"]) expect(screen.getByRole("columnheader", { name: column })).toBeInTheDocument();
+    expect(screen.getByText("当前接口未提供用户组织关联，不能按组织筛选。")) .toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "新增用户" }));
+    expect(screen.getByRole("dialog", { name: "新增用户" })).toBeInTheDocument();
+    expect(screen.getByLabelText("姓名")).toBeEnabled();
+    expect(screen.getByText("共 1 条")).toBeInTheDocument();
+  });
+
+  it("keeps prototype login and operation log filters, seven-column tables and controlled field gaps", async () => {
+    const auditResponse = { items: [{ id: "audit-1", actor_user_id: "user-1", action: "auth.login", resource_type: "auth", resource_id: null, result: "success", created_at: "2026-08-13T09:00:00Z" }], count: 1, page: 1, page_size: 20 };
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify(auditResponse), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ items: [{ id: "login-1", username: "admin", display_name: "管理员", logged_at: "2026-08-13T09:00:00Z", source_ip: null, client_summary: null, result: "success", reason: null }], count: 1, page: 1, page_size: 20 }), { status: 200 })));
+
+    render(<MemoryRouter><SystemManagementPage /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("tab", { name: "登录日志" }));
+    await screen.findByRole("columnheader", { name: "登录账号" });
+    expect(screen.getByLabelText("按登录结果筛选")).toBeInTheDocument();
+    expect(screen.getByLabelText("按时间范围筛选")).toBeInTheDocument();
+    for (const column of ["登录账号", "姓名", "登录时间", "来源 IP", "登录终端", "结果", "说明"]) expect(screen.getByRole("columnheader", { name: column })).toBeInTheDocument();
+    expect(screen.getAllByText("—").length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole("tab", { name: "操作日志" }));
+    expect(screen.getByLabelText("按模块筛选")).toBeInTheDocument();
+    expect(screen.getByLabelText("按操作结果筛选")).toBeInTheDocument();
+    for (const column of ["操作时间", "操作人", "模块", "操作类型", "操作对象", "结果", "说明"]) expect(screen.getByRole("columnheader", { name: column })).toBeInTheDocument();
+    expect(screen.getAllByText("—").length).toBeGreaterThan(0);
   });
 
   it("labels configured token budgets without claiming actual model consumption", async () => {

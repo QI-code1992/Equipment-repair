@@ -344,7 +344,10 @@ export type PageResult<T> = { items: T[]; count: number; page: number; page_size
 export type Equipment = { id: string; code: string; name: string; model: string; type: string; manufacturer: string; manufactured_at: string | null; commissioned_at: string | null; status: string; organization_id: string; owner_user_id: string | null; operating_hours: number; image_refs: Array<{ object_key: string; filename: string }> };
 export type WorkOrder = { id: string; number: string; fault_report_id: string; equipment_id: string; status: string; repairer_user_id: string | null; symptom: string; started_at: string | null; completed_at: string | null };
 export type MaintenanceRecord = { maintenance_record_id: string; work_order_id: string; fault_report_id?: string; equipment_id: string; work_order_number: string; status: string; symptom: string; actual_cause: string | null; actual_solution: string | null; repair_result: string | null; completed_at: string | null; knowledge_status: string; start_mode?: string; parts_replacement_notes?: string | null; created_at?: string; updated_at?: string };
-export type AuditEvent = { id: string; actor_user_id: string | null; action: string; resource_type: string; resource_id: string | null; result: string; created_at: string };
+export type AuditEvent = { id: string; actor_user_id: string | null; actor_display_name?: string | null; action: string; resource_type: string; resource_id: string | null; module?: string; target_type?: string; target_id?: string | null; target_display_name?: string | null; summary?: string | null; result: string; created_at?: string; occurred_at?: string };
+export type LoginEvent = { id: string; username: string; display_name: string | null; logged_at: string; source_ip: string | null; client_summary: string | null; result: string; reason: string | null };
+export type SystemRole = { id: string; code: string; name: string; description: string | null; built_in: boolean; enabled: boolean; user_count: number; updated_at: string; permission_codes: string[] };
+export type SystemUser = { id: string; username: string; enabled: boolean; role_ids: string[]; display_name: string | null; gender: "MALE" | "FEMALE" | "UNSPECIFIED" | null; email: string | null; phone: string | null; remark: string | null; organization_id: string | null };
 export type BiDashboard = { summary: { fault_count: number; active_fault_count: number; completed_work_order_count: number; completion_rate: number }; trend: Array<{ date: string; fault_count: number; completed_work_order_count: number }>; efficiency: { completed_work_order_count: number; average_completion_hours: number | null }; organization_ranking: Array<{ organization_id: string; organization_name: string; fault_count: number }>; history_comparison: { current_fault_count: number; previous_fault_count: number } };
 export type IntelligenceUsage = { items: Array<{ agent_id: string; status: string; run_count: number; configured_max_reply_tokens: number }>; count: number; retention_days: number; token_measurement: "configured_max_reply_tokens_not_actual_usage" };
 
@@ -377,12 +380,22 @@ export const getWorkOrders = (params?: { status?: string; page?: number; pageSiz
   return requestJson<PageResult<WorkOrder>>(`/api/work-orders${query.size ? `?${query}` : ""}`);
 };
 export const getWorkOrder = (id: string) => requestJson<WorkOrder & { pending_inspection_at: string | null }>(`/api/work-orders/${id}`);
-export const getAuditEvents = (params?: { action?: string; page?: number; pageSize?: number }) => {
+export const getAuditEvents = (params?: { action?: string; resourceType?: string; result?: string; page?: number; pageSize?: number }) => {
   const query = new URLSearchParams();
   if (params?.action) query.set("action", params.action);
+  if (params?.resourceType) query.set("resource_type", params.resourceType);
+  if (params?.result) query.set("result", params.result);
   if (params?.page && params.page !== 1) query.set("page", String(params.page));
   if (params?.pageSize && params.pageSize !== 20) query.set("page_size", String(params.pageSize));
   return requestJson<PageResult<AuditEvent>>(`/api/audit-events${query.size ? `?${query}` : ""}`);
+};
+export const getLoginEvents = (params?: { username?: string; result?: string; page?: number; pageSize?: number }) => {
+  const query = new URLSearchParams();
+  if (params?.username) query.set("username", params.username);
+  if (params?.result) query.set("result", params.result);
+  if (params?.page && params.page !== 1) query.set("page", String(params.page));
+  if (params?.pageSize && params.pageSize !== 20) query.set("page_size", String(params.pageSize));
+  return requestJson<PageResult<LoginEvent>>(`/api/login-events${query.size ? `?${query}` : ""}`);
 };
 export const getIntelligenceUsage = () => requestJson<IntelligenceUsage>("/api/intelligence/usage");
 export const getKnowledgeDocuments = (params?: { page?: number; pageSize?: number }) => {
@@ -408,13 +421,17 @@ export async function uploadKnowledgeDocument(datasetId: string, file: File): Pr
   return response.json() as Promise<{ id: string; filename: string; status: string }>;
 }
 export const getOrganizations = () => requestJson<Array<{ id: string; type: string; code: string; name: string; parent_id: string | null; enabled: boolean }>>("/api/organizations");
-export const getUsers = () => requestJson<Array<{ id: string; username: string; enabled: boolean; role_ids: string[] }>>("/api/users");
+export const getUsers = () => requestJson<SystemUser[]>("/api/users");
 export const retryKnowledgeDocument = (id: string) => postJson<{ id: string; status: string }>(`/api/knowledge/documents/${id}/retry`, { document_id: id });
-export const getRoles = () => requestJson<Array<{ id: string; code: string; name: string; permission_codes: string[] }>>("/api/roles");
+export const getRoles = () => requestJson<SystemRole[]>("/api/roles");
 export const getPermissions = () => requestJson<Array<{ code: string }>>("/api/permissions");
 export const createOrganization = (body: { type: string; code: string; name: string; parent_id: string; sort_order: number; enabled: boolean; remark: string }) => postJson<{ id: string }>("/api/organizations", body);
 export const updateOrganization = (id: string, body: { code: string; name: string; sort_order: number; enabled: boolean; remark: string }) => requestJson(`/api/organizations/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify(body) });
 export const deleteOrganization = (id: string) => requestJson(`/api/organizations/${id}`, { method: "DELETE" });
-export const createUser = (body: { username: string; password: string; role_ids: string[] }) => postJson<{ id: string }>("/api/users", body);
-export const updateUser = (id: string, body: { enabled: boolean; role_ids: string[] }) => requestJson(`/api/users/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify(body) });
+export const createUser = (body: Omit<SystemUser, "id"> & { password: string }) => postJson<SystemUser>("/api/users", body);
+export const updateUser = (id: string, body: Omit<SystemUser, "id" | "username">) => requestJson<SystemUser>(`/api/users/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify(body) });
 export const updateRolePermissions = (id: string, permission_codes: string[]) => requestJson(`/api/roles/${id}/permissions`, { method: "PATCH", headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify({ permission_codes }) });
+export const createRole = (body: Omit<SystemRole, "id" | "built_in" | "user_count" | "updated_at">) => postJson<SystemRole>("/api/roles", body);
+export const updateRole = (id: string, body: Omit<SystemRole, "id" | "built_in" | "user_count" | "updated_at">) => requestJson<SystemRole>(`/api/roles/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify(body) });
+export const deleteRole = (id: string) => requestJson<SystemRole>(`/api/roles/${id}`, { method: "DELETE", headers: { "Idempotency-Key": crypto.randomUUID() } });
+export const resetUserPassword = (id: string, newPassword: string) => postJson<SystemUser>(`/api/users/${id}/password-reset`, { new_password: newPassword });
