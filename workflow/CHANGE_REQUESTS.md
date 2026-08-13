@@ -951,7 +951,7 @@
 
 - Status: approved for Stage 5 implementation by the project owner.
 - Scope: protected built-in roles plus custom role lifecycle; user profile and organization association; administrator password reset with session invalidation; login-event and extended audit reads.
-- Migration: `0009_system_management_completion`. ECS automatic deployment must reject this revision. Before cutover, take a database backup, run `alembic upgrade head` manually, execute permission/idempotency/audit smoke tests and the HTTPS health check, then update the deployed SHA.
+- Migration: `0010_system_management_completion`. ECS automatic deployment must reject this revision. Before cutover, take a database backup, run `alembic upgrade head` manually, execute permission/idempotency/audit smoke tests and the HTTPS health check, then update the deployed SHA.
 
 ### CR-048 Post-Merge Governance Record (2026-07-31)
 
