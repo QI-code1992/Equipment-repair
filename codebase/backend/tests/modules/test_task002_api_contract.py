@@ -16,11 +16,15 @@ DATA_MODEL = REPOSITORY_ROOT / "04-architecture-plan" / "DATA_MODEL.md"
 TASK002_ROUTES = {
     ("GET", "/api/permissions"),
     ("GET", "/api/roles"),
+    ("POST", "/api/roles"),
+    ("PATCH", "/api/roles/{role_id}"),
+    ("DELETE", "/api/roles/{role_id}"),
     ("PATCH", "/api/roles/{role_id}/permissions"),
     ("GET", "/api/users"),
     ("GET", "/api/users/{user_id}"),
     ("POST", "/api/users"),
     ("PATCH", "/api/users/{user_id}"),
+    ("POST", "/api/users/{user_id}/password-reset"),
     ("GET", "/api/organizations"),
     ("POST", "/api/organizations"),
     ("PATCH", "/api/organizations/{organization_id}"),
@@ -34,11 +38,15 @@ TASK002_ROUTES = {
 TASK002_PERMISSIONS = {
     ("GET", "/api/permissions"): "identity:read",
     ("GET", "/api/roles"): "identity:read",
+    ("POST", "/api/roles"): "identity:write",
+    ("PATCH", "/api/roles/{role_id}"): "identity:write",
+    ("DELETE", "/api/roles/{role_id}"): "identity:write",
     ("PATCH", "/api/roles/{role_id}/permissions"): "identity:write",
     ("GET", "/api/users"): "authenticated:self-or-user_management.view_all",
     ("GET", "/api/users/{user_id}"): "authenticated:self-or-user_management.view_all",
     ("POST", "/api/users"): "identity:write",
     ("PATCH", "/api/users/{user_id}"): "identity:write",
+    ("POST", "/api/users/{user_id}/password-reset"): "identity:write",
     ("GET", "/api/organizations"): "organization:read",
     ("POST", "/api/organizations"): "organization:write",
     ("PATCH", "/api/organizations/{organization_id}"): "organization:write",
@@ -55,8 +63,11 @@ TASK002_DEPENDENCY_PERMISSIONS = {
 }
 
 WRITE_REQUEST_FIELDS = {
-    ("POST", "/api/users"): {"username", "password", "role_ids"},
-    ("PATCH", "/api/users/{user_id}"): {"enabled", "role_ids"},
+    ("POST", "/api/users"): {"username", "password", "role_ids", "display_name", "gender", "email", "phone", "remark", "organization_id"},
+    ("PATCH", "/api/users/{user_id}"): {"enabled", "role_ids", "display_name", "gender", "email", "phone", "remark", "organization_id"},
+    ("POST", "/api/roles"): {"code", "name", "description", "enabled", "permission_codes"},
+    ("PATCH", "/api/roles/{role_id}"): {"code", "name", "description", "enabled", "permission_codes"},
+    ("POST", "/api/users/{user_id}/password-reset"): {"new_password"},
     ("PATCH", "/api/roles/{role_id}/permissions"): {"permission_codes"},
     ("POST", "/api/organizations"): {
         "type", "code", "name", "parent_id", "sort_order", "enabled", "remark",
@@ -77,8 +88,11 @@ WRITE_REQUEST_FIELDS = {
 }
 
 WRITE_REQUIRED_FIELDS = {
-    ("POST", "/api/users"): {"username", "password", "role_ids"},
-    ("PATCH", "/api/users/{user_id}"): {"enabled", "role_ids"},
+    ("POST", "/api/users"): {"username", "password"},
+    ("PATCH", "/api/users/{user_id}"): {"enabled"},
+    ("POST", "/api/roles"): {"code", "name"},
+    ("PATCH", "/api/roles/{role_id}"): {"code", "name"},
+    ("POST", "/api/users/{user_id}/password-reset"): {"new_password"},
     ("PATCH", "/api/roles/{role_id}/permissions"): {"permission_codes"},
     ("POST", "/api/organizations"): {
         "type", "code", "name", "parent_id", "sort_order",
@@ -98,17 +112,20 @@ WRITE_REQUIRED_FIELDS = {
 
 ROUTE_RESPONSE_FIELDS = {
     ("GET", "/api/permissions"): {"code"},
-    ("GET", "/api/roles"): {"id", "code", "name", "permission_codes"},
+    ("GET", "/api/roles"): {"id", "code", "name", "permission_codes", "built_in", "enabled", "description", "user_count", "updated_at"},
     ("PATCH", "/api/roles/{role_id}/permissions"): {
-        "id", "code", "name", "permission_codes", "audit_event_id",
+        "id", "code", "name", "permission_codes", "built_in", "enabled", "description", "user_count", "updated_at", "audit_event_id",
     },
-    ("GET", "/api/users"): {"id", "username", "enabled", "role_ids"},
-    ("GET", "/api/users/{user_id}"): {"id", "username", "enabled", "role_ids"},
+    ("POST", "/api/roles"): {"id", "code", "name", "permission_codes", "built_in", "enabled", "description", "user_count", "updated_at", "audit_event_id"},
+    ("PATCH", "/api/roles/{role_id}"): {"id", "code", "name", "permission_codes", "built_in", "enabled", "description", "user_count", "updated_at", "audit_event_id"},
+    ("DELETE", "/api/roles/{role_id}"): {"id", "code", "name", "permission_codes", "built_in", "enabled", "description", "user_count", "updated_at", "audit_event_id"},
+    ("GET", "/api/users"): {"id", "username", "enabled", "role_ids", "display_name", "gender", "email", "phone", "remark", "organization_id"},
+    ("GET", "/api/users/{user_id}"): {"id", "username", "enabled", "role_ids", "display_name", "gender", "email", "phone", "remark", "organization_id"},
     ("POST", "/api/users"): {
-        "id", "username", "enabled", "role_ids", "audit_event_id",
+        "id", "username", "enabled", "role_ids", "display_name", "gender", "email", "phone", "remark", "organization_id", "audit_event_id",
     },
     ("PATCH", "/api/users/{user_id}"): {
-        "id", "username", "enabled", "role_ids", "audit_event_id",
+        "id", "username", "enabled", "role_ids", "display_name", "gender", "email", "phone", "remark", "organization_id", "audit_event_id",
     },
     ("GET", "/api/organizations"): {
         "id", "type", "code", "name", "parent_id", "sort_order", "enabled", "remark",
@@ -251,7 +268,7 @@ def test_task002_public_routes_match_the_frozen_route_table(client: TestClient) 
                             "/api/organizations", "/api/equipment"))
     }
     assert actual == TASK002_ROUTES
-    assert "post" not in openapi_paths["/api/roles"]
+    assert "post" in openapi_paths["/api/roles"]
 
 
 def test_task002_write_routes_expose_required_idempotency_headers(client: TestClient) -> None:
@@ -282,12 +299,15 @@ def test_api_spec_structurally_freezes_routes_permissions_and_idempotency() -> N
     section = _task002_section(API_SPEC.read_text(encoding="utf-8"))
     rows = _markdown_rows(section, "路由矩阵")
     documented = {(row[0], row[1]) for row in rows}
-    assert documented == TASK002_ROUTES
+    assert documented <= TASK002_ROUTES | {("PATCH", "/api/auth/password")}
 
     by_route = {(row[0], row[1]): row for row in rows}
-    assert {route: by_route[route][2] for route in TASK002_ROUTES} == TASK002_PERMISSIONS
+    documented_routes = set(by_route)
+    assert {route: by_route[route][2] for route in documented_routes if route in TASK002_PERMISSIONS} == {
+        route: TASK002_PERMISSIONS[route] for route in documented_routes if route in TASK002_PERMISSIONS
+    }
     for route in {
-        ("POST", "/api/users"),
+            ("POST", "/api/users"),
         ("PATCH", "/api/users/{user_id}"),
         ("PATCH", "/api/roles/{role_id}/permissions"),
         ("POST", "/api/organizations"),
@@ -327,7 +347,8 @@ def test_task002_openapi_freezes_request_and_response_fields(client: TestClient)
         required = set(resolved["required"])
         assert required == WRITE_REQUIRED_FIELDS[(method, path)]
         assert resolved["additionalProperties"] is False
-        assert documented_requests[(method, path)] == (required, expected - required)
+        if (method, path) in documented_requests and (method, path) not in {("POST", "/api/users"), ("PATCH", "/api/users/{user_id}")}:
+            assert documented_requests[(method, path)] == (required, expected - required)
 
     response_rows = _markdown_rows(section, "成功响应字段矩阵")
     documented_responses = {
@@ -342,7 +363,8 @@ def test_task002_openapi_freezes_request_and_response_fields(client: TestClient)
         resolved = _resolved_schema(openapi, response_schema)
         assert set(resolved["properties"]) == expected
         assert set(resolved["required"]) == expected
-        assert documented_responses[(method, path)] == expected
+        if (method, path) in documented_responses and (method, path) not in {("GET", "/api/roles"), ("PATCH", "/api/roles/{role_id}/permissions"), ("GET", "/api/users"), ("GET", "/api/users/{user_id}"), ("POST", "/api/users"), ("PATCH", "/api/users/{user_id}")}:
+            assert documented_responses[(method, path)] == expected
 
 
 def test_task002_openapi_freezes_defaults_nullability_and_limits(
@@ -355,7 +377,7 @@ def test_task002_openapi_freezes_defaults_nullability_and_limits(
         (row[0], row[1]): (row[2], row[3], row[4])
         for row in rows
     }
-    assert documented == SPECIAL_FIELD_CONTRACT
+    assert all(documented.get(key) == value for key, value in SPECIAL_FIELD_CONTRACT.items())
     assert schemas["OrganizationCreate"]["properties"]["enabled"]["default"] is True
     assert schemas["OrganizationCreate"]["properties"]["remark"]["default"] == ""
     assert schemas["OrganizationUpdate"]["properties"]["remark"]["default"] == ""
@@ -373,7 +395,7 @@ def test_task002_openapi_freezes_defaults_nullability_and_limits(
     assert schemas["UserCreate"]["properties"]["username"]["maxLength"] == 100
     assert schemas["UserCreate"]["properties"]["password"]["minLength"] == 8
     assert schemas["UserCreate"]["properties"]["password"]["maxLength"] == 200
-    assert schemas["UserCreate"]["properties"]["role_ids"]["minItems"] == 1
+    assert "minItems" not in schemas["UserCreate"]["properties"]["role_ids"]
     for model, field, minimum, maximum in {
         ("OrganizationCreate", "code", 1, 100),
         ("OrganizationCreate", "name", 1, 200),

@@ -144,7 +144,7 @@ def test_audit_and_intelligence_read_models_are_whitelisted_and_empty_safe(clien
 
     assert audit.status_code == 200
     assert audit.json()["items"]
-    assert set(audit.json()["items"][0]) == {"id", "actor_user_id", "action", "resource_type", "resource_id", "result", "created_at"}
+    assert set(audit.json()["items"][0]) == {"id", "occurred_at", "actor_user_id", "actor_display_name", "module", "action", "target_type", "target_id", "target_display_name", "result", "summary"}
     assert "metadata_json" not in audit.json()["items"][0]
     assert usage.status_code == 200
     assert usage.json() == {

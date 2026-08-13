@@ -947,6 +947,12 @@
 - Boundary: governance/evidence only; no production code, test logic, database, dependency, infrastructure or runtime configuration changes.
 - Gate: TASK-005 live lifecycle evidence is recorded as `2 passed, 5 warnings`, but `DEF-STAGE6-003`, `DEF-STAGE6-004` and `DEF-STAGE6-005` remain open. Stage 6 is not passed and Stage 7/8 remain locked.
 
+### CR-SYSTEM-MANAGEMENT-001 (2026-08-13)
+
+- Status: approved for Stage 5 implementation by the project owner.
+- Scope: protected built-in roles plus custom role lifecycle; user profile and organization association; administrator password reset with session invalidation; login-event and extended audit reads.
+- Migration: `0009_system_management_completion`. ECS automatic deployment must reject this revision. Before cutover, take a database backup, run `alembic upgrade head` manually, execute permission/idempotency/audit smoke tests and the HTTPS health check, then update the deployed SHA.
+
 ### CR-048 Post-Merge Governance Record (2026-07-31)
 
 - Status: `INTEGRATED_PENDING_FORMAL_START_NOTICE`.
