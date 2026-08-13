@@ -936,6 +936,17 @@
 - Boundary: governance/evidence only; no production code, test logic, database, dependency, infrastructure or runtime configuration changes.
 - Gate: TASK-005 live lifecycle evidence is recorded as `2 passed, 5 warnings`, but `DEF-STAGE6-003`, `DEF-STAGE6-004` and `DEF-STAGE6-005` remain open. Stage 6 is not passed and Stage 7/8 remain locked.
 
+### CR-050：正式前端原型还原与视觉验收规范（2026-08-13）
+
+- 级别：L2 前端交付与验收规则补全；不改变 PRD、SPEC、原型范围、公开 API、数据模型、权限或部署配置。
+- 状态：Approved / Effective for subsequent prototype-fidelity remediation.
+- 提出人：项目负责人。
+- 原始请求：将原型真相源、HTML 分析、截图、viewport、字体、CSS 迁移、React 组件、图片/SVG、禁止修改项、视觉验收、Screenshot Diff、修复循环、页面完成判定和 `AGENTS.md` 规则形成正式规范。
+- 决策：项目负责人已确认。新增 `03-ui-prototype/FRONTEND_RECONSTRUCTION_RULES.md` 作为正式前端原型还原的专项执行规范，并在项目 `AGENTS.md` 设为涉及原型还原、修改或验收前端时的必读规则。
+- 影响：后续页面整改必须按原型 HTML 对照、目标 viewport 截图、视觉差异检查、真实接口边界和完成判定执行；仅测试/构建通过不能作为视觉完成结论。原型外可见模块、英文内部 code、裁切和遮挡均为整改缺陷。
+- 范围边界：不修改 `03-ui-prototype/prototype/`、业务代码、依赖、数据库、基础设施、真实环境配置或当前阶段状态；本规则生效不追溯宣称历史页面已通过视觉验收。
+- 验证：规范文件存在且被 `AGENTS.md` 引用；规则覆盖 14 项要求；`git diff --check` 通过。
+
 ### CR-048 Post-Merge Governance Record (2026-07-31)
 
 - Status: `INTEGRATED_PENDING_FORMAL_START_NOTICE`.
