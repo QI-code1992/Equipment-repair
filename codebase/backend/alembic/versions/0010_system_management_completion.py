@@ -1,6 +1,6 @@
 """Add system management role and user profile fields.
 
-Revision ID: 0010_system_management_completion
+Revision ID: 0010_system_mgmt
 Revises: 0009_task013_role_management
 """
 
@@ -8,7 +8,7 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = "0010_system_management_completion"
+revision = "0010_system_mgmt"
 down_revision = "0009_task013_role_management"
 branch_labels = None
 depends_on = None

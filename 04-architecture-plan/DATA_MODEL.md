@@ -49,7 +49,7 @@ MaintenanceRecord -> HistoricalRepairCase
 
 ## 系统管理后端补齐（2026-08-13）
 
-迁移 `0010_system_management_completion` 为 `User` 增加 `display_name,gender,email,phone,remark,organization_id`。角色字段由前序迁移 `0009_task013_role_management` 提供。内置角色以 `built_in=true` 保护；自定义角色在未绑定用户时可变更或删除。用户不会物理删除，密码重置撤销全部未撤销会话。完整字段和约束见 `04-architecture-plan/SYSTEM_MANAGEMENT_COMPLETION_CONTRACT.md`。
+迁移 `0010_system_mgmt` 为 `User` 增加 `display_name,gender,email,phone,remark,organization_id`。角色字段由前序迁移 `0009_task013_role_management` 提供。内置角色以 `built_in=true` 保护；自定义角色在未绑定用户时可变更或删除。用户不会物理删除，密码重置撤销全部未撤销会话。完整字段和约束见 `04-architecture-plan/SYSTEM_MANAGEMENT_COMPLETION_CONTRACT.md`。
 
 ## TASK-002 正式契约
 
