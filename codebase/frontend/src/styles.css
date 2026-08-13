@@ -179,6 +179,27 @@ a { color: inherit; text-decoration: none; }
 .system-toolbar label { display: grid; width: min(100%, 340px); gap: 6px; color: #47617f; font-size: 12px; font-weight: 700; }
 .system-toolbar input { min-height: 38px; padding: 8px 10px; border: 1px solid #b8c9dd; border-radius: 8px; background: #fff; font: inherit; }
 .system-toolbar > div { display: flex; gap: 8px; }
+.system-role-toolbar { align-items: center; gap: 14px; padding: 18px 22px; }
+.system-role-search { position: relative; width: 370px; }
+.system-role-search > span { position: absolute; left: 14px; top: 9px; color: #6b829f; font-size: 18px; }
+.system-role-search input { width: 100%; min-height: 42px; padding-left: 38px; border-radius: 11px; background: #f7fbff; font-size: 16px; }
+.system-role-filters { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; }
+.system-filter-chip { padding: 7px 12px; border: 1px solid #d6e2f0; border-radius: 999px; color: #617896; background: #f5f9fe; font-size: 13px; }
+.system-filter-chip--active { border-color: #9bc8ff; color: #1778d4; background: #edf6ff; }
+.system-role-heading { padding: 20px 22px; }
+.system-role-heading h3 { font-size: 20px; }
+.system-role-heading p { font-size: 14px; }
+.system-role-table th, .system-role-table td { padding: 18px 20px; }
+.system-role-table td strong, .system-role-table td small { display: block; }
+.system-role-table td strong { color: #182e51; font-size: 15px; }
+.system-role-table td small { margin-top: 5px; color: #6b829f; font-size: 12px; }
+.system-role-type, .system-status-enabled, .system-bound-count { display: inline-block; padding: 6px 11px; border: 1px solid #a9d3ff; border-radius: 999px; color: #1676d2; background: #edf6ff; font-size: 12px; white-space: nowrap; }
+.system-role-type:not(.is-builtin) { border-color: #a9e0bd; color: #15934e; background: #ebfaf0; }
+.system-status-enabled { border-color: #a9e0bd; color: #15934e; background: #e9faef; }
+.system-bound-count { border-color: #ffd08d; color: #b66b00; background: #fff5e6; }
+.system-role-actions { display: flex; gap: 12px; white-space: nowrap; }
+.system-role-actions .link-button:last-child { color: #d84545; }
+.system-role-actions .link-button:disabled { color: #c8d0db; cursor: not-allowed; }
 .system-tab-panel > table, .system-tab-panel > .portal-form, .system-tab-panel > .empty-panel { margin: 18px; width: calc(100% - 36px); }
 .system-permission-catalogue { margin: 18px; border: 1px solid #e2eaf4; border-radius: 10px; background: #fbfdff; }
 .system-permission-catalogue h4 { margin: 0; padding: 12px 16px; color: #36506f; border-bottom: 1px solid #e2eaf4; }
